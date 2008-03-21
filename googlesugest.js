@@ -1,15 +1,15 @@
 // Vimperator plugin: 'Completion by Google Suggest'
-// Last Change: 02-Mar-2008. Jan 2008
+// Last Change: 21-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // search word completion using google suggest script for vimperator0.6.*
 
-vimperator.commands.addUserCommand(['google'],"Search web sites with google suggest",
+liberator.commands.addUserCommand(['google'],"Search web sites with google suggest",
     function(arg){
         const endpoint = "http://www.google.co.jp/search?q=";
-        //vimperator.open(endpoint + encodeURIComponent(arg));
-        vimperator.open(endpoint + encodeURIComponent(arg),vimperator.NEW_TAB);
+        //liberator.open(endpoint + encodeURIComponent(arg));
+        liberator.open(endpoint + encodeURIComponent(arg),liberator.NEW_TAB);
     },
     {
         completer: function (filter) {

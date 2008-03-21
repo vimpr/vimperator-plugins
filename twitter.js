@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Update Twitter'
-// Last Change: 17-Mar-2008. Jan 2008
+// Last Change: 21-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -13,7 +13,7 @@
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send("status=" + encodeURIComponent(stat));
     }
-    vimperator.commands.addUserCommand(['twitter'], 'Change twitter status',
+    liberator.commands.addUserCommand(['twitter'], 'Change twitter status',
         function(arg,special){
             var password;
             var username;
@@ -22,14 +22,14 @@
                 if(logins.length)
                     [username, password] = [logins[0].username, logins[0].password];
                 else
-                    vimperator.echoerr("Twitter: account not found");
+                    liberator.echoerr("Twitter: account not found");
             }
             catch(ex) {
             }
 
             if(special){
-                arg = arg.replace(/%URL%/g, vimperator.buffer.URL)
-                        .replace(/%TITLE%/g ,vimperator.buffer.title);
+                arg = arg.replace(/%URL%/g, liberator.buffer.URL)
+                        .replace(/%TITLE%/g ,liberator.buffer.title);
             }
 
             sayTwitter(username,password,arg);

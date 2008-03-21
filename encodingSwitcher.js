@@ -87,7 +87,7 @@ function completion(array, filter){
 }
 var sbCharDefault = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('default'));
 const DEFAULT_CHARSET = sbCharDefault.GetStringFromName('intl.charset.default');
-vimperator.options.add(new vimperator.Option( ['fileencoding','fenc'], 'string',
+liberator.options.add(new liberator.Option( ['fileencoding','fenc'], 'string',
 	{
 		shortHelp: 'set the charactor encoding for the current page',
 		help: 'Please make certain of available value with <code class="command">:lsenc</code> command',
@@ -113,7 +113,7 @@ vimperator.options.add(new vimperator.Option( ['fileencoding','fenc'], 'string',
 ));
 var sbCharDetector = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('detector'));
 const DEFAULT_DETECTOR = createDetector(sbCharDetector.GetStringFromName('intl.charset.detector'))[0];
-vimperator.options.add(new vimperator.Option( ['autodetector','audet'], 'string',
+liberator.options.add(new liberator.Option( ['autodetector','audet'], 'string',
 	{
 		shortHelp: 'set auto detect character encoding',
 		help: 'Please make certain of available value with <code class="command">:lsdet</code> command',
@@ -165,11 +165,11 @@ function listCharset(arg, current, list){
 		}
 	});
 	str.push('</table>');
-	vimperator.echo( str.join(''), true);
+	liberator.echo( str.join(''), true);
 }
-vimperator.commands.add(new vimperator.Command(['listencoding','lsenc'],
+liberator.commands.add(new liberator.Command(['listencoding','lsenc'],
 	function(arg){
-		listCharset(arg, vimperator.options.fileencoding, encodings);
+		listCharset(arg, liberator.options.fileencoding, encodings);
 	},{
 		usage: ['listencoding [expr]','lsenc [expr]'],
 		shortHelp: 'list all encodings',
@@ -179,9 +179,9 @@ vimperator.commands.add(new vimperator.Command(['listencoding','lsenc'],
 		}
 	}
 ));
-vimperator.commands.add(new vimperator.Command(['listdetector','lsdet'],
+liberator.commands.add(new liberator.Command(['listdetector','lsdet'],
 	function(arg){
-		listCharset(arg, vimperator.options.autodetector, detectors);
+		listCharset(arg, liberator.options.autodetector, detectors);
 	},{
 		usage: ['listdetector [expr]','lsdet [expr]'],
 		shortHelp: 'list all auto detectors',

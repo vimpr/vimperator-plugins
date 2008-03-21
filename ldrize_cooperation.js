@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.09
-// Last Change: 16-Mar-2008. Jan 2008
+// Last Change: 21-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -46,13 +46,13 @@
     addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
         if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
             sandbox.window.addEventListener("focus",function(){
-                vimperator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
-                vimperator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
+                liberator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
+                liberator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
             },false);
             sandbox.window.addEventListener("load",function(){
                 if(window.content.wrappedJSObject == sandbox.unsafeWindow){
-                    vimperator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
-                    vimperator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
+                    liberator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
+                    liberator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
                 }
             },false);
         }
@@ -118,49 +118,49 @@
             for(let i=0;i<programInfo.length;i++)
                 if(programInfo[i].include.test(link)){
                     setTimeout(function(){
-                        vimperator.io.run(programInfo[i].program,[link],false);
+                        liberator.io.run(programInfo[i].program,[link],false);
                     },programInfo[i].wait != undefined ? programInfo[i].wait * count++ : 0);
                     return;
                 }
-            vimperator.echoerr("LDRize Cooperation: download pattern not found!!");
+            liberator.echoerr("LDRize Cooperation: download pattern not found!!");
         });
     }
 
     //Mappings
-    vimperator.mappings.addUserMap([vimperator.modes.NORMAL], ["j", "<Down>", "<C-e>"],
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["j", "<Down>", "<C-e>"],
         "Scroll document down",
-        function(){isEnableLDRize() ? sendRawKeyEvent(74,106):vimperator.buffer.scrollLines(scrollCount);} ,{});
-    vimperator.mappings.addUserMap([vimperator.modes.NORMAL], ["k", "<Up>", "<C-y>"],
+        function(){isEnableLDRize() ? sendRawKeyEvent(74,106):liberator.buffer.scrollLines(scrollCount);} ,{});
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["k", "<Up>", "<C-y>"],
         "Scroll document up",
-        function(){isEnableLDRize() ? sendRawKeyEvent(75,107):vimperator.buffer.scrollLines(-scrollCount);} ,{});
-    vimperator.mappings.addUserMap([vimperator.modes.NORMAL], ["o"],
+        function(){isEnableLDRize() ? sendRawKeyEvent(75,107):liberator.buffer.scrollLines(-scrollCount);} ,{});
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["o"],
         "Open a message",
-        function(){isEnableLDRize() ? sendRawKeyEvent(79,111):vimperator.commandline.open(":","open ",vimperator.modes.EX);},{});
-    vimperator.mappings.addUserMap([vimperator.modes.NORMAL], ["p"],
+        function(){isEnableLDRize() ? sendRawKeyEvent(79,111):liberator.commandline.open(":","open ",liberator.modes.EX);},{});
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["p"],
         "Open (put) a URL based on the current clipboard contents in the current buffer",
-        function(){isEnableLDRize() ? sendRawKeyEvent(80,112):vimperator.open(readFromClipboard());} ,{});
+        function(){isEnableLDRize() ? sendRawKeyEvent(80,112):liberator.open(readFromClipboard());} ,{});
 
-    vimperator.mappings.addUserMap([vimperator.modes.NORMAL], [",f"],
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
         "Focus on search field by LDRize",
         function(){LDRize.bindFocus();} ,{});
 
     //Commands
-    vimperator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
+    liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
         function(){
             var links = getPinnedLinks();
             var showString = links.length + " Items<br/>";
             links.forEach(function(link){
                 showString += link + "<br/>";
             });
-            vimperator.commandline.echo(showString, vimperator.commandline.HL_NORMAL, vimperator.commandline.FORCE_MULTILINE);
+            liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
         } ,{});
-    vimperator.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
+    liberator.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
         function(arg){Minibuffer.execute(arg)},
         {
             completer: function(filter){
                 var completionList = [];
-                var command = vimperator.plugins.Minibuffer.command;
-                var alias = vimperator.plugins.Minibuffer.alias_getter();
+                var command = liberator.plugins.Minibuffer.command;
+                var alias = liberator.plugins.Minibuffer.alias_getter();
                 var tokens = filter.split("|").map(function(str){return str.replace(/\s+/g,"")});
                 var exp = new RegExp("^" + tokens.pop());
                 for(let i in command) if(exp.test(i))completionList.push([tokens.concat(i).join(" | "),"MinibufferCommand"]);
@@ -168,13 +168,13 @@
                 return [0,completionList];
             }
         });
-    vimperator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
+    liberator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
         function(arg){ downloadLinksByProgram(getPinnedLinks());} ,{});
-    vimperator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
+    liberator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
         function(arg){ switchLDRizeCooperation(!isEnable);}, {});
 
     //Options
-    vimperator.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',isEnable,
+    liberator.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',isEnable,
         {
             setter: function(value){
                 switchLDRizeCooperation(value);

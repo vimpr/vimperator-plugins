@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Direct Hatena Bookmark'
-// Last Change: 14-Mar-2008. Jan 2008
+// Last Change: 21-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -140,21 +140,21 @@
         xhr.open("GET","http://api.pathtraq.com/normalize_url?url=" + url,false);
         xhr.send(null);
         if(xhr.status != 200){
-            vimperator.echoerr("Pathtraq: URL normalize faild!!");
+            liberator.echoerr("Pathtraq: URL normalize faild!!");
             return undefined;
         }
         return xhr.responseText;
     }
 
     function getTags(arg){
-        vimperator.plugins.hatena_tags = [];
+        liberator.plugins.hatena_tags = [];
         httpGET("http://b.hatena.ne.jp/my",
                 function(mypage_text){
                     var mypage_html = parseHTML(mypage_text);
                     var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
                     for(var i in tags)
-                        vimperator.plugins.hatena_tags.push(tags[i].innerHTML);
-                    vimperator.echo("Hatena bookmark: Tag parsing is finished. taglist length: " + tags.length);
+                        liberator.plugins.hatena_tags.push(tags[i].innerHTML);
+                    liberator.echo("Hatena bookmark: Tag parsing is finished. taglist length: " + tags.length);
                 });
     }
     getTags();
@@ -171,9 +171,9 @@
         xhr.onreadystatechange = function(){
             if(xhr.readyState == 4){
                 if(xhr.status == 201)
-                    vimperator.echo("HatenaBookmark: success");
+                    liberator.echo("HatenaBookmark: success");
                 else
-                    vimperator.echoerr("HatenaBookmark:" + xhr.statusText);
+                    liberator.echoerr("HatenaBookmark:" + xhr.statusText);
             }
         };
         var wsse = new WSSEUtils(user,password);
@@ -182,11 +182,11 @@
         xhr.setRequestHeader("Content-Type","application/x.atom+xml");
         xhr.send(request.toString());
     }
-    vimperator.commands.addUserCommand(['hbtags'],"Update HatenaBookmark Tags",
+    liberator.commands.addUserCommand(['hbtags'],"Update HatenaBookmark Tags",
         getTags,
         {}
     );
-    vimperator.commands.addUserCommand(['hb'],"Post to HatenaBookmark",
+    liberator.commands.addUserCommand(['hb'],"Post to HatenaBookmark",
         function(arg){
             try {
                 var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
@@ -194,19 +194,19 @@
                 if(logins.length)
                     [hatenaUser, hatenaPassword] = [logins[0].username, logins[0].password];
                 else
-                    vimperator.echoerr("Hatena bookmark: account not found");
+                    liberator.echoerr("Hatena bookmark: account not found");
             }
             catch(ex) {
             }
-            addHatenaBookmarks(hatenaUser,hatenaPassword,vimperator.buffer.URL,arg,isNormalize);
+            addHatenaBookmarks(hatenaUser,hatenaPassword,liberator.buffer.URL,arg,isNormalize);
         },{
             completer: function(filter){
                 var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited , now inputting]
                 var m = new RegExp("^" + match_result[2]);
                 var completionList = [];
-                for(var i in vimperator.plugins.hatena_tags)
-                    if(m.test(vimperator.plugins.hatena_tags[i])){
-                        completionList.push([match_result[1] + "[" + vimperator.plugins.hatena_tags[i] + "]","Tag"]);
+                for(var i in liberator.plugins.hatena_tags)
+                    if(m.test(liberator.plugins.hatena_tags[i])){
+                        completionList.push([match_result[1] + "[" + liberator.plugins.hatena_tags[i] + "]","Tag"]);
                     }
                 return [0, completionList];
             }
