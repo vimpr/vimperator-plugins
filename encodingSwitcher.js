@@ -59,19 +59,18 @@ function createDetector(name){
 	return [name,null,''];
 }
 function getDetector(name){
-	detectors.forEach(function(detector){
-		if (detector[0].toLowerCase() == name.toLowerCase()){
-			return detector[0] + detector[2];
+	for (var i=0; i<detectors.length; i++){
+		if (detectors[i][0].toLowerCase() == name.toLowerCase()){
+			return detectors[i][0] + detectors[i][2];
 		}
-	});
+	}
 }
 function getEncoding(name){
 	for (var i=0; i<encodings.length; i++){
-	encodings.forEach(function(encoding){
-		if (encoding[0].toLowerCase() == name.toLowerCase()){
-			return encoding[0];
+		if (encodings[i][0].toLowerCase() == name.toLowerCase()){
+			return encodings[i][0];
 		}
-	});
+	}
 }
 function isValid(array, value){
 	return array.some(function(v){
@@ -87,16 +86,13 @@ function completion(array, filter){
 }
 var sbCharDefault = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('default'));
 const DEFAULT_CHARSET = sbCharDefault.GetStringFromName('intl.charset.default');
-liberator.options.add(new liberator.Option( ['fileencoding','fenc'], 'string',
+liberator.options.add(['fileencoding','fenc'],'set the charactor encoding for the current page','string', DEFAULT_CHARSET,
 	{
-		shortHelp: 'set the charactor encoding for the current page',
-		help: 'Please make certain of available value with <code class="command">:lsenc</code> command',
-		defaultValue: DEFAULT_CHARSET,
 		setter: function(value){
 			if (!value) return;
 			value = getEncoding(value);
 			SetForcedCharset(value);
-			SetDefaultCharacterSet(value);
+			//SetDefaultCharacterSet(value);
 			BrowserSetForcedCharacterSet(value);
 		},
 		getter: function(){
@@ -106,18 +102,15 @@ liberator.options.add(new liberator.Option( ['fileencoding','fenc'], 'string',
 			return isValid( encodings, value);
 		},
 		completer: function(filter){
-			return completion( encodings, filter);
+			return [0,completion( encodings, filter)];
 		}
 	}
 
-));
+);
 var sbCharDetector = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('detector'));
 const DEFAULT_DETECTOR = createDetector(sbCharDetector.GetStringFromName('intl.charset.detector'))[0];
-liberator.options.add(new liberator.Option( ['autodetector','audet'], 'string',
+liberator.options.add(['autodetector','audet'],'set auto detect character encoding','string',DEFAULT_DETECTOR,
 	{
-		shortHelp: 'set auto detect character encoding',
-		help: 'Please make certain of available value with <code class="command">:lsdet</code> command',
-		defaultValue: DEFAULT_DETECTOR,
 		setter: function(value){
 			SetForcedDetector(true);
 			var pref = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefBranch);
@@ -143,11 +136,11 @@ liberator.options.add(new liberator.Option( ['autodetector','audet'], 'string',
 			return isValid( detectors, value);
 		},
 		completer: function(filter){
-			return completion( detectors, filter);
+			return [0,completion( detectors, filter)];
 		}
 	}
 
-));
+);
 function listCharset(arg, current, list){
 	if (!arg) arg = '.';
 	var reg = new RegExp(arg,'i');
@@ -167,30 +160,24 @@ function listCharset(arg, current, list){
 	str.push('</table>');
 	liberator.echo( str.join(''), true);
 }
-liberator.commands.add(new liberator.Command(['listencoding','lsenc'],
+liberator.commands.addUserCommand(['listencoding','lsenc'],'list all encodings',
 	function(arg){
 		listCharset(arg, liberator.options.fileencoding, encodings);
 	},{
-		usage: ['listencoding [expr]','lsenc [expr]'],
-		shortHelp: 'list all encodings',
-		help: 'current encoding is hi-light',
 		completer: function(filter){
-			return completion(encodings, filter);
+			return [0,completion(encodings, filter)];
 		}
 	}
-));
-liberator.commands.add(new liberator.Command(['listdetector','lsdet'],
+);
+liberator.commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
 	function(arg){
 		listCharset(arg, liberator.options.autodetector, detectors);
 	},{
-		usage: ['listdetector [expr]','lsdet [expr]'],
-		shortHelp: 'list all auto detectors',
-		help: 'current encoding is hi-light',
 		completer: function(filter){
-			return completion(detectors, filter);
+			return [0,completion(detectors, filter)];
 		}
 	}
-));
+);
 
 })();
 
