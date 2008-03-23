@@ -59,18 +59,18 @@ function createDetector(name){
 	return [name,null,''];
 }
 function getDetector(name){
-	for (var i=0; i<detectors.length; i++){
-		if (detectors[i][0].toLowerCase() == name.toLowerCase()){
-			return detectors[i][0] + detectors[i][2];
+	detectors.forEach(function(detector){
+		if (detector[0].toLowerCase() == name.toLowerCase()){
+			return detector[0] + detector[2];
 		}
-	}
+	});
 }
 function getEncoding(name){
-	for (var i=0; i<encodings.length; i++){
-		if (encodings[i][0].toLowerCase() == name.toLowerCase()){
-			return encodings[i][0];
+	encodings.forEach(function(encoding){
+		if (encoding[0].toLowerCase() == name.toLowerCase()){
+			return encoding[0];
 		}
-	}
+	});
 }
 function isValid(array, value){
 	return array.some(function(v){
