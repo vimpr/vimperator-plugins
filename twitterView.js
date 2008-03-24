@@ -69,7 +69,6 @@
                             lastestId = encodedJson[i-1].id;
                         }
                     }
-                    log(lastestId);
                 }else{
                     liberator.echoerr("Twitter Viewer: faild");
                 }
