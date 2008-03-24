@@ -46,11 +46,12 @@
 
     hbox.setAttribute('id','statusbar-twitter-timeline');
     //document.getElementById('status-bar').insertBefore(hbox,document.getElementById('statusbar-display'));
-    document.getElementById('liberator-commandline').appendChild(hbox);
-    document.getElementById('liberator-commandline').addEventListener("focus",function(e){
+    //document.getElementById('liberator-commandline').appendChild(hbox);
+    document.getElementById('liberator-commandline').insertBefore(hbox,document.getElementById('liberator-commandline-command'));
+    document.getElementById('liberator-commandline-command').addEventListener("focus",function(e){
         hbox.hidden = true;
     },true);
-    document.getElementById('liberator-commandline').addEventListener("blur",function(e){
+    document.getElementById('liberator-commandline-command').addEventListener("blur",function(e){
         hbox.hidden = false;
     },true);
 
