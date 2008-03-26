@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Statusbar Twitter'
-// Last Change: 24-Mar-2008. Jan 2008
+// Last Change: 26-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -11,6 +11,7 @@
     var maxWidth = '500px';
 
     var lastestId = 0;
+    var lastestStatus;
 
     var statuses = [];
     liberator.plugins.statuses = statuses;
@@ -31,7 +32,7 @@
     var iconPanel = document.createElement('image');
     var statusPanel = document.createElement('textbox');
 
-    hbox.style.overflow = "hidden";
+    //hbox.style.overflow = "hidden";
 
     iconPanel.setAttribute('id','statusbar-twitter-timeline-icon');
     iconPanel.style.width = "16px";
@@ -48,15 +49,21 @@
     //document.getElementById('status-bar').insertBefore(hbox,document.getElementById('statusbar-display'));
     //document.getElementById('liberator-commandline').appendChild(hbox);
     document.getElementById('liberator-commandline').insertBefore(hbox,document.getElementById('liberator-commandline-command'));
+
+    document.getElementById('liberator-commandline-command').style.textAlign = "right";
     document.getElementById('liberator-commandline-command').addEventListener("focus",function(e){
         hbox.hidden = true;
+        document.getElementById('liberator-commandline-command').style.textAlign = "left";
     },true);
     document.getElementById('liberator-commandline-command').addEventListener("blur",function(e){
         hbox.hidden = false;
+        document.getElementById('liberator-commandline-command').style.textAlign = "right";
     },true);
 
     checkTimeline();
     updateTimeline();
+    setInterval(checkTimeline ,checkTime);
+    setInterval(updateTimeline ,updateTime);
 
     function checkTimeline(){
         var xhr = new XMLHttpRequest();
@@ -77,18 +84,18 @@
         };
         xhr.open("GET","http://twitter.com/statuses/friends_timeline.json",true,username,password);
         xhr.send(null);
-
-        setTimeout(arguments.callee ,checkTime);
     }
     function updateTimeline(){
         if(statuses.length > 0 && !hbox.hidden){
-            var s = statuses.shift();
-            statusPanel.value = s.user.screen_name + " : " + s.text;
-            statusPanel.setAttribute('tooltiptext',s.user.screen_name + " : " + s.text);
-            iconPanel.setAttribute('src',s.user.profile_image_url);
-            iconPanel.setAttribute('tooltiptext',s.user.screen_name);
+            lastestStatus = statuses.shift();
+            statusPanel.value = lastestStatus.user.screen_name + " : " + lastestStatus.text;
+            statusPanel.setAttribute('tooltiptext',lastestStatus.user.screen_name + " : " + lastestStatus.text);
+            iconPanel.setAttribute('src',lastestStatus.user.profile_image_url);
+            iconPanel.setAttribute('tooltiptext',lastestStatus.user.screen_name);
         }
-
-        setTimeout(arguments.callee ,updateTime);
     }
+
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",r"],
+        "Reply to current user",
+        function () { liberator.commandline.open(":", "twitter @" + lastestStatus.user.screen_name + " ", liberator.modes.EX); });
 })();
