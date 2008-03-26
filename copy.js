@@ -1,7 +1,7 @@
 /**
  * vimperator plugin
  * Add `copy' command
- * For vimperator 0.6pre
+ * For vimperator 0.5.3
  * @author teramako teramako@gmail.com
  * @version 0.1
  *
@@ -47,7 +47,7 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 		var isError = false;
 		if (special && arg){
 			try {
-				copyString = window.eval('with(vimperator){' + arg + '}');
+				copyString = window.eval('with(liberator){' + arg + '}');
 				switch (typeof copyString){
 					case 'object':
 						copyString = copyString === null ? 'null' : copyString.toSource();
