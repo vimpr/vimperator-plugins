@@ -1,7 +1,7 @@
 /**
  * vimperator plugin
  * Add `copy' command
- * For vimperator 0.5.3
+ * For vimperator 0.6pre
  * @author teramako teramako@gmail.com
  * @version 0.1
  *
