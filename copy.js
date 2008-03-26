@@ -12,7 +12,7 @@
  * ex)
  * :copy %TITLE%              -> copied the title of the current page
  * :copy title                -> same as `:copy %TITLE%' by default
- * :copy! vimperator.version  -> copy the value of vimperator.version
+ * :copy! liberator.version  -> copy the value of liberator.version
  *
  * If non-argument, used `default'
  *
@@ -41,7 +41,7 @@ const templates = [
 ];
 // used when argument is none
 const defaultValue = templates[0].label;
-vimperator.commands.add(new vimperator.Command( ['copy'],
+liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 	function(arg, special){
 		var copyString = '';
 		var isError = false;
@@ -72,21 +72,19 @@ vimperator.commands.add(new vimperator.Command( ['copy'],
 			var str = getCopyTemplate(arg) || arg;
 			copyString = replaceVariable(str);
 		}
-		vimperator.copyToClipboard(copyString);
+		liberator.copyToClipboard(copyString);
 		if (isError){
-			vimperator.echoerr('CopiedErrorString: `' + copyString + "'");
+			liberator.echoerr('CopiedErrorString: `' + copyString + "'");
 		} else {
-			vimperator.echo('CopiedString: `' + vimperator.util.escapeHTML(copyString) + "'");
+			liberator.echo('CopiedString: `' + liberator.util.escapeHTML(copyString) + "'");
 		}
 	},{
-		usage: ['copy {copyString}','copy! {expr}'],
-		shortHelp: 'Copy to clipboard',
 		completer: function(filter){
-			if ( vimperator.commands.parseCommand(vimperator.commandline.getCommand())[2] ){
-				return vimperator.completion.javascript(filter);
+			if ( liberator.commands.parseCommand(liberator.commandline.getCommand())[2] ){
+				return liberator.completion.javascript(filter);
 			}
 			var templates = [];
-			for (var option in vimperator.options){
+			for (var option in liberator.options){
 				if ( option.name.indexOf('copy_') == 0 ){
 					templates.push([option.names[1], option.value]);
 				}
@@ -98,12 +96,12 @@ vimperator.commands.add(new vimperator.Command( ['copy'],
 					candidates.push(template);
 				}
 			});
-			return candidates;
+			return [0, candidates];
 		}
 	}
-));
+);
 function getCopyTemplate(label){
-	for (var option in vimperator.options){
+	for (var option in liberator.options){
 		if ( option.hasName('copy_'+label) || option.hasName(label) ){
 			return option.value;
 		}
@@ -121,48 +119,47 @@ function replaceVariable(str){
 		var serializer = new XMLSerializer();
 		htmlsel = serializer.serializeToString(sel.cloneContents());
 	}
-	return str.replace(/%TITLE%/g,vimperator.buffer.title)
-	          .replace(/%URL%/g,vimperator.buffer.URL)
+	return str.replace(/%TITLE%/g,liberator.buffer.title)
+	          .replace(/%URL%/g,liberator.buffer.URL)
 	          .replace(/%SEL%/g,sel.toString())
 	          .replace(/%HTMLSEL%/g,htmlsel);
 }
 
 templates.forEach(function(template){
-	vimperator.options.add(new vimperator.Option( ['copy_'+template.label, template.label], 'string',{
-		defaultValue: template.value,
-		shortHelp: 'Copy template: `' + vimperator.util.escapeHTML(template.value) + "'"
-	}));
+	liberator.options.add(['copy_'+template.label, template.label],
+		'Copy template: `' + liberator.util.escapeHTML(template.value) + "'", 'string',template.value,
+		{});
 });
-vimperator.completion.exTabCompletion = function (str) {
-	var [count, cmd, special, args] = vimperator.commands.parseCommand(str);
-	var completions = [];
-	var start = 0;
-	var matches = str.match(/^:*\d*(?=\w*$)/);
-	if (matches) {
-		completions = this.command(cmd);
-		start = matches[0].length;
-	} else {
-		var command = vimperator.commands.get(cmd);
-		if (command && command.completer) {
-			matches = str.match(/^:*\d*\w+!?\s+/);
-			start = matches ? matches[0].length : 0;
-			if (command.hasName("open") || command.hasName("tabopen") || command.hasName("winopen")) {
-				var skip = args.match(/^(.*,\s+)(.*)/);
-				if (skip) {
-					start += skip[1].length;
-					args = skip[2];
-				}
-			} else if (command.hasName("echo") || command.hasName("echoerr") ||
-			           command.hasName("javascript") || command.hasName("copy")) {
-				var skip = args.match(/^.*?(?=\w*$)/);
-				if (skip)
-					start += skip[0].length;
-			}
-			completions = command.completer.call(this, args);
-		}
-	}
-	return [start, completions];
-};
+//liberator.completion.exTabCompletion = function (str) {
+//	var [count, cmd, special, args] = liberator.commands.parseCommand(str);
+//	var completions = [];
+//	var start = 0;
+//	var matches = str.match(/^:*\d*(?=\w*$)/);
+//	if (matches) {
+//		completions = this.command(cmd);
+//		start = matches[0].length;
+//	} else {
+//		var command = liberator.commands.get(cmd);
+//		if (command && command.completer) {
+//			matches = str.match(/^:*\d*\w+!?\s+/);
+//			start = matches ? matches[0].length : 0;
+//			if (command.hasName("open") || command.hasName("tabopen") || command.hasName("winopen")) {
+//				var skip = args.match(/^(.*,\s+)(.*)/);
+//				if (skip) {
+//					start += skip[1].length;
+//					args = skip[2];
+//				}
+//			} else if (command.hasName("echo") || command.hasName("echoerr") ||
+//			           command.hasName("javascript") || command.hasName("copy")) {
+//				var skip = args.match(/^.*?(?=\w*$)/);
+//				if (skip)
+//					start += skip[0].length;
+//			}
+//			completions = command.completer.call(this, args);
+//		}
+//	}
+//	return [0, [start, completions]];
+//};
 })();
 
 // vim: set fdm=marker sw=4 ts=4 et:
