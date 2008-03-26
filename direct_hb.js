@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Direct Hatena Bookmark'
-// Last Change: 21-Mar-2008. Jan 2008
+// Last Change: 26-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -8,8 +8,18 @@
 //      AutoPagerize(c) id:swdyh
 //
 // Hatena bookmark direct add script for vimperator0.6.*
+// for Migemo search: require XUL/Migemo Extension
 (function(){
     var isNormalize = true;
+
+    try{
+        var XMigemoCore = Components
+            .classes['@piro.sakura.ne.jp/xmigemo/factory;1']
+            .getService(Components.interfaces.pIXMigemoFactory)
+            .getService("ja");
+    }catch(ex){
+        var XMigemoCore = undefined;
+    }
 
     function WSSEUtils(aUserName, aPassword){
         this._init(aUserName, aPassword);
@@ -201,12 +211,14 @@
             addHatenaBookmarks(hatenaUser,hatenaPassword,liberator.buffer.URL,arg,isNormalize);
         },{
             completer: function(filter){
-                var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited , now inputting]
-                var m = new RegExp("^" + match_result[2]);
+                //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited , now inputting]
+                var match_result = filter.match(/(\[.*\])?(?:\[)?(.*)/); //[all, commited , now inputting]
+                //var m = new RegExp("^" + match_result[2]);
+                var m = new RegExp(XMigemoCore ? XMigemoCore.getRegExp(match_result[2]) : "^" + match_result[2]);
                 var completionList = [];
                 for(var i in liberator.plugins.hatena_tags)
                     if(m.test(liberator.plugins.hatena_tags[i])){
-                        completionList.push([match_result[1] + "[" + liberator.plugins.hatena_tags[i] + "]","Tag"]);
+                        completionList.push([(match_result[1] || "") + "[" + liberator.plugins.hatena_tags[i] + "]","Tag"]);
                     }
                 return [0, completionList];
             }
