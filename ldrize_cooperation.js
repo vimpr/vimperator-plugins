@@ -1,24 +1,28 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.09
-// Last Change: 21-Mar-2008. Jan 2008
+// Version: 0.10
+// Last Change: 30-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // Cooperation LDRize Mappings for vimperator0.6.*
 (function(){
     var scrollCount = 3;
-    var programInfo = [
+    //pattern: wildcard
+    //include: [regexp, option] or regexp
+    //handler: [programPath, [args]] or programPath or function(url,title)
+    var handlerInfo = [
         //{
-        //    pattern: "http://www.nicovideo.jp/*",
-        //    program: "c:\\usr\\SmileDownloader\\SmileDownloader.exe",
+        //    pattern: 'http://www.nicovideo.jp/*',
+        //    handler: ['c:\\usr\\SmileDownloader\\SmileDownloader.exe',['%URL%']],
         //    wait: 5000
         //},
         //{
-        //    program: "C:\\usr\\irvine\\irvine.exe",
+        //    handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
         //},
     ];
+    var captureMappings = ['j','k','p','o'];
 
-    programInfo.forEach(function(x){
+    handlerInfo.forEach(function(x){
         x.include = typeof x.include != "undefined"
             ? typeof x.include == "string" ? new RegExp(x.include) : new RegExp(x.include[0],x.include[1])
             : typeof x.pattern != "undefined"
@@ -108,38 +112,41 @@
         window.content.wrappedJSObject.document.dispatchEvent(evt);
     }
     function isEnableLDRize(){ return isEnable && LDRize.getSiteinfo() != undefined; }
-    function getPinnedLinks(){
-        var xpath = LDRize.getSiteinfo()['link'];
-        return LDRize.getPinnedItems().map(function(i){return i.XPath(xpath)});
+    function getPinnedItems(){
+        var linkXpath = LDRize.getSiteinfo()['link'];
+        var viewXpath = LDRize.getSiteinfo()['view'];
+        return LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath)]});
     }
     function downloadLinksByProgram(links){
         var count = 0;
-        links.forEach(function(link){
-            for(let i=0;i<programInfo.length;i++)
-                if(programInfo[i].include.test(link)){
+        links.forEach(function([link,title]){
+            for each(let x in handlerInfo){
+                if(x.include.test(link)){
                     setTimeout(function(){
-                        liberator.io.run(programInfo[i].program,[link],false);
-                    },programInfo[i].wait != undefined ? programInfo[i].wait * count++ : 0);
+                        if(typeof x.handler == "object"){
+                            var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,link).replace(/%TITLE%/g,title); });
+                            liberator.io.run(x.handler[0],args,false);
+                        }else if(typeof x.handler == "string"){
+                            liberator.io.run(x.handler,[link],false);
+                        }else if(typeof x.handler == "function"){
+                            x.handler(link,title);
+                        }
+                    },x.wait != undefined ? x.wait * count++ : 0);
                     return;
                 }
+            }
             liberator.echoerr("LDRize Cooperation: download pattern not found!!");
         });
     }
 
     //Mappings
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["j", "<Down>", "<C-e>"],
-        "Scroll document down",
-        function(){isEnableLDRize() ? sendRawKeyEvent(74,106):liberator.buffer.scrollLines(scrollCount);} ,{});
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["k", "<Up>", "<C-y>"],
-        "Scroll document up",
-        function(){isEnableLDRize() ? sendRawKeyEvent(75,107):liberator.buffer.scrollLines(-scrollCount);} ,{});
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["o"],
-        "Open a message",
-        function(){isEnableLDRize() ? sendRawKeyEvent(79,111):liberator.commandline.open(":","open ",liberator.modes.EX);},{});
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], ["p"],
-        "Open (put) a URL based on the current clipboard contents in the current buffer",
-        function(){isEnableLDRize() ? sendRawKeyEvent(80,112):liberator.open(readFromClipboard());} ,{});
-
+    captureMappings.forEach(function(x){
+            var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
+            var oldAction = map.action;
+            map.action = function(){
+                isEnableLDRize() ? sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
+            }
+    });
     liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
         "Focus on search field by LDRize",
         function(){LDRize.bindFocus();} ,{});
@@ -147,7 +154,7 @@
     //Commands
     liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
         function(){
-            var links = getPinnedLinks();
+            var links = getPinnedItems();
             var showString = links.length + " Items<br/>";
             links.forEach(function(link){
                 showString += link + "<br/>";
@@ -169,7 +176,7 @@
             }
         });
     liberator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
-        function(arg){ downloadLinksByProgram(getPinnedLinks());} ,{});
+        function(arg){ downloadLinksByProgram(getPinnedItems());} ,{});
     liberator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
         function(arg){ switchLDRizeCooperation(!isEnable);}, {});
 
