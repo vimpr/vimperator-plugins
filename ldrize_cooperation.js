@@ -1,12 +1,36 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.10
-// Last Change: 30-Mar-2008. Jan 2008
+// Version: 0.11
+// Last Change: 31-Mar-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // Cooperation LDRize Mappings for vimperator0.6.*
+//
+// Mappings:
+//      replace for captureMapppings
+//      default: 'j','k','p','o'
+// Commands:
+//  'm' or 'mb' or 'minibuffer':
+//      Execute args as Minibuffer Command
+//      usage: :minibuffer pinned-link | open | clear-pin
+//  'pin':
+//      View pinned link list
+//      usage: :pin
+//  'pindownload':
+//      Download View pinned link by handler function or outer promgram. please see 'handlerInfo' also
+//      usage: :pindownload
+//  'ldrc' or 'toggleldrizecooperation':
+//      Toggle LDRize Cooperation
+//      usage: :toggleldrizecooperation
+// Options:
+//  'ldrc'
+//      Enable LDRize Cooperation
+//      usage: :set ldrc
+//  'noldrc'
+//      Disable LDRize Cooperation
+//      usage: :set noldrc
 (function(){
-    var scrollCount = 3;
+    var captureMappings = ['j','k','p','o'];
     //pattern: wildcard
     //include: [regexp, option] or regexp
     //handler: [programPath, [args]] or programPath or function(url,title)
@@ -16,11 +40,43 @@
         //    handler: ['c:\\usr\\SmileDownloader\\SmileDownloader.exe',['%URL%']],
         //    wait: 5000
         //},
+        //Niconico Downloader
+        {
+            pattern: 'http://www.nicovideo.jp/watch/*',
+            handler: function(url,title){
+                const nicoApiEndPoint = "http://www.nicovideo.jp/api/getflv?v=";
+                const nicoWatchEndPoint = "http://www.nicovideo.jp/watch/";
+                plugins.title = title;
+                var videoId = url.match(/\wm\d+/)[0];
+                httpGET(nicoApiEndPoint + videoId,function(apiResult){
+                    var flvUrl = decodeURIComponent(apiResult.match(/url=(.*?)&/)[1]);
+
+                    httpGET(nicoWatchEndPoint + videoId,function(watchPage){
+                        try{
+                            var DownloadManager = Cc["@mozilla.org/download-manager;1"]
+                                .getService(Ci.nsIDownloadManager);
+                            var WebBrowserPersist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+                                .createInstance(Ci.nsIWebBrowserPersist);
+
+                            var sourceUri = makeURI(flvUrl,null,null);
+                            var file = DownloadManager.userDownloadsDirectory;
+                            file.appendRelativePath(title + ".flv");
+                            var fileUri = makeFileURI(file);
+
+                            var download = DownloadManager.addDownload(0, sourceUri, fileUri, title + ".flv",
+                                    null, null, null, null, WebBrowserPersist);
+                            WebBrowserPersist.progressListener = download;
+                            WebBrowserPersist.saveURI(sourceUri, null, null, null, null, file);
+                        }catch(e){log(e);liberator.echoerr(e)}
+                    });
+                });
+            },
+            wait: 5000
+        },
         //{
         //    handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
         //},
     ];
-    var captureMappings = ['j','k','p','o'];
 
     handlerInfo.forEach(function(x){
         x.include = typeof x.include != "undefined"
@@ -114,22 +170,22 @@
     function isEnableLDRize(){ return isEnable && LDRize.getSiteinfo() != undefined; }
     function getPinnedItems(){
         var linkXpath = LDRize.getSiteinfo()['link'];
-        var viewXpath = LDRize.getSiteinfo()['view'];
-        return LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath)]});
+        var viewXpath = LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
+        return LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath).textContent]});
     }
     function downloadLinksByProgram(links){
         var count = 0;
-        links.forEach(function([link,title]){
+        links.forEach(function([url,title]){
             for each(let x in handlerInfo){
-                if(x.include.test(link)){
+                if(x.include.test(url)){
                     setTimeout(function(){
                         if(typeof x.handler == "object"){
-                            var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,link).replace(/%TITLE%/g,title); });
+                            var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,url).replace(/%TITLE%/g,title); });
                             liberator.io.run(x.handler[0],args,false);
                         }else if(typeof x.handler == "string"){
-                            liberator.io.run(x.handler,[link],false);
+                            liberator.io.run(x.handler,[url],false);
                         }else if(typeof x.handler == "function"){
-                            x.handler(link,title);
+                            x.handler(url.toString(),title);
                         }
                     },x.wait != undefined ? x.wait * count++ : 0);
                     return;
@@ -137,6 +193,20 @@
             }
             liberator.echoerr("LDRize Cooperation: download pattern not found!!");
         });
+    }
+
+    function httpGET(uri,callback){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                if(xhr.status == 200)
+                    callback.call(this,xhr.responseText);
+                else
+                    throw new Error(xhr.statusText)
+            }
+        };
+        xhr.open("GET",uri,true);
+        xhr.send(null);
     }
 
     //Mappings
