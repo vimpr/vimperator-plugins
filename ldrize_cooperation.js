@@ -1,13 +1,17 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.11
-// Last Change: 31-Mar-2008. Jan 2008
+// Version: 0.12
+// Last Change: 02-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // Cooperation LDRize Mappings for vimperator0.6.*
 //
+// Variable:
+//  g:ldrc_captureMapping
+//      Specifies keys that capture by LDRize
+//      usage: let g:ldrc_captureMappings = "['j','k','p','o','?']"
 // Mappings:
-//      replace for captureMapppings
+//      Mappings for LDRize
 //      default: 'j','k','p','o'
 // Commands:
 //  'm' or 'mb' or 'minibuffer':
@@ -30,7 +34,7 @@
 //      Disable LDRize Cooperation
 //      usage: :set noldrc
 (function(){
-    var captureMappings = ['j','k','p','o'];
+    var captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
     //pattern: wildcard
     //include: [regexp, option] or regexp
     //handler: [programPath, [args]] or programPath or function(url,title)
@@ -73,9 +77,9 @@
             },
             wait: 5000
         },
-        //{
-        //    handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
-        //},
+        {
+            handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
+        },
     ];
 
     handlerInfo.forEach(function(x){
