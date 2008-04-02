@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.12
-// Last Change: 02-Apr-2008. Jan 2008
+// Version: 0.13
+// Last Change: 03-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -10,6 +10,9 @@
 //  g:ldrc_captureMapping
 //      Specifies keys that capture by LDRize
 //      usage: let g:ldrc_captureMappings = "['j','k','p','o','?']"
+//  g:ldrc_enable
+//      LDRize Cooperation be Enable by default or not
+//      usage: let g:ldrc_enable = "false"
 // Mappings:
 //      Mappings for LDRize
 //      default: 'j','k','p','o'
@@ -33,8 +36,9 @@
 //  'noldrc'
 //      Disable LDRize Cooperation
 //      usage: :set noldrc
+//
+
 (function(){
-    var captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
     //pattern: wildcard
     //include: [regexp, option] or regexp
     //handler: [programPath, [args]] or programPath or function(url,title)
@@ -44,85 +48,10 @@
         //    handler: ['c:\\usr\\SmileDownloader\\SmileDownloader.exe',['%URL%']],
         //    wait: 5000
         //},
-        //Niconico Downloader
-        {
-            pattern: 'http://www.nicovideo.jp/watch/*',
-            handler: function(url,title){
-                const nicoApiEndPoint = "http://www.nicovideo.jp/api/getflv?v=";
-                const nicoWatchEndPoint = "http://www.nicovideo.jp/watch/";
-                plugins.title = title;
-                var videoId = url.match(/\wm\d+/)[0];
-                httpGET(nicoApiEndPoint + videoId,function(apiResult){
-                    var flvUrl = decodeURIComponent(apiResult.match(/url=(.*?)&/)[1]);
-
-                    httpGET(nicoWatchEndPoint + videoId,function(watchPage){
-                        try{
-                            var DownloadManager = Cc["@mozilla.org/download-manager;1"]
-                                .getService(Ci.nsIDownloadManager);
-                            var WebBrowserPersist = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-                                .createInstance(Ci.nsIWebBrowserPersist);
-
-                            var sourceUri = makeURI(flvUrl,null,null);
-                            var file = DownloadManager.userDownloadsDirectory;
-                            file.appendRelativePath(title + ".flv");
-                            var fileUri = makeFileURI(file);
-
-                            var download = DownloadManager.addDownload(0, sourceUri, fileUri, title + ".flv",
-                                    null, null, null, null, WebBrowserPersist);
-                            WebBrowserPersist.progressListener = download;
-                            WebBrowserPersist.saveURI(sourceUri, null, null, null, null, file);
-                        }catch(e){log(e);liberator.echoerr(e)}
-                    });
-                });
-            },
-            wait: 5000
-        },
         {
             handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
         },
     ];
-
-    handlerInfo.forEach(function(x){
-        x.include = typeof x.include != "undefined"
-            ? typeof x.include == "string" ? new RegExp(x.include) : new RegExp(x.include[0],x.include[1])
-            : typeof x.pattern != "undefined"
-                ? new RegExp("^"+String(x.pattern).replace(/\s+/g,"").replace(/[\\^$.+?|(){}\[\]]/g,"\\$&")
-                    .replace(/(?=\*)/g,".")+"$","i")
-                : /(?:)/;
-        delete x.pattern;
-    });
-
-    var LDRize = {getSiteinfo: function(){return undefined;}};
-    var Minibuffer;
-
-    var isEnable = true;
-
-    function addAfter(target,name,after) {
-        var original = target[name];
-        target[name] = function() {
-            var tmp = original.apply(target,arguments);
-            after.apply(target,arguments);
-            return tmp;
-        };
-    }
-
-    var GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
-    addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
-        if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
-            sandbox.window.addEventListener("focus",function(){
-                liberator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
-                liberator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
-            },false);
-            sandbox.window.addEventListener("load",function(){
-                if(window.content.wrappedJSObject == sandbox.unsafeWindow){
-                    liberator.plugins.LDRize = LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
-                    liberator.plugins.Minibuffer = Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
-                }
-            },false);
-        }
-    });
-
-    var feedPanel = document.createElement('statusbarpanel');
     const DISABLE_ICON = 'data:image/png;base64,'
         +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7E'
         +'AAAOxAGVKw4bAAACL0lEQVR4nF2Sy0tUYRjGf9+Z4/HMjJfjBUZEMM2MSDII'
@@ -154,115 +83,166 @@
         +'PDzctVYIEUXR29tbo9GAEO6WpJTO7e0tIQRjXK/XhRCe5ymlsiyDEAZB4Hle'
         +'lawEX19fqNVqVS/kOE6r1fI8DyHU6XT++ShjzM/Pz8HBAXx/f+/3+9X2WmvO'
         +'uVKq3GCMUUoxxlarVb1ef3h4+AWNW50eXTIBjgAAAABJRU5ErkJggg==';
-    feedPanel.setAttribute('id','ldrizecopperation-status');
-    feedPanel.setAttribute('class','statusbarpanel-iconic');
-    feedPanel.setAttribute('src',ENABLE_ICON);
-    feedPanel.addEventListener("click",function(e){
-            switchLDRizeCooperation(isEnable ? false : true);
-    },false);
-    document.getElementById('status-bar').insertBefore(feedPanel,document.getElementById('security-button'));
 
-    function switchLDRizeCooperation(value){
-            isEnable = value;
-            feedPanel.setAttribute("src",value ? DISABLE_ICON : ENABLE_ICON);
-    }
-    function sendRawKeyEvent(keyCode,charCode){
-        var evt = window.content.wrappedJSObject.document.createEvent("KeyEvents");
-        evt.initKeyEvent("keypress",true,true,window.content.wrappedJSObject,false,false,false,false,keyCode,charCode);
-        window.content.wrappedJSObject.document.dispatchEvent(evt);
-    }
-    function isEnableLDRize(){ return isEnable && LDRize.getSiteinfo() != undefined; }
-    function getPinnedItems(){
-        var linkXpath = LDRize.getSiteinfo()['link'];
-        var viewXpath = LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
-        return LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath).textContent]});
-    }
-    function downloadLinksByProgram(links){
-        var count = 0;
-        links.forEach(function([url,title]){
-            for each(let x in handlerInfo){
-                if(x.include.test(url)){
-                    setTimeout(function(){
-                        if(typeof x.handler == "object"){
-                            var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,url).replace(/%TITLE%/g,title); });
-                            liberator.io.run(x.handler[0],args,false);
-                        }else if(typeof x.handler == "string"){
-                            liberator.io.run(x.handler,[url],false);
-                        }else if(typeof x.handler == "function"){
-                            x.handler(url.toString(),title);
+    var Class = function(){return function(){this.initialize.apply(this,arguments)}}
+
+    LDRizeCooperation = new Class();
+    LDRizeCooperation.prototype = {
+        initialize: function(){
+            var self = this;
+            this.LDRize = {getSiteinfo: function(){return undefined;}};
+            this.Minibuffer = null;
+            this.isEnable = window.eval(liberator.globalVariables.ldrc_enable) || true;
+            this.handlerInfo = handlerInfo;
+
+            this.captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
+
+            this.convertHandlerInfo(this.handlerInfo);
+            this.hookGreasemonkey();
+            this.initLDRizeCaptureKeys(this.captureMappings);
+            this.initLDRizeCooperationFuture();
+            this.setupStatusbarPanel();
+        },
+        setupStatusbarPanel: function(){
+            var self = this;
+            var feedPanel = document.createElement('statusbarpanel');
+            feedPanel.setAttribute('id','ldrizecopperation-status');
+            feedPanel.setAttribute('class','statusbarpanel-iconic');
+            feedPanel.setAttribute('src',this.isEnable ? ENABLE_ICON : DISABLE_ICON);
+            feedPanel.addEventListener("click",function(e){
+                    self.isEnable = !self.isEnable;
+            },false);
+            document.getElementById('status-bar').insertBefore(feedPanel,document.getElementById('security-button'));
+            this.watch("isEnable",function(id,oldValue,newValue){feedPanel.setAttribute("src",newValue ? DISABLE_ICON : ENABLE_ICON);return newValue;});
+        },
+        hookGreasemonkey: function(){
+            var self = this;
+            var GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
+            this.addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
+                if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
+                    sandbox.window.addEventListener("focus",function(){
+                        self.LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
+                        self.Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
+                    },false);
+                    sandbox.window.addEventListener("load",function(){
+                        if(window.content.wrappedJSObject == sandbox.unsafeWindow){
+                            self.LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
+                            self.Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
                         }
-                    },x.wait != undefined ? x.wait * count++ : 0);
-                    return;
+                    },false);
                 }
-            }
-            liberator.echoerr("LDRize Cooperation: download pattern not found!!");
-        });
-    }
-
-    function httpGET(uri,callback){
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function(){
-            if(xhr.readyState == 4){
-                if(xhr.status == 200)
-                    callback.call(this,xhr.responseText);
-                else
-                    throw new Error(xhr.statusText)
-            }
-        };
-        xhr.open("GET",uri,true);
-        xhr.send(null);
-    }
-
-    //Mappings
-    captureMappings.forEach(function(x){
-            var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
-            var oldAction = map.action;
-            map.action = function(){
-                isEnableLDRize() ? sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
-            }
-    });
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
-        "Focus on search field by LDRize",
-        function(){LDRize.bindFocus();} ,{});
-
-    //Commands
-    liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
-        function(){
-            var links = getPinnedItems();
-            var showString = links.length + " Items<br/>";
-            links.forEach(function(link){
-                showString += link + "<br/>";
             });
-            liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
-        } ,{});
-    liberator.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
-        function(arg){Minibuffer.execute(arg)},
-        {
-            completer: function(filter){
-                var completionList = [];
-                var command = liberator.plugins.Minibuffer.command;
-                var alias = liberator.plugins.Minibuffer.alias_getter();
-                var tokens = filter.split("|").map(function(str){return str.replace(/\s+/g,"")});
-                var exp = new RegExp("^" + tokens.pop());
-                for(let i in command) if(exp.test(i))completionList.push([tokens.concat(i).join(" | "),"MinibufferCommand"]);
-                for(let i in alias) if(exp.test(i))completionList.push([i,"MinibufferAlias"]);
-                return [0,completionList];
-            }
-        });
-    liberator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
-        function(arg){ downloadLinksByProgram(getPinnedItems());} ,{});
-    liberator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
-        function(arg){ switchLDRizeCooperation(!isEnable);}, {});
+        },
+        initLDRizeCaptureKeys: function(keys){
+            var self = this;
+            keys.forEach(function(x){
+                    var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
+                    var oldAction = map.action;
+                    map.action = function(){
+                        self.isEnableLDRize() ? self.sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
+                    }
+            });
+        },
+        initLDRizeCooperationFuture: function(){
+            var self = this;
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
+                "Focus on search field by LDRize",
+                function(){self.LDRize.bindFocus();} ,{});
 
-    //Options
-    liberator.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',isEnable,
-        {
-            setter: function(value){
-                switchLDRizeCooperation(value);
-            },
-            getter: function(){
-                return isEnable;
-            }
-        }
-    );
+            //Commands
+            liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
+                function(){
+                    var links = self.getPinnedItems();
+                    var showString = links.length + " Items<br/>";
+                    links.forEach(function(link){
+                        showString += link + "<br/>";
+                    });
+                    liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
+                } ,{});
+            liberator.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
+                function(arg){self.Minibuffer.execute(arg)},
+                {
+                    completer: function(filter){
+                        var completionList = [];
+                        var command = self.Minibuffer.command;
+                        var alias = self.Minibuffer.alias_getter();
+                        var tokens = filter.split("|").map(function(str){return str.replace(/\s+/g,"")});
+                        var exp = new RegExp("^" + tokens.pop());
+                        for(let i in command) if(exp.test(i))completionList.push([tokens.concat(i).join(" | "),"MinibufferCommand"]);
+                        for(let i in alias) if(exp.test(i))completionList.push([i,"MinibufferAlias"]);
+                        return [0,completionList];
+                    }
+                });
+            liberator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
+                function(arg){ self.downloadLinksByProgram(self.getPinnedItems());} ,{});
+            liberator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
+            function(arg){ self.isEnable = !self.isEnable}, {});
+            //Options
+            liberator.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',this.isEnable,
+                {
+                    setter: function(value){ self.isEnable = value; },
+                    getter: function(){ return self.isEnable; }
+                }
+            );
+        },
+        convertHandlerInfo: function(handlerInfoArray){
+            handlerInfoArray.forEach(function(x){
+                x.include = typeof x.include != "undefined"
+                    ? typeof x.include == "string" ? new RegExp(x.include) : new RegExp(x.include[0],x.include[1])
+                    : typeof x.pattern != "undefined"
+                        ? new RegExp("^"+String(x.pattern).replace(/\s+/g,"").replace(/[\\^$.+?|(){}\[\]]/g,"\\$&")
+                            .replace(/(?=\*)/g,".")+"$","i")
+                        : /(?:)/;
+                delete x.pattern;
+            });
+        },
+
+        isEnableLDRize: function(){ return this.isEnable && this.LDRize.getSiteinfo() != undefined; },
+
+        //Pin
+        getPinnedItems: function(){
+            var linkXpath = this.LDRize.getSiteinfo()['link'];
+            var viewXpath = this.LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
+            return this.LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath).textContent]});
+        },
+        downloadLinksByProgram: function(links){
+            var self = this;
+            var count = 0;
+            links.forEach(function([url,title]){
+                for each(let x in self.handlerInfo){
+                    if(x.include.test(url)){
+                        setTimeout(function(){
+                            if(typeof x.handler == "object"){
+                                var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,url).replace(/%TITLE%/g,title); });
+                                liberator.io.run(x.handler[0],args,false);
+                            }else if(typeof x.handler == "string"){
+                                liberator.io.run(x.handler,[url],false);
+                            }else if(typeof x.handler == "function"){
+                                x.handler(url.toString(),title);
+                            }
+                        },x.wait != undefined ? x.wait * count++ : 0);
+                        return;
+                    }
+                }
+                liberator.echoerr("LDRize Cooperation: download pattern not found!!");
+            });
+        },
+
+        //Utils
+        addAfter: function(target,name,after){
+            var original = target[name];
+            target[name] = function() {
+                var tmp = original.apply(target,arguments);
+                after.apply(target,arguments);
+                return tmp;
+            };
+        },
+        sendRawKeyEvent: function(keyCode,charCode){
+            var evt = window.content.wrappedJSObject.document.createEvent("KeyEvents");
+            evt.initKeyEvent("keypress",true,true,window.content.wrappedJSObject,false,false,false,false,keyCode,charCode);
+            window.content.wrappedJSObject.document.dispatchEvent(evt);
+        },
+    }
+
+    liberator.plugins.LDRizeCooperation = new LDRizeCooperation();
 })();
