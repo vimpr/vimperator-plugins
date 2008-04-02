@@ -1,8 +1,8 @@
 /**
  * gmperator - vimperator plugin for Greasemonkey
- * For vimperator 0.5.3
+ * For vimperator 0.6pre
  * @author teramako teramako@gmail.com
- * @version 0.1a
+ * @version 0.2a
  *
  * Usage:
  *
@@ -18,24 +18,23 @@
  * :gmset! {filename}                -> toogle enable/disable the script
  * :gmset {filename} {options}
  *   {options}:
- *       n[ame]={value}              -> change name to {value}
- *       i[nclude]={expr[,expr,...]} -> change includes to expr list ("," demiliter)
- *       e[xclude]={expr[,expr,...]} -> change excludes to expr list ("," demiliter)
+ *       -n[ame] {value}              -> change name to {value}
+ *       -i[nclude] {expr[,expr,...]} -> change includes to expr list ("," demiliter)
+ *       -e[xclude] {expr[,expr,...]} -> change excludes to expr list ("," demiliter)
  *
  * Caution:
  * The change is permanent, not only the session.
  * And cannot get back.
  *
  * ex)
- * :gmset! {filename} n=fooScriptName i=http://*,https://* e=http://example.com/*
+ * :gmset! {filename} -n fooScriptName -i http://*,https://* -e http://example.com/*
  *   toggle enable or disable,
  *   name to "fooScriptName",
  *   includes to "http://*" and "https://*",
  *   and excludes to "http://example.com/*"
  */
 (function(){
-vimperator.commands.add(new vimperator.Command(
-	['gmli[st]','lsgm'],
+commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts',
 	function(arg,special){
 		var str = '';
 		var scripts = getScripts();
@@ -61,7 +60,7 @@ vimperator.commands.add(new vimperator.Command(
 				str += ' (' + scripts[i].filename + ')\n'
 			}
 		}
-		vimperator.echo(str);
+		echo(str);
 		function scriptToString(script){
 			return [
 				'<span class="hl-Title">' + script.name + '</span>::',
@@ -75,13 +74,9 @@ vimperator.commands.add(new vimperator.Command(
 				'<span style="font-weight:bold;">enabled</span>: ' + script.enabled
 			].join('\n');
 		}
-	},{
-		usage: ['gmli[st] [full] | {filter}','lsgm [full] | {filter}'],
-		shortHelp: 'list Greasemonkey scripts'
 	}
-));
-vimperator.commands.add(new vimperator.Command(
-	['gmlo[ad]'],
+);
+commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey script',
 	function(arg){
 		if (!arg) return;
 		var scripts = getScripts();
@@ -93,17 +88,17 @@ vimperator.commands.add(new vimperator.Command(
 			}
 		}
 		if (!script) {
-			vimperator.echoerr('Usage: :gmlo[ad] {name|filename}');
+			echoerr('Usage: :gmlo[ad] {name|filename}');
 			return;
 		} else {
-			vimperator.echo('load: ' +script.filename);
+			echo('load: ' +script.filename);
 		}
 		try {
 			var href = vimperator.buffer.URL;
 			var unsafewin = window.content.document.defaultView.wrappedJSObject;
 			GM_BrowserUI.gmSvc.wrappedJSObject.injectScripts([script],href,unsafewin,window);
 		} catch(e){
-			vimperator.log(e);
+			log(e);
 		}
 		/*
 		// do you have idea how to dispatch load event to only the script ?
@@ -114,22 +109,20 @@ vimperator.commands.add(new vimperator.Command(
 		},100);
 		*/
 	},{
-		usage: ['gmlo[ad] {name|filename}'],
-		shortHelp: 'load Greasemonkey script',
+		args: ['{name|filename}'],
 		completer: function(filter){
 			return scriptsCompleter(filter,true);
 		}
 	}
-));
-vimperator.commands.add(new vimperator.Command(
-	['gmset'],
+);
+commands.addUserCommand(['gmset'], 'change setting a greasemonkey script',
 	function(arg, special){
-		if (!arg && special) { // toggle enable/disable greasemonkey
-			GM_setEnabled(!GM_getEnabled());
+        var res = liberator.commands.parseArgs(arg, this.args);
+		if (!res) {
+            if (special) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable greasemonkey
 			return;
 		}
-		var args = arg.split(/\s+/);
-		var filename = args.shift();
+		var filename = res.args[0];
 		var config = new Config();
 		config.load();
 		var script;
@@ -143,45 +136,31 @@ vimperator.commands.add(new vimperator.Command(
 		if (special){ // toggle enable/disable the script if {filename} is exist
 			script.enabled = !script.enabled;
 		}
-		for (var i=0; i<args.length; i++){
-			var [,key,value] = args[i].match(/(\w+)=(.*)$/);
-			switch(key){
-				case 'n':
-				case 'name':
-					script.name = value;
-					break;
-				case 'i':
-				case 'include':
-					script.includes = value.split(',');
-					break;
-				case 'e':
-				case 'exclude':
-					script.excludes = value.split(',');
-					break;
-			}
-		}
+        if (res.opts.length > 0){
+            script.name     = liberator.commands.getOption(res.opts, '-name',    script.name);
+            script.includes = liberator.commands.getOption(res.opts, '-include', script.includes);
+            script.excludes = liberator.commands.getOption(res.opts, '-exclude', script.excludes);
+        }
 		config.save();
 	},{
-		usage: [
-			'gmset!',
-			'gmset[!] {filename}',
-			'gmset[!] {filename} n[ame]={name}',
-			'gmset[!] {filename} i[nclude]={expr[,expr,...]}',
-			'gmset[!] {filename} e[xeclude]={expr[,expr,...]}'
+		args: [
+			[['-name','-n'], liberator.commands.OPTION_STRING],
+			[['-include','-i'], liberator.commands.OPTION_LIST],
+			[['-exclude','-e'], liberator.commands.OPTION_LIST]
 		],
 		shortHelp: 'change setting a greasemonkey script',
 		help: [
 			'toggle enable/disable with "!", if <code>{filename}</code> is exist, if not toggle greasemonkey',
-			'<dl><dt>n<br/>name</dt><dd>change the name</dd>',
-			'<dt>i<br/>include</dt><dd>change the inclue list ("," demiliter)</dd>',
-			'<dt>e<br/>exclude</dt><dd>change the exclude list ("," demiliter)</dd></dl>',
+			'<dl><dt>-n<br/>-name</dt><dd>change the name</dd>',
+			'<dt>-i<br/>-include</dt><dd>change the inclue list ("," demiliter)</dd>',
+			'<dt>-e<br/>-exclude</dt><dd>change the exclude list ("," demiliter)</dd></dl>',
 			'Caution: the change is permanent, not the only session.<br/>And cannot get back.'
 		].join(''),
 		completer: function(filter){
-			return scriptsCompleter(filter, false);
+            return scriptsCompleter(filter, false);
 		}
 	}
-));
+);
 function getScripts(){
 	var config = new Config();
 	config.load();
@@ -209,7 +188,7 @@ function scriptsCompleter(filter,flag){
 			}
 		}
 	}
-	return candidates;
+	return [0,candidates];
 }
 
 })();
