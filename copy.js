@@ -1,9 +1,9 @@
 /**
  * vimperator plugin
  * Add `copy' command
- * For vimperator 0.5.3
+ * For vimperator 0.6pre
  * @author teramako teramako@gmail.com
- * @version 0.1
+ * @version 0.2
  *
  * Usage:
  * :copy {copyString}         -> copy the argument replaced some certain string
@@ -89,7 +89,7 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 					templates.push([option.names[1], option.value]);
 				}
 			}
-			if (!filter){ return templates; }
+			if (!filter){ return [0,templates]; }
 			var candidates = [];
 			templates.forEach(function(template){
 				if (template[0].indexOf(filter) == 0 || ('copy_'+template[0]).indexOf(filter) == 0){
