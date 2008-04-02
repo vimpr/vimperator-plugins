@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Direct Hatena Bookmark'
-// Last Change: 28-Mar-2008. Jan 2008
+// Last Change: 02-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -214,7 +214,7 @@
                 //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited , now inputting]
                 var match_result = filter.match(/(\[.*\])?(?:\[)?(.*)/); //[all, commited , now inputting]
                 //var m = new RegExp("^" + match_result[2]);
-                var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2]);
+                var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 for(var i in liberator.plugins.hatena_tags)
                     if(m.test(liberator.plugins.hatena_tags[i])){
