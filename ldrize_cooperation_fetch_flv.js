@@ -1,11 +1,11 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings - Niconico Flv Fetcher'
-// Version: 0.2
+// Version: 0.3
 // Last Change: 03-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // Cooperation LDRize Mappings - Niconico Flv Fetcher for vimperator0.6.*
-// Require LDRize Cooperation ver 0.13
+// Require LDRize Cooperation ver 0.14
 (function(){
     function LDRizeCooperationNiconicoFlvFetcher(){
         var NiconicoFlvFetcher = {
@@ -14,6 +14,7 @@
                 const nicoApiEndPoint = "http://www.nicovideo.jp/api/getflv?v=";
                 const nicoWatchEndPoint = "http://www.nicovideo.jp/watch/";
                 var videoId = url.match(/\wm\d+/)[0];
+                var fileName = title.replace(/[?\\\*\/:<>\|\"]/g,'_') + ".flv";
                 httpGET(nicoApiEndPoint + videoId,function(apiResult){
                     var flvUrl = decodeURIComponent(apiResult.match(/url=(.*?)&/)[1]);
 
@@ -26,10 +27,10 @@
 
                             var sourceUri = makeURI(flvUrl,null,null);
                             var file = DownloadManager.userDownloadsDirectory;
-                            file.appendRelativePath(title + ".flv");
+                            file.appendRelativePath(fileName);
                             var fileUri = makeFileURI(file);
 
-                            var download = DownloadManager.addDownload(0, sourceUri, fileUri, title + ".flv",
+                            var download = DownloadManager.addDownload(0, sourceUri, fileUri, fileName,
                                     null, null, null, null, WebBrowserPersist);
                             WebBrowserPersist.progressListener = download;
                             WebBrowserPersist.saveURI(sourceUri, null, null, null, null, file);
