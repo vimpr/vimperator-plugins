@@ -58,23 +58,8 @@
                 );
 
                 for (var j = 0; j < proxy_settings[i].setting.length; j++) {
-
                     var conf = proxy_settings[i].setting[j];
-                    switch (conf.label) {
-                        case "network.proxy.type":
-                        case "network.proxy.http_port":
-                        case "network.proxy.ssl_port":
-                            prefs.setIntPref(conf.label, conf.param);
-                            break;
-                        case "network.proxy.http":
-                        case "network.proxy.ssl":
-                        case "network.proxy.no_proxies_on":
-                        case "network.proxy.autoconfig_url":
-                        case "network.proxy.socks":
-                            prefs.setCharPref(conf.label, conf.param);
-                            break;
-                    }
-                
+                    liberator.options.setPref(conf.label, conf.param);
                 }
 
                 liberator.echo("set config:" + name);
