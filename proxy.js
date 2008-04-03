@@ -5,7 +5,7 @@
  *
  * @author cho45
  * @author halt feits
- * @version 0.6.0
+ * @version 0.6.1
  */
 
 (function() {
@@ -13,26 +13,28 @@
     const proxy_settings = [
     {
         conf_name: 'disable',
+        conf_usage: 'direct connection',
         setting: [
             {
-                label: 'network.proxy.type',
+                label: 'type',
                 param: 0
             }
         ]
     },
     {
         conf_name: 'polipo',
+        conf_usage: 'use polipo cache proxy',
         setting: [
             {
-                label: 'network.proxy.type',
+                label: 'type',
                 param: 1
             },
             {
-                label: 'network.proxy.http',
+                label: 'http',
                 param: 'localhost'
             },
             {
-                label: 'network.proxy.http_port',
+                label: 'http_port',
                 param: 8123
             }
         ]
@@ -47,7 +49,8 @@
             liberator.echo("Usage: proxy {setting name}");
         }
         for (var i = 0; i < proxy_settings.length; i++) {
-            if (proxy_settings[i].conf_name.toLowerCase() == name.toLowerCase()) {
+            var proxy_setting = proxy_settings[i];
+            if (proxy_setting.conf_name.toLowerCase() == name.toLowerCase()) {
 
                 //delete setting
                 ['http', 'ssl', 'ftp', 'gopher'].forEach(
@@ -57,9 +60,9 @@
                         }
                 );
 
-                for (var j = 0; j < proxy_settings[i].setting.length; j++) {
-                    var conf = proxy_settings[i].setting[j];
-                    liberator.options.setPref(conf.label, conf.param);
+                for (var j = 0; j < proxy_setting.setting.length; j++) {
+                    var conf = proxy_setting.setting[j];
+                    liberator.options.setPref('network.proxy.' + conf.label, conf.param);
                 }
 
                 liberator.echo("set config:" + name);
@@ -72,12 +75,13 @@
             var completions = [];
 
             for (var i = 0; i < proxy_settings.length; i++) {
-                name = proxy_settings[i].conf_name;
+                var name = proxy_settings[i].conf_name;
+                var usage = proxy_settings[i].conf_usage;
                 
                 var exp = new RegExp("^" + filter);
 
                 if (exp.test(name)) {
-                    completions.push([name, name]);
+                    completions.push([name, usage]);
                 }
             }
 
