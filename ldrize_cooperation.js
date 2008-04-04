@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.14
-// Last Change: 03-Apr-2008. Jan 2008
+// Version: 0.15
+// Last Change: 04-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -131,12 +131,10 @@
                         self.LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
                         self.Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
                     },false);
-                    sandbox.window.addEventListener("load",function(){
-                        if(window.content.wrappedJSObject == sandbox.unsafeWindow){
-                            self.LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
-                            self.Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
-                        }
-                    },false);
+                    if(window.content.wrappedJSObject == sandbox.unsafeWindow){
+                        self.LDRize = window.eval("self",sandbox.LDRize.getSiteinfo);
+                        self.Minibuffer = window.eval("command",sandbox.Minibuffer.addCommand);
+                    }
                 }
             });
         },
