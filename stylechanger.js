@@ -2,6 +2,7 @@
  * stylesheet changer
  * @author teramako teramako@gmail.com
  * @license MPL 1.1/GPL 2.0/LGPL 2.1
+ * @see http://d.hatena.ne.jp/teramako/20080405/vimperator_plugin_stylechanger_js
  *
  * Usage:
  *
@@ -44,7 +45,7 @@ commands.addUserCommand(['hi[ghlight]'],
 				['clear','disable stylesheet'],
 				['off','disable stylesheet']
 			];
-			var styles = list.concat( getStylesheetList().filter(
+			var styles = list.concat( getStylesheetList().map(
 					function(elm){ return [elm,'alternative style']; }
 			));
 			if (!aFilter) return [0,styles];
