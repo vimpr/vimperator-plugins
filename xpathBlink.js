@@ -1,6 +1,12 @@
 /**
- * For vimperator 0.5.3
+ * For vimperator 0.6pre
  * @author teramako teramako@gmail.com
+ *
+ * Usage:
+ *
+ * xpath blink nodes
+ * :xpathb[link] [EXPRESSION]
+ * :xb [EXPERSSION]
  */
 (function(){
 const Cc = Components.classes;
@@ -33,27 +39,23 @@ function blink(aNode){
 		setTimeout(setOutline, i * 100);
 	}
 }
-vimperator.commands.add(new vimperator.Command(['xpathb[link]','xb'],
+liberator.commands.addUserCommand(['xpathb[link]','xb'],'XPath blink nodes'.
 	function(expression){
 		var result
 		try {
-			result = vimperator.buffer.evaluateXPath(expression);
+			result = liberator.buffer.evaluateXPath(expression);
 		} catch(e) {
-			vimperator.echoerr('XPath blink: ' + e);
+			liberator.echoerr('XPath blink: ' + e);
 		}
 		if (!result.snapshotLength){
-			vimperator.echo('XPath blink: none');
+			liberator.echo('XPath blink: none');
 			return;
 		}
 		for (var i=0; i<result.snapshotLength; i++){
 			blink(result.snapshotItem(i));
 		}
-	},{
-		usage: ['xpathb[link] [EXPRESSION]','xb [EXPERSSION]'],
-		shortHelp: 'XPath blink nodes',
-		help: 'Search nodes with XPath [EXPRESSION] and blink the nodes'
-	}
-));
+	},{}
+);
 })();
 
 // vim: set fdm=marker sw=4 ts=4 et:
