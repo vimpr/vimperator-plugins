@@ -4,7 +4,7 @@
  * @license MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * Usage:
- * 
+ *
  * :hi[ghlight]                  -> enable stylesheet
  * :hi[ghlight] [on|clear|off]   -> enbale/disable stylesheet
  * :hi[ghlight] {alt style name} -> switch to the alternative stylesheet
@@ -17,7 +17,7 @@
  *      CSS-file are put in "~/vimperator/colors" directory
  *
  * `colors[chema]' command is similar to Stylish
- * 
+ *
  * Example:
  *
  * auto load settings
@@ -41,15 +41,15 @@ commands.addUserCommand(['hi[ghlight]'],
 		completer: function(aFilter){
 			var list = [
 				['on','enable stylesheet'],
-				['clear','disable stylesheet']
-				['off','disable stylesheet'],
+				['clear','disable stylesheet'],
+				['off','disable stylesheet']
 			];
 			var styles = list.concat( getStylesheetList().filter(
 					function(elm){ return [elm,'alternative style']; }
 			));
 			if (!aFilter) return [0,styles];
 			var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
-			return [ 0, candidates];
+			return [0, candidates];
 		}
 	}
 );
@@ -89,7 +89,7 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 		var file = io.getSpecialDirectory('colors');
 		file.append(aName + '.css');
 		if (file.exists()) return ios.newFileURI(file);
-		
+
 		return null;
 	}
 	var manager = {
@@ -123,15 +123,15 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 		list: function(){
 			var str = ['<span class="hl-Title">User StyleSheet List</span>'];
 			var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/,'');});
-			for (var i=0; i<files.length; i++){
+			files.forEach(function(file,i){
 				var buf = ' ' + (i+1) + ' ';
-				if (sss.sheetRegistered(getURIFromName(files[i]), sss.USER_SHEET)){
+				if (sss.sheetRegistered(getURIFromName(file), sss.USER_SHEET)){
 					buf += '<span style="color:blue">*</span>';
 				} else {
 					buf += ' ';
 				}
-				str.push(buf +' ' + files[i]);
-			}
+				str.push(buf +' ' + file);
+			});
 			echo( str.join('\n'), true);
 		}
 	};
