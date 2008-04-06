@@ -1,7 +1,7 @@
 // Vimperator plugin: 'Char Hints Mod'
-// Last Change: 15-Mar-2008. Jan 2008
+// Last Change: 06-Apr-2008. Jan 2008
 // License: GPL
-// Version: 0.2
+// Version: 0.3
 // Maintainer: Trapezoid <trapezoid.g@gmail.com>
 
 // This file is a tweak based on char-hints.js by:
@@ -16,8 +16,8 @@
 // and restart firefox or :source that file
 
 // plugin-setup
-vimperator.plugins.charhints = {};
-var chh = vimperator.plugins.charhints;
+liberator.plugins.charhints = {};
+var chh = liberator.plugins.charhints;
 
 //<<<<<<<<<<<<<<<< EDIT USER SETTINGS HERE
 
@@ -93,7 +93,7 @@ chh.docs = [];
 // reset all important variables
 chh.reset = function ()//{{{
 {
-    vimperator.statusline.updateInputBuffer("");
+    liberator.statusline.updateInputBuffer("");
     chh.hintString = "";
     chh.hintNumber = 0;
     chh.usedTabKey = false;
@@ -109,7 +109,7 @@ chh.reset = function ()//{{{
 //}}}
 chh.updateStatusline = function ()//{{{
 {
-    vimperator.statusline.updateInputBuffer(("") +
+    liberator.statusline.updateInputBuffer(("") +
             (chh.hintString ? "\"" + chh.hintString + "\"" : "") +
             (chh.hintNumber > 0 ? " <" + chh.hintNumber + ">" : ""));
 }
@@ -158,7 +158,7 @@ chh.openHint = function (where)//{{{
     var elemTagName = elem.localName.toLowerCase();
     elem.focus();
 
-    vimperator.buffer.followLink(elem, where);
+    liberator.buffer.followLink(elem, where);
     return true;
 }
 //}}}
@@ -206,8 +206,8 @@ chh.yankHint = function (text)//{{{
     else
         var loc = elem.href;
 
-    vimperator.copyToClipboard(loc);
-    vimperator.echo("Yanked " + loc, vimperator.commandline.FORCE_SINGLELINE);
+    liberator.copyToClipboard(loc);
+    liberator.echo("Yanked " + loc, liberator.commandline.FORCE_SINGLELINE);
 }
 //}}}
 chh.saveHint = function (skipPrompt)//{{{
@@ -219,11 +219,11 @@ chh.saveHint = function (skipPrompt)//{{{
 
     try
     {
-        vimperator.buffer.saveLink(elem,skipPrompt);
+        liberator.buffer.saveLink(elem,skipPrompt);
     }
     catch (e)
     {
-        vimperator.echoerr(e);
+        liberator.echoerr(e);
     }
 }
 //}}}
@@ -253,8 +253,8 @@ chh.generate = function (win)//{{{
     baseNodeAbsolute.className = "vimperator-hint";
 
     var elem, tagname, text, span, rect;
-    var res = vimperator.buffer.evaluateXPath(chh.hinttags, doc, null, true);
-    vimperator.log("shints: evaluated XPath after: " + (Date.now() - startDate) + "ms");
+    var res = liberator.buffer.evaluateXPath(chh.hinttags, doc, null, true);
+    liberator.log("shints: evaluated XPath after: " + (Date.now() - startDate) + "ms");
 
     var fragment = doc.createDocumentFragment();
     var start = chh.hints.length;
@@ -287,7 +287,7 @@ chh.generate = function (win)//{{{
     for (var i = 0; i < win.frames.length; i++)
         chh.generate(win.frames[i]);
 
-    vimperator.log("shints: generate() completed after: " + (Date.now() - startDate) + "ms");
+    liberator.log("shints: generate() completed after: " + (Date.now() - startDate) + "ms");
     return true;
 }
 //}}}
@@ -368,7 +368,7 @@ outer:
         }
     }
 
-    vimperator.log("shints: showHints() completed after: " + (Date.now() - startDate) + "ms");
+    liberator.log("shints: showHints() completed after: " + (Date.now() - startDate) + "ms");
     return true;
 }
 //}}}
@@ -415,7 +415,7 @@ chh.removeHints = function (timeout)//{{{
         }
     }
 
-    vimperator.log("shints: removeHints() done");
+    liberator.log("shints: removeHints() done");
     chh.reset();
 }
 //}}}
@@ -423,7 +423,7 @@ chh.processHints = function (followFirst)//{{{
 {
     if (chh.validHints.length == 0)
     {
-        vimperator.beep();
+        liberator.beep();
         return false;
     }
 
@@ -446,45 +446,45 @@ chh.processHints = function (followFirst)//{{{
         case ";": chh.focusHint(); break;
         case "a": chh.saveHint(false); break;
         case "s": chh.saveHint(true); break;
-        case "o": chh.openHint(vimperator.CURRENT_TAB); break;
-        case "O": vimperator.commandline.open(":", "open " + loc, vimperator.modes.EX); break;
-        case "t": chh.openHint(vimperator.NEW_TAB); break;
-        case "T": vimperator.commandline.open(":", "tabopen " + loc, vimperator.modes.EX); break;
-        case "w": chh.openHint(vimperator.NEW_WINDOW);  break;
-        case "W": vimperator.commandline.open(":", "winopen " + loc, vimperator.modes.EX); break;
+        case "o": chh.openHint(liberator.CURRENT_TAB); break;
+        case "O": liberator.commandline.open(":", "open " + loc, liberator.modes.EX); break;
+        case "t": chh.openHint(liberator.NEW_TAB); break;
+        case "T": liberator.commandline.open(":", "tabopen " + loc, liberator.modes.EX); break;
+        case "w": chh.openHint(liberator.NEW_WINDOW);  break;
+        case "W": liberator.commandline.open(":", "winopen " + loc, liberator.modes.EX); break;
         case "y": chh.yankHint(false); break;
         case "Y": chh.yankHint(true); break;
         default:
-        vimperator.echoerr("INTERNAL ERROR: unknown submode: " + chh.submode);
+        liberator.echoerr("INTERNAL ERROR: unknown submode: " + chh.submode);
     }
 
     var timeout = followFirst ? 0 : 500;
     chh.removeHints(timeout);
 
-    if (vimperator.modes.extended & vimperator.modes.ALWAYS_HINT)
+    if (liberator.modes.extended & liberator.modes.ALWAYS_HINT)
     {
         setTimeout(function () {
                 chh.canUpdate = true;
                 chh.hintString = "";
                 chh.hintNumber = 0;
-                vimperator.statusline.updateInputBuffer("");
+                liberator.statusline.updateInputBuffer("");
                 }, timeout);
     }
     else
     {
-        if (timeout == 0 || vimperator.modes.isReplaying)
+        if (timeout == 0 || liberator.modes.isReplaying)
         {
             // force a possible mode change, based on wheter an input field has focus
-            vimperator.events.onFocusChange();
-            if (vimperator.mode == vimperator.modes.CUSTOM)
-                vimperator.modes.reset(false);
+            liberator.events.onFocusChange();
+            if (liberator.mode == liberator.modes.HINTS)
+                liberator.modes.reset(false);
         }
         else
         {
-            vimperator.modes.add(vimperator.modes.INACTIVE_HINT);
+            liberator.modes.add(liberator.modes.INACTIVE_HINT);
             setTimeout(function () {
-                    if (vimperator.mode == vimperator.modes.CUSTOM)
-                        vimperator.modes.reset(false);
+                    if (liberator.mode == liberator.modes.HINTS)
+                        liberator.modes.reset(false);
                     }, timeout);
         }
     }
@@ -495,13 +495,13 @@ chh.processHints = function (followFirst)//{{{
 // TODO: implement framesets
 chh.show = function (mode, minor, filter)//{{{
 {
-    if (mode == vimperator.modes.EXTENDED_HINT && !/^[;asoOtTwWyY]$/.test(minor))
+    if (mode == liberator.modes.EXTENDED_HINT && !/^[;asoOtTwWyY]$/.test(minor))
     {
-        vimperator.beep();
+        liberator.beep();
         return;
     }
 
-    vimperator.modes.set(vimperator.modes.CUSTOM, mode);
+    liberator.modes.set(liberator.modes.HINTS, mode);
     chh.submode = minor || "o"; // open is the default mode
     chh.hintString = filter || "";
     chh.hintNumber = 0;
@@ -519,8 +519,8 @@ chh.show = function (mode, minor, filter)//{{{
 
     if (chh.validHints.length == 0)
     {
-        vimperator.beep();
-        vimperator.modes.reset();
+        liberator.beep();
+        liberator.modes.reset();
         return false;
     }
     else if (chh.validHints.length == 1)
@@ -539,7 +539,7 @@ chh.hide = function ()//{{{
 //}}}
 chh.onEvent = function (event)//{{{
 {
-    var key = vimperator.events.toString(event);
+    var key = liberator.events.toString(event);
 
     if (chh.showcapitals && key.length == 1)
         key = key.toLowerCase();
@@ -589,7 +589,7 @@ chh.onEvent = function (event)//{{{
             {
                 chh.usedTabKey = false;
                 chh.hintNumber = 0;
-                vimperator.beep();
+                liberator.beep();
                 return;
             }
             chh.showActiveHint(chh.hintNumber, oldID);
@@ -607,14 +607,14 @@ chh.onEvent = function (event)//{{{
             {
                 //FIXME: won't work probably
                 var map = null;
-                if ((map = vimperator.mappings.get(vimperator.modes.NORMAL, key)) ||
-                     (map = vimperator.mappings.get(vimperator.modes.CUSTOM, key))) //TODO
+                if ((map = liberator.mappings.get(liberator.modes.NORMAL, key)) ||
+                     (map = liberator.mappings.get(liberator.modes.HINTS, key))) //TODO
                 {
                     map.execute(null, -1);
                     return;
                 }
 
-                vimperator.beep();
+                liberator.beep();
                 return;
             }
 
@@ -643,7 +643,7 @@ chh.onEvent = function (event)//{{{
 
                 if (chh.hintNumber == 0 || chh.hintNumber > chh.validHints.length)
                 {
-                    vimperator.beep();
+                    liberator.beep();
                     return;
                 }
 
@@ -674,34 +674,34 @@ chh.onEvent = function (event)//{{{
 
 // <<<<<<<<<<<<<<< registering/setting up this plugin
 
-vimperator.modes.setCustomMode ("CHAR-HINTS", vimperator.plugins.charhints.onEvent,
-                                vimperator.plugins.charhints.hide);
-
-vimperator.mappings.addUserMap([vimperator.modes.NORMAL], [chh.mapNormal],
+//liberator.modes.setCustomMode ("CHAR-HINTS", liberator.plugins.charhints.onEvent,
+//                                liberator.plugins.charhints.hide);
+liberator.hints = chh;
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapNormal],
         "Start Custum-QuickHint mode",
-        function () { vimperator.plugins.charhints.show(vimperator.modes.QUICK_HINT); },
+        function () { liberator.plugins.charhints.show(liberator.modes.QUICK_HINT); },
         { noremap: true }
 );
 
-vimperator.mappings.addUserMap([vimperator.modes.NORMAL], [chh.mapNormalNewTab],
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapNormalNewTab],
         "Start Custum-QuickHint mode, but open link in a new tab",
-        function () { vimperator.plugins.charhints.show(vimperator.modes.QUICK_HINT, "t"); },
+        function () { liberator.plugins.charhints.show(liberator.modes.QUICK_HINT, "t"); },
         { noremap: true }
 );
 
-vimperator.mappings.addUserMap([vimperator.modes.NORMAL], [chh.mapExtended],
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapExtended],
         "Start an extended hint mode",
         function (arg)
         {
             if (arg == "f")
-                vimperator.plugins.charhints.show(vimperator.modes.ALWAYS_HINT, "o");
+                liberator.plugins.charhints.show(liberator.modes.ALWAYS_HINT, "o");
             else if (arg == "F")
-                vimperator.plugins.charhints.show(vimperator.modes.ALWAYS_HINT, "t");
+                liberator.plugins.charhints.show(liberator.modes.ALWAYS_HINT, "t");
             else
-                vimperator.plugins.charhints.show(vimperator.modes.EXTENDED_HINT, arg);
+                liberator.plugins.charhints.show(liberator.modes.EXTENDED_HINT, arg);
         },
         {
-            flags: vimperator.Mappings.flags.ARGUMENT,
+            flags: liberator.Mappings.flags.ARGUMENT,
             noremap: true
         }
 );
