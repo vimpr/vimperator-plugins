@@ -123,7 +123,7 @@ liberator.plugins.gmperator = (function(){ //{{{
         },
         getSandboxFromWindow: function(win){
             for each(var c in containers){
-                if(c.sandbox.window === win) return sandbox;
+                if(c.sandbox.window == win) return sandbox;
             }
             return null;
         },
