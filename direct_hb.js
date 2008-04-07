@@ -5,9 +5,9 @@
 // Parts:
 //      http://d.hatena.ne.jp/fls/20080309/p1
 //      Pagerization (c) id:ofk
-//      AutoPagerize(c) id:swdyh
+//      AutoPagerize (c) id:swdyh
 //
-// Hatena bookmark direct add script for vimperator0.6.*
+// Hatena Bookmark direct add script for Vimperator 0.6.*
 // for Migemo search: require XUL/Migemo Extension
 (function(){
     var isNormalize = true;
@@ -96,7 +96,7 @@
 
     };
 
-    // copied from AutoPagerize(c) id:swdyh
+    // copied from AutoPagerize (c) id:swdyh
     function getElementsByXPath(xpath, node) {
         node = node || document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null,
@@ -116,13 +116,11 @@
 
     // copied from Pagerization (c) id:ofk
     function parseHTML(str) {
-        str = str.replace(/^[\S\s]*?<html[^>]*>|<\/html\s*>[\S\s]*$/ig, '');
+        str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
-        res.documentElement.appendChild(
-                res.importNode(range.createContextualFragment(str), true)
-        );
+        res.documentElement.appendChild(res.importNode(range.createContextualFragment(str), true));
         return res;
     }
 
@@ -150,7 +148,7 @@
         xhr.open("GET","http://api.pathtraq.com/normalize_url?url=" + url,false);
         xhr.send(null);
         if(xhr.status != 200){
-            liberator.echoerr("Pathtraq: URL normalize faild!!");
+            liberator.echoerr("Pathtraq: FAILED to normalize URL!!");
             return undefined;
         }
         return xhr.responseText;
@@ -162,9 +160,9 @@
                 function(mypage_text){
                     var mypage_html = parseHTML(mypage_text);
                     var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
-                    for(var i in tags)
-                        liberator.plugins.hatena_tags.push(tags[i].innerHTML);
-                    liberator.echo("Hatena bookmark: Tag parsing is finished. taglist length: " + tags.length);
+                    for each(var tag in tags)
+                        liberator.plugins.hatena_tags.push(tag.innerHTML);
+                    liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 });
     }
     getTags();
@@ -189,7 +187,7 @@
         var wsse = new WSSEUtils(user,password);
         xhr.open("POST","http://b.hatena.ne.jp/atom/post", true);
         xhr.setRequestHeader("X-WSSE",wsse.getWSSEHeader());
-        xhr.setRequestHeader("Content-Type","application/x.atom+xml");
+        xhr.setRequestHeader("Content-Type","application/atom+xml");
         xhr.send(request.toString());
     }
     liberator.commands.addUserCommand(['hbtags'],"Update HatenaBookmark Tags",
@@ -204,21 +202,21 @@
                 if(logins.length)
                     [hatenaUser, hatenaPassword] = [logins[0].username, logins[0].password];
                 else
-                    liberator.echoerr("Hatena bookmark: account not found");
+                    liberator.echoerr("Hatena Bookmark: account not found");
             }
             catch(ex) {
             }
             addHatenaBookmarks(hatenaUser,hatenaPassword,liberator.buffer.URL,arg,isNormalize);
         },{
             completer: function(filter){
-                //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited , now inputting]
-                var match_result = filter.match(/(\[.*\])?(?:\[)?(.*)/); //[all, commited , now inputting]
+                //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited, now inputting]
+                var match_result = filter.match(/(\[[^\]]*\])?(?:\[)?(.*)/); //[all, commited, now inputting]
                 //var m = new RegExp("^" + match_result[2]);
                 var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
-                for(var i in liberator.plugins.hatena_tags)
-                    if(m.test(liberator.plugins.hatena_tags[i])){
-                        completionList.push([(match_result[1] || "") + "[" + liberator.plugins.hatena_tags[i] + "]","Tag"]);
+                for each(var tag in liberator.plugins.hatena_tags)
+                    if(m.test(tag)){
+                        completionList.push([(match_result[1] || "") + "[" + tag + "]","Tag"]);
                     }
                 return [0, completionList];
             }
