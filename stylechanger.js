@@ -30,11 +30,11 @@
 commands.addUserCommand(['hi[ghlight]'],
 	'basic style changer',
 	function(arg){
-		if (!arg || arg == 'on') {
+		if (!arg || arg == 'on'){
 			setStyleDisabled(false);
 		} else if (arg == 'clear' || arg == 'off'){
 			setStyleDisabled(true);
-		} else if ((getStylesheetList()).indexOf(arg) != -1) {
+		} else if ((getStylesheetList()).indexOf(arg) != -1){
 			stylesheetSwitchAll(window.content, arg);
 			setStyleDisabled(false);
 		}
@@ -46,7 +46,7 @@ commands.addUserCommand(['hi[ghlight]'],
 				['off','disable stylesheet']
 			];
 			var styles = list.concat( getStylesheetList().map(
-					function(elm){ return [elm,'alternative style']; }
+				function(elm){ return [elm,'alternative style']; }
 			));
 			if (!aFilter) return [0,styles];
 			var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
@@ -81,7 +81,7 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 		var cssFiles = [];
 		if (colorDir){
 			cssFiles = io.readDirectory(colorDir).filter(function(file){
-				return /\.css$/.test(file.leafName) && !file.isDirectory() ;
+				return /\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory() ;
 			});
 		}
 		return cssFiles;
@@ -123,7 +123,7 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 		},
 		list: function(){
 			var str = ['<span class="hl-Title">User StyleSheet List</span>'];
-			var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/,'');});
+			var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/i,'');});
 			files.forEach(function(file,i){
 				var buf = ' ' + (i+1) + ' ';
 				if (sss.sheetRegistered(getURIFromName(file), sss.USER_SHEET)){
@@ -138,7 +138,7 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 	};
 	commands.addUserCommand(['colo[rschema]'], 'set user stylesheet',
 		function(arg, special){
-			if (!arg) {
+			if (!arg){
 				manager.list();
 				return;
 			}
@@ -150,7 +150,7 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 		},{
 			completer: function(filter, special){
 				var list = getCSSFiles().map(function(file){
-					var name = file.leafName.replace(/\.css$/,'');
+					var name = file.leafName.replace(/\.css$/i,'');
 					return [name,sss.sheetRegistered(getURIFromName(name),sss.USER_SHEET) ? '*' : ''];
 				});
 				if (!filter) return [0,list];
@@ -170,4 +170,4 @@ liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
 
 })();
 
-// vim: set sw=4 ts=4 sts=0 fdm=marker:
+// vim: sw=4 ts=4 sts=0 fdm=marker:
