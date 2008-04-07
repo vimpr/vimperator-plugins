@@ -1,6 +1,6 @@
 /**
- * gmperator - vimperator plugin for Greasemonkey
- * For vimperator 0.6pre
+ * gmperator - Vimperator plugin for Greasemonkey
+ * For Vimperator 0.6pre
  * @author teramako teramako@gmail.com
  * @version 0.3a
  *
@@ -18,7 +18,7 @@
  *                                      so maybe you should edit the scripts before load
  * :gmlo[ad]! {name|filename}        -> force load the user script
  *
- * :gmset!                           -> toggle enable/disable greasemonkey
+ * :gmset!                           -> toggle enable/disable Greasemonkey
  * :gmset! {filename}                -> toogle enable/disable the script
  * :gmset {filename} {options}
  *   {options}:
@@ -64,10 +64,10 @@
  *                                  enabled    : {Boolean}
  *                                  includes   : {String[]}
  *                                  encludes   : {String[]}
- *                              ) 
+ *                              )
  *  addAutoCommand    : function( uri, script, cmd )
  *                      If both of uri and script is match
- *                          
+ *
  * )
  * }}}
  */
@@ -85,7 +85,7 @@ if(!liberator.plugins) liberator.plugins = {};
 
 liberator.plugins.gmperator = (function(){ //{{{
     // -----------------------
-    // PUBLIC section 
+    // PUBLIC section
     // -----------------------
     // {{{
     var manager =  {
@@ -96,7 +96,7 @@ liberator.plugins.gmperator = (function(){ //{{{
                 gmCon = containers[panelID];
             } else {
                 gmCon = new GmContainer(uri,sandbox);
-                containers[panelID] = gmCon; 
+                containers[panelID] = gmCon;
                 this.__defineGetter__(panelID,function(){return gmCon;});
                 log('gmpeartor: redisted: '+ panelID + ' - ' + uri);
             }
@@ -188,143 +188,151 @@ liberator.plugins.gmperator = (function(){ //{{{
 // User Command
 // ---------------------------
 commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
-	function(arg,special){
-		var str = '';
-		var scripts = getScripts();
-		var reg;
-		if (special || arg == 'full'){
-			reg = new RegExp('.*');
-		} else if( arg ){
-			reg = new RegExp(arg,'i');
-		}
-		if (reg){
-			for each(var s in scripts){
-				if ( reg.test(s.name) || reg.test(s.filename) ) {
-					str += scriptToString(s) + '\n\n';
-				}
-			}
-		} else {
-            str = '<table>';
-			for each(var s in scripts){
-				if (s.enabled){
-					str += '<tr><td><span style="font-weight:bold;">'+ s.name + '</span></td>'
-				} else {
-					str += '<tr><td>' + s.name + '</td>';
-				}
-				str += '<td>(' + s.filename + ')</td></tr>'
-			}
-            str += '</table>';
-		}
-		echo(str,true);
-		function scriptToString(script){
-            var thTag = '<th style="font-weight:bold;text-align:left;vertical-align:top">';
-            var rs = '<tr>' + thTag;
-            var re = '</td></tr>';
-            var sep = '</th><td>';
-			return [
-                '<table>',
-                '<caption class="hl-Title" style="text-align:left">', script.name, '</caption>',
-                rs, 'FileName',    sep, script.filename,              re,
-                rs, 'NameSpace',   sep, script.namespace,             re,
-                rs, 'Description', sep, script.description,           re,
-                rs, 'Includes',    sep, script.includes.join('<br>'), re,
-                rs, 'Excludes',    sep, script.excludes.join('<br>'), re,
-                rs, 'Enabled',     sep, script.enabled,               re,
-                '</table>'
-			].join('');
-		}
-	}
+    function(arg,special){
+        var str = '';
+        var scripts = getScripts();
+        var reg;
+        var table, tr;
+        if (special || arg == 'full'){
+            reg = new RegExp('.*');
+        } else if( arg ){
+            reg = new RegExp(arg,'i');
+        }
+        if (reg){
+            for each(var s in scripts){
+                if ( reg.test(s.name) || reg.test(s.filename) ) {
+                    str += scriptToString(s) + '\n\n';
+                }
+            }
+        } else {
+            table = <table/>;
+            for each(var script in scripts){
+                tr = <tr/>;
+                if (script.enabled){
+                    tr.* += <td><span style="font-weight:bold;">{script.name}</span></td>;
+                } else {
+                    tr.* += <td>{script.name}</td>;
+                }
+                tr.* += <td>({script.filename})</td>;
+                table.* += tr;
+            }
+            str += table.toSource();
+        }
+        echo(str,true);
+        function scriptToString(script){
+            var table = <table>
+                <caption class="hl-Title" style="text-align:left">{script.name}</caption>
+            </table>;
+            ['FileName', 'NameSpace', 'Description',
+             'Includes', 'Excludes', 'Enabled'].forEach(function(prop){
+                var tr = <tr>
+                    <th style="font-weight:bold;text-align:left;vertical-align:top">{prop}</th>
+                </tr>;
+                var contents = script[prop.toLowerCase()];
+                if (typeof contents == "string"){
+                    tr.* += <>{contents}</>;
+                } else {
+                    contents.forEach(function(c,i,a){
+                        tr.* += <>{c}</>;
+                        if (a[i+1]) tr.* += <br/>;
+                    });
+                }
+                table.* += tr;
+            });
+            return table.toSource();
+        }
+    }
 ); //}}}
-commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey script', //{{{
-	function(arg, special){
-		if (!arg) {
+commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
+    function(arg, special){
+        if (!arg) {
             echoerr('Usage: :gmlo[ad][!] {name|filename}');
             return;
         }
-		var scripts = getScripts();
-		var script;
-		for (var i=0; i<scripts.length; i++){
-			if (scripts[i].filename == arg || scripts[i].name == arg){
-				script = scripts[i];
-				break;
-			}
-		}
-		if (!script) {
-			echoerr('no such a user script');
-			return;
+        var scripts = getScripts();
+        var script;
+        for (var i=0; i<scripts.length; i++){
+            if (scripts[i].filename == arg || scripts[i].name == arg){
+                script = scripts[i];
+                break;
+            }
+        }
+        if (!script) {
+            echoerr('no such a user script');
+            return;
         } else if (plugins.gmperator.currentContainer.hasScript(script.filename) && !special){
             echoerr(script.filename + ' is already loaded!');
             return;
-		} else {
-			echo('load: ' +script.filename);
-		}
-		try {
-			var href = buffer.URL;
-			var unsafewin = window.content.document.defaultView.wrappedJSObject;
-			GM_BrowserUI.gmSvc.wrappedJSObject.injectScripts([script],href,unsafewin,window);
-		} catch(e){
-			log(e);
+        } else {
+            echo('loading: ' +script.filename);
+        }
+        try {
+            var href = buffer.URL;
+            var unsafewin = window.content.document.defaultView.wrappedJSObject;
+            GM_BrowserUI.gmSvc.wrappedJSObject.injectScripts([script],href,unsafewin,window);
+        } catch(e){
+            log(e);
             echoerr(e);
-		}
-		/*
-		// do you have idea how to dispatch load event to only the script ?
-		window.setTimeout(function(){
-			var loadEvent = document.createEvent('Event');
-			loadEvent.initEvent('load',true,true, window.content.document,1);
-			window.content.document.dispatchEvent(loadEvent);
-		},100);
-		*/
-	},{
-		completer: function(filter){
-			return scriptsCompleter(filter,true);
-		}
-	}
+        }
+        /*
+        // do you have idea how to dispatch load event to only the script ?
+        window.setTimeout(function(){
+            var loadEvent = document.createEvent('Event');
+            loadEvent.initEvent('load',true,true, window.content.document,1);
+            window.content.document.dispatchEvent(loadEvent);
+        },100);
+        */
+    },{
+        completer: function(filter){
+            return scriptsCompleter(filter,true);
+        }
+    }
 ); //}}}
-commands.addUserCommand(['gmset'], 'change setting a greasemonkey script', //{{{
-	function(arg, special){
+commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', //{{{
+    function(arg, special){
         var res = commands.parseArgs(arg, this.args);
-		if (!res) {
-            if (special) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable greasemonkey
-			return;
-		}
-		var filename = res.args[0];
-		var config = new Config();
-		config.load();
-		var script;
-		for (var i=0; i<config.scripts.length; i++){
-			if (config.scripts[i].filename == filename){
-				script = config.scripts[i];
-				break;
-			}
-		}
-		if (!script) return;
-		if (special){ // toggle enable/disable the script if {filename} is exist
-			script.enabled = !script.enabled;
-		}
+        if (!res) {
+            if (special) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable Greasemonkey
+            return;
+        }
+        var filename = res.args[0];
+        var config = new Config();
+        config.load();
+        var script;
+        for (var i=0; i<config.scripts.length; i++){
+            if (config.scripts[i].filename == filename){
+                script = config.scripts[i];
+                break;
+            }
+        }
+        if (!script) return;
+        if (special){ // toggle enable/disable the script if {filename} is exist
+            script.enabled = !script.enabled;
+        }
         if (res.opts.length > 0){
             script.name     = commands.getOption(res.opts, '-name',    script.name);
             script.includes = commands.getOption(res.opts, '-include', script.includes);
             script.excludes = commands.getOption(res.opts, '-exclude', script.excludes);
         }
-		config.save();
-	},{
-		args: [
-			[['-name','-n'],    commands.OPTION_STRING],
-			[['-include','-i'], commands.OPTION_LIST],
-			[['-exclude','-e'], commands.OPTION_LIST]
-		],
-		shortHelp: 'change setting a greasemonkey script',
-		help: [
-			'toggle enable/disable with "!", if <code>{filename}</code> is exist, if not toggle greasemonkey',
-			'<dl><dt>-n<br/>-name</dt><dd>change the name</dd>',
-			'<dt>-i<br/>-include</dt><dd>change the inclue list ("," demiliter)</dd>',
-			'<dt>-e<br/>-exclude</dt><dd>change the exclude list ("," demiliter)</dd></dl>',
-			'Caution: the change is permanent, not the only session.<br/>And cannot get back.'
-		].join(''),
-		completer: function(filter){
+        config.save();
+    },{
+        args: [
+            [['-name','-n'],    commands.OPTION_STRING],
+            [['-include','-i'], commands.OPTION_LIST],
+            [['-exclude','-e'], commands.OPTION_LIST]
+        ],
+        shortHelp: 'change settings for Greasemonkey scripts',
+        help: [
+            'toggle enable/disable with "!", if <code>{filename}</code> is exist, if not toggle Greasemonkey',
+            '<dl><dt><code>-n</code><br/><code>-name</code></dt><dd>change the name</dd>',
+            '<dt><code>-i</code><br/><code>-include</code></dt><dd>change the includes list ("," delimiter)</dd>',
+            '<dt><code>-e</code><br/><code>-exclude</code></dt><dd>change the excludes list ("," delimiter)</dd></dl>',
+            'Caution: the change is permanent, not the only session.<br/>And cannot get back.'
+        ].join(''),
+        completer: function(filter){
             return scriptsCompleter(filter, false);
-		}
-	}
+        }
+    }
 ); //}}}
 
 // ---------------------------
@@ -357,35 +365,35 @@ GmContainer.prototype = {
     }
 } // }}}
 function getScripts(){ //{{{
-	var config = new Config();
-	config.load();
-	return config.scripts;
+    var config = new Config();
+    config.load();
+    return config.scripts;
 } //}}}
 function scriptsCompleter(filter,flag){ //{{{
-	var candidates = [];
-	var scripts = getScripts();
-	var isAll = false;
-	if (!filter) isAll=true;
-	if (flag){
-		for each(var s in scripts){
-			if (isAll || s.name.toLowerCase().indexOf(filter) == 0 ||
-				s.filename.indexOf(filter) == 0)
-			{
-				candidates.push([s.name, s.description]);
-				candidates.push([s.filename, s.description]);
-			}
-		}
-	} else {
-		for each(var s in scripts){
-			if (isAll || s.filename.indexOf(filter) == 0)
-			{
-				candidates.push([s.filename, s.description]);
-			}
-		}
-	}
-	return [0,candidates];
+    var candidates = [];
+    var scripts = getScripts();
+    var isAll = false;
+    if (!filter) isAll=true;
+    if (flag){
+        for each(var s in scripts){
+            if (isAll || s.name.toLowerCase().indexOf(filter) == 0 ||
+                s.filename.indexOf(filter) == 0)
+            {
+                candidates.push([s.name, s.description]);
+                candidates.push([s.filename, s.description]);
+            }
+        }
+    } else {
+        for each(var s in scripts){
+            if (isAll || s.filename.indexOf(filter) == 0)
+            {
+                candidates.push([s.filename, s.description]);
+            }
+        }
+    }
+    return [0,candidates];
 } //}}}
 
 })();
 
-// vim: set fdm=marker sw=4 ts=4 et:
+// vim: fdm=marker sw=4 ts=4 et:
