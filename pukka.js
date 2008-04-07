@@ -3,7 +3,7 @@
  * Add `pukka' http://codesorcery.net/pukka/ command to Bookmark del.icio.us
  * For liberator 0.6pre
  * @author otsune (based on teramako)
- * @version 0.2
+ * @version 0.3
  *
  * Variable:
  *  g:pukka_normalizelink
@@ -20,7 +20,7 @@
  */
 
 (function(){
-    var useNormalizelink = liberator.globalVariables.pukka_normalizelink || false;
+    var useNormalizelink = liberator.globalVariables.pukka_normalizelink || true;
 liberator.commands.addUserCommand(['pukka','pu'], 'Post to Pukka bookmark',
 function(args){
     if (!liberator.buffer.title || !liberator.buffer.URL || liberator.buffer.URL=='about:blank'){
@@ -37,10 +37,23 @@ function(args){
 },{
     completer: function(filter){
         var complist = [];
+
+        complist.push([liberator.buffer.URL, 'Raw URL: ' + liberator.buffer.title]);
+
         if(useNormalizelink){
             complist.push([getNormalizedPermalink(liberator.buffer.URL), 'Normalized URL: ' + liberator.buffer.title]);
         }
-        complist.push([liberator.buffer.URL, 'Raw URL: ' + liberator.buffer.title]);
+
+        // detect rel="bookmark"
+        var elem;
+        var relb = liberator.buffer.evaluateXPath(
+//          '//*[@rel="bookmark"]',
+            '//*[contains(concat(" ", normalize-space(@rel), " "), " bookmark ")]', 
+            null, null, true);
+        while ((elem = relb.iterateNext()) !== null) {
+            complist.push([elem.toString(), '@rel="bookmark" URL: ' + elem]);
+        }
+
         return [0, complist];
     }
 }
