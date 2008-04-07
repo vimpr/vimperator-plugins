@@ -73,7 +73,7 @@ function getHTML(url, callback){
  * @return {DOMDocument}
  */
 function createHTMLDocument(str){
-    str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|[\r\n]+|<\/html\s*>[\S\s]*$/ig, '');
+    str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, " ");
     var htmlFragment = document.implementation.createDocument(null,'html',null);
     var range = document.createRange();
     range.setStartAfter(window.content.document.body);
