@@ -4,17 +4,17 @@
  * For liberator 0.6pre
  * @author otsune (based on teramako)
  * @version 0.2
- * 
+ *
  * Variable:
  *  g:pukka_normalizelink
- *      Specifies keys that use Pathtraq URL Normalizer 
+ *      Specifies keys that use Pathtraq URL Normalizer
  *      usage: let g:pukka_normalizelink = true
  * Mappings:
  *  '[C-z]':
  * Commands:
  *  'pukka' or 'pu':
  *      Post bookmark to del.icio.us with Pukka
- *      usage: :pukka http://example.com/ 
+ *      usage: :pukka http://example.com/
  * Options:
  *  not implemented
  */
@@ -40,14 +40,14 @@ function(args){
         if(useNormalizelink){
             complist.push([getNormalizedPermalink(liberator.buffer.URL), 'Normalized URL: ' + liberator.buffer.title]);
         }
-        complist.push([liberator.buffer.URL, 'Raw URL: ' + liberator.buffer.title]); 
+        complist.push([liberator.buffer.URL, 'Raw URL: ' + liberator.buffer.title]);
         return [0, complist];
     }
 }
 );
 
-liberator.mappings.addUserMap([liberator.modes.NORMAL], 
-['<C-z>'], 'Post to Pukka', 
+liberator.mappings.addUserMap([liberator.modes.NORMAL],
+['<C-z>'], 'Post to Pukka',
 function() {
     var urlarg = liberator.globalVariables.pukka_normalizelink ?
                  getNormalizedPermalink(liberator.buffer.URL) :
@@ -61,13 +61,13 @@ function() {
 }
 );
 
-// copied from trapezoid's direct-hb.js
+// copied from trapezoid's direct_hb.js
 function getNormalizedPermalink(url){
     var xhr = new XMLHttpRequest();
     xhr.open("GET","http://api.pathtraq.com/normalize_url?url=" + url,false);
     xhr.send(null);
     if(xhr.status != 200){
-        liberator.echoerr("Pathtraq: URL normalize faild!!");
+        liberator.echoerr("Pathtraq: FAILED to normalize URL!!");
         return url;
     }
     return xhr.responseText;
