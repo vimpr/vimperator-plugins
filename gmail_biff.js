@@ -53,7 +53,7 @@
             if(logins.length)
                 var [gmailUser, gmailPassword] = [logins[0].username, logins[0].password];
             else {
-                liberator.echoerr("GMail Biff: account not found");
+                liberator.echoerr("Gmail Biff: account not found");
                 return;
             }
 
