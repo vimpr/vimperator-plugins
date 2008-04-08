@@ -9,50 +9,66 @@
  * @minVersion        0.6pre
  * ==/VimperatorPlugin==
  *
- *  Please set g:ex_ime_mode value.
+ *  Please set g:ex_ime_mode and g:textarea_ime_mode value.
+ *  
+ *  g:ex_ime_mode:
+ *   used at into EX mode
+ *  
+ *  g:textarea_ime_mode:
+ *   used at into TEXTAREA mode from INSERT mode and "noinsertmode" is set.
+ *  
  *  ex).
  *  :let g:ex_ime_mode = "inactive"
+ *  :let g:textarea_ime_mode = "inactive"
  *
  *  following values are available:
  *      "auto"     : No change
  *      "active"   : Initially IME on
  *      "inactive" : Initially IME off
- *      "disable"  : Disable IME
+ *      "disabled"  : Disable IME
  *
  *  more details: see http://developer.mozilla.org/en/docs/CSS:ime-mode
  *
- *  default value is "inactive"
+ *  if these values are null, "inactive" is used
  *
- * TODO: TEXTAREAモード時にもIMEのON/OFF切り替え機能をつける
  */
 
-if(!liberator.plugins) vimperator.plugins = {};
+if(!liberator.plugins) vimperator.plugins = {}; 
 liberator.plugins.imeController = (function(){
     var inputElement = document.getAnonymousElementByAttribute(
         document.getElementById('liberator-commandline-command'),'anonid','input'
-    );
+    );  
+    function getMode(name){
+        return globalVariables[name] ? globalVariables[name] : 'inactive';
+    }   
     function preExec(target,name,func){
         var original = target[name];
         target[name] = function(){
             func.apply(this,arguments);
             return original.apply(target,arguments);
-        };
-    }
-    if(!globalVariables.ex_ime_mode){
-        globalVariables.ex_ime_mode = 'inactive';
-    }
+        }   
+    }   
     preExec(commandline,'open',function(){
-        liberator.plugins.imeController.set();
-    });
+        liberator.plugins.imeController.set(inputElement, getMode('ex_ime_mode'));
+    }); 
+    preExec(events,'onEscape',function(){
+        if (liberator.mode == liberator.modes.INSERT && (liberator.modes.extended & liberator.modes.TEXTAREA) && !liberator.options.insertmode){
+            var inputField = liberator.buffer.lastInputField;
+            if (liberator.plugins.imeController.set(inputField, getMode('textarea_ime_mode'))){
+                inputField.blur();
+                setTimeout(function(){inputField.focus();},0);
+            }   
+        }   
+    }); 
     return {
-        set: function(mode){
-            if(!mode) mode = globalVariables.ex_ime_mode ? globalVariables.ex_ime_mode : 'inactive';
-            inputElement.style.imeMode = mode;
-        },
+        set: function(elem, mode){
+            if (elem && mode) return elem.style.imeMode = mode;
+            return false;
+        },  
         reset: function(){
-            //keyElement.setAttribute('oncommand', original);
-            inputElement.style.imeMode = 'auto';
-        }
-    };
+            delete globalVariables.ex_ime_mode;
+            delete globalVariables.textarea_ime_mode;
+        }   
+    };  
 })();
 // vim: sw=4 ts=4 et:
