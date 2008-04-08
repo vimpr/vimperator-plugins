@@ -3,9 +3,9 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// search word completion using google suggest script for vimperator0.6.*
+// search word completion using Google Suggest script for Vimperator 0.6.*
 
-liberator.commands.addUserCommand(['google'],"Search web sites with google suggest",
+liberator.commands.addUserCommand(['google'],"Search Web sites with Google Suggest",
     function(arg){
         const endpoint = "http://www.google.co.jp/search?q=";
         //liberator.open(endpoint + encodeURIComponent(arg));
@@ -13,11 +13,14 @@ liberator.commands.addUserCommand(['google'],"Search web sites with google sugge
     },
     {
         completer: function (filter) {
-            const endPoint = "http://suggestqueries.google.com/complete/search?output=firefox&client=firefox&hl=ja&qu="
+            const endPoint = "http://suggestqueries.google.com/complete/search?output=firefox&client=firefox"
+            var [lang] = Components.classes["@mozilla.org/network/protocol;1?name=http"]
+                                   .getService(Components.interfaces.nsIHttpProtocolHandler)
+                                   .language.split("-", 1);
             var xhr = new XMLHttpRequest();
             var completionList = [];
 
-            xhr.open("GET",endPoint + encodeURIComponent(filter),false);
+            xhr.open("GET",endPoint + "&hl=" + lang + "&qu=" + encodeURIComponent(filter),false);
             xhr.send(null);
             var response = window.eval(xhr.responseText)[1];
 
@@ -27,3 +30,4 @@ liberator.commands.addUserCommand(['google'],"Search web sites with google sugge
         }
     }
 );
+// vim:sw=4 ts=4 et:
