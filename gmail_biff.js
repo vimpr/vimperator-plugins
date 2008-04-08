@@ -24,7 +24,7 @@
         'i+XYDgfLBv5R4lUy7gEA+gEwvA8NJOrB99imbAh6gnVhv3WzdbP2K6PH6NHEs3pWz6T9ok/0DXmD'+
         'jqBDzlGuKh2YYD7mA6AB+4/uRP+1HACDAD3ikEe/0iVYUIjCuOPxarxq6bGGrCH2umuqeX3ql/wN'+
         'QBozxfxKbAIAAAAASUVORK5CYII=';
-    
+
     const ICON2 = 'data:image/png;base64,'+
         'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAAAAABqCHz+AAAACXBIWXMAAABIAAAASABGyWs+AAAA'+
         'CXZwQWcAAAAQAAAAEABcxq3DAAABvUlEQVQoz2P4TwAw/J/13/x/9f87/6f/n4IErwHFTf73ARUc'+
@@ -43,15 +43,15 @@
     gmailPanel.setAttribute('src', ICON2);
     gmailPanel.addEventListener("click",function(e){
     },false);
-    document.getElementById('status-bar').insertBefore(
-        gmailPanel,document.getElementById('security-button'));
+    document.getElementById('status-bar')
+            .insertBefore(gmailPanel,document.getElementById('security-button'));
 
     setTimeout(function() {
         try {
             var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
             var logins = passwordManager.findLogins({}, 'https://www.google.com', 'https://www.google.com', null);
             if(logins.length)
-                [gmailUser, gmailPassword] = [logins[0].username, logins[0].password];
+                var [gmailUser, gmailPassword] = [logins[0].username, logins[0].password];
             else {
                 liberator.echoerr("GMail Biff: account not found");
                 return;
@@ -67,7 +67,7 @@
             setTimeout(arguments.callee, 30000);
         } catch(e) {
             liberator.log(e);
-            liberator.echoerr("GMail Biff: " + e);
+            liberator.echoerr("Gmail Biff: " + e);
         }
     }, 1000);
 })();
