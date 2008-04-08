@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name              IME Controller Lite
- * @description       controll ime at into commandline-mode
+ * @description       control imput method at into commandline-mode
  * @description-ja    コマンドラインモード移行時にIMEの制御を行う
  * @author            teramako teramako@gmail.com
  * @namespace         http://d.hatena.ne.jp/teramako/
@@ -13,17 +13,17 @@
  *  ex).
  *  :let g:ex_ime_mode = "inactive"
  *
- *  available value is
+ *  following values are available:
  *      "auto"     : No change
  *      "active"   : Initially IME on
  *      "inactive" : Initially IME off
- *      "disabled" : Disable IME
- * 
- *  more detail: see http://developer.mozilla.org/en/docs/CSS:ime-mode
+ *      "disable"  : Disable IME
+ *
+ *  more details: see http://developer.mozilla.org/en/docs/CSS:ime-mode
  *
  *  default value is "inactive"
  *
- * TODO: 将来的にTEXTAREAモード時にもIMEのON/OFF切り替え機能をつける
+ * TODO: TEXTAREAモード時にもIMEのON/OFF切り替え機能をつける
  */
 
 if(!liberator.plugins) vimperator.plugins = {};
@@ -36,9 +36,9 @@ liberator.plugins.imeController = (function(){
         target[name] = function(){
             func.apply(this,arguments);
             return original.apply(target,arguments);
-        }
+        };
     }
-    if (!globalVariables.ex_ime_mode){
+    if(!globalVariables.ex_ime_mode){
         globalVariables.ex_ime_mode = 'inactive';
     }
     preExec(commandline,'open',function(){
@@ -50,7 +50,7 @@ liberator.plugins.imeController = (function(){
             inputElement.style.imeMode = mode;
         },
         reset: function(){
-            keyElement.setAttribute('oncommand', original);
+            //keyElement.setAttribute('oncommand', original);
             inputElement.style.imeMode = 'auto';
         }
     };
