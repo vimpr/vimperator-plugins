@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.15
-// Last Change: 04-Apr-2008. Jan 2008
+// Version: 0.16
+// Last Change: 08-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -85,14 +85,14 @@
         +'uVKq3GCMUUoxxlarVb1ef3h4+AWNW50eXTIBjgAAAABJRU5ErkJggg==';
 
     var Class = function(){return function(){this.initialize.apply(this,arguments)}}
+    var _isEnable = window.eval(liberator.globalVariables.ldrc_enable) || true;
 
-    LDRizeCooperation = new Class();
+    var LDRizeCooperation = new Class();
     LDRizeCooperation.prototype = {
         initialize: function(){
             var self = this;
             this.LDRize = {getSiteinfo: function(){return undefined;}};
             this.Minibuffer = null;
-            this.isEnable = window.eval(liberator.globalVariables.ldrc_enable) || true;
             this.handlerInfo = handlerInfo;
 
             this.captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
@@ -101,7 +101,7 @@
             this.hookGreasemonkey();
             this.initLDRizeCaptureKeys(this.captureMappings);
             this.initLDRizeCooperationFuture();
-            this.setupStatusbarPanel();
+            this.LDRizeCooperationPanel = this.setupStatusbarPanel();
 
             if(liberator.plugins.LDRizeCooperationPlugins != undefined){
                 liberator.plugins.LDRizeCooperationPlugins.forEach(function(func){
@@ -112,15 +112,16 @@
         },
         setupStatusbarPanel: function(){
             var self = this;
-            var feedPanel = document.createElement('statusbarpanel');
-            feedPanel.setAttribute('id','ldrizecopperation-status');
-            feedPanel.setAttribute('class','statusbarpanel-iconic');
-            feedPanel.setAttribute('src',this.isEnable ? ENABLE_ICON : DISABLE_ICON);
-            feedPanel.addEventListener("click",function(e){
+            var LDRizeCooperationPanel = document.createElement('statusbarpanel');
+            LDRizeCooperationPanel.setAttribute('id','ldrizecopperation-status');
+            LDRizeCooperationPanel.setAttribute('class','statusbarpanel-iconic');
+            LDRizeCooperationPanel.setAttribute('src',this.isEnable ? ENABLE_ICON : DISABLE_ICON);
+            LDRizeCooperationPanel.addEventListener("click",function(e){
                     self.isEnable = !self.isEnable;
             },false);
-            document.getElementById('status-bar').insertBefore(feedPanel,document.getElementById('security-button'));
-            this.watch("isEnable",function(id,oldValue,newValue){feedPanel.setAttribute("src",newValue ? DISABLE_ICON : ENABLE_ICON);return newValue;});
+            document.getElementById('status-bar').insertBefore(LDRizeCooperationPanel,document.getElementById('security-button'));
+
+            return LDRizeCooperationPanel;
         },
         hookGreasemonkey: function(){
             var self = this;
@@ -202,13 +203,23 @@
             });
         },
 
+        get isEnable(){
+            return _isEnable;
+        },
+        set isEnable(value){
+            this.LDRizeCooperationPanel.setAttribute("src",value ? DISABLE_ICON : ENABLE_ICON);
+            _isEnable = value;
+        },
         isEnableLDRize: function(){ return this.isEnable && this.LDRize.getSiteinfo() != undefined; },
 
         //Pin
         getPinnedItems: function(){
             var linkXpath = this.LDRize.getSiteinfo()['link'];
             var viewXpath = this.LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
-            return this.LDRize.getPinnedItems().map(function(i){return [i.XPath(linkXpath),i.XPath(viewXpath).textContent]});
+            return this.LDRize.getPinnedItems().map(function(i){
+                let linkResult = i.XPath(linkXpath); let viewResult = i.XPath(viewXpath);
+                return [linkResult, viewResult ? viewResult.textContent : null]}
+            );
         },
         downloadLinksByProgram: function(links){
             var self = this;
