@@ -1,50 +1,46 @@
 /**
- * Auto switch vimperator key navigation
+ * Auto switch Vimperator key navigation
  *
  * @author teramako teramako@gmail.com
  * @author halt feits <halt.feit at gmail.com>
- * @version 0.6.0
+ * @version 0.6pre
  */
 
 (function(){
 
-/*
+/**
  * String or RegExp
  * e.g)
  *  * /^https?:\/\/mail\.google\.com\//
  *  * 'http://reader.livedoor.com/reader/'
  */
-var ignorePageList = [
+const ignorePagesList = [
     /^https?:\/\/mail\.google\.com\//,
-    'http://reader.livedoor.com/reader/'
-];
+    'http://reader.livedoor.com/reader/*',
+    'http://reader.livedoor.com/public/*',
+    'http://fastladder.com/reader/*',
+    'http://fastladder.com/public/*'
+].map(function(i)
+    i instanceof RegExp ? i :
+    i instanceof Array  ? new RegExp(String(i[0]), String(i[1])) :
+    new RegExp("^" + String(i).replace(/\s+/g, "")
+                              .replace(/[\\^$.+?|(){}\[\]]/g, "\\$&")
+                              .replace(/(?=\*)/g, ".")
+                   + "$", "i"));
 
 document.getElementById('appcontent').addEventListener('DOMContentLoaded',function(event){
-    if ( isMatch(event.target.documentURI) ){
-        liberator.modes.passAllKeys = true;
-    } else {
-        liberator.modes.passAllKeys = false;
-    }
+    var uri = event.target.documentURI;
+    liberator.modes.passAllKeys = isMatch(uri);
     //liberator.log('load page: ' + gBrowser.selectedBrowser.contentDocument.URL);
 },false);
 
 getBrowser().mTabBox.addEventListener('TabSelect',function(event){
     var uri = this.parentNode.currentURI.spec;
-    if ( isMatch(uri) ){
-        liberator.modes.passAllKeys = true;
-    } else {
-        liberator.modes.passAllKeys = false;
-    }
+    liberator.modes.passAllKeys = isMatch(uri);
     //liberator.log('select page: ' + gBrowser.selectedBrowser.contentDocument.URL);
-},false);                                     
-function isMatch(uri){
-    return ignorePageList.some(function(e,i,a){
-        if (typeof e == 'string'){
-            return uri.indexOf(e) != -1;
-        } else if (e instanceof RegExp){
-            return e.test(uri);
-        }
-    });
-}
-})();
+},false);
 
+function isMatch(uri) ignorePagesList.some(function(e) e.test(uri))
+
+})();
+// vim:sw=4 ts=4 et:
