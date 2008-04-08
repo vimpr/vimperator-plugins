@@ -1,5 +1,5 @@
 /**
- * bookmarklet wo command ni suru plugin 
+ * bookmarklet wo command ni suru plugin
  *
  * @author halt feits <halt.feits@gmail.com>
  * @version 0.6.0
@@ -16,22 +16,28 @@
       liberator.echoerr("No bookmarks set");
     }
   }
- 
-  for (var i = 0; i < items.length; i++) {
-    var title = liberator.util.escapeHTML(items[i][1]);
-    if (title.length > 50) {
-      title = title.substr(0, 47) + "...";
-    }
 
-    var url = liberator.util.escapeHTML(items[i][0]);
-    var command = new Function('', 'liberator.open("' + url + '");');
+  items.forEach(function(item) {
+    var [url, title] = item;
+    if (width(title) > 50) {
+      while (width(title) > 47)
+        title = title.slice(0, -1);
+      title +=  "...";
+    }
+    title = liberator.util.escapeHTML(title);
+
+    url = liberator.util.escapeHTML(url);
+    var command = new Function("", 'liberator.open("' + url + '");');
     liberator.commands.addUserCommand(
-        [title],
-        'bookmarklet',
-        command,
-        {
-            shortHelp: 'bookmarklet',
-        }
+      [title],
+      "bookmarklet",
+      command,
+      {
+        shortHelp: "bookmarklet",
+      }
     );
-  }
+  });
+
+  function width(str) str.replace(/[^\x20-\xFF]/g, "  ").length;
 })();
+// vim:sw=2 ts=2 et:
