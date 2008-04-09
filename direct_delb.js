@@ -60,7 +60,7 @@
         if(logins.length)
             [deliciousUser, deliciousPassword] = [logins[0].username, logins[0].password];
         else
-        liberator.echoerr("Delicious Bookmark: account not found");
+        liberator.echoerr("DeliciousBookmark: account not found");
     } catch(ex) { }
 
     function getTags(){
@@ -72,7 +72,7 @@
                     var tags = xhr.responseXML.getElementsByTagName('tag');
                     for each(var tag in tags)
                         liberator.plugins.delicious_tags.push(tag.getAttribute('tag'));
-                    liberator.echo("Delicious Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
+                    liberator.echo("DeliciousBookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 } else
                     throw new Error(xhr.statusText)
             }
@@ -90,18 +90,14 @@
         if (/^\[.*\]/.test(comment)) {
             var tag, text;
             while((tag = re.exec(comment))) {
-                text = tag[2];
-                tag = tag[1];
+                [, tag, text] = tag;
                 tags.push(tag);
             }
             comment = text || '';
         }
         var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
-            'url=' + encodeURIComponent(target),
-            'description=' + encodeURIComponent(title),
-            'extended=' + encodeURIComponent(comment),
-            'tags=' + encodeURIComponent(tags.join(' ')),
-        ].join('&');
+            ['url', target], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
+        ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(){
             if(xhr.readyState == 4){
@@ -121,7 +117,7 @@
             addDeliciousBookmarks(liberator.buffer.URL, liberator.buffer.title, arg, isNormalize);
         },{
             completer: function(filter){
-                var match_result = filter.match(/(\[[^\]]*\])?(?:\[)?(.*)/); //[all, commited, now inputting]
+                var match_result = filter.match(/(\[[^\]]*\])?\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 for each(var tag in liberator.plugins.delicious_tags)

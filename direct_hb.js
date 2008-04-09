@@ -27,21 +27,17 @@
 
     WSSEUtils.prototype = {
 
-        get userName(){
-            return this._userName;
-        },
+        get userName()
+            this._userName,
 
-        get noce(){
-            return this._nonce;
-        },
+        get noce()
+            this._nonce,
 
-        get created(){
-            return this._created;
-        },
+        get created()
+            this._created,
 
-        get passwordDigest(){
-            return this._passwordDigest;
-        },
+        get passwordDigest()
+            this._passwordDigest,
 
         getWSSEHeader: function(){
             var result = [
@@ -210,7 +206,7 @@
         },{
             completer: function(filter){
                 //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited, now inputting]
-                var match_result = filter.match(/(\[[^\]]*\])?(?:\[)?(.*)/); //[all, commited, now inputting]
+                var match_result = filter.match(/(\[[^\]]*\])?\[?(.*)/); //[all, commited, now inputting]
                 //var m = new RegExp("^" + match_result[2]);
                 var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
