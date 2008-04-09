@@ -20,8 +20,9 @@
     }
     function showFollowersStatus(username,password){
         var xhr = new XMLHttpRequest();
-        //xhr.open("GET","http://twitter.com/statuses/friends_timeline.json",false,username,password);
-        xhr.open("GET","http://twitter.com/statuses/user_timeline/otsune.json",false,username,password);
+        xhr.open("GET","http://twitter.com/statuses/friends_timeline.json",false,username,password);
+        // for debug
+        //xhr.open("GET","http://twitter.com/statuses/user_timeline/otsune.json",false,username,password);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send(null);
         var followers_status = window.eval(xhr.responseText);
