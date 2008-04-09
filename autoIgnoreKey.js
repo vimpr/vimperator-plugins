@@ -17,9 +17,9 @@
  * The autoignorekey_pages is a string variable which can set on
  * vimperatorrc as following.
  *
- * let autoignorekey_pages = "['http://foo.com/*', 'http://bar.com/*']"
+ * let autoignorekey_pages = "['http://example.com/*', 'http://example.org/*']"
  *
- * or your can set it using inline javascript.
+ * or your can set it using inline JavaScript.
  *
  * javascript <<EOM
  * liberator.globalVariables.autoignorekey_pages = uneval([
@@ -30,10 +30,7 @@
  */
 const ignorePagesList = window.eval(liberator.globalVariables.autoignorekey_pages) || [
     /^https?:\/\/mail\.google\.com\//,
-    'http://reader.livedoor.com/reader/*',
-    'http://reader.livedoor.com/public/*',
-    'http://fastladder.com/reader/*',
-    'http://fastladder.com/public/*'
+    /^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//,
 ].map(function(i)
     i instanceof RegExp ? i :
     i instanceof Array  ? new RegExp(String(i[0]), String(i[1])) :
