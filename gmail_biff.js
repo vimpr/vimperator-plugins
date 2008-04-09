@@ -37,20 +37,22 @@
         'k9UMW8vzxTtMN0ZvrATDio05GxM3hm/cMvFrhlvno2dxDF9Nbh+9Gn/19NUzUHj66kkgPH91y1WH'+
         'O1e/yzEQjk0CAAARc29gwOvTnwAAAABJRU5ErkJggg==';
 
+    var gmailBiffIntervals = parseInt(globalVariables.gmbf_check_intervals || 10) * 60000;
+
     var gmailBiffIcon = document.createElement('statusbarpanel');
     gmailBiffIcon.setAttribute('id','gmail-biff-icon');
     gmailBiffIcon.setAttribute('class','statusbarpanel-iconic');
     gmailBiffIcon.setAttribute('src', ICON2);
     gmailBiffIcon.setAttribute('tooltip', 'gmail-biff-tip');
     gmailBiffIcon.addEventListener("click",function(e){
-		liberator.open("http://mail.google.com/", liberator.NEW_TAB);
+        liberator.open("https://mail.google.com/", liberator.NEW_TAB);
     },false);
 
     var gmailBiffTip = document.createElement('tooltip');
     gmailBiffTip.setAttribute('id','gmail-biff-tip');
     var gmailBiffText = document.createElement('description');
     gmailBiffText.setAttribute('id','gmail-biff-text');
-	gmailBiffTip.appendChild(gmailBiffText);
+    gmailBiffTip.appendChild(gmailBiffText);
 
     document.getElementById('status-bar')
             .insertBefore(gmailBiffIcon,document.getElementById('security-button'));
@@ -67,18 +69,20 @@
                 return;
             }
 
-            const feed_url = 'http://mail.google.com/mail/feed/atom';
+            const feed_url = 'https://mail.google.com/mail/feed/atom';
             var xhr = new XMLHttpRequest();
+            xhr.mozBackgroundRequest = true;
             xhr.open("GET", feed_url, false, gmailUser, gmailPassword);
             xhr.send(null);
 
             var count = parseInt(xhr.responseXML.getElementsByTagName('fullcount')[0].childNodes[0].nodeValue);
             gmailBiffIcon.setAttribute('src', count > 0 ? ICON1 : ICON2);
             gmailBiffText.setAttribute('value', count > 0 ? 'You have new mail (' + count + ')' : 'No new mail');
-            setTimeout(arguments.callee, 30000);
+            setTimeout(arguments.callee, gmailBiffIntervals);
         } catch(e) {
             liberator.log(e);
             liberator.echoerr("Gmail Biff: " + e);
         }
     }, 1000);
 })();
+// vim:sw=4 ts=4 et:
