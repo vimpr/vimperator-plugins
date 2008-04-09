@@ -7,11 +7,11 @@
 
 (function(){
   var filter = "javascript:";
-  var items = liberator.bookmarks.get(filter);
+  var items  = liberator.bookmarks.get(filter);
 
   if (items.length == 0) {
     if (filter.length > 0) {
-      liberator.echoerr("E283: No bookmarks matching \"" + filter + "\"");
+      liberator.echoerr('E283: No bookmarks matching "' + filter + '"');
     } else {
       liberator.echoerr("No bookmarks set");
     }
@@ -20,9 +20,10 @@
   items.forEach(function(item) {
     var [url, title] = item;
     if (width(title) > 50) {
-      while (width(title) > 47)
-        title = title.slice(0, -1);
-      title +=  "...";
+      while (width(title) > 47) {
+        title = title.slice(0, -2);
+      }
+      title += "...";
     }
     title = liberator.util.escapeHTML(title);
 
@@ -33,7 +34,7 @@
       "bookmarklet",
       command,
       {
-        shortHelp: "bookmarklet",
+        shortHelp: "Bookmarklet",
       }
     );
   });
