@@ -15,7 +15,7 @@
     }
     function sprintf(format) {
         var i = 1, re = /%s/, result = "" + format;
-		while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
+        while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
         return result;
     }
     function showFollowersStatus(username,password){
@@ -26,19 +26,19 @@
         var followers_status = window.eval(xhr.responseText);
 
         var html = <><![CDATA[
-			<style tyep="text/css"><!--
-			a { text-decoration: none; }
-			img { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
-			--></style>
-		]]></>.toString().replace(/\n\s*/g, '');
+            <style tyep="text/css"><!--
+            a { text-decoration: none; }
+            img { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+            --></style>
+        ]]></>.toString().replace(/\n\s*/g, '');
         for (var i = 0; i < followers_status.length; i++) {
             var stat = followers_status[i];
-			html += sprintf(
-			        <><![CDATA[
-				        <a href="%s">
-							<img src="%s" title="%s" border="0" />
-							<strong>%s</strong>
-						</a>: <a href="%s">%s</a><br />
+            html += sprintf(
+                    <><![CDATA[
+                        <a href="%s">
+                            <img src="%s" title="%s" border="0" />
+                            <strong>%s</strong>
+                        </a>: <a href="%s">%s</a><br />
                     ]]></>.toString().replace(/\n\s*/g, ''),
                 "http://twitter.com/"  + stat.user.screen_name,
                 stat.user.profile_image_url,
@@ -48,7 +48,7 @@
                 stat.text
             );
         }
-			liberator.log(html);
+            liberator.log(html);
         liberator.echo(html, true);
     }
     liberator.commands.addUserCommand(['twitter'], 'Change twitter status',
