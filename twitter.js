@@ -37,16 +37,13 @@
             stat.text = stat.text.replace(/\u202e/, '');
             html += sprintf(
                     <><![CDATA[
-                        <a href="%s">
-                            <img src="%s" title="%s" border="0" />
-                            <strong>%s</strong>
-                        </a>: <a href="%s">%s</a><br />
+                        <img src="%s" title="%s" border="0" />
+                        <strong>%s</strong>
+                        : %s<br />
                     ]]></>.toString().replace(/\n\s*/g, ''),
-                "http://twitter.com/"  + stat.user.screen_name,
                 stat.user.profile_image_url,
+                stat.user.screen_name,
                 stat.user.name,
-                stat.user.name,
-                "http://twitter.com/" + stat.user.screen_name + "/" + stat.id,
                 stat.text
             );
         }
