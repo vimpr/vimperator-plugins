@@ -33,6 +33,8 @@
         ]]></>.toString().replace(/\n\s*/g, '');
         for (var i = 0; i < followers_status.length; i++) {
             var stat = followers_status[i];
+            stat.user.name = stat.user.name.replace(/\u202e/, '');
+            stat.text = stat.text.replace(/\u202e/, '');
             html += sprintf(
                     <><![CDATA[
                         <a href="%s">
