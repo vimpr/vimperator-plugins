@@ -27,17 +27,10 @@
 
     WSSEUtils.prototype = {
 
-        get userName()
-            this._userName,
-
-        get noce()
-            this._nonce,
-
-        get created()
-            this._created,
-
-        get passwordDigest()
-            this._passwordDigest,
+        get userName() this._userName,
+        get noce() this._nonce,
+        get created() this._created,
+        get passwordDigest() this._passwordDigest,
 
         getWSSEHeader: function(){
             var result = [
@@ -72,7 +65,7 @@
         },
 
         _getISO8601String: function(aDate){
-            function zeropad(s, l) {
+            function zeropad(s, l){
                 while(s.length < l){
                     s = "0" + s;
                 }
@@ -86,14 +79,14 @@
                             zeropad(aDate.getUTCHours(), 2), ":",
                             zeropad(aDate.getUTCMinutes(), 2), ":",
                             zeropad(aDate.getUTCSeconds(), 2), "Z"
-                        ].join("");
+            ].join("");
             return result;
         }
 
     };
 
     // copied from AutoPagerize (c) id:swdyh
-    function getElementsByXPath(xpath, node) {
+    function getElementsByXPath(xpath, node){
         node = node || document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null,
                 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -103,7 +96,7 @@
         return (data.length > 0) ? data : null;
     }
 
-    function getFirstElementByXPath(xpath, node) {
+    function getFirstElementByXPath(xpath, node){
         node = node || document;
         var result = (node.ownerDocument || node).evaluate(xpath, node, null,
                 XPathResult.FIRST_ORDERED_NODE_TYPE, null);
@@ -111,7 +104,7 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str) {
+    function parseHTML(str){
         str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
@@ -156,9 +149,10 @@
                 function(mypage_text){
                     var mypage_html = parseHTML(mypage_text);
                     var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
-                    for each(var tag in tags)
+                    tags.forEach(function(tag){
                         liberator.plugins.hatena_tags.push(tag.innerHTML);
-                    liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
+                    });
+                    liberator.echo("HatenaBookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 });
     }
     getTags();
@@ -198,24 +192,26 @@
                 if(logins.length)
                     [hatenaUser, hatenaPassword] = [logins[0].username, logins[0].password];
                 else
-                    liberator.echoerr("Hatena Bookmark: account not found");
+                    liberator.echoerr("HatenaBookmark: account not found");
             }
-            catch(ex) {
+            catch(ex){
             }
             addHatenaBookmarks(hatenaUser,hatenaPassword,liberator.buffer.URL,arg,isNormalize);
         },{
             completer: function(filter){
                 //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited, now inputting]
-                var match_result = filter.match(/((?:\[[^\]]*\])*)?\[?(.*)/); //[all, commited, now inputting]
+                var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]
                 //var m = new RegExp("^" + match_result[2]);
                 var m = new RegExp(XMigemoCore ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
-                for each(var tag in liberator.plugins.hatena_tags)
+                liberator.plugins.hatena_tags.forEach(function(tag){
                     if(m.test(tag)){
                         completionList.push([(match_result[1] || "") + "[" + tag + "]","Tag"]);
                     }
+                });
                 return [0, completionList];
             }
         }
     );
 })();
+// vim:sw=4 ts=4 et:
