@@ -13,8 +13,22 @@
  * e.g)
  *  * /^https?:\/\/mail\.google\.com\//
  *  * 'http://reader.livedoor.com/reader/'
+ *
+ * The autoignorekey_pages is a string variable which can set on
+ * vimperatorrc as following.
+ *
+ * let autoignorekey_pages = "['http://foo.com/*', 'http://bar.com/*']"
+ *
+ * or your can set it using inline javascript.
+ *
+ * javascript <<EOM
+ * liberator.globalVariables.autoignorekey_pages = uneval([
+ *   /^https?:\/\/mail\.google\.com\//,
+ *   /^https?:\/\/www\.google\.com\/reader\//,
+ * ]);
+ * EOM
  */
-const ignorePagesList = [
+const ignorePagesList = window.eval(liberator.globalVariables.autoignorekey_pages) || [
     /^https?:\/\/mail\.google\.com\//,
     'http://reader.livedoor.com/reader/*',
     'http://reader.livedoor.com/public/*',
