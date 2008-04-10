@@ -42,7 +42,8 @@
                      border="0"/>
                 <strong>{stat.user.name}</strong>
                 : {stat.text}<br/>
-            </>.toSource();
+            </>.toSource()
+               .replace(/(?:\r?\n|\r)\s*/g, '');
         });
         liberator.log(html);
         liberator.echo(html, true);
