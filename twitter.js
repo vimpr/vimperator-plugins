@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Update Twitter'
-// Last Change: 09-Apr-2008. Jan 2008
+// Last Change: 10-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -38,13 +38,14 @@
             stat.user.name += "\u202c";
             stat.text += "\u202c";
             html += <><![CDATA[
-                <img src={stat.user.profile_image_url}
-                     title={stat.user.screen_name}
+                <img src="{stat.user.profile_image_url}" 
+                     title="{stat.user.screen_name}" 
                      border="0"/>
                 <strong>{stat.user.name}</strong>
                 : {stat.text}<br/>
             ]]></>.toString()
-                  .replace(/(?:\r?\n|\r)\s*/g, '');
+                  .replace(/(?:\r?\n|\r)\s*/g, '')
+                  .replace(/\{([^}]+)\}/g, function(x){return window.eval(x)})
         });
         liberator.log(html);
         liberator.echo(html, true);
