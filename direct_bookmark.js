@@ -12,7 +12,7 @@
 // Social Bookmark direct add script for Vimperator 0.6.*
 // for Migemo search: require XUL/Migemo Extension
 //
-// Variable:
+// Variables:
 //  'g:direct_sbm_use_services_by_tag'
 //      Use social bookmark services to extract tags
 //          'h': Hatena Bookmark
@@ -27,11 +27,11 @@
 //      Use normalize permalink
 //  'g:direct_sbm_is_use_migemo'
 //      Use Migemo completion
-// Command:
+// Commands:
 //  ':btags'
-//      Extract social bookmarks tags for completion
+//      Extract tags from social bookmarks for completion
 //  ':sbm'
-//      Post current page to social bookmarks
+//      Post a current page to social bookmarks
 (function(){
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hd';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hd';
@@ -43,7 +43,8 @@
             .classes['@piro.sakura.ne.jp/xmigemo/factory;1']
             .getService(Components.interfaces.pIXMigemoFactory)
             .getService("ja");
-    }catch(ex){
+    }
+    catch(ex){
         var XMigemoCore = undefined;
     }
 
@@ -53,17 +54,10 @@
 
     WSSEUtils.prototype = {
 
-        get userName()
-            this._userName,
-
-        get noce()
-            this._nonce,
-
-        get created()
-            this._created,
-
-        get passwordDigest()
-            this._passwordDigest,
+        get userName() this._userName,
+        get noce() this._nonce,
+        get created() this._created,
+        get passwordDigest() this._passwordDigest,
 
         getWSSEHeader: function(){
             var result = [
@@ -98,7 +92,7 @@
         },
 
         _getISO8601String: function(aDate){
-            function zeropad(s, l) {
+            function zeropad(s, l){
                 while(s.length < l){
                     s = "0" + s;
                 }
@@ -112,24 +106,24 @@
                             zeropad(aDate.getUTCHours(), 2), ":",
                             zeropad(aDate.getUTCMinutes(), 2), ":",
                             zeropad(aDate.getUTCSeconds(), 2), "Z"
-                        ].join("");
+                         ].join("");
             return result;
         }
 
     };
 
     // copied from AutoPagerize (c) id:swdyh
-    function getElementsByXPath(xpath, node) {
+    function getElementsByXPath(xpath, node){
         node = node || document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null,
                 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         var data = [];
-        for (var i = 0, l = nodesSnapshot.snapshotLength; i < l;
+        for(var i = 0, l = nodesSnapshot.snapshotLength; i < l;
                 data.push(nodesSnapshot.snapshotItem(i++)));
         return (data.length > 0) ? data : null;
     }
 
-    function getFirstElementByXPath(xpath, node) {
+    function getFirstElementByXPath(xpath, node){
         node = node || document;
         var result = (node.ownerDocument || node).evaluate(xpath, node, null,
                 XPathResult.FIRST_ORDERED_NODE_TYPE, null);
@@ -137,7 +131,7 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str) {
+    function parseHTML(str){
         str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
@@ -158,7 +152,7 @@
                 if(xhr.status == 200)
                     callback.call(this,xhr.responseText);
                 else
-                    throw new Error(xhr.statusText)
+                    throw new Error(xhr.statusText);
             }
         };
         xhr.open("GET",uri,true);
@@ -177,8 +171,8 @@
     }
 
     function getUserAccount(form,post,arg){
-        var user,password;
-        try {
+        var user, password;
+        try{
             var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
             var logins = passwordManager.findLogins({}, form, post, arg);
             if(logins.length > 0){
@@ -196,7 +190,7 @@
                     window, form, "Enter username and password.",
                     promptUser, promptPass, null, {}
                 );
-                if (ret){
+                if(ret){
                     [user, password] = [promptUser.value, promptPass.value];
                     var formLoginInfo = new nsLoginInfo(form,
                             post, null,
@@ -207,7 +201,7 @@
                 }
             }
         }
-        catch(ex) {
+        catch(ex){
             liberator.echoerr("Direct Social Bookmark: handled exception during tag extracting");
             liberator.log(ex);
         }
@@ -221,7 +215,7 @@
 
     var services = {
         'h': {
-            description:'hatena bookmark',
+            description:'Hatena bookmark',
             account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
             poster:function(user,password,url,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
@@ -256,14 +250,15 @@
                 var mypage_html = parseHTML(xhr.responseText);
                 var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
 
-                for each(var tag in tags)
+                tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
-                liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
+                });
+                liberator.echo("HatenaBookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 return hatena_tags;
             },
         },
         'd': {
-            description:'del.cio.us',
+            description:'del.icio.us',
             account:['https://secure.delicious.com', 'https://secure.delicious.com', null],
             poster:function(user,password,url,comment,tags){
                 var title = liberator.buffer.title;
@@ -290,47 +285,46 @@
                 xhr.send(null);
 
                 var tags = window.eval("(" + xhr.responseText + ")");
-                for (var tag in tags)
+                for(var tag in tags)
                     returnValue.push(tag);
                 liberator.echo("DeliciousBookmark: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
             },
         },
     };
-    liberator.plugins.direct_bookmark = {services: services, tags: []};
-
+    liberator.plugins.direct_bookmark = { services: services, tags: [] };
 
     function getTags(arg){
         var user,password;
         liberator.plugins.direct_bookmark.tags = [];
-        for (var i = 0; i < useServicesByTag.length; i++){
-            var currentService = services[useServicesByTag[i]] || null;
+        useServicesByTag.split(/\s*/).forEach(function(service){
+            var currentService = services[service] || null;
             liberator.log(currentService);
             [user,password] = getUserAccount.apply(currentService,currentService.account);
             liberator.plugins.direct_bookmark.tags =
                 liberator.plugins.direct_bookmark.tags.concat(currentService.tags(user,password));
-        }
+        });
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         getTags, {}
     );
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(comment){
-            var user,password
+            var user, password;
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
 
-            if (/^\[.*\]/.test(comment)) {
+            if(/^\[[^\]]+\]/.test(comment)){
                 var tag, text;
-                while((tag = re.exec(comment))) {
+                while((tag = re.exec(comment))){
                     [, tag, text] = tag;
                     tags.push(tag);
                 }
                 comment = text || '';
             }
 
-            for (var i = 0; i < useServicesByPost.length; i++){
-                var currentService = services[useServicesByPost[i]] || null;
+            useServicesByPost.split(/\s*/).forEach(function(service){
+                var currentService = services[service] || null;
                 [user,password] = getUserAccount.apply(currentService,currentService.account);
                 currentService.poster(
                     user,password,
@@ -338,20 +332,21 @@
                     comment,
                     tags
                 );
-            }
+            });
         },{
             completer: function(filter){
-                var match_result = filter.match(/((?:\[[^\]]*\])*)?\[?(.*)/); //[all, commited, now inputting]
+                var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 if(liberator.plugins.direct_bookmark.tags.length == 0)
                     getTags();
-                for each(var tag in liberator.plugins.direct_bookmark.tags)
-                    if(m.test(tag)){
+                liberator.plugins.direct_bookmark.tags.forEach(function(tag){
+                    if(m.test(tag))
                         completionList.push([(match_result[1] || "") + "[" + tag + "]","Tag"]);
-                    }
+                });
                 return [0, completionList];
             }
         }
     );
 })();
+// vim:sw=4 ts=4 et:
