@@ -44,7 +44,7 @@
                 <strong>{stat.user.name}</strong>
                 : {stat.text}<br/>
             </>.toString()
-                  .replace(/(?:\r?\n|\r)\s*/g, '');
+               .replace(/(?:\r?\n|\r)\s*/g, '');
         });
         liberator.log(html);
         liberator.echo(html, true);
