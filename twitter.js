@@ -37,15 +37,14 @@
         followers_status.forEach(function(stat){
             stat.user.name += "\u202c";
             stat.text += "\u202c";
-            html += <><![CDATA[
-                <img src="{stat.user.profile_image_url}" 
-                     title="{stat.user.screen_name}" 
+            html += <>
+                <img src={stat.user.profile_image_url}
+                     title={stat.user.screen_name}
                      border="0"/>
                 <strong>{stat.user.name}</strong>
                 : {stat.text}<br/>
-            ]]></>.toString()
-                  .replace(/(?:\r?\n|\r)\s*/g, '')
-                  .replace(/\{([^}]+)\}/g, function(x){return window.eval(x)})
+            </>.toString()
+                  .replace(/(?:\r?\n|\r)\s*/g, '');
         });
         liberator.log(html);
         liberator.echo(html, true);
