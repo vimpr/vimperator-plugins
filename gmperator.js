@@ -30,7 +30,7 @@
  * The change is permanent, not only the session.
  * And cannot get back.
  *
- * ex)
+ * e.g.)
  * :gmset! {filename} -n fooScriptName -i http://*,https://* -e http://example.com/*
  *   toggle enable or disable,
  *   name to "fooScriptName",
@@ -43,8 +43,8 @@
  * ---------------------------
  * {{{
  *
- * 1). can access to the sandbox of Greasemonkey !!!
- * 2). can register commands which execute
+ * 1). you can access to the sandbox of Greasemonkey !!!
+ * 2). you can register commands to execute
  *     when the user script is executed on the URI
  *     @see liberator.plugins.gmperator.addAutoCommand
  *
@@ -66,7 +66,7 @@
  *                                  encludes   : {String[]}
  *                              )
  *  addAutoCommand    : function( uri, script, cmd )
- *                      If both of uri and script is match
+ *                      If both of uri and script are matched
  *
  * )
  * }}}
@@ -88,7 +88,7 @@ liberator.plugins.gmperator = (function(){ //{{{
     // PUBLIC section
     // -----------------------
     // {{{
-    var manager =  {
+    var manager = {
         register: function (uri,sandbox,script){
             var panelID = getPanelID(sandbox.window);
             var gmCon;
@@ -97,26 +97,18 @@ liberator.plugins.gmperator = (function(){ //{{{
             } else {
                 gmCon = new GmContainer(uri,sandbox);
                 containers[panelID] = gmCon;
-                this.__defineGetter__(panelID,function(){return gmCon;});
-                log('gmpeartor: redisted: '+ panelID + ' - ' + uri);
+                this.__defineGetter__(panelID,function() gmCon);
+                log('gmpeartor: Registered: ' + panelID + ' - ' + uri);
             }
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
             gmCon.uri = uri;
             autocommands.trigger('GMInjectedScript',uri+'\n'+script.filename);
         },
-        get gmScripts(){
-            return getScripts();
-        },
-        get allItem(){
-            return containers;
-        },
-        get currentPanel(){
-            return getBrowser().mCurrentTab.linkedPanel;
-        },
-        get currentContainer(){
-            return containers[this.currentPanel] || null;
-        },
+        get gmScripts() getScripts(),
+        get allItem() containers,
+        get currentPanel() getBrowser().mCurrentTab.linkedPanel,
+        get currentContainer() containers[this.currentPanel] || null,
         get currentSandbox(){
             var id = this.currentPanel;
             return containers[id] ? containers[id].sandbox : null;
@@ -170,7 +162,7 @@ liberator.plugins.gmperator = (function(){ //{{{
                 return tab.linkedPanel;
             }
         }
-        liberator.log(win + 'is no found');
+        liberator.log(win + 'is not found');
     }
     function updateGmContainerList(e){
         var t = e.target;
@@ -192,7 +184,6 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
         var str = '';
         var scripts = getScripts();
         var reg;
-        var table, tr;
         if (special || arg == 'full'){
             reg = new RegExp('.*');
         } else if( arg ){
@@ -205,7 +196,8 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
                 }
             }
         } else {
-            table = <table/>;
+            var table = <table/>;
+            var tr;
             for each(var script in scripts){
                 tr = <tr/>;
                 if (script.enabled){
@@ -230,12 +222,14 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
                 </tr>;
                 var contents = script[prop.toLowerCase()];
                 if (typeof contents == "string"){
-                    tr.* += <>{contents}</>;
+                    tr.* += <td>{contents}</td>;
                 } else {
+                    var td = <td/>;
                     contents.forEach(function(c,i,a){
-                        tr.* += <>{c}</>;
-                        if (a[i+1]) tr.* += <br/>;
+                        td.* += c;
+                        if (a[i+1]) td.* += <br/>;
                     });
+                    tr.* += td;
                 }
                 table.* += tr;
             });
@@ -283,9 +277,7 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         },100);
         */
     },{
-        completer: function(filter){
-            return scriptsCompleter(filter,true);
-        }
+        completer: function(filter) scriptsCompleter(filter,true)
     }
 ); //}}}
 commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', //{{{
@@ -329,9 +321,8 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
             '<dt><code>-e</code><br/><code>-exclude</code></dt><dd>change the excludes list ("," delimiter)</dd></dl>',
             'Caution: the change is permanent, not the only session.<br/>And cannot get back.'
         ].join(''),
-        completer: function(filter){
-            return scriptsCompleter(filter, false);
-        }
+        completer: function(filter)
+            scriptsCompleter(filter, false)
     }
 ); //}}}
 
@@ -349,11 +340,7 @@ function GmContainer(uri,sandbox){
     this.scripts = [];
 }
 GmContainer.prototype = {
-    addScript :  function(script){
-        if (this.hasScript(script)) return false;
-
-        return this.scripts.push(script);
-    },
+    addScript : function(script) !this.hasScript(script) && this.scripts.push(script) || false,
     hasScript : function(script){
         var filename;
         switch( typeof(script) ){
@@ -361,9 +348,9 @@ GmContainer.prototype = {
             case 'string': filename = script; break;
             default: return null;
         }
-        return this.scripts.some(function(s){ return s.filename == filename; });
+        return this.scripts.some(function(s) s.filename == filename);
     }
-} // }}}
+}; // }}}
 function getScripts(){ //{{{
     var config = new Config();
     config.load();
