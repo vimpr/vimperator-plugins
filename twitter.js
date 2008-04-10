@@ -27,13 +27,12 @@
         xhr.send(null);
         var followers_status = window.eval(xhr.responseText);
 
-        var html = <><![CDATA[
-            <style type="text/css"><!--
+        var html = <>
+            <style type="text/css"><![CDATA[
             a { text-decoration: none; }
             img { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
-            --></style>
-        ]]></>.toString()
-              .replace(/(?:\r?\n|\r)\s*/g, '');
+            ]]></style>
+        </>.toSource();
         followers_status.forEach(function(stat){
             stat.user.name += "\u202c";
             stat.text += "\u202c";
@@ -43,8 +42,7 @@
                      border="0"/>
                 <strong>{stat.user.name}</strong>
                 : {stat.text}<br/>
-            </>.toString()
-               .replace(/(?:\r?\n|\r)\s*/g, '');
+            </>.toSource();
         });
         liberator.log(html);
         liberator.echo(html, true);
