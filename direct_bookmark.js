@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.01
-// Last Change: 10-Apr-2008. Jan 2008
+// Last Change: 11-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -17,12 +17,14 @@
 //      Use social bookmark services to extract tags
 //          'h': Hatena Bookmark
 //          'd': Del.icio.us
-//      Usage: let g:direct_sbm_use_services_by_tag = "hd"
+//          'l': Livedoor Clip
+//      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 //  'g:direct_sbm_use_services_by_post'
 //      Use social bookmark services to post
 //          'h': Hatena Bookmark
 //          'd': Del.icio.us
-//      Usage: let g:direct_sbm_use_services_by_post = "hd"
+//          'l': Livedoor Clip
+//      Usage: let g:direct_sbm_use_services_by_post = "hdl"
 //  'g:direct_sbm_is_normalize'
 //      Use normalize permalink
 //  'g:direct_sbm_is_use_migemo'
@@ -33,8 +35,8 @@
 //  ':sbm'
 //      Post a current page to social bookmarks
 (function(){
-    var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hd';
-    var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hd';
+    var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
+    var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
     var isNormalize = window.eval(liberator.globalVariables.direct_sbm_is_normalize) || true;
     var isUseMigemo = window.eval(liberator.globalVariables.direct_sbm_is_use_migemo) || true;
 
@@ -178,7 +180,7 @@
             if(logins.length > 0){
                 [user, password] = [logins[0].username, logins[0].password];
             } else {
-                var promptUser = { value : "" }, promptPass = { value : "" };
+                var promptUser = { value : this.loginPrompt.user }, promptPass = { value : this.loginPrompt.password };
                 var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                     .getService(Ci.nsIPromptService);
 
@@ -187,7 +189,7 @@
                         "init");
 
                 var ret = promptSvc.promptUsernameAndPassword(
-                    window, form, "Enter username and password.",
+                    window, form, this.loginPrompt.description,
                     promptUser, promptPass, null, {}
                 );
                 if(ret){
@@ -217,6 +219,7 @@
         'h': {
             description:'Hatena bookmark',
             account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
+            loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
             poster:function(user,password,url,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
                 var request =
@@ -260,6 +263,7 @@
         'd': {
             description:'del.icio.us',
             account:['https://secure.delicious.com', 'https://secure.delicious.com', null],
+            loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
             poster:function(user,password,url,comment,tags){
                 var title = liberator.buffer.title;
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
@@ -289,6 +293,44 @@
                     returnValue.push(tag);
                 liberator.echo("DeliciousBookmark: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
+            },
+        },
+        'l': {
+            description:'livedoor clip',
+            account:['http://api.clip.livedoor.com', 'http://api.clip.livedoor.com', null],
+            loginPrompt:{ user:'', password:'apikey', description:'Enter username and apikey.\nyou can get "api-key" from\n\thttp://clip.livedoor.com/config/api' },
+            poster:function(user,password,url,comment,tags){
+                var title = liberator.buffer.title;
+                var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
+                    ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
+                ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState == 4){
+                        if(xhr.status == 200)
+                            liberator.echo("LivedoorClip: success");
+                        else
+                            liberator.echoerr("LivedoorClip:" + xhr.statusText);
+                    }
+                };
+                xhr.open("GET", request_url, true, user, password);
+                xhr.send(null);
+            },
+            tags:function(user,password){
+                var xhr = new XMLHttpRequest();
+                var ldc_tags = [];
+
+                xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://aaaaaaaaaaaaaaaaaaaaaaaaaaa",false);
+                xhr.send(null);
+
+                var mypage_html = parseHTML(xhr.responseText);
+                var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
+
+                tags.forEach(function(tag){
+                    ldc_tags.push(tag.textContent);
+                });
+                liberator.echo("LivedoorClip: Tag parsing is finished. Taglist length: " + tags.length);
+                return ldc_tags;
             },
         },
     };
