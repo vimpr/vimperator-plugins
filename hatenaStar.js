@@ -1,15 +1,15 @@
 /**
- * For vimperator 0.6.0
+ * For Vimperator 0.6.0
  * @author mattn mattn.jp@gmail.com
  */
 
 (function(){
 
-liberator.commands.addUserCommand(['hatenastar','hatenas'], 'add hatena star',
+liberator.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 	function (arg, special) {
 		try {
-			var result = liberator.buffer.evaluateXPath('.//img[@class="hatena-star-add-button"]');
-			for (var i = 0; i < result.snapshotLength; i++){
+			var result = liberator.buffer.evaluateXPath('.//img[contains(concat(" ", normalize-space(@class), " "), " hatena-star-add-button ")]');
+			for (var i = 0, l = result.snapshotLength; i < l; i++) {
 				if (arg == '' || arg == 'all' || arg == (i+1)) {
 					var s = result.snapshotItem(i);
 					var e = document.createEvent('MouseEvents');
@@ -17,18 +17,18 @@ liberator.commands.addUserCommand(['hatenastar','hatenas'], 'add hatena star',
 					s.dispatchEvent(e);
 				}
 			}
-		} catch (e) { liberator.echoerr('hatenastar: ' + e); }
+		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
 	}
 );
 
-liberator.mappings.addUserMap([liberator.modes.NORMAL], [',?s'], 'add hatena star',
-	function(count){
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [',?s'], 'add Hatena Star',
+	function (count) {
 		try {
-			for (var n = 0; n < count; n++) liberator.commands.get('hatenastar').execute("all", false, count);
-		} catch (e) { liberator.echoerr('hatenastar: ' + e); }
+			for (var n = 0; n++ < count; liberator.commands.get('hatenastar').execute("all", false, count));
+		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
 	}, {
 		noremap: true,
-		flags: liberator.Mappings.flags.COUNT 
+		flags: liberator.Mappings.flags.COUNT
 	}
 );
 
