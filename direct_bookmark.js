@@ -16,14 +16,14 @@
 //  'g:direct_sbm_use_services_by_tag'
 //      Use social bookmark services to extract tags
 //          'h': Hatena Bookmark
-//          'd': Del.icio.us
-//          'l': Livedoor Clip
+//          'd': del.icio.us
+//          'l': livedoor clip
 //      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 //  'g:direct_sbm_use_services_by_post'
 //      Use social bookmark services to post
 //          'h': Hatena Bookmark
-//          'd': Del.icio.us
-//          'l': Livedoor Clip
+//          'd': del.icio.us
+//          'l': livedoor clip
 //      Usage: let g:direct_sbm_use_services_by_post = "hdl"
 //  'g:direct_sbm_is_normalize'
 //      Use normalize permalink
