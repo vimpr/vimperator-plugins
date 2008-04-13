@@ -1,8 +1,11 @@
 /**
- * gmperator - Vimperator plugin for Greasemonkey
- * For Vimperator 0.6pre
- * @author teramako teramako@gmail.com
- * @version 0.3a
+ * ==VimperatorPlugin==
+ * @name           gmperator
+ * @description    Vimperator plugin for Greasemonkey
+ * @author         teramako teramako@gmail.com
+ * @namespace      http://d.hatena.ne.jp/teramako/
+ * @version        0.3a
+ * ==/VimperatorPlugin==
  *
  * ---------------------------
  * Usage:
@@ -98,7 +101,7 @@ liberator.plugins.gmperator = (function(){ //{{{
                 gmCon = new GmContainer(uri,sandbox);
                 containers[panelID] = gmCon;
                 this.__defineGetter__(panelID,function() gmCon);
-                log('gmpeartor: Registered: ' + panelID + ' - ' + uri);
+                //log('gmpeartor: Registered: ' + panelID + ' - ' + uri);
             }
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
@@ -162,7 +165,7 @@ liberator.plugins.gmperator = (function(){ //{{{
                 return tab.linkedPanel;
             }
         }
-        liberator.log(win + 'is not found');
+        //liberator.log(win + 'is not found');
     }
     function updateGmContainerList(e){
         var t = e.target;
