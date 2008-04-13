@@ -1,8 +1,12 @@
 /**
- * stylesheet changer
- * @author teramako teramako@gmail.com
- * @license MPL 1.1/GPL 2.0/LGPL 2.1
- * @see http://d.hatena.ne.jp/teramako/20080405/vimperator_plugin_stylechanger_js
+ * ==VimperatorPlugin==
+ * @name           stylesheet changer
+ * @description    enable to apply user stylesheets like Stylish
+ * @description-ja Stylishの様にユーザスタイルシートの適用を可能にします
+ * @author         teramako teramako@gmail.com
+ * @namespace http://d.hatena.ne.jp/teramako/20080405/vimperator_plugin_stylechanger_js
+ * @license        MPL 1.1/GPL 2.0/LGPL 2.1
+ * ==/VimperatorPlugin==
  *
  * Usage:
  *
@@ -65,8 +69,7 @@ function getStylesheetList(){
 	return list;
 }
 
-if (!liberator.plugins) liberator.plugins = {};
-liberator.plugins['styleSheetsManger@teramako.jp'] = (function(){
+liberator.plugins.styleSheetsManger = (function(){
 	var sss = Components.classes['@mozilla.org/content/style-sheet-service;1'].getService(Components.interfaces.nsIStyleSheetService);
 	var ios = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
 	function init(){
