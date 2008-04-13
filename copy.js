@@ -1,9 +1,12 @@
 /**
- * vimperator plugin
- * Add `copy' command
- * For vimperator 0.6pre
- * @author teramako teramako@gmail.com
- * @version 0.2
+ * ==VimperatorPlugin==
+ * @name           copy.js
+ * @description    enable to copy strings from a template (like CopyURL+)
+ * @description-ja テンプレートから文字列のコピーを可能にします（CopyURL+みたなもの）
+ * @minVersion     0.6pre
+ * @author         teramako teramako@gmail.com
+ * @version        0.3
+ * ==/VimperatorPlugin==
  *
  * Usage:
  * :copy {copyString}         -> copy the argument replaced some certain string
@@ -12,7 +15,7 @@
  * ex)
  * :copy %TITLE%              -> copied the title of the current page
  * :copy title                -> same as `:copy %TITLE%' by default
- * :copy! liberator.version  -> copy the value of liberator.version
+ * :copy! liberator.version   -> copy the value of liberator.version
  *
  * If non-argument, used `default'
  *
@@ -31,8 +34,25 @@
  *        %URL%     -> to the URL of the current page
  *        %SEL%     -> to the string of selection
  *        %HTMLSEL% -> to the html string of selection
+ *
+ * The copy_templates is a string variable which can set on
+ * vimperatorrc as following.
+ *
+ * let copy_templates = "[ {label:'titleAndURL', value:'%TITLE%\n%URL%'}, {label:'title', value:'%TITLE%'} ]"
+ *
+ * or your can set it using inline JavaScript.
+ *
+ * javascript <<EOM
+ * liberator.globalVariables.copy_templates = uneval([
+ *   { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
+ *   { label: 'title',          value: '%TITLE%' },
+ *   { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
+ *   { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
+ *   { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' },
+ * ]);
+ * EOM
  */
-const templates = [
+const templates = window.eval(liberator.globalVariables.copy_templates) || [
 	{ label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
 	{ label: 'title',          value: '%TITLE%' },
 	{ label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
