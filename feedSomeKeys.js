@@ -10,7 +10,7 @@
  * 英語での説明を放棄する
  *
  * keyイベント(正確にはkepressイベント)をWebコンテンツ側へ送る事を可能にするプラグイン
- * GmailとかLivedoor ReaderとかGreasemonkeyでキーを割り当てている場合に活躍するでしょう。
+ * Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場合に活躍するでしょう。
  * それ以外の場面ではむしろ邪魔になる諸刃の剣
  *
  * :f[eed]map lhs           -> lhsのキーマップをそのままWebコンテンツへ
@@ -23,18 +23,16 @@
  * == LDR の場合 ==
 js <<EOF
 autocommands.add('PageLoad,TabSelect',/reader\.livedoor\.com\/reader\//,
-  'js plugins.feedKey.setup(["j","k","s","a","p","o","v","c","<Space>","<S-Space>","z","b","<",">"]);');
+  'js plugins.feedKey.setup("j k s a p o v c <Space> <S-Space> z b < >".split(/ +/));');
 EOF
  * とかやると幸せになれるかも。
- * 
+ *
  * == Gmail の場合 ==
 js <<EOF
 autocommands.add('PageLoad,TabSelect',/mail\.google\.com\/mail/,[
-  'js plugins.feedKey.setup([',
-  '["c","3c"],["/","3/"],["j","3j"],["k","3k"],["n","3n"],["p","3p"],["o","3o"],["u","3u"],["e","3e"]',
-  '["x","3x"],["s","3s"],["r","3r"],["a","3a"],["#","3#"],["[","3["],["]","3]"],["z","3z"],["?","3?"]',
-  '["gi","3gi"],["gs","3gs"],["gt","3gt"],["gd","3gd"],["ga","3ga"],["gc","3gc"]',
-  ']);'
+  'js plugins.feedKey.setup(',
+  '"c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc".split(/ +/).map(function(i) [i, "3" + i])',
+  ');'
 ].join(''));
 EOF
  * とかやると幸せになれるかもしれません。
@@ -48,23 +46,23 @@ var origMaps = [];
 var feedMaps = [];
 
 // keyTableの再定義...ひどく不毛...
-var keyTable = [
-    [ KeyEvent.DOM_VK_ESCAPE, ["Esc", "Escape"] ],
-    [ KeyEvent.DOM_VK_LEFT_SHIFT, ["<"] ],
-    [ KeyEvent.DOM_VK_RIGHT_SHIFT, [">"] ],
-    [ KeyEvent.DOM_VK_RETURN, ["Return", "CR", "Enter"] ],
-    [ KeyEvent.DOM_VK_TAB, ["Tab"] ],
-    [ KeyEvent.DOM_VK_DELETE, ["Del"] ],
+const keyTable = [
     [ KeyEvent.DOM_VK_BACK_SPACE, ["BS"] ],
-    [ KeyEvent.DOM_VK_HOME, ["Home"] ],
-    [ KeyEvent.DOM_VK_INSERT, ["Insert", "Ins"] ],
-    [ KeyEvent.DOM_VK_END, ["End"] ],
-    [ KeyEvent.DOM_VK_LEFT, ["Left"] ],
-    [ KeyEvent.DOM_VK_RIGHT, ["Right"] ],
-    [ KeyEvent.DOM_VK_UP, ["Up"] ],
-    [ KeyEvent.DOM_VK_DOWN, ["Down"] ],
+    [ KeyEvent.DOM_VK_TAB, ["Tab"] ],
+    [ KeyEvent.DOM_VK_RETURN, ["Return", "CR", "Enter"] ],
+    //[ KeyEvent.DOM_VK_ENTER, ["Enter"] ],
+    [ KeyEvent.DOM_VK_ESCAPE, ["Esc", "Escape"] ],
+    [ KeyEvent.DOM_VK_SPACE, ["Spc", "Space"] ],
     [ KeyEvent.DOM_VK_PAGE_UP, ["PageUp"] ],
     [ KeyEvent.DOM_VK_PAGE_DOWN, ["PageDown"] ],
+    [ KeyEvent.DOM_VK_END, ["End"] ],
+    [ KeyEvent.DOM_VK_HOME, ["Home"] ],
+    [ KeyEvent.DOM_VK_LEFT, ["Left"] ],
+    [ KeyEvent.DOM_VK_UP, ["Up"] ],
+    [ KeyEvent.DOM_VK_RIGHT, ["Right"] ],
+    [ KeyEvent.DOM_VK_DOWN, ["Down"] ],
+    [ KeyEvent.DOM_VK_INSERT, ["Ins", "Insert"] ],
+    [ KeyEvent.DOM_VK_DELETE, ["Del", "Delete"] ],
     [ KeyEvent.DOM_VK_F1, ["F1"] ],
     [ KeyEvent.DOM_VK_F2, ["F2"] ],
     [ KeyEvent.DOM_VK_F3, ["F3"] ],
@@ -92,24 +90,21 @@ var keyTable = [
 ];
 function getKeyCode(str) {
     str = str.toLowerCase();
-    for (var i in keyTable) {
-        for (var k in keyTable[i][1]) {
-            if (keyTable[i][1][k].toLowerCase() == str) return keyTable[i][0];
-        }
-    }
-    return 0;
+    var ret = 0;
+    keyTable.some(function(i) i[1].some(function(k) k.toLowerCase() == str && (ret = i[0])));
+    return ret;
 }
 function init(keys){
     destroy();
-    for each(var key in keys){
+    keys.forEach(function(key){
         var origKey, feedKey;
-        if (typeof(key) == 'object'){
-            [origKey, feedKey] = [key[0],key[1]];
+        if (key instanceof Array){
+            [origKey, feedKey] = key;
         } else if (typeof(key) == 'string'){
             [origKey, feedKey] = [key,key];
         }
         replaceUserMap(origKey, feedKey);
-    }
+    });
 }
 function replaceUserMap(origKey, feedKey){
     if (mappings.hasMap(modes.NORMAL, origKey)){
@@ -117,11 +112,11 @@ function replaceUserMap(origKey, feedKey){
         if (origMap.description.indexOf(origKey+' -> ') != 0) {
             // origMapをそのままpushするとオブジェクト内の参照先を消されてしまう
             // 仕方なく複製を試みる
-            var clone = new Map(origMap.modes.map(function(m){return m;}),
-                                origMap.names.map(function(n){return n;}),
+            var clone = new Map(origMap.modes.map(function(m) m),
+                                origMap.names.map(function(n) n),
                                 origMap.description,
                                 origMap.action,
-                                { flags: origMap.flags, rhs:origMap.rhs, noremap:origMap.noremap });
+                                { flags:origMap.flags, rhs:origMap.rhs, noremap:origMap.noremap });
             origMaps.push(clone);
         }
     }
@@ -131,21 +126,20 @@ function replaceUserMap(origKey, feedKey){
             for (var i=0; i<count; i++){
                 feedKeyIntoContent(feedKey);
             }
-        }, { flags: liberator.Mappings.flags.COUNT, rhs:feedKey, noremap:true });
+        }, { flags:liberator.Mappings.flags.COUNT, rhs:feedKey, noremap:true });
     addUserMap(map);
-    for each(var fmap in feedMaps){
-        if (fmap.names[0] == origKey){
-            for (var key in fmap) fmap[key] = map[key];
-            return;
-        }
-    }
+    if (feedMaps.some(function(fmap){
+        if (fmap.names[0] != origKey) return false;
+        for (var key in fmap) fmap[key] = map[key];
+        return true;
+    })) return;
     feedMaps.push(map);
 }
 function destroy(){
     try{
-    feedMaps.forEach(function(map){
-        mappings.remove(map.modes[0],map.names[0]);
-    });
+        feedMaps.forEach(function(map){
+            mappings.remove(map.modes[0],map.names[0]);
+        });
     }catch(e){ log(map); }
     origMaps.forEach(function(map){
         addUserMap(map);
@@ -157,10 +151,10 @@ function addUserMap(map){
     mappings.addUserMap(map.modes, map.names, map.description, map.action, { flags:map.flags,noremap:map.noremap,rhs:map.rhs });
 }
 function parseKeys(keys){
-    var matches = keys.match(/^(\d+).+/);
+    var matches = /^\d+(?=\D)/.exec(keys);
     if (matches){
-        var num = parseInt(matches[1],10);
-        if (!isNaN(num)) return [keys.substr(matches[1].length), num];
+        var num = parseInt(matches[0],10);
+        if (!isNaN(num)) return [keys.substr(matches[0].length), num];
     }
     return [keys, 0];
 }
@@ -196,8 +190,8 @@ function feedKeyIntoContent(keys){
         var keyCode = 0;
         var shift = false, ctrl = false, alt = false, meta = false;
         if (charCode == 60){ // charCode:60 => "<"
-            var matches = keys.substr(i + 1).match(/([CSMAcsma]-)*([^>]+)/);
-            if (matches && matches[2]) {
+            var matches = keys.substr(i + 1).match(/^((?:[ACMSacms]-)*)([^>]+)/);
+            if (matches) {
                 if (matches[1]) {
                     ctrl  = /[cC]-/.test(matches[1]);
                     alt   = /[aA]-/.test(matches[1]);
@@ -208,7 +202,7 @@ function feedKeyIntoContent(keys){
                     if (!ctrl && !alt && !shift && !meta) return false;
                     charCode = matches[2].charCodeAt(0);
                 } else if (matches[2].toLowerCase() == "space") {
-                    charCode = 32;
+                    charCode = KeyEvent.DOM_VK_SPACE;
                 } else if (keyCode = getKeyCode(matches[2])) {
                     charCode = 0;
                 } else  {
@@ -233,9 +227,7 @@ function feedKeyIntoContent(keys){
 commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
     function(args){
         if(!args){
-            echo(feedMaps.map(function(map){
-                return map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            }),true);
+            echo(feedMaps.map(function(map) map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;')),true);
         }
         var [ ,lhs,rhs] = args.match(/(\S+)(?:\s+(.+))?/);
         if (!rhs){
@@ -245,24 +237,12 @@ commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
         }
     }
 );
-commands.addUserCommand(['feedmapclear','fmapc'],'Clear Feed Maps',
-    function(){
-        destroy();
-    }
-);
+commands.addUserCommand(['feedmapclear','fmapc'],'Clear Feed Maps',destroy);
 var converter = {
-    setup: function(keys){
-        init(keys);
-    },
-    get origMap(){
-        return origMaps;
-    },
-    get feedMap(){
-        return feedMaps;
-    },
-    reset: function(){
-        destroy();
-    }
+    get origMap() origMaps,
+    get feedMap() feedMaps,
+    setup: init,
+    reset: destroy
 };
 return converter;
 })();
