@@ -267,7 +267,7 @@
             description:'del.icio.us',
             account:['https://secure.delicious.com', 'https://secure.delicious.com', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
-            entryPage:'http://del.icio.us/url/%URL:MD5%',
+            entryPage:'http://del.icio.us/url/%URL::MD5%',
             poster:function(user,password,url,comment,tags){
                 var title = liberator.buffer.title;
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
