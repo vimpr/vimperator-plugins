@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.01
-// Last Change: 11-Apr-2008. Jan 2008
+// Last Change: 15-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -34,6 +34,8 @@
 //      Extract tags from social bookmarks for completion
 //  ':sbm'
 //      Post a current page to social bookmarks
+//  ':bentry'
+//      Goto Bookmark Entry Page
 (function(){
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
@@ -220,6 +222,7 @@
             description:'Hatena bookmark',
             account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
+            entryPage:'http://b.hatena.ne.jp/entry/%URL%',
             poster:function(user,password,url,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
                 var request =
@@ -264,6 +267,7 @@
             description:'del.icio.us',
             account:['https://secure.delicious.com', 'https://secure.delicious.com', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
+            entryPage:'http://del.icio.us/url/%URL:MD5%',
             poster:function(user,password,url,comment,tags){
                 var title = liberator.buffer.title;
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
@@ -299,6 +303,7 @@
             description:'livedoor clip',
             account:['http://api.clip.livedoor.com', 'http://api.clip.livedoor.com', null],
             loginPrompt:{ user:'', password:'apikey', description:'Enter username and apikey.\nyou can get "api-key" from\n\thttp://clip.livedoor.com/config/api' },
+            entryPage:'http://clip.livedoor.com/page/%URL%',
             poster:function(user,password,url,comment,tags){
                 var title = liberator.buffer.title;
                 var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
@@ -349,6 +354,37 @@
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         getTags, {}
+    );
+    liberator.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
+        function(service){
+            service = service || useServicesByPost.split(/\s*/)[0];
+            var currentService = services[service] || null;
+            if (currentService && currentService.entryPage) {
+                liberator.open(currentService.entryPage
+                    .replace(/%URL%/g, liberator.buffer.URL)
+                    .replace(/%URL::ESC%/g, encodeURIComponent(liberator.buffer.URL))
+                    .replace(/%URL::MD5%/g, function(x) {
+                        var url = liberator.buffer.URL;
+                        var cryptoHash = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+                        cryptoHash.init(Ci.nsICryptoHash.MD5);
+                        var inputStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
+                        inputStream.setData(url, url.length);
+                        cryptoHash.updateFromStream(inputStream, -1);
+                        var hash = cryptoHash.finish(false), ascii = [];
+                        const hexchars = '0123456789ABCDEF';
+                        var hexrep = new Array(hash.length * 2);
+                        for (var i = 0; i < hash.length; i++) {
+                            ascii[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 0xf);
+                            ascii[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 0xf);
+                        }
+                        return ascii.join('').toLowerCase();
+                    }), liberator.NEW_TAB);
+            }
+        },{
+            completer: function(filter){
+                return [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])];
+            }
+        }
     );
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(comment){
