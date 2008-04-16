@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.01
-// Last Change: 15-Apr-2008. Jan 2008
+// Last Change: 16-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -351,6 +351,10 @@
             liberator.plugins.direct_bookmark.tags =
                 liberator.plugins.direct_bookmark.tags.concat(currentService.tags(user,password));
         });
+        // unique tags
+        for(var i = 0, x = [], t = liberator.plugins.direct_bookmark.tags; i < t.length; i++)
+            if(x.indexOf(t[i]) < 0) x.push(t[i]);
+        liberator.plugins.direct_bookmark.tags = x;
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         getTags, {}
