@@ -18,14 +18,14 @@
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
-//          'f': Places (Firefox bookmark)
+//          'f': Places (Firefox bookmarks)
 //      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 //  'g:direct_sbm_use_services_by_post'
 //      Use social bookmark services to post
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
-//          'f': Places (Firefox bookmark)
+//          'f': Places (Firefox bookmarks)
 //      Usage: let g:direct_sbm_use_services_by_post = "hdl"
 //  'g:direct_sbm_is_normalize'
 //      Use normalize permalink
@@ -44,15 +44,13 @@
     var isNormalize = window.eval(liberator.globalVariables.direct_sbm_is_normalize) || true;
     var isUseMigemo = window.eval(liberator.globalVariables.direct_sbm_is_use_migemo) || true;
 
+    var XMigemoCore;
     try{
-        var XMigemoCore = Components
-            .classes['@piro.sakura.ne.jp/xmigemo/factory;1']
-            .getService(Components.interfaces.pIXMigemoFactory)
-            .getService("ja");
+        XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
+                                .getService(Components.interfaces.pIXMigemoFactory)
+                                .getService("ja");
     }
-    catch(ex){
-        var XMigemoCore = undefined;
-    }
+    catch(ex if ex instanceof TypeError){}
 
     function WSSEUtils(aUserName, aPassword){
         this._init(aUserName, aPassword);
@@ -327,7 +325,7 @@
                 var xhr = new XMLHttpRequest();
                 var ldc_tags = [];
 
-                xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://aaaaaaaaaaaaaaaaaaaaaaaaaaa",false);
+                xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://example.example/",false);
                 xhr.send(null);
 
                 var mypage_html = parseHTML(xhr.responseText);
@@ -340,8 +338,8 @@
                 return ldc_tags;
             },
         },
-        'f': {
-            description:'firefox places',
+        'f': { // p?
+            description:'Places',
             account:null,
             loginPrompt:null,
             entryPage:'%URL%',
@@ -352,40 +350,38 @@
                 taggingService.tagURI(nsUrl,tags);
                 Application.bookmarks.tags.addBookmark(nsUrl,window.content.document.title);
             },
-            tags:function(user,password){
-                var firefox_tags = Application.bookmarks.tags.children;
-                return firefox_tags.map(function(x){return x.title});
-            },
+            tags:function(user,password)
+                Application.bookmarks.tags.children.map(function(x) x.title),
         },
     };
     liberator.plugins.direct_bookmark = { services: services, tags: [] };
 
     function getTags(arg){
         var user,password;
+        var tags = liberator.plugins.direct_bookmark.tags;
         liberator.plugins.direct_bookmark.tags = [];
         useServicesByTag.split(/\s*/).forEach(function(service){
             var currentService = services[service] || null;
             [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
-            liberator.plugins.direct_bookmark.tags =
-                liberator.plugins.direct_bookmark.tags.concat(currentService.tags(user,password));
+            tags = tags.concat(currentService.tags(user,password));
         });
         // unique tags
-        for(var i = 0, x = [], t = liberator.plugins.direct_bookmark.tags; i < t.length; i++)
-            if(x.indexOf(t[i]) < 0) x.push(t[i]);
-        liberator.plugins.direct_bookmark.tags = x;
+        for(var i = tags.length; i --> 0; tags.indexOf(tag) == i || tags.splice(i, 1));
+        liberator.plugins.direct_bookmark.tags = tags.sort();
     }
-    liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
-        getTags, {}
-    );
+    liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",getTags,{});
     liberator.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(service){
             service = service || useServicesByPost.split(/\s*/)[0];
             var currentService = services[service] || null;
-            if (currentService && currentService.entryPage) {
-                liberator.open(currentService.entryPage
-                    .replace(/%URL%/g, liberator.buffer.URL)
-                    .replace(/%URL::ESC%/g, encodeURIComponent(liberator.buffer.URL))
-                    .replace(/%URL::MD5%/g, function(x) {
+            if(!currentService || !currentService.entryPage) {
+                return;
+            }
+            liberator.open(currentService.entryPage
+                .replace(/%URL(?:::(ESC|MD5))?%/g, function(x, t){
+                    if(!t) return liberator.buffer.URL;
+                    if(t == "ESC") return encodeURIComponent(liberator.buffer.URL);
+                    if(t == "MD5"){
                         var url = liberator.buffer.URL;
                         var cryptoHash = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
                         cryptoHash.init(Ci.nsICryptoHash.MD5);
@@ -395,17 +391,16 @@
                         var hash = cryptoHash.finish(false), ascii = [];
                         const hexchars = '0123456789ABCDEF';
                         var hexrep = new Array(hash.length * 2);
-                        for (var i = 0; i < hash.length; i++) {
-                            ascii[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 0xf);
-                            ascii[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 0xf);
+                        for(var i = 0; i < hash.length; i++) {
+                            ascii[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 0xF);
+                            ascii[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 0xF);
                         }
                         return ascii.join('').toLowerCase();
-                    }), liberator.NEW_TAB);
-            }
+                    }
+                }), liberator.NEW_TAB);
         },{
-            completer: function(filter){
-                return [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])];
-            }
+            completer: function(filter)
+                [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
         }
     );
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
