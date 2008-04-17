@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.01
-// Last Change: 16-Apr-2008. Jan 2008
+// Version: 0.03
+// Last Change: 17-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -18,12 +18,14 @@
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
+//          'f': Places (Firefox bookmark)
 //      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 //  'g:direct_sbm_use_services_by_post'
 //      Use social bookmark services to post
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
+//          'f': Places (Firefox bookmark)
 //      Usage: let g:direct_sbm_use_services_by_post = "hdl"
 //  'g:direct_sbm_is_normalize'
 //      Use normalize permalink
@@ -338,6 +340,23 @@
                 return ldc_tags;
             },
         },
+        'f': {
+            description:'firefox places',
+            account:null,
+            loginPrompt:null,
+            entryPage:'%URL%',
+            poster:function(user,password,url,comment,tags){
+                const taggingService = Cc["@mozilla.org/browser/tagging-service;1"].getService(Ci.nsITaggingService);
+                var nsUrl = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
+                nsUrl.spec = url;
+                taggingService.tagURI(nsUrl,tags);
+                Application.bookmarks.tags.addBookmark(nsUrl,window.content.document.title);
+            },
+            tags:function(user,password){
+                var firefox_tags = Application.bookmarks.tags.children;
+                return firefox_tags.map(function(x){return x.title});
+            },
+        },
     };
     liberator.plugins.direct_bookmark = { services: services, tags: [] };
 
@@ -346,8 +365,7 @@
         liberator.plugins.direct_bookmark.tags = [];
         useServicesByTag.split(/\s*/).forEach(function(service){
             var currentService = services[service] || null;
-            liberator.log(currentService);
-            [user,password] = getUserAccount.apply(currentService,currentService.account);
+            [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
             liberator.plugins.direct_bookmark.tags =
                 liberator.plugins.direct_bookmark.tags.concat(currentService.tags(user,password));
         });
@@ -407,7 +425,7 @@
 
             useServicesByPost.split(/\s*/).forEach(function(service){
                 var currentService = services[service] || null;
-                [user,password] = getUserAccount.apply(currentService,currentService.account);
+                [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
                 currentService.poster(
                     user,password,
                     isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
