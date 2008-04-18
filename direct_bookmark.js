@@ -135,22 +135,25 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str, strip_tags, ignore_tags){
-        var exp = '^[\\s\\S]*?<html(?:\\s[^>]*)?>|</html\\s*>[\\S\\s]*$';
-        if (strip_tags) {
-            strip_tags = strip_tags instanceof Array && strip_tags.length > 1
-                        ? '(?:' + strip_tags.join('|') + ')'
-                        : String(strip_tags);
-            exp += '|<' + strip_tags + '(?:\\s[^>]*)?>|</' + strip_tags + '\\s*>';
-        }
+    function parseHTML(str, ignore_tags){
+        var exp = "^[\\s\\S]*?<html(?:\\s[^>]*)?>|</html\\s*>[\\S\\s]*$";
         if (ignore_tags) {
             if (!(ignore_tags instanceof Array)) ignore_tags = [ignore_tags];
-            exp += '|' + ignore_tags.map(function(tag) {
-                return '<' + tag + '(?:\\s[^>]*)?>.*?</' + tag + '\\s*>';
-            }).join('|');
+            ignore_tags = ignore_tags.filter(function(tag) {
+                if (tag[tag.length - 1] != "/") return true;
+                tag = tag.replace(/\/$/, "");
+                exp += "|" + "<" + tag + "(?:\\s[^>]*)?>.*?</" + tag + "\\s*>";
+                return false;
+            });
+            if (ignore_tags.length > 0) {
+                ignore_tags = ignore_tags.length > 1
+                            ? "(?:" + ignore_tags.join("|") + ")"
+                            : String(ignore_tags);
+                exp += "|<" + ignore_tags + "(?:\\s[^>]*)?>|</" + ignore_tags + "\\s*>";
+            }
         }
-        str = str.replace(new RegExp(exp, 'ig'), '');
-        var res = document.implementation.createDocument(null, 'html', null);
+        str = str.replace(new RegExp(exp, "ig"), "");
+        var res = document.implementation.createDocument(null, "html", null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
         res.documentElement.appendChild(res.importNode(range.createContextualFragment(str), true));
@@ -266,7 +269,7 @@
                 xhr.open("GET","http://b.hatena.ne.jp/my",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
+                var mypage_html = parseHTML(xhr.responseText, ['img', 'script/']);
                 var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
 
                 tags.forEach(function(tag){
@@ -341,7 +344,7 @@
                 xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://example.example/",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
+                var mypage_html = parseHTML(xhr.responseText, ['img', 'script/']);
                 var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
 
                 tags.forEach(function(tag){
