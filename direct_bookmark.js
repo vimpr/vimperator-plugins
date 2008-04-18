@@ -135,21 +135,20 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str, ignore_tags){
+    function parseHTML(str, ignoreTags) {
         var exp = "^[\\s\\S]*?<html(?:\\s[^>]*)?>|</html\\s*>[\\S\\s]*$";
-        if (ignore_tags) {
-            if (typeof ignore_tag != "object") ignore_tags = [ignore_tags];
-            ignore_tags = ignore_tags.filter(function(tag) {
-                if (tag[tag.length - 1] != "/") return true;
-                tag = tag.replace(/\/$/, "");
-                exp += "|<" + tag + "(?:\\s[^>]*|/)?>(?:[\\s\\S]*?</" + tag + "\\s*>)?";
-                return false;
-            });
-            if (ignore_tags.length > 0) {
-                ignore_tags = ignore_tags.length > 1
-                            ? "(?:" + ignore_tags.join("|") + ")"
-                            : String(ignore_tags);
-                exp += "|<" + ignore_tags + "(?:\\s[^>]*|/)?>|</" + ignore_tags + "\\s*>";
+        if (ignoreTags) {
+            if (typeof ignoreTags == "string") ignoreTags = [ignoreTags];
+            var stripTags = [];
+            ignoreTags = ignoreTags.filter(function(tag) {
+                if (tag[tag.length - 1] == "/") return true;
+                stripTags.push(tag);
+            }).map(function(tag) tag.replace(/\/$/, ""));
+            if (stripTags.length > 0) {
+                stripTags = stripTags.length > 1
+                          ? "(?:" + stripTags.join("|") + ")"
+                          : String(stripTags);
+                exp += "|<" + stripTags + "(?:\\s[^>]*|/)?>|</" + stripTags + "\\s*>";
             }
         }
         str = str.replace(new RegExp(exp, "ig"), "");
@@ -157,6 +156,10 @@
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
         res.documentElement.appendChild(res.importNode(range.createContextualFragment(str), true));
+        if (ignoreTags) ignoreTags.forEach(function(tag) {
+            var elements = res.getElementsByTagName(tag);
+            for (var i = elements.length, el; el = elements.item(--i); el.parentNode.removeChild(el));
+        });
         return res;
     }
 
@@ -374,16 +377,13 @@
 
     function getTags(arg){
         var user,password;
-        var tags = liberator.plugins.direct_bookmark.tags;
-        liberator.plugins.direct_bookmark.tags = [];
+        var tags = [];
         useServicesByTag.split(/\s*/).forEach(function(service){
             var currentService = services[service] || null;
             [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
             tags = tags.concat(currentService.tags(user,password));
         });
-        // unique tags
-        for(var i = tags.length; i --> 0; tags.indexOf(tags[i]) == i || tags.splice(i, 1));
-        liberator.plugins.direct_bookmark.tags = tags.sort();
+        liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort();
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",getTags,{});
     liberator.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
