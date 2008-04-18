@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.03
-// Last Change: 17-Apr-2008. Jan 2008
+// Last Change: 18-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -135,8 +135,10 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str){
+    function parseHTML(str, ignore_tags){
         str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
+        if (ignore_tags && ignore_tags instanceof Array)
+            str = str.replace(new RegExp('<' + ignore_tags.join('[^>]+?>|<') + '[^>]+?>', 'ig'), '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
@@ -253,7 +255,7 @@
                 xhr.open("GET","http://b.hatena.ne.jp/my",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText);
+                var mypage_html = parseHTML(xhr.responseText, ['img']);
                 var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
 
                 tags.forEach(function(tag){
@@ -328,7 +330,7 @@
                 xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://example.example/",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText);
+                var mypage_html = parseHTML(xhr.responseText, ['img']);
                 var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
 
                 tags.forEach(function(tag){
@@ -366,7 +368,7 @@
             tags = tags.concat(currentService.tags(user,password));
         });
         // unique tags
-        for(var i = tags.length; i --> 0; tags.indexOf(tag) == i || tags.splice(i, 1));
+        for(var i = tags.length; i --> 0; tags.indexOf(tags[i]) == i || tags.splice(i, 1));
         liberator.plugins.direct_bookmark.tags = tags.sort();
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",getTags,{});
