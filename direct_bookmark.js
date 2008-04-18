@@ -137,8 +137,11 @@
     // copied from Pagerization (c) id:ofk
     function parseHTML(str, ignore_tags){
         str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
-        if (ignore_tags && ignore_tags instanceof Array)
-            str = str.replace(new RegExp('<' + ignore_tags.join('[^>]+?>|<') + '[^>]+?>', 'ig'), '');
+        if (ignore_tags && ignore_tags instanceof Array) {
+            ignore_tags.forEach(function(t) {
+                str = str.replace(new RegExp('<' + t + '(?:\\s[^>]+?)?>|<\\/' + t + '\\s*>', 'ig'), '');
+            });
+        }
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
@@ -255,7 +258,7 @@
                 xhr.open("GET","http://b.hatena.ne.jp/my",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img']);
+                var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
                 var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
 
                 tags.forEach(function(tag){
