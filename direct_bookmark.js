@@ -135,14 +135,21 @@
     }
 
     // copied from Pagerization (c) id:ofk
-    function parseHTML(str, ignore_tags){
-        str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
-        if (ignore_tags) {
-            ignore_tags = ignore_tags instanceof Array && ignore_tags.length > 1
-                        ? '(?:' + ignore_tags.join('|') + ')'
-                        : String(ignore_tags);
-            str = str.replace(new RegExp('<' + ignore_tags + '(?:\\s[^>]+)?>|</' + ignore_tags + '\\s*>', 'ig'), '');
+    function parseHTML(str, strip_tags, ignore_tags){
+        var exp = '^[\\s\\S]*?<html(?:\\s[^>]*)?>|</html\\s*>[\\S\\s]*$';
+        if (strip_tags) {
+            strip_tags = strip_tags instanceof Array && strip_tags.length > 1
+                        ? '(?:' + strip_tags.join('|') + ')'
+                        : String(strip_tags);
+            exp += '|<' + strip_tags + '(?:\\s[^>]*)?>|</' + strip_tags + '\\s*>';
         }
+        if (ignore_tags) {
+            if (!(ignore_tags instanceof Array)) ignore_tags = [ignore_tags];
+            exp += '|' + ignore_tags.map(function(tag) {
+                return '<' + tag + '(?:\\s[^>]*)?>.*?</' + tag + '\\s*>';
+            }).join('|');
+        }
+        str = str.replace(new RegExp(exp, 'ig'), '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
