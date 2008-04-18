@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.03
+// Version: 0.04
 // Last Change: 18-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
