@@ -1,9 +1,15 @@
 /*
- * liberator plugin
- * Add `pukka' http://codesorcery.net/pukka/ command to Bookmark del.icio.us
- * For liberator 0.6pre
- * @author otsune (based on teramako)
- * @version 0.3
+ * ==VimperatorPlugin==
+ * @name              Pukka
+ * @description       Add bookmark to del.icio.us with Pukka
+ * @description-ja    Pukkaを使用してdel.icio.usにブックマークする
+ * @author            otsune info@otsune.com
+ * @namespace         http://www.otsune.com/
+ * @minVersion        0.6pre
+ * @version           0.3
+ * ==/VimperatorPlugin==
+ *
+ * see also http://codesorcery.net/pukka/
  *
  * Variable:
  *  g:pukka_normalizelink
@@ -14,7 +20,7 @@
  * Commands:
  *  'pukka' or 'pu':
  *      Post bookmark to del.icio.us with Pukka
- *      usage: :pukka http://example.com/
+ *      usage: :pu[kka] [http://example.com/]
  * Options:
  *  not implemented
  */
@@ -26,14 +32,14 @@ function(args){
     if (!liberator.buffer.title || !liberator.buffer.URL || liberator.buffer.URL=='about:blank'){
         return false;
     }
-    var str = 'pukka:';
+    var scheme = 'pukka:';
     var title = encodeURIComponent(liberator.buffer.title);
     var url = encodeURIComponent(liberator.buffer.URL);
     var extend = encodeURIComponent(window.content.getSelection().toString() || '');
     if (args){
         url = encodeURIComponent(args);
     }
-    liberator.open(str + 'url=' + url + '&title=' + title + '&extended=' + extend);
+    liberator.open(scheme + 'url=' + url + '&title=' + title + '&extended=' + extend);
 },{
     completer: function(filter){
         var complist = [];
