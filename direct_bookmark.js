@@ -138,18 +138,18 @@
     function parseHTML(str, ignore_tags){
         var exp = "^[\\s\\S]*?<html(?:\\s[^>]*)?>|</html\\s*>[\\S\\s]*$";
         if (ignore_tags) {
-            if (!(ignore_tags instanceof Array)) ignore_tags = [ignore_tags];
+            if (typeof ignore_tag != "object") ignore_tags = [ignore_tags];
             ignore_tags = ignore_tags.filter(function(tag) {
                 if (tag[tag.length - 1] != "/") return true;
                 tag = tag.replace(/\/$/, "");
-                exp += "|" + "<" + tag + "(?:\\s[^>]*)?>.*?</" + tag + "\\s*>";
+                exp += "|<" + tag + "(?:\\s[^>]*|/)?>(?:[\\s\\S]*?</" + tag + "\\s*>)?";
                 return false;
             });
             if (ignore_tags.length > 0) {
                 ignore_tags = ignore_tags.length > 1
                             ? "(?:" + ignore_tags.join("|") + ")"
                             : String(ignore_tags);
-                exp += "|<" + ignore_tags + "(?:\\s[^>]*)?>|</" + ignore_tags + "\\s*>";
+                exp += "|<" + ignore_tags + "(?:\\s[^>]*|/)?>|</" + ignore_tags + "\\s*>";
             }
         }
         str = str.replace(new RegExp(exp, "ig"), "");
