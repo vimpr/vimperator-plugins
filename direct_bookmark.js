@@ -333,7 +333,7 @@
                 xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://example.example/",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img']);
+                var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
                 var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
 
                 tags.forEach(function(tag){
