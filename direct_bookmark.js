@@ -137,11 +137,8 @@
     // copied from Pagerization (c) id:ofk
     function parseHTML(str, ignore_tags){
         str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '');
-        if (ignore_tags && ignore_tags instanceof Array) {
-            ignore_tags.forEach(function(t) {
-                str = str.replace(new RegExp('<' + t + '(?:\\s[^>]+?)?>|<\\/' + t + '\\s*>', 'ig'), '');
-            });
-        }
+        if (ignore_tags && ignore_tags instanceof Array && ignore_tags.length > 0)
+            str = str.replace(new RegExp('<(?:' + ignore_tags.join('|') + ')(?:\\s[^>]+)?>|</(?:' + ignore_tags.join('|') + ')\\s*>', 'ig'), '');
         var res = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
