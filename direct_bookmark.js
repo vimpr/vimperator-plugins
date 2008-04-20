@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.04
-// Last Change: 18-Apr-2008. Jan 2008
+// Version: 0.05
+// Last Change: 20-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -8,6 +8,7 @@
 //      Pagerization (c) id:ofk
 //      AutoPagerize (c) id:swdyh
 //      direct_delb.js id:mattn
+//      JSDeferred id:cho45
 //
 // Social Bookmark direct add script for Vimperator 0.6.*
 // for Migemo search: require XUL/Migemo Extension
@@ -18,14 +19,15 @@
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
-//          'f': Places (Firefox bookmarks)
+//          'p': Places (Firefox bookmarks)
 //      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 //  'g:direct_sbm_use_services_by_post'
 //      Use social bookmark services to post
 //          'h': Hatena Bookmark
 //          'd': del.icio.us
 //          'l': livedoor clip
-//          'f': Places (Firefox bookmarks)
+//          'g': Google Bookmarks
+//          'p': Places (Firefox bookmarks)
 //      Usage: let g:direct_sbm_use_services_by_post = "hdl"
 //  'g:direct_sbm_is_normalize'
 //      Use normalize permalink
@@ -51,6 +53,52 @@
                                 .getService("ja");
     }
     catch(ex if ex instanceof TypeError){}
+
+
+    function Deferred () { return (this instanceof Deferred) ? this.init(this) : new Deferred() }
+    Deferred.prototype = {
+        init : function () {
+            this._next    = null;
+            this.callback = {
+                ok: function (x) { return x },
+                ng: function (x) { throw  x }
+            };
+            return this;
+        },
+
+        next  : function (fun) { return this._post("ok", fun) },
+        error : function (fun) { return this._post("ng", fun) },
+        call  : function (val) { return this._fire("ok", val) },
+        fail  : function (err) { return this._fire("ng", err) },
+
+        cancel : function () {
+            (this.canceller || function () {})();
+            return this.init();
+        },
+
+        _post : function (okng, fun) {
+            this._next =  new Deferred();
+            this._next.callback[okng] = fun;
+            return this._next;
+        },
+
+        _fire : function (okng, value) {
+            var self = this, next = "ok";
+            try {
+                value = self.callback[okng].call(self, value);
+            } catch (e) {
+                next  = "ng";
+                value = e;
+            }
+            if (value instanceof Deferred) {
+                value._next = self._next;
+            } else {
+                if (self._next) self._next._fire(next, value);
+            }
+            return this;
+        }
+    };
+
 
     function WSSEUtils(aUserName, aPassword){
         this._init(aUserName, aPassword);
@@ -251,19 +299,15 @@
                         <summary type="text/plain">{tagString + comment}</summary>
                     </entry>;
                 var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function(){
-                    if(xhr.readyState == 4){
-                        if(xhr.status == 201)
-                            liberator.echo("HatenaBookmark: success");
-                        else
-                            liberator.echoerr("HatenaBookmark:" + xhr.statusText);
-                    }
-                };
                 var wsse = new WSSEUtils(user,password);
-                xhr.open("POST","http://b.hatena.ne.jp/atom/post", true);
+
+                xhr.open("POST","http://b.hatena.ne.jp/atom/post", false);
                 xhr.setRequestHeader("X-WSSE",wsse.getWSSEHeader());
                 xhr.setRequestHeader("Content-Type","application/atom+xml");
                 xhr.send(request.toString());
+
+                if(xhr.status != 201)
+                    throw "HatenaBookmark: faild";
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -293,16 +337,12 @@
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function(){
-                    if(xhr.readyState == 4){
-                        if(xhr.status == 200)
-                            liberator.echo("DeliciousBookmark: success");
-                        else
-                            liberator.echoerr("DeliciousBookmark:" + xhr.statusText);
-                    }
-                };
-                xhr.open("GET", request_url, true, user, password);
+
+                xhr.open("GET", request_url, false, user, password);
                 xhr.send(null);
+
+                if(xhr.status != 200)
+                    throw "del.icio.us: faild";
             },
             tags:function(user,password){
                 const feed_url = 'http://feeds.delicious.com/feeds/json/tags/';
@@ -314,7 +354,7 @@
                 var tags = window.eval("(" + xhr.responseText + ")");
                 for(var tag in tags)
                     returnValue.push(tag);
-                liberator.echo("DeliciousBookmark: Tag parsing is finished. Taglist length: " + returnValue.length);
+                liberator.echo("del.icio.us: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
             },
         },
@@ -329,16 +369,12 @@
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function(){
-                    if(xhr.readyState == 4){
-                        if(xhr.status == 200)
-                            liberator.echo("LivedoorClip: success");
-                        else
-                            liberator.echoerr("LivedoorClip:" + xhr.statusText);
-                    }
-                };
+
                 xhr.open("GET", request_url, true, user, password);
                 xhr.send(null);
+
+                if(xhr.status != 200)
+                    throw "LivedoorClip: faild";
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -357,7 +393,29 @@
                 return ldc_tags;
             },
         },
-        'f': { // p?
+        'g': {
+            description:'Google Bookmarks',
+            account:null,
+            loginPrompt:null,
+            entryPage:'%URL%',
+            poster:function(user,password,url,comment,tags){
+                var request_url = 'http://www.google.com/bookmarks/mark';
+                var params = [
+                    ['bkmk', url], ['title', liberator.buffer.title], ['labels', tags.join(',')]
+                ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", request_url, false);
+
+                xhr.setRequestHeader("User-Agent", navigator.userAgent + " GoogleToolbarFF 3.0.20070525");
+                xhr.send(params);
+
+                if(xhr.status != 200)
+                    throw "GoogleBookmarks: faild";
+            },
+            tags:function(user,password) [],
+        },
+        'p': {
             description:'Places',
             account:null,
             loginPrompt:null,
@@ -367,7 +425,11 @@
                 var nsUrl = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
                 nsUrl.spec = url;
                 taggingService.tagURI(nsUrl,tags);
-                Application.bookmarks.tags.addBookmark(nsUrl,window.content.document.title);
+                try{
+                    Application.bookmarks.tags.addBookmark(liberator.buffer.title, nsUrl);
+                }catch(e){
+                    throw "Places: faild";
+                }
             },
             tags:function(user,password)
                 Application.bookmarks.tags.children.map(function(x) x.title),
@@ -421,9 +483,11 @@
     );
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(comment){
-            var user, password;
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
+
+            var d = new Deferred();
+            var first = d;
 
             if(/^\[[^\]]+\]/.test(comment)){
                 var tag, text;
@@ -435,15 +499,19 @@
             }
 
             useServicesByPost.split(/\s*/).forEach(function(service){
-                var currentService = services[service] || null;
-                [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
-                currentService.poster(
-                    user,password,
-                    isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
-                    comment,
-                    tags
-                );
+                var user, password, currentService = services[service] || null;
+                [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
+                d = d.next(function(){
+                    currentService.poster(
+                        user,password,
+                        isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
+                        comment,
+                        tags
+                    );
+                });
             });
+            d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);});
+            setTimeout(function(){first.call();},0);
         },{
             completer: function(filter){
                 var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]
