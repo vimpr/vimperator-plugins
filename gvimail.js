@@ -23,7 +23,7 @@
 	var use_gmail_v2 = true;
 	// If you have installed stylechanger.js and want to use the Vimish style, set the option below to true.
 	// If you didn't yet get the gvimail.css, download it from http://code.google.com/p/gvimail/source/browse/trunk/colors/GVimail.css
-	// and put it in ~/.vimperator/colors (or %HOMEPATH\vimperator\colors).
+	// and put it in ~/.vimperator/colors (or %HOMEPATH\vimperator\colors)
 	var use_gvimail_css = true;
 
 	// for compatibility with all versions of Vimperator >= 0.6pre,
@@ -45,7 +45,7 @@
 		return null;
 	},
 	/// Execute an action by simulating a click on an image. It has 2 params: the classname (for Gmail v2)
-	/// or a part of the src attribute of the img element (for Gmail v1).
+	/// or a part of the src attribute of the img element (for Gmail v1)
 	clickImage : function (classnamev2, imgsrcv1)
 	{
 		var elem = viberator.buffer.evaluateXPath('//*[contains(concat(" ", normalize-space(@class), " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
@@ -129,8 +129,8 @@ var gmail_v2_hinttags =
 	// Show|Hide quoted text
 	+ " | //span[contains(concat(' ', normalize-space(@class), ' '), ' WQ9l9c ')]"
 	//
-	+ " | //div[contains(concat(' ', normalize-space(@class), ' '), ' goog-menuitem')]";
-// We provide limited support for Gmail(v1).
+	+ " | //div[contains(concat(' ', normalize-space(@class)), ' goog-menuitem')]";
+// We provide limited support for Gmail(v1)
 var gmail_v1_hinttags =
       "//*[contains(@class, 'lk ') or @class='msc' or @class='ll' or @class='setl' or @class='lkw' or starts-with(@class, 'sc ')] | //tr[@class='rr' or @class='ur']/td[position()=5] | //div/span[contains(@class, 'bz_rbbb')] | //span[@class='l' and contains(@id, 'sl_')]" ;
 var gmail_hints = use_gmail_v1 ? gmail_v1_hinttags : "";
