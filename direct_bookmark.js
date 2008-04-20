@@ -55,21 +55,21 @@
     catch(ex if ex instanceof TypeError){}
 
 
-    function Deferred () { return (this instanceof Deferred) ? this.init(this) : new Deferred() }
+    function Deferred () this instanceof Deferred ? this.init(this) : new Deferred();
     Deferred.prototype = {
         init : function () {
             this._next    = null;
             this.callback = {
-                ok: function (x) { return x },
+                ok: function (x) x,
                 ng: function (x) { throw  x }
             };
             return this;
         },
 
-        next  : function (fun) { return this._post("ok", fun) },
-        error : function (fun) { return this._post("ng", fun) },
-        call  : function (val) { return this._fire("ok", val) },
-        fail  : function (err) { return this._fire("ng", err) },
+        next  : function (fun) this._post("ok", fun),
+        error : function (fun) this._post("ng", fun),
+        call  : function (val) this._fire("ok", val),
+        fail  : function (err) this._fire("ng", err),
 
         cancel : function () {
             (this.canceller || function () {})();
@@ -77,7 +77,7 @@
         },
 
         _post : function (okng, fun) {
-            this._next =  new Deferred();
+            this._next = new Deferred();
             this._next.callback[okng] = fun;
             return this._next;
         },
@@ -92,8 +92,8 @@
             }
             if (value instanceof Deferred) {
                 value._next = self._next;
-            } else {
-                if (self._next) self._next._fire(next, value);
+            } else if (self._next) {
+                self._next._fire(next, value);
             }
             return this;
         }
@@ -188,10 +188,8 @@
         if (ignoreTags) {
             if (typeof ignoreTags == "string") ignoreTags = [ignoreTags];
             var stripTags = [];
-            ignoreTags = ignoreTags.filter(function(tag) {
-                if (tag[tag.length - 1] == "/") return true;
-                stripTags.push(tag);
-            }).map(function(tag) tag.replace(/\/$/, ""));
+            ignoreTags = ignoreTags.filter(function(tag) tag[tag.length - 1] == "/" || !stripTags.push(tag))
+                                   .map(function(tag) tag.replace(/\/$/, ""));
             if (stripTags.length > 0) {
                 stripTags = stripTags.length > 1
                           ? "(?:" + stripTags.join("|") + ")"
@@ -307,7 +305,7 @@
                 xhr.send(request.toString());
 
                 if(xhr.status != 201)
-                    throw "HatenaBookmark: faild";
+                    throw "Hatena Bookmark: faild";
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -316,13 +314,13 @@
                 xhr.open("GET","http://b.hatena.ne.jp/my",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img', 'script/']);
+                var mypage_html = parseHTML(xhr.responseText, ['img/', 'script/']);
                 var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
 
                 tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
                 });
-                liberator.echo("HatenaBookmark: Tag parsing is finished. Taglist length: " + tags.length);
+                liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 return hatena_tags;
             },
         },
@@ -374,7 +372,7 @@
                 xhr.send(null);
 
                 if(xhr.status != 200)
-                    throw "LivedoorClip: faild";
+                    throw "livedoor clip: faild";
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -383,13 +381,13 @@
                 xhr.open("GET","http://clip.livedoor.com/clip/add?link=http://example.example/",false);
                 xhr.send(null);
 
-                var mypage_html = parseHTML(xhr.responseText, ['img', 'script/']);
+                var mypage_html = parseHTML(xhr.responseText, ['img/', 'script/']);
                 var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
 
                 tags.forEach(function(tag){
                     ldc_tags.push(tag.textContent);
                 });
-                liberator.echo("LivedoorClip: Tag parsing is finished. Taglist length: " + tags.length);
+                liberator.echo("livedoor clip: Tag parsing is finished. Taglist length: " + tags.length);
                 return ldc_tags;
             },
         },
@@ -411,7 +409,7 @@
                 xhr.send(params);
 
                 if(xhr.status != 200)
-                    throw "GoogleBookmarks: faild";
+                    throw "Google Bookmarks: faild";
             },
             tags:function(user,password) [],
         },
