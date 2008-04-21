@@ -123,8 +123,8 @@
         d.xhr = req;
         return d;
     }
-    http.get  = function (url)       { return http({method:"get",  url:url}) }
-    http.post = function (url, data) { return http({method:"post", url:url, data:data, headers:{"Content-Type":"application/x-www-form-urlencoded"}}) }
+    http.get  = function (url)       http({method:"get",  url:url});
+    http.post = function (url, data) http({method:"post", url:url, data:data, headers:{"Content-Type":"application/x-www-form-urlencoded"}});
 
     Deferred.Deferred = Deferred;
     Deferred.http     = http;
@@ -174,22 +174,23 @@
         },
 
         _getISO8601String: function(aDate){
+            var result = [
+                zeropad(aDate.getUTCFullYear(), 4), "-",
+                zeropad(aDate.getUTCMonth() + 1, 2), "-",
+                zeropad(aDate.getUTCDate(), 2), "T",
+                zeropad(aDate.getUTCHours(), 2), ":",
+                zeropad(aDate.getUTCMinutes(), 2), ":",
+                zeropad(aDate.getUTCSeconds(), 2), "Z"
+            ].join("");
+            return result;
+
             function zeropad(s, l){
+                s = String(s);
                 while(s.length < l){
                     s = "0" + s;
                 }
                 return s;
             }
-
-            var result = [
-                            zeropad(aDate.getUTCFullYear(), 4), "-",
-                            zeropad(aDate.getUTCMonth() + 1, 2), "-",
-                            zeropad(aDate.getUTCDate(), 2), "T",
-                            zeropad(aDate.getUTCHours(), 2), ":",
-                            zeropad(aDate.getUTCMinutes(), 2), ":",
-                            zeropad(aDate.getUTCSeconds(), 2), "Z"
-                         ].join("");
-            return result;
         }
 
     };
@@ -466,8 +467,8 @@
             [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
             d = d.next(function(t) t.concat(currentService.tags(user,password)));
         });
-        d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) {return a.indexOf(e) == i}).sort()})
-            .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
+        d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort()})
+         .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
         return first;
     }
     liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
@@ -525,25 +526,22 @@
             useServicesByPost.split(/\s*/).forEach(function(service){
                 var user, password, currentService = services[service] || null;
                 [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
-                d = d.next(function(){
-                    return currentService.poster(
-                        user,password,
-                        isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
-                        comment,
-                        tags
-                    );
-                });
+                d = d.next(function() currentService.poster(
+                    user,password,
+                    isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
+                    comment,tags
+                ));
             });
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);});
             setTimeout(function(){first.call();},0);
         },{
             completer: function(filter){
-                var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]
+                var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 if(liberator.plugins.direct_bookmark.tags.length == 0)
                     getTags().call([]);
-                return [0, [[(match_result[1] || "") + "[" + tag + "]","Tag"]
+                return [0, [[match_result[1] + "[" + tag + "]","Tag"]
                             for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag))]];
             }
         }
