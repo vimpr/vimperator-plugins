@@ -99,6 +99,36 @@
         }
     };
 
+    Deferred.next = function (fun) {
+        var d = new Deferred();
+        var id = setTimeout(function () { clearTimeout(id); d.call() }, 0);
+        if (fun) d.callback.ok = fun;
+        d.canceller = function () { try { clearTimeout(id) } catch (e) {} };
+        return d;
+    };
+
+    function http (opts) {
+        var d = Deferred();
+        var req = new XMLHttpRequest();
+        req.open(opts.method, opts.url, true, opts.user || null, opts.password || null);
+        if (opts.headers) {
+            for (var k in opts.headers) if (opts.headers.hasOwnProperty(k)) {
+                req.setRequestHeader(k, opts.headers[k]);
+            }
+        }
+        req.onreadystatechange = function () {
+            if (req.readyState == 4) d.call(req);
+        };
+        req.send(opts.data || null);
+        d.xhr = req;
+        return d;
+    }
+    http.get  = function (url)       { return http({method:"get",  url:url}) }
+    http.post = function (url, data) { return http({method:"post", url:url, data:data, headers:{"Content-Type":"application/x-www-form-urlencoded"}}) }
+
+    Deferred.Deferred = Deferred;
+    Deferred.http     = http;
+
 
     function WSSEUtils(aUserName, aPassword){
         this._init(aUserName, aPassword);
@@ -214,20 +244,6 @@
     //
     //
 
-    function httpGET(uri,callback){
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function(){
-            if(xhr.readyState == 4){
-                if(xhr.status == 200)
-                    callback.call(this,xhr.responseText);
-                else
-                    throw new Error(xhr.statusText);
-            }
-        };
-        xhr.open("GET",uri,true);
-        xhr.send(null);
-    }
-
     function getNormalizedPermalink(url){
         var xhr = new XMLHttpRequest();
         xhr.open("GET","http://api.pathtraq.com/normalize_url?url=" + url,false);
@@ -296,16 +312,19 @@
                         <link rel="related" type="text/html" href={url}/>
                         <summary type="text/plain">{tagString + comment}</summary>
                     </entry>;
-                var xhr = new XMLHttpRequest();
                 var wsse = new WSSEUtils(user,password);
 
-                xhr.open("POST","http://b.hatena.ne.jp/atom/post", false);
-                xhr.setRequestHeader("X-WSSE",wsse.getWSSEHeader());
-                xhr.setRequestHeader("Content-Type","application/atom+xml");
-                xhr.send(request.toString());
-
-                if(xhr.status != 201)
-                    throw "Hatena Bookmark: faild";
+                return Deferred.http({
+                    method: "post",
+                    url: "http://b.hatena.ne.jp/atom/post",
+                    data: request.toString(),
+                    headers: {
+                        "X-WSSE": wsse.getWSSEHeader(),
+                        "Content-Type": "application/atom+xml",
+                    },
+                }).next(function(xhr){
+                    if(xhr.status != 201) throw "Hatena Bookmark: faild";
+                });
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -334,13 +353,14 @@
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
-                var xhr = new XMLHttpRequest();
-
-                xhr.open("GET", request_url, false, user, password);
-                xhr.send(null);
-
-                if(xhr.status != 200)
-                    throw "del.icio.us: faild";
+                return Deferred.http({
+                    method: "get",
+                    url: request_url,
+                    user: user,
+                    password: password,
+                }).next(function(xhr){
+                    if(xhr.status != 200) throw "del.icio.us: faild";
+                });
             },
             tags:function(user,password){
                 const feed_url = 'http://feeds.delicious.com/feeds/json/tags/';
@@ -366,13 +386,14 @@
                 var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
-                var xhr = new XMLHttpRequest();
-
-                xhr.open("GET", request_url, true, user, password);
-                xhr.send(null);
-
-                if(xhr.status != 200)
-                    throw "livedoor clip: faild";
+                return Deferred.http({
+                    method: "get",
+                    url: request_url,
+                    user: user,
+                    password: password,
+                }).next(function(xhr){
+                    if(xhr.status != 200) throw "livedoor clip: faild";
+                });
             },
             tags:function(user,password){
                 var xhr = new XMLHttpRequest();
@@ -401,15 +422,16 @@
                 var params = [
                     ['bkmk', url], ['title', liberator.buffer.title], ['labels', tags.join(',')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
-
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", request_url, false);
-
-                xhr.setRequestHeader("User-Agent", navigator.userAgent + " GoogleToolbarFF 3.0.20070525");
-                xhr.send(params);
-
-                if(xhr.status != 200)
-                    throw "Google Bookmarks: faild";
+                return Deferred.http({
+                    method: "post",
+                    url: request_url,
+                    data: params,
+                    headers: {
+                        "User-Agent": navigator.userAgent + " GoogleToolbarFF 3.0.20070525",
+                    },
+                }).next(function(xhr){
+                    if(xhr.status != 200) throw "Google Bookmarks: faild";
+                });
             },
             tags:function(user,password) [],
         },
@@ -436,16 +458,20 @@
     liberator.plugins.direct_bookmark = { services: services, tags: [] };
 
     function getTags(arg){
-        var user,password;
-        var tags = [];
+        var d,first;
+        d = first = Deferred();
+
         useServicesByTag.split(/\s*/).forEach(function(service){
-            var currentService = services[service] || null;
-            [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
-            tags = tags.concat(currentService.tags(user,password));
+            var user, password, currentService = services[service] || null;
+            [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
+            d = d.next(function(t) t.concat(currentService.tags(user,password)));
         });
-        liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort();
+        d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) {return a.indexOf(e) == i}).sort()})
+            .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
+        return first;
     }
-    liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",getTags,{});
+    liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
+        function(arg){setTimeout(function(){getTags().call([])},0)}, {});
     liberator.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(service){
             service = service || useServicesByPost.split(/\s*/)[0];
@@ -500,7 +526,7 @@
                 var user, password, currentService = services[service] || null;
                 [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
                 d = d.next(function(){
-                    currentService.poster(
+                    return currentService.poster(
                         user,password,
                         isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
                         comment,
@@ -516,12 +542,9 @@
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 if(liberator.plugins.direct_bookmark.tags.length == 0)
-                    getTags();
-                liberator.plugins.direct_bookmark.tags.forEach(function(tag){
-                    if(m.test(tag))
-                        completionList.push([(match_result[1] || "") + "[" + tag + "]","Tag"]);
-                });
-                return [0, completionList];
+                    getTags().call([]);
+                return [0, [[(match_result[1] || "") + "[" + tag + "]","Tag"]
+                            for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag))]];
             }
         }
     );
