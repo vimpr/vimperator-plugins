@@ -55,7 +55,7 @@
     gmailBiffTip.appendChild(gmailBiffText);
 
     document.getElementById('status-bar')
-            .insertBefore(gmailBiffIcon,document.getElementById('security-button'));
+            .insertBefore(gmailBiffIcon,document.getElementById('security-button').nextSibling);
     document.getElementById('status-bar').appendChild(gmailBiffTip);
 
     setTimeout(function() {
