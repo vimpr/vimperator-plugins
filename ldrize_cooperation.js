@@ -119,7 +119,7 @@
             LDRizeCooperationPanel.addEventListener("click",function(e){
                     self.isEnable = !self.isEnable;
             },false);
-            document.getElementById('status-bar').insertBefore(LDRizeCooperationPanel,document.getElementById('security-button'));
+            document.getElementById('status-bar').insertBefore(LDRizeCooperationPanel,document.getElementById('security-button').nextSibling);
 
             return LDRizeCooperationPanel;
         },
