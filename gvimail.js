@@ -106,7 +106,9 @@ var gmail_v2_hinttags =
 	// Star on thread list (same subject)
 	+ " | //td/span[starts-with(@class, 'lHQn1d')]/img"
 	// Delete all spam messages now
-	+ " | //*[@class='rj1J6b']"
+	+ " | //*[@class='rj1J6b'"
+	// Hide filter options (settings)
+	+ " or @class='u7uAnb']"
 	// Select message in the list
 	+ " | //td[@class='mka4te']/ancestor::tr/td[5]"
 	// Change picture [Settings] ==> next step still not working
