@@ -23,10 +23,7 @@
  * :set copy_{label}=....
  *  or
  * :set {label}=...
- */
-
-(function(){
-/*
+ *
  * label: template name which is command argument
  * copy:  copy string
  *    the certian string is replace to ...
@@ -52,15 +49,18 @@
  * ]);
  * EOM
  */
-const templates = window.eval(liberator.globalVariables.copy_templates) || [
-	{ label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
-	{ label: 'title',          value: '%TITLE%' },
-	{ label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
-	{ label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
-	{ label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
-];
+(function(){
+if (!liberator.globalVariables.copy_templates) {
+    liberator.globalVariables.copy_templates = [
+        { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
+        { label: 'title',          value: '%TITLE%' },
+        { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
+        { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
+        { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
+    ];
+}
 // used when argument is none
-const defaultValue = templates[0].label;
+//const defaultValue = templates[0].label;
 liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 	function(arg, special){
 		var copyString = '';
@@ -88,7 +88,7 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 				copyString = e.toString();
 			}
 		} else {
-			if (!arg){ arg = defaultValue; }
+			if (!arg){ arg = liberator.globalVariables.copy_templates[0].label; }
 			var str = getCopyTemplate(arg) || arg;
 			copyString = replaceVariable(str);
 		}
@@ -99,20 +99,17 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 			liberator.echo('CopiedString: `' + liberator.util.escapeHTML(copyString) + "'");
 		}
 	},{
-		completer: function(filter){
-			if ( liberator.commands.parseCommand(liberator.commandline.getCommand())[2] ){
+		completer: function(filter, special){
+			if (special){
 				return liberator.completion.javascript(filter);
 			}
-			var templates = [];
-			for (var option in liberator.options){
-				if ( option.name.indexOf('copy_') == 0 ){
-					templates.push([option.names[1], option.value]);
-				}
-			}
+			var templates = liberator.globalVariables.copy_templates.map(function(template){
+				return [template.label, template.value];
+			});
 			if (!filter){ return [0,templates]; }
 			var candidates = [];
 			templates.forEach(function(template){
-				if (template[0].indexOf(filter) == 0 || ('copy_'+template[0]).indexOf(filter) == 0){
+				if (template[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
 					candidates.push(template);
 				}
 			});
@@ -121,9 +118,9 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 	}
 );
 function getCopyTemplate(label){
-	for (var option in liberator.options){
-		if ( option.hasName('copy_'+label) || option.hasName(label) ){
-			return option.value;
+	for each(var template in liberator.globalVariables.copy_templates){
+		if ( template.label == label ){
+			return template.value;
 		}
 	}
 	return null;
@@ -145,41 +142,6 @@ function replaceVariable(str){
 	          .replace(/%HTMLSEL%/g,htmlsel);
 }
 
-templates.forEach(function(template){
-	liberator.options.add(['copy_'+template.label, template.label],
-		'Copy template: `' + liberator.util.escapeHTML(template.value) + "'", 'string',template.value,
-		{});
-});
-//liberator.completion.exTabCompletion = function (str) {
-//	var [count, cmd, special, args] = liberator.commands.parseCommand(str);
-//	var completions = [];
-//	var start = 0;
-//	var matches = str.match(/^:*\d*(?=\w*$)/);
-//	if (matches) {
-//		completions = this.command(cmd);
-//		start = matches[0].length;
-//	} else {
-//		var command = liberator.commands.get(cmd);
-//		if (command && command.completer) {
-//			matches = str.match(/^:*\d*\w+!?\s+/);
-//			start = matches ? matches[0].length : 0;
-//			if (command.hasName("open") || command.hasName("tabopen") || command.hasName("winopen")) {
-//				var skip = args.match(/^(.*,\s+)(.*)/);
-//				if (skip) {
-//					start += skip[1].length;
-//					args = skip[2];
-//				}
-//			} else if (command.hasName("echo") || command.hasName("echoerr") ||
-//			           command.hasName("javascript") || command.hasName("copy")) {
-//				var skip = args.match(/^.*?(?=\w*$)/);
-//				if (skip)
-//					start += skip[0].length;
-//			}
-//			completions = command.completer.call(this, args);
-//		}
-//	}
-//	return [0, [start, completions]];
-//};
 })();
 
 // vim: set fdm=marker sw=4 ts=4 et:
