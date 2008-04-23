@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Statusbar Twitter'
-// Last Change: 26-Mar-2008. Jan 2008
+// Last Change: 23-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -8,7 +8,6 @@
 (function(){
     var checkTime = 90 * 1000;
     var updateTime = 10 * 1000;
-    var maxWidth = '500px';
 
     var lastestId = 0;
     var lastestStatus;
@@ -30,9 +29,9 @@
 
     var hbox = document.createElement('hbox');
     var iconPanel = document.createElement('image');
-    var statusPanel = document.createElement('textbox');
+    var statusPanel = document.createElement('label');
 
-    //hbox.style.overflow = "hidden";
+    var commandline = document.getElementById('liberator-commandline');
 
     iconPanel.setAttribute('id','statusbar-twitter-timeline-icon');
     iconPanel.style.width = "16px";
@@ -40,15 +39,14 @@
 
     statusPanel.setAttribute('id','statusbar-twitter-timeline-status');
     statusPanel.setAttribute('class','plain');
-    statusPanel.style.width = maxWidth;
 
     hbox.appendChild(iconPanel);
     hbox.appendChild(statusPanel);
 
     hbox.setAttribute('id','statusbar-twitter-timeline');
-    //document.getElementById('status-bar').insertBefore(hbox,document.getElementById('statusbar-display'));
-    //document.getElementById('liberator-commandline').appendChild(hbox);
-    document.getElementById('liberator-commandline').insertBefore(hbox,document.getElementById('liberator-commandline-command'));
+
+    commandline.style.overflow = "hidden";
+    commandline.insertBefore(hbox,document.getElementById('liberator-commandline-command'));
 
     document.getElementById('liberator-commandline-command').style.textAlign = "right";
     document.getElementById('liberator-commandline-command').addEventListener("focus",function(e){
