@@ -1,16 +1,60 @@
 /**
- * Vimperator plugin
+ * ==VimperatorPlugin==
+ * @name           proxy.js
+ * @description    proxy setting plugin 
+ * @description-ja プロクシ設定
+ * @minVersion     0.6pre
+ * @author         cho45 halt feits
+ * @version        0.6
+ * ==/VimperatorPlugin==
  *
- * proxy setting plugin (for Vimperator 0.6pre)
+ * Usage:
+ * :proxy {conf_name}         -> set proxy setting to conf_name
  *
- * @author cho45
- * @author halt feits
- * @version 0.6
+ * The proxy_settings is a string variable which can set on
+ * vimperatorrc as following.
+ *
+ * let proxy_settings = "[{ { conf_name:'disable', conf_usage:'direct connection', settings:[{label:'type', param:0}] } }]"
+ *
+ * or your can set it using inline JavaScript.
+ *
+ * javascript <<EOM
+ * liberator.globalVariables.proxy_settings = [
+ *    {
+ *       conf_name: 'disable',
+ *       conf_usage: 'direct connection',
+ *       settings: [
+ *       {
+ *          label: 'type',
+ *          param: 0
+ *       }
+ *       ]
+ *    },
+ *    {
+ *       conf_name: 'squid',
+ *       conf_usage: 'use squid cache proxy',
+ *       settings: [
+ *       {
+ *          label: 'type',
+ *          param: 1
+ *       },
+ *       {
+ *          label: 'http',
+ *          param: 'squid.example.com'
+ *       },
+ *       {
+ *          label: 'http_port',
+ *          param: 3128
+ *       }
+ *       ]
+ *    }
+ * ];
+ * EOM
  */
 
 (function() {
-
-    const proxy_settings = [
+if (!liberator.globalVariables.proxy_settings){
+    liberator.globalVariables.proxy_settings = [
         {
             conf_name: 'disable',
             conf_usage: 'direct connection',
@@ -40,7 +84,9 @@
             ]
         }
     ];
-
+};
+    var proxy_settings = liberator.globalVariables.proxy_settings;
+    
     liberator.commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
         const prefs = Components.classes["@mozilla.org/preferences-service;1"]
                                 .getService(Components.interfaces.nsIPrefService);
