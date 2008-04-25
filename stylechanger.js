@@ -4,17 +4,20 @@
  * @description    enable to apply user stylesheets like Stylish
  * @description-ja Stylishの様にユーザスタイルシートの適用を可能にします
  * @author         teramako teramako@gmail.com
- * @namespace http://d.hatena.ne.jp/teramako/20080405/vimperator_plugin_stylechanger_js
  * @license        MPL 1.1/GPL 2.0/LGPL 2.1
+ * @version        0.3a
  * ==/VimperatorPlugin==
  *
  * Usage:
  *
- * :hi[ghlight]                  -> enable stylesheet
- * :hi[ghlight] [on|clear|off]   -> enbale/disable stylesheet
- * :hi[ghlight] {alt style name} -> switch to the alternative stylesheet
+ * :hi[ghlight] [groupName]             -> list all or specified group temporary-style(s)
+ * :hi[ghlight] clear [groupName}       -> clear all or specified group temporary-styles
+ * :hi[ghlight] {groupName} {style...}  -> define style as {groupName}
  *
- * :colo[rschema]                -> list available user stylesheets
+ * :altcolo[rschema]                -> list available site alternative styles (`*'-marked is current style)
+ * :altcolo[rschema] {altStyleName} -> switch to the style
+ *
+ * :colo[rschema]                -> list available user stylesheets (`*'-marked are loaded styles)
  * :colo[rschema] {styleName}    -> enable the style
  * :colo[rschema]! {styleName}   -> disable the style
  *
@@ -31,47 +34,11 @@
  */
 
 (function(){
-commands.addUserCommand(['hi[ghlight]'],
-	'basic style changer',
-	function(arg){
-		if (!arg || arg == 'on'){
-			setStyleDisabled(false);
-		} else if (arg == 'clear' || arg == 'off'){
-			setStyleDisabled(true);
-		} else if ((getStylesheetList()).indexOf(arg) != -1){
-			stylesheetSwitchAll(window.content, arg);
-			setStyleDisabled(false);
-		}
-	},{
-		completer: function(aFilter){
-			var list = [
-				['on','enable stylesheet'],
-				['clear','disable stylesheet'],
-				['off','disable stylesheet']
-			];
-			var styles = list.concat( getStylesheetList().map(
-				function(elm){ return [elm,'alternative style']; }
-			));
-			if (!aFilter) return [0,styles];
-			var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
-			return [0, candidates];
-		}
-	}
-);
-function getStylesheetList(){
-	var list = [];
-	var stylesheets = getAllStyleSheets(window.content);
-	stylesheets.forEach(function(style){
-		var media = style.media.mediaText.toLowerCase();
-		if (media && media.indexOf('screen') == -1 && media.indexOf('all') == -1) return;
-		if (style.title) list.push(style.title);
-	});
-	return list;
-}
 
 liberator.plugins.styleSheetsManger = (function(){
 	var sss = Components.classes['@mozilla.org/content/style-sheet-service;1'].getService(Components.interfaces.nsIStyleSheetService);
 	var ios = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
+	var CSSDataPrefix = 'data:text/css,';
 	function init(){
 		if (!globalVariables.styles) return;
 		var list = globalVariables.styles.split(/\s*,\s*/);
@@ -96,10 +63,28 @@ liberator.plugins.styleSheetsManger = (function(){
 
 		return null;
 	}
+	function getURIFromCSS(aString){
+		return ios.newURI('data:text/css,' + aString, null, null);
+	}
+	function getStylesheetList(){
+		var list = [];
+		var stylesheets = getAllStyleSheets(window.content);
+		stylesheets.forEach(function(style){
+			var media = style.media.mediaText.toLowerCase();
+			if (media && media.indexOf('screen') == -1 && media.indexOf('all') == -1) return;
+			if (style.title) list.push([style.title, style.disabled === true ? false : true]);
+		});
+		return list;
+	}
 	var manager = {
-		load: function(aName){
-			if(!aName) return false;
-			var uri = getURIFromName(aName);
+		load: function(css){
+			if(!css) return false;
+			var uri = null;
+			if (typeof css == 'string') {
+				uri = getURIFromName(css);
+			} else if (css instanceof Components.interfaces.nsIURI) {
+				uri = css;
+			}
 			if (!uri) return false;
 
 			if(sss.sheetRegistered(uri, sss.USER_SHEET))
@@ -107,42 +92,85 @@ liberator.plugins.styleSheetsManger = (function(){
 
 			sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
 			if (options.verbose > 8)
-				log('Resisted colorschema '+aName);
+				log('Resisted colorschema '+css);
 
 			return true;
 		},
-		unload: function(aName){
-			if(!aName) return false;
-			var uri = getURIFromName(aName);
+		unload: function(css){
+			if(!css) return false;
+			var uri = null;
+			if (typeof css == 'string'){
+				uri = getURIFromName(css);
+			} else if (css instanceof Components.interfaces.nsIURI){
+				uri = css;
+			}
 			if (!uri) return false;
 
 			if(sss.sheetRegistered(uri, sss.USER_SHEET))
 				sss.unregisterSheet(uri, sss.USER_SHEET);
 
 			if (options.verbose > 8)
-				log('Unresisted colorschema '+aName);
+				log('Unresisted colorschema '+css);
 
 			return true;
 		},
-		list: function(){
-			var str = ['<span class="hl-Title">User StyleSheet List</span>'];
-			var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/i,'');});
-			files.forEach(function(file,i){
-				var buf = ' ' + (i+1) + ' ';
-				if (sss.sheetRegistered(getURIFromName(file), sss.USER_SHEET)){
-					buf += '<span style="color:blue">*</span>';
-				} else {
-					buf += ' ';
-				}
-				str.push(buf +' ' + file);
-			});
-			echo( str.join('\n'), true);
+		list: function(isAltanative){
+			var str = [];
+			if (isAltanative){
+				str.push('<span class="hl-Title">Alternative StyleSheet List</span>');
+				getStylesheetList().forEach(function(elm,i){
+					var buf = ' ' + (i+1) + ' ';
+					if (elm[1]){
+						buf += '<span style="color:blue">*</span>';
+					} else {
+						buf += ' ';
+					}
+					str.push(buf + ' ' + elm[0]);
+				});;
+				if (str.length == 1) str = ['Alternative StyleSheet is none.'];
+			} else {
+				str.push('<span class="hl-Title">User StyleSheet List</span>');
+				var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/i,'');});
+				files.forEach(function(file,i){
+					var buf = ' ' + (i+1) + ' ';
+					if (sss.sheetRegistered(getURIFromName(file), sss.USER_SHEET)){
+						buf += '<span style="color:blue">*</span>';
+					} else {
+						buf += ' ';
+					}
+					str.push(buf +' ' + file);
+				});
+			}
+			echo(str.join('\n'), true);
+		},
+		get hightlist(){
+			return CSSData;
 		}
 	};
+	commands.addUserCommand(['altcolo[rschema]'], 'set alternativeStyleSheet',
+		function(arg){
+			if (!arg){
+				manager.list(true);
+				return;
+			} else if (getStylesheetList().some(function(elm){return  elm[0] == arg;})){
+				stylesheetSwitchAll(window.content, arg);
+				setStyleDisabled(false);
+			}
+		},{
+			completer: function(aFilter){
+				var styles = list.concat( getStylesheetList().map(
+					function(elm){ return [elm[0], elm[1] ? '* ' : '  ' + 'alternative style']; }
+				));
+				if (!aFilter) return [0,styles];
+				var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
+				return [0, candidates];
+			}
+		}
+	);
 	commands.addUserCommand(['colo[rschema]'], 'set user stylesheet',
 		function(arg, special){
 			if (!arg){
-				manager.list();
+				manager.list(false);
 				return;
 			}
 			if (special){
@@ -164,6 +192,65 @@ liberator.plugins.styleSheetsManger = (function(){
 					}
 				});
 				return [0,candidates];
+			}
+		}
+	);
+	var CSSData = {};
+	commands.addUserCommand(['hi[ghlight]'], 'instant style changer',
+		function(arg){
+			var rel = commands.parseArgs(arg);
+			if (!rel || rel.args.length == 0){
+				var str = ['show highlight list'];
+				for (var name in CSSData){
+					str.push('<span class="hl-Title">' + name + '</span>');
+					str.push(CSSData[name]);
+				}
+				echo(str.join('\n'),true);
+			} else if (rel.args.length == 1){
+				if (rel.args[0] == 'clear'){
+					for (var name in CSSData){
+						manager.unload(getURIFromCSS(CSSData[name]));
+					}
+				} else if (rel.args[0] in CSSData){
+					echo('<span class="hl-Title">' + rel.args[0] + '</span>\n' + CSSData[rel.args[0]], true);
+				}
+			} else if (rel.args.length > 1){
+				var groupName = rel.args.shift();
+				if (groupName == 'clear'){
+					rel.args.forEach(function(name){
+						if (name in CSSData) manager.unload(getURIFromCSS(CSSData[name]));
+					});
+				} else {
+					if (groupName in CSSData) manager.unload(getURIFromCSS(CSSData[groupName]));
+					CSSData[groupName] = rel.args.join(' ');
+					manager.load(getURIFromCSS(CSSData[groupName]));
+				}
+			}
+		},{
+			completer: function(aFilter){
+				var rel = commands.parseArgs(aFilter);
+				var list1 = [ ['clear', 'clear all or specified group'] ];
+				var list2 = [];
+				if (!rel){
+					for (var name in CSSData){
+						list2.push([name, CSSData[name]]);
+					}
+					return [0,list1.concat(list2)];
+				}
+				if (rel.args.length == 2 && rel.args[0] == 'clear'){
+					for (var name in CSSData){
+						if (name.indexOf(rel.args[1]) == 0) list2.push([name, CSSData[name]]);
+					}
+					return [6, list2];
+				} else if (rel.args.length == 1){
+					for (var name in CSSData){
+						if (name.indexOf(rel.args[0]) == 0) list2.push([name, CSSData[name]]);
+					}
+					if ('clear'.indexOf(rel.args[0]) == 0)
+						return [0, list1.concat(list2)];
+					else
+						return [0, list2];
+				}
 			}
 		}
 	);
