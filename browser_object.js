@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Map behave like text-object'
-// Version: 0.2
-// Last Change: 05-Apr-2008. Jan 2008
+// Version: 0.3
+// Last Change: 27-Apr-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -16,37 +16,40 @@
 //  '{motion}{scope}{target}'
 //      Motions:
 //          'd' : Delete
+//          'r' : Reload
 //          'y' : Yank
 //      Scopes:
 //          'l' : Left
 //          'r' : Right
 //          'a' : All
+//          'c' : Current
 //          'o' : Other
+//          's' : Same host
 //      Target:
 //          't' : Tabs
 (function(){
-    function Tab(){
-        return {
-            close: function(ary){
-                for each(var i in ary)
-                    i.close();
-            },
-            yank: function(ary){
-                var copyStrings = [];
-                for each(var i in ary)
-                    copyStrings.push(i.document.title);
-                liberator.copyToClipboard(copyStrings.join(", "));
-            },
+    function Tab(){}
+    Tab.prototype = {
+        close: function(ary){
+            for each(var i in ary)
+                i.close();
+        },
+        yank: function(ary){
+            var copyStrings = [];
+            for each(var i in ary)
+                copyStrings.push(i.document.location.href);
+            liberator.copyToClipboard(copyStrings.join(", "));
+        },
+        reload: function(ary){
+            for each(var i in ary)
+                i.document.location.reload();
+        },
 
-            //default function
-            active: function(){
-                return Application.activeWindow.activeTab.index;
-            },
-            collection: function(){
-                return Application.activeWindow.tabs;
-            },
-        }
-    }
+        //default function
+        active: function() Application.activeWindow.activeTab.index ,
+        identify: function(i){try{return i.document.location.host}catch(e){}},
+        collection: function() Application.activeWindow.tabs ,
+    };
 
     function Container(){
         var collections = {};
@@ -79,6 +82,7 @@
 
     browserObject.motions.add('d','close');
     browserObject.motions.add('y','yank');
+    browserObject.motions.add('r','reload');
 
     browserObject.scopes.add('l',function(ary){
         var active = this.active();
@@ -92,38 +96,45 @@
         var active = this.active();
         return [ary[i] for (i in ary) if (i != active)];
     });
-    browserObject.scopes.add('i',function(ary){
-        return [ary[this.active()]];
-    });
-    browserObject.scopes.add('a',function(ary){
-        return ary;
+    browserObject.scopes.add('c',function(ary) [ary[this.active()]]);
+    browserObject.scopes.add('a',function(ary) ary);
+    browserObject.scopes.add('s',function(ary){
+        var activeIdentify = this.identify(ary[this.active()]);
+        return [ary[i] for (i in ary) if (this.identify(ary[i]) == activeIdentify)];
     });
 
     browserObject.targets.add('t',new Tab());
 
     var prefix = liberator.globalVariables.browser_object_prefix || "";
     for (let m in browserObject.motions){
+        let motion = m;
         for (let s in browserObject.scopes){
-            let motion = m;
             let scope = s;
-            liberator.log(motion.id + scope.id);
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], [prefix + motion.id + scope.id],
                 "Browser Object Mapping",
                 function (arg) {
-                    var target = browserObject.targets.get(arg);
-                    var targetCollection = target.handler.collection();
+                    var target, targetCollection;
 
-                    targetCollection = scope.handler.call(target.handler,targetCollection);
-                    target.handler[motion.handler].call(target.handler,targetCollection);
+                    target = browserObject.targets.get(arg);
+                    if(!target){
+                        liberator.echoerr("BrowserObject: target not found");
+                        return;
+                    }
+
+                    targetCollection = scope.handler.call(target.handler,target.handler.collection());
+                    if(target.handler[motion.handler])
+                        target.handler[motion.handler].call(target.handler,targetCollection);
+                    else
+                        liberator.echoerr("BrowserObject: motion handler not found");
                 },
                 { flags: liberator.Mappings.flags.ARGUMENT});
         }
+        let map = liberator.mappings.get(null,motion.id);
+        if(!prefix && map){
+            liberator.mappings.addUserMap([liberator.modes.NORMAL],
+                [motion.id + motion.id], map.description, map.action,
+            {});
+        }
     }
-
-    if(prefix == "")
-        liberator.mappings.addUserMap([liberator.modes.NORMAL], ["dd"],
-            "Delete current buffer",
-            function (count) { liberator.tabs.remove(getBrowser().mCurrentTab, count, false, 0); },
-            { flags: liberator.Mappings.flags.COUNT });
 })();
