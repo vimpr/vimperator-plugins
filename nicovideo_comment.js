@@ -2,7 +2,7 @@
  * ==VimperatorPlugin==
  * @name           nicovideo_comment.js
  * @description   
- * @description-ja $B%K%3%K%3F02h$N%3%a%s%HMs$rF~NO(B
+ * @description-ja ニコニコ動画のコメント欄を入力
  * @minVersion     0.6pre
  * @author         otsune
  * @version        0.1
