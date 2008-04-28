@@ -4,6 +4,7 @@
  * @description    enable to apply user stylesheets like Stylish
  * @description-ja Stylishの様にユーザスタイルシートの適用を可能にします
  * @author         teramako teramako@gmail.com
+ * @url            http://coderepos.org/share/wiki/VimperatorPlugin/stylechanger.js
  * @license        MPL 1.1/GPL 2.0/LGPL 2.1
  * @version        0.3a
  * ==/VimperatorPlugin==
@@ -143,7 +144,7 @@ liberator.plugins.styleSheetsManger = (function(){
 			}
 			echo(str.join('\n'), true);
 		},
-		get hightlist(){
+		get highlightList(){
 			return CSSData;
 		}
 	};
@@ -152,15 +153,15 @@ liberator.plugins.styleSheetsManger = (function(){
 			if (!arg){
 				manager.list(true);
 				return;
-			} else if (getStylesheetList().some(function(elm){return  elm[0] == arg;})){
+			} else if (getStylesheetList().some(function(elm){return elm[0] == arg;})){
 				stylesheetSwitchAll(window.content, arg);
 				setStyleDisabled(false);
 			}
 		},{
 			completer: function(aFilter){
-				var styles = list.concat( getStylesheetList().map(
+				var styles = getStylesheetList().map(
 					function(elm){ return [elm[0], elm[1] ? '* ' : '  ' + 'alternative style']; }
-				));
+				);
 				if (!aFilter) return [0,styles];
 				var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
 				return [0, candidates];
@@ -196,7 +197,7 @@ liberator.plugins.styleSheetsManger = (function(){
 		}
 	);
 	var CSSData = {};
-	commands.addUserCommand(['hi[ghlight]'], 'instant style changer',
+	commands.addUserCommand(['hi[ghlight]'], 'temporary style changer',
 		function(arg){
 			var rel = commands.parseArgs(arg);
 			if (!rel || rel.args.length == 0){
@@ -210,6 +211,7 @@ liberator.plugins.styleSheetsManger = (function(){
 				if (rel.args[0] == 'clear'){
 					for (var name in CSSData){
 						manager.unload(getURIFromCSS(CSSData[name]));
+						delete CSSData[name];
 					}
 				} else if (rel.args[0] in CSSData){
 					echo('<span class="hl-Title">' + rel.args[0] + '</span>\n' + CSSData[rel.args[0]], true);
@@ -218,7 +220,10 @@ liberator.plugins.styleSheetsManger = (function(){
 				var groupName = rel.args.shift();
 				if (groupName == 'clear'){
 					rel.args.forEach(function(name){
-						if (name in CSSData) manager.unload(getURIFromCSS(CSSData[name]));
+						if (name in CSSData){
+							manager.unload(getURIFromCSS(CSSData[name]));
+							delete CSSData[name];
+						}
 					});
 				} else {
 					if (groupName in CSSData) manager.unload(getURIFromCSS(CSSData[groupName]));
