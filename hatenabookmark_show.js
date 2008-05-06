@@ -10,7 +10,7 @@
         const endPoint = "http://b.hatena.ne.jp/entry/json/";
         var xhr = new XMLHttpRequest();
         var tagString,showString = "<div>";
-        xhr.open("GET",endPoint + url,false);
+        xhr.open("GET",endPoint + url.replace(/#/,"%23") ,false);
         xhr.send(null);
         var response;
         if(!(response = window.eval(xhr.responseText))){
