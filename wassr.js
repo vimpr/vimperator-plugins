@@ -35,7 +35,7 @@
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
                 <>
-                    <img src={'http://wassr.jp/user/' + status.user_login_id + '/profile_img.png.32'}
+                    <img src={"http://wassr.jp/user/" + status.user_login_id + "/profile_img.png.32"}
                          alt={status.user.screen_name}
                          title={status.user.screen_name}
                          class="wassr photo"/>
@@ -46,6 +46,59 @@
                         .join("<br/>");
 
         //liberator.log(html);
+        liberator.echo(html, true);
+    }
+    function todoAction(username, password, arg){
+        var xhr = new XMLHttpRequest();
+        liberator.log(arg)
+        if (arg.match(/\+ (.*)/)) {
+            xhr.open("POST", "http://api.wassr.jp/todo/add.json", false, username, password);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("body=" + encodeURIComponent(RegExp.$1));
+        } else
+        if (arg.match(/- (.*)/)) {
+            xhr.open("POST", "http://api.wassr.jp/todo/delete.json", false, username, password);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("todo_rid=" + encodeURIComponent(RegExp.$1));
+        } else
+        if (arg.match(/\* (.*)/)) {
+            xhr.open("POST", "http://api.wassr.jp/todo/start.json", false, username, password);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("todo_rid=" + encodeURIComponent(RegExp.$1));
+        } else
+        if (arg.match(/\/ (.*)/)) {
+            xhr.open("POST", "http://api.wassr.jp/todo/stop.json", false, username, password);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("todo_rid=" + encodeURIComponent(RegExp.$1));
+        } else
+        if (arg.match(/! (.*)/)) {
+            xhr.open("POST", "http://api.wassr.jp/todo/done.json", false, username, password);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("todo_rid=" + encodeURIComponent(RegExp.$1));
+        }
+
+        xhr.open("GET", "http://api.wassr.jp/todo/list.json", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        var todos = window.eval(xhr.responseText);
+
+        var html = <style type="text/css"><![CDATA[
+            span.wassr.entry-content a { text-decoration: none; }
+            img.wassr.icon { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+        ]]></style>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+            todos.map(function(todo)
+                <>
+                    <img src="http://wassr.jp/img/icn-balloon.gif"
+                         alt="todo"
+                         title="todo"
+                         class="wassr icon"/>
+                    <strong>{todo.todo_rid}</strong>
+                </>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+                    sprintf(': <span class="wassr entry-content">%s</span>', todo.body))
+                        .join("<br/>");
+
         liberator.echo(html, true);
     }
     liberator.commands.addUserCommand(["wassr"], "Change wassr status",
@@ -71,8 +124,38 @@
             if (!arg || arg.length == 0)
                 showFollowersStatus(username, password);
             else
+            if (arg.match(/^-todo(.*)/))
+                todoAction(username, password, RegExp.$1);
+            else
                 sayWassr(username, password, arg);
         },
-    { });
+    {
+        completer: function(filter) {
+            liberator.log(filter)
+            candidates = [];
+            if (filter.match(/-todo([^!].*)/)) {
+                var password;
+                var username;
+                try {
+                    var logins = passwordManager.findLogins({}, "http://wassr.jp", "http://wassr.jp", null);
+                    if (logins.length)
+                        [username, password] = [logins[0].username, logins[0].password];
+                    else
+                        throw "Wassr: account not found";
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", "http://api.wassr.jp/todo/list.json", false, username, password);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(null);
+                    var todos = window.eval(xhr.responseText);
+                    for(let i in todos) candidates.push([filter + ' ' + todos[i].todo_rid, todos[i].body]);
+                    liberator.log(candidates)
+                }
+                catch (ex){
+                    liberator.echoerr(ex);
+                }
+            }
+            return [0,candidates];
+        }
+    });
 })();
 // vim:sw=4 ts=4 et:
