@@ -193,15 +193,15 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
             reg = new RegExp(arg,'i');
         }
         if (reg){
-            for each(var s in scripts){
+            scripts.forEach(function(s){
                 if ( reg.test(s.name) || reg.test(s.filename) ) {
                     str += scriptToString(s) + '\n\n';
                 }
-            }
+            });
         } else {
             var table = <table/>;
             var tr;
-            for each(var script in scripts){
+            scripts.forEach(function(script){
                 tr = <tr/>;
                 if (script.enabled){
                     tr.* += <td><span style="font-weight:bold;">{script.name}</span></td>;
@@ -210,8 +210,8 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
                 }
                 tr.* += <td>({script.filename})</td>;
                 table.* += tr;
-            }
-            str += table.toSource();
+            });
+            str += table.toXMLString();
         }
         echo(str,true);
         function scriptToString(script){
@@ -236,7 +236,7 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
                 }
                 table.* += tr;
             });
-            return table.toSource();
+            return table.toXMLString();
         }
     }
 ); //}}}
@@ -365,21 +365,21 @@ function scriptsCompleter(filter,flag){ //{{{
     var isAll = false;
     if (!filter) isAll=true;
     if (flag){
-        for each(var s in scripts){
+        scripts.forEach(function(s){
             if (isAll || s.name.toLowerCase().indexOf(filter) == 0 ||
                 s.filename.indexOf(filter) == 0)
             {
                 candidates.push([s.name, s.description]);
                 candidates.push([s.filename, s.description]);
             }
-        }
+        });
     } else {
-        for each(var s in scripts){
+        scripts.forEach(function(s){
             if (isAll || s.filename.indexOf(filter) == 0)
             {
                 candidates.push([s.filename, s.description]);
             }
-        }
+        });
     }
     return [0,candidates];
 } //}}}
