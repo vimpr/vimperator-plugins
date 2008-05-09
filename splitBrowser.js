@@ -39,8 +39,8 @@ vimperator.commands.add(new vimperator.Command(['sp[lit]'],
 		shortHelp: 'split browser',
 		help: 'Split browser and load the <code class="argument">[URL]</code>.<br/>' +
 			  'If you don\'t specify the <code class="argument">[URL]</code> argument, browser loads the current URL.<br/>' +
-			  '<br/>You need install <a href="https://addons.mozilla.org/en-US/firefox/addon/4287">Split Browser</a>.',
-		completer:function(filter){ return vimperator.completion.get_url_completions(filter); }
+			  '<br/>You need to install <a href="https://addons.mozilla.org/firefox/addon/4287">Split Browser</a>.',
+		completer: function(filter) vimperator.completion.get_url_completions(filter)
 	}
 ));
 vimperator.commands.add(new vimperator.Command(['on[ly]'],
