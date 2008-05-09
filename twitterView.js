@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Statusbar Twitter'
-// Last Change: 23-Apr-2008. Jan 2008
+// Last Change: 09-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -63,6 +63,15 @@
     setInterval(checkTimeline ,checkTime);
     setInterval(updateTimeline ,updateTime);
 
+    function favoriteStatus(id){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4 && xhr.status != 200)
+                liberator.echoerr("Twitter Viewer: faild to favorite");
+        };
+        xhr.open("GET","http://twitter.com/favourings/create/" + id,true,username,password);
+        xhr.send(null);
+    }
     function checkTimeline(){
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(){
@@ -96,4 +105,7 @@
     liberator.mappings.addUserMap([liberator.modes.NORMAL], [",r"],
         "Reply to current user",
         function () { liberator.commandline.open(":", "twitter @" + lastestStatus.user.screen_name + " ", liberator.modes.EX); });
+    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
+        "Favorite to current user",
+        function () { favoriteStatus(lastestStatus.id) });
 })();
