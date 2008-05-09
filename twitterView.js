@@ -3,13 +3,12 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// show twitter on statusesbar script for vimperator0.6.*
+// show Twitter on statusesbar script for Vimperator 0.6.*
 
 (function(){
-    var checkTime = 90 * 1000;
-    var updateTime = 10 * 1000;
+    const checkTime = 90 * 1000;
+    const updateTime = 10 * 1000;
 
-    var lastestId = 0;
     var lastestStatus;
 
     var statuses = [];
@@ -60,8 +59,8 @@
 
     checkTimeline();
     updateTimeline();
-    setInterval(checkTimeline ,checkTime);
-    setInterval(updateTimeline ,updateTime);
+    setInterval(function() checkTimeline(Date.now() - checkTime), checkTime);
+    setInterval(updateTimeline, updateTime);
 
     function favoriteStatus(id){
         var xhr = new XMLHttpRequest();
@@ -72,24 +71,28 @@
         xhr.open("GET","http://twitter.com/favourings/create/" + id,true,username,password);
         xhr.send(null);
     }
-    function checkTimeline(){
+    function checkTimeline(since){
+        var req = "http://twitter.com/statuses/friends_timeline.json";
+        if(typeof since == "number")
+          since = new Date(since);
+        if(since)
+          req += "?since=" + encodeURIComponent(since.toUTCString());
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(){
             if(xhr.readyState == 4){
                 if(xhr.status == 200){
-                    var encodedJson = window.eval(xhr.responseText);
-                    for(var i = encodedJson.length;i>0;i--){
-                        if(lastestId < encodedJson[i-1].id){
-                            statuses.push(encodedJson[i-1]);
-                            lastestId = encodedJson[i-1].id;
-                        }
-                    }
+                    var response = window.eval(xhr.responseText);
+                    statuses = statuses.concat(response);
                 }else{
-                    liberator.echoerr("Twitter Viewer: faild");
+                    liberator.echoerr("Twitter Viewer: failed");
                 }
             }
         };
-        xhr.open("GET","http://twitter.com/statuses/friends_timeline.json",true,username,password);
+        //xhr.setRequestHeader("X-Twitter-Client", "Vimperator");
+        //xhr.setRequestHeader("X-Twitter-Client-Version", "");
+        //xhr.setRequestHeader("X-Twitter-Client-URL", "");
+        //xhr.setRequestHeader("If-Modified-Since", "");
+        xhr.open("GET",req,true,username,password);
         xhr.send(null);
     }
     function updateTimeline(){
@@ -109,3 +112,4 @@
         "Favorite to current user",
         function () { favoriteStatus(lastestStatus.id) });
 })();
+// vim: fdm=marker sw=4 ts=4 et:
