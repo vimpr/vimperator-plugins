@@ -1,10 +1,10 @@
 /**
  * ==VimperatorPlugin==
  * @name           proxy.js
- * @description    proxy setting plugin 
+ * @description    proxy setting plugin
  * @description-ja プロクシ設定
  * @minVersion     0.6pre
- * @author         cho45 halt feits
+ * @author         cho45, halt feits
  * @version        0.6
  * ==/VimperatorPlugin==
  *
@@ -53,40 +53,41 @@
  */
 
 (function() {
-if (!liberator.globalVariables.proxy_settings){
-    liberator.globalVariables.proxy_settings = [
-        {
-            conf_name: 'disable',
-            conf_usage: 'direct connection',
-            settings: [
-                {
-                    label: 'type',
-                    param: 0
-                }
-            ]
-        },
-        {
-            conf_name: 'polipo',
-            conf_usage: 'use polipo cache proxy',
-            settings: [
-                {
-                    label: 'type',
-                    param: 1
-                },
-                {
-                    label: 'http',
-                    param: 'localhost'
-                },
-                {
-                    label: 'http_port',
-                    param: 8123
-                }
-            ]
-        }
-    ];
-};
+    if (!liberator.globalVariables.proxy_settings) {
+        liberator.globalVariables.proxy_settings = [
+            {
+                conf_name: 'disable',
+                conf_usage: 'direct connection',
+                settings: [
+                    {
+                        label: 'type',
+                        param: 0
+                    }
+                ]
+            },
+            {
+                conf_name: 'polipo',
+                conf_usage: 'use polipo cache proxy',
+                settings: [
+                    {
+                        label: 'type',
+                        param: 1
+                    },
+                    {
+                        label: 'http',
+                        param: 'localhost'
+                    },
+                    {
+                        label: 'http_port',
+                        param: 8123
+                    }
+                ]
+            }
+        ];
+    };
+
     var proxy_settings = liberator.globalVariables.proxy_settings;
-    
+
     liberator.commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
         const prefs = Components.classes["@mozilla.org/preferences-service;1"]
                                 .getService(Components.interfaces.nsIPrefService);
