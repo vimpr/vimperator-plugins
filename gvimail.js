@@ -48,7 +48,7 @@
 	/// or a part of the src attribute of the img element (for Gmail v1)
 	clickImage : function (classnamev2, imgsrcv1)
 	{
-		var elem = viberator.buffer.evaluateXPath('//*[contains(concat(" ", normalize-space(@class), " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
+		var elem = viberator.buffer.evaluateXPath('//*[contains(concat(" ", @class, " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
 		// hmm, the code below generates a log: Invalid argument for followLink.
 		viberator.buffer.followLink(elem, viberator.CURRENT_TAB);
 	},
@@ -93,14 +93,14 @@ var gmail_v2_hinttags =
 	+ " | //span[@role='link']"
 	// Refresh, Back to "label", Reply to all, Forward, Filter messages like this, ...
 	// You could just use //div[@act] here, but there appears 4 unwanted hints when first-viewing a message
-	+ " | //div[@act][not(ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' zWKgkf ')]) or (ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' zWKgkf ') and contains(@style, 'visibility')])]"
+	+ " | //div[@act][not(ancestor::div[contains(concat(' ', @class, ' '), ' zWKgkf ')]) or (ancestor::div[contains(concat(' ', @class, ' '), ' zWKgkf ') and contains(@style, 'visibility')])]"
 	// More actions, Toolbar buttons on RTE (don't use RTE, plain ascii mails are sexier)
 	+ " | //*[@unselectable='on']"
 	// Fold and UnFold messages in thread that has an excerpt displayed in grey
-	+ " | //div[contains(concat(' ', normalize-space(@class), ' '), ' IUCKJe ')]"
+	+ " | //div[contains(concat(' ', @class, ' '), ' IUCKJe ')]"
 	// UnFold messages in thread when no excerpt is displayed (blank line)
 	//    Such <div>s have a class XoqCub, have another <div> child having the class YrHFdf, and there is no table il all their descendants
-	+ " | //*[contains(concat(' ', normalize-space(@class), ' '), ' XoqCub ')]/div[@class='YrHFdf'][count(descendant-or-self::table)=0]"
+	+ " | //*[contains(concat(' ', @class, ' '), ' XoqCub ')]/div[@class='YrHFdf'][count(descendant-or-self::table)=0]"
 	// Star on message list
 	+ " | //td[@class='mka4te']/img"
 	// Star on thread list (same subject)
@@ -114,7 +114,7 @@ var gmail_v2_hinttags =
 	// Change picture [Settings] ==> next step still not working
 	+ " | //div[@class='c3pyI']/span"
 	// Attach a file + Add event invitation + Rich formatting|Plain text
-	+ " | //*[contains(concat(' ', normalize-space(@class), ' '), ' MRoIub ')]"
+	+ " | //*[contains(concat(' ', @class, ' '), ' MRoIub ')]"
 	// Check spelling
 	+ " | //span[@class='mrKIf']"
 	// Everything that is displayed as image (+ Edit labels)
@@ -125,13 +125,13 @@ var gmail_v2_hinttags =
 	// <label>|x
 	+ " | //table[@class='Ir5Jyf']//span"
 	// Settings> Accounts> make_default|edit_info|delete|View_history|Check_mail_now
-	+ " | //*[contains(concat(' ', normalize-space(@class), ' '), ' GaVz0 ')]"
+	+ " | //*[contains(concat(' ', @class, ' '), ' GaVz0 ')]"
 	// Update conversation, Ignore (when someone just posted a message on the thread you're reading & editing)
-	+ " | //*[contains(concat(' ', normalize-space(@class), ' '), ' Gf76kb ')]"
+	+ " | //*[contains(concat(' ', @class, ' '), ' Gf76kb ')]"
 	// Show|Hide quoted text
-	+ " | //span[contains(concat(' ', normalize-space(@class), ' '), ' WQ9l9c ')]"
+	+ " | //span[contains(concat(' ', @class, ' '), ' WQ9l9c ')]"
 	//
-	+ " | //div[contains(concat(' ', normalize-space(@class)), ' goog-menuitem')]";
+	+ " | //div[contains(concat(' ', @class), ' goog-menuitem')]";
 // We provide limited support for Gmail(v1)
 var gmail_v1_hinttags =
       "//*[contains(@class, 'lk ') or @class='msc' or @class='ll' or @class='setl' or @class='lkw' or starts-with(@class, 'sc ')] | //tr[@class='rr' or @class='ur']/td[position()=5] | //div/span[contains(@class, 'bz_rbbb')] | //span[@class='l' and contains(@id, 'sl_')]" ;
