@@ -59,7 +59,7 @@
 
     checkTimeline();
     updateTimeline();
-    setInterval(function() checkTimeline(Date.now() - checkTime), checkTime);
+    setInterval(function() checkTimeline(Date.now() - checkTime - 3), checkTime);
     setInterval(updateTimeline, updateTime);
 
     function favoriteStatus(id){
@@ -82,7 +82,7 @@
             if(xhr.readyState == 4){
                 if(xhr.status == 200){
                     var response = window.eval(xhr.responseText);
-                    statuses = statuses.concat(response);
+                    statuses = statuses.concat(response.filter(function(r) !statuses.some(function(status) status.id == r.id)));
                 }else{
                     liberator.echoerr("Twitter Viewer: failed");
                 }
