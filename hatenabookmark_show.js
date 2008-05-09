@@ -3,7 +3,7 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// show hatena bookmark comments script for vimperator0.6.*
+// show hatena bookmark comments script for Vimperator 0.6
 
 (function(){
     function showComments(url){
@@ -19,12 +19,12 @@
         var bookmarks = response["bookmarks"];
         showString += response["count"] + " users : " + response["title"] + "<dl>";
 
-        for each (var bookmark in bookmarks){
+        bookmarks.forEach(function(bookmark){
             tagString = bookmark.tags.length ? "[" + bookmark.tags.join("][") + "]":"";
             showString += "<dt style=\"float:left;clear:both;width:10%;margin:0;\">" + bookmark.user + "</dt>";
             showString += "<dd style=\"margin:0 0 0 10%;width:90%;border-left:1px solid;\"> "
             showString += tagString + (bookmark.tags.length > 0 && bookmark.comment ? "<br/> ":"") + bookmark.comment + "</dd>";
-        }
+        });
         showString += "</dl></div>";
         liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
     }
