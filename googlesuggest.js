@@ -24,8 +24,9 @@ liberator.commands.addUserCommand(['google'],"Search Web sites with Google Sugge
             xhr.send(null);
             var response = window.eval(xhr.responseText)[1];
 
-            for each (var r in response)
+            response.forEach(function(r) {
                 completionList.push([r,"Suggests"]);
+            });
             return [0,completionList];
         }
     }
