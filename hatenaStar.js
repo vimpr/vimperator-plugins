@@ -8,7 +8,7 @@
 liberator.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 	function (arg, special) {
 		try {
-			var result = liberator.buffer.evaluateXPath('.//img[contains(concat(" ", normalize-space(@class), " "), " hatena-star-add-button ")]');
+			var result = liberator.buffer.evaluateXPath('.//img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]');
 			for (var i = 0, l = result.snapshotLength; i < l; i++) {
 				if (arg == '' || arg == 'all' || arg == (i+1)) {
 					var s = result.snapshotItem(i);
