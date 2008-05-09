@@ -82,7 +82,11 @@
             if(xhr.readyState == 4){
                 if(xhr.status == 200){
                     var response = window.eval(xhr.responseText);
-                    statuses = statuses.concat(response.filter(function(r) !statuses.some(function(status) status.id == r.id)));
+                    liberator.plugins.statuses =
+                      statuses =
+                        statuses.concat(response.filter(function(r)
+                                                          !statuses.some(function(status)
+                                                                           status.id == r.id)));
                 }else{
                     liberator.echoerr("Twitter Viewer: failed");
                 }
