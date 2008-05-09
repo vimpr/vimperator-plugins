@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name           nicovideo_comment.js
- * @description   
+ * @description    This plugin allows you to fill in the comment form for NICO NICO DOUGA.
  * @description-ja ニコニコ動画のコメント欄を入力
  * @minVersion     0.6pre
  * @author         otsune
@@ -10,10 +10,10 @@
  *
  * Usage:
  * :nico {String}             -> Fill comment form
- * :nico! {String}            -> Fill mail form 
+ * :nico! {String}            -> Fill mail form
  */
 (function(){
-var flvp = window.content.wrappedJSObject.document.getElementById('flvplayer'); 
+var flvp = window.content.wrappedJSObject.document.getElementById('flvplayer');
 
 liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
     function(arg, special){
@@ -28,18 +28,18 @@ liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
                 'big',
                 'medium',
                 'small',
-                'white', 
-                'red', 
-                'pink', 
-                'orange', 
-                'yellow', 
-                'green', 
-                'cyan', 
+                'white',
+                'red',
+                'pink',
+                'orange',
+                'yellow',
+                'green',
+                'cyan',
                 'blue',
                 'purple',
                 '184',
                 'sage'
-                ];
+            ];
             var premiumcommands = [
                 'invisible',
                 'niconicowhite',
@@ -50,21 +50,21 @@ liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
                 'marineblue',
                 'nobleviolet',
                 'black'
-                ];
+            ];
             if (special){
                 commands.forEach(function(command){
                     if (command[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
                         templates.push(command);
                     }
                 });
-            };
+            }
             if (special && !(flvp.GetVariable('premiumNo')) ){
                 premiumcommands.forEach(function(premiumcommand){
                     if (premiumcommand[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
                         templates.push(premiumcommand);
                     }
                 });
-            };
+            }
 
             return [0, templates];
         }
