@@ -16,14 +16,14 @@
 
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var password; var username;
-    try {
-        var logins = passwordManager.findLogins({}, 'http://twitter.com',  'https://twitter.com', null);
+    try{
+        var logins = passwordManager.findLogins({},'http://twitter.com','https://twitter.com',null);
         if(logins.length)
-            [username, password] = [logins[0].username, logins[0].password];
+            [username,password] = [logins[0].username,logins[0].password];
         else
             liberator.echoerr("Twitter: account not found");
     }
-    catch(ex) {
+    catch(ex){
     }
 
     var hbox = document.createElement('hbox');
@@ -59,8 +59,8 @@
 
     checkTimeline();
     updateTimeline();
-    setInterval(function() checkTimeline(Date.now() - checkTime - 3), checkTime);
-    setInterval(updateTimeline, updateTime);
+    setInterval(function() checkTimeline(Date.now() - checkTime - 3),checkTime);
+    setInterval(updateTimeline,updateTime);
 
     function favoriteStatus(id){
         var xhr = new XMLHttpRequest();
@@ -73,29 +73,26 @@
     }
     function checkTimeline(since){
         var req = "http://twitter.com/statuses/friends_timeline.json";
-        if(typeof since == "number")
-          since = new Date(since);
-        if(since)
+        if(typeof since == "number") since = new Date(since);
+        if(since){
           req += "?since=" + encodeURIComponent(since.toUTCString());
+        }
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function(){
-            if(xhr.readyState == 4){
-                if(xhr.status == 200){
-                    var response = window.eval(xhr.responseText);
-                    liberator.plugins.statuses =
-                      statuses =
-                        statuses.concat(response.filter(function(r)
-                                                          !statuses.some(function(status)
-                                                                           status.id == r.id)));
-                }else{
-                    liberator.echoerr("Twitter Viewer: failed");
-                }
+            if(xhr.readyState != 4) return;
+            if(xhr.status != 200){
+                liberator.echoerr("Twitter Viewer: failed");
             }
+            var response = window.eval(xhr.responseText);
+            liberator.plugins.statuses = statuses =
+                statuses.concat(response.filter(function(r)
+                    !statuses.some(function(status)
+                        status.id == r.id)));
         };
-        //xhr.setRequestHeader("X-Twitter-Client", "Vimperator");
-        //xhr.setRequestHeader("X-Twitter-Client-Version", "");
-        //xhr.setRequestHeader("X-Twitter-Client-URL", "");
-        //xhr.setRequestHeader("If-Modified-Since", "");
+        //xhr.setRequestHeader("X-Twitter-Client","Vimperator");
+        //xhr.setRequestHeader("X-Twitter-Client-Version","");
+        //xhr.setRequestHeader("X-Twitter-Client-URL","");
+        //xhr.setRequestHeader("If-Modified-Since","");
         xhr.open("GET",req,true,username,password);
         xhr.send(null);
     }
@@ -109,11 +106,11 @@
         }
     }
 
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",r"],
+    liberator.mappings.addUserMap([liberator.modes.NORMAL],[",r"],
         "Reply to current user",
-        function () { liberator.commandline.open(":", "twitter @" + lastestStatus.user.screen_name + " ", liberator.modes.EX); });
-    liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
+        function (){ liberator.commandline.open(":","twitter @" + lastestStatus.user.screen_name + " ",liberator.modes.EX); });
+    liberator.mappings.addUserMap([liberator.modes.NORMAL],[",f"],
         "Favorite to current user",
-        function () { favoriteStatus(lastestStatus.id) });
+        function (){ favoriteStatus(lastestStatus.id); });
 })();
 // vim: fdm=marker sw=4 ts=4 et:
