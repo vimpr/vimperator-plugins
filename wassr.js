@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 08-May-2008. Jan 2008
+// Last Change: 09-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -45,12 +45,10 @@
                     sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.text))
                         .join("<br/>");
 
-        //liberator.log(html);
         liberator.echo(html, true);
     }
     function todoAction(username, password, arg){
         var xhr = new XMLHttpRequest();
-        liberator.log(arg)
         if (arg.match(/\+ (.*)/)) {
             xhr.open("POST", "http://api.wassr.jp/todo/add.json", false, username, password);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -101,6 +99,52 @@
 
         liberator.echo(html, true);
     }
+    function footmarkAction(username, password){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://api.wassr.jp/footmark/recent.json", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        var footmarks = window.eval(xhr.responseText);
+
+        var html = <style type="text/css"><![CDATA[
+            img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+        ]]></style>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+            footmarks.map(function(footmark)
+                <>
+                    <img src={"http://wassr.jp/user/" + footmark.login_id + "/profile_img.png.32"}
+                         alt={footmark.nick}
+                         title={footmark.nick}
+                         class="wassr photo"/>
+                    <strong>{footmark.login_id}&#x202C;</strong>
+                </>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ")).join("<br/>");
+
+        liberator.echo(html, true);
+    }
+    function footmarkAction(username, password){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://api.wassr.jp/footmark/recent.json", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        var footmarks = window.eval(xhr.responseText);
+
+        var html = <style type="text/css"><![CDATA[
+            img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+        ]]></style>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+            footmarks.map(function(footmark)
+                <>
+                    <img src={"http://wassr.jp/user/" + footmark.login_id + "/profile_img.png.32"}
+                         alt={footmark.nick}
+                         title={footmark.nick}
+                         class="wassr photo"/>
+                    <strong>{footmark.login_id}&#x202C;</strong>
+                </>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ")).join("<br/>");
+
+        liberator.echo(html, true);
+    }
     liberator.commands.addUserCommand(["wassr"], "Change wassr status",
         function(arg, special){
             var password;
@@ -127,13 +171,28 @@
             if (arg.match(/^-todo(.*)/))
                 todoAction(username, password, RegExp.$1);
             else
+            if (arg.match(/^-footmark$/))
+                footmarkAction(username, password);
+            else
                 sayWassr(username, password, arg);
         },
     {
+        args: [
+            [['-todo'], commands.OPTION_STRING],
+            [['-footmark'], null]
+        ],
         completer: function(filter) {
-            liberator.log(filter)
             candidates = [];
-            if (filter.match(/-todo([^!].*)/)) {
+            if (filter.match(/-todo$/)) {
+                candidates = [
+                    ['-todo+', 'add todo'],
+                    ['-todo-', 'delete todo'],
+                    ['-todo*', 'start todo'],
+                    ['-todo/', 'stop todo'],
+                    ['-todo!', 'done todo'],
+                ];
+            } else
+            if (filter.match(/-todo[^\+].*/)) {
                 var password;
                 var username;
                 try {
@@ -148,11 +207,15 @@
                     xhr.send(null);
                     var todos = window.eval(xhr.responseText);
                     for(let i in todos) candidates.push([filter + ' ' + todos[i].todo_rid, todos[i].body]);
-                    liberator.log(candidates)
                 }
                 catch (ex){
                     liberator.echoerr(ex);
                 }
+            } else {
+                candidates = [
+                    ['-todo', 'todo'],
+                    ['-footmark', 'footmark'],
+                ];
             }
             return [0,candidates];
         }
