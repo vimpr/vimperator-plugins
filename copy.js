@@ -92,7 +92,7 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
             var str = getCopyTemplate(arg) || arg;
             copyString = replaceVariable(str);
         }
-        liberator.copyToClipboard(copyString);
+        liberator.util.copyToClipboard(copyString);
         if (isError){
             liberator.echoerr('CopiedErrorString: `' + copyString + "'");
         } else {
