@@ -39,17 +39,14 @@ const ignorePagesList = window.eval(liberator.globalVariables.autoignorekey_page
                               .replace(/(?=\*)/g, ".")
                    + "$", "i"));
 
-document.getElementById('appcontent').addEventListener('DOMContentLoaded',function(event){
-    var uri = event.target.documentURI;
+document.getElementById('appcontent').addEventListener('DOMContentLoaded',passAllKeysIfTarget,false);
+getBrowser().mTabBox.addEventListener('TabSelect',passAllKeysIfTarget,false);
+
+function passAllKeysIfTarget() {
+    var uri = content.document.documentURI;
     liberator.modes.passAllKeys = isMatch(uri);
     //liberator.log('load page: ' + gBrowser.selectedBrowser.contentDocument.URL);
-},false);
-
-getBrowser().mTabBox.addEventListener('TabSelect',function(event){
-    var uri = this.parentNode.currentURI.spec;
-    liberator.modes.passAllKeys = isMatch(uri);
-    //liberator.log('select page: ' + gBrowser.selectedBrowser.contentDocument.URL);
-},false);
+}
 
 function isMatch(uri) ignorePagesList.some(function(e) e.test(uri))
 
