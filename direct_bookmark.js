@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.05
-// Last Change: 24-Apr-2008. Jan 2008
+// Version: 0.06
+// Last Change: 18-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -38,13 +38,18 @@
 //      Extract tags from social bookmarks for completion
 //  ':sbm'
 //      Post a current page to social bookmarks
+//      Arguments
+//          -s,-service: default:"hdl"
+//              Specify target SBM services to post
 //  ':bentry'
 //      Goto Bookmark Entry Page
 (function(){
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
-    var isNormalize = window.eval(liberator.globalVariables.direct_sbm_is_normalize) || true;
-    var isUseMigemo = window.eval(liberator.globalVariables.direct_sbm_is_use_migemo) || true;
+    var isNormalize = liberator.globalVariables.direct_sbm_is_normalize ?
+        window.eval(liberator.globalVariables.direct_sbm_is_normalize) : true;
+    var isUseMigemo = liberator.globalVariables.direct_sbm_is_use_migemo ?
+        window.eval(liberator.globalVariables.direct_sbm_is_use_migemo) : true;
 
     var XMigemoCore;
     try{
@@ -507,7 +512,24 @@
         }
     );
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
-        function(comment){
+        function(arg){
+            var res = liberator.commands.parseArgs(arg, this.args);
+            var comment = arg;
+            var targetServices = useServicesByPost;
+
+            if(res){
+                if(res.opts.length > 0){
+                    res.opts.forEach(function(opt){
+                        switch(opt[0]){
+                            case '-s':
+                                if (opt[1]) targetServices = opt[1];
+                                break;
+                        }
+                    });
+                    comment = res.args.join(" ");
+                }
+            }
+
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
 
@@ -523,7 +545,7 @@
                 comment = text || '';
             }
 
-            useServicesByPost.split(/\s*/).forEach(function(service){
+            targetServices.split(/\s*/).forEach(function(service){
                 var user, password, currentService = services[service] || null;
                 [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
                 d = d.next(function() currentService.poster(
@@ -532,7 +554,7 @@
                     comment,tags
                 ));
             });
-            d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);});
+            d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
         },{
             completer: function(filter){
@@ -543,7 +565,10 @@
                     getTags().call([]);
                 return [0, [[match_result[1] + "[" + tag + "]","Tag"]
                             for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag))]];
-            }
+            },
+            args: [
+                [['-s','-service'], liberator.commands.OPTION_STRING],
+            ]
         }
     );
 })();

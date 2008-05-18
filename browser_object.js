@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Map behave like text-object'
 // Version: 0.3
-// Last Change: 27-Apr-2008. Jan 2008
+// Last Change: 18-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -38,7 +38,7 @@
             var copyStrings = [];
             for each(var i in ary)
                 copyStrings.push(i.document.location.href);
-            liberator.copyToClipboard(copyStrings.join(", "));
+            liberator.util.copyToClipboard(copyStrings.join(", "));
         },
         reload: function(ary){
             for each(var i in ary)
