@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.16
-// Last Change: 08-Apr-2008. Jan 2008
+// Version: 0.17
+// Last Change: 19-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -13,6 +13,11 @@
 //  g:ldrc_enable
 //      LDRize Cooperation be Enable by default or not
 //      usage: let g:ldrc_enable = "false"
+//      default: true
+//  g:ldrc_isModHints
+//      Narrows "hinttags" based on Siteinfo.
+//      usage: let g:ldrc_isModHints = "true"
+//      default: false
 // Mappings:
 //      Mappings for LDRize
 //      default: 'j','k','p','o'
@@ -37,6 +42,12 @@
 //      Disable LDRize Cooperation
 //      usage: :set noldrc
 //
+//  'ldrchints'
+//      Enable "Narrows Hinttags based on Siteinfo"
+//      usage: :set ldrchints
+//  'noldrchints'
+//      Disable "Narrows Hinttags based on Siteinfo"
+//      usage: :set noldrchints
 
 (function(){
     //pattern: wildcard
@@ -48,9 +59,9 @@
         //    handler: ['c:\\usr\\SmileDownloader\\SmileDownloader.exe',['%URL%']],
         //    wait: 5000
         //},
-        {
-            handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
-        },
+        //{
+        //    handler: ['C:\\usr\\irvine\\irvine.exe',['%URL%']],
+        //},
     ];
     const DISABLE_ICON = 'data:image/png;base64,'
         +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7E'
@@ -96,6 +107,8 @@
             this.handlerInfo = handlerInfo;
 
             this.captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
+            this.isModHints = liberator.globalVariables.ldrc_isModHints != undefined ?
+                window.eval(liberator.globalVariables.ldrc_isModHints) : false ;
 
             this.convertHandlerInfo(this.handlerInfo);
             this.hookGreasemonkey();
@@ -151,10 +164,59 @@
         },
         initLDRizeCooperationFuture: function(){
             var self = this;
+
+            var originalHinttags = liberator.options.hinttags;
+            var originalExtendedHinttags = liberator.options.hinttags;
+
+            function setHinttags(){
+                if(self.isEnableLDRize() && self.isModHints){
+                    var siteinfo = self.LDRize.getSiteinfo();
+                    if(siteinfo.link && siteinfo.paragraph){
+                        liberator.options.hinttags = siteinfo.paragraph + "/" + siteinfo.link;
+                        liberator.options.extendedhinttags = siteinfo.paragraph + "/" + siteinfo.link;
+                    }else{
+                        liberator.options.hinttags = originalHinttags;
+                        liberator.options.extendedhinttags = originalExtendedHinttags;
+                    }
+                }else{
+                    liberator.options.hinttags = originalHinttags;
+                    liberator.options.extendedhinttags = originalExtendedHinttags;
+                }
+            }
+
+
+            //Mappings
             liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
                 "Focus on search field by LDRize",
                 function(){self.LDRize.bindFocus();} ,{});
 
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], ["f"],
+                "Start QuickHint mode",
+                function(){
+                    setHinttags();
+                    liberator.hints.show(liberator.modes.QUICK_HINT);
+                },{});
+
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], ["F"],
+                "Start QuickHint mode, but open link in a new tab",
+                function(){
+                    setHinttags();
+                    liberator.hints.show(liberator.modes.QUICK_HINT, "t");
+                },{});
+
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], [";"],
+                "Start an extended hint mode",
+                function(arg){
+                    setHinttags();
+
+                    if(arg == "f")
+                        liberator.hints.show(liberator.modes.ALWAYS_HINT, "o");
+                    else if(arg == "F")
+                        liberator.hints.show(liberator.modes.ALWAYS_HINT, "t");
+                    else
+                        liberator.hints.show(liberator.modes.EXTENDED_HINT, arg);
+                },
+                { flags: liberator.Mappings.flags.ARGUMENT });
             //Commands
             liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
                 function(){
@@ -188,6 +250,12 @@
                 {
                     setter: function(value){ self.isEnable = value; },
                     getter: function(){ return self.isEnable; }
+                }
+            );
+            liberator.options.add(['ldrchints'],'mod hinttags for LDRize','boolean',this.isModHints,
+                {
+                    setter: function(value){ self.isModHints = value; },
+                    getter: function(){ return self.isModHints; }
                 }
             );
         },
