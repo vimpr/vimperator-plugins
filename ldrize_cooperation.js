@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.17
-// Last Change: 19-May-2008. Jan 2008
+// Version: 0.18
+// Last Change: 20-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -21,6 +21,8 @@
 // Mappings:
 //      Mappings for LDRize
 //      default: 'j','k','p','o'
+//  ',f'
+//      Show hints that specified by LDRize's siteinfo
 // Commands:
 //  'm' or 'mb' or 'minibuffer':
 //      Execute args as Minibuffer Command
@@ -168,8 +170,8 @@
             var originalHinttags = liberator.options.hinttags;
             var originalExtendedHinttags = liberator.options.hinttags;
 
-            function setHinttags(){
-                if(self.isEnableLDRize() && self.isModHints){
+            function setHinttags(enable){
+                if(enable){
                     var siteinfo = self.LDRize.getSiteinfo();
                     if(siteinfo.link && siteinfo.paragraph){
                         liberator.options.hinttags = siteinfo.paragraph + "/" + siteinfo.link;
@@ -187,27 +189,31 @@
 
             //Mappings
             liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
-                "Focus on search field by LDRize",
-                function(){self.LDRize.bindFocus();} ,{});
+                "Start QuickHint mode with LDRize",
+                function(){
+                    setHinttags(true);
+                    liberator.hints.show(liberator.modes.QUICK_HINT);
+                    setHinttags(self.isEnableLDRize() && self.isModHints);
+                } ,{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], ["f"],
                 "Start QuickHint mode",
                 function(){
-                    setHinttags();
+                    setHinttags(self.isEnableLDRize() && self.isModHints);
                     liberator.hints.show(liberator.modes.QUICK_HINT);
                 },{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], ["F"],
                 "Start QuickHint mode, but open link in a new tab",
                 function(){
-                    setHinttags();
+                    setHinttags(self.isEnableLDRize() && self.isModHints);
                     liberator.hints.show(liberator.modes.QUICK_HINT, "t");
                 },{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], [";"],
                 "Start an extended hint mode",
                 function(arg){
-                    setHinttags();
+                    setHinttags(self.isEnableLDRize() && self.isModHints);
 
                     if(arg == "f")
                         liberator.hints.show(liberator.modes.ALWAYS_HINT, "o");
