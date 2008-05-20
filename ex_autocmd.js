@@ -11,8 +11,8 @@
 
 var recentTabURI = null;
 function tabSelect(e){
-    liberator.autocommands.trigger("TabSelect",gBrowser.selectedTab.linkedBrowser.contentWindow.location.href);
     liberator.autocommands.trigger("TabLeave",recentTabURI ? recentTabURI : "");
+    liberator.autocommands.trigger("TabSelect",gBrowser.selectedTab.linkedBrowser.contentWindow.location.href);
     recentTabURI = gBrowser.selectedTab.linkedBrowser.contentWindow.location.href;
 }
 gBrowser.tabContainer.addEventListener("TabSelect",tabSelect,false);
