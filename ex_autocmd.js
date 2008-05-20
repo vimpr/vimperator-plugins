@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Ex Autocmd'
-// Last Change: 14-Apr-2008. Jan 2008
+// Last Change: 20-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -7,11 +7,23 @@
 // Ex Events:
 //      TabSelect
 //      TabLeave
+//      CurrentPageLoad
 
-var recentTab = null;
+var recentTabURI = null;
 function tabSelect(e){
     liberator.autocommands.trigger("TabSelect",gBrowser.selectedTab.linkedBrowser.contentWindow.location.href);
-    liberator.autocommands.trigger("TabLeave",recentTab && recentTab.linkedBrowser.contentWindow?recentTab.linkedBrowser.contentWindow.location.href:"");
-    recentTab = gBrowser.selectedTab;
+    liberator.autocommands.trigger("TabLeave",recentTabURI ? recentTabURI : "");
+    recentTabURI = gBrowser.selectedTab.linkedBrowser.contentWindow.location.href;
 }
 gBrowser.tabContainer.addEventListener("TabSelect",tabSelect,false);
+
+
+function currentPageLoad(e){
+    var doc = e.originalTarget;
+    if (doc instanceof HTMLDocument &&  doc == gBrowser.contentDocument){
+        liberator.autocommands.trigger("CurrentPageLoad",doc.documentURI);
+        recentTabURI = doc.documentURI;
+    }
+}
+gBrowser.addEventListener("load", currentPageLoad, true);
+
