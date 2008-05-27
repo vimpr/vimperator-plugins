@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.06
-// Last Change: 18-May-2008. Jan 2008
+// Version: 0.07
+// Last Change: 27-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -43,6 +43,8 @@
 //              Specify target SBM services to post
 //  ':bentry'
 //      Goto Bookmark Entry Page
+//  ':bicon'
+//      Show Bookmark Count as Icon
 (function(){
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
@@ -348,6 +350,9 @@
                 liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 return hatena_tags;
             },
+            icon:function(url){
+                return '<img src="http://b.hatena.ne.jp/entry/image/' + url + '" style="vertical-align: middle;" />';
+            },
         },
         'd': {
             description:'del.icio.us',
@@ -380,6 +385,22 @@
                     returnValue.push(tag);
                 liberator.echo("del.icio.us: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
+            },
+            icon:function(url){
+                var url = liberator.buffer.URL;
+                var cryptoHash = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+                cryptoHash.init(Ci.nsICryptoHash.MD5);
+                var inputStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
+                inputStream.setData(url, url.length);
+                cryptoHash.updateFromStream(inputStream, -1);
+                var hash = cryptoHash.finish(false), ascii = [];
+                const hexchars = '0123456789ABCDEF';
+                var hexrep = new Array(hash.length * 2);
+                for(var i = 0; i < hash.length; i++) {
+                    ascii[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 0xF);
+                    ascii[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 0xF);
+                }
+                return '<img src="http://del.icio.us/feeds/img/savedcount/' + ascii.join('').toLowerCase() + '?aggregate" style="vertical-align: middle;" />';
             },
         },
         'l': {
@@ -416,6 +437,9 @@
                 });
                 liberator.echo("livedoor clip: Tag parsing is finished. Taglist length: " + tags.length);
                 return ldc_tags;
+            },
+            icon:function(url){
+                return '<img src="http://image.clip.livedoor.com/counter/' + url + '" style="vertical-align: middle;" />';
             },
         },
         'g': {
@@ -511,6 +535,16 @@
                 [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
         }
     );
+    liberator.commands.addUserCommand(['bicon'],"Show Bookmark Count as Icon",
+        function(arg){
+            var url = getNormalizedPermalink(liberator.buffer.URL);
+            var html = useServicesByTag.split(/\s*/).map(function(service){
+                var currentService = services[service] || null;
+                return (currentService && typeof currentService.icon === 'function') ?
+                        (currentService.description + ': ' + currentService.icon(url)) : null;
+            }).join('<br />');
+            liberator.echo(html, true);
+        }, {});
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
             var res = liberator.commands.parseArgs(arg, this.args);
