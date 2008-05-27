@@ -308,7 +308,7 @@ function getMD5Hash(str){
     function toHexString(charCode){
         return ('0' + charCode.toString(16)).slice(-2);
     }
-    var s = [toHexString(hash.charCodeAt(i)) for (i in hash)].join('');
+    var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : '' for (i in hash)].join('');
     return s;
 } //}}}
 /**
