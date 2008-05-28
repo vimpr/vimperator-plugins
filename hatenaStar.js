@@ -19,6 +19,10 @@ function getFlasher(){
 }
 
 function blink(aNode){
+	if (!aNode) {
+		liberator.echoerr('start not found');
+		return;
+	}
 	if (aNode.nodeType == 3) aNode = aNode.parentNode;
 	var toggle = true;
 	var flasher = getFlasher();
@@ -35,8 +39,8 @@ liberator.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 	function (arg, special) {
 		try {
 			var result = liberator.buffer.evaluateXPath('.//img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]');
-			if (arg.match(/^\?(\d+)$/)) {
-				blink(result.snapshotItem(RegExp.$1));
+			if (arg.match(/^(\d+)\?$/)) {
+				blink(result.snapshotItem(Number(RegExp.$1)-1));
 				return;
 			}
 			for (var i = 0, l = result.snapshotLength; i < l; i++) {
