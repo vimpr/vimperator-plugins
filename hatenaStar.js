@@ -1,5 +1,5 @@
 /**
- * For Vimperator 0.6.0
+ * For Vimperator 0.7.0
  * @author mattn mattn.jp@gmail.com
  */
 
