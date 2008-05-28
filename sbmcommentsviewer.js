@@ -22,7 +22,7 @@
  *                    TODO:まだ出来てない
  *
  * 指定可能フォーマット:
- *  id, timpstamp, tags, comment
+ *  id, timpstamp, tags, comment, tagsAndComment
  *
  * SBMタイプ:
  *  h   : hatena bookmark
@@ -72,7 +72,7 @@ SBMContainer.prototype = { //{{{
             return label;
         } else {
             var str = [
-                '<table><caption style="text-align:left;" class="hl-Title">' + label + '</caption><tr>'
+                '<table id="liberator-sbmcommentsviewer"><caption style="text-align:left;" class="hl-Title">' + label + '</caption><tr>'
             ];
             format.forEach(function(colum){
                 var name = manager.format[colum] || '-';
@@ -119,15 +119,18 @@ SBMEntry.prototype = { //{{{
         format.forEach(function(colum){
             switch(colum){
                 case 'id':
-                    str.push('<td>' + (self.userIcon ? '<img src="'+self.userIcon +'" width="16" height="16"/>' : '') +
-                             self.id + '</td>');
+                    str.push('<td class="liberator-sbmcommentsviewer-id">' + (self.userIcon ? '<p style="display:table-cell;vertical-align:middle;padding-right:3px;"><img src="'+self.userIcon +'" width="16" height="16"/></p>' : '') +
+                             '<p style="display:table-cell;vertical-align:middle;">' + self.id + '</p></td>');
                     break;
                 case 'timestamp':
-                    str.push('<td>' + self.formatDate() + '</td>'); break;
+                    str.push('<td class="liberator-sbmcommentsviewer-timestamp">' + self.formatDate() + '</td>'); break;
                 case 'tags':
-                    str.push('<td>' + self.tags.join(',') + '</td>'); break;
+                    str.push('<td class="liberator-sbmcommentsviewer-tags">' + self.tags.join(',') + '</td>'); break;
                 case 'comment':
-                    str.push('<td style="white-space:normal;">' + self.comment + '</td>'); break;
+                    str.push('<td class="liberator-sbmcommentsviewer-comment" style="white-space:normal;">' + self.comment + '</td>'); break;
+                case 'tagsAndComment':
+                    tagString = self.tags.length ? '[' + self.tags.join('][') + ']':'';
+                    str.push('<td class="liberator-sbmcommentsviewer-tagsAndComment" style="white-space:normal;">' + tagString + ' ' + self.comment + '</td>'); break;
                 default:
                     str.push('<td>-</td>');
             }
@@ -354,7 +357,8 @@ var manager = {
         id: 'ID',
         comment: 'Comment',
         timestamp: 'TimeStamp',
-        tags: 'Tags'
+        tags: 'Tags',
+        tagsAndComment: 'Tags&Comment'
     },
     // for debug
     convertMD5: function(str){
