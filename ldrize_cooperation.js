@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.19
+// Version: 0.20
 // Last Change: 29-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
@@ -353,24 +353,33 @@
             var paragraph = paragraphes[getter]();
             var current = paragraphes.current;
 
-            if(paragraph.paragraph == undefined) return false ;
-            if(current.paragraph == undefined) return false ;
+            var innerHeight = window.content.innerHeight;
+            var scrollY = window.content.scrollY;
 
+            var limit = window.content.innerHeight * (self.skipHeight + 0.5);
+
+            if(paragraph.paragraph == undefined) return true ;
+            if(current.paragraph == undefined) return false ;
             if(current.paragraph.y - window.content.scrollY == this.LDRize.getScrollHeight() && getter == "getPrev") return false;
 
             var [x, y] = paragraph.paragraph.getOffset();
-            var limit = window.content.innerHeight * (self.skipHeight + 0.5);
+            //var [x2, y2] = [x + paragraph.paragraph.node.offsetWidth, y + paragraph.paragraph.node.offsetHeight];
+            var [cx, cy] = current.paragraph.getOffset();
+            //var [cx2, cy2] = [cx + current.paragraph.node.offsetWidth, cy + current.paragraph.node.offsetHeight];
+            var [cx2, cy2] = [x, y];
 
-            //log("next y:"+y);
-            //log("limit:"+limit);
-            //log("distance:" + Math.abs(y - (window.content.scrollY + window.content.innerHeight/2)));
+            /*
+             *log("next y:"+y);
+             *log("limit:"+limit);
+             *log("distance:" + Math.abs(y - (window.content.scrollY + window.content.innerHeight/2)));
+             */
 
-            if(Math.abs(y -(window.content.scrollY + window.content.innerHeight/2)) > limit){
-                return true ;    //scroll
-            }
-            else{
-                return false ;   //bind
-            }
+            //check current paragraph
+            if(!(scrollY < cy2 && cy < scrollY + innerHeight)) return false;            // bind
+            //check next/prev paragraph
+            if(Math.abs(y -(scrollY + innerHeight/2)) < innerHeight * 0.5) return false; // bind
+            if(Math.abs(y -(scrollY + innerHeight/2)) > limit) return true;              // scroll
+            else return false;                                                           // bind
         },
 
         //Utils
