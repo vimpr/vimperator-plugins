@@ -60,12 +60,29 @@
 
     setTimeout(function() {
         try {
+            var form = ['https://www.google.com', 'https://www.google.com', null];
             var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-            var logins = passwordManager.findLogins({}, 'https://www.google.com', 'https://www.google.com', null);
+            var logins = passwordManager.findLogins({}, form[0], form[1], form[2]);
             if(logins.length)
                 var [gmailUser, gmailPassword] = [logins[0].username, logins[0].password];
             else {
                 liberator.echoerr("Gmail Biff: account not found");
+                var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                    .getService(Ci.nsIPromptService);
+                var user = { value : null };
+                var pass = { value : null };
+                var ret = promptSvc.promptUsernameAndPassword(
+                    window, form[0], "GMail Biff Login", user, pass, null, {});
+                if(ret){
+                    var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+                            Ci.nsILoginInfo,
+                            "init");
+                    [gmailUser, gmailPassword] = [user.value, pass.value];
+                    var formLoginInfo = new nsLoginInfo(
+                        form[0], form[1], form[2],
+                        gmailUser, gmailPassword, '', '');
+                    passwordManager.addLogin(formLoginInfo);
+                }
                 return;
             }
 
