@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.18
-// Last Change: 20-May-2008. Jan 2008
+// Version: 0.19
+// Last Change: 29-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -14,10 +14,18 @@
 //      LDRize Cooperation be Enable by default or not
 //      usage: let g:ldrc_enable = "false"
 //      default: true
-//  g:ldrc_isModHints
+//  g:ldrc_hints
 //      Narrows "hinttags" based on Siteinfo.
-//      usage: let g:ldrc_isModHints = "true"
+//      usage: let g:ldrc_hints = "true"
 //      default: false
+//  g:ldrc_intelligence_bind
+//      More inteligence cooperation bind
+//      usage: let g:ldrc_intelligence_bind = "true"
+//      default: false
+//  g:ldrc_skip
+//      length in which paragraph is skipped (use by inteligence bind mode)
+//      usage: let g:ldrc_hints = "true"
+//      default: 0.5
 // Mappings:
 //      Mappings for LDRize
 //      default: 'j','k','p','o'
@@ -98,7 +106,8 @@
         +'uVKq3GCMUUoxxlarVb1ef3h4+AWNW50eXTIBjgAAAABJRU5ErkJggg==';
 
     var Class = function(){return function(){this.initialize.apply(this,arguments)}}
-    var _isEnable = window.eval(liberator.globalVariables.ldrc_enable) || true;
+
+    var _isEnable;
 
     var LDRizeCooperation = new Class();
     LDRizeCooperation.prototype = {
@@ -108,15 +117,23 @@
             this.Minibuffer = null;
             this.handlerInfo = handlerInfo;
 
+            this.LDRizeCooperationPanel = this.setupStatusbarPanel();
+
+            this.isEnable = liberator.globalVariables.ldrc_enable != undefined ?
+                window.eval(liberator.globalVariables.ldrc_enable) : true ;
+            this.isIntelligenceBind = liberator.globalVariables.ldrc_intelligence_bind != undefined ?
+                window.eval(liberator.globalVariables.ldrc_intelligence_bind) : false ;
+            this.isModHints = liberator.globalVariables.ldrc_hints != undefined ?
+                window.eval(liberator.globalVariables.ldrc_hints) : false ;
             this.captureMappings = window.eval(liberator.globalVariables.ldrc_captureMappings) || ['j','k','p','o'];
-            this.isModHints = liberator.globalVariables.ldrc_isModHints != undefined ?
-                window.eval(liberator.globalVariables.ldrc_isModHints) : false ;
+            this.skipHeight = liberator.globalVariables.ldrc_skip != undefined ?
+                window.eval(liberator.globalVariables.ldrc_skip) : 0.5 ;
 
             this.convertHandlerInfo(this.handlerInfo);
             this.hookGreasemonkey();
             this.initLDRizeCaptureKeys(this.captureMappings);
             this.initLDRizeCooperationFuture();
-            this.LDRizeCooperationPanel = this.setupStatusbarPanel();
+
 
             if(liberator.plugins.LDRizeCooperationPlugins != undefined){
                 liberator.plugins.LDRizeCooperationPlugins.forEach(function(func){
@@ -159,8 +176,20 @@
             keys.forEach(function(x){
                     var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
                     var oldAction = map.action;
-                    map.action = function(){
-                        self.isEnableLDRize() ? self.sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
+                    switch(x){
+                        case 'j':
+                        case 'k':   map.action = function(){
+                                        self.isEnableLDRizeCooperation() ?
+                                            self.isIntelligenceBind && self.isScrollOrBind("get" + (x == 'j' ? "Next" : "Prev")) ?
+                                                oldAction.apply(this,arguments)           // scroll
+                                                : self.sendRawKeyEvent(0,x.charCodeAt(0)) // bind
+                                            : oldAction.apply(this,arguments);
+                                    };
+                                    break;
+                        default:    map.action = function(){
+                                        self.isEnableLDRizeCooperation() ? self.sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
+                                    };
+                                    break;
                     }
             });
         },
@@ -193,27 +222,27 @@
                 function(){
                     setHinttags(true);
                     liberator.hints.show(liberator.modes.QUICK_HINT);
-                    setHinttags(self.isEnableLDRize() && self.isModHints);
+                    setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                 } ,{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], ["f"],
                 "Start QuickHint mode",
                 function(){
-                    setHinttags(self.isEnableLDRize() && self.isModHints);
+                    setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                     liberator.hints.show(liberator.modes.QUICK_HINT);
                 },{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], ["F"],
                 "Start QuickHint mode, but open link in a new tab",
                 function(){
-                    setHinttags(self.isEnableLDRize() && self.isModHints);
+                    setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                     liberator.hints.show(liberator.modes.QUICK_HINT, "t");
                 },{});
 
             liberator.mappings.addUserMap([liberator.modes.NORMAL], [";"],
                 "Start an extended hint mode",
                 function(arg){
-                    setHinttags(self.isEnableLDRize() && self.isModHints);
+                    setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
 
                     if(arg == "f")
                         liberator.hints.show(liberator.modes.ALWAYS_HINT, "o");
@@ -284,7 +313,8 @@
             this.LDRizeCooperationPanel.setAttribute("src",value ? DISABLE_ICON : ENABLE_ICON);
             _isEnable = value;
         },
-        isEnableLDRize: function(){ return this.isEnable && this.LDRize.getSiteinfo() != undefined; },
+        isEnableLDRize: function(){ return this.LDRize.getSiteinfo() != undefined; },
+        isEnableLDRizeCooperation: function(){ return this.isEnable && this.isEnableLDRize() },
 
         //Pin
         getPinnedItems: function(){
@@ -316,6 +346,31 @@
                 }
                 liberator.echoerr("LDRize Cooperation: download pattern not found!!");
             });
+        },
+        isScrollOrBind: function(getter){
+            var self = this;
+            var paragraphes = this.LDRize.getParagraphes();
+            var paragraph = paragraphes[getter]();
+            var current = paragraphes.current;
+
+            if(paragraph.paragraph == undefined) return false ;
+            if(current.paragraph == undefined) return false ;
+
+            if(current.paragraph.y - window.content.scrollY == this.LDRize.getScrollHeight() && getter == "getPrev") return false;
+
+            var [x, y] = paragraph.paragraph.getOffset();
+            var limit = window.content.innerHeight * (self.skipHeight + 0.5);
+
+            //log("next y:"+y);
+            //log("limit:"+limit);
+            //log("distance:" + Math.abs(y - (window.content.scrollY + window.content.innerHeight/2)));
+
+            if(Math.abs(y -(window.content.scrollY + window.content.innerHeight/2)) > limit){
+                return true ;    //scroll
+            }
+            else{
+                return false ;   //bind
+            }
         },
 
         //Utils
