@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.07
-// Last Change: 30-May-2008. Jan 2008
+// Version: 0.08
+// Last Change: 03-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -511,7 +511,7 @@
             }
             liberator.open(currentService.entryPage
                 .replace(/%URL(?:::(ESC|MD5))?%/g, function(x, t){
-                    if(!t) return liberator.buffer.URL;
+                    if(!t) return liberator.buffer.URL.replace(/#/, '%23');
                     if(t == "ESC") return encodeURIComponent(liberator.buffer.URL);
                     if(t == "MD5"){
                         var url = liberator.buffer.URL;
