@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 09-May-2008. Jan 2008
+// Last Change: 04-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -7,6 +7,16 @@
 // The script allows you to update Wassr status from Vimperator 0.6.*.
 
 (function(){
+    var evalFunc = window.eval;
+    try {
+        var sandbox = new Components.utils.Sandbox(window);
+        if (Components.utils.evalInSandbox("true", sandbox) === true) {
+            evalFunc = function(text) {
+                return Components.utils.evalInSandbox(text, sandbox);
+            }
+        }
+    } catch(e) { liberator.log('warning: wassr.js is working with unsafe sandbox.'); }
+
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     function sayWassr(username, password, stat){
         var xhr = new XMLHttpRequest();
@@ -26,7 +36,7 @@
         //xhr.open("GET", "http://api.wassr.jp/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = window.eval(xhr.responseText);
+        var statuses = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.wassr.entry-content a { text-decoration: none; }
@@ -78,7 +88,7 @@
         xhr.open("GET", "http://api.wassr.jp/todo/list.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var todos = window.eval(xhr.responseText);
+        var todos = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.wassr.entry-content a { text-decoration: none; }
@@ -104,7 +114,7 @@
         xhr.open("GET", "http://api.wassr.jp/footmark/recent.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var footmarks = window.eval(xhr.responseText);
+        var footmarks = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
@@ -127,7 +137,7 @@
         xhr.open("GET", "http://api.wassr.jp/footmark/recent.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var footmarks = window.eval(xhr.responseText);
+        var footmarks = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
@@ -205,7 +215,7 @@
                     xhr.open("GET", "http://api.wassr.jp/todo/list.json", false, username, password);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(null);
-                    var todos = window.eval(xhr.responseText);
+                    var todos = evalFunc(xhr.responseText);
                     for(let i in todos) candidates.push([filter + ' ' + todos[i].todo_rid, todos[i].body]);
                 }
                 catch (ex){

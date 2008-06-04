@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.08
-// Last Change: 03-Jun-2008. Jan 2008
+// Version: 0.09
+// Last Change: 04-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -46,12 +46,22 @@
 //  ':bicon'
 //      Show Bookmark Count as Icon
 (function(){
+    var evalFunc = window.eval;
+    try {
+        var sandbox = new Components.utils.Sandbox(window);
+        if (Components.utils.evalInSandbox("true", sandbox) === true) {
+            evalFunc = function(text) {
+                return Components.utils.evalInSandbox(text, sandbox);
+            }
+        }
+    } catch(e) { liberator.log('warning: wassr.js is working with unsafe sandbox.'); }
+
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
     var isNormalize = liberator.globalVariables.direct_sbm_is_normalize ?
-        window.eval(liberator.globalVariables.direct_sbm_is_normalize) : true;
+        evalFunc(liberator.globalVariables.direct_sbm_is_normalize) : true;
     var isUseMigemo = liberator.globalVariables.direct_sbm_is_use_migemo ?
-        window.eval(liberator.globalVariables.direct_sbm_is_use_migemo) : true;
+        evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo) : true;
 
     var XMigemoCore;
     try{
@@ -380,7 +390,7 @@
                 xhr.open("GET", feed_url + user + "?raw", false, user, password);
                 xhr.send(null);
 
-                var tags = window.eval("(" + xhr.responseText + ")");
+                var tags = evalFunc("(" + xhr.responseText + ")");
                 for(var tag in tags)
                     returnValue.push(tag);
                 liberator.echo("del.icio.us: Tag parsing is finished. Taglist length: " + returnValue.length);
