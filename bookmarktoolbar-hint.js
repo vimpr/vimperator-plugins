@@ -54,6 +54,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			return true;
 		} else {
 			liberator.open(target.node.uri, where);
+			liberator.options.guioptions = liberator.plugins.bookmarkToolbarHints.go;
 		}
 		return false;
 	}
@@ -64,9 +65,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 	var focusNum = 0;
 	var where = liberator.CURERNT_TAB;
 	var manager = {
-		get toolbar(){
-			return getToolbar();
-		},
+		get toolbar(){ return getToolbar(); },
 		go : null,
 		get where(){ return where; },
 		set where(value){ where = value; },
@@ -80,7 +79,6 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 				if (button.localName == "menuseparator") continue;
 				hints.push(button);
 				var tooltip = createTooltip();
-				//tooltip.showPopup(button, button.boxObject.screenX, button.boxObject.screenY);
 				tooltip.showPopup(button, -1, -1,"tooltip","topright");
 			}
 		},
@@ -91,10 +89,9 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 				case "<Esc>":
 				case "<C-[>":
 					allHidePopup(current);
-					liberator.options.guioptions= liberator.plugins.bookmarkToolbarHints.go;
+					liberator.options.guioptions = liberator.plugins.bookmarkToolbarHints.go;
 					break;
 				case "<Return>":
-					//if (toolbarOpen(current.childNodes[focusNum])) return;
 					if (toolbarOpen(hints[focusNum])) return;
 					break;
 				case "<Tab>":
@@ -105,15 +102,12 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 						num = parseInt(key,10);
 						if (currentNum) num += currentNum * 10;
 
-						//if (current.childNodes.length >= num*10){
 						if (hints.length >= num*10){
 							currentNum = num;
 							forcusNum = num;
 							return;
 						}
-						//if (current.childNodes[num-1]){
 						if (hints[num-1]){
-							//if (toolbarOpen(current.childNodes[num-1])) return;
 							if (toolbarOpen(hints[num-1])) return;
 						}
 					}
@@ -131,7 +125,6 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 				tooltipbox.firstChild.hidePopup();
 				tooltipbox.removeChild(tooltipbox.firstChild);
 			}
-			//clearTooltips();
 		}
 	};
 	var tooltipbox = document.createElement('box');
@@ -159,5 +152,4 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<Leader>F'],
 		plugins.bookmarkToolbarHints.show();
 	}
 );
-//$("liberator-container").* += <tooltip id="liberator-tooltip"><label id="liberator-tooltip-text" value=""/></tooltip>;
 
