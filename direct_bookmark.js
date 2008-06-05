@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.09
-// Last Change: 04-Jun-2008. Jan 2008
+// Version: 0.10
+// Last Change: 05-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -43,8 +43,6 @@
 //              Specify target SBM services to post
 //  ':bentry'
 //      Goto Bookmark Entry Page
-//  ':bicon'
-//      Show Bookmark Count as Icon
 (function(){
     var evalFunc = window.eval;
     try {
@@ -54,7 +52,7 @@
                 return Components.utils.evalInSandbox(text, sandbox);
             }
         }
-    } catch(e) { liberator.log('warning: wassr.js is working with unsafe sandbox.'); }
+    } catch(e) { liberator.log('warning: direct_bookmark.js is working with unsafe sandbox.'); }
 
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
@@ -322,7 +320,7 @@
             account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
             entryPage:'http://b.hatena.ne.jp/entry/%URL%',
-            poster:function(user,password,url,comment,tags){
+            poster:function(user,password,url,title,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
                 var request =
                     <entry xmlns="http://purl.org/atom/ns#">
@@ -369,8 +367,7 @@
             account:['https://secure.delicious.com', 'https://secure.delicious.com', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
             entryPage:'http://del.icio.us/url/%URL::MD5%',
-            poster:function(user,password,url,comment,tags){
-                var title = liberator.buffer.title;
+            poster:function(user,password,url,title,comment,tags){
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
@@ -418,8 +415,7 @@
             account:['http://api.clip.livedoor.com', 'http://api.clip.livedoor.com', null],
             loginPrompt:{ user:'', password:'apikey', description:'Enter username and apikey.\nyou can get "api-key" from\n\thttp://clip.livedoor.com/config/api' },
             entryPage:'http://clip.livedoor.com/page/%URL%',
-            poster:function(user,password,url,comment,tags){
-                var title = liberator.buffer.title;
+            poster:function(user,password,url,title,comment,tags){
                 var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
@@ -457,10 +453,10 @@
             account:null,
             loginPrompt:null,
             entryPage:'%URL%',
-            poster:function(user,password,url,comment,tags){
+            poster:function(user,password,url,title,comment,tags){
                 var request_url = 'http://www.google.com/bookmarks/mark';
                 var params = [
-                    ['bkmk', url], ['title', liberator.buffer.title], ['labels', tags.join(',')]
+                    ['bkmk', url], ['title', title], ['labels', tags.join(',')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "post",
@@ -480,13 +476,13 @@
             account:null,
             loginPrompt:null,
             entryPage:'%URL%',
-            poster:function(user,password,url,comment,tags){
+            poster:function(user,password,url,title,comment,tags){
                 const taggingService = Cc["@mozilla.org/browser/tagging-service;1"].getService(Ci.nsITaggingService);
                 var nsUrl = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
                 nsUrl.spec = url;
                 taggingService.tagURI(nsUrl,tags);
                 try{
-                    Application.bookmarks.tags.addBookmark(liberator.buffer.title, nsUrl);
+                    Application.bookmarks.tags.addBookmark(title, nsUrl);
                 }catch(e){
                     throw "Places: faild";
                 }
@@ -589,12 +585,15 @@
                 comment = text || '';
             }
 
+            var url = liberator.buffer.URL;
+            var title = liberator.buffer.title;
+
             targetServices.split(/\s*/).forEach(function(service){
                 var user, password, currentService = services[service] || null;
                 [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
                 d = d.next(function() currentService.poster(
                     user,password,
-                    isNormalize ? getNormalizedPermalink(liberator.buffer.URL) : liberator.buffer.URL,
+                    isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
                 ));
             });
