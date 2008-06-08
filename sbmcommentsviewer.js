@@ -25,9 +25,10 @@
  *  id, timpstamp, tags, comment, tagsAndComment
  *
  * SBMタイプ:
- *  h   : hatena bookmark
- *  d   : del.icio.us bookmark
- *  l   : livedoor clip
+ *  h : hatena bookmark
+ *  d : del.icio.us bookmark
+ *  l : livedoor clip
+ *  z : Buzzurl
  *  XXX:今後増やしていきたい
  *
  *  例:
@@ -201,7 +202,8 @@ var SBM = { //{{{
             return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#'));
         },
         parser: function(xhr){
-            var json = window.eval(xhr.responseText);
+            //var json = window.eval(xhr.responseText);
+            var json = jsonDecode(xhr.responseText, true);
             var count = json.bookmarks.length;
             var c = new SBMContainer('h', json.count, {
                 faviconURL:'http://b.hatena.ne.jp/favicon.ico',
@@ -265,9 +267,12 @@ var SBM = { //{{{
             return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#')) + '&all=0';
         },
         parser: function(xhr){
+        /*
             var json = Components.classes['@mozilla.org/dom/json;1'].
                        getService(Components.interfaces.nsIJSON).
                        decode(xhr.responseText);
+            */
+            var json = jsonDecode(xhr.reponseText);
             if (json && json.isSuccess){
                 var c = new SBMContainer('l', json.total_clip_count, {
                     faviconURL: 'http://clip.livedoor.com/favicon.ico',
@@ -291,8 +296,50 @@ var SBM = { //{{{
             }
         }
     }, //}}}
+    buzzurl: { //{{{
+        getURL: function(url){
+            var urlPrefix = 'http://api.buzzurl.jp/api/posts/get/v1/json/?url=';
+            return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#'));
+        },
+        parser: function(xhr){
+            var url = 'http://buzzurl.jp/user/';
+            var json = jsonDecode(xhr.responseText);
+            if (json && json[0] && json[0].user_num){
+                var c = new SBMContainer('buzzurl', json[0].user_num, {
+                    faviconURL: 'http://buzzurl.jp/favicon.ico',
+                    pageURL:    'http://buzzurl.jp/entry/' + json[0].url
+                });
+                json[0].posts.forEach(function(entry){
+                    c.add( entry.user_name, window.eval('new Date(' + entry.date.split(/[-\s:]/,6).join(',') + ')'),
+                           entry.comment ? entry.comment : '', entry.keywords.split(','),
+                           {
+                            userIcon: url + entry.user_name + '/photo',
+                            link: url + '/' + entry.user_name
+                           }
+                    );
+                });
+                return c;
+            } else {
+                liverator.log('Faild: Buzzurl');
+            }
+        }
+    }, //}}}
 }; //}}}
 
+
+/**
+ * jsonDecode {{{
+ * @param {String} str JSON String
+ * @param {Boolean} toRemove はてなブックマークのJSONの様に
+ *                           前後に()が付いている場合に取り除くためのフラグ
+ */
+function jsonDecode(str, toRemove){
+    var json = Components.classes['@mozilla.org/dom/json;1'].getService(Components.interfaces.nsIJSON);
+    if (toRemove) str = str.substring(1, str.length -1);
+
+    return json.decode(str);
+}
+//}}}
 /**
  * getMD5Hash {{{
  * @param {String} str
@@ -351,7 +398,8 @@ var manager = {
     type: {
         h: 'hatena',
         d: 'delicious',
-        l: 'livedoorclip'
+        l: 'livedoorclip',
+        z: 'buzzurl'
     },
     format: {
         id: 'ID',
@@ -389,7 +437,7 @@ var manager = {
 
 commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     function(arg){ //{{{
-        var types =  liberator.globalVariables.def_sbms || 'hdl';
+        var types =  liberator.globalVariables.def_sbms || 'hdlz';
         var format = (liberator.globalVariables.def_sbm_format ||  'id,timestamp,tags,comment').split(',');
         var countOnly = false, openToBrowser = false;
         var url = buffer.URL;
