@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 04-Jun-2008. Jan 2008
+// Last Change: 09-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -18,6 +18,13 @@
     } catch(e) { liberator.log('warning: wassr.js is working with unsafe sandbox.'); }
 
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+
+    function emojiConv(str){
+        return str.replace(/[^*+.-9A-Z_a-z-]/g,function(s){
+            var c = s.charCodeAt(0);
+            return (0xE001 <= c && c <= 0xF0FC) ? '<img src="http://wassr.jp/img/pictogram/' + c.toString(16).toUpperCase() + '.gif"/>' : s;
+        })
+    }
     function sayWassr(username, password, stat){
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://api.wassr.jp/statuses/update.json", false, username, password);
@@ -52,7 +59,7 @@
                     <strong>{status.user_login_id}&#x202C;</strong>
                 </>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.text))
+                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', emojiConv(status.text)))
                         .join("<br/>");
 
         liberator.echo(html, true);
