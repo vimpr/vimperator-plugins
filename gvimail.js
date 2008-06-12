@@ -90,7 +90,8 @@ viberator.mappings.addUserMap(GViMail.modes, ["zR"],
 var gmail_v2_hinttags =
 	"//span[@selector]"
 	// Menu Settings, Older version, Compose Mail, Inbox, Starred .. Contacts, Labels, turn on/off chat
-	+ " | //span[@role='link']"
+	// The [not(ancestor::tr//td[@class='mka4te'])] is to avoid interferring with //td[@class='mka4te']/ancestor::tr/td[5], see Select message in the list below
+	+ " | //span[@role='link'][not(ancestor::tr//td[@class='mka4te'])]"
 	// Refresh, Back to "label", Reply to all, Forward, Filter messages like this, ...
 	// You could just use //div[@act] here, but there appears 4 unwanted hints when first-viewing a message
 	+ " | //div[@act][not(ancestor::div[contains(concat(' ', @class, ' '), ' zWKgkf ')]) or (ancestor::div[contains(concat(' ', @class, ' '), ' zWKgkf ') and contains(@style, 'visibility')])]"
