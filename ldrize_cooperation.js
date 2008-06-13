@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.20
-// Last Change: 29-May-2008. Jan 2008
+// Version: 0.21
+// Last Change: 13-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -176,11 +176,12 @@
             keys.forEach(function(x){
                     var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
                     var oldAction = map.action;
+                    var getter = "getPrev";
                     switch(x){
-                        case 'j':
+                        case 'j':   getter = "getNext";
                         case 'k':   map.action = function(){
                                         self.isEnableLDRizeCooperation() ?
-                                            self.isIntelligenceBind && self.isScrollOrBind("get" + (x == 'j' ? "Next" : "Prev")) ?
+                                            self.isIntelligenceBind && self.isScrollOrBind(getter) ?
                                                 oldAction.apply(this,arguments)           // scroll
                                                 : self.sendRawKeyEvent(0,x.charCodeAt(0)) // bind
                                             : oldAction.apply(this,arguments);
@@ -348,38 +349,44 @@
             });
         },
         isScrollOrBind: function(getter){
-            var self = this;
-            var paragraphes = this.LDRize.getParagraphes();
-            var paragraph = paragraphes[getter]();
-            var current = paragraphes.current;
+            try{
+                var self = this;
+                var paragraphes = this.LDRize.getParagraphes();
+                var paragraph = paragraphes[getter]();
+                var current = paragraphes.current;
+                var next = paragraphes.getNext();
 
-            var innerHeight = window.content.innerHeight;
-            var scrollY = window.content.scrollY;
+                var innerHeight = window.content.innerHeight;
+                var scrollY = window.content.scrollY;
 
-            var limit = window.content.innerHeight * (self.skipHeight + 0.5);
+                var limit = window.content.innerHeight * (self.skipHeight + 0.5);
 
-            if(paragraph.paragraph == undefined) return true ;
-            if(current.paragraph == undefined) return false ;
-            if(current.paragraph.y - window.content.scrollY == this.LDRize.getScrollHeight() && getter == "getPrev") return false;
+                if(paragraph.paragraph == undefined) return true;                                 // scroll
+                if(current.paragraph == undefined) return false;                                  // bind
+                if(current.paragraph.y - window.content.scrollY == this.LDRize.getScrollHeight()
+                        && getter == "getPrev") return false;                                     // bind
 
-            var [x, y] = paragraph.paragraph.getOffset();
-            //var [x2, y2] = [x + paragraph.paragraph.node.offsetWidth, y + paragraph.paragraph.node.offsetHeight];
-            var [cx, cy] = current.paragraph.getOffset();
-            //var [cx2, cy2] = [cx + current.paragraph.node.offsetWidth, cy + current.paragraph.node.offsetHeight];
-            var [cx2, cy2] = [x, y];
+                var p = this.getClientPosition(paragraph.paragraph.node);
+                var np = next && next.paragraph.node != undefined ?
+                    this.getClientPosition(next.paragraph.node) :
+                    {top: window.content.scrollMaxY + window.content.innerHeight,left: 0};
+                var cp = this.getClientPosition(current.paragraph.node);
 
-            /*
-             *log("next y:"+y);
-             *log("limit:"+limit);
-             *log("distance:" + Math.abs(y - (window.content.scrollY + window.content.innerHeight/2)));
-             */
+                /*
+                 *log(p);
+                 *log(np);
+                 *log(cp);
+                 */
 
-            //check current paragraph
-            if(!(scrollY < cy2 && cy < scrollY + innerHeight)) return false;            // bind
-            //check next/prev paragraph
-            if(Math.abs(y -(scrollY + innerHeight/2)) < innerHeight * 0.5) return false; // bind
-            if(Math.abs(y -(scrollY + innerHeight/2)) > limit) return true;              // scroll
-            else return false;                                                           // bind
+                //check current paragraph
+                if(!(scrollY < np.top && cp.top < scrollY + innerHeight)) return false;            // bind
+                //check next/prev paragraph
+                if(Math.abs(p.top - (scrollY + innerHeight/2)) < innerHeight * 0.5) return false; // bind
+                if(Math.abs(p.top - (scrollY + innerHeight/2)) > limit) return true;              // scroll
+                else return false;                                                                // bind
+            }catch(e){
+                log(e);
+            }
         },
 
         //Utils
@@ -390,6 +397,17 @@
                 after.apply(target,arguments);
                 return tmp;
             };
+        },
+        getClientPosition: function(elem){
+            try{
+                var position = elem.getBoundingClientRect();
+            }catch(e){
+                position = elem.parentNode.getBoundingClientRect();
+            }
+            return {
+                left:Math.round(window.content.scrollX+position.left),
+                top:Math.round(window.content.scrollY+position.top)
+            }
         },
         sendRawKeyEvent: function(keyCode,charCode){
             var evt = window.content.wrappedJSObject.document.createEvent("KeyEvents");
