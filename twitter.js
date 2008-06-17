@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 10-Apr-2008. Jan 2008
+// Last Change: 11-May-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -18,9 +18,11 @@
         while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
         return result;
     }
-    function showFollowersStatus(username, password){
+    function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://twitter.com/statuses/friends_timeline.json", false, username, password);
+        var endPoint = target ? "http://twitter.com/statuses/user_timeline/" + target + ".json"
+            : "http://twitter.com/statuses/friends_timeline.json";
+        xhr.open("GET", endPoint, false, username, password);
         // for debug
         //xhr.open("GET", "http://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -62,13 +64,11 @@
                 liberator.echoerr(ex);
             }
 
-            if (special){
-                arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                         .replace(/%TITLE%/g, liberator.buffer.title);
-            }
+            arg = arg.replace(/%URL%/g, liberator.buffer.URL)
+                .replace(/%TITLE%/g, liberator.buffer.title);
 
-            if (!arg || arg.length == 0)
-                showFollowersStatus(username, password);
+            if (special || arg.length == 0)
+                showFollowersStatus(username, password, arg)
             else
                 sayTwitter(username, password, arg);
         },
