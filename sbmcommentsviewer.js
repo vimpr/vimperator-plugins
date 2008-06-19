@@ -3,7 +3,7 @@
  * @name           SBM Comments Viewer
  * @description    List show Social BookMark Comments
  * @description-ja ソーシャル・ブックマーク・コメントを表示します
- * @version        0.1a
+ * @version        0.1b
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -441,43 +441,26 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         var format = (liberator.globalVariables.def_sbm_format ||  'id,timestamp,tags,comment').split(',');
         var countOnly = false, openToBrowser = false;
         var url = buffer.URL;
-        var res = liberator.commands.parseArgs(arg, this.args);
-        if (res){
-            if (res.args.length > 0){
-                res.args.forEach(function(arg){
-                    switch(arg){
-                        case '-c':
-                        case '-count':
-                            countOnly = true;
-                            break;
-                        case '-b':
-                        case '-browser':
-                            openToBrowser = true;
-                            break;
-                        default:
-                            url = arg;
-                    }
-                });
+        for (var opt in arg){
+            switch(opt){
+                case '-c':
+                case '-count':
+                    countOnly = true;
+                    break;
+                case '-b':
+                case '-browser':
+                    openToBrowser = true;
+                    break;
+                case '-t':
+                    if (arg[opt]) types = arg[opt];
+                    break;
+                case '-f':
+                    if (arg[opt]) format = arg[opt];
+                    break;
+                case "arguments":
+                    if (arg[opt].length > 0) url = arg[opt][0];
+                    break;
             }
-            if (res.opts.length > 0){
-                res.opts.forEach(function(opt){
-                    switch(opt[0]){
-                        case '-t':
-                            if (opt[1]) types = opt[1];
-                            break;
-                        case '-f':
-                            if (opt[1]) format = opt[1];
-                            break;
-                        case '-c':
-                            countOnly = true;
-                            break;
-                        case '-b':
-                            openToBrowser = true;
-                            break;
-                    }
-                });
-            }
-            if (res.args[0]) url = res.args[0];
         }
 
         for (var i=0; i<types.length; i++){
@@ -501,7 +484,7 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         }
     }, //}}}
     {
-        args: [
+        options: [
             [['-t','-type'], liberator.commands.OPTION_STRING],
             [['-f','-format'], liberator.commands.OPTION_LIST],
             [['-c','-count'], liberator.commands.OPTION_NOARG],

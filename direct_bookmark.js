@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.10
-// Last Change: 05-Jun-2008. Jan 2008
+// Version: 0.11
+// Last Change: 19-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -553,20 +553,16 @@
         }, {});
     liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
-            var res = liberator.commands.parseArgs(arg, this.args);
-            var comment = arg;
+            var comment = "";
             var targetServices = useServicesByPost;
 
-            if(res){
-                if(res.opts.length > 0){
-                    res.opts.forEach(function(opt){
-                        switch(opt[0]){
-                            case '-s':
-                                if (opt[1]) targetServices = opt[1];
-                                break;
-                        }
-                    });
-                    comment = res.args.join(" ");
+            for(var opt in arg){
+                switch(opt){
+                    case '-s':
+                        if (arg[opt]) targetServices = arg[opt];
+                        break;
+                    case 'arguments':
+                        if(arg[opt].length > 0) comment = arg[opt].join(" ");
                 }
             }
 
@@ -610,7 +606,7 @@
                 return [0, [[match_result[1] + "[" + tag + "]","Tag"]
                             for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0)]];
             },
-            args: [
+            options: [
                 [['-s','-service'], liberator.commands.OPTION_STRING],
             ]
         }
