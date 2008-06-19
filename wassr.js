@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 09-Jun-2008. Jan 2008
+// Last Change: 19-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -36,9 +36,11 @@
         while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
         return result;
     }
-    function showFollowersStatus(username, password){
+    function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://api.wassr.jp/statuses/friends_timeline.json", false, username, password);
+        var endPoint = target ? "http://api.wassr.jp/user_timeline.json?id=" + target
+            : "http://api.wassr.jp/statuses/friends_timeline.json";
+        xhr.open("GET", endPoint, false, username, password);
         // for debug
         //xhr.open("GET", "http://api.wassr.jp/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -177,13 +179,11 @@
                 liberator.echoerr(ex);
             }
 
-            if (special){
-                arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                         .replace(/%TITLE%/g, liberator.buffer.title);
-            }
+            arg = arg.replace(/%URL%/g, liberator.buffer.URL)
+                .replace(/%TITLE%/g, liberator.buffer.title);
 
-            if (!arg || arg.length == 0)
-                showFollowersStatus(username, password);
+            if (special || arg.length == 0)
+                showFollowersStatus(username, password, arg);
             else
             if (arg.match(/^-todo(.*)/))
                 todoAction(username, password, RegExp.$1);
@@ -200,6 +200,8 @@
         ],
         completer: function(filter) {
             candidates = [];
+            if (filter.match(/{emoji:$/)) {
+            } else
             if (filter.match(/-todo$/)) {
                 candidates = [
                     ['-todo+', 'add todo'],
