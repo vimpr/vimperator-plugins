@@ -45,6 +45,33 @@
                 .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         liberator.echo(html, true);
     }
+    function showTwitterReply(username, password){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://twitter.com/statuses/replies.json", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        var statuses = window.eval(xhr.responseText);
+
+        var html = <style type="text/css"><![CDATA[
+            span.twitter.entry-content a { text-decoration: none; }
+            img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+        ]]></style>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+            statuses.map(function(status)
+                <>
+                    <img src={status.user.profile_image_url}
+                         alt={status.user.screen_name}
+                         title={status.user.screen_name}
+                         class="twitter photo"/>
+                    <strong>{status.user.name}&#x202C;</strong>
+                </>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+                    sprintf(': <span class="twitter entry-content">%s&#x202C;</span>', status.text))
+                        .join("<br/>");
+
+        //liberator.log(html);
+        liberator.echo(html, true);
+    }
     function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
         var endPoint = target ? "http://twitter.com/statuses/user_timeline/" + target + ".json"
@@ -96,6 +123,9 @@
 
             if (special && arg.match(/^\?\s*(.*)/))
                 showTwitterSearchResult(RegExp.$1)
+            else
+            if (special && arg.match(/^@/))
+                showTwitterReply(username, password)
             else
             if (special || arg.length == 0)
                 showFollowersStatus(username, password, arg)
