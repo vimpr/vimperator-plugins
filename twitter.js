@@ -12,6 +12,8 @@
 //      show someone's statuses.
 //  :twitter!? someword
 //      show search result of 'someword' from "http://twitter.1x1.jp".
+//  :twitter!@
+//      show replies.
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
