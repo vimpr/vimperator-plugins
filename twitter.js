@@ -49,7 +49,7 @@
     }
     function showTwitterReply(username, password){
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://twitter.com/statuses/replies.json", false, username, password);
+        xhr.open("POST", "http://twitter.com/statuses/replies.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
         var statuses = window.eval(xhr.responseText);
@@ -78,9 +78,9 @@
         var xhr = new XMLHttpRequest();
         var endPoint = target ? "http://twitter.com/statuses/user_timeline/" + target + ".json"
             : "http://twitter.com/statuses/friends_timeline.json";
-        xhr.open("GET", endPoint, false, username, password);
+        xhr.open("POST", endPoint, false, username, password);
         // for debug
-        //xhr.open("GET", "http://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
+        //xhr.open("POST", "http://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
         var statuses = window.eval(xhr.responseText);
