@@ -14,45 +14,58 @@
 //      show search result of 'someword' from "http://twitter.1x1.jp".
 //  :twitter!@
 //      show replies.
+//  :twitter!+ someone
+//      fav someone's last status..
+//  :twitter!- someone
+//      un-fav someone's last status..
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+    var evalFunc = window.eval;
+    try {
+        var sandbox = new Components.utils.Sandbox(window);
+        if (Components.utils.evalInSandbox("true", sandbox) === true) {
+            evalFunc = function(text) {
+                return Components.utils.evalInSandbox(text, sandbox);
+            }
+        }
+    } catch(e) { liberator.log('warning: twitter.js is working with unsafe sandbox.'); }
+
+    function sprintf(format){
+        var i = 1, re = /%s/, result = "" + format;
+        while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
+        return result;
+    }
     function sayTwitter(username, password, stat){
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://twitter.com/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send("status=" + encodeURIComponent(stat));
     }
-    function sprintf(format){
-        var i = 1, re = /%s/, result = "" + format;
-        while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
-        return result;
-    }
-    function showTwitterSearchResult(word){
+    function favTwitter(username, password, user){
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://twitter.1x1.jp/rss/search/?keyword=" + encodeURIComponent(word) + "&text=1", false);
+        xhr.open("POST", "http://twitter.com/statuses/user_timeline/" + user + ".json?count=1", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var items = xhr.responseXML.getElementsByTagName('item');
-        var html = <style type="text/css"><![CDATA[
-            span.twitter.entry-content a { text-decoration: none; }
-        ]]></style>.toSource()
-            .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
-        for (var n = 0; n < items.length; n++)
-            html += <>
-                <strong>{items[n].getElementsByTagName('title')[0].textContent}&#x202C;</strong>
-                : <span class="twitter entry-content">{items[n].getElementsByTagName('description')[0].textContent}&#x202C;</span>
-
-                <br />
-            </>.toSource()
-                .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
-        liberator.echo(html, true);
+        xhr.open("POST", "http://twitter.com/favourings/create/" + window.eval(xhr.responseText)[0].id, false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+    }
+    function unfavTwitter(username, password, user){
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://twitter.com/statuses/user_timeline/" + user + ".json?count=1", false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        xhr.open("POST", "http://twitter.com/favourings/destroy/" + window.eval(xhr.responseText)[0].id, false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
     }
     function showTwitterReply(username, password){
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://twitter.com/statuses/replies.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = window.eval(xhr.responseText);
+        var statuses = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
@@ -83,7 +96,7 @@
         //xhr.open("POST", "http://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = window.eval(xhr.responseText);
+        var statuses = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
@@ -103,6 +116,25 @@
                         .join("<br/>");
 
         //liberator.log(html);
+        liberator.echo(html, true);
+    }
+    function showTwitterSearchResult(word){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://twitter.1x1.jp/rss/search/?keyword=" + encodeURIComponent(word) + "&text=1", false);
+        xhr.send(null);
+        var items = xhr.responseXML.getElementsByTagName('item');
+        var html = <style type="text/css"><![CDATA[
+            span.twitter.entry-content a { text-decoration: none; }
+        ]]></style>.toSource()
+            .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
+        for (var n = 0; n < items.length; n++)
+            html += <>
+                <strong>{items[n].getElementsByTagName('title')[0].textContent}&#x202C;</strong>
+                : <span class="twitter entry-content">{items[n].getElementsByTagName('description')[0].textContent}&#x202C;</span>
+
+                <br />
+            </>.toSource()
+                .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         liberator.echo(html, true);
     }
     liberator.commands.addUserCommand(["twitter"], "Change Twitter status",
@@ -125,6 +157,12 @@
 
             if (special && arg.match(/^\?\s*(.*)/))
                 showTwitterSearchResult(RegExp.$1)
+            else
+            if (special && arg.match(/^\+\s*(.*)/))
+                favTwitter(username, password, RegExp.$1)
+            else
+            if (special && arg.match(/^\-\s*(.*)/))
+                unfavTwitter(username, password, RegExp.$1)
             else
             if (special && arg.match(/^@/))
                 showTwitterReply(username, password)
