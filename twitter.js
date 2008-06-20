@@ -4,6 +4,14 @@
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // The script allows you to update Twitter status from Vimperator 0.6.*.
+//
+// Commands:
+//  :twitter some thing text
+//      post "some thing text" to twitter.
+//  :twitter! someone
+//      show someone's statuses.
+//  :twitter!? someword
+//      show search result of 'someword' from "http://twitter.1x1.jp".
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
