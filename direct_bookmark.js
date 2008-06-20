@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.11
-// Last Change: 19-Jun-2008. Jan 2008
+// Last Change: 20-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -43,6 +43,8 @@
 //              Specify target SBM services to post
 //  ':bentry'
 //      Goto Bookmark Entry Page
+//  ':bicon'
+//      Show Bookmark Count as Icon
 (function(){
     var evalFunc = window.eval;
     try {
