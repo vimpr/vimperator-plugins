@@ -94,8 +94,8 @@
             arg = arg.replace(/%URL%/g, liberator.buffer.URL)
                 .replace(/%TITLE%/g, liberator.buffer.title);
 
-            if (special && arg.match(/^\?.+/))
-                showTwitterSearchResult(arg)
+            if (special && arg.match(/^\?\s*(.*)/))
+                showTwitterSearchResult(RegExp.$1)
             else
             if (special || arg.length == 0)
                 showFollowersStatus(username, password, arg)
