@@ -3,9 +3,9 @@
  * @name           copy.js
  * @description    enable to copy strings from a template (like CopyURL+)
  * @description-ja テンプレートから文字列のコピーを可能にします（CopyURL+みたなもの）
- * @minVersion     0.6pre
+ * @minVersion     1.1
  * @author         teramako teramako@gmail.com
- * @version        0.3
+ * @version        0.5a
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -19,18 +19,26 @@
  *
  * If non-argument, used `default'
  *
- * Change the value by `set' command. (only the current session)
- * :set copy_{label}=....
- *  or
- * :set {label}=...
- *
  * label: template name which is command argument
- * copy:  copy string
+ * value:  copy string
  *    the certian string is replace to ...
  *        %TITTLE%  -> to the title of the current page
  *        %URL%     -> to the URL of the current page
  *        %SEL%     -> to the string of selection
  *        %HTMLSEL% -> to the html string of selection
+ *
+ * map: key map (optional)
+ *
+ * custom: {function} or {Array} (optional)
+ *   {function}:
+ *    execute the function and copy return value, if specified.
+ *
+ *   {Array}:
+ *    replaced to the {value} by normal way at first.
+ *    and replace words matched {Array}[0] in the replaced string to {Array}[1].
+ *    {Array}[0] is string or regexp
+ *    {Array}[1] is string or function
+ *    see http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace
  *
  * The copy_templates is a string variable which can set on
  * vimperatorrc as following.
@@ -42,14 +50,15 @@
  * javascript <<EOM
  * liberator.globalVariables.copy_templates = [
  *   { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
- *   { label: 'title',          value: '%TITLE%' },
+ *   { label: 'title',          value: '%TITLE%', map: ',y' },
  *   { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
  *   { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
  *   { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
+ *   { label: 'ASIN',   value: 'copy ASIN code from Amazon', custom: function() content.document.getElementById('ASIN').value},
  * ];
  * EOM
  */
-(function(){
+liberator.plugins.exCopy = (function(){
 if (!liberator.globalVariables.copy_templates){
     liberator.globalVariables.copy_templates = [
         { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
@@ -59,10 +68,79 @@ if (!liberator.globalVariables.copy_templates){
         { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
     ];
 }
+
+liberator.globalVariables.copy_templates.forEach(function(template){
+    if (typeof template.map == 'string')
+        addUserMap(template.label, [template.map]);
+    else if (template.map instanceof Array)
+        addUserMap(template.label, template.map);
+});
+
 // used when argument is none
 //const defaultValue = templates[0].label;
 liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
     function(arg, special){
+        liberator.plugins.exCopy.copy(arg, special);
+    },{
+        completer: function(filter, special){
+            if (special){
+                return liberator.completion.javascript(filter);
+            }
+            var templates = liberator.globalVariables.copy_templates.map(function(template)
+                [template.label, template.value]
+            );
+            if (!filter){ return [0,templates]; }
+            var candidates = [];
+            templates.forEach(function(template){
+                if (template[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
+                    candidates.push(template);
+                }
+            });
+            return [0, candidates];
+        }
+    }
+);
+
+function addUserMap(label, map){
+    liberator.mappings.addUserMap([liberator.modes.NORMAL,liberator.modes.VISUAL], map,
+        label, function(){ liberator.plugins.exCopy.copy(label); }
+    );
+}
+function getCopyTemplate(label){
+    var ret = null;
+    liberator.globalVariables.copy_templates.some(function(template)
+        template.label == label ? (ret = template) && true : false);
+    return ret;
+}
+function replaceVariable(str){
+    if (!str) return '';
+    var win = new XPCNativeWrapper(window.content.window);
+    var sel = '',htmlsel = '';
+    if (str.indexOf('%SEL%') >= 0 || str.indexOf('%HTMLSEL%') >= 0){
+        sel = win.getSelection().getRangeAt(0);
+    }
+    if (str.indexOf('%HTMLSEL%') >= 0){
+        var serializer = new XMLSerializer();
+        htmlsel = serializer.serializeToString(sel.cloneContents());
+    }
+    return str.replace(/%TITLE%/g,liberator.buffer.title)
+              .replace(/%URL%/g,liberator.buffer.URL)
+              .replace(/%SEL%/g,sel.toString())
+              .replace(/%HTMLSEL%/g,htmlsel);
+}
+
+var exCopyManager = {
+    add: function(label, value, custom, map){
+        var template = {label: label, value: value, custom: custom, map: map};
+        liberator.globalVariables.copy_templates.unshift(template);
+        if (map) addUserMap(label, map);
+
+        return template;
+    },
+    get: function(label){
+        return getCopyTemplate(label);
+    },
+    copy: function(arg, special){
         var copyString = '';
         var isError = false;
         if (special && arg){
@@ -88,9 +166,15 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
                 copyString = e.toString();
             }
         } else {
-            if (!arg){ arg = liberator.globalVariables.copy_templates[0].label; }
-            var str = getCopyTemplate(arg) || arg;
-            copyString = replaceVariable(str);
+            if (!arg) arg = liberator.globalVariables.copy_templates[0];
+            var template = getCopyTemplate(arg) || arg;
+            if (typeof template.custom == 'function'){
+                copyString = template.custom.call(this, template.value);
+            } else if (template.custom instanceof Array){
+                copyString = replaceVariable(template.value).replace(tempalte.custom[0], template.custom[1]);
+            } else {
+                copyString = replaceVariable(template.value);
+            }
         }
         liberator.util.copyToClipboard(copyString);
         if (isError){
@@ -98,48 +182,9 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
         } else {
             liberator.echo('CopiedString: `' + liberator.util.escapeHTML(copyString) + "'");
         }
-    },{
-        completer: function(filter, special){
-            if (special){
-                return liberator.completion.javascript(filter);
-            }
-            var templates = liberator.globalVariables.copy_templates.map(function(template)
-                [template.label, template.value]
-            );
-            if (!filter){ return [0,templates]; }
-            var candidates = [];
-            templates.forEach(function(template){
-                if (template[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
-                    candidates.push(template);
-                }
-            });
-            return [0, candidates];
-        }
     }
-);
-function getCopyTemplate(label){
-    var ret = null;
-    liberator.globalVariables.copy_templates.some(function(template)
-        template.label == label ? (ret = template.value) && true : false);
-    return ret;
-}
-function replaceVariable(str){
-    if (!str) return;
-    var win = new XPCNativeWrapper(window.content.window);
-    var sel = '',htmlsel = '';
-    if (str.indexOf('%SEL%') >= 0 || str.indexOf('%HTMLSEL%') >= 0){
-        sel = win.getSelection().getRangeAt(0);
-    }
-    if (str.indexOf('%HTMLSEL%') >= 0){
-        var serializer = new XMLSerializer();
-        htmlsel = serializer.serializeToString(sel.cloneContents());
-    }
-    return str.replace(/%TITLE%/g,liberator.buffer.title)
-              .replace(/%URL%/g,liberator.buffer.URL)
-              .replace(/%SEL%/g,sel.toString())
-              .replace(/%HTMLSEL%/g,htmlsel);
-}
-
+};
+return exCopyManager;
 })();
 
 // vim: set fdm=marker sw=4 ts=4 et:
