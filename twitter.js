@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 11-May-2008. Jan 2008
+// Last Change: 20-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -17,6 +17,25 @@
         var i = 1, re = /%s/, result = "" + format;
         while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
         return result;
+    }
+    function showTwitterSearchResult(word){
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://twitter.1x1.jp/rss/search/?keyword=" + encodeURIComponent(word) + "&text=1", false);
+        xhr.send(null);
+        var items = xhr.responseXML.getElementsByTagName('item');
+        var html = <style type="text/css"><![CDATA[
+            span.twitter.entry-content a { text-decoration: none; }
+        ]]></style>.toSource()
+            .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
+        for (var n = 0; n < items.length; n++)
+            html += <>
+                <strong>{items[n].getElementsByTagName('title')[0].textContent}&#x202C;</strong>
+                : <span class="twitter entry-content">{items[n].getElementsByTagName('description')[0].textContent}&#x202C;</span>
+
+                <br />
+            </>.toSource()
+                .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
+        liberator.echo(html, true);
     }
     function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
@@ -67,6 +86,9 @@
             arg = arg.replace(/%URL%/g, liberator.buffer.URL)
                 .replace(/%TITLE%/g, liberator.buffer.title);
 
+            if (special && arg.match(/^\?.+/))
+                showTwitterSearchResult(arg)
+            else
             if (special || arg.length == 0)
                 showFollowersStatus(username, password, arg)
             else
