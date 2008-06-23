@@ -19,7 +19,10 @@
         function(arg, special){
             if (arg.match(/^[0-9]+$/))
                 arg = pref.getComplexValue("extensions.speeddial.thumbnail-" + arg + "-url", nsISupportsString).data;
-            if (arg) liberator.open(arg, special ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+            else
+            if (arg.length == 0)
+                arg = "chrome://speeddial/content/speeddial.xul";
+            liberator.open(arg, special ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         }, {
             completer: function(filter) {
                 candidates = [];
