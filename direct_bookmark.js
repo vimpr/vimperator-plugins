@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.11
-// Last Change: 20-Jun-2008. Jan 2008
+// Version: 0.12
+// Last Change: 24-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -472,6 +472,38 @@
                 });
             },
             tags:function(user,password) [],
+        },
+        'f': {
+            description:'foves',
+            account:['https://secure.faves.com', 'https://secure.faves.com', null],
+            loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
+            entryPage:'%URL%',
+            poster:function(user,password,url,title,comment,tags){
+                var request_url = 'https://secure.faves.com/v1/posts/add?' + [
+                    ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
+                ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
+                return Deferred.http({
+                    method: "get",
+                    url: request_url,
+                    user: user,
+                    password: password,
+                }).next(function(xhr){
+                    if(xhr.status != 200) throw "foves: faild";
+                });
+            },
+            tags:function(user,password){
+                const feed_url = 'https://secure.faves.com/v1/tags/get';
+                var returnValue = [];
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", feed_url, false, user, password);
+                xhr.send(null);
+
+                var tags = xhr.responseXML.getElementsByTagName('tag');
+                for(var n = 0; n < tags.length; n++)
+                    returnValue.push(tags[n].getAttribute('tag'));
+                liberator.echo("foves: Tag parsing is finished. Taglist length: " + returnValue.length);
+                return returnValue;
+            },
         },
         'p': {
             description:'Places',
