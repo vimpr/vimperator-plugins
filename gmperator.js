@@ -101,14 +101,15 @@ liberator.plugins.gmperator = (function(){ //{{{
                 gmCon = new GmContainer(uri,sandbox);
                 containers[panelID] = gmCon;
                 this.__defineGetter__(panelID,function() gmCon);
-                //log('gmpeartor: Registered: ' + panelID + ' - ' + uri);
+                log('gmpeartor: Registered: ' + panelID + ' - ' + uri, 8);
             }
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
             gmCon.uri = uri;
-            autocommands.trigger('GMInjectedScript',uri+'\n'+script.filename);
+            autocommands.trigger('GMInjectedScript',uri+'\n'+script._filename);
+            log('gmpeartor: GMInjectedScript ' + uri+'\n'+script._filename, 8);
         },
-        get gmScripts() getScripts(),
+        get gmScripts() GM_getConfig().scripts,
         get allItem() containers,
         get currentPanel() getBrowser().mCurrentTab.linkedPanel,
         get currentContainer() containers[this.currentPanel] || null,
@@ -165,7 +166,6 @@ liberator.plugins.gmperator = (function(){ //{{{
                 return tab.linkedPanel;
             }
         }
-        //liberator.log(win + 'is not found');
     }
     function updateGmContainerList(e){
         var t = e.target;
@@ -185,7 +185,7 @@ liberator.plugins.gmperator = (function(){ //{{{
 commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
     function(arg,special){
         var str = '';
-        var scripts = getScripts();
+        var scripts = GM_getConfig().scripts;
         var reg;
         if (special || arg == 'full'){
             reg = new RegExp('.*');
@@ -193,50 +193,50 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
             reg = new RegExp(arg,'i');
         }
         if (reg){
-            scripts.forEach(function(s){
-                if ( reg.test(s.name) || reg.test(s.filename) ) {
-                    str += scriptToString(s) + '\n\n';
+            for each(var s in scripts){
+                if ( reg.test(s.name) || reg.test(s._filename) ) {
+                    str += scriptToString(s) + '\n';
                 }
-            });
+            }
         } else {
             var table = <table/>;
             var tr;
-            scripts.forEach(function(script){
+            for each(var script in scripts){
                 tr = <tr/>;
                 if (script.enabled){
-                    tr.* += <td><span style="font-weight:bold;">{script.name}</span></td>;
+                    tr.* += <td style="font-weight:bold;">{script.name}</td>;
                 } else {
                     tr.* += <td>{script.name}</td>;
                 }
-                tr.* += <td>({script.filename})</td>;
+                tr.* += <td>({script._filename})</td>;
                 table.* += tr;
-            });
-            str += table.toXMLString();
+            }
+            str += table.toSource().replace(/\n/g,'');
         }
         echo(str,true);
         function scriptToString(script){
             var table = <table>
                 <caption class="hl-Title" style="text-align:left">{script.name}</caption>
             </table>;
-            ['FileName', 'NameSpace', 'Description',
-             'Includes', 'Excludes', 'Enabled'].forEach(function(prop){
+            [['FileName','_filename'], ['NameSpace','namespace'], ['Description','description'],
+             ['Includes','includes'], ['Excludes','excludes'], ['Enabled','enabled']].forEach(function(prop){
                 var tr = <tr>
-                    <th style="font-weight:bold;text-align:left;vertical-align:top">{prop}</th>
+                    <th style="font-weight:bold;text-align:left;vertical-align:top">{prop[0]}</th>
                 </tr>;
-                var contents = script[prop.toLowerCase()];
-                if (typeof contents == "string"){
+                var contents = script[prop[1]];
+                if (typeof contents == "string" || typeof contents == "boolean"){
                     tr.* += <td>{contents}</td>;
                 } else {
                     var td = <td/>;
-                    contents.forEach(function(c,i,a){
-                        td.* += c;
-                        if (a[i+1]) td.* += <br/>;
-                    });
+                    for (var i=0; i<contents.length; i++){
+                        td.* += contents[i];
+                        if (contents[i+1]) td.* += <br/>;
+                    }
                     tr.* += td;
                 }
                 table.* += tr;
             });
-            return table.toXMLString();
+            return table.toSource().replace(/\n/g,'');
         }
     }
 ); //}}}
@@ -246,10 +246,10 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
             echoerr('Usage: :gmlo[ad][!] {name|filename}');
             return;
         }
-        var scripts = getScripts();
+        var scripts = GM_getConfig().scripts;
         var script;
         for (var i=0; i<scripts.length; i++){
-            if (scripts[i].filename == arg || scripts[i].name == arg){
+            if (scripts[i]._filename == arg || scripts[i].name == arg){
                 script = scripts[i];
                 break;
             }
@@ -257,11 +257,11 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         if (!script) {
             echoerr('no such a user script');
             return;
-        } else if (plugins.gmperator.currentContainer.hasScript(script.filename) && !special){
-            echoerr(script.filename + ' is already loaded!');
+        } else if (plugins.gmperator.currentContainer.hasScript(script._filename) && !special){
+            echoerr(script._filename + ' is already loaded!');
             return;
         } else {
-            echo('loading: ' +script.filename);
+            echo('loading: ' +script._filename);
         }
         try {
             var href = buffer.URL;
@@ -284,18 +284,20 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
     }
 ); //}}}
 commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', //{{{
-    function(arg, special){
-        var res = commands.parseArgs(arg, this.args);
-        if (!res) {
+    function(args, special){
+        var options = [ [['-name','-n'],    commands.OPTION_STRING],
+                        [['-include','-i'], commands.OPTION_LIST],
+                        [['-exclude','-e'], commands.OPTION_LIST] ];
+        var res = commands.parseArgs(args, options);
+        if (res.arguments.length == 0) {
             if (special) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable Greasemonkey
             return;
         }
-        var filename = res.args[0];
-        var config = new Config();
-        config.load();
+        var filename = res.arguments[0];
+        var config = GM_getConfig();
         var script;
         for (var i=0; i<config.scripts.length; i++){
-            if (config.scripts[i].filename == filename){
+            if (config.scripts[i]._filename == filename){
                 script = config.scripts[i];
                 break;
             }
@@ -304,26 +306,11 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
         if (special){ // toggle enable/disable the script if {filename} is exist
             script.enabled = !script.enabled;
         }
-        if (res.opts.length > 0){
-            script.name     = commands.getOption(res.opts, '-name',    script.name);
-            script.includes = commands.getOption(res.opts, '-include', script.includes);
-            script.excludes = commands.getOption(res.opts, '-exclude', script.excludes);
-        }
-        config.save();
+        if (res['-name']) script.name = res['-name'];
+        if (res['-include']) script.include = res['-include'];
+        if (res['-exclude']) script.exclude = res['-exclude'];
+        config._save();
     },{
-        args: [
-            [['-name','-n'],    commands.OPTION_STRING],
-            [['-include','-i'], commands.OPTION_LIST],
-            [['-exclude','-e'], commands.OPTION_LIST]
-        ],
-        shortHelp: 'change settings for Greasemonkey scripts',
-        help: [
-            'toggle enable/disable with "!", if <code>{filename}</code> is exist, if not toggle Greasemonkey',
-            '<dl><dt><code>-n</code><br/><code>-name</code></dt><dd>change the name</dd>',
-            '<dt><code>-i</code><br/><code>-include</code></dt><dd>change the includes list ("," delimiter)</dd>',
-            '<dt><code>-e</code><br/><code>-exclude</code></dt><dd>change the excludes list ("," delimiter)</dd></dl>',
-            'Caution: the change is permanent, not the only session.<br/>And cannot get back.'
-        ].join(''),
         completer: function(filter)
             scriptsCompleter(filter, false)
     }
@@ -347,39 +334,34 @@ GmContainer.prototype = {
     hasScript : function(script){
         var filename;
         switch( typeof(script) ){
-            case 'object': filename = script.filename; break;
+            case 'object': filename = script._filename; break;
             case 'string': filename = script; break;
             default: return null;
         }
         return this.scripts.some(function(s) s.filename == filename);
     }
 }; // }}}
-function getScripts(){ //{{{
-    var config = new Config();
-    config.load();
-    return config.scripts;
-} //}}}
 function scriptsCompleter(filter,flag){ //{{{
     var candidates = [];
-    var scripts = getScripts();
+    var scripts = GM_getConfig().scripts;
     var isAll = false;
     if (!filter) isAll=true;
     if (flag){
-        scripts.forEach(function(s){
+        for each(var s in scripts){
             if (isAll || s.name.toLowerCase().indexOf(filter) == 0 ||
-                s.filename.indexOf(filter) == 0)
+                s._filename.indexOf(filter) == 0)
             {
                 candidates.push([s.name, s.description]);
-                candidates.push([s.filename, s.description]);
+                candidates.push([s._filename, s.description]);
             }
-        });
+        }
     } else {
-        scripts.forEach(function(s){
-            if (isAll || s.filename.indexOf(filter) == 0)
+        for each(var s in scripts){
+            if (isAll || s._filename.indexOf(filter) == 0)
             {
-                candidates.push([s.filename, s.description]);
+                candidates.push([s._filename, s.description]);
             }
-        });
+        }
     }
     return [0,candidates];
 } //}}}
