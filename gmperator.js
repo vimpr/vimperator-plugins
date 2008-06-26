@@ -94,8 +94,9 @@ liberator.plugins.gmperator = (function(){ //{{{
     var manager = {
         register: function (uri,sandbox,script){
             var panelID = getPanelID(sandbox.window);
+            if (!panelID) return;
             var gmCon;
-            if (containers[panelID]){
+            if (containers[panelID] && containers[panelID].uri == uri){
                 gmCon = containers[panelID];
             } else {
                 gmCon = new GmContainer(uri,sandbox);
@@ -106,8 +107,10 @@ liberator.plugins.gmperator = (function(){ //{{{
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
             gmCon.uri = uri;
-            autocommands.trigger('GMInjectedScript',uri+'\n'+script._filename);
-            log('gmpeartor: GMInjectedScript ' + uri+'\n'+script._filename, 8);
+            triggerGMEvent('GMInjectedScript', uri, script._filename);
+            if (panelID == this.currentPanel){
+                triggerGMEvent('GMActiveScript', uri, script._filename);
+            }
         },
         get gmScripts() GM_getConfig().scripts,
         get allItem() containers,
@@ -167,14 +170,35 @@ liberator.plugins.gmperator = (function(){ //{{{
             }
         }
     }
-    function updateGmContainerList(e){
-        var t = e.target;
+    function updateGmContainerList(event){
+        var t = event.target;
         if (t && t.localName == 'tab' && t.linkedPanel){
             delete containers[t.linkedPanel];
             delete plugins.gmperator[t.linkedPanel];
         }
     }
+    function dispatchGMTabSelect(event){
+        var panelID = event.originalTarget.linkedPanel;
+        var container;
+        if (container = containers[panelID]){
+            liberator.log(panelID + '\n' + container.uri +'\n'+ container.scripts.length, 8);
+            container.scripts.forEach(function(script){
+                triggerGMEvent('GMActiveScript', container.uri, script._filename);
+            });
+        }
+    }
+    /**
+     * trigger autocommand
+     * @param {String} name Event name
+     * @param {String} uri
+     * @param {String} filename script filename
+     */
+    function triggerGMEvent(name, uri, filename){
+        liberator.autocommands.trigger(name, uri+'\n'+filename);
+        liberator.log('gmpeartor: '+ name + ' ' + uri+'\n'+filename, 8);
+    }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
+    getBrowser().mTabBox.addEventListener('TabSelect',dispatchGMTabSelect,false);
     // }}}
     return manager;
 })(); //}}}
@@ -330,7 +354,12 @@ function GmContainer(uri,sandbox){
     this.scripts = [];
 }
 GmContainer.prototype = {
-    addScript : function(script) !this.hasScript(script) && this.scripts.push(script) || false,
+    addScript : function(script) {
+        if (!this.hasScript(script)){
+            return this.scripts.push(script)
+        }
+        return false;
+    },
     hasScript : function(script){
         var filename;
         switch( typeof(script) ){
@@ -338,7 +367,7 @@ GmContainer.prototype = {
             case 'string': filename = script; break;
             default: return null;
         }
-        return this.scripts.some(function(s) s.filename == filename);
+        return this.scripts.some(function(s) s._filename == filename);
     }
 }; // }}}
 function scriptsCompleter(filter,flag){ //{{{
