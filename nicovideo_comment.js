@@ -13,10 +13,10 @@
  * :nico! {String}            -> Fill mail form
  */
 (function(){
-var flvp = window.content.wrappedJSObject.document.getElementById('flvplayer');
 
 liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
     function(arg, special){
+        var flvp = window.content.wrappedJSObject.document.getElementById('flvplayer');
         var form = special ? 'inputArea.MailInput.text' : 'inputArea.ChatInput1.text' ;
         flvp.SetVariable(form, arg.toString() );
     },{
@@ -53,14 +53,14 @@ liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
             ];
             if (special){
                 commands.forEach(function(command){
-                    if (command[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
+                    if (command[0].indexOf(filter.toLowerCase()) === 0){
                         templates.push(command);
                     }
                 });
             }
             if (special && !(flvp.GetVariable('premiumNo')) ){
                 premiumcommands.forEach(function(premiumcommand){
-                    if (premiumcommand[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
+                    if (premiumcommand[0].indexOf(filter.toLowerCase()) === 0){
                         templates.push(premiumcommand);
                     }
                 });
