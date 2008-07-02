@@ -5,7 +5,7 @@
  * @description-ja ニコニコ動画のコメント欄を入力
  * @minVersion     0.6pre
  * @author         otsune
- * @version        0.1
+ * @version        0.2
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -16,9 +16,9 @@
 
 liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
     function(arg, special){
-        var flvp = window.content.wrappedJSObject.document.getElementById('flvplayer');
-        var form = special ? 'inputArea.MailInput.text' : 'inputArea.ChatInput1.text' ;
-        flvp.SetVariable(form, arg.toString() );
+        var flvp = window.content.document.getElementById('flvplayer'); 
+        var form = special ? 'MailInput.text' : 'ChatInput.text' ;
+        flvp.wrappedJSObject.SetVariable(form, arg.toString() );
     },{
         completer: function(filter, special){
             var templates = [];
