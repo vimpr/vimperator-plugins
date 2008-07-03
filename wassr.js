@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 19-Jun-2008. Jan 2008
+// Last Change: 03-Jul-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -29,7 +29,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://api.wassr.jp/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send("status=" + encodeURIComponent(stat));
+        xhr.send("status=" + encodeURIComponent(stat) + "&source=" + encodeURIComponent("vimperator/wassr.js"));
     }
     function sprintf(format){
         var i = 1, re = /%s/, result = "" + format;
