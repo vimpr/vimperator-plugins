@@ -6,6 +6,13 @@
  * @depend  "Split Browser" {29c4afe1-db19-4298-8785-fcc94d1d6c1d}
  * ==/VimperatorPlugin==
  *
+ * CAUTION:
+ *  It's need "SplitBrowser" addon.
+ *  Please install from
+ *      - https://addons.mozilla.org/en-US/firefox/addon/4287
+ *      or
+ *      - https://addons.mozilla.org/ja/firefox/addon/4287
+ *
  * Usage:
  *
  * ----------------------------
