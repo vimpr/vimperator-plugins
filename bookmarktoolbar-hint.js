@@ -93,7 +93,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 		startup: function(where){
 			this.go = options.guioptions;
 			options.guioptions += "b";
-			//liberator.modes.setCustomMode('BookmarksToolbar-Hint', this.onEvent, this.quit);
+			this.where = where;
 			liberator.modes.setCustomMode('BookmarksToolbar-Hint', function(){return;}, this.quit);
 			this.show();
 		},
@@ -146,21 +146,21 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 						folderOpen(hints[currentNum]);
 					}
 					return;
-				case "h":
 				case "<BS>":
 					if (key == "<BS>" && currentNum > 0){
 						currentNum = Math.floor(currentNum / 10);
 						updateSelector();
+						return;
+					}
+				case "h":
+					if (current == this.toolbar){
+						closeMenus(current);
+						liberator.options.guioptions = this.go;
+						this.quit();
 					} else {
-						if (current == this.toolbar){
-							closeMenus(current);
-							liberator.options.guioptions = this.go;
-							this.quit();
-						} else {
-							current.hidePopup();
-							clearTooltips();
-							this.show(current.parentNode.parentNode);
-						}
+						current.hidePopup();
+						clearTooltips();
+						this.show(current.parentNode.parentNode);
 					}
 					return;
 				default:
