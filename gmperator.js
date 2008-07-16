@@ -4,7 +4,7 @@
  * @description    Vimperator plugin for Greasemonkey
  * @author         teramako teramako@gmail.com
  * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.3a
+ * @version        0.4a
  * ==/VimperatorPlugin==
  *
  * ---------------------------
@@ -40,16 +40,23 @@
  *   includes to "http://*" and "https://*",
  *   and excludes to "http://example.com/*"
  *
+ * ---------------------------
+ * Autocommand
+ * ---------------------------
+ * Available events:
+ * 'GMInjectedScript'  -> when open either foreground or background
+ * 'GMActiveScript'    -> when TabSelect or open foreground
+ * e.g.)
+ * autocmd GMActiveScript scriptName\.user\.js$ :echo "scriptName is executing"
+ *    when any URL and scriptName.user.js is executing
+ *
  * }}}
  * ---------------------------
  * For plugin developer:
  * ---------------------------
  * {{{
  *
- * 1). you can access to the sandbox of Greasemonkey !!!
- * 2). you can register commands to execute
- *     when the user script is executed on the URI
- *     @see liberator.plugins.gmperator.addAutoCommand
+ * you can access to the sandbox of Greasemonkey !!!
  *
  * liberator.plugins.gmperator => (
  *   allItem           :  return object of key   : {panalID},
@@ -68,9 +75,6 @@
  *                                  includes   : {String[]}
  *                                  encludes   : {String[]}
  *                              )
- *  addAutoCommand    : function( uri, script, cmd )
- *                      If both of uri and script are matched
- *
  * )
  * }}}
  */
@@ -132,14 +136,6 @@ liberator.plugins.gmperator = (function(){ //{{{
                 if (c.uri == uri) list.push(c);
             }
             return list.length > 0 ? list : null;
-        },
-        addAutoCommand: function(uri, script, cmd){
-            var reg = uri+'.*\n'+script+'\.user\.js';
-            autocommands.add('GMInjectedScript', reg, cmd);
-        },
-        removeAutoCommand: function(uri, script){
-            var reg = uri+'.*\n'+script+'\.user\.js';
-            autocommands.remove('GMInjectedScript', reg);
         },
     };
     // }}}
