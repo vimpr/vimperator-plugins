@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 03-Jul-2008. Jan 2008
+// Last Change: 17-Jul-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -39,7 +39,7 @@
     function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
         var endPoint = target ? "http://api.wassr.jp/user_timeline.json?id=" + target
-            : "http://api.wassr.jp/statuses/friends_timeline.json";
+            : "http://api.wassr.jp/statuses/friends_timeline.json?id=" + username;
         xhr.open("GET", endPoint, false, username, password);
         // for debug
         //xhr.open("GET", "http://api.wassr.jp/statuses/user_timeline/otsune.json", false, username, password);
