@@ -2,7 +2,7 @@
  * ==VimperatorPlugin==
  * @name           tombloo.js
  * @description    Tombloo integrate plugin
- * @description-ja TomblooŒo—R‚Å‘I‘ğ—Ìˆæ‚È‚Ç‚ğpost‚·‚é
+ * @description-ja TomblooçµŒç”±ã§é¸æŠé ˜åŸŸãªã©ã‚’postã™ã‚‹
  * @author         Trapezoid
  * @version        0.1
  * ==/VimperatorPlugin==
