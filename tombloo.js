@@ -4,12 +4,13 @@
  * @description    Tombloo integrate plugin
  * @description-ja Tombloo経由で選択領域などをpostする
  * @author         Trapezoid
- * @version        0.1a
+ * @version        0.1b
  * ==/VimperatorPlugin==
  *
  * Usage:
- * :tombloo arg         -> post by Tombloo
- * :tomblooAction arg   -> execute Tombloo's action in tool menu
+ *  :tombloo arg                    -> post by Tombloo (don't use prompt)
+ *  :tombloo! arg                   -> post by Tombloo (use prompt)
+ *  :tomblooAction arg              -> execute Tombloo's action in tool menu
  **/
 var TomblooService = Components.classes['@brasil.to/tombloo-service;1'].getService().wrappedJSObject;
 function update(target, src, keys){
@@ -55,8 +56,8 @@ liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
 );
 
 liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
-    function(arg){
-        TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extracters[arg],true);
+    function(arg,special){
+        TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extracters[arg],special);
     },{
         completer: function(filter){
             var completionList = new Array();
@@ -66,5 +67,12 @@ liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
                     completionList.push([exts[i].name,exts[i].name]);
             return [0,completionList];
         }
+    }
+);
+
+liberator.options.add(['tomblooprompt'],'Use Tombloo prompt','boolean',this.isEnable,
+    {
+        setter: function(value){ self.isEnable = value; },
+        getter: function(){ return self.isEnable; }
     }
 );
