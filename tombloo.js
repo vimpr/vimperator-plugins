@@ -69,10 +69,3 @@ liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
         }
     }
 );
-
-liberator.options.add(['tomblooprompt'],'Use Tombloo prompt','boolean',this.isEnable,
-    {
-        setter: function(value){ self.isEnable = value; },
-        getter: function(){ return self.isEnable; }
-    }
-);
