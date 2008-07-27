@@ -4,7 +4,7 @@
  * @description    Vimperator plugin for Greasemonkey
  * @author         teramako teramako@gmail.com
  * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.4a
+ * @version        0.5b
  * ==/VimperatorPlugin==
  *
  * ---------------------------
@@ -50,6 +50,11 @@
  * autocmd GMActiveScript scriptName\.user\.js$ :echo "scriptName is executing"
  *    when any URL and scriptName.user.js is executing
  *
+ * ---------------------------
+ * Dialog
+ * ---------------------------
+ * :dialog userscriptmanager -> open Greasemonkey UserScript Manager
+ *
  * }}}
  * ---------------------------
  * For plugin developer:
@@ -87,8 +92,6 @@ if (!Cc[gmID]) {
     log('Greasemonkey is not installed');
     return;
 }
-if(!liberator.plugins) liberator.plugins = {};
-
 
 liberator.plugins.gmperator = (function(){ //{{{
     // -----------------------
@@ -195,6 +198,10 @@ liberator.plugins.gmperator = (function(){ //{{{
     }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
     getBrowser().mTabBox.addEventListener('TabSelect',dispatchGMTabSelect,false);
+    
+    liberator.config.autocommands.push(["GMInjectedScript","Triggered when UserScript is injected"]);
+    liberator.config.autocommands.push(["GMActiveScript","Triggered when location is changed and injected UserScripts are exist"]);
+    liberator.config.dialogs.push(["userscriptmanager", "Greasemonkey Manager", function(){GM_openUserScriptManager();}]);
     // }}}
     return manager;
 })(); //}}}
