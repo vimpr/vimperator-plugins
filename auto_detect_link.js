@@ -272,7 +272,7 @@
       (function (input) {
         result.push({
           frame: content, 
-          uri: input.form.action, 
+          uri: input.form && input.form.action, 
           text: input.value,
           click: input.click,
           element: input,
