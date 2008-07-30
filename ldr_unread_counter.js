@@ -2,14 +2,14 @@
  * ==VimperatorPlugin==
  * @name            LDR unread counter
  * @description     Display unread count of LDR to statusbar
- * @description-ja  ¥¹¥Æ¡¼¥¿¥¹¥Ğ¡¼¤ËLDR¤ÎÌ¤ÆÉ·ï¿ô¤òÉ½¼¨
+ * @description-ja  ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒãƒ¼ã«LDRã®æœªèª­ä»¶æ•°ã‚’è¡¨ç¤º
  * @version         0.1a
  * @author          teramako teramako@gmail.com
  * ==/VimperatorPlugin==
  *
- * ¤Ş¤ººÇ½é¤Ë
+ * ã¾ãšæœ€åˆã«
  * let livedoor_id = "<livedoor ID>"
- * ¤È¥æ¡¼¥¶ID¤òÀßÄê¤·¤Æ¤¯¤À¤µ¤¤¡£
+ * ã¨ãƒ¦ãƒ¼ã‚¶IDã‚’è¨­å®šã—ã¦ãã ã•ã„ã€‚
  */
 
 liberator.plugins.ldrUnreadCounter = (function(){
@@ -45,7 +45,7 @@ function createStatusButton(){
 		for (var name in attrs) elm.setAttribute(name, attrs[name]);
 		return elm;
 	}
-	// FIXME: onclick»ş¤ËLDR¤ò³«¤¯¤è¤¦¤ËÍ×½¤Àµ
+	// FIXME: onclickæ™‚ã«LDRã‚’é–‹ãã‚ˆã†ã«è¦ä¿®æ­£
 	statusPanel = createElement("statusbarpanel", {
 		id: "ldr_unread_count_panel",
 		tooltiptext: "Count: " });
@@ -55,7 +55,7 @@ function createStatusButton(){
 	},"http://www.w3.org/1999/xhtml");
 	statusPanel.appendChild(canvas);
 
-	// Icon¤À¤±ºÇ½é¤ËÉÁ²è¤¬¤·¤Æ¤ª¤¯
+	// Iconã ã‘æœ€åˆã«æç”»ãŒã—ã¦ãŠã
 	var ctx = canvas.getContext("2d");
 	icon_image.onload=function(){ ctx.drawImage(icon_image,0,0); };
 	//ctx.drawImage(icon_image,0,0);
@@ -77,22 +77,22 @@ function updateCanvasCount(count){
 	ctx.clearRect(0,0,24,16);
 	ctx.save();
 
-	// LDR Icon ¤ÎÉÁ²è
+	// LDR Icon ã®æç”»
 	ctx.drawImage(icon_image,0,0);
 
 	var width = ctx.canvas.width;
 	var height = ctx.canvas.height;
 	var len = ctx.mozMeasureText(count);
 
-	// Ì¤ÆÉ·ï¿ô¤ÎÇØ·Ê¤ò°Å¤¯¤¹¤ë
-	// XXX: ¤â¤Ã¤ÈÎÉ¤¤¿§Êç½¸
+	// æœªèª­ä»¶æ•°ã®èƒŒæ™¯ã‚’æš—ãã™ã‚‹
+	// XXX: ã‚‚ã£ã¨è‰¯ã„è‰²å‹Ÿé›†
 	ctx.save();
 	ctx.fillStyle = "rgba(48,48,48,0.75)";
 	ctx.fillRect(width-len-1,4,len+1,12);
 	ctx.restore();
 
-	// Ì¤ÆÉ·ï¿ô¤ÎÉÁ²è
-	// XXX: ¤â¤Ã¤ÈÎÉ¤¤¿§Êç½¸
+	// æœªèª­ä»¶æ•°ã®æç”»
+	// XXX: ã‚‚ã£ã¨è‰¯ã„è‰²å‹Ÿé›†
 	ctx.fillStyle = "Cyan";
 	ctx.mozTextStyle = "12px sans-serif";
 	ctx.translate(width - len-1 ,height-1);
@@ -107,7 +107,7 @@ function canvasDrawStop(){
 	ctx.clearRect(0,0,24,16);
 	ctx.drawImage(icon_image,0,0);
 	ctx.save();
-	//¶Ø»ß¥Ş¡¼¥¯¤ÎÉÁ²è
+	//ç¦æ­¢ãƒãƒ¼ã‚¯ã®æç”»
 	ctx.strokeStyle = "Red";
 	ctx.lineWidth = "2";
 	ctx.beginPath();
@@ -175,7 +175,7 @@ var manager = {
 	start: function(){
 		if (!this.user_id) {
 			liberator.echoerr("LDR Unread Counter: Please :let "+ userIdName + " = <livedoor ID>");
-			// FIXME: ¤Ê¤ó¤«¥¨¥é¡¼¤¬½Ğ¤ë¡£¸¶°ø¤¬ÎÉ¤¯Ê¬¤«¤é¤ó
+			// FIXME: ãªã‚“ã‹ã‚¨ãƒ©ãƒ¼ãŒå‡ºã‚‹ã€‚åŸå› ãŒè‰¯ãåˆ†ã‹ã‚‰ã‚“
 			//this.stop();
 			return;
 		}
