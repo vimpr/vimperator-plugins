@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0.1
+// @version        1.0.2
 // ==/VimperatorPlugin==
 //
 //  Usage:
@@ -235,23 +235,6 @@
     if (pattern instanceof RegExp)
       return pattern.test(link.text);
     return link.text.toLowerCase().indexOf(pattern.toString().toLowerCase()) >= 0;
-  }
-
-
-  // XPath
-  function getElementByXPath (xpath, root) {
-    let res = content.document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    if (res)
-      return res.singleNodeValue;
-  }
-
-
-  // XPath
-  function getElementsByXPath (xpath, root) {
-    let result = [], res = content.document.evaluate(xpath, root, null, 7, null);
-    for (let i = 0; i < res.snapshotLength; i++)
-      result.push(res.snapshotItem(i));
-    return result;
   }
 
 
