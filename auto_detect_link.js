@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.0.1
 // ==/VimperatorPlugin==
 //
 //  Usage:
@@ -194,30 +194,33 @@
       return [];
     let [_, dir, file] = urim, result = [];
     // succ number
-    let (dm, succs, file = file, left = '') {
+    let (dm, succs, file = file, left = '', temp = []) {
       while (file && (dm = file.match(/\d+/))) {
         let [rcontext, lcontext, lmatch] = [RegExp.rightContext, RegExp.leftContext, RegExp.lastMatch];
         left += lcontext;
         succs = succNumber(lmatch, next);
         for each (let succ in succs) {
-          result.push(dir + left + succ + rcontext);
+          temp.push(dir + left + succ + rcontext);
         }
         left += lmatch;
         file = rcontext;
       }
+      result = result.concat(temp.reverse());
     }
+    liberator.log(result);
     // succ string
-    let (dm, succs, file = file, left = '') {
+    let (dm, succs, file = file, left = '', temp = []) {
       while (file && (dm = file.match(/(^|[^a-zA-Z])([a-zA-Z])([^a-zA-Z]|$)/))) {
         let [rcontext, lcontext] = [RegExp.rightContext, RegExp.leftContext];
         left += lcontext + dm[1];
         succs = succString(dm[2], next);
         for each (let succ in succs) {
-          result.push(dir + left + succ + dm[3] + rcontext);
+          temp.push(dir + left + succ + dm[3] + rcontext);
         }
         left += dm[1];
         file = dm[3] + rcontext;
       }
+      result = result.concat(temp.reverse());
     }
     return result;
   }
@@ -265,12 +268,19 @@
     // Anchor
     for each (let it in content.document.links) {
       if (linkFilter(it))
-        result.push({frame: content, uri: it.href, text: it.textContent, element: it});
+        result.push({
+          type: 'link',
+          frame: content,
+          uri: it.href,
+          text: it.textContent,
+          element: it
+        });
     }
     // Form
     for each (let input in content.document.getElementsByTagName('input')) {
       (function (input) {
         result.push({
+          type: 'input',
           frame: content, 
           uri: input.form && input.form.action, 
           text: input.value,
@@ -328,7 +338,7 @@
       let succs = succURI(uri, next);
       if (setting.useSuccPattern) {
         for each (succ in succs) {
-          let link = find(links, function (link) (link.uri.indexOf(succ) >= 0));
+          let link = find(links, function (link) (link.uri && (link.uri.indexOf(succ) >= 0)));
           if (link)
             return link;
         }
