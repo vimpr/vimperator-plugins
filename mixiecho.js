@@ -6,7 +6,7 @@
 (function(){
 	var ucnv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
 		.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-    ucnv.charset = "EUC-JP";
+	ucnv.charset = "EUC-JP";
 	function sprintf(format){
 		var i = 1, re = /%s/, result = "" + format;
 		while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
@@ -52,7 +52,7 @@
 				XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		return result.singleNodeValue ? result.singleNodeValue : null;
 	}
-    function showFollowersStatus(){
+	function showFollowersStatus(){
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "http://mixi.jp/recent_echo.pl", false);
 		xhr.send(null);
@@ -77,7 +77,6 @@
 				text : text
 			});
 		});
-
 		var html = <style type="text/css"><![CDATA[
 			span.twitter.entry-content a { text-decoration: none; }
 			img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
@@ -94,7 +93,6 @@
 				   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
 					sprintf(': <span class="twitter entry-content">%s&#x202C;</span>', status.text))
 						.join("<br/>");
-
 		//liberator.log(html);
 		liberator.echo(html, true);
 	}
@@ -102,7 +100,6 @@
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "http://mixi.jp/recent_echo.pl", false);
 		xhr.send(null);
-
 		var form = getFirstElementByXPath('//form[@action="add_echo.pl"]', parseHTML(xhr.responseText, ['script']));
 		var input = getFirstElementByXPath('.//textarea', form);
 		input.value = text;
@@ -113,12 +110,12 @@
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xhr.send(params.join('&'));
 	}
-    liberator.commands.addUserCommand(["mixiecho"], "Change mixi echo",
-        function(arg, special){
-            if (special || arg.length == 0)
-                showFollowersStatus()
-            else
-                sayEcho(arg);
-        },
-    { });
+	liberator.commands.addUserCommand(["mixiecho"], "Change mixi echo",
+		function(arg, special){
+			if (special || arg.length == 0)
+				showFollowersStatus()
+			else
+				sayEcho(arg);
+		},
+	{ });
 })();
