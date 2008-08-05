@@ -1,4 +1,12 @@
+// Vimperator plugin: "Update mixi echo"
+// Last Change: 05-Aug-2008. Jan 2008
+// License: Creative Commons
+// Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
+
 (function(){
+	var ucnv = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+		.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+    ucnv.charset = "EUC-JP";
 	function sprintf(format){
 		var i = 1, re = /%s/, result = "" + format;
 		while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
@@ -91,7 +99,6 @@
 		liberator.echo(html, true);
 	}
 	function sayEcho(text){
-		/* FIXME TODO: does not work!!!!!!!!!!!!!!!!!!!!
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", "http://mixi.jp/recent_echo.pl", false);
 		xhr.send(null);
@@ -101,18 +108,17 @@
 		input.value = text;
 		var params = [];
 		var inputs = getElementsByXPath('.//*[contains(" INPUT TEXTAREA SELECT ", concat(" ", local-name(), " "))]', form);
-		inputs.forEach(function(input) { params.push(input.name + '=' + encodeURIComponent(input.value)); });
+		inputs.forEach(function(input) { if (input.name.length) params.push(input.name + '=' + escape(ucnv.ConvertFromUnicode(input.value))); });
 		xhr.open("POST", "http://mixi.jp/add_echo.pl", false);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xhr.send(params.join('&'));
-		*/
 	}
     liberator.commands.addUserCommand(["mixiecho"], "Change mixi echo",
         function(arg, special){
             if (special || arg.length == 0)
                 showFollowersStatus()
-            //else
-                //sayTwitter(username, password, arg);
+            else
+                sayEcho(arg);
         },
     { });
 })();
