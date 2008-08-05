@@ -21,19 +21,40 @@
 
   let lastKeyword = null;
 
-  liberator.search.find = function (str, backwards) {
-    XMigemoFind.findMode = XMigemoFind.FIND_MODE_MIGEMO;
-    XMigemoFind.find(backwards, lastKeyword = str, false);
+  let migemized = {
+    find: function (str, backwards) {
+      XMigemoFind.findMode = XMigemoFind.FIND_MODE_MIGEMO;
+      XMigemoFind.find(backwards, lastKeyword = str, false);
+    },
+
+    findAgain: function (reverse) {
+      XMigemoFind.find(reverse, lastKeyword, false);
+    },
+
+    searchSubmitted: function (command, forcedBackward) {
+      //ねこ
+    },
+
+    searchCanceled: function () {
+      XMigemoFind.clear(false);
+    },
   };
 
-  liberator.search.findAgain = function (reverse) {
-    XMigemoFind.find(reverse, lastKeyword, false);
-  };
+  let original = {};
 
-  liberator.search.searchSubmitted = function (command, forcedBackward) {
-    //どうしよう
-  };
+  for (let name in migemized)
+    original[name] = liberator.search[name];
 
-  
+  function set (funcs) {
+    for (let name in funcs)
+      liberator.search[name] = funcs[name];
+  }
+
+  set(migemized);
+
+  liberator.plugins.migemizedFind = {
+    install: function () set(migemized),
+    uninstall: function () set(original),
+  };
 
 })();
