@@ -238,9 +238,15 @@
   }
 
 
+  // 要素が表示されているか？
+  function isVisible (element) {
+    return !(element.style && element.style.display.match(/none/)) && (!element.parentNode || isVisible(element.parentNode))
+  }
+
+
   // リンクのフィルタ
-  function linkFilter (link) {
-    return link.href && !link.href.match(/@/) && link.href.match(/^((https?|file|ftp):\/\/|javascript:)/) && link.textContent;
+  function linkElementFilter (elem) {
+    return isVisible(elem) && elem.href && !elem.href.match(/@/) && elem.href.match(/^((https?|file|ftp):\/\/|javascript:)/) && elem.textContent;
   }
 
 
@@ -250,7 +256,7 @@
     var result = [];
     // Anchor
     for each (let it in content.document.links) {
-      if (linkFilter(it))
+      if (linkElementFilter(it))
         result.push({
           type: 'link',
           frame: content,
