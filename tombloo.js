@@ -4,7 +4,7 @@
  * @description    Tombloo integrate plugin
  * @description-ja Tombloo経由で選択領域などをpostする
  * @author         Trapezoid
- * @version        0.1b
+ * @version        0.1c
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -57,7 +57,7 @@ liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
 
 liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
     function(arg,special){
-        TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extracters[arg],special);
+        TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extractors[arg],special);
     },{
         completer: function(filter){
             var completionList = new Array();
