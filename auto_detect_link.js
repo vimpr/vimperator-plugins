@@ -34,15 +34,19 @@
 //      force:
 //        (次|前)っぽいURIを捏造してそこに移動します。
 //
+//    example:
+//      :js liberator.globalVariables.autoDetectLink = {nextPatterns: [/next/, /次/]}
+//
 //  Function:
 //    (次|前)へのリンクを検出する。
 //    liberator.plugins.autoDetectLink.detect(next, setting)
 //      next:     次のリンクを探すときは、true。
 //      setting:  設定を一時的に上書きする。省略可。
 //      return:   リンクのURIなどを含んだオブジェクト
-//        uri:    アドレス。
-//        text:   リンクテキストなど。
-//        frame:  リンクの存在するフレームの Window オブジェクト。
+//        uri:     アドレス。
+//        text:    リンクテキストなど
+//        frame:   リンクの存在するフレームの Window オブジェクト
+//        element: リンクの要素
 //
 //    (次|前)へのリンクに移動。
 //    liberator.plugins.autoDetectLink.go(next, setting)
@@ -240,7 +244,12 @@
 
   // 要素が表示されているか？
   function isVisible (element) {
-    return !(element.style && element.style.display.match(/none/)) && (!element.parentNode || isVisible(element.parentNode))
+    try {
+      let st = content.document.defaultView.getComputedStyle(element, null);
+      return !(st.display && st.display.match(/none/)) && (!element.parentNode || isVisible(element.parentNode))
+    } catch {
+      return true;
+    }
   }
 
 
