@@ -27,8 +27,7 @@
     }
     title = liberator.util.escapeHTML(title);
 
-    url = liberator.util.escapeHTML(url);
-    var command = new Function("", 'liberator.open("' + url + '");');
+    var command = function () { liberator.open(url); };
     liberator.commands.addUserCommand(
       [title],
       "bookmarklet",
