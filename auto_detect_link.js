@@ -247,7 +247,7 @@
     try {
       let st = content.document.defaultView.getComputedStyle(element, null);
       return !(st.display && st.display.match(/none/)) && (!element.parentNode || isVisible(element.parentNode))
-    } catch {
+    } catch (e) {
       return true;
     }
   }
@@ -402,7 +402,7 @@
   }
 
 
-  liberator.log('auto_nextandback.js loaded');
+  liberator.log('auto_detect_link.js loaded');
 
 }catch(e){liberator.log(e)}
 })();
