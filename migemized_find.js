@@ -32,7 +32,8 @@
     },
 
     searchSubmitted: function (command, forcedBackward) {
-      //ねこ
+      XMigemoFind.clear(false);
+      liberator.modes.reset();
     },
 
     searchCanceled: function () {
