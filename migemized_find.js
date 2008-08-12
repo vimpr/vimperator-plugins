@@ -47,11 +47,11 @@
       if (!word)
         return;
       XMigemoFind.findMode = mode;
-      XMigemoFind.find(backwards, lastKeyword = word, false);
+      XMigemoFind.find(backwards, lastKeyword = word, true);
     },
 
     findAgain: function findAgain (reverse) {
-      XMigemoFind.find(reverse, lastKeyword, false);
+      XMigemoFind.find(reverse, lastKeyword, true);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
