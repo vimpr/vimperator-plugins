@@ -24,7 +24,7 @@
 
   // findMode := FIND_MODE_NATIVE | FIND_MODE_MIGEMO | FIND_MODE_REGEXP 
 
-  let elem = document.getElementById('FindToolbar').getElement('findbar-textbox');
+  const findbarTextbox = document.getElementById('FindToolbar').getElement('findbar-textbox');
   const DOMUtils = Components.classes["@mozilla.org/inspector/dom-utils;1"].
                       getService(Components.interfaces["inIDOMUtils"]);
 
@@ -32,11 +32,10 @@
   let lastKeyword = null;
   let original = {};
 
-  const findbarTextbox = document.getElementById('FindToolbar').getElement('findbar-textbox');
 
-  // アレな方法で not found を検出
+  // とりあえず、アレな方法で not found を検出
   function isNotFound () {
-    let rules = DOMUtils.getCSSStyleRules(elem);
+    let rules = DOMUtils.getCSSStyleRules(findbarTextbox);
     for (let i = 0; i < rules.Count(); i++) {
       if (rules.GetElementAt(i).selectorText.indexOf('notfound') >= 0)
         return true;
@@ -63,19 +62,19 @@
       if (!word)
         return;
       XMigemoFind.findMode = mode;
-      let found = XMigemoFind.find(backwards, lastKeyword = word, true);
-      liberator.log(XMigemoFind.NOTFOUND);
+      XMigemoFind.find(backwards, lastKeyword = word, true);
     },
 
     findAgain: function findAgain (reverse) {
-      let found = XMigemoFind.find(reverse, lastKeyword || previousKeyword, true);
-      liberator.log(XMigemoFind.NOTFOUND);
+      XMigemoFind.find(reverse, lastKeyword || previousKeyword, true);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
       previousKeyword = lastKeyword;
       XMigemoFind.clear(false);
       liberator.modes.reset();
+      if (isNotFound())
+        setTimeout(function () { liberator.echoerr("E486: Pattern not found: " + command); }, 0);
     },
 
     searchCanceled: function searchCanceled () {
