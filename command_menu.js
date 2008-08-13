@@ -2,7 +2,7 @@
 // @name           Command-MainMenu
 // @description-ja メインメニューとツールバーをコマンドで実行できる
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.2
+// @version        1.3
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -115,7 +115,7 @@
   const contextmenu = document.getElementById('contentAreaContextMenu');
 
   function fixName (name) {
-    return name.replace(/^\s+|\s+$/, '').replace(/[\-\s]+/g, '_');
+    return name ? name.replace(/^\s+|\s+$/, '').replace(/[\-\s]+/g, '_') : '';
   }
 
   function getElementName (elem, multi) {

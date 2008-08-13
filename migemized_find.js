@@ -24,7 +24,8 @@
 
   // findMode := FIND_MODE_NATIVE | FIND_MODE_MIGEMO | FIND_MODE_REGEXP 
 
-  const findbarTextbox = document.getElementById('FindToolbar').getElement('findbar-textbox');
+  const FindToolbar = document.getElementById('FindToolbar')
+  const FindbarTextbox = FindToolbar.getElement('findbar-textbox');
   const DOMUtils = Components.classes["@mozilla.org/inspector/dom-utils;1"].
                       getService(Components.interfaces["inIDOMUtils"]);
 
@@ -35,7 +36,7 @@
 
   // とりあえず、アレな方法で not found を検出
   function isNotFound () {
-    let rules = DOMUtils.getCSSStyleRules(findbarTextbox);
+    let rules = DOMUtils.getCSSStyleRules(FindbarTextbox);
     for (let i = 0; i < rules.Count(); i++) {
       if (rules.GetElementAt(i).selectorText.indexOf('notfound') >= 0)
         return true;
