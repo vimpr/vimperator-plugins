@@ -6,7 +6,7 @@
  * @author         teramako teramako@gmail.com
  * @url            http://coderepos.org/share/wiki/VimperatorPlugin/stylechanger.js
  * @license        MPL 1.1/GPL 2.0/LGPL 2.1
- * @version        0.3a
+ * @version        0.3b
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -198,28 +198,28 @@ liberator.plugins.styleSheetsManger = (function(){
 	);
 	var CSSData = {};
 	commands.addUserCommand(['hi[ghlight]'], 'temporary style changer',
-		function(arg){
-			var rel = commands.parseArgs(arg);
-			if (!rel || rel.args.length == 0){
+		function(args){
+			if (args.arguments.length == 0){
 				var str = ['show highlight list'];
 				for (var name in CSSData){
 					str.push('<span class="hl-Title">' + name + '</span>');
 					str.push(CSSData[name]);
 				}
 				echo(str.join('\n'),true);
-			} else if (rel.args.length == 1){
-				if (rel.args[0] == 'clear'){
+			} else if (args.arguments.length == 1){
+				var arg = args.arguments[0];
+				if (arg == 'clear'){
 					for (var name in CSSData){
 						manager.unload(getURIFromCSS(CSSData[name]));
 						delete CSSData[name];
 					}
-				} else if (rel.args[0] in CSSData){
+				} else if (arg in CSSData){
 					echo('<span class="hl-Title">' + rel.args[0] + '</span>\n' + CSSData[rel.args[0]], true);
 				}
-			} else if (rel.args.length > 1){
-				var groupName = rel.args.shift();
+			} else if (args.arguments.length > 1){
+				var groupName = args.arguments.shift();
 				if (groupName == 'clear'){
-					rel.args.forEach(function(name){
+					args.arguments.forEach(function(name){
 						if (name in CSSData){
 							manager.unload(getURIFromCSS(CSSData[name]));
 							delete CSSData[name];
@@ -227,13 +227,13 @@ liberator.plugins.styleSheetsManger = (function(){
 					});
 				} else {
 					if (groupName in CSSData) manager.unload(getURIFromCSS(CSSData[groupName]));
-					CSSData[groupName] = rel.args.join(' ');
+					CSSData[groupName] = args.arguments.join(' ');
 					manager.load(getURIFromCSS(CSSData[groupName]));
 				}
 			}
 		},{
 			completer: function(aFilter){
-				var rel = commands.parseArgs(aFilter);
+				var rel = commands.parseArgs(aFilter,null,"*");
 				var list1 = [ ['clear', 'clear all or specified group'] ];
 				var list2 = [];
 				if (!rel){
@@ -242,21 +242,22 @@ liberator.plugins.styleSheetsManger = (function(){
 					}
 					return [0,list1.concat(list2)];
 				}
-				if (rel.args.length == 2 && rel.args[0] == 'clear'){
+				if (rel.arguments.length == 2 && rel.arguments[0] == 'clear'){
 					for (var name in CSSData){
-						if (name.indexOf(rel.args[1]) == 0) list2.push([name, CSSData[name]]);
+						if (name.indexOf(rel.arguments[1]) == 0) list2.push([name, CSSData[name]]);
 					}
 					return [6, list2];
 				} else if (rel.args.length == 1){
 					for (var name in CSSData){
-						if (name.indexOf(rel.args[0]) == 0) list2.push([name, CSSData[name]]);
+						if (name.indexOf(rel.arguments[0]) == 0) list2.push([name, CSSData[name]]);
 					}
-					if ('clear'.indexOf(rel.args[0]) == 0)
+					if ('clear'.indexOf(rel.arguments[0]) == 0)
 						return [0, list1.concat(list2)];
 					else
 						return [0, list2];
 				}
-			}
+			},
+			argCount: '*'
 		}
 	);
 	init();
