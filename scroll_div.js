@@ -52,10 +52,12 @@
   }
 
   // スクロール対象を変更
-  function shiftScrollElement () {
+  function shiftScrollElement (n) {
     let idx = content.document.__div_scroller_index || 0;
     let es = scrollableElements();
-    idx++;
+    idx += (n || 1);
+    if (idx < 0)
+      idx = es.length - 1;
     if (idx >= es.length)
       idx = 0;
     content.document.__div_scroller_index = idx;
@@ -89,13 +91,24 @@
 
   liberator.mappings.addUserMap(
     [liberator.modes.NORMAL], 
-    [']d'],
-    'Shift Scroll Element',
-    function () shiftScrollElement()
+    ['<Leader>k'],
+    'Scroll up',
+    function () scroll(-30)
   );
 
-  scroll(100);
+  liberator.mappings.addUserMap(
+    [liberator.modes.NORMAL], 
+    [']d'],
+    'Shift Scroll Element',
+    function () shiftScrollElement(1)
+  );
 
+  liberator.mappings.addUserMap(
+    [liberator.modes.NORMAL], 
+    ['[d'],
+    'Shift Scroll Element',
+    function () shiftScrollElement(-1)
+  );
 
 
 })();
