@@ -1,18 +1,29 @@
+// ==VimperatorPlugin==
+// @name           Div Scroller
+// @description-ja スクロールができる div 要素などでスクロールする
+// @license        Creative Commons 2.1 (Attribution + Share Alike)
+// @version        0.1
+// ==/VimperatorPlugin==
+//
+//  Mappings:
+//    ]d [d
+//      スクロール対象を変更
+//      ]f [f のようなもの
+//    <Leader>j <Leader>k
+//      スクロールする
+//
+
 (function () {
 
-  let re = /auto|scroll/i;
-
+  // スクロール可能か？
   function isScrollable (e, doc) {
-    try {
-      let s = doc.defaultView.getComputedStyle(e, '');
-      if (e.scrollHeight <= e.clientHeight)
-        return;
-      for each (let n in ['overflow', 'overflowY', 'overflowX']) {
-        if (s[n] && s[n].match(re))
-          return true;
-      }
-    } catch (e) {
-      liberator.log(e);
+    const re = /auto|scroll/i;
+    let s = doc.defaultView.getComputedStyle(e, '');
+    if (e.scrollHeight <= e.clientHeight)
+      return;
+    for each (let n in ['overflow', 'overflowY', 'overflowX']) {
+      if (s[n] && s[n].match(re))
+        return true;
     }
   }
 
@@ -25,7 +36,6 @@
                 "position: fixed; top: 0; bottom: 0; left: 0; right: 0;";
     indicator.setAttribute("style", style);
     e.appendChild(indicator);
-
     // remove the frame indicator
     setTimeout(function () { e.removeChild(indicator); }, 500);
   }
@@ -34,19 +44,12 @@
   function scrollableElements () {
     let result = [];
     let doc = content.document;
-
-    // var r = doc.evaluate("//div[contains(@style, 'overflow')]", doc, null, 7, null)
-    // for (var i = 0; i < r.snapshotLength; i++) {
-    //   r.snapshotItem(i).scrollTop += dy;
-    // }
-
-    var r = doc.evaluate("//div", doc, null, 7, null)
+    var r = doc.evaluate("//div|//ul", doc, null, 7, null)
     for (var i = 0; i < r.snapshotLength; i++) {
       let e = r.snapshotItem(i);
       if (isScrollable(e, doc))
         result.push(e);
     }
-
     liberator.log('scrollableElements: ' + result.length);
     return result;
   }
@@ -71,10 +74,10 @@
   }
 
   // スクロールする
-  function scroll (dy) {
+  function scroll (down) {
     let elem = currentElement();
     if (elem)
-      elem.scrollTop += dy;
+      elem.scrollTop += Math.max(30, elem.clientHeight - 20) * (down ? 1 : -1);
     //for each (let elem in scrollableElements()) {
     //  liberator.log(elem.tagName);
     //  liberator.log(elem.id);
@@ -82,18 +85,19 @@
     //}
   }
 
+
   liberator.mappings.addUserMap(
     [liberator.modes.NORMAL], 
     ['<Leader>j'],
     'Scroll down',
-    function () scroll(30)
+    function () scroll(true)
   );
 
   liberator.mappings.addUserMap(
     [liberator.modes.NORMAL], 
     ['<Leader>k'],
     'Scroll up',
-    function () scroll(-30)
+    function () scroll(false)
   );
 
   liberator.mappings.addUserMap(
