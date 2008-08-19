@@ -2,13 +2,17 @@
 
   let re = /auto|scroll/i;
 
-  // FIXME!!!!!!!!  Firebug では overflow になってるのに false になったりする。
   function isScrollable (e, doc) {
-    let s = doc.defaultView.getComputedStyle(e, null);
-    for each (let n in ['overflow', 'overflow-x', 'overflow-y']) {
-      //if (s[n] && s[n].match(/.+/)) liberator.log(n + ':' + s[n]);
-      if (s[n] && s[n].match(re))
-        return true;
+    try {
+      let s = doc.defaultView.getComputedStyle(e, '');
+      if (e.scrollHeight <= e.clientHeight)
+        return;
+      for each (let n in ['overflow', 'overflowY', 'overflowX']) {
+        if (s[n] && s[n].match(re))
+          return true;
+      }
+    } catch (e) {
+      liberator.log(e);
     }
   }
 
@@ -43,7 +47,7 @@
         result.push(e);
     }
 
-    liberator.log(result.length);
+    liberator.log('scrollableElements: ' + result.length);
     return result;
   }
 
@@ -61,7 +65,6 @@
   function currentElement () {
     let es = scrollableElements();
     let idx = content.document.__div_scroller_index || 0;
-    liberator.log("idx: " + idx);
     return es[idx];
   }
 
@@ -70,8 +73,11 @@
     let elem = currentElement();
     if (elem)
       elem.scrollTop += dy;
-    //for each (let elem in scrollableElements())
+    //for each (let elem in scrollableElements()) {
+    //  liberator.log(elem.tagName);
+    //  liberator.log(elem.id);
     //  elem.scrollTop += dy;
+    //}
   }
 
   liberator.mappings.addUserMap(
@@ -88,6 +94,7 @@
     function () shiftScrollElement()
   );
 
+  scroll(100);
 
 
 
