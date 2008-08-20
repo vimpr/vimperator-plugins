@@ -12,14 +12,16 @@
 //    <Leader>j <Leader>k
 //      スクロールする
 //
+//  TODO:
+//    フレーム対応
 
 (function () {
 
   // スクロール可能か？
-  function isScrollable (e, doc) {
+  function isScrollable (elem) {
     const re = /auto|scroll/i;
-    let s = doc.defaultView.getComputedStyle(e, '');
-    if (e.scrollHeight <= e.clientHeight)
+    let s = elem.ownerDocument.defaultView.getComputedStyle(elem, '');
+    if (elem.scrollHeight <= elem.clientHeight)
       return;
     for each (let n in ['overflow', 'overflowY', 'overflowX']) {
       if (s[n] && s[n].match(re))
@@ -27,43 +29,49 @@
     }
   }
 
-  // FIXME
-  function flashElement (e, doc) {
-    var indicator = doc.createElement("div");
-    indicator.id = "liberator-frame-indicator";
-    // NOTE: need to set a high z-index - it's a crapshoot!
-    var style = "background-color: red; opacity: 0.5; z-index: 999;" +
-                "position: fixed; top: 0; bottom: 0; left: 0; right: 0;";
+  // 光らせる
+  function flashElement (elem) {
+    let indicator = elem.ownerDocument.createElement("div");
+    let rect = elem.getBoundingClientRect();
+    indicator.id = "nyantoro-element-indicator";
+    let style = "background-color: blue; opacity: 0.5; z-index: 999;" +
+                "position: fixed; " + 
+                "top: " + rect.top + "px;" +
+                "height:" + elem.clientHeight + "px;"+
+                "left: " + rect.left + "px;" +
+                "width: " + elem.clientWidth + "px";
     indicator.setAttribute("style", style);
-    e.appendChild(indicator);
-    // remove the frame indicator
-    setTimeout(function () { e.removeChild(indicator); }, 500);
+    elem.appendChild(indicator);
+    setTimeout(function () elem.removeChild(indicator), 500);
   }
 
   // スクロール可能な要素のリストを返す
   function scrollableElements () {
     let result = [];
     let doc = content.document;
-    var r = doc.evaluate("//div|//ul", doc, null, 7, null)
-    for (var i = 0; i < r.snapshotLength; i++) {
-      let e = r.snapshotItem(i);
-      if (isScrollable(e, doc))
-        result.push(e);
+    let r = doc.evaluate("//div|//ul", doc, null, 7, null)
+    for (let i = 0; i < r.snapshotLength; i++) {
+      let elem = r.snapshotItem(i);
+      if (isScrollable(elem))
+        result.push(elem);
     }
-    liberator.log('scrollableElements: ' + result.length);
     return result;
   }
 
   // スクロール対象を変更
   function shiftScrollElement (n) {
-    let idx = content.document.__div_scroller_index || 0;
+    let doc = content.document;
+    let idx = doc.__div_scroller_index || 0;
     let es = scrollableElements();
+    if (es.length <= 0)
+      liberator.echoerr('scrollable element not found');
     idx += (n || 1);
     if (idx < 0)
       idx = es.length - 1;
     if (idx >= es.length)
       idx = 0;
     content.document.__div_scroller_index = idx;
+    flashElement(es[idx]);
   }
 
   // 現在のスクロール対象を返す
@@ -78,11 +86,6 @@
     let elem = currentElement();
     if (elem)
       elem.scrollTop += Math.max(30, elem.clientHeight - 20) * (down ? 1 : -1);
-    //for each (let elem in scrollableElements()) {
-    //  liberator.log(elem.tagName);
-    //  liberator.log(elem.id);
-    //  elem.scrollTop += dy;
-    //}
   }
 
 
