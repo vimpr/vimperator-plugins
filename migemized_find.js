@@ -11,6 +11,10 @@
 //      '?'  => Migemo検索
 //      以外 => Migemo検索
 //
+// Setting:
+//    let g:migemized_find_delay = "0"
+//      検索開始の遅延時間
+//
 // Author:
 //    anekos
 //
@@ -18,7 +22,9 @@
 //    http://d.hatena.ne.jp/nokturnalmortum/20080805#1217941126
 //
 // TODO:
-//  FIND_MODE_NATIVE のときうまく動かない。XUL/Migemoの問題？
+//    FIND_MODE_NATIVE のときうまく動かない。XUL/Migemoの問題？
+//    検索時に取りこぼさないようにする。
+//    (とりあえず検索開始を遅延することで取りこぼしにくくした)
 
 (function () {
 
@@ -57,13 +63,21 @@
     return [str, XMigemoFind.FIND_MODE_MIGEMO];
   }
 
+  let timer = null;
+
   let migemized = {
     find: function find (str, backwards) {
-      let [word, mode] = getFindMode(str);
-      if (!word)
-        return;
-      XMigemoFind.findMode = mode;
-      XMigemoFind.find(backwards, lastKeyword = word, true);
+      let f = function () {
+        liberator.log('called ');
+        let [word, mode] = getFindMode(str);
+        if (!word)
+          return;
+        XMigemoFind.findMode = mode;
+        XMigemoFind.find(backwards, lastKeyword = word, true);
+      };
+      if (timer)
+        clearTimeout(timer);
+      timer = setTimeout(f, parseInt(liberator.globalVariables.migemized_find_delay || '300'));
     },
 
     findAgain: function findAgain (reverse) {
