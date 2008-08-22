@@ -10,6 +10,8 @@
 //      post "some thing text" to keyword 'id:username' on hatena haiku.
 //  :haiku #keyword some thing text
 //      post "some thing text" to keyword 'id:keyword' on hatena haiku.
+//  :haiku!/
+//      show public timeline.
 //  :haiku! someone
 //      show someone's statuses.
 //  :haiku!+ someone
@@ -50,7 +52,7 @@
         xhr.open("POST", "http://h.hatena.ne.jp/api/statuses/user_timeline/" + user + ".json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        xhr.open("POST", "http://h.hatena.ne.jp/api/favorites/create/" + window.eval(xhr.responseText)[0].id + '.json', false, username, password);
+        xhr.open("POST", "http://h.hatena.ne.jp/api/favorites/create/" + evalFunc(xhr.responseText)[0].id + '.json', false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
     }
@@ -59,14 +61,17 @@
         xhr.open("POST", "http://h.hatena.ne.jp/api/statuses/user_timeline/" + user + ".json?count=1", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        xhr.open("POST", "http://h.hatena.ne.jp/api/favorites/destroy/" + window.eval(xhr.responseText)[0].id + '.json', false, username, password);
+        xhr.open("POST", "http://h.hatena.ne.jp/api/favorites/destroy/" + evalFunc(xhr.responseText)[0].id + '.json', false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
     }
     function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
-        var endPoint = target ? "http://h.hatena.ne.jp/api/statuses/user_timeline/" + target + ".json"
-            : "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
+        var endPoint = target ?
+            target == "/" ?
+            "http://h.hatena.ne.jp/api/statuses/public_timeline.json"
+          : "http://h.hatena.ne.jp/api/statuses/user_timeline/" + target + ".json"
+          : "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
         xhr.open("POST", endPoint, false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
