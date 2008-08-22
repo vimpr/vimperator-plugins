@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        0.3
+// @version        1.0
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -11,90 +11,180 @@
 //      '?'  => Migemo検索
 //      以外 => Migemo検索
 //
-// Setting:
-//    let g:migemized_find_delay = "0"
-//      検索開始の遅延時間
-//
 // Author:
 //    anekos
 //
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/20080805#1217941126
-//
-// TODO:
-//    FIND_MODE_NATIVE のときうまく動かない。XUL/Migemoの問題？
-//    検索時に取りこぼさないようにする。
-//    (とりあえず検索開始を遅延することで取りこぼしにくくした)
 
-(function () {
+(function () { try {
 
-  // findMode := FIND_MODE_NATIVE | FIND_MODE_MIGEMO | FIND_MODE_REGEXP 
+  let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
+                     .getService(Components.interfaces.pIXMigemoFactory)
+                     .getService('ja');
 
-  const FindToolbar = document.getElementById('FindToolbar')
-  const FindbarTextbox = FindToolbar.getElement('findbar-textbox');
-  const DOMUtils = Components.classes["@mozilla.org/inspector/dom-utils;1"].
-                      getService(Components.interfaces["inIDOMUtils"]);
+  function getPosition (elem) {
+    if (!elem)
+      return {x: 0, y: 0};
+    let parent = getPosition(elem.offsetParent);
+    return { x: (elem.offsetLeft || 0) + parent.x,
+             y: (elem.offsetTop  || 0) + parent.y  }
+  }
 
-  let previousKeyword = null;
-  let lastKeyword = null;
+  let delayCallTimer = null;
+
+  let MF = {
+    lastSearchText: null,
+    previousSearchText: null,
+    lastDirection: null,
+
+    get buffer function () liberator.buffer,
+
+    get document function () content.document,
+
+    get storage function () (this.buffer.__migemized_find_storage || (this.buffer.__migemized_find_storage = {})),
+
+    get defaultRange function () {
+      let range = this.document.createRange();
+      range.selectNodeContents(this.document.body);
+      return range;
+    },
+
+    get highlightRemover function () (this.storage.highlightRemover || function () void(0)),
+    set highlightRemover function (fun) (this.storage.highlightRemover = fun),
+
+    MODE_NORMAL: 0,
+    MODE_REGEXP: 1,
+    MODE_MIGEMO: 2,
+
+    // 検索文字列から検索モードと検索文字列を得る。
+    searchTextToRegExpString: function (str) {
+      let [head, tail] = [str[0], str.slice(1)];
+      switch (head) {
+        case '/':
+          return tail;
+        case '?':
+          return XMigemoCore.getRegExp(tail);
+      }
+      return XMigemoCore.getRegExp(str);
+    },
+
+    removeHighlight: function () {
+      this.highlightRemover()
+      this.highlightRemover = null;
+    },
+
+    highlightRange: function (range, setRemover) {
+      let span = this.document.createElement('span');
+      let spanStyle = 'background-color: lightblue; color: black; border: dotted 3px blue;';
+
+      span.setAttribute('style', spanStyle);
+      range.surroundContents(span);
+
+      let scroll = function () {
+        let pos = getPosition(span);
+        content.scroll(pos.x - (content.innerWidth / 2),
+                       pos.y - (content.innerHeight / 2));
+      };
+      setTimeout(scroll, 0);
+
+      let remover = function () {
+        let range = this.document.createRange();
+        range.selectNodeContents(span);
+        let content = range.extractContents();
+        range.setStartBefore(span);
+        range.insertNode(content);
+        range.selectNode(span); 
+        range.deleteContents(); 
+      };
+
+      if (setRemover)
+        this.highlightRemover = remover;
+
+      return remover;
+    },
+
+    find: function (str, backwards, range, start, end) {
+        if (!range)
+          range = this.defaultRange;
+        try {
+          return XMigemoCore.regExpFind(str, 'i', range, start, end, backwards);
+        } catch (e) {
+          return false;
+        }
+    },
+
+    findFirst: function (str, backwards) {
+      let f = function () {
+        this.lastDirection = backwards;
+        this.lastSearchText = str = this.searchTextToRegExpString(str);
+
+        let result = this.storage.lastResult = this.find(str, backwards);
+
+        this.removeHighlight();
+        if (result)
+          this.highlightRange(result, true);
+
+        return result;
+      };
+
+      if (delayCallTimer)
+        clearTimeout(delayCallTimer);
+
+      delayCallTimer = setTimeout(function () f.call(MF), 300);
+    },
+
+    findAgain: function (reverse) {
+      this.removeHighlight();
+
+      let str = this.lastSearchText;
+      let range = this.defaultRange;
+      let last = this.storage.lastResult;
+      let backwards = !!(!this.lastDirection ^ !reverse);
+      let start, end;
+
+      if (last) {
+        if (backwards) {
+          end = last.cloneRange();
+          end.setStart(last.endContainer, last.endOffset);
+        } else {
+          start = last.cloneRange();
+          start.setStart(last.endContainer, last.endOffset);
+        }
+      }
+
+      let result = this.storage.lastResult = this.find(str, backwards, range, start, end);
+      if (!result)
+        result = this.storage.lastResult = this.find(str, backwards, range);
+
+      if (result)
+        this.highlightRange(result, true);
+      else
+        liberator.echoerr('not found: ' + str);
+
+      return result;
+    },
+  };
+
   let original = {};
-
-
-  // とりあえず、アレな方法で not found を検出
-  function isNotFound () {
-    let rules = DOMUtils.getCSSStyleRules(FindbarTextbox);
-    for (let i = 0; i < rules.Count(); i++) {
-      if (rules.GetElementAt(i).selectorText.indexOf('notfound') >= 0)
-        return true;
-    }
-  }
-
-  // 検索文字列から検索モードと検索文字列を得る。
-  function getFindMode (str) {
-    let [head, tail] = [str[0], str.slice(1)];
-    switch (head) {
-      case '/':
-        return [tail, XMigemoFind.FIND_MODE_REGEXP];
-      case '?':
-        return [tail, XMigemoFind.FIND_MODE_MIGEMO];
-      //  case '-':
-      //    return [tail, XMigemoFind.FIND_MODE_NATIVE];
-    }
-    return [str, XMigemoFind.FIND_MODE_MIGEMO];
-  }
-
-  let timer = null;
 
   let migemized = {
     find: function find (str, backwards) {
-      let f = function () {
-        liberator.log('called ');
-        let [word, mode] = getFindMode(str);
-        if (!word)
-          return;
-        XMigemoFind.findMode = mode;
-        XMigemoFind.find(backwards, lastKeyword = word, true);
-      };
-      if (timer)
-        clearTimeout(timer);
-      timer = setTimeout(f, parseInt(liberator.globalVariables.migemized_find_delay || '300'));
+      MF.findFirst(str, backwards);
     },
 
     findAgain: function findAgain (reverse) {
-      XMigemoFind.find(reverse, lastKeyword || previousKeyword, true);
+      MF.findAgain(reverse);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
-      previousKeyword = lastKeyword;
-      XMigemoFind.clear(false);
-      liberator.modes.reset();
-      if (isNotFound())
-        setTimeout(function () { liberator.echoerr("E486: Pattern not found: " + command); }, 0);
+      if (!MF.storage.lastResult)
+        liberator.echoerr('not found: ' + MF.lastSearchText);
+      MF.previousSearchText = MF.lastSearchText;
     },
 
     searchCanceled: function searchCanceled () {
-      lastKeyword = null;
-      XMigemoFind.clear(false);
+      MF.lastSearchText = MF.previousSearchText;
     },
   };
 
@@ -113,4 +203,4 @@
     uninstall: function () set(original),
   };
 
-})();
+}catch(e){liberator.log(e);}})();
