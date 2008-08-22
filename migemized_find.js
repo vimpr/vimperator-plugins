@@ -107,6 +107,19 @@
     find: function (str, backwards, range, start, end) {
         if (!range)
           range = this.defaultRange;
+
+        if (!start) {
+          start = range.startContainer.ownerDocument.createRange();
+          start.setStartBefore(range.startContainer);
+        }
+        if (!end) {
+          end = range.endContainer.ownerDocument.createRange();
+          end.setEndAfter(range.endContainer);
+        }
+
+        if (backwards)
+          [start, end] = [end, start];
+
         try {
           return XMigemoCore.regExpFind(str, 'i', range, start, end, backwards);
         } catch (e) {
@@ -146,7 +159,7 @@
       if (last) {
         if (backwards) {
           end = last.cloneRange();
-          end.setStart(last.endContainer, last.endOffset);
+          end.setEnd(last.startContainer, last.startOffset);
         } else {
           start = last.cloneRange();
           start.setStart(last.endContainer, last.endOffset);
