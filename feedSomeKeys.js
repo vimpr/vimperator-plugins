@@ -20,6 +20,8 @@
  * :fmapc
  * :feedmapclear            -> 全てを無に帰して元に戻す
  *
+ * :f[eed]map! lhs          -> "!" をつけると、仮想キーコードでイベントを送るように
+ *
  * == LDR の場合 ==
 js <<EOF
 autocommands.add('PageLoad,TabSelect',/reader\.livedoor\.com\/reader\//,
@@ -86,15 +88,67 @@ const keyTable = [
     [ KeyEvent.DOM_VK_F21, ["F21"] ],
     [ KeyEvent.DOM_VK_F22, ["F22"] ],
     [ KeyEvent.DOM_VK_F23, ["F23"] ],
-    [ KeyEvent.DOM_VK_F24, ["F24"] ]
+    [ KeyEvent.DOM_VK_F24, ["F24"] ],
 ];
-function getKeyCode(str) {
+const vkeyTable = [
+    [ KeyEvent.DOM_VK_0, ['0'] ],
+    [ KeyEvent.DOM_VK_1, ['1'] ],
+    [ KeyEvent.DOM_VK_2, ['2'] ],
+    [ KeyEvent.DOM_VK_3, ['3'] ],
+    [ KeyEvent.DOM_VK_4, ['4'] ],
+    [ KeyEvent.DOM_VK_5, ['5'] ],
+    [ KeyEvent.DOM_VK_6, ['6'] ],
+    [ KeyEvent.DOM_VK_7, ['7'] ],
+    [ KeyEvent.DOM_VK_8, ['8'] ],
+    [ KeyEvent.DOM_VK_9, ['9'] ],
+    [ KeyEvent.DOM_VK_SEMICOLON, [';'] ],
+    [ KeyEvent.DOM_VK_EQUALS, ['='] ],
+    [ KeyEvent.DOM_VK_A, ['a'] ],
+    [ KeyEvent.DOM_VK_B, ['b'] ],
+    [ KeyEvent.DOM_VK_C, ['c'] ],
+    [ KeyEvent.DOM_VK_D, ['d'] ],
+    [ KeyEvent.DOM_VK_E, ['e'] ],
+    [ KeyEvent.DOM_VK_F, ['f'] ],
+    [ KeyEvent.DOM_VK_G, ['g'] ],
+    [ KeyEvent.DOM_VK_H, ['h'] ],
+    [ KeyEvent.DOM_VK_I, ['i'] ],
+    [ KeyEvent.DOM_VK_J, ['j'] ],
+    [ KeyEvent.DOM_VK_K, ['k'] ],
+    [ KeyEvent.DOM_VK_L, ['l'] ],
+    [ KeyEvent.DOM_VK_M, ['m'] ],
+    [ KeyEvent.DOM_VK_N, ['n'] ],
+    [ KeyEvent.DOM_VK_O, ['o'] ],
+    [ KeyEvent.DOM_VK_P, ['p'] ],
+    [ KeyEvent.DOM_VK_Q, ['q'] ],
+    [ KeyEvent.DOM_VK_R, ['r'] ],
+    [ KeyEvent.DOM_VK_S, ['s'] ],
+    [ KeyEvent.DOM_VK_T, ['t'] ],
+    [ KeyEvent.DOM_VK_U, ['u'] ],
+    [ KeyEvent.DOM_VK_V, ['v'] ],
+    [ KeyEvent.DOM_VK_W, ['w'] ],
+    [ KeyEvent.DOM_VK_X, ['x'] ],
+    [ KeyEvent.DOM_VK_Y, ['y'] ],
+    [ KeyEvent.DOM_VK_Z, ['z'] ],
+    [ KeyEvent.DOM_VK_MULTIPLY, ['*'] ],
+    [ KeyEvent.DOM_VK_ADD, ['+'] ],
+    [ KeyEvent.DOM_VK_SUBTRACT, ['-'] ],
+    [ KeyEvent.DOM_VK_COMMA, [','] ],
+    [ KeyEvent.DOM_VK_PERIOD, ['.'] ],
+    [ KeyEvent.DOM_VK_SLASH, ['/'] ],
+    [ KeyEvent.DOM_VK_BACK_QUOTE, ['`'] ],
+    [ KeyEvent.DOM_VK_OPEN_BRACKET, ['{'] ],
+    [ KeyEvent.DOM_VK_BACK_SLASH, ['\\'] ],
+    [ KeyEvent.DOM_VK_CLOSE_BRACKET, ['}'] ],
+    [ KeyEvent.DOM_VK_QUOTE, ["'"] ],
+];
+
+function getKeyCode(str, vkey) {
     str = str.toLowerCase();
     var ret = 0;
-    keyTable.some(function(i) i[1].some(function(k) k.toLowerCase() == str && (ret = i[0])));
+    (vkey ? vkeyTable : keyTable).some(function(i) i[1].some(function(k) k.toLowerCase() == str && (ret = i[0])));
     return ret;
 }
-function init(keys){
+function init(keys, useVkey){
     destroy();
     keys.forEach(function(key){
         var origKey, feedKey;
@@ -103,10 +157,10 @@ function init(keys){
         } else if (typeof(key) == 'string'){
             [origKey, feedKey] = [key,key];
         }
-        replaceUserMap(origKey, feedKey);
+        replaceUserMap(origKey, feedKey, useVkey);
     });
 }
-function replaceUserMap(origKey, feedKey){
+function replaceUserMap(origKey, feedKey, useVkey){
     if (mappings.hasMap(modes.NORMAL, origKey)){
         var origMap = mappings.get(modes.NORMAL,origKey);
         if (origMap.description.indexOf(origKey+' -> ') != 0) {
@@ -124,7 +178,7 @@ function replaceUserMap(origKey, feedKey){
         function(count){
             count = count > 1 ? count : 1;
             for (var i=0; i<count; i++){
-                feedKeyIntoContent(feedKey);
+                feedKeyIntoContent(feedKey, useVkey);
             }
         }, { flags:liberator.Mappings.flags.COUNT, rhs:feedKey, noremap:true });
     addUserMap(map);
@@ -178,7 +232,7 @@ function getDestinationElement(frameNum){
     }
     return root;
 }
-function feedKeyIntoContent(keys){
+function feedKeyIntoContent(keys, useVkey){
     var frameNum = 0;
     [keys, frameNum] = parseKeys(keys);
     var destElem = getDestinationElement(frameNum);
@@ -186,10 +240,15 @@ function feedKeyIntoContent(keys){
     modes.passAllKeys = true;
     modes.passNextKey = false;
     for (var i=0; i<keys.length; i++){
-        var charCode = keys.charCodeAt(i);
-        var keyCode = 0;
+        var keyCode;
         var shift = false, ctrl = false, alt = false, meta = false;
-        if (charCode == 60){ // charCode:60 => "<"
+        if (useVkey && (keyCode = getKeyCode(keys[i], true))) {
+            var charCode = 0;
+        } else {
+            var charCode = keys.charCodeAt(i);
+            keyCode = 0;
+        }
+        if (keys[i] == '<'){ 
             var matches = keys.substr(i + 1).match(/^((?:[ACMSacms]-)*)([^>]+)/);
             if (matches) {
                 if (matches[1]) {
@@ -200,9 +259,18 @@ function feedKeyIntoContent(keys){
                 }
                 if (matches[2].length == 1) {
                     if (!ctrl && !alt && !shift && !meta) return false;
-                    charCode = matches[2].charCodeAt(0);
+                    if (useVkey && (keyCode = getKeyCode(matches[2], true))) {
+                        charCode = 0;
+                    } else {
+                        charCode = matches[2].charCodeAt(0);
+                    }
                 } else if (matches[2].toLowerCase() == "space") {
-                    charCode = KeyEvent.DOM_VK_SPACE;
+                    if (useVkey) {
+                        charCode = 0;
+                        keyCode = KeyEvent.DOM_VK_SPACE;
+                    } else {
+                        charCode = KeyEvent.DOM_VK_SPACE;
+                    }
                 } else if (keyCode = getKeyCode(matches[2])) {
                     charCode = 0;
                 } else  {
@@ -214,6 +282,7 @@ function feedKeyIntoContent(keys){
             shift = (keys[i] >= "A" && keys[i] <= "Z");
         }
 
+        //liberator.log({ctrl:ctrl, alt:alt, shift:shift, meta:meta, keyCode:keyCode, charCode:charCode, useVkey: useVkey});
         var evt = content.document.createEvent('KeyEvents');
         evt.initKeyEvent('keypress', true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
         destElem.document.dispatchEvent(evt);
@@ -225,15 +294,15 @@ function feedKeyIntoContent(keys){
 // Command
 // --------------------------
 commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
-    function(args){
+    function(args, bang){
         if(!args){
             echo(feedMaps.map(function(map) map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;')),true);
         }
         var [ ,lhs,rhs] = args.match(/(\S+)(?:\s+(.+))?/);
         if (!rhs){
-            replaceUserMap(lhs,lhs);
+            replaceUserMap(lhs,lhs,bang);
         } else {
-            replaceUserMap(lhs,rhs);
+            replaceUserMap(lhs,rhs,bang);
         }
     }
 );
