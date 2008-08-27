@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.2
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -31,10 +31,27 @@
              y: (elem.offsetTop  || 0) + parent.y  }
   }
 
-  let delayCallTimer = null;
+  function slashArray (ary, center) {
+    let head = [], tail = [];
+    let current = head;
+    for (let i = 0; i < ary.length; i++) {
+      let it = ary[i];
+      if (it == center)
+        current = tail;
+      else
+        current.push(it);
+    }
+    return [head, tail];
+  }
 
   let MF = {
+    // 定数
+    MODE_NORMAL: 0,
+    MODE_REGEXP: 1,
+    MODE_MIGEMO: 2,
+
     lastSearchText: null,
+    lastSearchExpr: null,
     previousSearchText: null,
     lastDirection: null,
 
@@ -42,20 +59,17 @@
 
     get document function () content.document,
 
-    get storage function () (this.buffer.__migemized_find_storage || (this.buffer.__migemized_find_storage = {})),
+    // タブ毎に状態を保存するために、変数を用意
+    get storage function () (gBrowser.mCurrentTab.__migemized_find_storage || (gBrowser.mCurrentTab.__migemized_find_storage = {})),
 
-    get defaultRange function () {
-      let range = this.document.createRange();
-      range.selectNodeContents(this.document.body);
+    makeBodyRange: function (frame) {
+      let range = frame.document.createRange();
+      range.selectNodeContents(frame.document.body);
       return range;
     },
 
     get highlightRemover function () (this.storage.highlightRemover || function () void(0)),
     set highlightRemover function (fun) (this.storage.highlightRemover = fun),
-
-    MODE_NORMAL: 0,
-    MODE_REGEXP: 1,
-    MODE_MIGEMO: 2,
 
     // 検索文字列から検索モードと検索文字列を得る。
     searchTextToRegExpString: function (str) {
@@ -74,17 +88,17 @@
       this.highlightRemover = null;
     },
 
-    highlightRange: function (range, setRemover) {
+    highlight: function (target, setRemover) {
       let span = this.document.createElement('span');
       let spanStyle = 'background-color: lightblue; color: black; border: dotted 3px blue;';
 
       span.setAttribute('style', spanStyle);
-      range.surroundContents(span);
+      target.range.surroundContents(span);
 
       let scroll = function () {
         let pos = getPosition(span);
-        content.scroll(pos.x - (content.innerWidth / 2),
-                       pos.y - (content.innerHeight / 2));
+        target.frame.scroll(pos.x - (target.frame.innerWidth / 2),
+                            pos.y - (target.frame.innerHeight / 2));
       };
       setTimeout(scroll, 0);
 
@@ -105,115 +119,181 @@
     },
 
     find: function (str, backwards, range, start, end) {
-        if (!range)
-          range = this.defaultRange;
+      if (!range)
+        range = this.makeBodyRange(this.currentFrames[0]);
 
-        if (!start) {
-          start = range.startContainer.ownerDocument.createRange();
-          start.setStartBefore(range.startContainer);
-        }
-        if (!end) {
-          end = range.endContainer.ownerDocument.createRange();
-          end.setEndAfter(range.endContainer);
-        }
+      if (!start) {
+        start = range.startContainer.ownerDocument.createRange();
+        start.setStartBefore(range.startContainer);
+      }
+      if (!end) {
+        end = range.endContainer.ownerDocument.createRange();
+        end.setEndAfter(range.endContainer);
+      }
 
-        if (backwards)
-          [start, end] = [end, start];
+      // 検索方向に合わせて、開始終了位置を交換
+      if (backwards)
+        [start, end] = [end, start];
 
-        try {
-          return XMigemoCore.regExpFind(str, 'i', range, start, end, backwards);
-        } catch (e) {
-          return false;
-        }
+      try {
+        return XMigemoCore.regExpFind(str, 'i', range, start, end, backwards);
+      } catch (e) {
+        return false;
+      }
     },
 
     findFirst: function (str, backwards) {
-      let f = function () {
-        this.lastDirection = backwards;
-        this.lastSearchText = str = this.searchTextToRegExpString(str);
+      this.lastDirection = backwards;
+      this.lastSearchText = str;
+      this.lastSearchExpr = str = this.searchTextToRegExpString(str);
 
-        let result = this.storage.lastResult = this.find(str, backwards);
+      let result, frames = this.currentFrames;
+      if (backwards)
+        frames = frames.reverse();
 
-        this.removeHighlight();
-        if (result)
-          this.highlightRange(result, true);
-
-        return result;
-      };
-
-      if (delayCallTimer)
-        clearTimeout(delayCallTimer);
-
-      delayCallTimer = setTimeout(function () f.call(MF), 300);
-    },
-
-    findAgain: function (reverse) {
-      this.removeHighlight();
-
-      let str = this.lastSearchText;
-      let range = this.defaultRange;
-      let last = this.storage.lastResult;
-      let backwards = !!(!this.lastDirection ^ !reverse);
-      let start, end;
-
-      if (last) {
-        if (backwards) {
-          end = last.cloneRange();
-          end.setEnd(last.startContainer, last.startOffset);
-        } else {
-          start = last.cloneRange();
-          start.setStart(last.endContainer, last.endOffset);
+      for each (let frame in frames) {
+        let ret = this.find(str, backwards, this.makeBodyRange(frame));
+        if (ret) {
+          result = this.storage.lastResult = {
+            frame: frame,
+            range: ret,
+          };
+          break;
         }
       }
 
-      let result = this.storage.lastResult = this.find(str, backwards, range, start, end);
-      if (!result)
-        result = this.storage.lastResult = this.find(str, backwards, range);
+      this.removeHighlight();
+      if (result)
+        this.highlight(result, true);
+
+      return result;
+    },
+
+    findAgain: function (reverse) {
+      let backwards = !!(!this.lastDirection ^ !reverse);
+      let last = this.storage.lastResult;
+      let currentFrames = this.currentFrames;
+
+      // 前回の結果がないので、(初め|最後)のフレームを対象にする
+      // findFirst と"似た"挙動になる
+      if (!last) {
+        let idx = backwards ? frames.length - 1 
+                            : 0;
+        last = {frame: frames[idx], range: this.makeBodyRange(frames[idx])};
+      }
+
+      this.removeHighlight();
+
+      let str = this.lastSearchExpr;
+      let start, end;
+
+      if (backwards) {
+        end = last.range.cloneRange();
+        end.setEnd(last.range.startContainer, last.range.startOffset);
+      } else {
+        start = last.range.cloneRange();
+        start.setStart(last.range.endContainer, last.range.endOffset);
+      }
+
+      let result;
+      let ret = this.find(str, backwards, this.makeBodyRange(last.frame), start, end);
+
+      if (ret) {
+        result = {frame: last.frame, range: ret};
+      } else {
+        // 見つからなかったので、ほかのフレームから検索
+        let [head, tail] = slashArray(currentFrames, last.frame);
+        let next = backwards ? head.reverse().concat(tail.reverse())
+                             : tail.concat(head);
+        for each (let frame in next) {
+          let r = this.find(str, backwards, this.makeBodyRange(frame));
+          if (r) {
+            result = {frame: frame, range: r};
+            break;
+          }
+        }
+      }
+
+      this.storage.lastResult = result;
 
       if (result)
-        this.highlightRange(result, true);
-      else
-        liberator.echoerr('not found: ' + str);
+        this.highlight(result, true);
 
+      return result;
+    },
+
+    submit: function () {
+      this.previousSearchText = this.lastSearchText;
+    },
+
+    cancel: function () {
+      this.lastSearchText = MF.previousSearchText;
+    },
+
+    get currentFrames function () {
+      let result = [];
+      (function (frame) {
+        // ボディがない物は検索対象外なので外す
+        if (frame.document.body.localName.toLowerCase() == 'body')
+          result.push(frame);
+        for (let i = 0; i < frame.frames.length; i++)
+          arguments.callee(frame.frames[i]);
+      })(content);
       return result;
     },
   };
 
-  let original = {};
+
+  // 前のタイマーを削除するために保存しておく
+  let delayCallTimer = null;
 
   let migemized = {
     find: function find (str, backwards) {
-      MF.findFirst(str, backwards);
+      // 短時間に何回も検索をしないように遅延させる
+      let f = function () MF.findFirst(str, backwards);
+      if (delayCallTimer)
+        clearTimeout(delayCallTimer);
+      delayCallTimer = setTimeout(function () f(), 300);
     },
 
     findAgain: function findAgain (reverse) {
       MF.findAgain(reverse);
+      if (!MF.storage.lastResult)
+        liberator.echoerr('not found: ' + MF.lastSearchText);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
+      MF.submit();
       if (!MF.storage.lastResult)
         liberator.echoerr('not found: ' + MF.lastSearchText);
-      MF.previousSearchText = MF.lastSearchText;
     },
 
     searchCanceled: function searchCanceled () {
-      MF.lastSearchText = MF.previousSearchText;
+      MF.cancel();
     },
   };
 
-  for (let name in migemized)
-    original[name] = liberator.search[name];
 
-  function set (funcs) {
-    for (let name in funcs)
-      liberator.search[name] = funcs[name];
+  // オリジナルの状態に戻せるように保存しておく
+  {
+    let original = {};
+
+    for (let name in migemized)
+      original[name] = liberator.search[name];
+
+    function set (funcs) {
+      for (let name in funcs)
+        liberator.search[name] = funcs[name];
+    }
+
+    set(migemized);
+
+    MF.install = function () set(migemized);
+    MF.uninstall = function () set(original);
   }
 
-  set(migemized);
 
-  liberator.plugins.migemizedFind = {
-    install: function () set(migemized),
-    uninstall: function () set(original),
-  };
+  // 外から使えるように
+  liberator.plugins.migemizedFind = MF;
 
 }catch(e){liberator.log(e);}})();
