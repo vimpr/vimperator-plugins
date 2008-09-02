@@ -16,7 +16,7 @@
 			gUbiquity.__textBox.value = arg||'';
 			var context = gUbiquity.__makeContext();
 			var previewBlock = document.getElementById("cmd-preview").contentDocument.getElementById("preview");
-			gUbiquity.__cmdManager.updateInput("map osaka", context, previewBlock);
+			gUbiquity.__cmdManager.updateInput(arg||'', context, previewBlock);
 			if (special) {
 				gUbiquity.__cmdManager.execute(context);
 				gUbiquity.closeWindow();
