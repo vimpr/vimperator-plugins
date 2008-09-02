@@ -1,4 +1,4 @@
-// Vimperator plugin: uaSwitch
+// Vimperator plugin: ubiquity
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net
 // Require: Ubiquity - https://wiki.mozilla.org/Labs/Ubiquity
 // Usage:
