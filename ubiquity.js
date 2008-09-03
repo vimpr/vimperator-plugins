@@ -3,7 +3,7 @@
  * @name         Ubiquity Glue
  * @description  viperator-plugin for Ubiquity
  * @depend       Ubiquity (ubiquity@labs.mozilla.com)
- * @version      0.1a
+ * @version      0.1.1a
  * ==/VimperatorPlugin==
  * 
  * USAGE:
@@ -27,7 +27,8 @@
 
 liberator.plugins.ubiquity = (function(){
 
-if (!Application.extensions.has('ubiquity@labs.mozilla.com')){
+var ubiquityID = 'ubiquity@labs.mozilla.com';
+if (!Application.extensions.has(ubiquityID) || !Application.extensions.get(ubiquityID).enabled){
     Components.utils.reportError('Vimperator: UbiquityGlue: Ubiquity is not installed');
     return null;
 }
