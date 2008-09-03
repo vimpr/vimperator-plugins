@@ -88,6 +88,15 @@
       this.highlightRemover = null;
     },
 
+    focusLink: function (range) {
+      let node = range.commonAncestorContainer;
+      while (node && node.parentNode) {
+        if (node.localName.toString().toLowerCase() == 'a')
+          return void(Components.lookupMethod(node, 'focus').call(node));
+        node = node.parentNode;
+      }
+    },
+
     highlight: function (target, setRemover) {
       let span = this.document.createElement('span');
       let spanStyle = 'background-color: lightblue; color: black; border: dotted 3px blue;';
@@ -111,6 +120,8 @@
         range.selectNode(span); 
         range.deleteContents(); 
       };
+
+      this.focusLink(target.range);
 
       if (setRemover)
         this.highlightRemover = remover;
