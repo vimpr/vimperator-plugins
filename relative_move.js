@@ -18,16 +18,17 @@
 
 (function (){
     function trim_query(url){
-        var res = (_r = url.match(/^(.*)\?/)) ? _r[1] : url;
-        res = (_r = res.match(/^(http.*)http/)) ? _r[1] : res;
-        res = (_r = url.match(/^(.*)#/)) ? _r[1] : res;
+        var _r;
+        var res = (_r = url.match(/^.*(?=\?)/)) ? _r[0] : url;
+        res = (_r = res.match(/^https?:\/\/.*(?=https?:\/\/)/)) ? _r[0] : res;
+        res = (_r = url.match(/^.*(?=#)/)) ? _r[0] : res;
         return res;
     }
 
     function open_path(path, tab){
         var win = window.content.window;
         var loc = win.location;
-        var splited_path = path.split("/");
+        var splited_path = path.split(/\/+/);
         var up = 0;
 
         if(!tab){
@@ -48,33 +49,33 @@
                 break;
         }
 
+        var url, base;
         switch(up){
             case -2: // "/hoge"
-                var base = loc.protocol + "//" + loc.hostname;
-                var url = base + path;
+                base = loc.protocol + "//" + loc.hostname;
+                url = base + path;
                 break;
             case -1: // "./hoge"
-                var _r = null;
-                var base = trim_query(loc.href);
+                base = trim_query(loc.href);
                 path = path.substring(2);
                 if(base[base.length-1] == "/")
-                    var url = base + path;
+                    url = base + path;
                 else
-                    var url = base + "/" + path;
+                    url = base + "/" + path;
                 break;
             case 0: // "hoge"
-                var url = loc.href + path;
+                url = loc.href + path;
                 break;
             default: // "../../hoge"
-                var base = trim_query(loc.href);
-                var c = 0;
+                base = trim_query(loc.href);
+                let c = 0;
                 while(c < up){
                     if(c > 0) base = base.substr(0, base.length-1);
-                    base = base.match(/^(.*\/)[^\/]*$/)[1];
+                    [base] = base.match(/^.*\/(?=[^\/]*$)/);
                     path = path.substring(3);
                     c++;
                 }
-                var url = base + path;
+                url = base + path;
             break;
         }
         liberator.open(url, tab);
@@ -83,9 +84,7 @@
     liberator.commands.addUserCommand(
         ["ro[pen]"],
         "Open relative URL in the current tab",
-        function(path){
-            open_path(path);
-        }
+        open_path
     );
 
     liberator.commands.addUserCommand(
