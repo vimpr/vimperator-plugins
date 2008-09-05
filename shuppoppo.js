@@ -14,7 +14,7 @@
  * OPTION
  * set [no]slbeep
  */
-//:js (function(){echo('\n\n\n\n\n\n\n\n\n\n\n\n\n',true); var f=$('liberator-multiline-output');var d=f.contentDocument,s=d.createElement('script');s.src="http://labs.creazy.net/sl/bookmarklet.js";d.body.appendChild(s);})()
+//:js (function(){echo('\n\n\n\n\n\n\n\n\n\n\n\n\n',true);var f=$('liberator-multiline-output');var d=f.contentDocument,s=d.createElement('script');s.src="http://labs.creazy.net/sl/bookmarklet.js";d.body.appendChild(s);})()
 
 liberator.plugins.sl = (function(){
 // COMMAND
@@ -64,25 +64,14 @@ var data = [ // {{{
 	'	="__/ =| o |=-~O=====O=====O=====O\\ ____Y___________|__|__________________________|_ <br>"',
 	'	+" |/-=|___|=    ||    ||    ||    |_____/~\\___/          |_D__D__D_|  |_D__D__D_|   <br>"',
 	'	+"  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/               \\_/   \\_/    \\_/   \\_/    <br>";',
-	"sl_steam[0]  = sl_steam[0].replace(/ /g,'&nbsp;');",
-	"sl_steam[1]  = sl_steam[1].replace(/ /g,'&nbsp;');",
-	"sl_body      = sl_body.replace(/ /g,'&nbsp;');",
-	"sl_wheels[0] = sl_wheels[0].replace(/ /g,'&nbsp;');",
-	"sl_wheels[1] = sl_wheels[1].replace(/ /g,'&nbsp;');",
-	"sl_wheels[2] = sl_wheels[2].replace(/ /g,'&nbsp;');",
-	"sl_wheels[3] = sl_wheels[3].replace(/ /g,'&nbsp;');",
-	"sl_wheels[4] = sl_wheels[4].replace(/ /g,'&nbsp;');",
-	"sl_wheels[5] = sl_wheels[5].replace(/ /g,'&nbsp;');",
-	'var sl_patterns = [];',
-	'sl_patterns[0]  = sl_steam[0] + sl_body + sl_wheels[0];',
-	'sl_patterns[1]  = sl_steam[0] + sl_body + sl_wheels[1];',
-	'sl_patterns[2]  = sl_steam[0] + sl_body + sl_wheels[2];',
-	'sl_patterns[3]  = sl_steam[1] + sl_body + sl_wheels[3];',
-	'sl_patterns[4]  = sl_steam[1] + sl_body + sl_wheels[4];',
-	'sl_patterns[5]  = sl_steam[1] + sl_body + sl_wheels[5];',
+	"sl_steam  = sl_steam.map(function(s) s.replace(/ /g, '&nbsp;'));",
+	"sl_body   = sl_body.replace(/ /g,'&nbsp;');",
+	"sl_wheels = sl_wheels.map(function(s) s.replace(/ /g, '&nbsp;'));",
+	'var sl_patterns = [0, 0, 0, 1, 1, 1];',
+	'sl_patterns = sl_patterns.map(function(p, i) sl_steam[p] + sl_body + sl_wheels[i]);',
 	'var sl_counter  = 0;',
 	'var sl_position = 0;',
-	'var scrollTop = document.body.scrollTop  || document.documentElement.scrollTop;',
+	'var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;',
 	'var windowWidth = window.innerWidth;',
 	"var sl_style_base ='display: block;position: absolute;text-align: left;overflow: visible;white-space: pre;font: 12px/12px monospace;';",
 	"var sl_style_main =sl_style_base +'top: '+(scrollTop+0)+'px;' +'left: '+windowWidth+'px;' +'padding: 20px;' +'z-index: 999;' +'color: '+sl_tx_color+';';",
@@ -90,7 +79,7 @@ var data = [ // {{{
 	'var sl_w = document.getElementById("__sl_main__").clientWidth;',
 	'var sl_h = document.getElementById("__sl_main__").clientHeight;',
 	"var sl_style_background =sl_style_base +'top: '+(scrollTop+0)+'px;' +'left: 0px;' +'width: '+windowWidth+'px;' +'height: '+sl_h+'px;' +'z-index: 998;' +'background-color: '+sl_bg_color+';' +'filter: alpha(opacity=0);' +'-moz-opacity: 0.0;' +'opacity: 0.0;';",
-	"document.body.innerHTML += '<div id=\"__sl_background__\" style=\"'+sl_style_background+'\"><br /></div>';",
+	"document.body.innerHTML += '<div id=\"__sl_background__\" style=\"'+sl_style_background+'\"><br></div>';",
 	'var sl_bg_counter = 0;',
 	'sl_open = function() {',
 	'	var oid = "__sl_background__";',
@@ -121,7 +110,7 @@ var data = [ // {{{
 	'sl_close = function() {',
 	'	var oid = "__sl_background__";',
 	'	var op  = sl_bg_counter;',
-	'	var ua = navigator.userAgent',
+	'	var ua  = navigator.userAgent',
 	'	document.getElementById(oid).style.MozOpacity = op / 10;',
 	'	if ( sl_bg_counter > 0 ) {',
 	'		sl_bg_counter--;',
@@ -138,15 +127,15 @@ function sl(){
 		sl_fg_color : "#FFFFFF",
 		sl_bg_color : "#000000"
 	};
-	for (var v in option){
+	for (let v in option){
 		if (liberator.globalVariables[v]) option[v] = liberator.globalVariables[v];
 	}
-	var option_code = "var sl_speed=" + option.sl_speed + 
-	                  ",sl_pitch=" + option.sl_pitch + 
+	var option_code = "var sl_speed=" + option.sl_speed +
+	                  ",sl_pitch=" + option.sl_pitch +
 					  ",sl_tx_color=\"" + option.sl_fg_color + "\"" +
 					  ",sl_bg_color=\"" + option.sl_bg_color + "\";\n";
 	var script = d.createElement('script');
-	script.setAttribute('type','application/x-javascript');
+	script.setAttribute('type','application/javascript');
 	var cdata = document.createCDATASection(option_code + data);
 	//var cdata = d.createComment(data);
 	script.appendChild(cdata);
@@ -159,7 +148,7 @@ liberator.beep = function(){
 		sl();
 	else
 		orig_beep();
-}
+};
 return sl;
 })();
 
