@@ -6,9 +6,9 @@
 (function(){
     liberator.commands.addUserCommand(["twissr"], "Change Twitter & Wassr status",
         function(arg, special){
-			arg = (special ? '! ' : ' ') + arg;
-			liberator.execute('twitter' + arg);
-			liberator.execute('wassr' + arg);
+            arg = (special ? '! ' : ' ') + arg;
+            liberator.execute('twitter' + arg);
+            liberator.execute('wassr' + arg);
         },
     { });
 })();
