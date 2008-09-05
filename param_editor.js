@@ -8,14 +8,14 @@
         var snap = doc.evaluate(query, node, null,
             XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         var res = [];
-        for(var i = 0; i < snap.snapshotLength; i++){
+        for(let i = 0, l = snap.snapshotLength; i < l; i++){
             res.push(snap.snapshotItem(i));
         }
         return res;
     };
 
     var Form = function(form, i){
-        this.uid = i; 
+        this.uid = i;
         this.method = (form.method.length) ? form.method.toUpperCase() : "GET";
         this.action = form.action;
         this.name = (form.name.length) ? form.name : this.uid;
@@ -29,8 +29,8 @@
             if(!e.type) return;
             var type = e.type.toLowerCase();
             if(type == "radio" || type == "checkbox"){
-                var mg = null;
-                for(var i = 0; i < this.member.length; i++){
+                let mg = null;
+                for(let i = 0, l = this.member.length; i < l; i++){
                     if(this.member[i].constructor == FormMemberGroup &&
                        this.member[i].name == e.name){
                         mg = this.member[i];
@@ -93,7 +93,7 @@
             }
         };
 
-        for(var i = 0; i < this.elems.length; i++){
+        for(let i = 0, l = this.elems.length; i < l; i++){
             if(this.elems[i].value == v){
                 check.call(this, i);
                 return;
@@ -106,20 +106,20 @@
 
     FormMemberGroup.prototype.add_elem = function(e){
         this.elems.push(e);
-    }
+    };
 
     var form2html = function(form){
         var html = [
-            '<style>',
-                '.red { color: #c00 !important}',
-                '.blue { color: #00c !important}',
+            '<style type="text/css">',
+                '.red { color:#c00 !important}',
+                '.blue { color:#00c !important}',
                 'caption { margin:5px 0; text-align:left; font-weight:bold !important;}',
                 'th { padding:0 7px; text-align:left; font-weight:bold !important;}',
                 'td { padding:0 7px;}',
             '</style>',
             '<table style="width:100%;">',
                 '<caption><span class="blue">' + form.method + '</span> name:<span class="red">' + form.name + '</span> =>' + form.action + '</caption>',
-                '<tr><th style="width:15%;">   Name</th><th style="width:15%;">  Type</th><th>  Value</th></tr>'];
+                '<tr><th style="width:15%;"> Name</th><th style="width:15%;"> Type</th><th> Value</th></tr>'];
 
         form.member.forEach(function(e){
             var uid = (e.uid < 10) ? e.uid + " " : e.uid;
@@ -134,18 +134,17 @@
     };
 
     var get_forms = function(){
-        var count = 0;
         var r = [];
         var f = doc.forms;
-        for(var i = 0; i < f.length; i++){
-            r.push(new Form(f[i], count++));
+        for(let i = 0, l = f.length; i < l; i++){
+            r.push(new Form(f[i], i));
         }
         return r;
     };
 
     var select = function(a, q){
         var cand = [];
-        for(var i = 0; i < a.length; i++){
+        for(let i = 0, l = a.length; i < l; i++){
             if(a[i].name == q || a[i].uid == q){
                 cand.push(a[i]);
                 break;
@@ -169,16 +168,16 @@
 
             var html = null;
             if(q){
-                var form = select(forms, q);
+                let form = select(forms, q);
                 if(form) html = form.html;
             }else if(forms.length){
                 html = "";
                 forms.forEach(function(f){
                     html += f.html;
-                    html += "<br />";
+                    html += "<br/>";
                 });
             }
-            
+
             if(html){
                 liberator.commandline.echo(html,
                     liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
@@ -203,15 +202,12 @@
         ["pe[dit]"],
         "Edit value of a form element",
         function(q, submit){
-            var _ = q.match(/^\s*([^\.\s]+)\.([^=\s]+)\s*=\s*(.*)$/);
-            try{
-                var f = _[1], m = _[2], v = _[3];
-            }catch(e){
-                if(!f || !m || !v){
-                    liberator.echoerr("Failed to parse query");
-                    return;
-                }
+            var _ = q.match(/^\s*([^.\s]+)\.([^=\s]+)\s*=\s*(.*)$/);
+            if(!_){
+                liberator.echoerr("Failed to parse query");
+                return;
             }
+            var [, f, m, v] = _;
             //liberator.log([f, m, v], 9);
 
             doc = window.content.document;
