@@ -116,7 +116,7 @@ liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
 			liberator.echoerr('No arguments');
 			return;
 		}
-		var args = liberator.commands.parseArgs(arg).args;
+        var args = liberator.commands.parseArgs(arg).arguments;
 		if (args.length == 1){
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
@@ -127,8 +127,8 @@ liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
 		}
 	},{
 		completer: function(filter){
-			if (!filter) return;
-			var args = liberator.commands.parseArgs(filter).args;
+			if (!filter) return [];
+            var args = liberator.commands.parseArgs(filter).arguments;
 			var list = [];
 			var position = 0;
 			if (args.length == 1){
