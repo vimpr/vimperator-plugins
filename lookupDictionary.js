@@ -1,11 +1,11 @@
 /**
- * lookup dictionary (Vimperator plugin)
- * For Vimperator 0.6pre
+ * ==VimperatorPlugin==
+ * @name lookup dictionary (Vimperator plugin)
+ * @description    Lookup words from Web dictionaries, and show the results in the bottom of the window
+ * @description-ja Web上の辞書を引いた結果をコマンドライン・バッファへ出力します
  * @author teramako teramako@gmail.com
- * @version 0.1
- *
- * Lookup words from Web dictionaries
- * And show the results in the bottom of the window
+ * @version 0.2
+ * ==/VimperatorPlugin==
  */
 (function(){
 [{
@@ -25,7 +25,8 @@
         dictionary.names,
         dictionary.shortHelp,
         function(arg,special){
-            var sel = window.content.document.getSelection();
+            var sel = (window.content.window.getSelection) ?
+                window.content.window.getSelection().toString() : null;
             if (special && sel) arg = sel;
             if (!arg) return;
             var url;
@@ -46,15 +47,16 @@
                 }
                 var xs = new XMLSerializer();
                 liberator.echo('<base href="' + url + '"/>' + xs.serializeToString( result ), true);
-            });
+            }, dictionary.encode ? dictionary.encode : 'UTF-8');
         },{}
     );
 });
 /**
  * @param {String} url
  * @param {Function} callback
+ * @param {String} charset
  */
-function getHTML(url, callback){
+function getHTML(url, callback, charset){
     var xhr= new XMLHttpRequest();
     xhr.onreadystatechange = function(){
         if (xhr.readyState == 4){
@@ -66,6 +68,7 @@ function getHTML(url, callback){
         }
     };
     xhr.open('GET',url,true);
+    xhr.overrideMimeType('text/html; charset=' + charset);
     xhr.send(null);
 }
 /**
