@@ -89,7 +89,6 @@ liberator.options.add(['fileencoding','fenc'],'set the charactor encoding for th
             value = getEncoding(value);
             SetForcedCharset(value);
             //SetDefaultCharacterSet(value);
-            BrowserSetForcedCharacterSet(value);
         },
         getter: function()
             getBrowser().docShell.QueryInterface(Ci.nsIDocCharset).charset,
@@ -104,7 +103,6 @@ const DEFAULT_DETECTOR = createDetector(sbCharDetector.GetStringFromName('intl.c
 liberator.options.add(['autodetector','audet'],'set auto detect character encoding','string',DEFAULT_DETECTOR,
     {
         setter: function(value){
-            SetForcedDetector(true);
             var pref = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefBranch);
             var str = Cc['@mozilla.org/supports-string;1'].createInstance(Ci.nsISupportsString);
             if (!value || value == 'off') {
@@ -113,7 +111,7 @@ liberator.options.add(['autodetector','audet'],'set auto detect character encodi
                 str.data = value = getDetector(value);
             }
             pref.setComplexValue('intl.charset.detector',Ci.nsISupportsString, str);
-            BrowserSetForcedCharacterSet(value);
+            SetForcedDetector(true);
         },
         getter: function(){
             var elms = document.getElementById('charsetMenu').getElementsByAttribute('checed','true');
