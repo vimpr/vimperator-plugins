@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0.2
+// @version        1.1.0
 // ==/VimperatorPlugin==
 //
 //  Usage:
@@ -33,6 +33,9 @@
 //          doc_a.html => doc_b.html
 //      force:
 //        (次|前)っぽいURIを捏造してそこに移動します。
+//      useAutoPagerize:
+//        AutoPagerize のキャッシュを利用します。
+//        (ただし、"次" へのリンクにしか使われません)
 //
 //    example:
 //      :js liberator.globalVariables.autoDetectLink = {nextPatterns: [/next/, /次/]}
@@ -92,6 +95,7 @@
     useBackHistory: false,
     //clickButton: true,
     force: false,
+    useAutoPagerize: true,
   }
 
   ////////////////////////////////////////////////////////////////
@@ -117,6 +121,14 @@
     }
 
     return _gv;
+  }
+
+  const APPREF = 'greasemonkey.scriptvals.http://swdyh.yu.to//AutoPagerize.cacheInfo';
+  let ap_cache = eval(Application.prefs.getValue(APPREF, null));
+
+  for each (let cache in ap_cache) {
+    cache.info = cache.info.filter(function(i) { return ('url' in i) })
+    cache.info.sort(function(a, b) { return (b.url.length - a.url.length) })
   }
 
 
@@ -147,7 +159,7 @@
 
   // 開いたURIなどの表示
   function displayOpened (link) {
-    let msg = 'open <' + link.text + '> ' + link.uri;
+    let msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
     setTimeout(function () liberator.echo(msg), 1000);
     liberator.log(msg);
   }
@@ -309,6 +321,37 @@
   }
 
 
+  // 相対アドレスから絶対アドレスに変換するんじゃないの？
+  function toAbsPath (path) {
+    with (content.document.createElement('a'))
+      return (href = path) && href;
+  }
+
+  // AutoPagerize のデータからマッチする物を取得
+  function getAutopagerizeNext () {
+    if (!ap_cache)
+      return;
+
+    let info = (function () {
+      let uri = buffer.URL;
+      for each (let cache in ap_cache) {
+        for each (let info in cache.info) {
+          if (uri.match(info.url))
+            return info;
+        }
+      }
+    })();
+
+    if (!info)
+      return;
+
+    let doc = content.document;
+    let result = doc.evaluate(info.nextLink, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    if (result.singleNodeValue)
+      return result.singleNodeValue;
+  }
+
+
   ////////////////////////////////////////////////////////////////
   // main
   ////////////////////////////////////////////////////////////////
@@ -317,6 +360,20 @@
   function detect (next, setting) {
     try {
       setting = getCurrentSetting(setting);
+
+      // TODO
+      if (setting.useAutoPagerize) {
+        let apnext = getAutopagerizeNext();
+        if (apnext) {
+          return {
+            type: 'aplink',
+            frame: content,
+            uri: apnext.href || apnext.action || apnext.value,
+            text: apnext.textContent,
+            element: apnext
+          };
+        }
+      }
 
       patterns = next ? setting.nextPatterns : setting.backPatterns;
 
@@ -345,8 +402,9 @@
       // force
       if (setting.force && succs.length) 
         return {
+          type: 'force',
           uri: succs[0],
-          text: '!force!',
+          text: '-force-',
           frame: window.content,
         };
 
