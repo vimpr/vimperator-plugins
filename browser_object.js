@@ -63,8 +63,8 @@
     Tab.prototype = {
         close: function(ary){
             for(var i = 0 ; i < ary.length; i++){
-                let j = i;
-                window.setTimeout(function(){ ary[j].linkedBrowser.contentWindow.close(); },0);
+                let j = ary[i];
+                window.setTimeout(function(){ j.linkedBrowser.contentWindow.close(); },0);
             }
         },
         yank: function(ary){
