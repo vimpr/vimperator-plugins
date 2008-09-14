@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Map behave like text-object'
-// Version: 0.3
-// Last Change: 18-May-2008. Jan 2008
+// Version: 0.4
+// Last Change: 14-Sep-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -18,6 +18,8 @@
 //          'd' : Delete
 //          'r' : Reload
 //          'y' : Yank
+//          'e' : Set Pin
+//          'E' : Unset Pin
 //      Scopes:
 //          'l' : Left
 //          'r' : Right
@@ -25,30 +27,114 @@
 //          'c' : Current
 //          'o' : Other
 //          's' : Same host
+//          'p' : Pinned
 //      Target:
 //          't' : Tabs
 (function(){
+     const PINNED_ICON = 'data:image/png;base64,'
+     +'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgI'
+     +'fAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3'
+     +'Lmlua3NjYXBlLm9yZ5vuPBoAAAIlSURBVFiF7Za9a1RBEMB/KwcxipGQBIUo'
+     +'UUGLIEi8StAyBCuDaEBUIgQPBIVgIQiCqa5QvDYo5JCkMRrxo1ALUYkKWoj+'
+     +'B8aPeGg4LQQVdmfH4r13vJPT5O64i8Xbbubtzvx2Pt6sUVWWc61YVu8JQAKQ'
+     +'ACQACcD/AJBqtsOXYjoVMsBx4GpTAZ5ZcwjIo6wMVZtMs8bxk18mDTwFWgEU'
+     +'Cig7mhKBhz9MF8ptoDW8rgeO9K/WhYYDPPhuDDClsAGAgCC7t00fQROK0Apn'
+     +'gIFIVpgFxiK5rhq4883sAdbta9eZSt9vfTW7CBymQjefgb79HVqoC+Bm0fQC'
+     +'OZSB8PTuA536PL7nxoJpB14r9IQqAfqHuvRxfF/VKZj+YtLAC42fVYaBMgDr'
+     +'yQM9Yc5ROH94fblzqOFPaIU2K6ScgBOwAtYzNFUwUW8z+cmccsKgE3AerOe+'
+     +'E7KV7FUN4DyzzjPvfOA8BFnrhEGA/EfT54SLJTjhgxOODndXznXVAMe6Vaxw'
+     +'2Ya3i0CskLnyzqxxwrT1tFhfgsuMbNTi3+zVVITjb00H8F5hVVyvyisgXZJh'
+     +'5uQWPfgvWzVNwxObtWiFibI6CCKSjkXkpxNGF7NV8zh2npz1SCzUcRCcZ2J0'
+     +'q843DOD0Np1zwnUXdAF/gDgrXFqKnboeJFa4EOuEOMj42V6dazjAue36xgn3'
+     +'ovCHINecXzz30ap7GFnPCDCJ0gLkFO5mdy69tX4DuVQpJGsygDkAAAAASUVO'
+     +'RK5CYII=';
+    const PINNED_ICON_STYLE = "margin-top: 1px;"
+    +"margin-start-value: 7px;"
+    +"margin-left-ltr-source: logical;"
+    +"margin-right-rtl-source: logical;"
+    +"margin-end-value: 3px;"
+    +"margin-right-ltr-source: logical;"
+    +"margin-left-rtl-source: logical;"
+    +"width: 16px;"
+    +"height: 16px;"
+    +"-moz-image-region: rect(0px, 16px, 16px, 0px);";
+
     function Tab(){}
     Tab.prototype = {
         close: function(ary){
-            for each(var i in ary)
-                i.close();
+            for(var i = 0 ; i < ary.length; i++){
+                let j = i;
+                window.setTimeout(function(){ ary[j].linkedBrowser.contentWindow.close(); },0);
+            }
         },
         yank: function(ary){
             var copyStrings = [];
-            for each(var i in ary)
-                copyStrings.push(i.document.location.href);
+            for(var i = 0 ; i < ary.length; i++)
+                if(typeof ary[i] == "object")
+                    copyStrings.push(i.linkedBrowser.contentDocument.location.href);
             liberator.util.copyToClipboard(copyStrings.join(", "));
         },
         reload: function(ary){
-            for each(var i in ary)
-                i.document.location.reload();
+            for(var i = 0 ; i < ary.length; i++)
+                if(typeof ary[i] == "object")
+                    ary[i].linkedBrowser.contentDocument.location.reload();
+        },
+        togglePin: function(ary){
+            for(var i = 0 ; i < ary.length; i++){
+                if(typeof ary[i] == "object")
+                    if(ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon == undefined){
+                        var image = document.createElement('image');
+                        image.setAttribute('src',PINNED_ICON);
+                        image.setAttribute('style',PINNED_ICON_STYLE);
+                        ary[i].insertBefore(image,ary[i].firstChild);
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon = image;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = true;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false;
+                    }
+                    else if(ary[i].linkedBrowser.vimperatorBrowserObjectPin){
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false ;
+                    }else{
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = true ;
+                    }
+            }
+        },
+        setPin: function(ary){
+            for(var i = 0 ; i < ary.length; i++){
+                if(typeof ary[i] == "object"){
+                    ary[i].linkedBrowser.vimperatorBrowserObjectPin = true ;
+                    if(ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon == undefined){
+                        var image = document.createElement('image');
+                        image.setAttribute('src',PINNED_ICON);
+                        image.setAttribute('style',PINNED_ICON_STYLE);
+                        ary[i].insertBefore(image,ary[i].firstChild);
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon = image;
+                    }
+                    ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false;
+                }
+            }
+        },
+        unsetPin: function(ary){
+            for(var i = 0 ; i < ary.length; i++){
+                if(typeof ary[i] == "object"){
+                    if(ary[i].linkedBrowser.vimperatorBrowserObjectPin == true){
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false ;
+                    }
+                }
+            }
         },
 
-        //default function
-        active: function() Application.activeWindow.activeTab.index ,
-        identify: function(i){try{return i.document.location.host}catch(e){}},
-        collection: function() Application.activeWindow.tabs ,
+        active: function() gBrowser.mTabContainer.selectedIndex ,
+        identify: function(i){try{return i.linkedBrowser.contentDocument.location.host}catch(e){}},
+        pinned: function(i){
+            if(typeof i == "object"){
+                return i.linkedBrowser.vimperatorBrowserObjectPin
+            }
+            return false;
+        },
+        collection: function() window.gBrowser.mTabContainer.childNodes ,
     };
 
     function Container(){
@@ -83,6 +169,8 @@
     browserObject.motions.add('d','close');
     browserObject.motions.add('y','yank');
     browserObject.motions.add('r','reload');
+    browserObject.motions.add('e','setPin');
+    browserObject.motions.add('E','unsetPin');
 
     browserObject.scopes.add('l',function(ary){
         var active = this.active();
@@ -102,8 +190,12 @@
         var activeIdentify = this.identify(ary[this.active()]);
         return [ary[i] for (i in ary) if (this.identify(ary[i]) == activeIdentify)];
     });
+    browserObject.scopes.add('p',function(ary){
+        return [ary[i] for (i in ary) if (this.pinned(ary[i]) == true)];
+    });
 
     browserObject.targets.add('t',new Tab());
+
 
     var prefix = liberator.globalVariables.browser_object_prefix || "";
     for (let m in browserObject.motions){
