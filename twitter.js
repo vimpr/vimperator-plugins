@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 29-Aug-2008. Jan 2008
+// Last Change: 20-Jun-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -137,55 +137,6 @@
                 .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         liberator.echo(html, true);
     }
-    var services = {
-        'twitter': {
-            description:'Twitter',
-            account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
-            loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
-            entryPage:'http://b.hatena.ne.jp/entry/%URL%',
-            poster:function(user,password,url,title,comment,tags){
-                var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
-                var request =
-                    <entry xmlns="http://purl.org/atom/ns#">
-                        <title>dummy</title>
-                        <link rel="related" type="text/html" href={url}/>
-                        <summary type="text/plain">{tagString + comment}</summary>
-                    </entry>;
-                var wsse = new WSSEUtils(user,password);
-
-                return Deferred.http({
-                    method: "post",
-                    url: "http://b.hatena.ne.jp/atom/post",
-                    data: request.toString(),
-                    headers: {
-                        "X-WSSE": wsse.getWSSEHeader(),
-                        "Content-Type": "application/atom+xml",
-                    },
-                }).next(function(xhr){
-                    if(xhr.status != 201) throw "Hatena Bookmark: faild";
-                });
-            },
-            tags:function(user,password){
-                var xhr = new XMLHttpRequest();
-                var hatena_tags = [];
-
-                xhr.open("GET","http://b.hatena.ne.jp/my",false);
-                xhr.send(null);
-
-                var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
-                var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
-
-                tags.forEach(function(tag){
-                    hatena_tags.push(tag.innerHTML);
-                });
-                liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
-                return hatena_tags;
-            },
-            icon:function(url){
-                return '<img src="http://b.hatena.ne.jp/entry/image/' + url + '" style="vertical-align: middle;" />';
-            },
-        }
-    };
     liberator.commands.addUserCommand(["twitter"], "Change Twitter status",
         function(arg, special){
             var password;
