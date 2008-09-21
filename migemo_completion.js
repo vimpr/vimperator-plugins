@@ -4,11 +4,18 @@
  * @description    replace completion function with using Migemo
  * @description-ja •âŠ®ŠÖ”‚ğMigemo‚ğg—p‚µ‚½‚à‚Ì‚Éæ‚è‘Ö‚¦‚é
  * @author         Trapezoid
- * @version        0.1
+ * @version        0.2
  * ==/VimperatorPlugin==
  *
  * Support commands:
  *  - :buffer
+ *  - :sidebar
+ *  - :emenu
+ *  - :dialog
+ *  - :help
+ *  - :macros
+ *  - :play
+ *  and more
  **/
 var XMigemoCore;
 try{
@@ -30,4 +37,15 @@ replaceFunction(liberator.completion,"buffer",function(oldResult,args){
         return migemoPattern.test(value) || migemoPattern.test(label)
         })];
 },[""]);
+liberator.completion.filter = function(array,filter,matchFromBeginning){
+    if(!filter) return array;
 
+    var migemoString = XMigemoCore.getRegExp(filter);
+    if(matchFromBeginning)
+        migemoString ="^(" + migemoString + ")";
+    var migemoPattern = new RegExp(migemoString);
+
+    return array.filter(function([value,label]){
+            return migemoPattern.test(value) || migemoPattern.test(label)
+        });
+}
