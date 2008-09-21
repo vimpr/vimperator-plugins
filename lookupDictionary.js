@@ -12,7 +12,7 @@
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
     shortHelp: 'SPACE ALC (英辞郎 on the Web)',
-    xpath: '//*[@id="resultList"]'
+    xpath: 'id("resultList")'
 },{
     names: ['goo'],
     url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0',
@@ -20,6 +20,17 @@
     encode: 'EUC-JP',
     xpath: '//div[@id="incontents"]/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
     multi: true
+},{
+    names: ['infokanji'],
+    url: 'http://dictionary.www.infoseek.co.jp/?sc=1&se=on&lp=0&gr=kj&sv=KJ&qt=&qty=%s&qtb=&qtk=0',
+    shorthelp: 'Infoseek 漢字辞書',
+    encode: 'EUC-JP',
+    xpath: '//div[@class="NetDicHead"]'
+},{
+    names: ['answers'],
+    url: 'http://www.answers.com/%s',
+    shortHelp: 'Answers.com(英英辞書)',
+    xpath: 'id("firstDs")'
 }].forEach(function(dictionary){
     liberator.commands.addUserCommand(
         dictionary.names,

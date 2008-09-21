@@ -103,7 +103,9 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 
 function addUserMap(label, map){
     liberator.mappings.addUserMap([liberator.modes.NORMAL,liberator.modes.VISUAL], map,
-        label, function(){ liberator.plugins.exCopy.copy(label); }
+        label,
+        function(){ liberator.plugins.exCopy.copy(label); },
+        { rhs: label }
     );
 }
 function getCopyTemplate(label){

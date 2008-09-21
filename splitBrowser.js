@@ -2,7 +2,7 @@
  * ==VimperatorPlugin==
  * @name    Split Browser for Vimperator
  * @author  teramako <teramako@gmail.com>
- * @version 1.1a
+ * @version 1.1b
  * @depend  "Split Browser" {29c4afe1-db19-4298-8785-fcc94d1d6c1d}
  * ==/VimperatorPlugin==
  *
@@ -18,12 +18,12 @@
  * ----------------------------
  * Commands
  * ----------------------------
- * :sp[lit] [arg1], [arg2], ... [destination]
+ * :sp[lit] [arg1] [arg2] ... [destination]
  *          split horizontal and open [arg1]
  *          opens [arg2] ... to background tab, if [arg2] ... is applied
  *          [destination] is -top, if omitted
  *
- * :vs[plit] [arg1], [arg2], ... [destination]
+ * :vs[plit] [arg1] [arg2] ... [destination]
  *          like sp[lit] command
  *          but [destination] is -right, if omitted
  *
@@ -63,18 +63,10 @@ if (!Application.extensions.get(SplitBrowserAppID).enabled) return;
 
 liberator.plugins.splitBrowser = (function(){
 
-/*
-var origGetBrowser = getBrowser;
-
-getBrowser = function(){
-    return SplitBrowser.activeBrowser;
-};
-*/
-function getPositionForOpen(args){
+function getPositionForOpen(obj){
     var p = null;
-    if (!args || args.length == 0) return p;
-    for (var i=0; i<args.length; i++){
-        switch (args[i][0]){
+    for (var i in obj){
+        switch (i){
             case '-l': p = SplitBrowser.POSITION_LEFT; break;
             case '-r': p = SplitBrowser.POSITION_RIGHT; break;
             case '-t': p = SplitBrowser.POSITION_TOP; break;
@@ -123,27 +115,36 @@ function focusSwitch(where, isAbsolute){ //{{{
     }
 } //}}}
 
+var commandExtra = {
+    completer: function(filter) liberator.completion.url(filter),
+    options: [ [['-l','-left'],   liberator.commands.OPTION_NOARG],
+               [['-r','-right'],  liberator.commands.OPTION_NOARG],
+               [['-t','-top'],    liberator.commands.OPTION_NOARG],
+               [['-b','-bottom'], liberator.commands.OPTION_NOARG] ],
+    argCount: "*"
+};
+
 /* ----------------------------------------------
  * Commands
  * --------------------------------------------*/
 liberator.commands.addUserCommand(['sp[lit]'], 'split browser', //{{{
-	function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_TOP); },
-    { completer: function(filter) liberator.completion.url(filter) }
+    function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_TOP); },
+    commandExtra
 ); //}}}
 liberator.commands.addUserCommand(['vs[plit]'], 'split browser', //{{{
-	function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_RIGHT); },
-	{ completer: function(filter) liberator.completion.url(filter) }
+    function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_RIGHT); },
+    commandExtra
 ); //}}}
 liberator.commands.addUserCommand(['on[ly]'], 'Close or gather all subbrowsers', //{{{
-	function(args){
-		if (SplitBrowser.browsers.length == 0) {
-			liberator.echoerr('SubBrowser is none');
+    function(args){
+        if (SplitBrowser.browsers.length == 0) {
+            liberator.echoerr('SubBrowser is none');
             return;
         }
         if (args == '-g') {
             SplitBrowser.gatherSubBrowsers();
         } else {
-			SplitBrowser.removeAllSubBrowsers();
+            SplitBrowser.removeAllSubBrowsers();
         }
   }
 ); //}}}
@@ -163,12 +164,13 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL],['s'], 'SplitBrowser moti
             gBrowser = document.getElementById('content');
         }
     },{
-        flags: liberator.Mappings.flags.MOTION + liberator.Mappings.flags.COUNT
+        flags: liberator.Mappings.flags.MOTION + liberator.Mappings.flags.COUNT,
+        rhs: 'Motion map for SplitBrowser'
     }
 );
 //}}}
 liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
-	function(count, key){
+    function(count, key){
         if (/[1-9]/.test(key)){
             focusSwitch(parseInt(key), true);
             return;
@@ -199,91 +201,85 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<C-w>'], 'select subbr
                 liberator.plugins.splitBrowser.openSubBrowser(liberator.buffer.URL,SplitBrowser.POSITION_TOP);
                 break;
         }
-	},{ flags: liberator.Mappings.flags.COUNT + liberator.Mappings.flags.ARGUMENT }
+    },{
+        flags: liberator.Mappings.flags.COUNT + liberator.Mappings.flags.ARGUMENT,
+        rhs: 'select subbrowser'
+    }
 ); //}}}
 
 /**
  * Overwrite liberator.open for SplitBrowser
  * @see liberator.js::vimperaotr.open
  */
-liberator.open = function(urls, where){ //{{{
-	if (typeof urls == 'string') urls = liberator.util.stringToURLArray(urls);
-	if (urls.length == 0) return false;
+liberator.open = function(urls, where, force){ //{{{
+    if (typeof urls == 'string') urls = liberator.util.stringToURLArray(urls);
+    if (urls.length > 20 && !force){
+        liberator.commandline.input("This will open " + urls.length + " new tabs. Would you like to continue? (yes/[no])",
+            function (resp) { if (resp && resp.match(/^y(es)?$/i)) liberator.open(urls, where, true); });
+        return true;
+    }
+    if (urls.length == 0) return false;
     if (liberator.forceNewTab && liberator.has("tabs")){
         where = liberator.NEW_TAB;
     } else if (!where || !liberator.has("tabs")){
         where = liberator.CURRENT_TAB;
     }
-	var url = typeof urls[0] == 'string' ? urls[0] : urls[0][0];
-	var postdata = typeof urls[0] == 'string' ? null : urls[0][1];
-	var whichwindow = window;
-	var activeBrowser = SplitBrowser.activeBrowser;
+    var url = typeof urls[0] == 'string' ? urls[0] : urls[0][0];
+    var postdata = typeof urls[0] == 'string' ? null : urls[0][1];
+    var whichwindow = window;
+    var activeBrowser = SplitBrowser.activeBrowser;
 
-	switch (where) {
-		case liberator.CURRENT_TAB:
-			activeBrowser.loadURIWithFlags(url, null, null, null, postdata);
-			break;
-		case liberator.NEW_TAB:
-			var firsttab = activeBrowser.addTab(url, null, null, postdata);
-			activeBrowser.selectedTab = firsttab;
-			break;
-		case liberator.NEW_BACKGROUND_TAB:
-			activeBrowser.addTab(url, null, null, postdata);
-			break;
-		case liberator.NEW_WINDOW:
-			window.open();
-			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			                   .getService(Components.interfaces.nsIWindowMediator);
-			whichwindow = vm.getMostRecentWindow('navigator:browser');
-			whichwindow.loadURI(url, null, postdata);
-			break;
-		default:
-			liberator.echoerr("Exxx: Invalid 'where' directive in liberator.open(...)");
-			return false;
-	}
+    switch (where) {
+        case liberator.CURRENT_TAB:
+            activeBrowser.loadURIWithFlags(url, null, null, null, postdata);
+            break;
+        case liberator.NEW_TAB:
+            var firsttab = activeBrowser.addTab(url, null, null, postdata);
+            activeBrowser.selectedTab = firsttab;
+            break;
+        case liberator.NEW_BACKGROUND_TAB:
+            activeBrowser.addTab(url, null, null, postdata);
+            break;
+        case liberator.NEW_WINDOW:
+            window.open();
+            var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                               .getService(Components.interfaces.nsIWindowMediator);
+            whichwindow = vm.getMostRecentWindow('navigator:browser');
+            whichwindow.loadURI(url, null, postdata);
+            break;
+        default:
+            liberator.echoerr("Exxx: Invalid 'where' directive in liberator.open(...)");
+            return false;
+    }
     if (!liberator.has("tabs")) return true;
 
-	for (var i=1, l=urls.length; i < l; i++){
-		url = typeof urls[i] == 'string' ? urls[i] : urls[i][0];
-		postdata = typeof urls[i] == 'string' ? null : urls[i][1];
-		whichwindow.SplitBrowser.activeBrowser.addTab(url, null, null, postdata);
-	}
+    for (var i=1, l=urls.length; i < l; i++){
+        url = typeof urls[i] == 'string' ? urls[i] : urls[i][0];
+        postdata = typeof urls[i] == 'string' ? null : urls[i][1];
+        whichwindow.SplitBrowser.activeBrowser.addTab(url, null, null, postdata);
+    }
     return true;
 }; //}}}
 
 var manager = {
     splitBrowserId: SplitBrowserAppID,
-    args: [ [['-l','-left'],   liberator.commands.OPTION_NOARG],
-            [['-r','-right'],  liberator.commands.OPTION_NOARG],
-            [['-t','-top'],    liberator.commands.OPTION_NOARG],
-            [['-b','-bottom'], liberator.commands.OPTION_NOARG] ],
-    get gBrowser(){
-        return origGetBrowser();
-    },
     /**
      * create new subBrowser and load url
-     * @param {String} args command aruguments
+     * @param {Object} args command aruguments
      * @param {Number} defPosition default split direction
      */
     openSubBrowser: function(args, defPosition){
         var url;
         var urls = [];
         var position = defPosition || SplitBrowser.POSITION_TOP;
-        if (args){
-            var res = liberator.commands.parseArgs(args, this.args);
-            position = getPositionForOpen(res.opts) || position;
-            if (res.args.length > 0){
-                liberator.log(res.args);
-                urls = liberator.util.stringToURLArray(res.args.join(' '));
-                liberator.log(urls);
-                if (urls.length == 0) {
-                    url = liberator.buffer.URL;
-                } else {
-                    url = urls[0];
-                    urls.shift();
-                }
-            } else {
+        position = getPositionForOpen(args) || position;
+        if (args.arguments.length > 0){
+            urls = liberator.util.stringToURLArray(args.arguments.join(', '));
+            if (urls.length == 0) {
                 url = liberator.buffer.URL;
+            } else {
+                url = urls[0];
+                urls.shift();
             }
         } else {
             url = liberator.buffer.URL;
@@ -298,19 +294,19 @@ var manager = {
         });
         return subBrowser;
     },
-	closeSubBrowser: function(){
-		var b = SplitBrowser.activeBrowser;
-		if (b.mTabs.length > 1){
-			b.removeTab(b.mCurrentTab);
-		} else {
-			if (b === getBrowser()){
-				liberator.open('about:blank', liberator.NEW_BACKGROUND_TAB);
-				getBrowser().removeTab(gBrowser.mCurrentTab);
-			} else {
-				SplitBrowser.activeBrowserCloseWindow();
-			}
-		}
-	}
+    closeSubBrowser: function(){
+        var b = SplitBrowser.activeBrowser;
+        if (b.mTabs.length > 1){
+            b.removeTab(b.mCurrentTab);
+        } else {
+            if (b === getBrowser()){
+                liberator.open('about:blank', liberator.NEW_BACKGROUND_TAB);
+                getBrowser().removeTab(gBrowser.mCurrentTab);
+            } else {
+                SplitBrowser.activeBrowserCloseWindow();
+            }
+        }
+    }
 };
 return manager;
 })();
@@ -318,4 +314,4 @@ return manager;
 
 })();
 
-// vim: set fdm=marker sw=4 ts=4 et:
+// vim:fdm=marker sw=4 ts=4 et:

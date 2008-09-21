@@ -200,10 +200,12 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 
 liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<Leader>f'],
 	'Start Toolbar-HINTS (open current tab)',
-	function(){ plugins.bookmarkToolbarHints.startup(liberator.CURRENT_TAB); }
+	function(){ plugins.bookmarkToolbarHints.startup(liberator.CURRENT_TAB); },
+	{ rhs: 'Bookmarks Toolbar-HINTS (current-tab)'}
 );
 liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<Leader>F'],
 	'Start Toolbar-HINTS (open new tab)',
-	function(){ plugins.bookmarkToolbarHints.startup(liberator.NEW_TAB); }
+	function(){ plugins.bookmarkToolbarHints.startup(liberator.NEW_TAB); },
+	{ rhs: 'Bookmarks Toolbar-HINTS (new-tab)' }
 );
 
