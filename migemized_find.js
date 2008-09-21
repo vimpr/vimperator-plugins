@@ -263,14 +263,17 @@
 
   // 前のタイマーを削除するために保存しておく
   let delayCallTimer = null;
+  let delayedFunc = null;
 
   let migemized = {
     find: function find (str, backwards) {
       // 短時間に何回も検索をしないように遅延させる
-      let f = function () MF.findFirst(str, backwards);
-      if (delayCallTimer)
+      delayedFunc = function () MF.findFirst(str, backwards);
+      if (delayCallTimer) {
+        delayCallTimer = null;
         clearTimeout(delayCallTimer);
-      delayCallTimer = setTimeout(function () f(), 300);
+      }
+      delayCallTimer = setTimeout(function () delayedFunc(), 300);
     },
 
     findAgain: function findAgain (reverse) {
@@ -279,6 +282,11 @@
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
+      if (delayCallTimer) {
+        delayCallTimer = null;
+        clearTimeout(delayCallTimer);
+        delayedFunc();
+      }
       if (!MF.submit())
         liberator.echoerr('not found: ' + MF.currentSearchText);
     },
