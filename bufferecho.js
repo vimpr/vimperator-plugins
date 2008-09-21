@@ -3,7 +3,7 @@
  * @name           bufferecho.js
  * @description    Display results of JavaScript to a buffer(browser) instead of commandline-buffer
  * @description-ja JavaScript実行結果をコマンドライン・バッファではなくバッファ(ブラウザ)に表示
- * @version        0.1a
+ * @version        0.1
  * ==/VimperatorPlugin==
  */ 
 liberator.plugins.buffer_echo = (function(){
@@ -17,6 +17,11 @@ function execute(str){
         result = e.name + ":\n" + e.message;
     }
     return result;
+}
+function htmlEscape(str){
+    return str.replace("&","&amp;","g")
+              .replace("<","&lt;","g")
+              .replace(">","&gt;","g");
 }
 
 liberator.commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to a buffer(browser)',
@@ -34,7 +39,7 @@ var manager = {
     open: function(str, forceNewTab) {
         var result = execute(str);
         if (typeof(result) == "object") result = liberator.util.objectToString(result,true);
-        var data = '<div><h1>' + str + '</h1><pre>' + result + '</pre></div>';
+        var data = '<div><h1>' + htmlEscape(str) + '</h1><pre>' + result + '</pre></div>';
         if (liberator.buffer.title == title && !forceNewTab){
             this.append(data);
             return;
