@@ -52,8 +52,10 @@
 
     lastSearchText: null,
     lastSearchExpr: null,
-    previousSearchText: null,
     lastDirection: null,
+    currentSearchText: null,
+    currentSearchExpr: null,
+    lastResult: null,
 
     get buffer function () liberator.buffer,
 
@@ -155,15 +157,16 @@
 
     findFirst: function (str, backwards) {
       this.lastDirection = backwards;
-      this.lastSearchText = str;
-      this.lastSearchExpr = str = this.searchTextToRegExpString(str);
+      let expr = this.searchTextToRegExpString(str);
+      this.currentSearchText = str;
+      this.currentSearchExpr = expr;
 
       let result, frames = this.currentFrames;
       if (backwards)
         frames = frames.reverse();
 
       for each (let frame in frames) {
-        let ret = this.find(str, backwards, this.makeBodyRange(frame));
+        let ret = this.find(expr, backwards, this.makeBodyRange(frame));
         if (ret) {
           result = this.storage.lastResult = {
             frame: frame,
@@ -174,8 +177,10 @@
       }
 
       this.removeHighlight();
-      if (result)
+      if (result) 
         this.highlight(result, true);
+
+      this.lastResult = result;
 
       return result;
     },
@@ -234,11 +239,12 @@
     },
 
     submit: function () {
-      this.previousSearchText = this.lastSearchText;
+      this.lastSearchText = this.currentSearchText;
+      this.lastSearchExpr = this.currentSearchExpr;
+      return this.lastResult;
     },
 
     cancel: function () {
-      this.lastSearchText = MF.previousSearchText;
     },
 
     get currentFrames function () {
@@ -268,15 +274,13 @@
     },
 
     findAgain: function findAgain (reverse) {
-      MF.findAgain(reverse);
-      if (!MF.storage.lastResult)
-        liberator.echoerr('not found: ' + MF.lastSearchText);
+      if (!MF.findAgain(reverse))
+        liberator.echoerr('not found: ' + MF.currentSearchText);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
-      MF.submit();
-      if (!MF.storage.lastResult)
-        liberator.echoerr('not found: ' + MF.lastSearchText);
+      if (!MF.submit())
+        liberator.echoerr('not found: ' + MF.currentSearchText);
     },
 
     searchCanceled: function searchCanceled () {
