@@ -103,24 +103,22 @@
         liberator.echo(html, true);
     }
     function convert(str){
-        function createHTML(all, extension){
+        function createHTML(url){
             var str = '';
-            if (/\.(jpe?g|gif|png|bmp)$/.test(extension)){
-                str = '<img src="'+all+'"/>';
-            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(all)){
+            if (/\.(?:jpe?g|gif|png|bmp)$/.test(url)){
+                str = '<img src="'+url+'"/>';
+            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(url)){
                 var url = "http://www.youtube.com/v/" + RegExp.$1;
                 str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
-                      '<div><object height="250" width="300">' +
-                      '<param name="movie" value="' + url + '">' +
-                      '<param name="wmode" value="transparent">' +
-                      '<embed src="' + url + '" type="application/x-shockwave-flash" wmode="transparent" height="250" width="300">' +
+                      '<div><object height="250" width="300" data="' + url + '" type="application/x-shockwave-flash">' +
+                      '<param name="wmode" value="transparent"/>' +
                       '</object></div>';
             } else {
-                str = '<a href="#" class="hl-URL">'+all+'</a>';
+                str = '<a href="#" class="hl-URL">'+url+'</a>';
             }
             return str;
         }
-        return str.replace(/https?:\/\/[^\/]+?\/([^\s]*)/g, createHTML);
+        return str.replace(/https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+/g, createHTML);
     }
     liberator.commands.addUserCommand(["haiku"], "Change Haiku status",
         function(arg, special){
@@ -151,12 +149,12 @@
             }
 
             arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                .replace(/%TITLE%/g, liberator.buffer.title);
+                     .replace(/%TITLE%/g, liberator.buffer.title);
 
             if (special && arg.match(/^\+\s*(.*)/))
                 favHaiku(username, password, RegExp.$1)
             else
-            if (special && arg.match(/^\-\s*(.*)/))
+            if (special && arg.match(/^-\s*(.*)/))
                 unfavHaiku(username, password, RegExp.$1)
             else
             if (special || arg.length == 0)
