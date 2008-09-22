@@ -84,7 +84,9 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status) {
-                var text = status.text.substr(status.keyword.length + 1);
+                var text = status.text;
+                if (text.indexOf(status.keyword+"=") == 0) text = status.text.substr(status.keyword.length + 1);
+                text = convert(text);
                 return <>
                     <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
@@ -99,6 +101,26 @@
 
         //liberator.log(html);
         liberator.echo(html, true);
+    }
+    function convert(str){
+        function createHTML(all, extension){
+            var str = '';
+            if (/\.(jpe?g|gif|png|bmp)$/.test(extension)){
+                str = '<img src="'+all+'"/>';
+            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(all)){
+                var url = "http://www.youtube.com/v/" + RegExp.$1;
+                str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
+                      '<div><object height="250" width="300">' +
+                      '<param name="movie" value="' + url + '">' +
+                      '<param name="wmode" value="transparent">' +
+                      '<embed src="' + url + '" type="application/x-shockwave-flash" wmode="transparent" height="250" width="300">' +
+                      '</object></div>';
+            } else {
+                str = '<a href="#" class="hl-URL">'+all+'</a>';
+            }
+            return str;
+        }
+        return str.replace(/https?:\/\/[^\/]+?\/([^\s]*)/g, createHTML);
     }
     liberator.commands.addUserCommand(["haiku"], "Change Haiku status",
         function(arg, special){
