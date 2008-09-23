@@ -116,7 +116,7 @@
             } else if (/^http:\/\/(?:[^.]+\.)?youtube\.com\/(?:watch\?(?:[^&]+&)*v=|v\/)([^&=#?;\/]+)/.test(all)){
                 var url = "http://www.youtube.com/v/" + RegExp.$1 + "&fs=1";
                 str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
-                      '<div><object width="300" height="243" data="' + url + '" type="application/x-shockwave-flash">' +
+                      '<div><object width="300" height="250" data="' + url + '" type="application/x-shockwave-flash">' +
                       '<param name="wmode" value="transparent"/>' +
                       '<param name="allowFullScreen" value="true"/>' +
                       '</object></div>';
