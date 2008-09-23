@@ -85,7 +85,7 @@ const thumbnailURL = 'http://tn-skr1.smilevideo.jp/smile?i=';
 
 // style
 const styles = [
-    '<style>',
+    '<style type="text/css">',
         'table.nnp_coop .index     { text-align:right; width:2em; }',
         'table.nnp_coop .thumbnail { text-align:center; }',
         'table.nnp_coop caption    { color:green; }',
@@ -121,7 +121,7 @@ const thead = [
 const itemHTML = [
     '<tr>',
         '<td class="index">$INDEX:</td>',
-        '<td class="thumbnail"><image src="$THUMBNAILURL$ID" width="33" height="25" /></td>',
+        '<td class="thumbnail"><image src="$THUMBNAILURL$ID" width="33" height="25"/></td>',
         '<td>$TITLE</td>',
         '<td>$URL</td>',
     '</tr>',

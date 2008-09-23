@@ -80,23 +80,23 @@
  *   2008/09/04 v0.60 add function to post related tag page
  * */
 
-(function(){
+(function() {
 
 // information functions
 // change XPath query when html changed.
-function NicoScraper(){}
+function NicoScraper() {}
 NicoScraper.prototype = {
     constants: {
-        VERSION:            '0.50',
-        WATCH_PAGE:         1,
-        WATCH_URL:          '^http://www\.nicovideo\.jp/watch/[a-z][a-z]\\d+',
-        TAG_PAGE:           2,
-        TAG_URL:            '^http://www\.nicovideo\.jp/tag/',
-        RELATED_TAG_PAGE:   3,
-        RELATED_TAG_URL:    '^http://www\.nicovideo\.jp/related_tag/',
+        VERSION:          '0.50',
+        WATCH_PAGE:       1,
+        WATCH_URL:        '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
+        TAG_PAGE:         2,
+        TAG_URL:          '^http://www\\.nicovideo\\.jp/tag/',
+        RELATED_TAG_PAGE: 3,
+        RELATED_TAG_URL:  '^http://www\\.nicovideo\\.jp/related_tag/',
     },
 
-    version: function(){ return this.constants.VERSION; },
+    version: function() { return this.constants.VERSION; },
 
     pagecheck: function() {
         if(this.getURL().match(this.constants.WATCH_URL))       return this.constants.WATCH_PAGE;
@@ -115,9 +115,7 @@ NicoScraper.prototype = {
         return null;
     },
 
-    getURL: function() {
-        return liberator.buffer.URL;
-    },
+    getURL: function() { return liberator.buffer.URL; },
 
     getSubject: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
@@ -258,7 +256,7 @@ liberator.commands.addUserCommand(['matanico'], "update Twitter's status to curr
             if(req) {
                 req.open('POST', postURL, true, user, pass);
                 req.onreadystatechange = function() {
-                    if (req.readyState == 4) {
+                    if(req.readyState == 4) {
                         if(req.status == 200) liberator.echo('Posted ' + post_string)
                         else throw 'failure in posting status to Twitter. HTTP status code : ' + req.status;
                     }
@@ -306,12 +304,12 @@ function $s(query, node) {
 // user account manager
 // from direct_bookmark.js
 // thanks to Trapezoid
-function getUserAccount(form,post,arg){
+function getUserAccount(form,post,arg) {
     var user, password;
-    try{
+    try {
         var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
         var logins = passwordManager.findLogins({}, form, post, arg);
-        if(logins.length > 0){
+        if(logins.length > 0) {
             [user, password] = [logins[0].username, logins[0].password];
         } else {
             var promptUser = { value : '' }, promptPass = { value : '' };
@@ -326,7 +324,7 @@ function getUserAccount(form,post,arg){
                     window, form, 'Enter e-mail address and password.',
                     promptUser, promptPass, null, {}
                     );
-            if(ret){
+            if(ret) {
                 [user, password] = [promptUser.value, promptPass.value];
                 var formLoginInfo = new nsLoginInfo(form,
                         post, null,
@@ -337,7 +335,7 @@ function getUserAccount(form,post,arg){
             }
         }
     }
-    catch(ex){
+    catch(ex) {
         liberator.echoerr("handled exception during getting username and password");
         liberator.log(ex);
     }

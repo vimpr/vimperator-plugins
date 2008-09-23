@@ -103,8 +103,8 @@ function NicoPlayerController(){}
 NicoPlayerController.prototype = {
     constants: {
         VERSION:    '0.41',
-        WATCH_URL:  '^http://www\.nicovideo\.jp/watch/[a-z][a-z]\\d+',
-        TAG_URL:    '^http://www\.nicovideo\.jp/tag/',
+        WATCH_URL:  '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
+        TAG_URL:    '^http://www\\.nicovideo\\.jp/tag/',
         WATCH_PAGE: 1,
         TAG_PAGE:   2,
         COMMAND_NORMAL: [
@@ -147,9 +147,7 @@ NicoPlayerController.prototype = {
         throw 'current tab is not nicovideo.jp';
     },
 
-    getURL: function() {
-        return liberator.buffer.URL;
-    },
+    getURL: function() { return liberator.buffer.URL; },
 
     _flvplayer: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
@@ -450,7 +448,7 @@ function expandExCommand(arg) {
     }
 
     // ex_command is putted in braces
-    if(comment.match(/^\{([^\}]+)\}(.+)/)) {
+    if(comment.match(/^\{([^{}]+)\}(.+)/)) {
         var exCommand = RegExp.$1;
         var text = RegExp.$2;
 
@@ -511,7 +509,7 @@ function analysisExCommand(exCommand) {
     // line
     if(exCommand.match(/\bline(-?\d+)\b/)) {
         var line = parseInt(RegExp.$1, 10);
-        if(line < 0)   line = properties.max + line + 1;
+        if(line < 0) line = properties.max + line + 1;
         if(line > properties.max) line = properties.max;
         properties.line = line;
     }
