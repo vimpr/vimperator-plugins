@@ -270,7 +270,6 @@
       // 短時間に何回も検索をしないように遅延させる
       delayedFunc = function () MF.findFirst(str, backwards);
       if (delayCallTimer) {
-        delayCallTimer = null;
         clearTimeout(delayCallTimer);
       }
       delayCallTimer = setTimeout(function () delayedFunc(), 300);
@@ -283,8 +282,8 @@
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
       if (delayCallTimer) {
-        delayCallTimer = null;
         clearTimeout(delayCallTimer);
+        delayCallTimer = null;
         delayedFunc();
       }
       if (!MF.submit())
