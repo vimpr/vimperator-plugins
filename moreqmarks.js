@@ -4,7 +4,7 @@
  * @description    add feature(record position, stack, queue) to QuickMarks
  * @description-ja QuickMarksに機能追加(位置の記憶、qmarksとは別のスタックとキュー追加)
  * @author         hogelog
- * @version        0.01
+ * @version        0.02
  * ==/VimperatorPlugin==
  *
  * MAPPINGS:
@@ -380,14 +380,14 @@
             if(usepos) {
                 var win = window.content;
 
-                if (win.document.body.localName.toLowerCase() == "frameset")
-                {
-                    liberator.echoerr("Marks support for frameset pages not implemented yet");
-                    return;
+                var x, y;
+                if (win.document.body.localName.toLowerCase() == "frameset") {
+                    x = 0;
+                    y = 0;
+                } else {
+                    x = win.scrollMaxX ? win.pageXOffset / win.scrollMaxX : 0;
+                    y = win.scrollMaxY ? win.pageYOffset / win.scrollMaxY : 0;
                 }
-
-                var x = win.scrollMaxX ? win.pageXOffset / win.scrollMaxX : 0;
-                var y = win.scrollMaxY ? win.pageYOffset / win.scrollMaxY : 0;
                 add_qmark(qmark, {url: url, x: x, y: y}, target);
                 var message = (target?target+" : ":"add : "+qmark+" | ")+"("+x*100+"%, "+y*100+"%) | "+url;
                 liberator.commandline.echo(message, liberator.commandline.HL_INFOMSG);
@@ -479,8 +479,7 @@
                         if (filter.indexOf(mark[0]) > -1)
                             return mark;
                 });
-                if (marks.length == 0)
-                {
+                if (marks.length == 0) {
                     liberator.echoerr("E283: No QuickMarks matching \"" + filter + "\"");
                     return;
                 }
