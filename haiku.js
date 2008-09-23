@@ -80,7 +80,7 @@
 
         var html = <style type="text/css"><![CDATA[
             span.haiku.entry-title { text-decoration: underline; }
-            span.haiku.entry-content { white-space:normal; }
+            span.haiku.entry-content { white-space: normal; }
             span.haiku.entry-content a { text-decoration: none; }
             img.haiku.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
         ]]></style>.toSource()
@@ -107,27 +107,27 @@
         liberator.echo(html, true);
     }
     function convert(str){
-        function createHTML(url,userid){
+        function createHTML(all){
             var str = '';
-            if (userid){
-                str = '<a href="http://h.hatena.ne.jp/id/'+userid+'">id:'+userid+'</a>'
-            } else if (/\.(?:jpe?g|gif|png|bmp)$/.test(url)){
-                str = '<img src="'+url+'"/>';
-            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(url)){
+            if (all.indexOf("id:") == 0){
+                str = '<a href="http://h.hatena.ne.jp/id/' + all.substring(3) + '">' + all + '</a>'
+            } else if (/\.(?:jpe?g|gif|png|bmp)$/.test(all)){
+                str = '<img src="' + all + '"/>';
+            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(all)){
                 var url = "http://www.youtube.com/v/" + RegExp.$1;
                 str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
                       '<div><object height="250" width="300" data="' + url + '" type="application/x-shockwave-flash">' +
                       '<param name="wmode" value="transparent"/>' +
                       '</object></div>';
             } else {
-                if (url.charAt(0) == "<")
-                    str = url.replace(/(href|src)="\//g,'$1="http://h.hatena.ne.jp/');
-                else 
-                    str = '<a href="#" class="hl-URL">'+url+'</a>';
+                if (all.charAt(0) == "<")
+                    str = all.replace(/(?:href|src)="(?=\/)/g,'$&http://h.hatena.ne.jp');
+                else
+                    str = '<a href="#" class="hl-URL">' + all + '</a>';
             }
             return str;
         }
-        return str.replace(/<[^>]+>|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:([-\w]+)/g, createHTML)
+        return str.replace(/<[^>]+>|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:[a-zA-Z][-\w]{1,30}[a-zA-Z\d]/g, createHTML)
                   .replace("\n","<br/>","g");
     }
     liberator.commands.addUserCommand(["haiku"], "Change Haiku status",
