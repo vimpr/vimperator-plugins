@@ -3,7 +3,7 @@
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 //
-// The script allows you to update Haiku status from Vimperator 0.6.*.
+// The script allows you to update Haiku status from Vimperator.
 //
 // Commands:
 //  :haiku some thing text
@@ -29,7 +29,7 @@
                 return Components.utils.evalInSandbox(text, sandbox);
             }
         }
-    } catch(e) { liberator.log('warning: haiku.js is working with unsafe sandbox.'); }
+    } catch (e) { liberator.log('warning: haiku.js is working with unsafe sandbox.'); }
 
     function sprintf(format){
         var i = 1, re = /%s/, result = "" + format;
@@ -110,14 +110,15 @@
         function createHTML(all){
             var str = '';
             if (all.indexOf("id:") == 0){
-                str = '<a href="http://h.hatena.ne.jp/id/' + all.substring(3) + '">' + all + '</a>'
+                str = '<a href="http://h.hatena.ne.jp/' + all.replace(":", "/") + '">' + all + '</a>'
             } else if (/\.(?:jpe?g|gif|png|bmp)$/.test(all)){
                 str = '<img src="' + all + '"/>';
-            } else if (/^http:\/\/www\.youtube\.com\/(?:watch\?v=|v\/)([-\w]+)$/.test(all)){
-                var url = "http://www.youtube.com/v/" + RegExp.$1;
+            } else if (/^http:\/\/(?:[^.]+\.)?youtube\.com\/(?:watch\?(?:[^&]+&)*v=|v\/)([^&=#?;\/]+)/.test(all)){
+                var url = "http://www.youtube.com/v/" + RegExp.$1 + "&fs=1";
                 str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
-                      '<div><object height="250" width="300" data="' + url + '" type="application/x-shockwave-flash">' +
+                      '<div><object width="300" height="243" data="' + url + '" type="application/x-shockwave-flash">' +
                       '<param name="wmode" value="transparent"/>' +
+                      '<param name="allowFullScreen" value="true"/>' +
                       '</object></div>';
             } else {
                 if (all.charAt(0) == "<")
