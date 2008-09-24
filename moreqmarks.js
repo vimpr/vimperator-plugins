@@ -4,7 +4,7 @@
  * @description    add feature(record position, stack, queue) to QuickMarks
  * @description-ja QuickMarksに機能追加(位置の記憶、qmarksとは別のスタックとキュー追加)
  * @author         hogelog
- * @version        0.03
+ * @version        0.04
  * ==/VimperatorPlugin==
  *
  * MAPPINGS:
@@ -201,9 +201,9 @@
             case "queue":
                 var savedQuickMarkQueue = "";
                 for (var mark in qmark_queue) {
-                    savedQuickMarkStack += qmark_queue[mark].url + "\n";
-                    savedQuickMarkStack += qmark_queue[mark].x + "\n";
-                    savedQuickMarkStack += qmark_queue[mark].y + "\n";
+                    savedQuickMarkQueue += qmark_queue[mark].url + "\n";
+                    savedQuickMarkQueue += qmark_queue[mark].x + "\n";
+                    savedQuickMarkQueue += qmark_queue[mark].y + "\n";
                 }
                 liberator.options.setPref("extensions.vimperator.moreqmarkqueue", savedQuickMarkQueue);
                 break;
