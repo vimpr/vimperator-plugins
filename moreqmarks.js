@@ -4,7 +4,7 @@
  * @description    add feature(record position, stack, queue) to QuickMarks
  * @description-ja QuickMarksに機能追加(位置の記憶、qmarksとは別のスタックとキュー追加)
  * @author         hogelog
- * @version        0.02
+ * @version        0.03
  * ==/VimperatorPlugin==
  *
  * MAPPINGS:
@@ -26,49 +26,45 @@
  */
 
 (function(){
-    var usepos = true;
+    var use_position = true;
+    var use_default_data = true;
     var qmarks = {};
     var qmark_stack = [];
     var qmark_queue = [];
 
     // TODO: move to a storage module
+    var defaultMarks = liberator.options.getPref("extensions.vimperator.quickmarks", "").split("\n");
     var savedMarks = liberator.options.getPref("extensions.vimperator.moreqmarks", "").split("\n");
     var savedMarkStack = liberator.options.getPref("extensions.vimperator.moreqmarkstack", "").split("\n");
     var savedMarkQueue = liberator.options.getPref("extensions.vimperator.moreqmarkqueue", "").split("\n");
 
     // load the saved quickmarks -- TODO: change to sqlite
-    if(usepos) {
-        for (var i = 0; i < savedMarks.length - 1; i += 4) {
-            var url = savedMarks[i+1];
-            var x = savedMarks[i+2];
-            var y = savedMarks[i+3];
-    
-            qmarks[savedMarks[i]] = {url: url, x: x, y:y};
+    if(use_default_data) {
+        for (var i = 0; i < defaultMarks.length - 1; i += 2) {
+            var url = defaultMarks[i+1];
+            qmarks[defaultMarks[i]] = {url: url, x: 0, y: 0};
         }
-        for (var i = 0; i < savedMarkStack.length - 1; i += 3) {
-            var url = savedMarkStack[i];
-            var x = savedMarkStack[i+1];
-            var y = savedMarkStack[i+2];
+    }
+    for (var i = 0; i < savedMarks.length - 1; i += 4) {
+        var url = savedMarks[i+1];
+        var x = savedMarks[i+2];
+        var y = savedMarks[i+3];
     
-            qmark_stack.push({url: url, x: x, y:y});
-        }
-        for (var i = 0; i < savedMarkQueue.length - 1; i += 3) {
-            var url = savedMarkQueue[i];
-            var x = savedMarkQueue[i+1];
-            var y = savedMarkQueue[i+2];
+        qmarks[savedMarks[i]] = {url: url, x: x, y:y};
+    }
+    for (var i = 0; i < savedMarkStack.length - 1; i += 3) {
+        var url = savedMarkStack[i];
+        var x = savedMarkStack[i+1];
+        var y = savedMarkStack[i+2];
+    
+        qmark_stack.push({url: url, x: x, y:y});
+    }
+    for (var i = 0; i < savedMarkQueue.length - 1; i += 3) {
+        var url = savedMarkQueue[i];
+        var x = savedMarkQueue[i+1];
+        var y = savedMarkQueue[i+2];
 
-            qmark_queue.unshift({url: url, x: x, y:y});
-        }
-    } else {
-        for (var i = 0; i < savedMarks.length - 1; i += 2) {
-            qmarks[savedMarks[i]] = savedMarks[i+1];
-        }
-        for (var i = 0; i < savedMarkStack.length - 1; i += 1) {
-            qmark_stack.push(savedMarkStack[i]);
-        }
-        for (var i = 0; i < savedMarkQueue.length - 1; i += 1) {
-            qmark_queue.unshift(savedMarkQueue[i]);
-        }
+        qmark_queue.unshift({url: url, x: x, y:y});
     }
 
     function add_qmark(qmark, item, target) {
@@ -110,20 +106,14 @@
                 list = qmarks; 
                 break;
         }
-        if(usepos) {
-            for (var mark in list) {
-                marks.push([mark, list[mark].url, list[mark].x, list[mark].y]);
-            }
-        } else {
-            for (var mark in list) {
-                marks.push([mark, list[mark]]);
-            }
+        for (var mark in list) {
+            marks.push([mark, list[mark].url, list[mark].x, list[mark].y]);
         }
         marks.sort();
         return marks;
     }
     function list_qmarks(marks) {
-        if(usepos) {
+        if(use_position) {
             var list = ":" + liberator.util.escapeHTML(liberator.commandline.getCommand()) + "<br/>" +
                        "<table><tr align=\"left\" class=\"hl-Title\"><th>mark</th><th>line</th><th>col</th><th>file</th></tr>";
             for (var i = 0; i < marks.length; i++)
@@ -150,14 +140,9 @@
         }
     }
     function jump_item(item, where, find) {
-        var url, x, y;
-        if(usepos) {
-            url = item.url;
-            x = item.x;
-            y = item.y;
-        } else {
-            url = item;
-        }
+        var url = item.url;
+        var x = item.x;
+        var y = item.y;
         if (url) {
             if(find) {
                 var items = liberator.completion.buffer("")[1];
@@ -170,7 +155,7 @@
                     if(marked_url == url) {
                         liberator.tabs.switchTo(number);
                         var win = getBrowser().selectedTab.linkedBrowser.contentWindow;
-                        if(usepos) {
+                        if(use_position) {
                             if(x!=0 || y!=0) {
                                 win.scrollTo(x*win.scrollMaxX, y*win.scrollMaxY);
                             }
@@ -182,7 +167,7 @@
             var tab = open_url(url, where);
             if(tab) {
                 var win = tab.linkedBrowser.contentWindow;
-                if(usepos) {
+                if(use_position) {
                     if(x!=0 || y!=0) {
                         // scrollMaxX and scrollMaxY are 0 before construct content
                         // But small document(scrollMaxX = 0 and scrollMaxY = 0) is marked,
@@ -206,50 +191,29 @@
         switch(target) {
             case "stack":
                 var savedQuickMarkStack = "";
-                if(usepos) {
-                    for (var mark in qmark_stack) {
-                        savedQuickMarkStack += qmark_stack[mark].url + "\n";
-                        savedQuickMarkStack += qmark_stack[mark].x + "\n";
-                        savedQuickMarkStack += qmark_stack[mark].y + "\n";
-                    }
-                } else {
-                    for (var mark in qmark_stack) {
-                        savedQuickMarkStack += qmark_stack[mark]+ "\n";
-                    }
+                for (var mark in qmark_stack) {
+                    savedQuickMarkStack += qmark_stack[mark].url + "\n";
+                    savedQuickMarkStack += qmark_stack[mark].x + "\n";
+                    savedQuickMarkStack += qmark_stack[mark].y + "\n";
                 }
                 liberator.options.setPref("extensions.vimperator.moreqmarkstack", savedQuickMarkStack);
                 break;
             case "queue":
                 var savedQuickMarkQueue = "";
-                if(usepos) {
-                    for (var mark in qmark_queue) {
-                        savedQuickMarkStack += qmark_queue[mark].url + "\n";
-                        savedQuickMarkStack += qmark_queue[mark].x + "\n";
-                        savedQuickMarkStack += qmark_queue[mark].y + "\n";
-                    }
-                } else {
-                    for (var mark in qmark_queue) {
-                        savedQuickMarkStack += qmark_queue[mark] + "\n";
-                    }
+                for (var mark in qmark_queue) {
+                    savedQuickMarkStack += qmark_queue[mark].url + "\n";
+                    savedQuickMarkStack += qmark_queue[mark].x + "\n";
+                    savedQuickMarkStack += qmark_queue[mark].y + "\n";
                 }
                 liberator.options.setPref("extensions.vimperator.moreqmarkqueue", savedQuickMarkQueue);
                 break;
             default:
                 var savedQuickMarks = "";
-                if(usepos) {
-                    for (var mark in qmarks)
-                    {
-                        savedQuickMarks += mark + "\n";
-                        savedQuickMarks += qmarks[mark].url + "\n";
-                        savedQuickMarks += qmarks[mark].x + "\n";
-                        savedQuickMarks += qmarks[mark].y + "\n";
-                    }
-                } else {
-                    for (var mark in qmarks)
-                    {
-                        savedQuickMarks += mark + "\n";
-                        savedQuickMarks += qmarks[mark] + "\n";
-                    }
+                for (var mark in qmarks) {
+                    savedQuickMarks += mark + "\n";
+                    savedQuickMarks += qmarks[mark].url + "\n";
+                    savedQuickMarks += qmarks[mark].x + "\n";
+                    savedQuickMarks += qmarks[mark].y + "\n";
                 }
                 liberator.options.setPref("extensions.vimperator.moreqmarks", savedQuickMarks);
                 break;
@@ -350,7 +314,7 @@
             var where = /\bquickmark\b/.test(liberator.options["activate"]) ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB;
             liberator.quickmarks.jumpTo("", where, true, "stack");
         });
-    liberator.commands.add(["stackli[st]", "stli[st]"], "List QuickMarkStack",
+    liberator.commands.add(["stackli[st]", "stls"], "List QuickMarkStack",
         function ()
         {
             liberator.plugins.moreqmarks.list("", "stack");
@@ -377,7 +341,7 @@
 
         add: function (qmark, url, target)
         {
-            if(usepos) {
+            if(use_position) {
                 var win = window.content;
 
                 var x, y;
@@ -392,7 +356,7 @@
                 var message = (target?target+" : ":"add : "+qmark+" | ")+"("+x*100+"%, "+y*100+"%) | "+url;
                 liberator.commandline.echo(message, liberator.commandline.HL_INFOMSG);
             } else {
-                add_qmark(qmark, url, target);
+                add_qmark(qmark, {url: url, x: 0, y: 0}, target);
                 var message = (target?target+" : ":"add : "+qmark+" | ")+url;
                 liberator.commandline.echo(message, liberator.commandline.HL_INFOMSG);
             }
@@ -403,18 +367,10 @@
         {
             if(url) {
                 for(var mark in qmarks) {
-                    if(usepos) {
-                        if(url == qmarks[mark].url) {
-                            delete qmarks[mark];
-                            liberator.commandline.echo("delete qmark "+mark, liberator.commandline.HL_INFOMSG);
-                            return;
-                        }
-                    } else {
-                        if(url == qmarks[mark]) {
-                            delete qmarks[mark];
-                            liberator.commandline.echo("delete qmark "+mark, liberator.commandline.HL_INFOMSG);
-                            return;
-                        }
+                    if(url == qmarks[mark].url) {
+                        delete qmarks[mark];
+                        liberator.commandline.echo("delete qmark "+mark, liberator.commandline.HL_INFOMSG);
+                        return;
                     }
                 }
                 liberator.echoerr('No QuickMark set to '+url);
@@ -491,7 +447,7 @@
 
         destroy: function ()
         {
-            // save_qmarks is called when add:
+            // save_qmarks is called when liberator.plugins.moreqmarks.add
             // save_qmarks("stack");
             // save_qmarks("queue");
             // save_qmarks("list");
