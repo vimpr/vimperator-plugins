@@ -6,7 +6,7 @@
  * @author         teramako teramako@gmail.com
  * @url            http://coderepos.org/share/wiki/VimperatorPlugin/stylechanger.js
  * @license        MPL 1.1/GPL 2.0/LGPL 2.1
- * @version        0.3b
+ * @version        0.3c
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -48,19 +48,24 @@ liberator.plugins.styleSheetsManger = (function(){
 		}
 	}
 	function getCSSFiles(){
-		var colorDir = io.getSpecialDirectory('colors');
 		var cssFiles = [];
-		if (colorDir){
-			cssFiles = io.readDirectory(colorDir).filter(function(file){
-				return /\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory() ;
-			});
+		var colorDirs = io.getRuntimeDirectories('colors');
+		for each(var colorDir in colorDirs){
+			if (colorDir){
+				cssFiles.concat(io.readDirectory(colorDir).filter(function(file){
+					return /\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory() ;
+				}));
+			}
 		}
+		
 		return cssFiles;
 	}
 	function getURIFromName(aName){
-		var file = io.getSpecialDirectory('colors');
-		file.append(aName + '.css');
-		if (file.exists()) return ios.newFileURI(file);
+		var colorDirs = io.getRuntimeDirectories('colors');
+		for each(var file in colorDirs){
+			file.append(aName + '.css');
+			if (file.exists()) return ios.newFileURI(file);
+		}
 
 		return null;
 	}
