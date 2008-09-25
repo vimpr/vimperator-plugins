@@ -120,6 +120,9 @@
                       '<param name="wmode" value="transparent"/>' +
                       '<param name="allowFullScreen" value="true"/>' +
                       '</object></div>';
+            } else if (/^http:\/\/www\.nicovideo\.jp\/watch\/([-\w]+)$/.test(all)){
+                str = '<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/'+RegExp.$1+'" scrolling="no">'+
+                      '<a href="' + all + '">' + all + '</a></iframe>';
             } else {
                 if (all.charAt(0) == "<")
                     str = all.replace(/(?:href|src)="(?=\/)/g,'$&http://h.hatena.ne.jp');
