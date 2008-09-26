@@ -4,12 +4,12 @@
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.20
- * @minversion      1.1
+ * @version         0.30
+ * @minversion      1.2
  * ==VimperatorPlugin==
  *
  * CONSTRAINT
- *   need NicoNicoPlaylist version 0.3 or above
+ *   need NicoNicoPlaylist version 1.11 or above
  *
  * LICENSE
  *   New BSD License
@@ -35,8 +35,9 @@
  *     :NNPGetList で表示するリストの個数を指定する。デフォルトは 10 。
  *
  * HISTORY
- *   2008/07/11 initial written.
- *   2008/07/15 refactoring
+ *   2008/07/11 ver. 0.1    initial written.
+ *   2008/07/15 ver. 0.2    refactoring.
+ *   2008/09/25 ver. 0.3    change XPath expression.
  *
  * */
 /*
@@ -85,7 +86,7 @@ const thumbnailURL = 'http://tn-skr1.smilevideo.jp/smile?i=';
 
 // style
 const styles = [
-    '<style type="text/css">',
+    '<style>',
         'table.nnp_coop .index     { text-align:right; width:2em; }',
         'table.nnp_coop .thumbnail { text-align:center; }',
         'table.nnp_coop caption    { color:green; }',
@@ -121,7 +122,7 @@ const thead = [
 const itemHTML = [
     '<tr>',
         '<td class="index">$INDEX:</td>',
-        '<td class="thumbnail"><image src="$THUMBNAILURL$ID" width="33" height="25"/></td>',
+        '<td class="thumbnail"><image src="$THUMBNAILURL$ID" width="33" height="25" /></td>',
         '<td>$TITLE</td>',
         '<td>$URL</td>',
     '</tr>',
@@ -139,7 +140,7 @@ liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
         }
 
         // check existence of items in NicoNicoPlaylist
-        var nodes = $s('div[2]/ul/li/a[2]', playlist);
+        var nodes = $s('./div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a', playlist);
         var nodesLength = nodes.length
         if(nodesLength === 0) {
             liberator.echoerr('no items in NicoNicoPlaylist.');
@@ -219,9 +220,9 @@ function $s(query, node) {
     [['nnpremove'],        "remove item in NicoNicoPlaylist",        'GMNNPRemove'],
     [['nnpclear'],         "clear all items in NicoNicoPlaylist",    'GMNNPClear'],
 ].forEach(
-    function([command, description, eventname]){
+    function ([command, description, eventname]){
         liberator.commands.addUserCommand(command, description,
-            function(arg) {
+            function (arg) {
                 var r = document.createEvent("CommandEvent");
                 r.initCommandEvent(eventname, true, true, arg);
                 window.content.dispatchEvent(r);
