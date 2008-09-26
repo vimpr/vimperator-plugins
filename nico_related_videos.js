@@ -29,15 +29,15 @@
 
   function httpRequest (uri, onComplete) {
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function(){
-      if(xhr.readyState == 4){
-        if(xhr.status == 200)
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200)
           onComplete(xhr.responseXML);
         else
           throw new Error(xhr.statusText)
       }
     };
-    xhr.open("GET", uri, true);
+    xhr.open('GET', uri, true);
     xhr.send(null);
   }
 
@@ -48,7 +48,7 @@
     let videos = [];
     let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + videoId;
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", uri, false);
+    xhr.open('GET', uri, false);
     xhr.send(null);
     let xml = xhr.responseXML;
     let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
@@ -71,11 +71,11 @@
     'niconico related videos',
     function (url) {
       url = (function () {
-        if (url == nothing) 
+        if (url == nothing)
           return 'http://www.nicovideo.jp/';
         if (url.match(/^[a-z]{2}\d+$/))
           return 'http://www.nicovideo.jp/watch/' + url;
-        if (!url.match(/http:\/\//))
+        if (url.indexOf('http://') == -1)
           return 'http://www.nicovideo.jp/search/' + encodeURIComponent(url);
       })() || url;
       liberator.open(url);
