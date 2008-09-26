@@ -22,25 +22,23 @@
     const re = /auto|scroll/i;
     let s = elem.ownerDocument.defaultView.getComputedStyle(elem, '');
     if (elem.scrollHeight <= elem.clientHeight)
-      return;
-    for each (let n in ['overflow', 'overflowY', 'overflowX']) {
-      if (s[n] && s[n].match(re))
-        return true;
-    }
+      return false;
+    return ['overflow', 'overflowY', 'overflowX'].some(function (n)
+      s[n] && re.test(s[n]));
   }
 
   // 光らせる
   function flashElement (elem) {
-    let indicator = elem.ownerDocument.createElement("div");
+    let indicator = elem.ownerDocument.createElement('div');
     let rect = elem.getBoundingClientRect();
-    indicator.id = "nyantoro-element-indicator";
-    let style = "background-color: blue; opacity: 0.5; z-index: 999;" +
-                "position: fixed; " + 
-                "top: " + rect.top + "px;" +
-                "height:" + elem.clientHeight + "px;"+
-                "left: " + rect.left + "px;" +
-                "width: " + elem.clientWidth + "px";
-    indicator.setAttribute("style", style);
+    indicator.id = 'nyantoro-element-indicator';
+    let style = 'background-color: blue; opacity: 0.5; z-index: 999;' +
+                'position: fixed; ' +
+                'top: ' + rect.top + 'px;' +
+                'height:' + elem.clientHeight + 'px;'+
+                'left: ' + rect.left + 'px;' +
+                'width: ' + elem.clientWidth + 'px';
+    indicator.setAttribute('style', style);
     elem.appendChild(indicator);
     setTimeout(function () elem.removeChild(indicator), 500);
   }
@@ -49,8 +47,8 @@
   function scrollableElements () {
     let result = [];
     let doc = content.document;
-    let r = doc.evaluate("//div|//ul", doc, null, 7, null)
-    for (let i = 0; i < r.snapshotLength; i++) {
+    let r = doc.evaluate('//div|//ul', doc, null, 7, null)
+    for (let i = 0, l = r.snapshotLength; i < l; i++) {
       let elem = r.snapshotItem(i);
       if (isScrollable(elem))
         result.push(elem);
@@ -90,28 +88,28 @@
 
 
   liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL], 
+    [liberator.modes.NORMAL],
     ['<Leader>j'],
     'Scroll down',
     function () scroll(true)
   );
 
   liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL], 
+    [liberator.modes.NORMAL],
     ['<Leader>k'],
     'Scroll up',
     function () scroll(false)
   );
 
   liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL], 
+    [liberator.modes.NORMAL],
     [']d'],
     'Shift Scroll Element',
     function () shiftScrollElement(1)
   );
 
   liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL], 
+    [liberator.modes.NORMAL],
     ['[d'],
     'Shift Scroll Element',
     function () shiftScrollElement(-1)
