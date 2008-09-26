@@ -30,7 +30,7 @@
  * Example:
  *
  * auto load settings
- *    let g:styles = "style,name"
+ *    let g:styles = "style, name"
  *
  */
 
@@ -40,38 +40,27 @@ liberator.plugins.styleSheetsManger = (function(){
 	var sss = Components.classes['@mozilla.org/content/style-sheet-service;1'].getService(Components.interfaces.nsIStyleSheetService);
 	var ios = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
 	var CSSDataPrefix = 'data:text/css,';
-	function init(){
-		if (!globalVariables.styles) return;
-		var list = globalVariables.styles.split(/\s*,\s*/);
-		for each(var item in list){
-			manager.load(item);
-		}
+	function init() {
+		if (globalVariables.styles) globalVariables.styles.split(/\s*,\s*/).forEach(manager.load);
 	}
-	function getCSSFiles(){
-		var cssFiles = [];
-		var colorDirs = io.getRuntimeDirectories('colors');
-		for each(var colorDir in colorDirs){
-			if (colorDir){
-				cssFiles.concat(io.readDirectory(colorDir).filter(function(file){
-					return /\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory() ;
-				}));
-			}
-		}
-		
-		return cssFiles;
-	}
+	function getCSSFiles()
+		io.getRuntimeDirectories('colors')
+		  .filter(function(colorDir) colorDir)
+		  .map(function(colorDir)
+			io.readDirectory(colorDir).filter(function(file)
+				/\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory()));
 	function getURIFromName(aName){
-		var colorDirs = io.getRuntimeDirectories('colors');
-		for each(var file in colorDirs){
+		var ret = null;
+		io.getRuntimeDirectories('colors').some(function(file){
 			file.append(aName + '.css');
-			if (file.exists()) return ios.newFileURI(file);
-		}
-
-		return null;
+			if (file.exists()){
+				ret = ios.newFileURI(file);
+				return true;
+			}
+		});
+		return ret;
 	}
-	function getURIFromCSS(aString){
-		return ios.newURI('data:text/css,' + aString, null, null);
-	}
+	function getURIFromCSS(aString) ios.newURI('data:text/css,' + aString, null, null);
 	function getStylesheetList(){
 		var list = [];
 		var stylesheets = getAllStyleSheets(window.content);
@@ -84,26 +73,7 @@ liberator.plugins.styleSheetsManger = (function(){
 	}
 	var manager = {
 		load: function(css){
-			if(!css) return false;
-			var uri = null;
-			if (typeof css == 'string') {
-				uri = getURIFromName(css);
-			} else if (css instanceof Components.interfaces.nsIURI) {
-				uri = css;
-			}
-			if (!uri) return false;
-
-			if(sss.sheetRegistered(uri, sss.USER_SHEET))
-				sss.unregisterSheet(uri, sss.USER_SHEET);
-
-			sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
-			if (options.verbose > 8)
-				log('Resisted colorschema '+css);
-
-			return true;
-		},
-		unload: function(css){
-			if(!css) return false;
+			if (!css) return false;
 			var uri = null;
 			if (typeof css == 'string'){
 				uri = getURIFromName(css);
@@ -111,20 +81,33 @@ liberator.plugins.styleSheetsManger = (function(){
 				uri = css;
 			}
 			if (!uri) return false;
-
-			if(sss.sheetRegistered(uri, sss.USER_SHEET))
+			if (sss.sheetRegistered(uri, sss.USER_SHEET))
 				sss.unregisterSheet(uri, sss.USER_SHEET);
-
+			sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
+			if (options.verbose > 8)
+				log('Resisted colorschema '+css);
+			return true;
+		},
+		unload: function(css){
+			if (!css) return false;
+			var uri = null;
+			if (typeof css == 'string'){
+				uri = getURIFromName(css);
+			} else if (css instanceof Components.interfaces.nsIURI){
+				uri = css;
+			}
+			if (!uri) return false;
+			if (sss.sheetRegistered(uri, sss.USER_SHEET))
+				sss.unregisterSheet(uri, sss.USER_SHEET);
 			if (options.verbose > 8)
 				log('Unresisted colorschema '+css);
-
 			return true;
 		},
 		list: function(isAltanative){
 			var str = [];
 			if (isAltanative){
 				str.push('<span class="hl-Title">Alternative StyleSheet List</span>');
-				getStylesheetList().forEach(function(elm,i){
+				getStylesheetList().forEach(function(elm, i){
 					var buf = ' ' + (i+1) + ' ';
 					if (elm[1]){
 						buf += '<span style="color:blue">*</span>';
@@ -136,8 +119,8 @@ liberator.plugins.styleSheetsManger = (function(){
 				if (str.length == 1) str = ['Alternative StyleSheet is none.'];
 			} else {
 				str.push('<span class="hl-Title">User StyleSheet List</span>');
-				var files = getCSSFiles().map(function(file){return file.leafName.replace(/\.css$/i,'');});
-				files.forEach(function(file,i){
+				var files = getCSSFiles().map(function(file) file.leafName.replace(/\.css$/i, ''));
+				files.forEach(function(file, i){
 					var buf = ' ' + (i+1) + ' ';
 					if (sss.sheetRegistered(getURIFromName(file), sss.USER_SHEET)){
 						buf += '<span style="color:blue">*</span>';
@@ -158,17 +141,16 @@ liberator.plugins.styleSheetsManger = (function(){
 			if (!arg){
 				manager.list(true);
 				return;
-			} else if (getStylesheetList().some(function(elm){return elm[0] == arg;})){
+			} else if (getStylesheetList().some(function(elm) elm[0] == arg)){
 				stylesheetSwitchAll(window.content, arg);
 				setStyleDisabled(false);
 			}
-		},{
+		}, {
 			completer: function(aFilter){
-				var styles = getStylesheetList().map(
-					function(elm){ return [elm[0], elm[1] ? '* ' : '  ' + 'alternative style']; }
-				);
-				if (!aFilter) return [0,styles];
-				var candidates = styles.filter(function(elm){return elm[0].indexOf(aFilter) == 0;});
+				var styles = getStylesheetList().map(function(elm)
+					[elm[0], elm[1] ? '* ' : '  ' + 'alternative style']);
+				if (!aFilter) return [0, styles];
+				var candidates = styles.filter(function(elm) elm[0].indexOf(aFilter) == 0);
 				return [0, candidates];
 			}
 		}
@@ -184,20 +166,20 @@ liberator.plugins.styleSheetsManger = (function(){
 			} else {
 				manager.load(arg) && echo('Redisted '+arg);
 			}
-		},{
+		}, {
 			completer: function(filter, special){
 				var list = getCSSFiles().map(function(file){
-					var name = file.leafName.replace(/\.css$/i,'');
-					return [name,sss.sheetRegistered(getURIFromName(name),sss.USER_SHEET) ? '*' : ''];
+					var name = file.leafName.replace(/\.css$/i, '');
+					return [name, sss.sheetRegistered(getURIFromName(name), sss.USER_SHEET) ? '*' : ''];
 				});
-				if (!filter) return [0,list];
+				if (!filter) return [0, list];
 				var candidates = [];
 				list.forEach(function(item){
-					if(item[0].toLowerCase().indexOf(filter) == 0){
+					if (item[0].toLowerCase().indexOf(filter) == 0){
 						candidates.push(item);
 					}
 				});
-				return [0,candidates];
+				return [0, candidates];
 			}
 		}
 	);
@@ -206,15 +188,15 @@ liberator.plugins.styleSheetsManger = (function(){
 		function(args){
 			if (args.arguments.length == 0){
 				var str = ['show highlight list'];
-				for (var name in CSSData){
+				for (let name in CSSData){
 					str.push('<span class="hl-Title">' + name + '</span>');
 					str.push(CSSData[name]);
 				}
-				echo(str.join('\n'),true);
+				echo(str.join('\n'), true);
 			} else if (args.arguments.length == 1){
 				var arg = args.arguments[0];
 				if (arg == 'clear'){
-					for (var name in CSSData){
+					for (let name in CSSData){
 						manager.unload(getURIFromCSS(CSSData[name]));
 						delete CSSData[name];
 					}
@@ -236,24 +218,24 @@ liberator.plugins.styleSheetsManger = (function(){
 					manager.load(getURIFromCSS(CSSData[groupName]));
 				}
 			}
-		},{
+		}, {
 			completer: function(aFilter){
-				var rel = commands.parseArgs(aFilter,null,"*");
-				var list1 = [ ['clear', 'clear all or specified group'] ];
+				var rel = commands.parseArgs(aFilter, null, '*');
+				var list1 = [['clear', 'clear all or specified group']];
 				var list2 = [];
 				if (!rel){
-					for (var name in CSSData){
+					for (let name in CSSData){
 						list2.push([name, CSSData[name]]);
 					}
-					return [0,list1.concat(list2)];
+					return [0, list1.concat(list2)];
 				}
 				if (rel.arguments.length == 2 && rel.arguments[0] == 'clear'){
-					for (var name in CSSData){
+					for (let name in CSSData){
 						if (name.indexOf(rel.arguments[1]) == 0) list2.push([name, CSSData[name]]);
 					}
 					return [6, list2];
 				} else if (rel.args.length == 1){
-					for (var name in CSSData){
+					for (let name in CSSData){
 						if (name.indexOf(rel.arguments[0]) == 0) list2.push([name, CSSData[name]]);
 					}
 					if ('clear'.indexOf(rel.arguments[0]) == 0)
