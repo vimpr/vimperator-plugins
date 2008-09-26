@@ -4,11 +4,12 @@
  * @description    Lookup words from Web dictionaries, and show the results in the bottom of the window
  * @description-ja Web上の辞書を引いた結果をコマンドライン・バッファへ出力します
  * @author teramako teramako@gmail.com
- * @version 0.2
+ * @version 0.3
  * ==/VimperatorPlugin==
  */
 (function(){
-[{
+
+const SITE_DEFINITION = [{
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
     shortHelp: 'SPACE ALC (英辞郎 on the Web)',
@@ -31,7 +32,91 @@
     url: 'http://www.answers.com/%s',
     shortHelp: 'Answers.com(英英辞書)',
     xpath: 'id("firstDs")'
-}].forEach(function(dictionary){
+}];
+
+// class definition
+function SpellChecker() {
+    this.initialize.apply(this, arguments);
+}
+SpellChecker.prototype = {
+    initialize: function () {
+        const MYSPELL  = "@mozilla.org/spellchecker/myspell;1";
+        const HUNSPELL = "@mozilla.org/spellchecker/hunspell;1";
+        const ENGINE   = "@mozilla.org/spellchecker/engine;1";
+
+        var spellclass = MYSPELL;
+        if (HUNSPELL in Components.classes)
+            spellclass = HUNSPELL;
+        if (ENGINE in Components.classes)
+            spellclass = ENGINE;
+
+        this.engine = Components.classes[spellclass]
+                      .createInstance(Components.interfaces.mozISpellCheckingEngine);
+    },
+
+    /**
+     * @return {Array}
+     */
+    getDictionaryList: function () {
+        var dictionaries = {};
+        this.engine.getDictionaryList(dictionaries, {});
+        return dictionaries.value;
+    },
+
+    /**
+     * @return {String}
+     */
+    dictionary: function () {
+        var dict;
+        try { dict = this.engine.dictionary; }
+        catch (e) {}
+        return dict ? dict : null;
+    },
+
+    /**
+     * @param {String} dict
+     */
+    setDictionary: function (dict) {
+        this.engine.dictionary = dict;
+    },
+
+    /**
+     * @param {Boolean} isBeginningWith
+     */
+    setBeginningWith: function (isBeginningWith) {
+        this.isBeginningWith = isBeginningWith;
+    },
+
+    /**
+     * @param {String} spell
+     * @return {Boolean}
+     */
+    check: function (spell) {
+        return this.engine.check(spell);
+    },
+
+    /**
+     * @param {String} spell
+     * @return {Array}
+     */
+    suggest: function (spell) {
+        var suggestions = {};
+        this.engine.suggest(spell, suggestions, {});
+        suggestions = suggestions.value;
+
+        if (this.isBeginningWith) {
+            suggestions = suggestions.filter( function (cand) {
+                return (cand.toLowerCase().indexOf(spell) === 0);
+            });
+        }
+
+        return suggestions;
+    },
+};
+
+var spellChecker = buildSpellChecker();
+
+SITE_DEFINITION.forEach(function(dictionary){
     liberator.commands.addUserCommand(
         dictionary.names,
         dictionary.shortHelp,
@@ -59,9 +144,31 @@
                 var xs = new XMLSerializer();
                 liberator.echo('<base href="' + url + '"/>' + xs.serializeToString( result ), true);
             }, dictionary.encode ? dictionary.encode : 'UTF-8');
-        },{}
+        },
+        {
+            completer: function (arg) {
+                if (!spellChecker.dictionary()) return [0, []];
+
+                var suggestions = spellChecker.suggest(arg);
+                var candidates = [];
+                for (var i=0, max=suggestions.length ; i<max ; ++i) {
+                    candidates.push([suggestions[i], 'suggest']);
+                }
+
+                if (!spellChecker.check(arg)) {
+                    candidates.unshift(['', 'not exist']);
+                }
+                return [0, candidates];
+            },
+        }
     );
 });
+liberator.commands.addUserCommand(
+    ['availabledictionaries'],
+    'display available dictionaries',
+    function () { liberator.echo('available dictionaries: ' + spellChecker.getDictionaryList()); },
+    {}
+);
 /**
  * @param {String} url
  * @param {Function} callback
@@ -114,6 +221,28 @@ function getNodeFromXPath(xpath,doc,isMulti){
         result = node.singleNodeValue;
     }
     return result;
+}
+
+/**
+ * @return {Object}
+ */
+function buildSpellChecker() {
+    var enable = liberator.globalVariables.lookupDictionary_enableSuggestion;
+    enable = (enable === undefined) ? true : !!parseInt(enable, 10);
+    if (!enable) return;
+
+    var spellChecker = new SpellChecker();
+    var dict = liberator.globalVariables.lookupDictionary_dictionary || 'en-US';
+    var dictionaries = spellChecker.getDictionaryList()
+    for (var i=0, max=dictionaries.length ; i<max ; ++i) {
+        if (dictionaries[i] === dict) spellChecker.setDictionary(dict);
+    }
+
+    var isBeginningWith = liberator.globalVariables.lookupDictionary_beginningWith
+    isBeginningWith = (isBeginningWith === undefined) ? false : !!parseInt(isBeginningWith, 10);
+    spellChecker.setBeginningWith(isBeginningWith);
+
+    return spellChecker;
 }
 })();
 
