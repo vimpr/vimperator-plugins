@@ -2,53 +2,65 @@
  * ==VimperatorPlugin==
  * @name            niconicoplaylist_cooperation.js
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
- * @description-ja  NicoNicoPlaylist ‚ğƒL[ƒ{[ƒh‚Å‘€ì‚Å‚«‚é‚æ‚¤‚É‚·‚éB
+ * @description-ja  NicoNicoPlaylist ã‚’ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã§æ“ä½œã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.30
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
  * CONSTRAINT
- *   need NicoNicoPlaylist version 1.11 or above
+ *   need NicoNicoPlaylist version 1.12 or above
  *
  * LICENSE
  *   New BSD License
  *
  * USAGE
  *   :nnppushallvideos
- *     Œ»İ‚Ìƒy[ƒW“à‚Ì‚·‚×‚Ä‚Ì“®‰æ‚ğÄ¶ƒŠƒXƒg‚É‘—‚éB
- *     ƒ‰ƒ“ƒLƒ“ƒO‚âƒ}ƒCƒŠƒXƒg‚Ì‚Ù‚©A“®‰æƒy[ƒW‚Å‚ÍƒIƒXƒXƒ“®‰æ‚ª’Ç‰Á‚³‚ê‚éB
+ *     ç¾åœ¨ã®ãƒšãƒ¼ã‚¸å†…ã®ã™ã¹ã¦ã®å‹•ç”»ã‚’å†ç”Ÿãƒªã‚¹ãƒˆã«é€ã‚‹ã€‚
+ *     ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã‚„ãƒã‚¤ãƒªã‚¹ãƒˆã®ã»ã‹ã€å‹•ç”»ãƒšãƒ¼ã‚¸ã§ã¯ã‚ªã‚¹ã‚¹ãƒ¡å‹•ç”»ãŒè¿½åŠ ã•ã‚Œã‚‹ã€‚
  *   :nnppushthisvideo
- *     Œ»İŒ©‚Ä‚¢‚é“®‰æ‚ğÄ¶ƒŠƒXƒg‚É‘—‚éB
+ *     ç¾åœ¨è¦‹ã¦ã„ã‚‹å‹•ç”»ã‚’å†ç”Ÿãƒªã‚¹ãƒˆã«é€ã‚‹ã€‚
  *   :nnpplaynext [next]
- *     Ä¶ƒŠƒXƒg‚ÌŸ‚Ì“®‰æ‚ğÄ¶‚·‚éB
+ *     å†ç”Ÿãƒªã‚¹ãƒˆã®æ¬¡ã®å‹•ç”»ã‚’å†ç”Ÿã™ã‚‹ã€‚
  *   :nnpremove [index]
- *     index ”Ô–Ú‚Ì“®‰æ‚ğÄ¶ƒŠƒXƒg‚©‚çæ‚èœ‚­B index ‚Í 0 ‚©‚ç”‚¦‚éB
- *     w’è‚µ‚È‚¢ê‡‚Íˆê”Ôã‚ªæ‚èœ‚©‚ê‚éB
+ *     index ç•ªç›®ã®å‹•ç”»ã‚’å†ç”Ÿãƒªã‚¹ãƒˆã‹ã‚‰å–ã‚Šé™¤ãã€‚ index ã¯ 0 ã‹ã‚‰æ•°ãˆã‚‹ã€‚
+ *     æŒ‡å®šã—ãªã„å ´åˆã¯ä¸€ç•ªä¸ŠãŒå–ã‚Šé™¤ã‹ã‚Œã‚‹ã€‚
  *   :nnpclear
- *     Ä¶ƒŠƒXƒg‚ğ‚·‚×‚ÄƒNƒŠƒA‚·‚éB
+ *     å†ç”Ÿãƒªã‚¹ãƒˆã‚’ã™ã¹ã¦ã‚¯ãƒªã‚¢ã™ã‚‹ã€‚
  *   :nnpgetlist [numof]
- *     Ä¶ƒŠƒXƒg‚Ìã‚©‚ç numof ŒÂ‚ğ•\¦‚·‚éBw’è‚µ‚È‚¢ê‡‚Í g:nnp_coop_numoflist ‚ªg‚í‚ê‚éB
+ *     å†ç”Ÿãƒªã‚¹ãƒˆã®ä¸Šã‹ã‚‰ numof å€‹ã‚’è¡¨ç¤ºã™ã‚‹ã€‚æŒ‡å®šã—ãªã„å ´åˆã¯ g:nnp_coop_numoflist ãŒä½¿ã‚ã‚Œã‚‹ã€‚
+ *   :nnprandom
+ *     ãƒ©ãƒ³ãƒ€ãƒ ãƒ¢ãƒ¼ãƒ‰ã® on / off
+ *   :nnploop
+ *     ãƒ«ãƒ¼ãƒ—ãƒ¢ãƒ¼ãƒ‰ã® on / off
+ *   :nnpfullscreen
+ *     å…¨ç”»é¢ãƒ¢ãƒ¼ãƒ‰ã® on / off
  *
  * VARIABLES
  *   g:nnp_coop_numoflist
- *     :NNPGetList ‚Å•\¦‚·‚éƒŠƒXƒg‚ÌŒÂ”‚ğw’è‚·‚éBƒfƒtƒHƒ‹ƒg‚Í 10 B
+ *     :NNPGetList ã§è¡¨ç¤ºã™ã‚‹ãƒªã‚¹ãƒˆã®å€‹æ•°ã‚’æŒ‡å®šã™ã‚‹ã€‚ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯ 10 ã€‚
  *
  * HISTORY
  *   2008/07/11 ver. 0.1    initial written.
  *   2008/07/15 ver. 0.2    refactoring.
- *   2008/09/25 ver. 0.3    change XPath expression.
+ *   2008/09/26 ver. 0.3    change XPath expression.
+ *                          correspond mode toggling (fullscreen, random, loop).
+ *                          change caption: display now-playing title and mode's statuses.
+ *                          mode's statuses are displayed with the following word.
+ *                              R: random mode is on
+ *                              L: loop mode is on
+ *                              F: fullscreen mode is on
  *
  * */
 /*
-ˆÈ‰º‚ÌƒR[ƒh‚ğ _vimperatorrc ‚É“\‚è•t‚¯‚é‚ÆK‚¹‚É‚È‚ê‚é‚©‚àB
-ƒRƒ}ƒ“ƒh ( [',nn'] ‚â [',nr'] ‚Ì•”•ª ) ‚Í“K‹X•Ï‚¦‚Ä‚ËB
+ä»¥ä¸‹ã®ã‚³ãƒ¼ãƒ‰ã‚’ _vimperatorrc ã«è²¼ã‚Šä»˜ã‘ã‚‹ã¨å¹¸ã›ã«ãªã‚Œã‚‹ã‹ã‚‚ã€‚
+ã‚³ãƒãƒ³ãƒ‰ ( [',nn'] ã‚„ [',nr'] ã®éƒ¨åˆ† ) ã¯é©å®œå¤‰ãˆã¦ã­ã€‚
 
 javascript <<EOM
 
 // [N],nn
-// N ”Ô–Ú‚Ì“®‰æ‚ğÄ¶‚·‚éB
-// w’è‚È‚µ‚Ìê‡Ÿ‚Ì“®‰æ‚ªÄ¶‚³‚ê‚éB
+// N ç•ªç›®ã®å‹•ç”»ã‚’å†ç”Ÿã™ã‚‹ã€‚
+// æŒ‡å®šãªã—ã®å ´åˆæ¬¡ã®å‹•ç”»ãŒå†ç”Ÿã•ã‚Œã‚‹ã€‚
 liberator.mappings.addUserMap(
     [liberator.modes.NORMAL],
     [',nn'],
@@ -61,8 +73,8 @@ liberator.mappings.addUserMap(
 );
 
 // [N],nr
-// ã‚©‚ç N ŒÂ‚Ì“®‰æ‚ğíœ‚·‚éB
-// w’è‚È‚µ‚Ìê‡ˆê”Ôã‚Ì“®‰æ‚ªíœ‚³‚ê‚éB
+// ä¸Šã‹ã‚‰ N å€‹ã®å‹•ç”»ã‚’å‰Šé™¤ã™ã‚‹ã€‚
+// æŒ‡å®šãªã—ã®å ´åˆä¸€ç•ªä¸Šã®å‹•ç”»ãŒå‰Šé™¤ã•ã‚Œã‚‹ã€‚
 liberator.mappings.addUserMap(
     [liberator.modes.NORMAL],
     [',nr'],
@@ -86,7 +98,7 @@ const thumbnailURL = 'http://tn-skr1.smilevideo.jp/smile?i=';
 
 // style
 const styles = [
-    '<style>',
+    '<style type="text/css">',
         'table.nnp_coop .index     { text-align:right; width:2em; }',
         'table.nnp_coop .thumbnail { text-align:center; }',
         'table.nnp_coop caption    { color:green; }',
@@ -104,7 +116,7 @@ const tableTemplate = [
 ].join('');
 
 // table caption
-const captionTemplate = '<caption>$NUMOFDISPLAY / $NUMOFTOTAL items from NicoNicoPlaylist</caption>';
+const captionTemplate = '<caption>now playing: $PLAYTITLE (display $NUMOFDISPLAY / $NUMOFTOTAL$STATUSES)</caption>';
 
 // table head
 const thead = [
@@ -131,13 +143,20 @@ const itemHTML = [
 
 // scrape from div element that inserted by NicoNicoPlaylist
 liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
-    function(arg) {
+    function (arg) {
         // check existence of NicoNicoPlaylist
         var playlist = $f('//div[contains(@id, "playlistcontroller_")]');
         if(!playlist) {
             liberator.echoerr('NicoNicoPlaylist is not found.');
             return;
         }
+
+        var playTitle = $f('//h1').textContent;
+        var statuses = '';
+        if ($f('.//input[contains(@id, "-checkbox-random")]', playlist).checked) statuses += 'R';
+        if ($f('.//input[contains(@id, "-checkbox-loop")]', playlist).checked)   statuses += 'L';
+        if ($f('.//input[contains(@id, "-checkbox-full")]', playlist).checked)   statuses += 'F';
+        if (statuses) statuses = ' ' + statuses;
 
         // check existence of items in NicoNicoPlaylist
         var nodes = $s('./div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a', playlist);
@@ -171,7 +190,9 @@ liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
         // evaluate variables
         var caption = captionTemplate
             .replace(/\$NUMOFDISPLAY/g, (nodesLength < numofList) ? nodesLength : numofList)
-            .replace(/\$NUMOFTOTAL/g,   nodesLength);
+            .replace(/\$NUMOFTOTAL/g,   nodesLength)
+            .replace(/\$PLAYTITLE/g,    playTitle)
+            .replace(/\$STATUSES/g,     statuses);
 
         // final processing
         var str = styles + tableTemplate.replace(/\$CAPTION/g, caption)
@@ -214,11 +235,14 @@ function $s(query, node) {
 // define other commands
 // only send CommandEvent to NicoNicoPlaylist script
 [
-    [['nnppushallvideos'], "push all videos to NicoNicoPlaylist",    'GMNNPPushAllVideos'],
-    [['nnppushthisvideo'], "push current video to NicoNicoPlaylist", 'GMNNPPushThisVideo'],
-    [['nnpplaynext'],      "play next in NicoNicoPlaylist",          'GMNNPPlayNext'],
-    [['nnpremove'],        "remove item in NicoNicoPlaylist",        'GMNNPRemove'],
-    [['nnpclear'],         "clear all items in NicoNicoPlaylist",    'GMNNPClear'],
+    [['nnppushallvideos'], "push all videos to NicoNicoPlaylist",        'GMNNPPushAllVideos'],
+    [['nnppushthisvideo'], "push current video to NicoNicoPlaylist",     'GMNNPPushThisVideo'],
+    [['nnpplaynext'],      "play next in NicoNicoPlaylist",              'GMNNPPlayNext'],
+    [['nnpremove'],        "remove item in NicoNicoPlaylist",            'GMNNPRemove'],
+    [['nnpclear'],         "clear all items in NicoNicoPlaylist",        'GMNNPClear'],
+    [['nnprandom'],        "toggle random mode of NicoNicoPlaylist",     'GMNNPRandom'],
+    [['nnploop'],          "toggle loop mode of NicoNicoPlaylist",       'GMNNPLoop'],
+    [['nnpfullscreen'],    "toggle fullscreen mode of NicoNicoPlaylist", 'GMNNPFullScreen'],
 ].forEach(
     function ([command, description, eventname]){
         liberator.commands.addUserCommand(command, description,
