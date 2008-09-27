@@ -13,25 +13,28 @@ const SITE_DEFINITION = [{
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
     shortHelp: 'SPACE ALC (英辞郎 on the Web)',
-    xpath: 'id("resultList")'
+    xpath: 'id("resultList")',
+    dictionary: 'en-US',
 },{
     names: ['goo'],
     url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0',
     shortHelp: 'goo 辞書',
     encode: 'EUC-JP',
     xpath: '//div[@id="incontents"]/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
-    multi: true
+    multi: true,
+    dictionary: 'en-US',
 },{
     names: ['infokanji'],
     url: 'http://dictionary.www.infoseek.co.jp/?sc=1&se=on&lp=0&gr=kj&sv=KJ&qt=&qty=%s&qtb=&qtk=0',
     shorthelp: 'Infoseek 漢字辞書',
     encode: 'EUC-JP',
-    xpath: '//div[@class="NetDicHead"]'
+    xpath: '//div[@class="NetDicHead"]',
 },{
     names: ['answers'],
     url: 'http://www.answers.com/%s',
     shortHelp: 'Answers.com(英英辞書)',
-    xpath: 'id("firstDs")'
+    xpath: 'id("firstDs")',
+    dictionary: 'en-US',
 }];
 
 // class definition
@@ -77,7 +80,14 @@ SpellChecker.prototype = {
      * @param {String} dict
      */
     setDictionary: function (dict) {
-        this.engine.dictionary = dict;
+        var dictionaries = this.getDictionaryList()
+        for (var i=0, max=dictionaries.length ; i<max ; ++i) {
+            if (dictionaries[i] === dict) {
+                this.engine.dictionary = dict;
+                return dict;
+            }
+        }
+        return null;
     },
 
     /**
@@ -147,7 +157,10 @@ SITE_DEFINITION.forEach(function(dictionary){
         },
         {
             completer: function (arg) {
-                if (!spellChecker.dictionary()) return [0, []];
+                if (!spellChecker ||
+                    !dictionary.dictionary ||
+                    !spellChecker.setDictionary(dictionary.dictionary))
+                return [0, []];
 
                 var suggestions = spellChecker.suggest(arg);
                 var candidates = [];
@@ -232,11 +245,6 @@ function buildSpellChecker() {
     if (!enable) return;
 
     var spellChecker = new SpellChecker();
-    var dict = liberator.globalVariables.lookupDictionary_dictionary || 'en-US';
-    var dictionaries = spellChecker.getDictionaryList()
-    for (var i=0, max=dictionaries.length ; i<max ; ++i) {
-        if (dictionaries[i] === dict) spellChecker.setDictionary(dict);
-    }
 
     var isBeginningWith = liberator.globalVariables.lookupDictionary_beginningWith
     isBeginningWith = (isBeginningWith === undefined) ? false : !!parseInt(isBeginningWith, 10);
