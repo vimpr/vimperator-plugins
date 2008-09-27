@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.2
+// @version        1.3
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -50,28 +50,60 @@
     MODE_REGEXP: 1,
     MODE_MIGEMO: 2,
 
+    // 全体で共有する変数
     lastSearchText: null,
     lastSearchExpr: null,
     lastDirection: null,
+    lastColor: null,
     currentSearchText: null,
     currentSearchExpr: null,
-    lastResult: null,
+    currentColor: null,
 
+    // submit の為に使う
+    resultOfFirst: null,
+
+    // --color-- の部分は置換される。
+    style: 'background-color: --color--; color: black; border: dotted 3px blue;',
+    findColor: 'lightblue',
+    highlightColor: 'orange',
+
+    // 手抜き用プロパティ
     get buffer function () liberator.buffer,
-
     get document function () content.document,
 
     // タブ毎に状態を保存するために、変数を用意
-    get storage function () (gBrowser.mCurrentTab.__migemized_find_storage || (gBrowser.mCurrentTab.__migemized_find_storage = {})),
+    // 初回アクセス時に初期化を行う
+    get storage function () (
+      gBrowser.mCurrentTab.__migemized_find_storage || 
+      (gBrowser.mCurrentTab.__migemized_find_storage = {
+        highlightRemovers: {},
+      })
+    ),
 
+    // 現在のタブのフレームリスト
+    get currentFrames function () {
+      let result = [];
+      (function (frame) {
+        // ボディがない物は検索対象外なので外す
+        if (frame.document.body.localName.toLowerCase() == 'body')
+          result.push(frame);
+        for (let i = 0; i < frame.frames.length; i++)
+          arguments.callee(frame.frames[i]);
+      })(content);
+      return result;
+    },
+
+    // ボディを範囲とした Range を作る
     makeBodyRange: function (frame) {
       let range = frame.document.createRange();
       range.selectNodeContents(frame.document.body);
       return range;
     },
 
-    get highlightRemover function () (this.storage.highlightRemover || function () void(0)),
-    set highlightRemover function (fun) (this.storage.highlightRemover = fun),
+    // this.style に色を適用した物を返す
+    coloredStyle: function (color) {
+      return this.style.replace(/--color--/, color);
+    },
 
     // 検索文字列から検索モードと検索文字列を得る。
     searchTextToRegExpString: function (str) {
@@ -85,9 +117,10 @@
       return XMigemoCore.getRegExp(str);
     },
 
-    removeHighlight: function () {
-      this.highlightRemover()
-      this.highlightRemover = null;
+    // 指定色のハイライト削除
+    removeHighlight: function (color) {
+      (this.storage.highlightRemovers[color] || function () void(0))();
+      delete this.storage.highlightRemovers[color];
     },
 
     focusLink: function (range) {
@@ -99,19 +132,20 @@
       }
     },
 
-    highlight: function (target, setRemover) {
+    highlight: function (target, color, doScroll, setRemover) {
       let span = this.document.createElement('span');
-      let spanStyle = 'background-color: lightblue; color: black; border: dotted 3px blue;';
 
-      span.setAttribute('style', spanStyle);
+      span.setAttribute('style', this.coloredStyle(color));
       target.range.surroundContents(span);
-
-      let scroll = function () {
-        let pos = getPosition(span);
-        target.frame.scroll(pos.x - (target.frame.innerWidth / 2),
-                            pos.y - (target.frame.innerHeight / 2));
-      };
-      setTimeout(scroll, 0);
+      
+      if (doScroll) {
+        let scroll = function () {
+          let pos = getPosition(span);
+          target.frame.scroll(pos.x - (target.frame.innerWidth / 2),
+                              pos.y - (target.frame.innerHeight / 2));
+        };
+        setTimeout(scroll, 0);
+      }
 
       let remover = function () {
         let range = this.document.createRange();
@@ -123,10 +157,8 @@
         range.deleteContents(); 
       };
 
-      this.focusLink(target.range);
-
       if (setRemover)
-        this.highlightRemover = remover;
+        this.storage.highlightRemovers[color] = remover;
 
       return remover;
     },
@@ -155,11 +187,15 @@
       }
     },
 
-    findFirst: function (str, backwards) {
+    findFirst: function (str, backwards, color) {
+      if (!color)
+        color = this.findColor;
+
       this.lastDirection = backwards;
       let expr = this.searchTextToRegExpString(str);
       this.currentSearchText = str;
       this.currentSearchExpr = expr;
+      this.currentColor = color;
 
       let result, frames = this.currentFrames;
       if (backwards)
@@ -176,13 +212,19 @@
         }
       }
 
-      this.removeHighlight();
-      if (result) 
-        this.highlight(result, true);
+      this.removeHighlight(color);
 
-      this.lastResult = result;
+      if (result) 
+        this.highlight(result, color, true, true);
+
+      this.resultOfFirst = result;
 
       return result;
+    },
+
+    findSubmit: function (str, backwards, color) {
+      this.findFirst(str, backwards, color);
+      return this.submit();
     },
 
     findAgain: function (reverse) {
@@ -198,7 +240,7 @@
         last = {frame: frames[idx], range: this.makeBodyRange(frames[idx])};
       }
 
-      this.removeHighlight();
+      this.removeHighlight(this.lastColor);
 
       let str = this.lastSearchExpr;
       let start, end;
@@ -232,8 +274,10 @@
 
       this.storage.lastResult = result;
 
-      if (result)
-        this.highlight(result, true);
+      if (result) {
+        this.highlight(result, this.lastColor, true, true);
+        this.focusLink(result);
+      }
 
       return result;
     },
@@ -241,22 +285,38 @@
     submit: function () {
       this.lastSearchText = this.currentSearchText;
       this.lastSearchExpr = this.currentSearchExpr;
-      return this.lastResult;
+      this.lastColor = this.currentColor;
+      this.focusLink(this.storage.lastResult.range);
+      return this.resultOfFirst;
     },
 
     cancel: function () {
     },
 
-    get currentFrames function () {
-      let result = [];
-      (function (frame) {
-        // ボディがない物は検索対象外なので外す
-        if (frame.document.body.localName.toLowerCase() == 'body')
-          result.push(frame);
-        for (let i = 0; i < frame.frames.length; i++)
-          arguments.callee(frame.frames[i]);
-      })(content);
-      return result;
+    highlightAll: function (str, color) {
+      let expr = this.searchTextToRegExpString(str);
+      this.lastSearchText = str;
+      this.lastSearchExpr = expr;
+
+      if (!color)
+        color = this.highlightColor;
+
+      this.removeHighlight(color);
+
+      let frames = this.currentFrames;
+      let removers = [];
+
+      for each (let frame in frames) {
+        let frameRange = this.makeBodyRange(frame);
+        let ret, start = frameRange;
+        while (ret = this.find(expr, false, frameRange, start)) {
+          removers.push(this.highlight({frame: frame, range: ret}, color, false, false));
+          start = ret.cloneRange();
+          start.setStart(ret.endContainer, ret.endOffset);
+        }
+      }
+
+      this.storage.highlightRemovers[color] = function () { removers.forEach(function (it) it.call()); };
     },
   };
 
@@ -265,25 +325,28 @@
   let delayCallTimer = null;
   let delayedFunc = null;
 
+
+  // ミゲモ化セット
   let migemized = {
     find: function find (str, backwards) {
       // 短時間に何回も検索をしないように遅延させる
       delayedFunc = function () MF.findFirst(str, backwards);
       if (delayCallTimer) {
+        delayCallTimer = null;
         clearTimeout(delayCallTimer);
       }
-      delayCallTimer = setTimeout(function () delayedFunc(), 300);
+      delayCallTimer = setTimeout(function () delayedFunc(), 500);
     },
 
     findAgain: function findAgain (reverse) {
       if (!MF.findAgain(reverse))
-        liberator.echoerr('not found: ' + MF.currentSearchText);
+        liberator.echoerr('not found: ' + MF.lastSearchText);
     },
 
     searchSubmitted: function searchSubmitted (command, forcedBackward) {
       if (delayCallTimer) {
-        clearTimeout(delayCallTimer);
         delayCallTimer = null;
+        clearTimeout(delayCallTimer);
         delayedFunc();
       }
       if (!MF.submit())
@@ -297,9 +360,7 @@
 
 
   // オリジナルの状態に戻せるように保存しておく
-  {
-    let original = {};
-
+  let (original = {}) {
     for (let name in migemized)
       original[name] = liberator.search[name];
 
@@ -314,6 +375,50 @@
     MF.uninstall = function () set(original);
   }
 
+
+  // highlight コマンド
+  liberator.commands.addUserCommand(
+    ['hl', 'highlight'],
+    'Highlight matched words',
+    function (opts) {
+      MF.highlightAll(opts.arguments.join(' '), opts['-color']);
+    },
+    {
+      options: [
+        [['-color', '-c'], liberator.commands.OPTION_STRING],
+      ]
+    }
+  );
+
+  // remove highlight コマンド
+  liberator.commands.addUserCommand(
+    ['rhl', 'removehighlight'],
+    'Remove highlight',
+    function (args) {
+      if (!args)
+        return MF.removeHighlight(MF.highlightColor);
+      if (args == 'all')
+        return [f() for each (f in MF.storage.highlightRemovers)];
+      for each (let color in args.split(/\s+/))
+        MF.removeHighlight(color);
+    }
+  );
+  
+  // find コマンド 
+  liberator.commands.addUserCommand(
+    ['mf[ind]'],
+    'Migemized find',
+    function (opts) {
+      if (!MF.findSubmit(opts.arguments.join(' '), opts['-backward'], opts['-color']))
+        liberator.echoerr('not found: ' + MF.currentSearchText);
+    },
+    {
+      options: [
+        [['-backward', '-b'], liberator.commands.OPTION_NOARG],
+        [['-color', '-c'], liberator.commands.OPTION_STRING],
+      ]
+    }
+  );
 
   // 外から使えるように
   liberator.plugins.migemizedFind = MF;
