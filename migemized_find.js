@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.3
+// @version        2.0
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -10,6 +10,18 @@
 //      '/'  => 正規表現検索
 //      '?'  => Migemo検索
 //      以外 => Migemo検索
+//
+//    :hl <検索ワード> [-c <色>]
+//    :highlight <検索ワード> [-c <色>]
+//      検索ワードを指定色で強調表示する。
+//
+//    :rhl <色1> <色2> ... <色N>
+//    :removehighlight  <色1> <色2> ... <色N>
+//      指定の色の強調表示を消す
+//
+//    :rhl all
+//    :removehighlight all
+//      全ての強調表示を消す。
 //
 // Author:
 //    anekos
