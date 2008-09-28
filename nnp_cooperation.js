@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.30
+ * @version         0.31
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -41,15 +41,16 @@
  *     :NNPGetList で表示するリストの個数を指定する。デフォルトは 10 。
  *
  * HISTORY
- *   2008/07/11 ver. 0.1    initial written.
- *   2008/07/15 ver. 0.2    refactoring.
- *   2008/09/26 ver. 0.3    change XPath expression.
- *                          correspond mode toggling (fullscreen, random, loop).
- *                          change caption: display now-playing title and mode's statuses.
- *                          mode's statuses are displayed with the following word.
+ *   2008/07/11 ver. 0.10   - initial written.
+ *   2008/07/15 ver. 0.20   - refactoring.
+ *   2008/09/26 ver. 0.30   - change XPath expression.
+ *                          - correspond mode toggling (fullscreen, random, loop).
+ *                          - change caption: display now-playing title and mode's statuses.
+ *                          - mode's statuses are displayed with the following word.
  *                              R: random mode is on
  *                              L: loop mode is on
  *                              F: fullscreen mode is on
+ *   2008/09/28 ver. 0.31   - bugfix :nnpgetlist in ranking page.
  *
  * */
 /*
@@ -151,7 +152,8 @@ liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
             return;
         }
 
-        var playTitle = $f('//h1').textContent;
+        var titleNode = $f('//h1') || $f('./html/head/title');
+        var playTitle = titleNode.textContent;
         var statuses = '';
         if ($f('.//input[contains(@id, "-checkbox-random")]', playlist).checked) statuses += 'R';
         if ($f('.//input[contains(@id, "-checkbox-loop")]', playlist).checked)   statuses += 'L';
