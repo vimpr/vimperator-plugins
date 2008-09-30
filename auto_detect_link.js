@@ -160,7 +160,7 @@
   // 開いたURIなどの表示
   function displayOpened (link) {
     let msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
-    setTimeout(function () liberator.echo(msg), 1000);
+    setTimeout(function () liberator.echo(msg, liberator.commandline.FORCE_SINGLELINE), 1000);
     liberator.log(msg);
   }
 
