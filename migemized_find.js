@@ -155,6 +155,11 @@
           let pos = getPosition(span);
           target.frame.scroll(pos.x - (target.frame.innerWidth / 2),
                               pos.y - (target.frame.innerHeight / 2));
+          let sel = target.frame.getSelection();
+          let r = target.range.cloneRange();
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
         };
         setTimeout(scroll, 0);
       }
@@ -242,28 +247,28 @@
     findAgain: function (reverse) {
       let backwards = !!(!this.lastDirection ^ !reverse);
       let last = this.storage.lastResult;
-      let currentFrames = this.currentFrames;
+      let frames = this.currentFrames;
 
-      // 前回の結果がないので、(初め|最後)のフレームを対象にする
+      // 前回の結果がない場合、(初め|最後)のフレームを対象にする
       // findFirst と"似た"挙動になる
-      if (!last) {
+      if (last) {
+        if (backwards) {
+          end = last.range.cloneRange();
+          end.setEnd(last.range.startContainer, last.range.startOffset);
+        } else {
+          start = last.range.cloneRange();
+          start.setStart(last.range.endContainer, last.range.endOffset);
+        }
+      } else {
         let idx = backwards ? frames.length - 1 
                             : 0;
-        last = {frame: frames[idx], range: this.makeBodyRange(frames[idx])};
+        last = {frame: frames[0], range: this.makeBodyRange(frames[0])};
       }
 
       this.removeHighlight(this.lastColor);
 
       let str = this.lastSearchExpr;
       let start, end;
-
-      if (backwards) {
-        end = last.range.cloneRange();
-        end.setEnd(last.range.startContainer, last.range.startOffset);
-      } else {
-        start = last.range.cloneRange();
-        start.setStart(last.range.endContainer, last.range.endOffset);
-      }
 
       let result;
       let ret = this.find(str, backwards, this.makeBodyRange(last.frame), start, end);
@@ -272,7 +277,7 @@
         result = {frame: last.frame, range: ret};
       } else {
         // 見つからなかったので、ほかのフレームから検索
-        let [head, tail] = slashArray(currentFrames, last.frame);
+        let [head, tail] = slashArray(frames, last.frame);
         let next = backwards ? head.reverse().concat(tail.reverse())
                              : tail.concat(head);
         for each (let frame in next) {
