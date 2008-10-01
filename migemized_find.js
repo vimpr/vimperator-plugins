@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        2.0
+// @version        2.2
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -334,6 +334,8 @@
       }
 
       this.storage.highlightRemovers[color] = function () { removers.forEach(function (it) it.call()); };
+
+      return removers;
     },
   };
 
@@ -398,7 +400,9 @@
     ['hl', 'highlight'],
     'Highlight matched words',
     function (opts) {
-      MF.highlightAll(opts.arguments.join(' '), opts['-color']);
+      let r = MF.highlightAll(opts.arguments.join(' '), opts['-color']);
+      echo(r ? r.length + ' words highlighted.'
+             : 'word not found.');
     },
     {
       options: [
