@@ -43,12 +43,15 @@ liberator.plugins.styleSheetsManger = (function(){
 	function init() {
 		if (globalVariables.styles) globalVariables.styles.split(/\s*,\s*/).forEach(manager.load);
 	}
-	function getCSSFiles()
+	function getCSSFiles() {
+		let files = [];
 		io.getRuntimeDirectories('colors')
 		  .filter(function(colorDir) colorDir)
-		  .map(function(colorDir)
-			io.readDirectory(colorDir).filter(function(file)
-				/\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory()));
+		  .forEach(function(colorDir)
+			io.readDirectory(colorDir).forEach(function(file)
+				/\.css$/.test(file.leafName.toLowerCase()) && !file.isDirectory() && files.push(file)));
+		return files;
+	}
 	function getURIFromName(aName){
 		var ret = null;
 		io.getRuntimeDirectories('colors').some(function(file){
