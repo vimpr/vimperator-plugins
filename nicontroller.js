@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.50
+ * @version         0.51
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -62,7 +62,10 @@
  *                              thanks to なまえ (no name ?)
  *                              refer: http://d.hatena.ne.jp/janus_wel/20080914/1221387317
  *   2008/10/01 ver. 0.50   - add :nicodescription.
- *
+ *   2008/10/02 ver. 0.51   - refactoring.
+ *                          - use Error object when throw exception.
+ *                          - extract constant variables from code
+ *                            and define in NicoPlayerController.constants.
  * */
 
 /*
@@ -102,15 +105,120 @@ EOM
 
 (function(){
 
+// class definition
+// cookie manager
+function CookieManager() {
+    this.initialize.apply(this, arguments);
+}
+CookieManager.prototype = {
+    initialize: function (uri) {
+        const Cc = Components.classes;
+        const Ci = Components.interfaces;
+
+        const MOZILLA = '@mozilla.org/';
+        const IO_SERVICE = MOZILLA + 'network/io-service;1';
+        const COOKIE_SERVICE = MOZILLA + 'cookieService;1';
+
+        this.ioService = Cc[IO_SERVICE].getService(Ci.nsIIOService);
+        this.cookieService = Cc[COOKIE_SERVICE].getService(Ci.nsICookieService);
+        if (!this.ioService || !this.cookieService) {
+            throw new Error('error on CookieManager initialize.');
+        }
+
+        this.readCookie(uri);
+    },
+
+    readCookie: function (uri) {
+        if (uri) {
+            this.uri = uri;
+            this.uriObject = this.ioService.newURI(uri, null, null);
+            this.cookie = this._deserializeCookie(this._getCookieString());
+        }
+    },
+
+    _getCookieString: function () {
+        return this.uriObject
+            ? this.cookieService.getCookieString(this.uriObject, null)
+            : null;
+    },
+
+    _setCookieString: function (cookieString) {
+        if (this.uriObject && cookieString) {
+            this.cookieService.setCookieString(this.uriObject, null, cookieString, null);
+        }
+    },
+
+    _deserializeCookie: function (cookieString) {
+        var cookies = cookieString.split('; ');
+        var cookie = {};
+        var key, val;
+        for (var i=0, max=cookies.length ; i<max ; ++i) {
+            [key, val] = cookies[i].split('=');
+            cookie[key] = val;
+        }
+        return cookie;
+    },
+
+    getCookie: function (key) {
+        return this.cookie[key] ? this.cookie[key] : null;
+    },
+
+    setCookie: function (obj) {
+        this.cookie[obj.key] = obj.value;
+        var string = [
+            obj.key + '=' + obj.value,
+            'domain=' + obj.domain,
+            'expires=' + new Date(new Date().getTime() + obj.expires),
+        ].join(';');
+        this._setCookieString(string);
+    },
+};
+
 // NicoPlayerController Class
-function NicoPlayerController(){}
+function NicoPlayerController() {
+    this.initialize.apply(this, arguments);
+}
 NicoPlayerController.prototype = {
+    initialize: function () {
+        this.cookieManager = new CookieManager();
+    },
+
     constants: {
-        VERSION:    '0.50',
-        WATCH_URL:  '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
-        TAG_URL:    '^http://www\\.nicovideo\\.jp/tag/',
-        WATCH_PAGE: 1,
-        TAG_PAGE:   2,
+        VERSION:        '0.51',
+
+        CARDINAL_NUMBER:    10,
+
+        NICO_DOMAIN:    '.nicovideo.jp',
+        NICO_URL:       'http://www.nicovideo.jp/',
+        WATCH_URL:      'http://www.nicovideo.jp/watch/',
+        WATCH_PAGE:     1,
+
+        FLVPLAYER_NODE_ID: 'flvplayer',
+
+        STATE_PLAYING:  'playing',
+        PLAY:           true,
+        PAUSE:          false,
+
+        STATE_SIZE_NORMAL:  'normal',
+        STATE_SIZE_FIT:     'fit',
+
+        NAME_PREMIUM_NO:     'premiumNo',
+        NAME_PLAYER_VERSION: 'PLAYER_VERSION',
+
+        SEEKTO_DEFAULT:     0,
+        SEEKBY_DEFAULT:     0,
+        VOLUMETO_DEFAULT:   100,
+        VOLUMEBY_DEFAULT:   0,
+
+        DESCRIPTION_HIDDEN_NODE_ID:    'des_1',
+        DESCRIPTION_DISPLAYED_NODE_ID: 'des_2',
+
+        DESCRIPTION_HIDDEN_STATE:       0,
+        DESCRIPTION_DISPLAYED_STATE:    1,
+
+        COOKIE_DESCRIPTION_NAME:    'desopen',
+        COOKIE_EXPIRES:             60 * 60 * 24 * 365 * 1000,
+
         COMMAND_NORMAL: [
             ['naka',      'normal comment (flow right to left)'],
             ['ue',        'fix comment to vertical top and horizonal center of the screen'],
@@ -143,29 +251,33 @@ NicoPlayerController.prototype = {
         ],
     },
 
-    version: function(){ return this.constants.VERSION; },
+    getControllerVersion: function () { return this.constants.VERSION; },
+    getPlayerVersion: function () { return this.getValue(this.constants.NAME_PLAYER_VERSION); },
 
     pagecheck: function() {
         if(this.getURL().match(this.constants.WATCH_URL)) return this.constants.WATCH_PAGE;
-        if(this.getURL().match(this.constants.TAG_URL))   return this.constants.TAG_PAGE;
-        throw 'current tab is not nicovideo.jp';
+        throw new Error('current tab is not watch page on nicovideo.jp');
     },
 
     getURL: function() { return liberator.buffer.URL; },
 
     _flvplayer: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            var flvplayer = window.content.document.getElementById('flvplayer');
-            if(! flvplayer) throw 'flvplayer is not found';
+            var flvplayer = window.content.document.getElementById(this.constants.FLVPLAYER_NODE_ID);
+            if(! flvplayer) throw new Error('flvplayer is not found');
 
-            return flvplayer.wrappedJSObject ? flvplayer.wrappedJSObject : flvplayer ? flvplayer : null;
+            return flvplayer.wrappedJSObject
+                ? flvplayer.wrappedJSObject
+                : flvplayer ? flvplayer : null;
         }
         return null;
     },
 
     togglePlay: function() {
         var p = this._flvplayer();
-        (p.ext_getStatus() !== 'playing') ? p.ext_play(true) : p.ext_play(false);
+        (p.ext_getStatus() !== this.constants.STATE_PLAYING)
+            ? p.ext_play(this.constants.PLAY)
+            : p.ext_play(this.constants.PAUSE);
     },
 
     toggleMute: function() {
@@ -185,17 +297,54 @@ NicoPlayerController.prototype = {
 
     toggleSize: function() {
         var p = this._flvplayer();
-        (p.ext_getVideoSize() === 'normal') ? p.ext_setVideoSize('fit') : p.ext_setVideoSize('normal');
+        (p.ext_getVideoSize() === this.constants.STATE_SIZE_NORMAL)
+            ? p.ext_setVideoSize(this.constants.STATE_SIZE_FIT)
+            : p.ext_setVideoSize(this.constants.STATE_SIZE_NORMAL);
+    },
+
+    toggleDescription: function () {
+        if (!(this.pagecheck() === this.constants.WATCH_PAGE)) {
+            return;
+        }
+
+        // get nodes
+        var hidden = window.content.document.getElementById(this.constants.DESCRIPTION_HIDDEN_NODE_ID);
+        var displayed = window.content.document.getElementById(this.constants.DESCRIPTION_DISPLAYED_NODE_ID);
+
+        // get cookie
+        this.cookieManager.readCookie(this.constants.NICO_URL);
+        var val = this.cookieManager.getCookie(this.constants.COOKIE_DESCRIPTION_NAME);
+
+        if (!(hidden && displayed && val !== undefined && val !== null)) {
+            return;
+        }
+
+        // change 'display' property of description nodes
+        var escape = hidden.style.display;
+        hidden.style.display = displayed.style.display;
+        displayed.style.display = escape;
+
+        // change cookie
+        var change = (val == this.constants.DESCRIPTION_HIDDEN_STATE)
+            ? this.constants.DESCRIPTION_DISPLAYED_STATE
+            : this.constants.DESCRIPTION_HIDDEN_STATE;
+        this.cookieManager.setCookie({
+            key:        this.constants.COOKIE_DESCRIPTION_NAME,
+            value:      change,
+            domain:     this.constants.NICO_DOMAIN,
+            expires:    this.constants.COOKIE_EXPIRES,
+        });
     },
 
     seekTo: function(position) {
         if(position) {
             if(position.match(/^(\d+):(\d+)$/)) {
-                position = parseInt(RegExp.$1, 10) * 60 + parseInt(RegExp.$2, 10);
+                position = parseInt(RegExp.$1, this.constants.CARDINAL_NUMBER) * 60
+                    + parseInt(RegExp.$2, this.constants.CARDINAL_NUMBER);
             }
-            if(isNaN(position)) throw 'assign unsigned number : seekTo()';
+            if(isNaN(position)) throw new Error('assign unsigned number : seekTo()');
         }
-        else position = 0;
+        else position = this.constants.SEEKTO_DEFAULT;
 
         var p = this._flvplayer();
         p.ext_setPlayheadTime(position);
@@ -203,22 +352,22 @@ NicoPlayerController.prototype = {
 
     seekBy: function(delta) {
         if(delta) {
-            if(isNaN(delta)) throw 'assign signed number : seekBy()';
+            if(isNaN(delta)) throw new Error('assign signed number : seekBy()');
         }
-        else delta = 0;
+        else delta = this.constants.SEEKBY_DEFAULT;
 
         var p = this._flvplayer();
         var position = p.ext_getPlayheadTime();
-        position += parseInt(delta, 10);
+        position += parseInt(delta, this.constants.CARDINAL_NUMBER);
 
         p.ext_setPlayheadTime(position);
     },
 
     volumeTo: function(volume) {
         if(volume) {
-            if(isNaN(volume)) throw 'assign unsigned number : volumeTo()';
+            if(isNaN(volume)) throw new Error('assign unsigned number : volumeTo()');
         }
-        else volume = 100;
+        else volume = this.constants.VOLUMETO_DEFAULT;
 
         var p = this._flvplayer();
         p.ext_setVolume(volume);
@@ -226,13 +375,13 @@ NicoPlayerController.prototype = {
 
     volumeBy: function(delta) {
         if(delta) {
-            if(isNaN(delta)) throw 'assign signed number : volumeBy()';
+            if(isNaN(delta)) throw new Error('assign signed number : volumeBy()');
         }
-        else delta = 0;
+        else delta = this.constants.VOLUMEBY_DEFAULT;
 
         var p = this._flvplayer();
         var volume = p.ext_getVolume();
-        volume += parseInt(delta, 10);
+        volume += parseInt(delta, this.constants.CARDINAL_NUMBER);
 
         p.ext_setVolume(volume);
     },
@@ -250,71 +399,11 @@ NicoPlayerController.prototype = {
     // (adding method to Array has a lot of troubles)
     // refer: http://la.ma.la/blog/diary_200510062243.htm
     getAvailableCommands: function() {
-        return this.getValue('premiumNo')
+        return this.getValue(this.constants.NAME_PREMIUM_NO)
             ? this.constants.COMMAND_NORMAL.concat(this.constants.COMMAND_PREMIUM)
             : Array.apply(null, this.constants.COMMAND_NORMAL)
     }
 
-};
-
-// cookie manager
-function CookieManager() {
-    this.initialize.apply(this, arguments);
-}
-CookieManager.prototype = {
-    initialize: function (uri) {
-        const Cc = Components.classes;
-        const Ci = Components.interfaces;
-
-        const MOZILLA = '@mozilla.org/';
-        const IO_SERVICE = MOZILLA + 'network/io-service;1';
-        const COOKIE_SERVICE = MOZILLA + 'cookieService;1';
-
-        this.ioService = Cc[IO_SERVICE].getService(Ci.nsIIOService);
-        this.cookieService = Cc[COOKIE_SERVICE].getService(Ci.nsICookieService);
-        this.readCookie(uri);
-    },
-
-    readCookie: function (uri) {
-        if (uri) {
-            this.uri = uri;
-            this.uriObject = this.ioService.newURI(uri, null, null);
-            this.deserializeCookie(this._getCookieString());
-        }
-    },
-
-    _getCookieString: function () {
-        return this.cookieService.getCookieString(this.uriObject, null);
-    },
-
-    _setCookieString: function (cookieString) {
-        this.cookieService.setCookieString(this.uriObject, null, cookieString, null);
-    },
-
-    deserializeCookie: function (cookieString) {
-        var cookies = cookieString.split('; ');
-        var cookie = {};
-        var key, val;
-        for (var i=0, max=cookies.length ; i<max ; ++i) {
-            [key, val] = cookies[i].split('=');
-            cookie[key] = val;
-        }
-        this.cookie = cookie;
-    },
-
-    getCookie: function (key) {
-        return this.cookie[key] ? this.cookie[key] : null;
-    },
-
-    setCookie: function (obj) {
-        this.cookie[obj.key] = obj.value;
-        var string = [
-            obj.key + '=' + obj.value,
-            'domain=' + obj.domain,
-            'expires=' + new Date(new Date().getTime() + obj.expires),
-        ].join(';');
-        this._setCookieString(string);
-    },
 };
 
 // global object
@@ -327,14 +416,12 @@ liberator.commands.addUserCommand(
     function() {
         try {
             var info = [
-                'player version : ' + controller.getValue('PLAYER_VERSION'),
-                'script version : ' + controller.version(),
+                'player version     : ' + controller.getPlayerVersion(),
+                'controller version : ' + controller.getControllerVersion(),
             ].join("\n");
             liberator.echo(info, liberator.commandline.FORCE_MULTILINE);
         }
-        catch(e) {
-            liberator.echoerr(e);
-        }
+        catch(e) { liberator.echoerr(e); }
     },
     {}
 );
@@ -413,27 +500,8 @@ liberator.commands.addUserCommand(
     ['nicodescription'],
     'toggle display or not the description for video',
     function(arg) {
-        var hidden = $f('id("des_1")');
-        var displayed = $f('id("des_2")');
-        var escape = hidden.style.display;
-        hidden.style.display = displayed.style.display;
-        displayed.style.display = escape;
-
-        const uri = 'http://www.nicovideo.jp/';
-        const domain = '.nicovideo.jp';
-        const cookieName = 'desopen';
-        const expires = 60 * 60 * 24 * 365 * 1000;
-
-        var cookieManager = new CookieManager(uri);
-        var val = cookieManager.getCookie(cookieName);
-        var change = (val == 0) ? 1 : 0;
-
-        cookieManager.setCookie({
-            key:        cookieName,
-            value:      change,
-            domain:     domain,
-            expires:    expires,
-        });
+        try      { controller.toggleDescription(); }
+        catch(e) { liberator.echoerr(e); }
     },
     {}
 );
@@ -613,18 +681,5 @@ function analysisExCommand(exCommand) {
     return properties;
 }
 })();
-
-// stuff function -------------------------------------------------------
-function $f(query, node) {
-    node = node || window.content.document;
-    var result = (node.ownerDocument || node).evaluate(
-        query,
-        node,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    );
-    return result.singleNodeValue ? result.singleNodeValue : null;
-}
 
 // vim: set sw=4 ts=4 et;
