@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.41
+ * @version         0.50
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -36,6 +36,8 @@
  *   :nicovolume! delta
  *     ボリュームを現在の値から変更する。 -100 ～ +100 を指定可能。
  *     指定なしの場合変化しない。
+ *   :nicodescription
+ *     説明文・メニューの表示 / 非表示を切り替える
  *   :nicomment comment
  *     コメント欄を指定した文字列で埋める。
  *     詳しい機能は http://d.hatena.ne.jp/janus_wel/20080913/1221317583
@@ -45,19 +47,21 @@
  *     補完はけっこう賢くなったと思う。
  *
  * HISTORY
- *   2008/07/13 ver. 0.10   initial written.
- *   2008/07/14 ver. 0.20   add nicosize, nicoseek, nicovolume.
- *   2008/07/15 ver. 0.30   add nicoinfo.
- *   2008/07/19 ver. 0.31   allow assign mm:ss format to seekTo method.
+ *   2008/07/13 ver. 0.10   - initial written.
+ *   2008/07/14 ver. 0.20   - add nicosize, nicoseek, nicovolume.
+ *   2008/07/15 ver. 0.30   - add nicoinfo.
+ *   2008/07/19 ver. 0.31   - allow assign mm:ss format to seekTo method.
  *                              thanks to id:nokturnalmortum
  *                              refer: http://d.hatena.ne.jp/nokturnalmortum/20080718#1216314934
- *                          fix error message.
- *   2008/09/12 ver. 0.40   completer function of :nicommand -> usefull.
- *                          add feature: comment input assistance.
- *   2008/09/14 ver. 0.41   fix the bug that happen by adding method to Array.
- *                          fix the nicopause bug associated with flvplayer's status('buffering' and 'end').
+ *                          - fix error message.
+ *   2008/09/12 ver. 0.40   - completer function of :nicommand -> usefull.
+ *                          - add feature: comment input assistance.
+ *   2008/09/14 ver. 0.41   - fix the bug that happen by adding method to Array.
+ *                          - fix the nicopause bug associated with
+ *                            flvplayer's status('buffering' and 'end').
  *                              thanks to なまえ (no name ?)
  *                              refer: http://d.hatena.ne.jp/janus_wel/20080914/1221387317
+ *   2008/10/01 ver. 0.50   - add :nicodescription.
  *
  * */
 
@@ -102,7 +106,7 @@ EOM
 function NicoPlayerController(){}
 NicoPlayerController.prototype = {
     constants: {
-        VERSION:    '0.41',
+        VERSION:    '0.50',
         WATCH_URL:  '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
         TAG_URL:    '^http://www\\.nicovideo\\.jp/tag/',
         WATCH_PAGE: 1,
@@ -253,8 +257,70 @@ NicoPlayerController.prototype = {
 
 };
 
+// cookie manager
+function CookieManager() {
+    this.initialize.apply(this, arguments);
+}
+CookieManager.prototype = {
+    initialize: function (uri) {
+        const Cc = Components.classes;
+        const Ci = Components.interfaces;
+
+        const MOZILLA = '@mozilla.org/';
+        const IO_SERVICE = MOZILLA + 'network/io-service;1';
+        const COOKIE_SERVICE = MOZILLA + 'cookieService;1';
+
+        this.ioService = Cc[IO_SERVICE].getService(Ci.nsIIOService);
+        this.cookieService = Cc[COOKIE_SERVICE].getService(Ci.nsICookieService);
+        this.readCookie(uri);
+    },
+
+    readCookie: function (uri) {
+        if (uri) {
+            this.uri = uri;
+            this.uriObject = this.ioService.newURI(uri, null, null);
+            this.deserializeCookie(this._getCookieString());
+        }
+    },
+
+    _getCookieString: function () {
+        return this.cookieService.getCookieString(this.uriObject, null);
+    },
+
+    _setCookieString: function (cookieString) {
+        this.cookieService.setCookieString(this.uriObject, null, cookieString, null);
+    },
+
+    deserializeCookie: function (cookieString) {
+        var cookies = cookieString.split('; ');
+        var cookie = {};
+        var key, val;
+        for (var i=0, max=cookies.length ; i<max ; ++i) {
+            [key, val] = cookies[i].split('=');
+            cookie[key] = val;
+        }
+        this.cookie = cookie;
+    },
+
+    getCookie: function (key) {
+        return this.cookie[key] ? this.cookie[key] : null;
+    },
+
+    setCookie: function (obj) {
+        this.cookie[obj.key] = obj.value;
+        var string = [
+            obj.key + '=' + obj.value,
+            'domain=' + obj.domain,
+            'expires=' + new Date(new Date().getTime() + obj.expires),
+        ].join(';');
+        this._setCookieString(string);
+    },
+};
+
+// global object
 var controller = new NicoPlayerController();
 
+// command register
 liberator.commands.addUserCommand(
     ['nicoinfo'],
     'display player information',
@@ -344,6 +410,35 @@ liberator.commands.addUserCommand(
 );
 
 liberator.commands.addUserCommand(
+    ['nicodescription'],
+    'toggle display or not the description for video',
+    function(arg) {
+        var hidden = $f('id("des_1")');
+        var displayed = $f('id("des_2")');
+        var escape = hidden.style.display;
+        hidden.style.display = displayed.style.display;
+        displayed.style.display = escape;
+
+        const uri = 'http://www.nicovideo.jp/';
+        const domain = '.nicovideo.jp';
+        const cookieName = 'desopen';
+        const expires = 60 * 60 * 24 * 365 * 1000;
+
+        var cookieManager = new CookieManager(uri);
+        var val = cookieManager.getCookie(cookieName);
+        var change = (val == 0) ? 1 : 0;
+
+        cookieManager.setCookie({
+            key:        cookieName,
+            value:      change,
+            domain:     domain,
+            expires:    expires,
+        });
+    },
+    {}
+);
+
+liberator.commands.addUserCommand(
     ['nicomment'],
     'fill comment box',
     function(arg) {
@@ -414,6 +509,7 @@ liberator.commands.addUserCommand(
         },
     }
 );
+
 
 // for ex-command -------------------------------------------------------
 // constants
@@ -517,5 +613,18 @@ function analysisExCommand(exCommand) {
     return properties;
 }
 })();
+
+// stuff function -------------------------------------------------------
+function $f(query, node) {
+    node = node || window.content.document;
+    var result = (node.ownerDocument || node).evaluate(
+        query,
+        node,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+    );
+    return result.singleNodeValue ? result.singleNodeValue : null;
+}
 
 // vim: set sw=4 ts=4 et;
