@@ -1,6 +1,6 @@
 // ==VimperatorPlugin==
 // @name           XPCOM List
-// @description    list XPCOM Components (for developer)
+// @description    list XPCOM Components (for developers)
 // @description-ja XPCOMコンポーネントを表示(開発者用)
 // ==/VimperatorPlugin==
 //
@@ -17,7 +17,7 @@
 //
 // 未補完でも大丈夫。適当に使えそうな組み合わせを表示してくれます
 //
-// 注意：あまりに組み合わせの多いクラスとインターフェースを表示しようとするとFirefox,Thunderbirdごと落ちます(ぉ
+// 注意：あまりに組み合わせの多いクラスとインターフェースを表示しようとするとFirefox, Thunderbirdごと落ちます(ぉ
 // （だれか直してー）
 //
 liberator.XPCOM = (function(){
@@ -27,27 +27,27 @@ const Ci = Components.interfaces;
 function XPClass(class){ //{{{
 	this.name = class;
 	var _interface;
-	this.__defineGetter__('interface',function(){
+	this.__defineGetter__('interface', function(){
 		if (_interface) return _interface;
 		_interface = {};
 		var cl;
 		try {
 			cl = Cc[this.name].createInstance();
-		} catch(e){
+		} catch (e){
 			try {
 				cl = Cc[this.name].getService();
-			} catch(ex){
+			} catch (ex){
 				liberator.log(this.name);
 				liberator.log(e);
 				return _interface;
 			}
 		}
-		for (var i in Ci){
+		for (let i in Ci){
 			if (i == 'nsISupports' || i == 'IDispatch') continue;
-			var obj;
+			let obj;
 			try {
 				obj = cl.QueryInterface(Ci[i]);
-			} catch(e){
+			} catch (e){
 				continue;
 			}
 			if (obj){
@@ -58,23 +58,19 @@ function XPClass(class){ //{{{
 	});
 } //}}}
 XPClass.prototype = { //{{{
-	get number(){
-		return Cc[this.name].number;
-	},
+	get number() Cc[this.name].number,
 	has: function(filter){
 		var flag = false;
 		if (filter instanceof RegExp){
-			for (var i in this.interface){
+			for (let i in this.interface){
 				if(flag = filter.test(i)) break;
 			}
 		} else {
-			flag =  (interface in this.interface);
+			flag = (interface in this.interface);
 		}
 		return flag;
 	},
-	toString: function(){
-		return this.name;
-	}
+	toString: function() this.name
 }; //}}}
 function XPInterface(c, i){ //{{{
 	this.interface = Ci[i];
@@ -90,20 +86,18 @@ XPInterface.prototype = { //{{{
 		var instance;
 		try {
 			instance = this.class.createInstance(this.interface);
-		} catch(e){
+		} catch (e){
 			try {
 				instance = this.class.getService(this.interface);
-			}catch(e) {}
+			}catch (e){}
 		}
 		return instance;
 	}
 }; //}}}
-function toKey(str){
-	return str.replace(/[^\d\w](.)/g, function(m,p)p.toUpperCase());
-}
+function toKey(str) str.replace(/\W(.)/g, function(m, p) p.toUpperCase());
 var tree = {};
-for (var c in Cc){
-	var key = toKey(c);
+for (let c in Cc){
+	let key = toKey(c);
 	tree[key] = new XPClass(c);
 	tree[c] = tree[key];
 }
@@ -116,29 +110,30 @@ liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
 			liberator.echoerr('No arguments');
 			return;
 		}
-        var args = liberator.commands.parseArgs(arg).arguments;
+		var args = liberator.commands.parseArgs(arg).arguments;
 		if (args.length == 1){
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
-			var instance = tree[toKey(args[0])].interface[args[1]].create();
-			echo(liberator.util.objectToString(instance,true) ,true);
+			let instance = tree[toKey(args[0])].interface[args[1]].create();
+			echo(liberator.util.objectToString(instance, true), true);
 		} else {
 			liberator.echo(liberator.XPCOM.listClass(args[0], args[1], true), true);
 		}
-	},{
+	}, {
 		completer: function(filter){
 			if (!filter) return [];
-            var args = liberator.commands.parseArgs(filter).arguments;
+			var args = liberator.commands.parseArgs(filter).arguments;
 			var list = [];
 			var position = 0;
+			var reg;
 			if (args.length == 1){
-				var reg = new RegExp(args[0],'i');
-				for (var c in Cc){
+				reg = new RegExp(args[0], 'i');
+				for (let c in Cc){
 					if (reg.test(c)) list.push([Cc[c].name, Cc[c].number]);
 				}
 			} else if (args.length == 2 && args[0] in Cc){
-				var reg = new RegExp(args[1],'i');
-				for (var i in tree[toKey(args[0])].interface){
+				reg = new RegExp(args[1], 'i');
+				for (let i in tree[toKey(args[0])].interface){
 					if (reg.test(i)) list.push([Ci[i].name, Ci[i].number]);
 				}
 				position = args[0].length + 1;
@@ -149,19 +144,17 @@ liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
 );
 var manager = {
 	get all() tree,
-	toKey: function(class){
-		return toKey(class);
-	},
+	toKey: function(class) toKey(class),
 	toHTML: function(list){
 		var str = ['<dl>'];
 		list.forEach(function(o){
 			str.push('<dt>' + o.name + ' ' + o.number + '</td>');
 			if (o.interface){
-				for (var i in o.interface){
+				for (let i in o.interface){
 					str.push('<dd>' + o.interface[i].name + ' ' + o.interface[i].number + '</dd>');
 				}
 			} else {
-				for (var member in o){
+				for (let member in o){
 					str.push('<dd>' + member + ': ' + o[member] + '</dd>');
 				}
 			}
@@ -172,9 +165,9 @@ var manager = {
 	listClass: function(cFilter, iFilter, format){
 		var list = [];
 		if (!cFilter) return null;
-		cReg = new RegExp(cFilter,'i');
-		iReg  = new RegExp((iFilter ? iFilter : '.*'),'i');
-		for (var c in tree){
+		cReg = new RegExp(cFilter, 'i');
+		iReg = new RegExp((iFilter ? iFilter : '.*'), 'i');
+		for (let c in tree){
 			if (cReg.test(tree[c].name) && tree[c].has(iReg)){
 				list.push(tree[c]);
 			}
@@ -186,8 +179,8 @@ var manager = {
 	listInterface: function(iFilter, format){
 		var list = [];
 		if (!iFilter) return null;
-		iReg  = new RegExp(iFilter,'i');
-		for (var i in Ci){
+		iReg = new RegExp(iFilter, 'i');
+		for (let i in Ci){
 			if (iReg.test(i)) list.push(Ci[i]);
 		}
 		if (format) return this.toHTML(list);
@@ -198,4 +191,4 @@ var manager = {
 return manager;
 })();
 
-// vim: sw=4 ts=4 sts=0 fdm=marker:
+// vim: sw=4 ts=4 sts=0 fdm=marker noet:
