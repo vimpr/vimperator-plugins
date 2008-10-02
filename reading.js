@@ -1,4 +1,4 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            reading.js
  * @description     update Twitter's status to current URL and comment
@@ -49,10 +49,10 @@
 
 // twitter's URL to post
 const DOMAIN   = 'http://twitter.com/';
-const POST_URL = 'http://twitter.com/statuses/update.json';
+const POST_URL = 'https://twitter.com/statuses/update.json';
 
 // information functions
-// change XPath query when html changed.
+// change XPath query when HTML changed.
 function Scraper(){}
 Scraper.prototype = {
     constants: {
@@ -117,10 +117,10 @@ liberator.commands.addUserCommand(['reading'], "update Twitter's status to curre
                 req.open('POST', POST_URL, true, user, pass);
                 req.onreadystatechange = function() {
                     if (req.readyState == 4) {
-                        if(req.status == 200) liberator.echo('Posted ' + post_string)
+                        if(req.status == 200) liberator.echo('Posted ' + post_string);
                         else throw new Error('failure in posting status to Twitter. HTTP status code : ' + req.status);
                     }
-                }
+                };
                 req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
                 req.send(parameter);
             }
@@ -162,7 +162,7 @@ function $s(query, node) {
 }
 
 function canonicalizeURL(url) {
-    const PATHTRAQ_CANONICALIZE_URL_API = 'http://api.pathtraq.com/normalize_url2?api=json&url=';
+    const PATHTRAQ_CANONICALIZE_URL_API = 'http://api.pathtraq.com/normalize_url2?api=json;url=';
 
     var req = new XMLHttpRequest();
     req.open('GET', PATHTRAQ_CANONICALIZE_URL_API + encodeURI(url), false);
