@@ -8,11 +8,11 @@
  * ==/VimperatorPlugin==
  *
  * COMMANDS:
- *  :decdomain   -> Increment the number in the domain name
- *  :decfragment -> Increment the number in the fragment ID
- *  :decpath     -> Increment the number in the path name
- *  :decport     -> Increment the number in the port number
- *  :decquery    -> Increment the number in the query string
+ *  :decdomain   -> Decrement the number in the domain name
+ *  :decfragment -> Decrement the number in the fragment ID
+ *  :decpath     -> Decrement the number in the path name
+ *  :decport     -> Decrement the number in the port number
+ *  :decquery    -> Decrement the number in the query string
  *  :decuri      -> Decrement the number in the URI
  *  :incdomain   -> Increment the number in the domain name
  *  :incfragment -> Increment the number in the fragment ID
