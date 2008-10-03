@@ -1,20 +1,30 @@
 /**
  * ==VimperatorPlugin==
  * @name           incuri.js
- * @description    increment number in URI
+ * @description    increment the number in the URI
  * @description-ja URIに含まれる数字をインクリメント
  * @author         hogelog
- * @version        0.01
+ * @version        0.02
  * ==/VimperatorPlugin==
  *
  * COMMANDS:
- *  :incuri -> Increment number in URI
- *  :decuri -> Decrement number in URI
+ *  :decdomain   -> Increment the number in the domain name
+ *  :decfragment -> Increment the number in the fragment ID
+ *  :decpath     -> Increment the number in the path name
+ *  :decport     -> Increment the number in the port number
+ *  :decquery    -> Increment the number in the query string
+ *  :decuri      -> Decrement the number in the URI
+ *  :incdomain   -> Increment the number in the domain name
+ *  :incfragment -> Increment the number in the fragment ID
+ *  :incpath     -> Increment the number in the path name
+ *  :incport     -> Increment the number in the port number
+ *  :incquery    -> Increment the number in the query string
+ *  :incuri      -> Increment the number in the URI
  *
  */
 
-(function(){
-    var numreg = /^(.+[^\d])(\d+)([^\d]*)$/;
+(function() {
+    var numreg = /^(.*\D|)(\d+)(\D*)$/;
     function numstr(num, len) {
         var str = String(num);
         while(str.length<len) {
@@ -22,22 +32,51 @@
         }
         return str;
     }
-    function makeinc(f) {
-        return function() {
-            let uri = window.content.location.href;
-            if(numreg.test(uri)) {
+    function makeinc(f, p)
+        function(arg) {
+            var l = window.content.location;
+            var part = l[p];
+            if(p == "port" && part == "") {
+                part = "80";
+            }
+            if(numreg.test(part)) {
                 let num = RegExp.$2;
                 let nextnum = numstr(f(parseInt(num)), num.length);
-                let nexturi = RegExp.$1 + nextnum + RegExp.$3;
-                window.content.location.href = nexturi;
+                let newpart = RegExp.$1 + nextnum + RegExp.$3;
+                if(p == "href") {
+                    window.content.location.href = newpart;
+                } else {
+                    window.content.location.href = [
+                        "protocol", "//", "hostname", ":", "port", "pathname",
+                        "search", "hash"
+                    ].map(function(part) part.length > 2 ? p == part ? newpart
+                                                                     : l[part]
+                                                         : part)
+                     .join("");
+                }
             } else {
-                liberator.echoerr("Cannot find number in "+uri);
+                liberator.echoerr("Cannot find a number in the " +
+                                  p + " <" + part + ">");
             }
         };
-    }
-    liberator.commands.add(["incuri"], "Increment number in URI",
-        makeinc(function(x) {return x+1}));
-    liberator.commands.add(["decuri"], "Decrement number in URI",
-        makeinc(function(x) {return x-1}));
+    [
+        ["uri",      "href",     "URI"],
+        ["path",     "pathname", "path name"],
+        ["query",    "search",   "query string"],
+        ["fragment", "hash",     "fragment ID"],
+        ["port",     "port",     "port number"],
+        ["domain",   "hostname", "domain name"]
+    ].forEach(function(part) {
+        var [suffix, prop, name] = part;
+        [
+            ["In", 1], ["De", -1]
+        ].forEach(function(direction) {
+            var [prefix, dir] = direction;
+            liberator.commands
+                     .add([prefix.toLowerCase() + "c" + suffix],
+                          prefix + "crement the number in the " + name + ".",
+                          makeinc(function(x) x + dir, prop));
+        });
+    });
 })();
-// vim: set sw=4 ts=4 et:
+// vim: set sw=4 ts=4 sts=4 et:
