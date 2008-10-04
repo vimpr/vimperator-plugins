@@ -25,7 +25,7 @@
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-    var CLIENT_NAME = liberator.config.name + "::plugin::haiku.js";
+    var CLIENT_NAME = encodeURIComponent(liberator.config.name + "::plugin::haiku.js");
     var evalFunc = window.eval;
     var statuses = null;
     try {
@@ -44,16 +44,25 @@
     }
     function sayHaiku(username, password, stat){
         var keyword = '';
+        var user = '', id = '';
         if (stat.match(/^#([^ ].+)\s+(.*)$/)) [keyword, stat] = [RegExp.$1, RegExp.$2];
+        else if (stat.match(/^@([^\s#]+)(?:#(\d+))?\s+(.*)$/)) [user, id, stat] = [RegExp.$1, RegExp.$2, RegExp.$3];
         stat = stat.split("\\n").map(function(str) encodeURIComponent(str)).join("\n");
-        var source = encodeURIComponent(CLIENT_NAME);
+        //liberator.log({keyword:keyword,user:user,id:id,stat:stat},0);
+        if (user && !(id && isValidStatusID(id))){
+            id = getStatusIDFromUserID(user);
+            if (!id) stat = "@" + user + "\n" + stat;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://h.hatena.ne.jp/api/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        if (keyword)
-            xhr.send("status=" + stat + '&keyword=' + encodeURIComponent(keyword) + '&source=' + source);
-        else
-            xhr.send("status=" + stat + '&source=' + source);
+        var senddata = [
+            "status=", stat,
+            keyword ? "&keyword=" + encodeURIComponent(keyword) : id ? "&in_reply_to_status_id=" + id : "",
+            "&source=" + CLIENT_NAME
+        ].join('');
+        //liberator.log('xhr.send(' + senddata +')',0);
+        xhr.send(senddata);
     }
     function favHaiku(username, password, user){
         var xhr = new XMLHttpRequest();
@@ -72,6 +81,14 @@
         xhr.open("POST", "http://h.hatena.ne.jp/api/favorites/destroy/" + evalFunc(xhr.responseText)[0].id + '.json', false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
+    }
+    function isValidStatusID(id){
+        if (!statuses) return false;
+        return statuses.some(function(status) status.id == id);
+    }
+    function getStatusIDFromUserID(userid){
+        if (!statuses) return null;
+        return statuses.filter(function(status) status.in_reply_to_user_id == userid)[0].id;
     }
     function getTimelineURLFromTarget(target){
         if (target == "/"){
@@ -200,9 +217,9 @@
                 sayHaiku(username, password, arg);
         }, {
             completer: function(filter, special){
-                if (!filter || !statuses) return;
+                if (!filter || !statuses) return [0,[]];
                 var matches= filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
-                if (!matches) return;
+                if (!matches) return [0,[]];
                 var list = [];
                 var [prefix, target] = [matches[1],matches[2]];
                 switch (prefix.charAt(0)){
@@ -210,14 +227,17 @@
                     case "-":
                         if (!special) return;
                     case "@":
-                        list = statuses.map(function(entry) [entry.user.id, entry.text]);
+                        if (special)
+                            list = statuses.map(function(entry) [entry.user.id, entry.text]);
+                        else
+                            list = statuses.map(function(entry) [entry.user.id + "#" + entry.id, entry.text]);
                         break;
                     case "#":
                         list = statuses.map(function(entry) [entry.keyword, entry.text]);
                         break;
                 }
                 if (target){
-                    list = list.filter(function($_) $_[0].indexOf(target) > 0);
+                    list = list.filter(function($_) $_[0].indexOf(target) >= 0);
                 }
                 return [prefix.length, list];
             }
