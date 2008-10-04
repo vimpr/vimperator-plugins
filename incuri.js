@@ -4,7 +4,7 @@
  * @description    increment the number in the URI
  * @description-ja URIに含まれる数字をインクリメント
  * @author         hogelog
- * @version        0.02
+ * @version        0.03
  * ==/VimperatorPlugin==
  *
  * COMMANDS:
@@ -37,11 +37,15 @@
             var l = window.content.location;
             var part = l[p];
             if(p == "port" && part == "") {
-                part = "80";
+                part = ({
+                    "ftp:" : "21", "http:" : "80", "https:" : "443"
+                })[l.protocol] || part;
             }
             if(numreg.test(part)) {
+                arg = arg.arguments[0];
                 let num = RegExp.$2;
-                let nextnum = numstr(f(parseInt(num)), num.length);
+                let quantity = !arg || isNaN(arg) ? 1 : parseInt(arg);
+                let nextnum = numstr(f(parseInt(num), quantity), num.length);
                 let newpart = RegExp.$1 + nextnum + RegExp.$3;
                 if(p == "href") {
                     window.content.location.href = newpart;
@@ -75,7 +79,8 @@
             liberator.commands
                      .add([prefix.toLowerCase() + "c" + suffix],
                           prefix + "crement the number in the " + name + ".",
-                          makeinc(function(x) x + dir, prop));
+                          makeinc(function(x, q) x + dir * q, prop),
+                          { argCount : "?" });
         });
     });
 })();
