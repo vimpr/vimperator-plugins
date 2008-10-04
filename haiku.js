@@ -128,6 +128,7 @@
             statuses.map(function(status) {
                 var text = status.text;
                 var keyword = status.keyword;
+                var star = status.favorited > 0 ? '<img src="http://s.hatena.ne.jp/images/star.gif"/><span style="color:orange;">x' + status.favorited + '</span>' : '';
                 if (text.indexOf(keyword+"=") == 0) text = status.text.substr(keyword.length + 1);
                 text = convert(text);
                 keyword = convert(keyword);
@@ -139,6 +140,7 @@
                     <strong>{status.user.name}&#x202C;</strong>
                 </>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+                   star +
                    sprintf(': <span class="haiku entry-title">%s</span><br /><span class="haiku entry-content">%s&#x202C;</span><hr />',
                        keyword, text)
             }).join("");
