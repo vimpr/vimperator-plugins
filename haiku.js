@@ -14,14 +14,20 @@
 //      show public timeline.
 //  :haiku! someone
 //      show someone's statuses.
+//  :haiku! album
+//      show aubum timeline.
 //  :haiku!+ someone
 //      fav someone's last status.. mean put hatena star.
 //  :haiku!- someone
 //      un-fav someone's last status.. mean remove hatena star.
+//  :haiku! #keyword
+//      show the keyword timeline.
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+    var CLIENT_NAME = liberator.config.name + "::plugin::haiku.js";
     var evalFunc = window.eval;
+    var statuses = null;
     try {
         var sandbox = new Components.utils.Sandbox(window);
         if (Components.utils.evalInSandbox("true", sandbox) === true) {
@@ -40,13 +46,14 @@
         var keyword = '';
         if (stat.match(/^#([^ ].+)\s+(.*)$/)) [keyword, stat] = [RegExp.$1, RegExp.$2];
         stat = stat.split("\\n").map(function(str) encodeURIComponent(str)).join("\n");
+        var source = encodeURIComponent(CLIENT_NAME);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://h.hatena.ne.jp/api/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         if (keyword)
-            xhr.send("status=" + stat + '&keyword=' + encodeURIComponent(keyword));
+            xhr.send("status=" + stat + '&keyword=' + encodeURIComponent(keyword) + '&source=' + source);
         else
-            xhr.send("status=" + stat);
+            xhr.send("status=" + stat + '&source=' + source);
     }
     function favHaiku(username, password, user){
         var xhr = new XMLHttpRequest();
@@ -66,17 +73,33 @@
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
     }
+    function getTimelineURLFromTarget(target){
+        if (target == "/"){
+            return "http://h.hatena.ne.jp/api/statuses/public_timeline.json";
+        } else if (target == "album"){
+            return "http://h.hatena.ne.jp/api/statuses/album.json";
+        } else if (/^#(.+)/.test(target)){
+            return "http://h.hatena.ne.jp/api/statuses/keyword_timeline/" +
+                   encodeURIComponent(RegExp.$1) + ".json";
+        } else if (/^@?(.+)/.test(target)){
+            return "http://h.hatena.ne.jp/api/statuses/user_timeline/" + RegExp.$1 + ".json";
+        }
+        return "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
+    }
     function showFollowersStatus(username, password, target){
         var xhr = new XMLHttpRequest();
+        var endPoint = getTimelineURLFromTarget(target);
+        /*
         var endPoint = target ?
             target == "/" ?
             "http://h.hatena.ne.jp/api/statuses/public_timeline.json"
           : "http://h.hatena.ne.jp/api/statuses/user_timeline/" + target + ".json"
           : "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
+        */
         xhr.open("POST", endPoint, false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = evalFunc(xhr.responseText);
+        statuses = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.haiku.entry-title { text-decoration: underline; }
@@ -175,7 +198,30 @@
                 showFollowersStatus(username, password, arg)
             else
                 sayHaiku(username, password, arg);
-        },
-    { });
+        }, {
+            completer: function(filter, special){
+                if (!filter || !statuses) return;
+                var matches= filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
+                if (!matches) return;
+                var list = [];
+                var [prefix, target] = [matches[1],matches[2]];
+                switch (prefix.charAt(0)){
+                    case "+":
+                    case "-":
+                        if (!special) return;
+                    case "@":
+                        list = statuses.map(function(entry) [entry.user.id, entry.text]);
+                        break;
+                    case "#":
+                        list = statuses.map(function(entry) [entry.keyword, entry.text]);
+                        break;
+                }
+                if (target){
+                    list = list.filter(function($_) $_[0].indexOf(target) > 0);
+                }
+                return [prefix.length, list];
+            }
+        }
+    );
 })();
 // vim:sw=4 ts=4 et:
