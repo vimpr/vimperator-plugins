@@ -45,7 +45,7 @@
                 arg = arg.arguments[0];
                 let num = RegExp.$2;
                 let quantity = !arg || isNaN(arg) ? 1 : parseInt(arg);
-                let nextnum = numstr(f(parseInt(num), quantity), num.length);
+                let nextnum = numstr(f(parseInt(num, 10), quantity), num.length);
                 let newpart = RegExp.$1 + nextnum + RegExp.$3;
                 if(p == "href") {
                     window.content.location.href = newpart;
