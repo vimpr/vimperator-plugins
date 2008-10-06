@@ -183,7 +183,8 @@ liberator.plugins.styleSheetsManger = (function(){
 					}
 				});
 				return [0, candidates];
-			}
+			},
+			bang: true
 		}
 	);
 	var CSSData = {};

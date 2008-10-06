@@ -242,7 +242,8 @@
                     list = list.filter(function($_) $_[0].indexOf(target) >= 0);
                 }
                 return [prefix.length, list];
-            }
+            },
+            bang: true
         }
     );
 })();
