@@ -47,18 +47,17 @@
   function makeRegExp (str) {
     if (!migemo)
       return new RegExp(str, 'i');
-    if (str.indexOf('/') == 0) {
+    if (str.indexOf('/') == 0)
       return new RegExp(str.slice(1), 'i');
-    } else { 
+    else
       return migemo.getRegExp(str);
-    }
   }
 
   function filteredLinks (word) {
     if (word.match(/^\s*$/))
-      return []; // [it for each (it in content.document.links) if (it.href)];  
+      return []; // [it for each (it in content.document.links) if (it.href)];
     let re = makeRegExp(word);
-    return [it for each (it in content.document.links) if (lmatch(re, it))]; 
+    return [it for each (it in content.document.links) if (lmatch(re, it))];
   }
 
   function charToWhere (str, fail) {
@@ -104,7 +103,7 @@
       completer: function (word) {
         let links = filteredLinks(word);
         return [0, [[it.href, it.textContent] for each (it in links)]];
-      },
+      }
     }
   );
 
@@ -132,15 +131,15 @@
       if (lolinks[0]) {
         liberator.buffer.followLink(lolinks[0], where);
       } else {
-        liberator.echoerr('lol')
+        liberator.echoerr('lol');
       }
     },
     {
-      options: looptions;
+      options: looptions,
       completer: function (word) {
         let opts = liberator.parseArgs(word, looptions, "1", true);
         log(opts);
-        lolinks = filteredLinks(word);//word.match(/\bhttp[^\s]+/));
+        lolinks = filteredLinks(word);//word.match(/\bhttp\S+/));
         return [0, [[it.href, it.textContent] for each (it in lolinks)]];
       }
     }
