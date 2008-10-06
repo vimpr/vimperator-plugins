@@ -4,7 +4,7 @@
  * @description    Tombloo integrate plugin
  * @description-ja Tombloo経由で選択領域などをpostする
  * @author         Trapezoid
- * @version        0.1c
+ * @version        0.1d
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -13,13 +13,13 @@
  *  :tomblooAction arg              -> execute Tombloo's action in tool menu
  **/
 var TomblooService = Components.classes['@brasil.to/tombloo-service;1'].getService().wrappedJSObject;
-function update(target, src, keys){
+function update(target,src,keys){
     if(keys){
         keys.forEach(function(key){
-                target[key] = src[key];
-                });
+            target[key] = src[key];
+        });
     } else {
-        for(var key in src)
+        for(let key in src)
             target[key] = src[key];
     }
 
@@ -38,7 +38,7 @@ function getContext(){
         //event     : event,
         //mouse     : mouse,
         //menu      : gContextMenu,
-    }, {}), win.location);
+    },{}),win.location);
 }
 
 liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
@@ -47,7 +47,7 @@ liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
     },{
         completer: function(filter){
             var completionList = new Array();
-            for(var name in TomblooService.Tombloo.Service.actions)
+            for(let name in TomblooService.Tombloo.Service.actions)
                 if(name.indexOf(filter) > -1)
                     completionList.push([name,name]);
             return [0,completionList];
@@ -57,13 +57,13 @@ liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
 
 liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
     function(arg,special){
-        TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extractors[arg],special);
+        TomblooService.Tombloo.Service.share(getContext(),TomblooService.Tombloo.Service.extractors[arg],special);
     },{
-		bang: true,
+        bang: true,
         completer: function(filter){
             var completionList = new Array();
             var exts = TomblooService.Tombloo.Service.check(getContext());
-            for(var i=0; i < exts.length; i++)
+            for(let i=0,l=exts.length; i < l; i++)
                 if(exts[i].name.indexOf(filter) > -1)
                     completionList.push([exts[i].name,exts[i].name]);
             return [0,completionList];
