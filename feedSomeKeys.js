@@ -304,6 +304,8 @@ commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
         } else {
             replaceUserMap(lhs,rhs,bang);
         }
+    },{
+        bang: true
     }
 );
 commands.addUserCommand(['feedmapclear','fmapc'],'Clear Feed Maps',destroy);

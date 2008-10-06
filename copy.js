@@ -97,7 +97,8 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
                 }
             });
             return [0, candidates];
-        }
+        },
+        bang: true
     }
 );
 

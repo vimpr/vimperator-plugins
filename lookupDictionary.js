@@ -184,6 +184,7 @@ SITE_DEFINITION.forEach(function(dictionary){
                 }
                 return [0, candidates];
             },
+            bang: true
         }
     );
 });
