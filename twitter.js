@@ -171,7 +171,9 @@
                 showFollowersStatus(username, password, arg)
             else
                 sayTwitter(username, password, arg);
-        },
+        },{
+            bang: true
+        }
     { });
 })();
 // vim:sw=4 ts=4 et:

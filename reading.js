@@ -131,7 +131,7 @@ liberator.commands.addUserCommand(['reading'], "update Twitter's status to curre
         }
     },
     // complete logic is none.
-    {}
+    { bang: true }
 );
 
 // stuff functions

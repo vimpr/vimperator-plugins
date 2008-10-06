@@ -20,6 +20,7 @@ liberator.commands.addUserCommand(['nico'],'Fill comment form in nicovideo',
         var form = special ? 'MailInput.text' : 'ChatInput.text' ;
         flvp.wrappedJSObject.SetVariable(form, arg.toString() );
     },{
+        bang: true,
         completer: function(filter, special){
             var templates = [];
             var commands = [

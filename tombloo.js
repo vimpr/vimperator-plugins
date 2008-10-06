@@ -59,6 +59,7 @@ liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
     function(arg,special){
         TomblooService.Tombloo.Service.share(getContext(), TomblooService.Tombloo.Service.extractors[arg],special);
     },{
+		bang: true,
         completer: function(filter){
             var completionList = new Array();
             var exts = TomblooService.Tombloo.Service.check(getContext());

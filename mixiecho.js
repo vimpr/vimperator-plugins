@@ -116,6 +116,8 @@
 				showFollowersStatus()
 			else
 				sayEcho(arg);
-		},
+		},{
+			bang: true
+		}
 	{ });
 })();

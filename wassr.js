@@ -302,6 +302,7 @@
             [['-todo'], commands.OPTION_STRING],
             [['-footmark'], null]
         ],
+        bang: true,
         completer: function(filter) {
             candidates = [];
             if (filter.match(/{emoji:$/)) {
