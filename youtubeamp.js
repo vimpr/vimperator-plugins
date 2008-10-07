@@ -136,8 +136,8 @@ YouTubePlayerController.prototype = {
     _changeToFull: function () {
         var p = this._player();
         setTimeout(function () {
-            p.width = window.innerWidth;
-            p.height = liberator.buffer.pageHeight;
+            p.width = content.innerWidth;
+            p.height = content.innerHeight;
         }, 0);
     },
 
