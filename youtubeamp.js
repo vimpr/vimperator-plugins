@@ -1,10 +1,10 @@
 /*
  * ==VimperatorPlugin==
  * @name            youtubeamp.js
- * @description     this script give you keyboard opration for youtube.com.
+ * @description     this script gives you keyboard oprations for YouTube.com.
  * @description-ja  YouTube のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.10
+ * @version         0.11
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -40,13 +40,13 @@
  *   2008/10/07 ver. 0.10   - initial written.
  * */
 
-(function(){
+(function() {
 
 Function.prototype.bind = function(object) {
     var __method = this;
     return function() {
         return __method.apply(object, arguments);
-    }
+    };
 };
 
 // class definition
@@ -55,33 +55,33 @@ function YouTubePlayerController() {
     this.initialize.apply(this, arguments);
 }
 YouTubePlayerController.prototype = {
-    initialize: function () {
+    initialize: function() {
         this.fuller = this._changeToFull.bind(this);
     },
 
     constants: {
-        VERSION:        '0.10',
+        VERSION: '0.10',
 
-        CARDINAL_NUMBER:    10,
+        CARDINAL_NUMBER: 10,
 
-        YOUTUBE_DOMAIN:    '.youtube.jp',
-        YOUTUBE_URL:       '^http://[^.]+\\.youtube\\.com/',
-        WATCH_URL:          'http://[^.]+\\.youtube\\.com/watch',
-        WATCH_PAGE:         1,
+        YOUTUBE_DOMAIN: '.youtube.jp',
+        YOUTUBE_URL:    '^http://[^.]+\\.youtube\\.com/',
+        WATCH_URL:      'http://[^.]+\\.youtube\\.com/watch',
+        WATCH_PAGE:     1,
 
         PLAYER_NODE_ID: 'movie_player',
 
-        STATE_PLAYING:  1,
+        STATE_PLAYING: 1,
 
-        SIZE_WIDTH_DEFAULT:     480,
-        SIZE_HEIGHT_DEFAULT:    385,
+        SIZE_WIDTH_DEFAULT:  480,
+        SIZE_HEIGHT_DEFAULT: 385,
 
         NAME_PLAYER_VERSION: 'PLAYER_VERSION',
 
-        SEEKTO_DEFAULT:     0,
-        SEEKBY_DEFAULT:     0,
-        VOLUMETO_DEFAULT:   100,
-        VOLUMEBY_DEFAULT:   0,
+        SEEKTO_DEFAULT:   0,
+        SEEKBY_DEFAULT:   0,
+        VOLUMETO_DEFAULT: 100,
+        VOLUMEBY_DEFAULT: 0,
 
         HIDE_NODES: [
             'old-masthead',
@@ -95,7 +95,7 @@ YouTubePlayerController.prototype = {
         ],
     },
 
-    getControllerVersion: function () { return this.constants.VERSION; },
+    getControllerVersion: function() { return this.constants.VERSION; },
 
     pagecheck: function() {
         if(this.getURL().match(this.constants.WATCH_URL)) return this.constants.WATCH_PAGE;
@@ -133,24 +133,24 @@ YouTubePlayerController.prototype = {
             : this._normalSize();
     },
 
-    _changeToFull: function () {
+    _changeToFull: function() {
         var p = this._player();
-        setTimeout(function () {
+        setTimeout(function() {
             p.width = content.innerWidth;
             p.height = content.innerHeight;
         }, 0);
     },
 
-    _getElementById: function (id) {
+    _getElementById: function(id) {
         var e = window.content.document.getElementById(id);
-        if (!e) return null;
+        if(!e) return null;
 
         return e.wrappedJSObject
             ? e.wrappedJSObject
             : e;
     },
 
-    _fullSize: function () {
+    _fullSize: function() {
         var b = this._getElementById('baseDiv');
         this.defMargin = b.style.margin;
         this.defPadding = b.style.padding;
@@ -159,9 +159,9 @@ YouTubePlayerController.prototype = {
         b.style.padding = 0;
         b.style.width = '100%';
 
-        for (var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
+        for(var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
             var h = this._getElementById(this.constants.HIDE_NODES[i]);
-            if (h) { h.style.display = 'none'; }
+            if(h) { h.style.display = 'none'; }
         }
 
         this._changeToFull();
@@ -173,15 +173,15 @@ YouTubePlayerController.prototype = {
         );
     },
 
-    _normalSize: function () {
+    _normalSize: function() {
         var b = this._getElementById('baseDiv');
         b.style.margin  = this.defMargin;
         b.style.padding = this.defPadding;
         b.style.width   = this.defWidth;
 
-        for (var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
+        for(var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
             var h = this._getElementById(this.constants.HIDE_NODES[i]);
-            if (h) { h.style.display = 'block'; }
+            if(h) { h.style.display = 'block'; }
         }
 
         var p = this._player();
@@ -257,7 +257,7 @@ liberator.commands.addUserCommand(
         try {
             var info = [
                 'controller version : ' + controller.getControllerVersion(),
-            ].join("\n");
+            ].join('\n');
             liberator.echo(info, liberator.commandline.FORCE_MULTILINE);
         }
         catch(e) { liberator.echoerr(e); }
@@ -287,25 +287,25 @@ liberator.commands.addUserCommand(
 
 liberator.commands.addUserCommand(
     ['ytseek'],
-    'controll seek bar',
+    'control seek bar',
     function(arg, special) {
         try      { special ? controller.seekBy(arg) : controller.seekTo(arg); }
         catch(e) { liberator.echoerr(e); }
     },
     {
-        bang:   true,
+        bang: true,
     }
 );
 
 liberator.commands.addUserCommand(
     ['ytvolume'],
-    'controll volume',
+    'control volume',
     function(arg, special) {
         try      { special ? controller.volumeBy(arg) : controller.volumeTo(arg); }
         catch(e) { liberator.echoerr(e); }
     },
     {
-        bang:   true,
+        bang: true,
     }
 );
 
