@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 20-Jun-2008. Jan 2008
+// Last Change: 08-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -174,6 +174,6 @@
         },{
             bang: true
         }
-    { });
+    );
 })();
 // vim:sw=4 ts=4 et:
