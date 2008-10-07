@@ -29,13 +29,12 @@
 //    let g:fopen_default_interval="<INTERVAL_SEC>"
 
 
-
-(function () { try{
+(function () { try {
 
   let migemo = window.XMigemoCore;
 
   function isHttpLink (link) {
-    return link.href && ~link.href.indexOf('http');
+    return link.href && link.href.indexOf('http') == 0;
   }
 
   function lmatch (re, link) {
@@ -50,9 +49,9 @@
 
   function filteredLinks (word) {
     if (word.match(/^\s*$/))
-      return []; 
+      return [];
     let re = makeRegExp(word);
-    return [it for each (it in content.document.links) if (lmatch(re, it))]; 
+    return [it for each (it in content.document.links) if (lmatch(re, it))];
   }
 
   function charToWhere (str, fail) {
@@ -117,7 +116,7 @@
 
   }
 
-  let ( 
+  let (
     lolinks = [],
     looptions = [ [['-where', '-w'], liberator.commands.OPTION_STRING, null, WHERE_COMPLETIONS] ]
   ) {
@@ -128,15 +127,15 @@
       function (opts, bang) {
         let where = charToWhere(opts['-where'], bang ? NEW_TAB : CURRENT_TAB);
         let arg = opts.arguments[0];
-        let m = arg.match(/^(\d+),/);
-        if (m) 
-          liberator.buffer.followLink(lolinks[parseInt(m[1], 10)], where);
+        let m = arg.match(/^\d+(?=,)/);
+        if (m)
+          liberator.buffer.followLink(lolinks[parseInt(m[0], 10)], where);
       },
       {
         options: looptions,
         bang: true,
         completer: function (word) {
-          if (!word || word.match(/\d+,|\s/))
+          if (!word || word.match(/\s|\d+,/))
             return [];
           lolinks = filteredLinks(word);
           return [0, [[i + ',' + lolinks[i].href, lolinks[i].textContent] for (i in lolinks || [])]];
@@ -146,6 +145,6 @@
 
   }
 
-}catch(e){log(e);}})();
+} catch (e) { log(e); }})();
 
 // vim:sw=2 ts=2 et:
