@@ -25,7 +25,7 @@ function toArray (obj) {
 
 let roots = toArray(globalVariables.plugin_loader_roots);
 let plugins = toArray(globalVariables.plugin_loader_plugins);
-let filter = new RegExp("[\\\\/](" + plugins.join('|') + ")\.(js|vimp)$");
+let filter = new RegExp('[\\\\/](' + plugins.join('|') + ')\\.(js|vimp)$');
 
 log('plugin_loader: loading');
 
