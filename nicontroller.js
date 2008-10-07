@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.51
+ * @version         0.52
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -66,6 +66,8 @@
  *                          - use Error object when throw exception.
  *                          - extract constant variables from code
  *                            and define in NicoPlayerController.constants.
+ *   2008/10/08 ver. 0.52   - correspond vimperator specification
+ *                            "bang" in extra object on addUserCommand.
  * */
 
 /*
@@ -473,7 +475,9 @@ liberator.commands.addUserCommand(
         try      { special ? controller.seekBy(arg) : controller.seekTo(arg); }
         catch(e) { liberator.echoerr(e); }
     },
-    {}
+    {
+        bang: true,
+    }
 );
 
 liberator.commands.addUserCommand(
@@ -483,7 +487,9 @@ liberator.commands.addUserCommand(
         try      { special ? controller.volumeBy(arg) : controller.volumeTo(arg); }
         catch(e) { liberator.echoerr(e); }
     },
-    {}
+    {
+        bang: true,
+    }
 );
 
 liberator.commands.addUserCommand(

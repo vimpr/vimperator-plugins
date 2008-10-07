@@ -1,4 +1,4 @@
-/**
+/*
  * ==VimperatorPlugin==
  * @name            reading.js
  * @description     update Twitter's status to current URL and comment
@@ -131,7 +131,9 @@ liberator.commands.addUserCommand(['reading'], "update Twitter's status to curre
         }
     },
     // complete logic is none.
-    { bang: true }
+    {
+        bang:   true,
+    }
 );
 
 // stuff functions
@@ -162,7 +164,7 @@ function $s(query, node) {
 }
 
 function canonicalizeURL(url) {
-    const PATHTRAQ_CANONICALIZE_URL_API = 'http://api.pathtraq.com/normalize_url2?api=json;url=';
+    const PATHTRAQ_CANONICALIZE_URL_API = 'http://api.pathtraq.com/normalize_url2?api=json&url=';
 
     var req = new XMLHttpRequest();
     req.open('GET', PATHTRAQ_CANONICALIZE_URL_API + encodeURI(url), false);

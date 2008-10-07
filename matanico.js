@@ -66,18 +66,20 @@
  *       let g:matanico_related_tag_servicename='またキーワードでニコニコタグ検索してる'
  *
  * HISTORY
- *   2008/06/14 v0.10 initial written.
- *   2008/06/27 v0.20 change replace argument to regexp with 'g' option.
- *                    add matanico! command.
- *                    refactoring
- *                    display sended status if succeed.
- *   2008/06/28 v0.21 change display strings, 'Yanked ' and 'Posted '
- *   2008/07/13 v0.30 change xpath function and xpath query
- *   2008/07/14 v0.40 change url checking
- *   2008/07/15 v0.50 make NicoScraper class
- *                    add function to post tag page
- *                    refer : http://nicovideo.g.hatena.ne.jp/koizuka/20080322/matanico_tag
- *   2008/09/04 v0.60 add function to post related tag page
+ *   2008/06/14 ver. 0.10   - initial written.
+ *   2008/06/27 ver. 0.20   - change replace argument to regexp with 'g' option.
+ *                          - add matanico! command.
+ *                          - refactoring
+ *                          - display sended status if succeed.
+ *   2008/06/28 ver. 0.21   - change display strings, 'Yanked ' and 'Posted '.
+ *   2008/07/13 ver. 0.30   - change xpath function and xpath query.
+ *   2008/07/14 ver. 0.40   - change url checking.
+ *   2008/07/15 ver. 0.50   - make NicoScraper class.
+ *                          - add function to post tag page.
+ *                            refer : http://nicovideo.g.hatena.ne.jp/koizuka/20080322/matanico_tag
+ *   2008/09/04 ver. 0.60   - add function to post related tag page.
+ *   2008/10/08 ver. 0.61   - correspond vimperator specification
+ *                            "bang" in extra object on addUserCommand.
  * */
 
 (function() {
@@ -246,7 +248,7 @@ liberator.commands.addUserCommand(['matanico'], "update Twitter's status to curr
 
             // twitter's URL to post
             var domain  = 'http://twitter.com/';
-            var postURL = 'http://twitter.com/statuses/update.json';
+            var postURL = 'https://twitter.com/statuses/update.json';
 
             // get user account for twitter
             var [user, pass] = getUserAccount(domain, postURL, null);
@@ -271,7 +273,9 @@ liberator.commands.addUserCommand(['matanico'], "update Twitter's status to curr
         }
     },
     // complete logic is none.
-    {}
+    {
+        bang: true,
+    }
 );
 
 // stuff functions
