@@ -20,22 +20,24 @@
 
 function toArray (obj) {
   return obj instanceof Array ? obj
-                              : obj.toString().split(/[,|\s]/);
+                              : obj.toString().split(/[,| \t\r\n]+/);
 }
 
 let roots = toArray(globalVariables.plugin_loader_roots);
 let plugins = toArray(globalVariables.plugin_loader_plugins);
-let filter = new RegExp('[\\\\/](' + plugins.join('|') + ')\\.(js|vimp)$');
+let filter = new RegExp('[\\\\/](?:' +
+                        plugins.map(function (plugin) plugin.replace(/(?=[\\^$.+*?|(){}\[\]])/g, '\\'))
+                               .join('|') +
+                        ')\\.(?:js|vimp)$');
 
 log('plugin_loader: loading');
 
-for each (let root in roots) {
+roots.forEach(function (root) {
   let files = io.readDirectory(io.getFile(root), true);
-  for each (let file in files) {
-    if (!filter.test(file.path))
-      continue;
-    liberator.io.source(file.path, false);
-  }
-}
+  files.forEach(function (file) {
+    if (filter.test(file.path))
+      liberator.io.source(file.path, false);
+  });
+});
 
 log('plugin_loader: loaded');
