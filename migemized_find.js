@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        2.2
+// @version        2.5
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -11,17 +11,20 @@
 //      '?'  => Migemo検索
 //      以外 => Migemo検索
 //
-//    :hl <検索ワード> [-c <色>]
-//    :highlight <検索ワード> [-c <色>]
+//    :ml <検索ワード> [-c <色>]
+//    :migelight <検索ワード> [-c <色>]
 //      検索ワードを指定色で強調表示する。
 //
-//    :rhl <色1> <色2> ... <色N>
-//    :removehighlight  <色1> <色2> ... <色N>
+//    :ml! <色1> <色2> ... <色N>
+//    :migelight!  <色1> <色2> ... <色N>
 //      指定の色の強調表示を消す
 //
-//    :rhl all
-//    :removehighlight all
+//    :ml! all
+//    :migelight! all
 //      全ての強調表示を消す。
+//
+//    let g:migemized_find_language = "cat";
+//      ミ言語設定
 //
 // Author:
 //    anekos
@@ -33,7 +36,7 @@
 
   let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
                      .getService(Components.interfaces.pIXMigemoFactory)
-                     .getService('ja');
+                     .getService(globalVariables.migemized_find_language || 'ja');
 
   function getPosition (elem) {
     if (!elem)
@@ -397,14 +400,20 @@
 
   // highlight コマンド
   liberator.commands.addUserCommand(
-    ['hl', 'highlight'],
-    'Highlight matched words',
-    function (opts) {
-      let r = MF.highlightAll(opts.arguments.join(' '), opts['-color']);
-      echo(r ? r.length + ' words highlighted.'
-             : 'word not found.');
+    ['ml', 'migelight'],
+    'Migelight matched words',
+    function (opts, bang) {
+      if (bang) {
+        let colors = opts.arguments.join(' ') + ' ' + (opts['-color'] || '');
+        liberator.execute('removemigelight ' + colors);
+      } else {
+        let r = MF.highlightAll(opts.arguments.join(' '), opts['-color']);
+        echo(r ? r.length + ' words migelighted.'
+               : 'word not found.');
+      }
     },
     {
+      bang: true,
       options: [
         [['-color', '-c'], liberator.commands.OPTION_STRING],
       ]
@@ -413,8 +422,8 @@
 
   // remove highlight コマンド
   liberator.commands.addUserCommand(
-    ['rhl', 'removehighlight'],
-    'Remove highlight',
+    ['rml', 'removemigelight'],
+    'Remove migelight',
     function (args) {
       if (!args)
         return MF.removeHighlight(MF.highlightColor);
