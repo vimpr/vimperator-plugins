@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update mixi echo"
-// Last Change: 05-Aug-2008. Jan 2008
+// Last Change: 08-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 
@@ -119,5 +119,5 @@
 		},{
 			bang: true
 		}
-	{ });
+	);
 })();
