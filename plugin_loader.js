@@ -17,27 +17,28 @@
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/20081008#1223397705
 
+{
+  function toArray (obj) {
+    return obj instanceof Array ? obj
+                                : obj.toString().split(/[,| \t\r\n]+/);
+  }
 
-function toArray (obj) {
-  return obj instanceof Array ? obj
-                              : obj.toString().split(/[,| \t\r\n]+/);
-}
+  let roots = toArray(globalVariables.plugin_loader_roots);
+  let plugins = toArray(globalVariables.plugin_loader_plugins);
+  let filter = new RegExp('[\\\\/](?:' +
+                          plugins.map(function (plugin) plugin.replace(/(?=[\\^$.+*?|(){}\[\]])/g, '\\'))
+                                 .join('|') +
+                          ')\\.(?:js|vimp)$');
 
-let roots = toArray(globalVariables.plugin_loader_roots);
-let plugins = toArray(globalVariables.plugin_loader_plugins);
-let filter = new RegExp('[\\\\/](?:' +
-                        plugins.map(function (plugin) plugin.replace(/(?=[\\^$.+*?|(){}\[\]])/g, '\\'))
-                               .join('|') +
-                        ')\\.(?:js|vimp)$');
+  log('plugin_loader: loading');
 
-log('plugin_loader: loading');
-
-roots.forEach(function (root) {
-  let files = io.readDirectory(io.getFile(root), true);
-  files.forEach(function (file) {
-    if (filter.test(file.path))
-      liberator.io.source(file.path, false);
+  roots.forEach(function (root) {
+    let files = io.readDirectory(io.getFile(root), true);
+    files.forEach(function (file) {
+      if (filter.test(file.path))
+        liberator.io.source(file.path, false);
+    });
   });
-});
 
-log('plugin_loader: loaded');
+  log('plugin_loader: loaded');
+}
