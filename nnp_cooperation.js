@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.31
+ * @version         0.32
  * @minversion      1.2
  * ==VimperatorPlugin==
  *
@@ -123,7 +123,7 @@ const captionTemplate = '<caption>now playing: $PLAYTITLE (display $NUMOFDISPLAY
 const thead = [
     '<thead>',
         '<tr>',
-            '<td>&nbsp;</td>',
+            '<td> </td>',
             '<td>thumbnail</td>',
             '<td>title</td>',
             '<td>url</td>',
@@ -135,7 +135,7 @@ const thead = [
 const itemHTML = [
     '<tr>',
         '<td class="index">$INDEX:</td>',
-        '<td class="thumbnail"><image src="$THUMBNAILURL$ID" width="33" height="25" /></td>',
+        '<td class="thumbnail"><img src="$THUMBNAILURL$ID" width="33" height="25" /></td>',
         '<td>$TITLE</td>',
         '<td>$URL</td>',
     '</tr>',
