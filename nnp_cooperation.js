@@ -95,7 +95,7 @@ EOM
 (function(){
 
 // thumbnail URL
-const thumbnailURL = 'http://tn-skr1.smilevideo.jp/smile?i=';
+const thumbnailURL = 'http://tn-skr$HOSTNUMBER.smilevideo.jp/smile?i=$VIDEO_ID';
 
 // style
 const styles = [
@@ -135,7 +135,7 @@ const thead = [
 const itemHTML = [
     '<tr>',
         '<td class="index">$INDEX:</td>',
-        '<td class="thumbnail"><img src="$THUMBNAILURL$ID" width="33" height="25" /></td>',
+        '<td class="thumbnail"><img src="$THUMBNAILURL" width="33" height="25" /></td>',
         '<td>$TITLE</td>',
         '<td>$URL</td>',
     '</tr>',
@@ -179,11 +179,14 @@ liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
         for(var i=0 ; i<nodesLength && i<numofList ; ++i ) {
             // get video id
             var id = nodes[i].href.match(/\d+$/);
+            // build thumnail's URL
+            // refer: http://d.hatena.ne.jp/ZIGOROu/20081014/1223991205
+            var thumbnail = thumbnailURL.replace(/\$HOSTNUMBER/g, id % 2 + 1)
+                                        .replace(/\$VIDEO_ID/g,    id);
             // evaluate variables and push to list
             items.push(
                 itemHTML.replace(/\$INDEX/g,        i + 1)
-                        .replace(/\$THUMBNAILURL/g, thumbnailURL)
-                        .replace(/\$ID/g,           id)
+                        .replace(/\$THUMBNAILURL/g, thumbnail)
                         .replace(/\$TITLE/g,        nodes[i].textContent)
                         .replace(/\$URL/g,          nodes[i].href)
             );
