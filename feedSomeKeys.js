@@ -174,13 +174,13 @@ function replaceUserMap(origKey, feedKey, useVkey){
             origMaps.push(clone);
         }
     }
-    var map = new (liberator.Map)([modes.NORMAL], [origKey], origKey + ' -> ' + feedKey,
+    var map = new Map([modes.NORMAL], [origKey], origKey + ' -> ' + feedKey,
         function(count){
             count = count > 1 ? count : 1;
             for (var i=0; i<count; i++){
                 feedKeyIntoContent(feedKey, useVkey);
             }
-        }, { flags:liberator.Mappings.flags.COUNT, rhs:feedKey, noremap:true });
+        }, { flags:Mappings.flags.COUNT, rhs:feedKey, noremap:true });
     addUserMap(map);
     if (feedMaps.some(function(fmap){
         if (fmap.names[0] != origKey) return false;

@@ -78,13 +78,13 @@ liberator.globalVariables.copy_templates.forEach(function(template){
 
 // used when argument is none
 //const defaultValue = templates[0].label;
-liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
+commands.addUserCommand(['copy'],'Copy to clipboard',
     function(arg, special){
         liberator.plugins.exCopy.copy(arg, special);
     },{
         completer: function(filter, special){
             if (special){
-                return liberator.completion.javascript(filter);
+                return completion.javascript(filter);
             }
             var templates = liberator.globalVariables.copy_templates.map(function(template)
                 [template.label, template.value]
@@ -103,7 +103,7 @@ liberator.commands.addUserCommand(['copy'],'Copy to clipboard',
 );
 
 function addUserMap(label, map){
-    liberator.mappings.addUserMap([liberator.modes.NORMAL,liberator.modes.VISUAL], map,
+    mappings.addUserMap([modes.NORMAL,modes.VISUAL], map,
         label,
         function(){ liberator.plugins.exCopy.copy(label); },
         { rhs: label }
@@ -126,8 +126,8 @@ function replaceVariable(str){
         var serializer = new XMLSerializer();
         htmlsel = serializer.serializeToString(sel.cloneContents());
     }
-    return str.replace(/%TITLE%/g,liberator.buffer.title)
-              .replace(/%URL%/g,liberator.buffer.URL)
+    return str.replace(/%TITLE%/g,buffer.title)
+              .replace(/%URL%/g,buffer.URL)
               .replace(/%SEL%/g,sel.toString())
               .replace(/%HTMLSEL%/g,htmlsel);
 }
@@ -179,11 +179,11 @@ var exCopyManager = {
                 copyString = replaceVariable(template.value);
             }
         }
-        liberator.util.copyToClipboard(copyString);
+        util.copyToClipboard(copyString);
         if (isError){
             liberator.echoerr('CopiedErrorString: `' + copyString + "'");
         } else {
-            liberator.echo('CopiedString: `' + liberator.util.escapeHTML(copyString) + "'");
+            liberator.echo('CopiedString: `' + util.escapeHTML(copyString) + "'");
         }
     }
 };

@@ -42,12 +42,12 @@ function preExec(target,name,func){
     }
 }
 
-preExec(liberator.events, 'onEscape', function(){
+preExec(events, 'onEscape', function(){
     if (ubiquityManager.panel.state == 'open') gUbiquity.closeWindow();
 });
 var focusedWindow = null;
 var focusedElement = null;
-preExec(liberator.commandline, 'open', function(){
+preExec(commandline, 'open', function(){
     focusedWindow = document.commandDispatcher.focusedWindow;
     focusedElement = document.commandDispatcher.focusedElement;
 });
@@ -63,7 +63,7 @@ preExec(gUbiquity, 'openWindow', function(anchor, flag){
 // -------------------------------------------------
 // Command
 // -------------------------------------------------
-liberator.commands.addUserCommand(['ubi[quity]'],'Vimperator Ubiquity Glue',
+commands.addUserCommand(['ubi[quity]'],'Vimperator Ubiquity Glue',
     function(args){
         if (!args){
             gUbiquity.openWindow(getBrowser(), true);

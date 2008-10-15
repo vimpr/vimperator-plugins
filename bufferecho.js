@@ -24,27 +24,27 @@ function htmlEscape(str){
               .replace(">","&gt;","g");
 }
 
-liberator.commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to a buffer(browser)',
+commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to a buffer(browser)',
     function(args, special){
         liberator.plugins.buffer_echo.open(args, special);
     },{
-        completer: function(filter) liberator.completion.javascript(filter)
+        completer: function(filter) completion.javascript(filter)
     },true
 );
 var manager = {
     append: function(htmlString){
-        var body = liberator.buffer.evaluateXPath('/html/body').snapshotItem(0);
+        var body = buffer.evaluateXPath('/html/body').snapshotItem(0);
         body.innerHTML += htmlString;
     },
     open: function(str, forceNewTab) {
         var result = execute(str);
-        if (typeof(result) == "object") result = liberator.util.objectToString(result,true);
+        if (typeof(result) == "object") result = util.objectToString(result,true);
         var data = '<div><h1>' + htmlEscape(str) + '</h1><pre>' + result + '</pre></div>';
-        if (liberator.buffer.title == title && !forceNewTab){
+        if (buffer.title == title && !forceNewTab){
             this.append(data);
             return;
         }
-        var where = liberator.buffer.URL == "about:blank" ? liberator.CURRENT_TAB : liberator.NEW_TAB;
+        var where = buffer.URL == "about:blank" ? liberator.CURRENT_TAB : liberator.NEW_TAB;
         liberator.open([prefix + '<title>'+title+'</title>' + data], where);
     }
 };

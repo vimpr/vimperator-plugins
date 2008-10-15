@@ -37,7 +37,7 @@
         'k9UMW8vzxTtMN0ZvrATDio05GxM3hm/cMvFrhlvno2dxDF9Nbh+9Gn/19NUzUHj66kkgPH91y1WH'+
         'O1e/yzEQjk0CAAARc29gwOvTnwAAAABJRU5ErkJggg==';
 
-    var gmailBiffIntervals = parseInt(globalVariables.gmbf_check_intervals || 30) * 1000;
+    var gmailBiffIntervals = parseInt(liberator.globalVariables.gmbf_check_intervals || 30) * 1000;
 
     var gmailBiffIcon = document.createElement('statusbarpanel');
     gmailBiffIcon.setAttribute('id','gmail-biff-icon');

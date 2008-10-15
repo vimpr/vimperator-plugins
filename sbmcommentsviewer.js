@@ -485,10 +485,10 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     }, //}}}
     {
         options: [
-            [['-t','-type'], liberator.commands.OPTION_STRING],
-            [['-f','-format'], liberator.commands.OPTION_LIST],
-            [['-c','-count'], liberator.commands.OPTION_NOARG],
-            [['-b','-browser'],liberator.commands.OPTION_NORARG]
+            [['-t','-type'], commands.OPTION_STRING],
+            [['-f','-format'], commands.OPTION_LIST],
+            [['-c','-count'], commands.OPTION_NOARG],
+            [['-b','-browser'],commands.OPTION_NORARG]
         ]
     }
 ); //}}}

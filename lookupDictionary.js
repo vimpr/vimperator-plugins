@@ -138,7 +138,7 @@ SpellChecker.prototype = {
 var spellChecker = buildSpellChecker();
 
 SITE_DEFINITION.forEach(function(dictionary){
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
         dictionary.names,
         dictionary.shortHelp,
         function(arg,special){
@@ -188,7 +188,7 @@ SITE_DEFINITION.forEach(function(dictionary){
         }
     );
 });
-liberator.commands.addUserCommand(
+commands.addUserCommand(
     ['availabledictionaries'],
     'display available dictionaries',
     function () { liberator.echo('available dictionaries: ' + spellChecker.getDictionaryList()); },

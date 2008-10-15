@@ -116,26 +116,26 @@ function focusSwitch(where, isAbsolute){ //{{{
 } //}}}
 
 var commandExtra = {
-    completer: function(filter) liberator.completion.url(filter),
-    options: [ [['-l','-left'],   liberator.commands.OPTION_NOARG],
-               [['-r','-right'],  liberator.commands.OPTION_NOARG],
-               [['-t','-top'],    liberator.commands.OPTION_NOARG],
-               [['-b','-bottom'], liberator.commands.OPTION_NOARG] ],
+    completer: function(filter) completion.url(filter),
+    options: [ [['-l','-left'],   commands.OPTION_NOARG],
+               [['-r','-right'],  commands.OPTION_NOARG],
+               [['-t','-top'],    commands.OPTION_NOARG],
+               [['-b','-bottom'], commands.OPTION_NOARG] ],
     argCount: "*"
 };
 
 /* ----------------------------------------------
  * Commands
  * --------------------------------------------*/
-liberator.commands.addUserCommand(['sp[lit]'], 'split browser', //{{{
+commands.addUserCommand(['sp[lit]'], 'split browser', //{{{
     function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_TOP); },
     commandExtra
 ); //}}}
-liberator.commands.addUserCommand(['vs[plit]'], 'split browser', //{{{
+commands.addUserCommand(['vs[plit]'], 'split browser', //{{{
     function(args){ liberator.plugins.splitBrowser.openSubBrowser(args, SplitBrowser.POSITION_RIGHT); },
     commandExtra
 ); //}}}
-liberator.commands.addUserCommand(['on[ly]'], 'Close or gather all subbrowsers', //{{{
+commands.addUserCommand(['on[ly]'], 'Close or gather all subbrowsers', //{{{
     function(args){
         if (SplitBrowser.browsers.length == 0) {
             liberator.echoerr('SubBrowser is none');
@@ -152,11 +152,11 @@ liberator.commands.addUserCommand(['on[ly]'], 'Close or gather all subbrowsers',
 /* ----------------------------------------------
  * Mappings
  * --------------------------------------------*/
-liberator.mappings.addUserMap([liberator.modes.NORMAL],['s'], 'SplitBrowser motion  Map', //{{{
+mappings.addUserMap([modes.NORMAL],['s'], 'SplitBrowser motion  Map', //{{{
     function(key, count){
         gBrowser = SplitBrowser.activeBrowser;
         try {
-            var map = liberator.mappings.get(liberator.modes.NORMAL, key)
+            var map = mappings.get(modes.NORMAL, key)
             map.execute(null, count);
         } catch(e) {
             liberator.log(e);
@@ -164,12 +164,12 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL],['s'], 'SplitBrowser moti
             gBrowser = document.getElementById('content');
         }
     },{
-        flags: liberator.Mappings.flags.MOTION + liberator.Mappings.flags.COUNT,
+        flags: Mappings.flags.MOTION + Mappings.flags.COUNT,
         rhs: 'Motion map for SplitBrowser'
     }
 );
 //}}}
-liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
+mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
     function(count, key){
         if (/[1-9]/.test(key)){
             focusSwitch(parseInt(key), true);
@@ -195,14 +195,14 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<C-w>'], 'select subbr
                 liberator.plugins.splitBrowser.closeSubBrowser();
                 break;
             case '<C-v>':
-                liberator.plugins.splitBrowser.openSubBrowser(liberator.buffer.URL,SplitBrowser.POSITION_RIGHT);
+                liberator.plugins.splitBrowser.openSubBrowser(buffer.URL,SplitBrowser.POSITION_RIGHT);
                 break;
             case '<C-s>':
-                liberator.plugins.splitBrowser.openSubBrowser(liberator.buffer.URL,SplitBrowser.POSITION_TOP);
+                liberator.plugins.splitBrowser.openSubBrowser(buffer.URL,SplitBrowser.POSITION_TOP);
                 break;
         }
     },{
-        flags: liberator.Mappings.flags.COUNT + liberator.Mappings.flags.ARGUMENT,
+        flags: Mappings.flags.COUNT + Mappings.flags.ARGUMENT,
         rhs: 'select subbrowser'
     }
 ); //}}}
@@ -212,9 +212,9 @@ liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<C-w>'], 'select subbr
  * @see liberator.js::vimperaotr.open
  */
 liberator.open = function(urls, where, force){ //{{{
-    if (typeof urls == 'string') urls = liberator.util.stringToURLArray(urls);
+    if (typeof urls == 'string') urls = util.stringToURLArray(urls);
     if (urls.length > 20 && !force){
-        liberator.commandline.input("This will open " + urls.length + " new tabs. Would you like to continue? (yes/[no])",
+        commandline.input("This will open " + urls.length + " new tabs. Would you like to continue? (yes/[no])",
             function (resp) { if (resp && resp.match(/^y(es)?$/i)) liberator.open(urls, where, true); });
         return true;
     }
@@ -274,15 +274,15 @@ var manager = {
         var position = defPosition || SplitBrowser.POSITION_TOP;
         position = getPositionForOpen(args) || position;
         if (args.arguments.length > 0){
-            urls = liberator.util.stringToURLArray(args.arguments.join(', '));
+            urls = util.stringToURLArray(args.arguments.join(', '));
             if (urls.length == 0) {
-                url = liberator.buffer.URL;
+                url = buffer.URL;
             } else {
                 url = urls[0];
                 urls.shift();
             }
         } else {
-            url = liberator.buffer.URL;
+            url = buffer.URL;
         }
         var subBrowser = SplitBrowser.addSubBrowser(url, null, position);
         subBrowser.addEventListener('load',function(){

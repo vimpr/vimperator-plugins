@@ -33,7 +33,6 @@
  *
  */
 
-if(!liberator.plugins) vimperator.plugins = {}; 
 liberator.plugins.imeController = (function(){
     var inputElement = document.getAnonymousElementByAttribute(
         document.getElementById('liberator-commandline-command'),'anonid','input'
@@ -52,8 +51,8 @@ liberator.plugins.imeController = (function(){
         liberator.plugins.imeController.set(inputElement, getMode('ex_ime_mode'));
     }); 
     preExec(events,'onEscape',function(){
-        if (liberator.mode == liberator.modes.INSERT && (liberator.modes.extended & liberator.modes.TEXTAREA) && !liberator.options.insertmode){
-            var inputField = liberator.buffer.lastInputField;
+        if (liberator.mode == modes.INSERT && (modes.extended & modes.TEXTAREA) && !options.insertmode){
+            var inputField = buffer.lastInputField;
             if (liberator.plugins.imeController.set(inputField, getMode('textarea_ime_mode'))){
                 inputField.blur();
                 setTimeout(function(){inputField.focus();},0);

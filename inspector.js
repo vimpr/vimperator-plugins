@@ -37,8 +37,8 @@ function getFrameList(){
 	}
 	return list;
 }
-liberator.commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
-	function(arg, special){
+commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
+	function(arg, bang){
 		if (!arg){
 			bang ? inspectDOMDocument(document) : inspectDOMDocument(content.document);
 			return;
@@ -59,9 +59,9 @@ liberator.commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
 	},{
 		bang: true,
 		completer: function(filter){
-			var list = liberator.completion.filter(getFrameList(), filter, true);
+			var list = completion.filter(getFrameList(), filter, true);
 			if (list.length > 0) return [0, list];
-			return liberator.completion.javascript(filter);
+			return completion.javascript(filter);
 		},
 	}
 );

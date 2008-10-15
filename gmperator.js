@@ -193,15 +193,15 @@ liberator.plugins.gmperator = (function(){ //{{{
      * @param {String} filename script filename
      */
     function triggerGMEvent(name, uri, filename){
-        liberator.autocommands.trigger(name, uri+'\n'+filename);
+        autocommands.trigger(name, uri+'\n'+filename);
         liberator.log('gmpeartor: '+ name + ' ' + uri+'\n'+filename, 8);
     }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
     getBrowser().mTabBox.addEventListener('TabSelect',dispatchGMTabSelect,false);
     
-    liberator.config.autocommands.push(["GMInjectedScript","Triggered when UserScript is injected"]);
-    liberator.config.autocommands.push(["GMActiveScript","Triggered when location is changed and injected UserScripts are exist"]);
-    liberator.config.dialogs.push(["userscriptmanager", "Greasemonkey Manager", function(){GM_openUserScriptManager();}]);
+    config.autocommands.push(["GMInjectedScript","Triggered when UserScript is injected"]);
+    config.autocommands.push(["GMActiveScript","Triggered when location is changed and injected UserScripts are exist"]);
+    config.dialogs.push(["userscriptmanager", "Greasemonkey Manager", function(){GM_openUserScriptManager();}]);
     // }}}
     return manager;
 })(); //}}}

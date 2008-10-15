@@ -39,11 +39,11 @@ function blink(aNode){
 		setTimeout(setOutline, i * 100);
 	}
 }
-liberator.commands.addUserCommand(['xpathb[link]','xb'],'XPath blink nodes',
+commands.addUserCommand(['xpathb[link]','xb'],'XPath blink nodes',
 	function(expression){
 		var result
 		try {
-			result = liberator.buffer.evaluateXPath(expression);
+			result = buffer.evaluateXPath(expression);
 		} catch(e) {
 			liberator.echoerr('XPath blink: ' + e);
 		}
