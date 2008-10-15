@@ -25,7 +25,7 @@
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-    var CLIENT_NAME = encodeURIComponent(liberator.config.name + "::plugin::haiku.js");
+    var CLIENT_NAME = encodeURIComponent(config.name + "::plugin::haiku.js");
     var evalFunc = window.eval;
     var statuses = null;
     try {
@@ -103,48 +103,64 @@
         }
         return "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
     }
-    function showFollowersStatus(username, password, target){
-        var xhr = new XMLHttpRequest();
-        var endPoint = getTimelineURLFromTarget(target);
-        /*
-        var endPoint = target ?
-            target == "/" ?
-            "http://h.hatena.ne.jp/api/statuses/public_timeline.json"
-          : "http://h.hatena.ne.jp/api/statuses/user_timeline/" + target + ".json"
-          : "http://h.hatena.ne.jp/api/statuses/friends_timeline.json";
-        */
-        xhr.open("POST", endPoint, false, username, password);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send(null);
-        statuses = evalFunc(xhr.responseText);
-
+    function statusToXML(statuses){
         var html = <style type="text/css"><![CDATA[
             span.haiku.entry-title { text-decoration: underline; }
-            span.haiku.entry-content { white-space: normal; }
-            span.haiku.entry-content a { text-decoration: none; }
+            .haiku.entry-content { white-space: pre; }
+            .haiku.entry-content a { text-decoration: none; }
+            dl.haiku { margin-left: 1em; }
             img.haiku.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
-        ]]></style>.toSource()
-                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-            statuses.map(function(status) {
-                var text = status.text;
-                var keyword = status.keyword;
-                var star = status.favorited > 0 ? '<img src="http://s.hatena.ne.jp/images/star.gif"/><span style="color:orange;">x' + status.favorited + '</span>' : '';
-                if (text.indexOf(keyword+"=") == 0) text = status.text.substr(keyword.length + 1);
-                text = convert(text);
-                keyword = convert(keyword);
-                return <>
+        ]]></style>;
+
+        statuses.forEach(function(status) {
+            var text = status.text;
+            var keyword = status.keyword;
+            var star = status.favorited > 0 ? <><img src="http://s.hatena.ne.jp/images/star.gif"/><span style="color:orange;">{'x' + status.favorited}</span></> : <></>;
+            var replies = <></>;
+
+            if (text.indexOf(keyword+"=") == 0) text = status.text.substr(keyword.length + 1);
+            text = convert(text);
+            keyword = convert(keyword);
+
+            if (status.replies.length > 0){
+                replies = <dl class="haiku"></dl>;
+                status.replies.forEach(function(rep){
+                    replies.* += <>
+                                 <dt>
+                                    <img src={rep.user.profile_image_url} alt={rep.user.screen_name} class="haiku photo"/>
+                                    <strong>{rep.user_name}</strong>
+                                 </dt>
+                                 <dd class="haiku entry-content">{rep.text.substr(keyword.length+1)}</dd>
+                                 </>;
+                });
+            }
+            html += <>
+                <div>
                     <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
                          title={status.user.screen_name}
                          class="haiku photo"/>
                     <strong>{status.user.name}&#x202C;</strong>
-                </>.toSource()
-                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                   star +
-                   sprintf(': <span class="haiku entry-title">%s</span><br /><span class="haiku entry-content">%s&#x202C;</span><hr />',
-                       keyword, text)
-            }).join("");
+                    {star}
+                    <span>:</span>
+                    <span class="haiku entry-title">{keyword}</span><br/>
+                    <span class="haiku entry-content">{text}</span>
+                </div>
+                {replies}
+                <hr/>
+            </>;
+        });
+        return html;
+    }
+    function showFollowersStatus(username, password, target){
+        var xhr = new XMLHttpRequest();
+        var endPoint = getTimelineURLFromTarget(target);
+        xhr.open("POST", endPoint, false, username, password);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(null);
+        statuses = evalFunc(xhr.responseText);
 
+        var html = statusToXML(statuses);
         //liberator.log(html);
         liberator.echo(html, true);
     }
@@ -152,31 +168,35 @@
         function createHTML(all){
             var str = '';
             if (all.indexOf("id:") == 0){
-                str = '<a href="http://h.hatena.ne.jp/' + all.replace(":", "/") + '">' + all + '</a>'
+                str = <a href={'http://h.hatena.ne.jp/' + all.replace(":", "/")}>{all}</a>;
             } else if (/\.(?:jpe?g|gif|png|bmp)$/.test(all)){
-                str = '<img src="' + all + '"/>';
+                str = <img src={all} />;
             } else if (/^http:\/\/(?:[^.]+\.)?youtube\.com\/(?:watch\?(?:[^&]+&)*v=|v\/)([^&=#?;\/]+)/.test(all)){
                 var url = "http://www.youtube.com/v/" + RegExp.$1 + "&fs=1";
-                str = '<a href="#" class="hl-URL">' + url + '</a>\n' +
-                      '<div><object width="300" height="250" data="' + url + '" type="application/x-shockwave-flash">' +
-                      '<param name="wmode" value="transparent"/>' +
-                      '<param name="allowFullScreen" value="true"/>' +
-                      '</object></div>';
+                str = <>
+                    <a href="#" class="hl-URL">{url}</a>
+                    <div>
+                        <object width="300" height="250" data={url} type="application/x-shockwave-flash">
+                         <param name="wmode" value="transparent"/>
+                         <param name="allowFullScreen" value="true"/>
+                        </object>
+                    </div>
+                </>;
             } else if (/^http:\/\/www\.nicovideo\.jp\/watch\/([-\w]+)$/.test(all)){
-                str = '<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/'+RegExp.$1+'" scrolling="no">'+
-                      '<a href="' + all + '">' + all + '</a></iframe>';
+                str = <iframe width="312" height="176" src={'http://ext.nicovideo.jp/thumb/'+RegExp.$1} scrolling="no">
+                    <a href={all}>{all}</a>
+                </iframe>;
             } else {
                 if (all.charAt(0) == "<")
-                    str = all.replace(/(?:href|src)="(?=\/)/g,'$&http://h.hatena.ne.jp');
+                    str = new XMLList(all.replace(/(?:href|src)="(?=\/)/g,'$&http://h.hatena.ne.jp'));
                 else
-                    str = '<a href="#" class="hl-URL">' + all + '</a>';
+                    str = <a href="#" class="hl-URL">{all}</a>;
             }
             return str;
         }
-        return str.replace(/<[^>]+>|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:[a-zA-Z][-\w]{1,30}[a-zA-Z\d]/g, createHTML)
-                  .replace("\n","<br/>","g");
+        return str.replace(/<[^>]+>|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:[a-zA-Z][-\w]{1,30}[a-zA-Z\d]/g, createHTML);
     }
-    liberator.commands.addUserCommand(["haiku"], "Change Haiku status",
+    commands.addUserCommand(["haiku"], "Change Haiku status",
         function(arg, special){
             var password;
             var username;
@@ -204,8 +224,8 @@
                 liberator.echoerr(ex);
             }
 
-            arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                     .replace(/%TITLE%/g, liberator.buffer.title);
+            arg = arg.replace(/%URL%/g, buffer.URL)
+                     .replace(/%TITLE%/g, buffer.title);
 
             if (special && arg.match(/^\+\s*(.*)/))
                 favHaiku(username, password, RegExp.$1)
@@ -218,6 +238,8 @@
             else
                 sayHaiku(username, password, arg);
         }, {
+            bang: true,
+            hereDoc: true,
             completer: function(filter, special){
                 if (!filter || !statuses) return [0,[]];
                 var matches= filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
@@ -242,8 +264,7 @@
                     list = list.filter(function($_) $_[0].indexOf(target) >= 0);
                 }
                 return [prefix.length, list];
-            },
-            bang: true
+            }
         }
     );
 })();
