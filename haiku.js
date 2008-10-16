@@ -106,7 +106,7 @@
     function statusToXML(statuses){
         var html = <style type="text/css"><![CDATA[
             span.haiku.entry-title { text-decoration: underline; }
-            .haiku.entry-content { white-space: pre; }
+            .haiku.entry-content { white-space: normal; }
             .haiku.entry-content a { text-decoration: none; }
             dl.haiku { margin-left: 1em; }
             img.haiku.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
@@ -161,40 +161,37 @@
         statuses = evalFunc(xhr.responseText);
 
         var html = statusToXML(statuses);
-        //liberator.log(html);
+        liberator.log(html.toXMLString(), 0);
         liberator.echo(html, true);
     }
     function convert(str){
         function createHTML(all){
-            var str = '';
+            var str = all;
             if (all.indexOf("id:") == 0){
-                str = <a href={'http://h.hatena.ne.jp/' + all.replace(":", "/")}>{all}</a>;
+                str = '<a href="http://h.hatena.ne.jp/' + all.replace(":", "/") + '">' + all + '</a>';
             } else if (/\.(?:jpe?g|gif|png|bmp)$/.test(all)){
-                str = <img src={all} />;
+                str = '<img src="' + all + '"/>';
             } else if (/^http:\/\/(?:[^.]+\.)?youtube\.com\/(?:watch\?(?:[^&]+&)*v=|v\/)([^&=#?;\/]+)/.test(all)){
-                var url = "http://www.youtube.com/v/" + RegExp.$1 + "&fs=1";
-                str = <>
-                    <a href="#" class="hl-URL">{url}</a>
-                    <div>
-                        <object width="300" height="250" data={url} type="application/x-shockwave-flash">
-                         <param name="wmode" value="transparent"/>
-                         <param name="allowFullScreen" value="true"/>
-                        </object>
-                    </div>
-                </>;
+                var url = "http://www.youtube.com/v/" + RegExp.$1 + "&amp;fs=1";
+                str = '<a href="#" class="hl-URL">' + url + '</a>' +
+                      '<div><object width="300" height="250" data="' + url + '" type="application/x-shockwave-flash">'+
+                      '<param name="wmode" value="transparent"/><param name="allowFullScreen" value="true"/>'+
+                      '</object></div>';
             } else if (/^http:\/\/www\.nicovideo\.jp\/watch\/([-\w]+)$/.test(all)){
-                str = <iframe width="312" height="176" src={'http://ext.nicovideo.jp/thumb/'+RegExp.$1} scrolling="no">
-                    <a href={all}>{all}</a>
-                </iframe>;
-            } else {
-                if (all.charAt(0) == "<")
-                    str = new XMLList(all.replace(/(?:href|src)="(?=\/)/g,'$&http://h.hatena.ne.jp'));
-                else
-                    str = <a href="#" class="hl-URL">{all}</a>;
+                str = '<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/'+RegExp.$1 + '" scrolling="no">'+
+                      '<a href="' + all + '">' +all+'</a></iframe>';
+            } else if (all.charAt(0) == "["){
+                var keyword = all.substring(2, all.length -2);
+                str = '<a href="http://h.hatena.ne.jp/keyword/' + keyword + '" class="hl-URL">' + keyword + '</a>';
             }
             return str;
         }
-        return str.replace(/<[^>]+>|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:[a-zA-Z][-\w]{1,30}[a-zA-Z\d]/g, createHTML);
+        var str = str.replace(/&/g,"&amp;")
+                     .replace(/</g,"&lt;")
+                     .replace(/>/g,"&gt;")
+                     .replace(/\n/g,"<br/>")
+                     .replace(/\[\[[^\]]+\]\]|https?:\/\/[-\w!#$%&'()*+,.\/:;=?@~]+|id:[a-zA-Z][-\w]{1,30}[a-zA-Z\d]/g, createHTML);
+        return new XMLList(str);
     }
     commands.addUserCommand(["haiku"], "Change Haiku status",
         function(arg, special){
