@@ -221,7 +221,7 @@
                 liberator.echoerr(ex);
             }
 
-            arg = arg.replace(/%URL%/g, buffer.URL)
+            arg = arg.string.replace(/%URL%/g, buffer.URL)
                      .replace(/%TITLE%/g, buffer.title);
 
             if (special && arg.match(/^\+\s*(.*)/))
