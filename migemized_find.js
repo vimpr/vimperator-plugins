@@ -436,6 +436,9 @@
     ['rml', 'removemigelight'],
     'Remove migelight',
     function (args) {
+      // HEAD (2)
+      if (args != undefined)
+        args = args.string;
       if (!args)
         return MF.removeHighlight(MF.highlightColor);
       if (args == 'all')
