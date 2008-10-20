@@ -36,7 +36,7 @@
 
   let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
                      .getService(Components.interfaces.pIXMigemoFactory)
-                     .getService(globalVariables.migemized_find_language || 'ja');
+                     .getService(liberator.globalVariables.migemized_find_language || 'ja');
 
   function getPosition (elem) {
     if (!elem)
@@ -75,7 +75,7 @@
     currentColor: null,
 
     // submit の為に使う
-    resultOfFirst: null,
+    firstResult: null,
 
     // --color-- の部分は置換される。
     style: 'background-color: --color--; color: black; border: dotted 3px blue;',
@@ -83,7 +83,6 @@
     highlightColor: 'orange',
 
     // 手抜き用プロパティ
-    get buffer function () liberator.buffer,
     get document function () content.document,
 
     // タブ毎に状態を保存するために、変数を用意
@@ -237,7 +236,7 @@
       if (result) 
         this.highlight(result, color, true, true);
 
-      this.resultOfFirst = result;
+      this.firstResult = result;
 
       return result;
     },
@@ -306,8 +305,9 @@
       this.lastSearchText = this.currentSearchText;
       this.lastSearchExpr = this.currentSearchExpr;
       this.lastColor = this.currentColor;
-      this.focusLink(this.storage.lastResult.range);
-      return this.resultOfFirst;
+      if (this.firstResult)
+        this.focusLink(this.firstResult.range);
+      return this.firstResult;
     },
 
     cancel: function () {
@@ -347,10 +347,9 @@
   let delayCallTimer = null;
   let delayedFunc = null;
 
-
-  // ミゲモ化セット
-  let migemized = {
-    find: function find (str, backwards) {
+  // Vimp の仕様変更に対応
+  let _backwards;
+  let _findFirst = function (str, backwards) {
       // 短時間に何回も検索をしないように遅延させる
       delayedFunc = function () MF.findFirst(str, backwards);
       if (delayCallTimer) {
@@ -358,6 +357,14 @@
         clearTimeout(delayCallTimer);
       }
       delayCallTimer = setTimeout(function () delayedFunc(), 500);
+  };
+
+  // ミゲモ化セット
+  let migemized = {
+    find: function find (str, backwards) {
+      _backwards = backwards;
+      if (str)
+        _findFirst(str, backwards);
     },
 
     findAgain: function findAgain (reverse) {
@@ -378,17 +385,21 @@
     searchCanceled: function searchCanceled () {
       MF.cancel();
     },
+
+    searchKeyPressed: function (str) {
+      _findFirst(str, _backwards);
+    },
   };
 
 
   // オリジナルの状態に戻せるように保存しておく
   let (original = {}) {
     for (let name in migemized)
-      original[name] = liberator.search[name];
+      original[name] = search[name];
 
     function set (funcs) {
       for (let name in funcs)
-        liberator.search[name] = funcs[name];
+        search[name] = funcs[name];
     }
 
     set(migemized);
@@ -399,7 +410,7 @@
 
 
   // highlight コマンド
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['ml', 'migelight'],
     'Migelight matched words',
     function (opts, bang) {
@@ -408,20 +419,20 @@
         liberator.execute('removemigelight ' + colors);
       } else {
         let r = MF.highlightAll(opts.arguments.join(' '), opts['-color']);
-        echo(r ? r.length + ' words migelighted.'
+        liberator.echo(r ? r.length + ' words migelighted.'
                : 'word not found.');
       }
     },
     {
       bang: true,
       options: [
-        [['-color', '-c'], liberator.commands.OPTION_STRING],
+        [['-color', '-c'], commands.OPTION_STRING],
       ]
     }
   );
 
   // remove highlight コマンド
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['rml', 'removemigelight'],
     'Remove migelight',
     function (args) {
@@ -435,7 +446,7 @@
   );
   
   // find コマンド 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['mf[ind]'],
     'Migemized find',
     function (opts) {
@@ -444,8 +455,8 @@
     },
     {
       options: [
-        [['-backward', '-b'], liberator.commands.OPTION_NOARG],
-        [['-color', '-c'], liberator.commands.OPTION_STRING],
+        [['-backward', '-b'], commands.OPTION_NOARG],
+        [['-color', '-c'], commands.OPTION_STRING],
       ]
     }
   );
