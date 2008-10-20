@@ -2,7 +2,8 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.1.0
+// @version        1.3
+// @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
 //  Usage:
@@ -160,7 +161,7 @@
   // 開いたURIなどの表示
   function displayOpened (link) {
     let msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
-    setTimeout(function () liberator.echo(msg, liberator.commandline.FORCE_SINGLELINE), 1000);
+    setTimeout(function () liberator.echo(msg, commandline.FORCE_SINGLELINE), 1000);
     liberator.log(msg);
   }
 
@@ -441,8 +442,8 @@
   ////////////////////////////////////////////////////////////////
 
   if (gv().nextMappings.length) {
-    liberator.mappings.addUserMap(
-      [liberator.modes.NORMAL], 
+    mappings.addUserMap(
+      [modes.NORMAL], 
       gv().nextMappings,
       'Go next',
       function () go(true)
@@ -451,8 +452,8 @@
 
 
   if (gv().backMappings.length) {
-    liberator.mappings.addUserMap(
-      [liberator.modes.NORMAL], 
+    mappings.addUserMap(
+      [modes.NORMAL], 
       gv().backMappings,
       'Go back',
       function () go(false)

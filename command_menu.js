@@ -2,7 +2,8 @@
 // @name           Command-MainMenu
 // @description-ja メインメニューとツールバーをコマンドで実行できる
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.3
+// @version        1.5
+// @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -20,7 +21,7 @@
 //    http://creativecommons.org/licenses/by-sa/2.1/jp/
 //    http://creativecommons.org/licenses/by-sa/2.1/jp/deed.en_CA
 
-(function(){ try{
+(function(){
 
   const migemo = Components
                   .classes['@piro.sakura.ne.jp/xmigemo/factory;1']
@@ -34,13 +35,13 @@
   function cloneArray (src) src.map(id);
 
   function matchPath (elem, path, getName) {
-    for (var i = 0; i < path.length; i++) {
+    for (let i = 0; i < path.length; i++) {
       if (!path[i](getName(elem)))
         break;
     }
     if (i) {
-      var res = [];
-      for (var j = i; j < path.length; j++)
+      let res = [];
+      for (let j = i; j < path.length; j++)
         res.push(path[j]);
       return res;
     }
@@ -49,10 +50,11 @@
   function getElementsByPath (elem, path, getName, isTarget, isEnabled) {
     try{
       function get (point, elem, path) {
+        let m = path[0](getName(elem, true));
+
         if (isTarget(elem)) {
           if (!isEnabled(elem))
             return [];
-          var m = path[0](getName(elem, true));
           if (m) {
             if (path.length == 1)
               return [[point + m, elem]];
@@ -63,9 +65,9 @@
         }
 
         //elem.containerOpen = true;
-        var res, cs = elem.childNodes, result = [];
+        let res, cs = elem.childNodes, result = [];
         if (cs && cs.length) {
-          for (var i = 0; i < cs.length; i++) {
+          for (let i = 0; i < cs.length; i++) {
             if (res = get(m + point, cs[i], path))
               res.map(function(it) it && result.push(it));
           }
@@ -95,7 +97,7 @@
   }
 
   function getPathString (elem, isRoot, getName, isTarget) {
-    var res = [];
+    let res = [];
     while (!isRoot(elem)) {
       isTarget(elem) && res.unshift(getName(elem));
       elem = elem.parentNode;
@@ -135,7 +137,7 @@
 
   function addCommand(cmds, name, root, action) {
     function _find (args, single) {
-      var result =  getElementsByPath(root, 
+      let result =  getElementsByPath(root, 
                                       getPathMatchers(args), 
                                       getElementName, 
                                       isClickable,
@@ -152,11 +154,14 @@
       };
     }
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
       cmds,
       name,
       function (args, _, num, extra) {
-        var res = _find(args.replace(/-\s*$/,''), true);
+        // for HEAD (2)
+        if (args.string != undefined)
+          args = args.string;
+        let res = _find(args.replace(/-\s*$/,''), true);
         if (!(res && action(res)))
           liberator.echoerr('menu not found');
       },
@@ -184,6 +189,5 @@
              }
   );
 
-}catch(e){ liberator.log(e);}
 })();
 

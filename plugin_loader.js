@@ -2,7 +2,7 @@
 // @name           Plugin Loader
 // @description-ja 指定(ディレクトリ|プラグイン)を起動時にロードする
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        2.2
+// @version        2.3
 // @author         anekos
 // ==/VimperatorPlugin==
 //
@@ -23,22 +23,22 @@
                                 : obj.toString().split(/[,| \t\r\n]+/);
   }
 
-  let roots = toArray(globalVariables.plugin_loader_roots);
-  let plugins = toArray(globalVariables.plugin_loader_plugins);
+  let roots = toArray(liberator.globalVariables.plugin_loader_roots);
+  let plugins = toArray(liberator.globalVariables.plugin_loader_plugins);
   let filter = new RegExp('[\\\\/](?:' +
                           plugins.map(function (plugin) plugin.replace(/(?=[\\^$.+*?|(){}\[\]])/g, '\\'))
                                  .join('|') +
                           ')\\.(?:js|vimp)$');
 
-  log('plugin_loader: loading');
+  liberator.log('plugin_loader: loading');
 
   roots.forEach(function (root) {
     let files = io.readDirectory(io.getFile(root), true);
     files.forEach(function (file) {
       if (filter.test(file.path))
-        liberator.io.source(file.path, false);
+        io.source(file.path, false);
     });
   });
 
-  log('plugin_loader: loaded');
+  liberator.log('plugin_loader: loaded');
 }

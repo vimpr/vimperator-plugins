@@ -2,7 +2,7 @@
 // @name           Read Cat Later
 // @description-ja Read It Later 的な物
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        0.1
+// @version        0.2
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -26,10 +26,12 @@
   liberator.log('readcatlater.js loading');
   
   // このプラグインでブックマークしたときに必ずつくタグ
-  RCL_TAG = 'readcatlater'; 
+  const RCL_TAG = 'readcatlater'; 
   // このプラグインが保存するブックマークのフォルダ名
   // 変更しても良いし、場所を移動しても平気である。
-  FOLDER_NAME = 'L';
+  const FOLDER_NAME = 'L';
+  // 逆順表示
+  const REVERSE = eval(liberator.globalVariables.readcatlater_reverse || 'false');
 
   var prefs = {
     prefix: 'extensions.vimperator.plugins.readcatlater.',
@@ -192,7 +194,7 @@
     if (closeOriginally)
       folderNode.containerOpen = false;
 
-    return result;
+    return liberator.globalVariables.readcatlater_reverse ? result.reverse() : result;
   }catch(e){ liberator.log(e); }}
 
   function completer (args) {
@@ -216,11 +218,14 @@
   * Add Command
   ********************************************************************************/
 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['readcatlater', 'rcl'],
     'read cat later',
     function (args, _, num, extra) {
-      var res = addEntry(window.content.document, splitBySpaces(args));
+      // for HEAD
+      if (args.string != undefined)
+        args = args.string;
+      var res = addEntry(window.content.document, splitBySpaces(args)); // FIXME
       if (res)
         liberator.echo('"' + title + '" was added');
       else
@@ -229,10 +234,13 @@
     {}
   );
 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['readcatnow', 'rcn'],
     'read cat now',
     function (uri, bang, num, extra) {
+      // for HEAD
+      if (uri.string != undefined)
+        uri = uri.string;
       openURI(uri);
       if (!bang && removeItems(uri))
         liberator.echo('"' + uri + '" was removed.'); 
@@ -242,7 +250,7 @@
     }
   );
 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['deletecatnow', 'dcn'],
     'delete cat now',
     function (uri, bang, num, extra) {
