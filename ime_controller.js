@@ -38,7 +38,7 @@ liberator.plugins.imeController = (function(){
         document.getElementById('liberator-commandline-command'),'anonid','input'
     );  
     function getMode(name){
-        return globalVariables[name] ? globalVariables[name] : 'inactive';
+        return liberator.globalVariables[name] ? liberator.globalVariables[name] : 'inactive';
     }   
     function preExec(target,name,func){
         var original = target[name];
@@ -65,8 +65,8 @@ liberator.plugins.imeController = (function(){
             return false;
         },  
         reset: function(){
-            delete globalVariables.ex_ime_mode;
-            delete globalVariables.textarea_ime_mode;
+            delete liberator.globalVariables.ex_ime_mode;
+            delete liberator.globalVariables.textarea_ime_mode;
         }   
     };  
 })();
