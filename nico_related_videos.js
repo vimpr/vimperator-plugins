@@ -77,7 +77,7 @@
     ['nicorelated'],
     'niconico related videos',
     function (url) {
-      (url === undefined) || (url = url.string);
+      (url.string === undefined) || (url = url.string);
       url = (function () {
         if (url == nothing)
           return 'http://www.nicovideo.jp/';
