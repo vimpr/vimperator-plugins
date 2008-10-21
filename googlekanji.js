@@ -18,9 +18,10 @@
   var copycompl = [];
 
   function getKanji (word) {
-    var re = /[一-龠]+/g;
-    var ignore = /検索|関連/;
+    var re = /[\u4e00-\u9fa0]+/g; // 一-龠
+    var ignore = /\u691c\u7d22|\u95a2\u9023/; // 検索|関連
     var req = new XMLHttpRequest();
+    liberator.log(word);
     var word = encodeURIComponent(word);
     liberator.log(word);
     req.open('GET', 'http://www.google.co.jp/search?hl=ja&q=' + word + '&lr=lang_ja', true);
@@ -55,7 +56,7 @@
   liberator.commands.addUserCommand(
     ['gkanji', 'googlekanji'],
     'Google kanji',
-    getKanji
+    function (arg) getKanji(arg.string)
   );
 
   function copyToClipboard (copytext) {
