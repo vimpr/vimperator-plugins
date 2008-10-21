@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings - Niconico Flv Fetchearg || liberator.buffer.URLr'
 // Version: 0.4
-// Last Change: 06-Apr-2008. Jan 2008
+// Last Change: 21-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -66,12 +66,12 @@
         xhr.open("GET",uri,true);
         xhr.send(null);
     }
-    liberator.commands.addUserCommand(['fetchflv'],'Download flv file from Nicovideo',
+    liberator.modules.commands.addUserCommand(['fetchflv'],'Download flv file from Nicovideo',
         function(arg){
-            httpGET(arg || liberator.buffer.URL,function(responseText){
+            httpGET(arg.string || liberator.modules.buffer.URL,function(responseText){
                 var [,title] = responseText.match(/<title>(.*?)<\/title>/i);
                 liberator.log(title);
-                NiconicoFlvHandler(arg || liberator.buffer.URL,title);
+                NiconicoFlvHandler(arg.string || liberator.modules.buffer.URL,title);
             });
         },{}
     );

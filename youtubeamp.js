@@ -4,8 +4,8 @@
  * @description     this script gives you keyboard oprations for YouTube.com.
  * @description-ja  YouTube のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.11
- * @minversion      1.2
+ * @version         0.12
+ * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
  * LICENSE
@@ -60,7 +60,7 @@ YouTubePlayerController.prototype = {
     },
 
     constants: {
-        VERSION: '0.10',
+        VERSION: '0.12',
 
         CARDINAL_NUMBER: 10,
 
@@ -102,7 +102,7 @@ YouTubePlayerController.prototype = {
         throw new Error('current tab is not watch page on youtube.com');
     },
 
-    getURL: function() { return liberator.buffer.URL; },
+    getURL: function() { return liberator.modules.buffer.URL; },
 
     _player: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
@@ -250,7 +250,7 @@ YouTubePlayerController.prototype = {
 var controller = new YouTubePlayerController();
 
 // command register
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytinfo'],
     'display player information',
     function() {
@@ -258,14 +258,14 @@ liberator.commands.addUserCommand(
             var info = [
                 'controller version : ' + controller.getControllerVersion(),
             ].join('\n');
-            liberator.echo(info, liberator.commandline.FORCE_MULTILINE);
+            liberator.echo(info, liberator.modules.commandline.FORCE_MULTILINE);
         }
         catch(e) { liberator.echoerr(e); }
     },
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytpause'],
     'toggle play / pause',
     function() {
@@ -275,7 +275,7 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytmute'],
     'toggle mute',
     function() {
@@ -285,11 +285,16 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytseek'],
     'control seek bar',
-    function(arg, special) {
-        try      { special ? controller.seekBy(arg) : controller.seekTo(arg); }
+    function(args, special) {
+        try {
+            var arg = (args.arguments.length > 1)
+                ? args.arguments[0].toString()
+                : args.string;
+            special ? controller.seekBy(arg) : controller.seekTo(arg);
+        }
         catch(e) { liberator.echoerr(e); }
     },
     {
@@ -297,11 +302,16 @@ liberator.commands.addUserCommand(
     }
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytvolume'],
     'control volume',
-    function(arg, special) {
-        try      { special ? controller.volumeBy(arg) : controller.volumeTo(arg); }
+    function(args, special) {
+        try      {
+            var arg = (args.arguments.length > 1)
+                ? args.arguments[0].toString()
+                : args.string;
+            special ? controller.volumeBy(arg) : controller.volumeTo(arg);
+        }
         catch(e) { liberator.echoerr(e); }
     },
     {
@@ -309,7 +319,7 @@ liberator.commands.addUserCommand(
     }
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['ytsize'],
     'toggle video size',
     function() {

@@ -4,8 +4,8 @@
  * @description     update Twitter's status to current video name and comment
  * @description-ja  今見てる動画のタイトルとコメントを Twitter に投稿する
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.60
- * @minversion      1.1
+ * @version         0.62
+ * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
  * LICENSE
@@ -89,7 +89,7 @@
 function NicoScraper() {}
 NicoScraper.prototype = {
     constants: {
-        VERSION:          '0.50',
+        VERSION:          '0.62',
         WATCH_PAGE:       1,
         WATCH_URL:        '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
         TAG_PAGE:         2,
@@ -117,7 +117,7 @@ NicoScraper.prototype = {
         return null;
     },
 
-    getURL: function() { return liberator.buffer.URL; },
+    getURL: function() { return liberator.modules.buffer.URL; },
 
     getSubject: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
@@ -176,9 +176,11 @@ NicoScraper.prototype = {
 
 var scraper = new NicoScraper;
 
-liberator.commands.addUserCommand(['matanico'], "update Twitter's status to current video name and comment",
-    function(arg, special) {
+liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status to current video name and comment",
+    function(args, special) {
         try {
+            var arg = args.string;
+
             // build post string -----
             var post_string;
             // domain check
@@ -238,7 +240,7 @@ liberator.commands.addUserCommand(['matanico'], "update Twitter's status to curr
 
             // ':matanico!' display the evaluated format.
             if(special) {
-                liberator.util.copyToClipboard(post_string, true);
+                liberator.modules.util.copyToClipboard(post_string, true);
                 return;
             }
 

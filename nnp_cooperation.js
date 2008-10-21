@@ -5,7 +5,7 @@
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.32
- * @minversion      1.2
+ * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
  * CONSTRAINT
@@ -62,22 +62,22 @@ javascript <<EOM
 // [N],nn
 // N 番目の動画を再生する。
 // 指定なしの場合次の動画が再生される。
-liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+liberator.modules.mappings.addUserMap(
+    [liberator.modules.modes.NORMAL],
     [',nn'],
     'play next item in NicoNicoPlaylist',
     function(count) {
         if(count === -1) count = 1;
         liberator.execute(':nnpplaynext ' + count);
     },
-    { flags: liberator.Mappings.flags.COUNT }
+    { flags: liberator.modules.Mappings.flags.COUNT }
 );
 
 // [N],nr
 // 上から N 個の動画を削除する。
 // 指定なしの場合一番上の動画が削除される。
-liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+liberator.modules.mappings.addUserMap(
+    [liberator.modules.modes.NORMAL],
     [',nr'],
     'remove item in NicoNicoPlaylist',
     function(count) {
@@ -85,7 +85,7 @@ liberator.mappings.addUserMap(
         for(var i=0 ; i<count ; ++i) liberator.execute(':nnpremove');
         liberator.execute(':nnpgetlist');
     },
-    { flags: liberator.Mappings.flags.COUNT }
+    { flags: liberator.modules.Mappings.flags.COUNT }
 );
 
 EOM
@@ -143,8 +143,12 @@ const itemHTML = [
 
 
 // scrape from div element that inserted by NicoNicoPlaylist
-liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
-    function (arg) {
+liberator.modules.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
+    function (args) {
+        var arg = (args.arguments.length > 1)
+            ? args.arguments[0].toString()
+            : args.string;
+
         // check existence of NicoNicoPlaylist
         var playlist = $f('//div[contains(@id, "playlistcontroller_")]');
         if(!playlist) {
@@ -204,7 +208,7 @@ liberator.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
                                         .replace(/\$THEAD/g,   thead)
                                         .replace(/\$ITEMS/g,   items.join(''));
 
-        liberator.echo(str, liberator.commandline.FORCE_MULTILINE);
+        liberator.echo(str, liberator.modules.commandline.FORCE_MULTILINE);
     },{}
 );
 
@@ -250,10 +254,10 @@ function $s(query, node) {
     [['nnpfullscreen'],    "toggle fullscreen mode of NicoNicoPlaylist", 'GMNNPFullScreen'],
 ].forEach(
     function ([command, description, eventname]){
-        liberator.commands.addUserCommand(command, description,
+        liberator.modules.commands.addUserCommand(command, description,
             function (arg) {
                 var r = document.createEvent("CommandEvent");
-                r.initCommandEvent(eventname, true, true, arg);
+                r.initCommandEvent(eventname, true, true, arg.string);
                 window.content.dispatchEvent(r);
             },{}
         );

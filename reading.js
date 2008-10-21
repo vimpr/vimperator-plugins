@@ -4,8 +4,8 @@
  * @description     update Twitter's status to current URL and comment
  * @description-ja  今見てるページの URL とタイトルをコメントといっしょに Twitter に投稿する
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.21
- * @minversion      1.2
+ * @version         0.22
+ * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
  * LICENSE
@@ -56,13 +56,13 @@ const POST_URL = 'https://twitter.com/statuses/update.json';
 function Scraper(){}
 Scraper.prototype = {
     constants: {
-        VERSION:    '0.21',
+        VERSION:    '0.22',
     },
 
     version: function(){ return this.constants.VERSION; },
 
     getURL: function() {
-        return liberator.buffer.URL;
+        return liberator.modules.buffer.URL;
     },
 
     getTitle: function() {
@@ -76,9 +76,11 @@ Scraper.prototype = {
     }
 };
 
-liberator.commands.addUserCommand(['reading'], "update Twitter's status to current page title, URL and comment",
-    function(arg, special) {
+liberator.modules.commands.addUserCommand(['reading'], "update Twitter's status to current page title, URL and comment",
+    function(args, special) {
         try {
+            var arg = args.string;
+
             // build post string -----
             var post_string;
 
@@ -100,7 +102,7 @@ liberator.commands.addUserCommand(['reading'], "update Twitter's status to curre
 
             // ':matanico!' display the evaluated format.
             if(special) {
-                liberator.util.copyToClipboard(post_string, true);
+                liberator.modules.util.copyToClipboard(post_string, true);
                 return;
             }
 

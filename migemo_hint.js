@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Hint Matching with XUL/Migemo'
-// Last Change: 16-Jun-2008. Jan 2008
+// Last Change: 21-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Require: XUL/Migemo extension - https://addons.mozilla.org/ja/firefox/addon/5239
@@ -19,3 +19,6 @@ liberator.plugins.customHintMatcher = function(inputString){
     var r = new RegExp(XMigemoCore.getRegExp(inputString));
     return function(hintString) r.test(hintString);
 }
+
+plugins = {};
+plugins.customHintMatcher = liberator.plugins.customHintMatcher;

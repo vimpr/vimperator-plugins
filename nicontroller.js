@@ -4,8 +4,8 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.52
- * @minversion      1.2
+ * @version         0.53
+ * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
  * LICENSE
@@ -78,29 +78,29 @@ javascript <<EOM
 // [N],n-
 // N 秒前にシークする。
 // 指定なしの場合 10 秒前。
-liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+liberator.modules.mappings.addUserMap(
+    [liberator.modules.modes.NORMAL],
     [',n-'],
     'seek by count backward',
     function(count) {
         if(count === -1) count = 10;
         liberator.execute(':nicoseek! ' + '-' + count);
     },
-    { flags: liberator.Mappings.flags.COUNT }
+    { flags: liberator.modules.Mappings.flags.COUNT }
 );
 
 // [N],n+
 // N 秒後にシークする。
 // 指定なしの場合 10 秒後。
-liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+liberator.modules.mappings.addUserMap(
+    [liberator.modules.modes.NORMAL],
     [',n+'],
     'seek by count forward',
     function(count) {
         if(count === -1) count = 10;
         liberator.execute(':nicoseek! ' + count);
     },
-    { flags: liberator.Mappings.flags.COUNT }
+    { flags: liberator.modules.Mappings.flags.COUNT }
 );
 EOM
 */
@@ -186,7 +186,7 @@ NicoPlayerController.prototype = {
     },
 
     constants: {
-        VERSION:        '0.51',
+        VERSION:        '0.53',
 
         CARDINAL_NUMBER:    10,
 
@@ -261,7 +261,7 @@ NicoPlayerController.prototype = {
         throw new Error('current tab is not watch page on nicovideo.jp');
     },
 
-    getURL: function() { return liberator.buffer.URL; },
+    getURL: function() { return liberator.modules.buffer.URL; },
 
     _flvplayer: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
@@ -412,7 +412,7 @@ NicoPlayerController.prototype = {
 var controller = new NicoPlayerController();
 
 // command register
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicoinfo'],
     'display player information',
     function() {
@@ -421,14 +421,14 @@ liberator.commands.addUserCommand(
                 'player version     : ' + controller.getPlayerVersion(),
                 'controller version : ' + controller.getControllerVersion(),
             ].join("\n");
-            liberator.echo(info, liberator.commandline.FORCE_MULTILINE);
+            liberator.echo(info, liberator.modules.commandline.FORCE_MULTILINE);
         }
         catch(e) { liberator.echoerr(e); }
     },
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicopause'],
     'toggle play / pause',
     function() {
@@ -438,7 +438,7 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicomute'],
     'toggle mute',
     function() {
@@ -448,7 +448,7 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicommentvisible'],
     'toggle comment visible',
     function() {
@@ -458,7 +458,7 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicorepeat'],
     'toggle repeat',
     function() {
@@ -468,11 +468,16 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicoseek'],
     'controll seek bar',
-    function(arg, special) {
-        try      { special ? controller.seekBy(arg) : controller.seekTo(arg); }
+    function(args, special) {
+        try      {
+            var arg = (args.arguments.length > 1)
+                ? args.arguments[0].toString()
+                : args.string;
+            special ? controller.seekBy(arg) : controller.seekTo(arg);
+        }
         catch(e) { liberator.echoerr(e); }
     },
     {
@@ -480,11 +485,16 @@ liberator.commands.addUserCommand(
     }
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicovolume'],
     'controll volume',
-    function(arg, special) {
-        try      { special ? controller.volumeBy(arg) : controller.volumeTo(arg); }
+    function(args, special) {
+        try      {
+            var arg = (args.arguments.length > 1)
+                ? args.arguments[0].toString()
+                : args.string;
+            special ? controller.volumeBy(arg) : controller.volumeTo(arg);
+        }
         catch(e) { liberator.echoerr(e); }
     },
     {
@@ -492,7 +502,7 @@ liberator.commands.addUserCommand(
     }
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicosize'],
     'toggle video size',
     function() {
@@ -502,21 +512,23 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicodescription'],
     'toggle display or not the description for video',
-    function(arg) {
+    function() {
         try      { controller.toggleDescription(); }
         catch(e) { liberator.echoerr(e); }
     },
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicomment'],
     'fill comment box',
-    function(arg) {
+    function(args) {
         try      {
+            var arg = args.string;
+
             var command, comment;
             [command, comment] = expandExCommand(arg);
 
@@ -534,15 +546,17 @@ liberator.commands.addUserCommand(
     {}
 );
 
-liberator.commands.addUserCommand(
+liberator.modules.commands.addUserCommand(
     ['nicommand'],
     'fill command box',
     function(arg) {
-        try      { controller.setValue('inputArea.MailInput.text', arg); }
+        try      { controller.setValue('inputArea.MailInput.text', arg.string); }
         catch(e) { liberator.echoerr(e); }
     },
     {
-        completer: function(arg){
+        completer: function(args){
+            var arg = args.string;
+
             // get available commands by roll
             var availableCommands = controller.getAvailableCommands();
 
@@ -592,7 +606,7 @@ const MAX_LINE = {
     medium: 25,
     small:  38,
 };
-const EMSP = '　';
+const EMSP = '\u3000';
 const NBSP = '\u00a0';
 const LF = '\u000a';
 const PROPATIES_DEFAULT = {

@@ -141,7 +141,9 @@ SITE_DEFINITION.forEach(function(dictionary){
     commands.addUserCommand(
         dictionary.names,
         dictionary.shortHelp,
-        function(arg,special){
+        function(args,special){
+            var arg = args.string;
+
             var sel = (window.content.window.getSelection) ?
                 window.content.window.getSelection().toString() : null;
             if (special && sel) arg = sel;

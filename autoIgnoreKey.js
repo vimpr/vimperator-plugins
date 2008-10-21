@@ -44,7 +44,7 @@ getBrowser().mTabBox.addEventListener('TabSelect',passAllKeysIfTarget,false);
 
 function passAllKeysIfTarget() {
     var uri = content.document.documentURI;
-    liberator.modes.passAllKeys = isMatch(uri);
+    liberator.modules.modes.passAllKeys = isMatch(uri);
     //liberator.log('load page: ' + gBrowser.selectedBrowser.contentDocument.URL);
 }
 

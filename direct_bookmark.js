@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.12
-// Last Change: 22-Sep-2008. Jan 2008
+// Last Change: 21-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -396,7 +396,7 @@
                 return returnValue;
             },
             icon:function(url){
-                var url = liberator.buffer.URL;
+                var url = liberator.modules.buffer.URL;
                 var cryptoHash = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
                 cryptoHash.init(Ci.nsICryptoHash.MD5);
                 var inputStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
@@ -540,9 +540,9 @@
          .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
         return first;
     }
-    liberator.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
+    liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTags().call([])},0)}, {});
-    liberator.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
+    liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(service, special){
             service = service || useServicesByPost.split(/\s*/)[0];
             var currentService = services[service] || null;
@@ -551,10 +551,10 @@
             }
             liberator.open(currentService.entryPage
                 .replace(/%URL(?:::(ESC|MD5))?%/g, function(x, t){
-                    if(!t) return liberator.buffer.URL.replace(/#/, '%23');
-                    if(t == "ESC") return encodeURIComponent(liberator.buffer.URL);
+                    if(!t) return liberator.modules.buffer.URL.replace(/#/, '%23');
+                    if(t == "ESC") return encodeURIComponent(liberator.modules.buffer.URL);
                     if(t == "MD5"){
-                        var url = liberator.buffer.URL;
+                        var url = liberator.modules.buffer.URL;
                         var cryptoHash = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
                         cryptoHash.init(Ci.nsICryptoHash.MD5);
                         var inputStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
@@ -575,9 +575,9 @@
                 [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
         }
     );
-    liberator.commands.addUserCommand(['bicon'],"Show Bookmark Count as Icon",
+    liberator.modules.commands.addUserCommand(['bicon'],"Show Bookmark Count as Icon",
         function(arg){
-            var url = getNormalizedPermalink(liberator.buffer.URL);
+            var url = getNormalizedPermalink(liberator.modules.buffer.URL);
             var html = useServicesByTag.split(/\s*/).map(function(service){
                 var currentService = services[service] || null;
                 return (currentService && typeof currentService.icon === 'function') ?
@@ -585,7 +585,7 @@
             }).join('<br />');
             liberator.echo(html, true);
         }, {});
-    liberator.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
+    liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
             var comment = "";
             var targetServices = useServicesByPost;
@@ -615,8 +615,8 @@
                 comment = text || '';
             }
 
-            var url = liberator.buffer.URL;
-            var title = liberator.buffer.title;
+            var url = liberator.modules.buffer.URL;
+            var title = liberator.modules.buffer.title;
 
             targetServices.split(/\s*/).forEach(function(service){
                 var user, password, currentService = services[service] || null;
@@ -640,7 +640,7 @@
                             for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0)]];
             },
             options: [
-                [['-s','-service'], liberator.commands.OPTION_STRING],
+                [['-s','-service'], liberator.modules.commands.OPTION_STRING],
             ]
         }
     );
