@@ -173,7 +173,7 @@ liberator.plugins.gmperator = (function(){ //{{{
         var t = event.target;
         if (t && t.localName == 'tab' && t.linkedPanel){
             delete containers[t.linkedPanel];
-            delete plugins.gmperator[t.linkedPanel];
+            delete liberator.plugins.gmperator[t.linkedPanel];
         }
     }
     function dispatchGMTabSelect(event){
@@ -284,7 +284,7 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         if (!script) {
             echoerr('no such a user script');
             return;
-        } else if (plugins.gmperator.currentContainer.hasScript(script._filename) && !special){
+        } else if (liberator.plugins.gmperator.currentContainer.hasScript(script._filename) && !special){
             echoerr(script._filename + ' is already loaded!');
             return;
         } else {
