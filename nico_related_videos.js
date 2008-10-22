@@ -2,7 +2,7 @@
 // @name           Nico Related Videos
 // @description-ja ニコニコ動画のオススメ動画のリスト
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.1.0
+// @version        1.2.0
 // ==/VimperatorPlugin==
 //
 //  Author:
@@ -16,6 +16,8 @@
 //      動画ID(sm.+)  => 動画に移動
 //      ":" タグ名    => タグ検索
 //      その他文字列  => ニコニコ動画でそれを検索
+//
+//    "!" をつけると新しいタブで開く。
 //
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/20080910#1220991278
@@ -76,7 +78,7 @@
   commands.addUserCommand(
     ['nicorelated'],
     'niconico related videos',
-    function (url) {
+    function (url, bang) {
       (url.string === undefined) || (url = url.string);
       url = (function () {
         if (url == nothing)
@@ -88,9 +90,10 @@
         if (url.indexOf('http://') == -1)
           return 'http://www.nicovideo.jp/search/' + encodeURIComponent(url);
       })() || url;
-      liberator.open(url);
+      liberator.open(url, bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
     },
     {
+      bang: true,
       completer: function (args) {
         if (buffer.URL != last.url) {
           last.completions = [];
