@@ -20,7 +20,7 @@ function getFlasher(){
 
 function blink(aNode){
 	if (!aNode) {
-		liberator.echoerr('start not found');
+		liberator.echoerr('hatenastar not found');
 		return;
 	}
 	if (aNode.nodeType == 3) aNode = aNode.parentNode;
@@ -35,10 +35,11 @@ function blink(aNode){
 	}
 }
 
-liberator.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
+liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 	function (arg, special) {
 		try {
-			var result = liberator.buffer.evaluateXPath('.//img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]');
+			arg = arg.string;
+			var result = buffer.evaluateXPath('.//img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]');
 			if (arg.match(/^(\d+)\?$/)) {
 				blink(result.snapshotItem(Number(RegExp.$1)-1));
 				return;
@@ -52,17 +53,20 @@ liberator.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 				}
 			}
 		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
+	}, {
+		bang: true,
+		count: true
 	}
 );
 
-liberator.mappings.addUserMap([liberator.modes.NORMAL], [',?s'], 'add Hatena Star',
+liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [',?s'], 'add Hatena Star',
 	function (count) {
 		try {
-			for (var n = 0; n++ < count; liberator.commands.get('hatenastar').execute("all", false, count));
+			for (var n = 0; n++ < count; liberator.modules.commands.get('hatenastar').execute("all", false, count));
 		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
 	}, {
 		noremap: true,
-		flags: liberator.Mappings.flags.COUNT
+		flags: liberator.modules.Mappings.flags.COUNT
 	}
 );
 
