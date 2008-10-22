@@ -1,5 +1,5 @@
 // Vimperator plugin: "SpeedDial"
-// Last Change: 23-Jun-2008. Jan 2008
+// Last Change: 22-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 //
@@ -15,8 +15,9 @@
     const pref = Components.classes["@mozilla.org/preferences;1"].getService(Components.interfaces.nsIPrefBranch);
     var nsISupportsString = Components.interfaces.nsISupportsWString ||
                             Components.interfaces.nsISupportsString;
-    liberator.commands.addUserCommand(["sd"], "speeddial",
+    liberator.modules.commands.addUserCommand(["sd", "speeddial"], "speeddial",
         function(arg, special){
+            arg = arg.string;
             if (arg.match(/^[0-9]+$/))
                 arg = pref.getComplexValue("extensions.speeddial.thumbnail-" + arg + "-url", nsISupportsString).data;
             else
