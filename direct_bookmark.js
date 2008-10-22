@@ -544,7 +544,7 @@
         function(arg){setTimeout(function(){getTags().call([])},0)}, {});
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(service, special){
-            service = service || useServicesByPost.split(/\s*/)[0];
+            service = service.string || useServicesByPost.split(/\s*/)[0];
             var currentService = services[service] || null;
             if(!currentService || !currentService.entryPage) {
                 return;
@@ -569,7 +569,7 @@
                         }
                         return ascii.join('').toLowerCase();
                     }
-                }), special ? liberator.NEW_TAB : CURRENT_TAB);
+                }), special ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         },{
             completer: function(filter)
                 [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
