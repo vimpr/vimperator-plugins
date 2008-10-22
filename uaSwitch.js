@@ -26,11 +26,13 @@
 		});
 
 	// register Vimperator command
-	liberator.commands.addUserCommand(['ua'], 'Switch User Agent', function(arg, special){
+	liberator.modules.commands.addUserCommand(['ua'], 'Switch User Agent', function(arg, special){
+		arg = arg.string;
 		if (special) useragentswitcher_options();
 		else if (!arg) liberator.echo('UserAgent: ' + getItems().filter(function(n) n.checked)[0].label);
 		else window.eval(getItems().filter(function(n) n.label == arg)[0].oncommand);
 	}, {
+        bang: true,
 		completer: function(filter, special)
 			[0, getItems().map(function(n) [n.label, n.label])]
 	});
