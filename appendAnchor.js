@@ -9,10 +9,10 @@
 
 (function(){
 
-  liberator.commands.addUserCommand(['anc'], 'append anchors to texts look like url',
+  liberator.modules.commands.addUserCommand(['anc'], 'append anchors to texts look like url',
     function(arg, special) {
       var doc = window.content.document;
-      var nodes = liberator.buffer.evaluateXPath(
+      var nodes = liberator.modules.buffer.evaluateXPath(
         '/descendant::*[not(contains(" TITLE STYLE SCRIPT TEXTAREA XMP A ", concat(" ", translate(local-name(), "aceilmprstxy", "ACEILMPRSTXY"), " ")))]/child::text()'
       );
       var regex = new RegExp("h?(ttps?):/+([a-zA-Z0-9][-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+[-_~*(a-zA-Z0-9;/?@&=+$%#])");
