@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update mixi echo"
-// Last Change: 08-Oct-2008. Jan 2008
+// Last Change: 21-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 
@@ -58,7 +58,7 @@
 		xhr.send(null);
 		var nodes = getElementsByXPath('id("echo")//div[@class="archiveList"]//tr', parseHTML(xhr.responseText, ['script']));
 		var statuses = [];
-		nodes.forEach(function(node) {
+		if (nodes && nodes.length) nodes.forEach(function(node) {
 			var img = getFirstElementByXPath('.//img', node).src;
 			var name = getFirstElementByXPath('.//*[@class="nickname"]', node).textContent.replace(/(?:\r?\n|\r)[ \t]*/g, "");
 			var c = getFirstElementByXPath('.//*[@class="comment"]', node).childNodes;
@@ -110,8 +110,9 @@
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		xhr.send(params.join('&'));
 	}
-	liberator.commands.addUserCommand(["mixiecho"], "Change mixi echo",
+	commands.addUserCommand(["mixiecho"], "Change mixi echo",
 		function(arg, special){
+			arg = arg.string;
 			if (special || arg.length == 0)
 				showFollowersStatus()
 			else
