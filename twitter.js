@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 20-Oct-2008. Jan 2008
+// Last Change: 22-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -96,7 +96,7 @@
         //xhr.open("POST", "http://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = evalFunc(xhr.responseText);
+        var statuses = evalFunc(xhr.responseText) || [];
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }

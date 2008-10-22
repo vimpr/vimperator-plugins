@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 20-Oct-2008. Jan 2008
+// Last Change: 22-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -72,7 +72,7 @@
         //xhr.open("GET", "http://api.wassr.jp/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
-        var statuses = evalFunc(xhr.responseText);
+        var statuses = evalFunc(xhr.responseText) || [];
 
         var html = <style type="text/css"><![CDATA[
             span.wassr.entry-content a { text-decoration: none; }
