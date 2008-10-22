@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 08-Oct-2008. Jan 2008
+// Last Change: 20-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -137,7 +137,7 @@
                 .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         liberator.echo(html, true);
     }
-    liberator.commands.addUserCommand(["twitter"], "Change Twitter status",
+    liberator.modules.commands.addUserCommand(["twitter"], "Change Twitter status",
         function(arg, special){
             var password;
             var username;
@@ -152,8 +152,8 @@
                 liberator.echoerr(ex);
             }
 
-            arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                .replace(/%TITLE%/g, liberator.buffer.title);
+            arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
+                .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
             if (special && arg.match(/^\?\s*(.*)/))
                 showTwitterSearchResult(RegExp.$1)

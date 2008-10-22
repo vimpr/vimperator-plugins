@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 29-Aug-2008. Jan 2008
+// Last Change: 20-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -91,6 +91,7 @@
                     sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', emojiConv(status.text)))
                         .join("<br/>");
 
+        //liberator.log(html);
         liberator.echo(html, true);
     }
     function favWassr(username, password, user){
@@ -256,7 +257,7 @@
 
         liberator.echo(html, true);
     }
-    liberator.commands.addUserCommand(["wassr"], "Change wassr status",
+    liberator.modules.commands.addUserCommand(["wassr"], "Change wassr status",
         function(arg, special){
             var password;
             var username;
@@ -271,8 +272,8 @@
                 liberator.echoerr(ex);
             }
 
-            arg = arg.replace(/%URL%/g, liberator.buffer.URL)
-                .replace(/%TITLE%/g, liberator.buffer.title);
+            arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
+                .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
             if (special && arg.match(/^\?\s*(.*)/))
                 showWassrSearchResult(RegExp.$1)
@@ -299,7 +300,7 @@
         },
     {
         args: [
-            [['-todo'], commands.OPTION_STRING],
+            [['-todo'], liberator.modules.commands.OPTION_STRING],
             [['-footmark'], null]
         ],
         bang: true,
