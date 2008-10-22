@@ -43,7 +43,7 @@ commands.addUserCommand(['xpathb[link]','xb'],'XPath blink nodes',
 	function(expression){
 		var result
 		try {
-			result = buffer.evaluateXPath(expression);
+			result = buffer.evaluateXPath(expression.string);
 		} catch(e) {
 			liberator.echoerr('XPath blink: ' + e);
 		}
