@@ -87,29 +87,29 @@
   }
 
 
-  liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+  mappings.addUserMap(
+    [modes.NORMAL],
     ['<Leader>j'],
     'Scroll down',
     function () scroll(true)
   );
 
-  liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+  mappings.addUserMap(
+    [modes.NORMAL],
     ['<Leader>k'],
     'Scroll up',
     function () scroll(false)
   );
 
-  liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+  mappings.addUserMap(
+    [modes.NORMAL],
     [']d'],
     'Shift Scroll Element',
     function () shiftScrollElement(1)
   );
 
-  liberator.mappings.addUserMap(
-    [liberator.modes.NORMAL],
+  mappings.addUserMap(
+    [modes.NORMAL],
     ['[d'],
     'Shift Scroll Element',
     function () shiftScrollElement(-1)

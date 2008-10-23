@@ -3,7 +3,7 @@
 // @description    Open filtered link(s).
 // @description-ja リンクをフィルタリングして開く
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.1
+// @version        1.2
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -56,12 +56,12 @@
 
   function charToWhere (str, fail) {
     const table = {
-      f: NEW_TAB,
-      t: NEW_TAB,
-      n: NEW_TAB,
-      b: NEW_BACKGROUND_TAB,
-      c: CURRENT_TAB,
-      w: NEW_WINDOW,
+      f: liberator.NEW_TAB,
+      t: liberator.NEW_TAB,
+      n: liberator.NEW_TAB,
+      b: liberator.NEW_BACKGROUND_TAB,
+      c: liberator.CURRENT_TAB,
+      w: liberator.NEW_WINDOW,
     };
     return (str && table[str.charAt(0).toLowerCase()]) || fail;
   }
@@ -71,21 +71,21 @@
 
   let (foihandle) {
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
       ['fo[pen]', 'filteropen'],
       'Filtered open',
       function (opts, bang) {
-        let where = charToWhere(opts['-where'], bang ? NEW_TAB : NEW_BACKGROUND_TAB);
+        let where = charToWhere(opts['-where'], bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
         let [i, links] = [1, filteredLinks(opts.arguments.join(''))];
         if (!links.length)
           return;
-        open(links[0].href, where);
+        liberator.open(links[0].href, where);
         if (links.length <= 1)
           return;
         let interval = (opts['-interval'] || liberator.globalVariables.fopen_default_interval || 1) * 1000;
         foihandle = setInterval(function () {
           try {
-            open(links[i].href, where);
+            liberator.open(links[i].href, where);
             if ((++i) >= links.length)
               clearInterval(foihandle);
           } catch (e) {
@@ -96,8 +96,8 @@
       {
         bang: true,
         options: [
-          [['-interval', '-i'], liberator.commands.OPTION_INT],
-          [['-where', '-w'], liberator.commands.OPTION_STRING],
+          [['-interval', '-i'], commands.OPTION_INT],
+          [['-where', '-w'], commands.OPTION_STRING],
         ],
         completer: function (word) {
           let links = filteredLinks(word);
@@ -106,7 +106,7 @@
       }
     );
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
       ['stopfilteropen', 'stopfo[pen]'],
       'Stop filtered open',
       function () {
@@ -118,18 +118,18 @@
 
   let (
     lolinks = [],
-    looptions = [ [['-where', '-w'], liberator.commands.OPTION_STRING, null, WHERE_COMPLETIONS] ]
+    looptions = [ [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS] ]
   ) {
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
       function (opts, bang) {
-        let where = charToWhere(opts['-where'], bang ? NEW_TAB : CURRENT_TAB);
+        let where = charToWhere(opts['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         let arg = opts.arguments[0];
         let m = arg.match(/^\d+(?=,)/);
         if (m)
-          liberator.buffer.followLink(lolinks[parseInt(m[0], 10)], where);
+          buffer.followLink(lolinks[parseInt(m[0], 10)], where);
       },
       {
         options: looptions,
@@ -145,6 +145,6 @@
 
   }
 
-} catch (e) { log(e); }})();
+} catch (e) { liberator.log(e); }})();
 
 // vim:sw=2 ts=2 et:
