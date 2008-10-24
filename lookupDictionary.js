@@ -7,33 +7,39 @@
  * @version 0.3
  * ==/VimperatorPlugin==
  */
-(function(){
+(function () {
 
 const SITE_DEFINITION = [{
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
     shortHelp: 'SPACE ALC (英辞郎 on the Web)',
     xpath: 'id("resultList")',
-    dictionary: 'en-US',
+    dictionary: 'en-US'
 },{
-    names: ['goo'],
+    names: ['goo[dictionary]'],
     url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
     shortHelp: 'goo 辞書',
     xpath: 'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
     multi: true,
-    dictionary: 'en-US',
+    dictionary: 'en-US'
 },{
     names: ['answers'],
     url: 'http://www.answers.com/%s',
     shortHelp: 'Answers.com(英英辞書)',
     xpath: 'id("firstDs")',
-    dictionary: 'en-US',
+    dictionary: 'en-US'
 },{
-    names: ['wikipe[dia]'],
+    names: ['wikipe[diaja]'],
     url: 'http://ja.wikipedia.org/wiki/%s',
-    shortHelp: 'Wikipedia(ja) lite',
+    shortHelp: 'ウィキペディア lite',
     xpath: 'id("bodyContent")/p[1]',
-    dictionary: 'en-US',
+    dictionary: 'ja'
+},{
+    names: ['wikipe[diaen]'],
+    url: 'http://en.wikipedia.org/wiki/%s',
+    shortHelp: 'Wikipedia lite',
+    xpath: 'id("bodyContent")/p[1]',
+    dictionary: 'en'
 }];
 
 let (siteDef = liberator.globalVariables.lookupDictionary_site_definition) {
@@ -90,8 +96,8 @@ SpellChecker.prototype = {
      * @param {String} dict
      */
     setDictionary: function (dict) {
-        var dictionaries = this.getDictionaryList()
-        for (var i=0, max=dictionaries.length ; i<max ; ++i) {
+        var dictionaries = this.getDictionaryList();
+        for (let i=0, max=dictionaries.length ; i<max ; ++i) {
             if (dictionaries[i] === dict) {
                 this.engine.dictionary = dict;
                 return dict;
@@ -136,11 +142,11 @@ SpellChecker.prototype = {
 
 var spellChecker = buildSpellChecker();
 
-SITE_DEFINITION.forEach(function(dictionary){
+SITE_DEFINITION.forEach(function (dictionary) {
     commands.addUserCommand(
         dictionary.names,
         dictionary.shortHelp,
-        function(args,special){
+        function (args,special) {
             var arg = args.string;
 
             var sel = (window.content.window.getSelection) ?
@@ -148,8 +154,8 @@ SITE_DEFINITION.forEach(function(dictionary){
             if (special && sel) arg = sel;
             if (!arg) return;
             var url;
-            if (dictionary.encode){
-                var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
+            if (dictionary.encode) {
+                let ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                                      .getService( Components.interfaces.nsITextToSubURI);
                 url = dictionary.url.replace(/%s/g, ttbu.ConvertAndEscape(dictionary.encode, arg));
             } else {
@@ -157,14 +163,14 @@ SITE_DEFINITION.forEach(function(dictionary){
             }
             //liberator.log('URL: ' +url);
             var result;
-            getHTML(url, function(str){
+            getHTML(url, function (str) {
                 var doc = createHTMLDocument(str);
                 var result = getNodeFromXPath(dictionary.xpath, doc, dictionary.multi);
-                if (!result){
+                if (!result) {
                     liberator.echoerr('Nothing to show...');
                 }
                 var xs = new XMLSerializer();
-                liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<\/?[^>]+>/g,function(all) all.toLowerCase() ) + '</div>'), true);
+                liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<[^>]+>/g,function (all) all.toLowerCase() ) + '</div>'), true);
             }, dictionary.encode ? dictionary.encode : null);
         },
         {
@@ -176,7 +182,7 @@ SITE_DEFINITION.forEach(function(dictionary){
 
                 var suggestions = spellChecker.suggest(arg);
                 var candidates = [];
-                for (var i=0, max=suggestions.length ; i<max ; ++i) {
+                for (let i=0, max=suggestions.length ; i<max ; ++i) {
                     candidates.push([suggestions[i], 'suggest']);
                 }
 
@@ -200,11 +206,11 @@ commands.addUserCommand(
  * @param {Function} callback
  * @param {String} charset
  */
-function getHTML(url, callback, charset){
+function getHTML(url, callback, charset) {
     var xhr= new XMLHttpRequest();
-    xhr.onreadystatechange = function(){
-        if (xhr.readyState == 4){
-            if (xhr.status == 200){
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
                 callback.call(this,xhr.responseText);
             } else {
                 throw new Error(xhr.statusText);
@@ -219,8 +225,8 @@ function getHTML(url, callback, charset){
  * @param {String} str
  * @return {DOMDocument}
  */
-function createHTMLDocument(str){
-    str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig,'').replace(/[\r\n]+/g,' ');
+function createHTMLDocument(str) {
+    str = str.replace(/^[\s\S]*?<html(?:[ \t\r\n][^>]*)?>[ \t\n\r]*|[ \t\n\r]*<\/html[ \t\r\n]*>[\S\s]*$/ig,'').replace(/[\r\n]+/g,' ');
     var htmlFragment = content.document.implementation.createDocument(null,'html',null);
     var range = content.document.createRange();
     range.setStartAfter(window.content.document.body);
@@ -233,16 +239,16 @@ function createHTMLDocument(str){
  * @param {Boolean} isMulti
  * @return {Element}
  */
-function getNodeFromXPath(xpath,doc,isMulti){
+function getNodeFromXPath(xpath,doc,isMulti) {
     if (!xpath || !doc) return;
     var result;
-    if (isMulti){
-        var nodesSnapshot = doc.evaluate(xpath,doc.documentElement,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+    if (isMulti) {
+        let nodesSnapshot = doc.evaluate(xpath,doc.documentElement,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
         if (nodesSnapshot.snapshotLength == 0) return;
         result = document.createElementNS(null,'div');
-        for (var i=0; i<nodesSnapshot.snapshotLength; result.appendChild(nodesSnapshot.snapshotItem(i++)));
+        for (let i=0; i<nodesSnapshot.snapshotLength; result.appendChild(nodesSnapshot.snapshotItem(i++)));
     } else {
-        var node = doc.evaluate(xpath,doc.documentElement,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
+        let node = doc.evaluate(xpath,doc.documentElement,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
         if (!node.singleNodeValue) return;
         result = node.singleNodeValue;
     }
@@ -259,7 +265,7 @@ function buildSpellChecker() {
 
     var spellChecker = new SpellChecker();
 
-    var isBeginningWith = liberator.globalVariables.lookupDictionary_beginningWith
+    var isBeginningWith = liberator.globalVariables.lookupDictionary_beginningWith;
     isBeginningWith = (isBeginningWith === undefined) ? false : !!parseInt(isBeginningWith, 10);
     spellChecker.setBeginningWith(isBeginningWith);
 
