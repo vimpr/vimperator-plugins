@@ -17,23 +17,22 @@ const SITE_DEFINITION = [{
     dictionary: 'en-US',
 },{
     names: ['goo'],
-    url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0',
+    url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
     shortHelp: 'goo 辞書',
-    encode: 'EUC-JP',
-    xpath: '//div[@id="incontents"]/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
+    xpath: 'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
     multi: true,
     dictionary: 'en-US',
-},{
-    names: ['infokanji'],
-    url: 'http://dictionary.www.infoseek.co.jp/?sc=1&se=on&lp=0&gr=kj&sv=KJ&qt=&qty=%s&qtb=&qtk=0',
-    shorthelp: 'Infoseek 漢字辞書',
-    encode: 'EUC-JP',
-    xpath: '//div[@class="NetDicHead"]',
 },{
     names: ['answers'],
     url: 'http://www.answers.com/%s',
     shortHelp: 'Answers.com(英英辞書)',
     xpath: 'id("firstDs")',
+    dictionary: 'en-US',
+},{
+    names: ['wikipe[dia]'],
+    url: 'http://ja.wikipedia.org/wiki/%s',
+    shortHelp: 'Wikipedia(ja) lite',
+    xpath: 'id("bodyContent")/p[1]',
     dictionary: 'en-US',
 }];
 
@@ -154,7 +153,7 @@ SITE_DEFINITION.forEach(function(dictionary){
                                      .getService( Components.interfaces.nsITextToSubURI);
                 url = dictionary.url.replace(/%s/g, ttbu.ConvertAndEscape(dictionary.encode, arg));
             } else {
-                url = dictionary.url.replace(/%s/g,encodeURI(arg));
+                url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             }
             //liberator.log('URL: ' +url);
             var result;
@@ -165,8 +164,8 @@ SITE_DEFINITION.forEach(function(dictionary){
                     liberator.echoerr('Nothing to show...');
                 }
                 var xs = new XMLSerializer();
-                liberator.echo('<base href="' + url + '"/>' + xs.serializeToString( result ), true);
-            }, dictionary.encode ? dictionary.encode : 'UTF-8');
+                liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<\/?[^>]+>/g,function(all) all.toLowerCase() ) + '</div>'), true);
+            }, dictionary.encode ? dictionary.encode : null);
         },
         {
             completer: function (arg) {
@@ -213,7 +212,7 @@ function getHTML(url, callback, charset){
         }
     };
     xhr.open('GET',url,true);
-    xhr.overrideMimeType('text/html; charset=' + charset);
+    if (charset) xhr.overrideMimeType('text/html; charset=' + charset);
     xhr.send(null);
 }
 /**
@@ -222,8 +221,8 @@ function getHTML(url, callback, charset){
  */
 function createHTMLDocument(str){
     str = str.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig,'').replace(/[\r\n]+/g,' ');
-    var htmlFragment = document.implementation.createDocument(null,'html',null);
-    var range = document.createRange();
+    var htmlFragment = content.document.implementation.createDocument(null,'html',null);
+    var range = content.document.createRange();
     range.setStartAfter(window.content.document.body);
     htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str),true));
     return htmlFragment;
