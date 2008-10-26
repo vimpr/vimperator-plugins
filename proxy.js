@@ -5,7 +5,7 @@
  * @description-ja プロクシ設定
  * @minVersion     0.6pre
  * @author         cho45, halt feits
- * @version        0.6
+ * @version        0.6.1
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -88,10 +88,11 @@
 
     var proxy_settings = liberator.globalVariables.proxy_settings;
 
-    liberator.commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
+    commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
         const prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                                .getService(Components.interfaces.nsIPrefService);
-        var name = args;
+                      .getService(Components.interfaces.nsIPrefService);
+        var name = (args.arguments.length > 1) ? args.arguments[0].toString() : args.string;
+
         if (!name) {
             liberator.echo("Usage: proxy {setting name}");
         }
@@ -107,7 +108,7 @@
             });
 
             proxy_setting.settings.forEach(function (conf) {
-                liberator.options.setPref('network.proxy.' + conf.label, conf.param);
+                options.setPref('network.proxy.' + conf.label, conf.param);
             });
 
             liberator.echo("Set config: " + name);
