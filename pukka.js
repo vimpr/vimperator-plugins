@@ -16,7 +16,7 @@
  *      Specifies keys that use Pathtraq URL Normalizer
  *      usage: let g:pukka_normalizelink = true
  * Mappings:
- *  '[C-z]':
+ *  '[C-p]':
  * Commands:
  *  'pukka' or 'pu':
  *      Post bookmark to Delicious with Pukka
@@ -27,33 +27,35 @@
 
 (function() {
 var useNormalizelink = liberator.globalVariables.pukka_normalizelink || true;
+var buf = liberator.modules.buffer;
 
-liberator.commands
-         .addUserCommand(['pukka', 'pu'], 'Post to Pukka bookmark', function(args) {
-    if (!liberator.buffer.title || !liberator.buffer.URL || liberator.buffer.URL == 'about:blank') {
+liberator.modules.commands
+         .addUserCommand(['pukka', 'pu'], 'Post to Pukka bookmark', function(args, special) {
+    if (!buf.title || !buf.URL || buf.URL == 'about:blank') {
         return false;
     }
     var scheme = 'pukka:';
-    var title = encodeURIComponent(liberator.buffer.title);
-    var url = encodeURIComponent(liberator.buffer.URL);
+    var title = encodeURIComponent(buf.title);
+    var url = encodeURIComponent(buf.URL);
     var extend = encodeURIComponent(window.content.getSelection().toString() || '');
-    if (args) {
-        url = encodeURIComponent(args);
+    if (special) {
+        url = encodeURIComponent(args.string);
     }
     liberator.open(scheme + 'url=' + url + '&title=' + title + '&extended=' + extend);
 }, {
+    bang: false, 
     completer: function(filter) {
         var complist = [];
 
-        complist.push([liberator.buffer.URL, 'Raw URL: ' + liberator.buffer.title]);
+        complist.push([buf.URL, 'Raw URL: ' + buf.title]);
 
         if (useNormalizelink) {
-            complist.push([getNormalizedPermalink(liberator.buffer.URL), 'Normalized URL: ' + liberator.buffer.title]);
+            complist.push([getNormalizedPermalink(buf.URL), 'Normalized URL: ' + buf.title]);
         }
 
         // detect rel="bookmark"
         var elem;
-        var relb = liberator.buffer.evaluateXPath(
+        var relb = buf.evaluateXPath(
             '//*[contains(concat(" ", normalize-space(@rel), " "), " bookmark ")]',
             null, null, true);
         while ((elem = relb.iterateNext()) !== null) {
@@ -64,13 +66,13 @@ liberator.commands
     }
 });
 
-liberator.mappings
-         .addUserMap([liberator.modes.NORMAL], ['<C-z>'], 'Post to Pukka', function() {
+liberator.modules.mappings
+         .addUserMap([liberator.modules.modes.NORMAL], ['<C-p>'], 'Post to Pukka', function() {
     var urlarg = liberator.globalVariables.pukka_normalizelink ?
-                 getNormalizedPermalink(liberator.buffer.URL) :
-                 liberator.buffer.URL;
-    liberator.commandline
-             .open(':', 'pukka ' + urlarg, liberator.modes.EX);
+                 getNormalizedPermalink(buf.URL) :
+                 buf.URL;
+    liberator.modules.commandline
+             .open(':', 'pukka ' + urlarg, modes.EX);
 }, {});
 
 // copied from Trapezoid's direct_hb.js
