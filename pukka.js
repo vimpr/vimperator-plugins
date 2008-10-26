@@ -29,16 +29,16 @@
 var useNormalizelink = liberator.globalVariables.pukka_normalizelink || true;
 var buf = liberator.modules.buffer;
 
-liberator.modules.commands
-         .addUserCommand(['pukka', 'pu'], 'Post to Pukka bookmark', function(args, special) {
+liberator.modules.commands.addUserCommand(
+    ['pukka', 'pu'], 'Post to Pukka bookmark', function(args) {
     if (!buf.title || !buf.URL || buf.URL == 'about:blank') {
         return false;
     }
     var scheme = 'pukka:';
     var title = encodeURIComponent(buf.title);
-    var url = encodeURIComponent(buf.URL);
+    var url = encodeURIComponent(buf.URL.toString());
     var extend = encodeURIComponent(window.content.getSelection().toString() || '');
-    if (special) {
+    if (args.string) {
         url = encodeURIComponent(args.string);
     }
     liberator.open(scheme + 'url=' + url + '&title=' + title + '&extended=' + extend);
