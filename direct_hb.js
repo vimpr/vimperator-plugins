@@ -180,11 +180,11 @@
         xhr.setRequestHeader("Content-Type","application/atom+xml");
         xhr.send(request.toString());
     }
-    liberator.commands.addUserCommand(['hbtags'],"Update HatenaBookmark Tags",
+    commands.addUserCommand(['hbtags'],"Update HatenaBookmark Tags",
         getTags,
         {}
     );
-    liberator.commands.addUserCommand(['hb'],"Post to HatenaBookmark",
+    commands.addUserCommand(['hb'],"Post to HatenaBookmark",
         function(arg){
             try {
                 var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);

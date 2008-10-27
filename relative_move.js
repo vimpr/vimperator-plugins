@@ -81,13 +81,13 @@
         liberator.open(url, tab);
     }
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
         ["ro[pen]"],
         "Open relative URL in the current tab",
         open_path
     );
 
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
         ["rt[abopen]"],
         "Open relative URL in a new tab",
         function(path){
