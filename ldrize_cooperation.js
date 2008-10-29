@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.21
-// Last Change: 21-Oct-2008. Jan 2008
+// Last Change: 29-Oct-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -233,7 +233,7 @@
                     liberator.modules.hints.show("o");
                 },{});
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["F"],
+            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["<S-f>"],
                 "Start QuickHint mode, but open link in a new tab",
                 function(){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
