@@ -36,6 +36,13 @@ function runInspector(node){
 		inspectObject(node);
 	}
 }
+
+function getIDList(filter, isChrome){
+	var doc = isChrome ? document : content.document;
+	var iter = buffer.evaluateXPath('//*[@id and contains(@id,"' + filter + '")]',doc);
+	return [["#" + e.id, "TagName: "+ e.tagName] for (e in iter)];
+}
+
 var options = [
 	[["-frame","-f"], commands.OPTION_NOARG]
 ];
