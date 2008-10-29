@@ -222,7 +222,7 @@
                 "Start QuickHint mode with LDRize",
                 function(){
                     setHinttags(true);
-                    liberator.modules.hints.show(liberator.modules.modes.QUICK_HINT);
+                    liberator.modules.hints.show("o");
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                 } ,{});
 
@@ -230,27 +230,21 @@
                 "Start QuickHint mode",
                 function(){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show(liberator.modules.modes.QUICK_HINT);
+                    liberator.modules.hints.show("o");
                 },{});
 
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["F"],
                 "Start QuickHint mode, but open link in a new tab",
                 function(){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show(liberator.modules.modes.QUICK_HINT, "t");
+                    liberator.modules.hints.show("t");
                 },{});
 
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [";"],
                 "Start an extended hint mode",
                 function(arg){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-
-                    if(arg == "f")
-                        liberator.modules.hints.show(liberator.modules.modes.ALWAYS_HINT, "o");
-                    else if(arg == "F")
-                        liberator.modules.hints.show(liberator.modules.modes.ALWAYS_HINT, "t");
-                    else
-                        liberator.modules.hints.show(liberator.modules.modes.EXTENDED_HINT, arg);
+                    liberator.modules.hints.show(arg);
                 },
                 { flags: liberator.modules.Mappings.flags.ARGUMENT });
             //Commands
