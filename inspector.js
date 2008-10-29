@@ -36,21 +36,6 @@ function runInspector(node){
 		inspectObject(node);
 	}
 }
-function getIDList(filter, isChrome){
-	var doc = isChrome ? document : content.document;
-	var iter = buffer.evaluateXPath('//*[@id and contains(@id,"' + filter + '")]',doc);
-	return [["#" + e.id, "TagName: "+ e.tagName] for (e in iter)];
-}
-
-function getFrameList(){
-	var list = [];
-	var iframeList = document.getElementsByTagName("iframe");
-	for (var i=0, max=iframeList.length ; i<max ; ++i){
-		if (iframeList[i].hasAttribute("id"))
-			list.push([iframeList[i].id,'iframe id']);
-	}
-	return list;
-}
 var options = [
 	[["-frame","-f"], commands.OPTION_NOARG]
 ];
