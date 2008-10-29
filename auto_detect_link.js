@@ -154,7 +154,7 @@
     liberator.log('click: ' + elem);
     var e = content.document.createEvent('MouseEvents');
     e.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null); 
-    elem.dispatchEvent( e ); 
+    elem.dispatchEvent(e); 
   }
 
 
@@ -224,7 +224,6 @@
       }
       result = result.concat(temp.reverse());
     }
-    liberator.log(result);
     // succ string
     let (dm, succs, file = file, left = '', temp = []) {
       while (file && (dm = file.match(/(^|[^a-zA-Z])([a-zA-Z])([^a-zA-Z]|$)/))) {
@@ -363,14 +362,14 @@
       setting = getCurrentSetting(setting);
 
       // TODO
-      if (setting.useAutoPagerize) {
+      if (setting.useAutoPagerize && next) {
         let apnext = getAutopagerizeNext();
         if (apnext) {
           return {
             type: 'aplink',
             frame: content,
             uri: apnext.href || apnext.action || apnext.value,
-            text: apnext.textContent,
+            text: apnext.textContent || apnext.title || apnext,
             element: apnext
           };
         }
