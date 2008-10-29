@@ -13,7 +13,7 @@ const inspectorID = 'inspector@mozilla.org';
 if (!Application.extensions.get(inspectorID).enabled) return;
 
 /* これやるとFirefox終了時に実行されるんだけど...なぜ？
-Object.prototype.inspect = function()[
+Object.prototype.inspect = function(){
 	runInspector(this);
 }
 */
@@ -31,7 +31,7 @@ function runInspector(node){
 function getFrameList(){
 	var list = [];
 	var iframeList = document.getElementsByTagName("iframe");
-	for (var i=0; i< iframeList.length; i++){
+	for (var i=0, max=iframeList.length ; i<max ; ++i){
 		if (iframeList[i].hasAttribute("id"))
 			list.push([iframeList[i].id,'iframe id']);
 	}
@@ -39,17 +39,17 @@ function getFrameList(){
 }
 commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
 	function(arg, bang){
-		if (!arg){
+		if (!arg.string){
 			bang ? inspectDOMDocument(document) : inspectDOMDocument(content.document);
 			return;
 		}
 		var list = getFrameList();
-		var index = list.map(function($_) $_[0]).indexOf(arg);
+		var index = list.map(function($_) $_[0]).indexOf(arg.string);
 		var node;
 		if (index != -1) node = document.getElementById(list[index][0]).contentDocument;
 		if (!node){
 			try {
-				node = window.eval("with(liberator){" + arg + "}");
+				node = window.eval("with(liberator){" + arg.string + "}");
 			} catch(e) {
 				liberator.echoerr(e);
 				return;
