@@ -65,14 +65,14 @@
 //
 // License:
 //    http://creativecommons.org/licenses/by-sa/2.1/jp/
-//    http://creativecommons.org/licenses/by-sa/2.1/jp/deed.en_CA
+//    http://creativecommons.org/licenses/by-sa/2.1/jp/deed
 //
 // TODO:
 //    input / form
 //    history
 
 
-(function () { try{
+(function () { try {
   liberator.log('auto_detect_link.js loading');
 
   ////////////////////////////////////////////////////////////////
@@ -81,13 +81,15 @@
 
   let defaultSetting = {
     nextPatterns: [
-      /ＮＥＸＴ/, /ｎｅｘｔ/, /Ｎｅｘｔ/, 
-      /^次(へ|の)/, /つぎへ/, /つづく/, /続/, /次/, /つぎ/, /next/i, /進む/,
-      /^>$/, />>/, />/
+      /[NnＮｎ][EeＥｅ][XxＸｘ][TtＴｔ]/,
+      /[FfＦｆ](?:[OoＯｏ][RrＲｒ])?[WwＷｗ](?:[AaＡａ][RrＲｒ])?[DdＤｄ]/,
+      /^\s*(?:次|つぎ)[への]/, /つづく|続/, /次|つぎ/, /進む/,
+      /^\s*>\s*$/, />+|≫/
     ],
     backPatterns: [
-      /back/i, /back/i, /ＢＡＣＫ/, /ＰＲＥＶ/, 
-      /^前(へ|の)/, /前/, /戻る/, /^<$/, /<</, /</
+      /[BbＢｂ][AaＡａ][CcＣｃ][KkＫｋ]/, /[PpＰｐ][RrＲｒ][EeＥｅ][VvＶｖ]/,
+      /^\s*前[への]/, /前/, /戻る/,
+      /^\s*<\s*$/, /<+|≪/
     ],
     nextMappings: [']]'],
     backMappings: ['[['],
@@ -97,7 +99,7 @@
     //clickButton: true,
     force: false,
     useAutoPagerize: true,
-  }
+  };
 
   ////////////////////////////////////////////////////////////////
   // setting
@@ -107,7 +109,7 @@
 
   // 評価を遅延するために関数にしておく
   function gv () {
-    if (_gv) 
+    if (_gv)
       return _gv;
 
     if (liberator.globalVariables) {
@@ -128,8 +130,8 @@
   let ap_cache = eval(Application.prefs.getValue(APPREF, null));
 
   for each (let cache in ap_cache) {
-    cache.info = cache.info.filter(function(i) { return ('url' in i) })
-    cache.info.sort(function(a, b) { return (b.url.length - a.url.length) })
+    cache.info = cache.info.filter(function (i) 'url' in i);
+    cache.info.sort(function (a, b) b.url.length - a.url.length);
   }
 
 
@@ -139,8 +141,8 @@
 
   // Array#find
   function find (ary, f) {
-    let func = (typeof f == 'function') ? f : function (v) v == f;
-    for (var i = 0; i < ary.length; i++) {
+    var func = (typeof f == 'function') ? f : function (v) v == f;
+    for (let i = 0, l = ary.length; i < l; i++) {
       if (func(ary[i])) {
         return ary[i];
       }
@@ -153,14 +155,14 @@
   function clickElement (elem) {
     liberator.log('click: ' + elem);
     var e = content.document.createEvent('MouseEvents');
-    e.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null); 
-    elem.dispatchEvent(e); 
+    e.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+    elem.dispatchEvent(e);
   }
 
 
   // 開いたURIなどの表示
   function displayOpened (link) {
-    let msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
+    var msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
     setTimeout(function () liberator.echo(msg, commandline.FORCE_SINGLELINE), 1000);
     liberator.log(msg);
   }
@@ -172,22 +174,21 @@
     if (link.element) {
       clickElement(link.element);
     } else if (link.uri) {
-      link.frame.location.href = link.uri
+      link.frame.location.href = link.uri;
     }
     displayOpened(link);
   }
 
 
   // 元の文字列、詰め込む文字、長さ
-  function padChar (s, c, n) {
-    return s.replace(new RegExp('^(.{0,'+(n-1)+'})$'), function(s)padChar(c+s,c,n));
-  }
+  function padChar (s, c, n)
+    s.replace(new RegExp('^(.{0,'+(n-1)+'})$'), function (s) padChar(c+s, c, n));
 
 
   // (次|前)の数字文字列リストを取得
   function succNumber (n, next) {
-    let m = (parseInt(n.replace(/^0*(.)/,'$1')||0) + (next ? 1 : -1)).toString();
-    let result = [m];
+    var m = (parseInt(n.replace(/^0*(?=.)/, '') || 0) + (next ? 1 : -1)).toString();
+    var result = [m];
     if (m.length < n.length)
       result.unshift(padChar(m.toString(), '0', n.length));
     return result;
@@ -196,8 +197,8 @@
 
   // (次|前)の文字列リストを取得
   function succString (s, next) {
-    let result = [], d = next ? 1 : -1;
-    let c = String.fromCharCode(s.charCodeAt(0) + d);
+    var result = [], d = next ? 1 : -1;
+    var c = String.fromCharCode(s.charCodeAt(0) + d);
     if (('a' <= c && c <= 'z') || 'A' <= c && c <= 'Z')
       result.push(c);
     return result;
@@ -206,33 +207,31 @@
 
   // (次|前)のURIリストを取得
   function succURI (uri, next) {
-    let urim = uri.match(/^(.+\/)([^\/]+)$/);
+    var urim = uri.match(/^(.+\/)([^\/]+)$/);
     if (!urim)
       return [];
-    let [_, dir, file] = urim, result = [];
+    var [_, dir, file] = urim, result = [];
     // succ number
-    let (dm, succs, file = file, left = '', temp = []) {
+    let (dm, file = file, left = '', temp = []) {
       while (file && (dm = file.match(/\d+/))) {
         let [rcontext, lcontext, lmatch] = [RegExp.rightContext, RegExp.leftContext, RegExp.lastMatch];
         left += lcontext;
-        succs = succNumber(lmatch, next);
-        for each (let succ in succs) {
+        succNumber(lmatch, next).forEach(function (succ) {
           temp.push(dir + left + succ + rcontext);
-        }
+        });
         left += lmatch;
         file = rcontext;
       }
       result = result.concat(temp.reverse());
     }
     // succ string
-    let (dm, succs, file = file, left = '', temp = []) {
+    let (dm, file = file, left = '', temp = []) {
       while (file && (dm = file.match(/(^|[^a-zA-Z])([a-zA-Z])([^a-zA-Z]|$)/))) {
         let [rcontext, lcontext] = [RegExp.rightContext, RegExp.leftContext];
         left += lcontext + dm[1];
-        succs = succString(dm[2], next);
-        for each (let succ in succs) {
+        succString(dm[2], next).forEach(function (succ) {
           temp.push(dir + left + succ + dm[3] + rcontext);
-        }
+        });
         left += dm[1];
         file = dm[3] + rcontext;
       }
@@ -243,22 +242,19 @@
 
 
   // パターンマッチング
-  function match (pattern, link) {
-    if (pattern instanceof Function)
-      return pattern(link);
-    if (!link.text)
-      return;
-    if (pattern instanceof RegExp)
-      return pattern.test(link.text);
-    return link.text.toLowerCase().indexOf(pattern.toString().toLowerCase()) >= 0;
-  }
+  function match (pattern, link)
+    pattern instanceof Function ? pattern(link) :
+    !link.text                  ? null :
+    pattern instanceof RegExp   ? pattern.test(link.text) :
+    link.text.toLowerCase().indexOf(pattern.toString().toLowerCase()) >= 0;
 
 
   // 要素が表示されているか？
   function isVisible (element) {
+    var st;
     try {
-      let st = content.document.defaultView.getComputedStyle(element, null);
-      return !(st.display && st.display.match(/none/)) && (!element.parentNode || isVisible(element.parentNode))
+      st = content.document.defaultView.getComputedStyle(element, null);
+      return !(st.display && st.display.indexOf('none') >= 0) && (!element.parentNode || isVisible(element.parentNode))
     } catch (e) {
       return true;
     }
@@ -266,9 +262,8 @@
 
 
   // リンクのフィルタ
-  function linkElementFilter (elem) {
-    return isVisible(elem) && elem.href && !elem.href.match(/@/) && elem.href.match(/^((https?|file|ftp):\/\/|javascript:)/) && elem.textContent;
-  }
+  function linkElementFilter (elem)
+    isVisible(elem) && elem.href && elem.href.indexOf('@') < 0 && /^(?:(?:https?|f(?:ile|tp)):\/\/|javascript:)/.test(elem.href) && elem.textContent;
 
 
   // 全てのリンクを取得
@@ -276,7 +271,9 @@
   function getAllLinks (content) {
     var result = [];
     // Anchor
-    for each (let it in content.document.links) {
+    var elements = content.document.links;
+    for (let i = 0, l = elements.length; i < l; i++) {
+      let it = elements[i];
       if (linkElementFilter(it))
         result.push({
           type: 'link',
@@ -287,21 +284,22 @@
         });
     }
     // Form
-    for each (let input in content.document.getElementsByTagName('input')) {
+    elements = content.document.getElementsByTagName('input');
+    for (let i = 0, l = elements.length; i < l; i++) {
       (function (input) {
         result.push({
           type: 'input',
-          frame: content, 
-          uri: input.form && input.form.action, 
+          frame: content,
+          uri: input.form && input.form.action,
           text: input.value,
           click: input.click,
           element: input,
           });
-      })(input);
+      })(elements[i]);
     }
     // Frame
     if (content.frames) {
-      for (let i = 0; i < content.frames.length; i++) {
+      for (let i = 0, l = content.frames.length; i < l; i++) {
         result = result.concat(getAllLinks(content.frames[i]));
       }
     }
@@ -332,10 +330,11 @@
     if (!ap_cache)
       return;
 
-    let info = (function () {
-      let uri = buffer.URL;
+    var info = (function () {
+      var uri = buffer.URL;
       for each (let cache in ap_cache) {
-        for each (let info in cache.info) {
+        for (let i = 0, l = cache.info.length; i < l; i++) {
+          let info = cache.info[i];
           if (uri.match(info.url))
             return info;
         }
@@ -345,8 +344,8 @@
     if (!info)
       return;
 
-    let doc = content.document;
-    let result = doc.evaluate(info.nextLink, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    var doc = content.document;
+    var result = doc.evaluate(info.nextLink, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     if (result.singleNodeValue)
       return result.singleNodeValue;
   }
@@ -382,25 +381,27 @@
 
       // keywords
       if (1) {
-        for each (let pattern in patterns) {
-          let link = find(links, function (link) match(pattern, link));
-          if (link)
-            return link;
-        }
+        let link;
+        if (patterns.some(function (pattern) {
+          link = find(links, function (link) match(pattern, link));
+          return link ? true : false;
+        }))
+          return link;
       }
 
       // succ
       let succs = succURI(uri, next);
       if (setting.useSuccPattern) {
-        for each (succ in succs) {
-          let link = find(links, function (link) (link.uri && (link.uri.indexOf(succ) >= 0)));
-          if (link)
-            return link;
-        }
+        let link;
+        if (succs.some(function (succ) {
+          link = find(links, function (link) link.uri && (link.uri.indexOf(succ) >= 0));
+          return link ? true : false;
+        }))
+          return link;
       }
 
       // force
-      if (setting.force && succs.length) 
+      if (setting.force && succs.length)
         return {
           type: 'force',
           uri: succs[0],
@@ -425,7 +426,7 @@
       return;
     }
 
-    let link = detect(next, setting);
+    var link = detect(next, setting);
     if (link)
       open(link);
   }
@@ -442,7 +443,7 @@
 
   if (gv().nextMappings.length) {
     mappings.addUserMap(
-      [modes.NORMAL], 
+      [modes.NORMAL],
       gv().nextMappings,
       'Go next',
       function () go(true)
@@ -452,7 +453,7 @@
 
   if (gv().backMappings.length) {
     mappings.addUserMap(
-      [modes.NORMAL], 
+      [modes.NORMAL],
       gv().backMappings,
       'Go back',
       function () go(false)
@@ -462,7 +463,4 @@
 
   liberator.log('auto_detect_link.js loaded');
 
-}catch(e){liberator.log(e)}
-})();
-
-
+} catch (e) { liberator.log(e); } })();
