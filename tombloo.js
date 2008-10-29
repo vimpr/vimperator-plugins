@@ -41,7 +41,7 @@ function getContext(){
     },{}),win.location);
 }
 
-liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
+commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
     function(arg){
         TomblooService.Tombloo.Service.actions[arg].execute();
     },{
@@ -55,9 +55,9 @@ liberator.commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
     }
 );
 
-liberator.commands.addUserCommand(['tombloo'],'Post by Tombloo',
+commands.addUserCommand(['tombloo'],'Post by Tombloo',
     function(arg,special){
-        TomblooService.Tombloo.Service.share(getContext(),TomblooService.Tombloo.Service.extractors[arg],special);
+        TomblooService.Tombloo.Service.share(getContext(),TomblooService.Tombloo.Service.extractors[arg.string],special);
     },{
         bang: true,
         completer: function(filter){
