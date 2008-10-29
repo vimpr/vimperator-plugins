@@ -187,7 +187,7 @@
 
   // (次|前)の数字文字列リストを取得
   function succNumber (n, next) {
-    var m = (parseInt(n.replace(/^0*(?=.)/, '') || 0) + (next ? 1 : -1)).toString();
+    var m = (parseInt(n || 0, 10) + (next ? 1 : -1)).toString();
     var result = [m];
     if (m.length < n.length)
       result.unshift(padChar(m.toString(), '0', n.length));
