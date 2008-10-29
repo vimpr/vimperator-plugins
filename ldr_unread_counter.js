@@ -1,9 +1,9 @@
 /**
  * ==VimperatorPlugin==
  * @name            LDR unread counter
- * @description     Display unread count of LDR to statusbar
+ * @description     Display the unread count of LDR to the statusbar
  * @description-ja  ステータスバーにLDRの未読件数を表示
- * @version         0.1a
+ * @version         0.1b
  * @author          teramako teramako@gmail.com
  * ==/VimperatorPlugin==
  *
@@ -42,7 +42,7 @@ function init(){
 function createStatusButton(){
 	function createElement(localName, attrs, namespace){
 		var elm = document.createElementNS(namespace ? namespace : defaultNameSpace, localName);
-		for (var name in attrs) elm.setAttribute(name, attrs[name]);
+		for (let name in attrs) elm.setAttribute(name, attrs[name]);
 		return elm;
 	}
 	// FIXME: onclick時にLDRを開くように要修正
@@ -60,8 +60,8 @@ function createStatusButton(){
 	icon_image.onload=function(){ ctx.drawImage(icon_image,0,0); };
 	//ctx.drawImage(icon_image,0,0);
 
-	document.getElementById('status-bar').insertBefore( statusPanel,
-		document.getElementById('security-button').nextSibling);
+	document.getElementById("status-bar").insertBefore(statusPanel,
+		document.getElementById("security-button").nextSibling);
 }
 function updateTooltip(str){
 	statusPanel.setAttribute("tooltiptext",str);
@@ -95,7 +95,7 @@ function updateCanvasCount(count){
 	// XXX: もっと良い色募集
 	ctx.fillStyle = "Cyan";
 	ctx.mozTextStyle = "12px sans-serif";
-	ctx.translate(width - len-1 ,height-1);
+	ctx.translate(width - len-1, height-1);
 	ctx.mozDrawText(count);
 	ctx.restore();
 }
@@ -117,8 +117,8 @@ function canvasDrawStop(){
 	ctx.rotate(Math.PI/4);
 	ctx.beginPath();
 	ctx.moveTo(-6,0);
-	ctx.lineTo(6,0)
-	ctx.stroke()
+	ctx.lineTo(6,0);
+	ctx.stroke();
 	ctx.restore();
 }
 
@@ -130,13 +130,14 @@ function setCount(count){
 }
 
 function checkCount(id){
+	var xhr;
 	try {
-		var xhr = new XMLHttpRequest();
+		xhr = new XMLHttpRequest();
 		xhr.mozBackgroundRequest = true;
 		xhr.open("GET", "http://rpc.reader.livedoor.com/notify?user=" + id, false);
 		xhr.send(null);
 		setCount(xhr.responseText.split("|")[1]);
-	} catch (e) {
+	} catch (e){
 		liberator.log(e,0);
 		liberator.echoerr("LDR Unread Counter: " + e.message);
 	}
@@ -152,11 +153,11 @@ function startup(id){
 // PUBLIC
 // ---------------------------------------------------
 var manager = {
-	get user_id() {
+	get user_id(){
 		return liberator.globalVariables[userIdName];
 	},
-	get interval() {
-		var  interval = liberator.globalVariables[gIntervalName];
+	get interval(){
+		var interval = liberator.globalVariables[gIntervalName];
 		if (interval){
 			interval = parseInt(interval,10);
 		}
@@ -173,8 +174,8 @@ var manager = {
 		return unreadCount;
 	},
 	start: function(){
-		if (!this.user_id) {
-			liberator.echoerr("LDR Unread Counter: Please :let "+ userIdName + " = <livedoor ID>");
+		if (!this.user_id){
+			liberator.echoerr("LDR Unread Counter: Please :let " + userIdName + " = <livedoor ID>");
 			// FIXME: なんかエラーが出る。原因が良く分からん
 			//this.stop();
 			return;
@@ -191,7 +192,7 @@ var manager = {
 		updateTooltip("LDR Unread Counter: stoped");
 	},
 	open: function(){
-		liberator.open(['http://reader.livedoor.com/reader/']);
+		liberator.open(["http://reader.livedoor.com/reader/"]);
 	}
 };
 
