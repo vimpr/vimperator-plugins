@@ -81,6 +81,18 @@
 
   let defaultSetting = {
     nextPatterns: [
+      /[Nn\uff2e\uff4e][Ee\uff25\uff45][Xx\uff38\uff58][Tt\uff34\uff54]/,
+      /[Ff\uff26\uff46](?:[Oo\uff2f\uff4f][Rr\uff32\uff52])?[Ww\uff37\uff57](?:[Aa\uff21\uff41][Rr\uff32\uff52])?[Dd\uff24\uff44]/,
+      /^\s*(?:\u6b21|\u3064\u304e)[\u3078\u306e]/, /\u3064\u3065\u304f|\u7d9a/, /\u6b21|\u3064\u304e/, /\u9032\u3080/,
+      /^\s*>\s*$/, />+|\u226b/
+    ],
+    backPatterns: [
+      /[Bb\uff22\uff42][Aa\uff21\uff41][Cc\uff23\uff43][Kk\uff2b\uff4b]/, /[Pp\uff30\uff50][Rr\uff32\uff52][Ee\uff25\uff45][Vv\uff36\uff56]/,
+      /^\s*\u524d[\u3078\u306e]/, /\u524d/, /\u623b\u308b/,
+      /^\s*<\s*$/, /<+|\u226a/
+    ],
+/*  オリジナル
+    nextPatterns: [
       /[NnＮｎ][EeＥｅ][XxＸｘ][TtＴｔ]/,
       /[FfＦｆ](?:[OoＯｏ][RrＲｒ])?[WwＷｗ](?:[AaＡａ][RrＲｒ])?[DdＤｄ]/,
       /^\s*(?:次|つぎ)[への]/, /つづく|続/, /次|つぎ/, /進む/,
@@ -91,6 +103,7 @@
       /^\s*前[への]/, /前/, /戻る/,
       /^\s*<\s*$/, /<+|≪/
     ],
+*/
     nextMappings: [']]'],
     backMappings: ['[['],
     useSuccPattern: true,
