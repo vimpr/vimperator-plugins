@@ -1,3 +1,4 @@
+// ==VimperatorPlugin==
 // @name           Kawase
 // @description-ja 外国為替換算
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
@@ -72,10 +73,10 @@
       if (req.readyState == 4 && req.status == 200) {
         let m = req.responseText.match(re);
         if (m) {
-          let text = from + ' -> ' + to + 
+          let text = from + ' -> ' + to +
                      '\n ' + from + ': ' + value +
-                     '\n ' + to + ': ' + m[3] + 
-                     '\n rate: ' + m[2] + 
+                     '\n ' + to + ': ' + m[3] +
+                     '\n rate: ' + m[2] +
                      '\n time: ' + m[1];
           liberator.echo(text);
           if (clipboard)
@@ -113,4 +114,3 @@
   );
 
 })();
-
