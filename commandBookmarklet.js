@@ -21,7 +21,7 @@
     var [url, title] = item;
     var desc = title;
     title = escape( title.replace(/ +/g,'').toLowerCase() );
-    if (title.match(/[^a-zA-Z]+/)) {
+    if (/[^a-zA-Z]+/.test(title)) {
         title = "bm"+title.replace(/[^a-zA-Z]+/g,'');
         title = title.substr(0, title.length>50?50:title.length);
     }
