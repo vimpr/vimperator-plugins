@@ -13,7 +13,7 @@
 //    が開き、補完が可能になるので、正しそうな漢字を選びます。
 //    すると、クリップボードにその漢字がコピーされます。
 
-(function () { try {
+(function () {
 
   var copycompl = [];
 
@@ -43,7 +43,7 @@
       }
       cnta.sort(function (a, b) b[1] - a[1]);
       copycompl = cnta;
-      liberator.commandline.open(":", "gkcopy ", liberator.modes.EX);
+      commandline.open(":", "gkcopy ", modes.EX);
     };
     req.onreadystatechange = function (aEvt) {
       if (req.readyState == 4 && req.status == 200) {
@@ -53,7 +53,7 @@
     req.send(null);
   }
 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['gkanji', 'googlekanji'],
     'Google kanji',
     function (arg) getKanji(arg.string)
@@ -72,7 +72,7 @@
     clip.setData(trans, null, clipid.kGlobalClipboard);
   }
 
-  liberator.commands.addUserCommand(
+  commands.addUserCommand(
     ['gkcopy'],
     'Google kanji',
     copyToClipboard,
@@ -80,4 +80,4 @@
   );
 
 
-} catch (e) { liberator.log(e) } })();
+})();

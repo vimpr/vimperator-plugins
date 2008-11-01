@@ -32,7 +32,7 @@
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/20080805#1217941126
 
-(function () { try {
+(function () {
 
   let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
                      .getService(Components.interfaces.pIXMigemoFactory)
@@ -151,7 +151,7 @@
 
       span.setAttribute('style', this.coloredStyle(color));
       target.range.surroundContents(span);
-      
+
       if (doScroll) {
         let scroll = function () {
           let pos = getPosition(span);
@@ -172,8 +172,8 @@
         let content = range.extractContents();
         range.setStartBefore(span);
         range.insertNode(content);
-        range.selectNode(span); 
-        range.deleteContents(); 
+        range.selectNode(span);
+        range.deleteContents();
       };
 
       if (setRemover)
@@ -233,7 +233,7 @@
 
       this.removeHighlight(color);
 
-      if (result) 
+      if (result)
         this.highlight(result, color, true, true);
 
       this.firstResult = result;
@@ -262,7 +262,7 @@
           start.setStart(last.range.endContainer, last.range.endOffset);
         }
       } else {
-        let idx = backwards ? frames.length - 1 
+        let idx = backwards ? frames.length - 1
                             : 0;
         last = {frame: frames[0], range: this.makeBodyRange(frames[0])};
       }
@@ -447,8 +447,8 @@
         MF.removeHighlight(color);
     }
   );
-  
-  // find コマンド 
+
+  // find コマンド
   commands.addUserCommand(
     ['mf[ind]'],
     'Migemized find',
@@ -467,4 +467,4 @@
   // 外から使えるように
   liberator.plugins.migemizedFind = MF;
 
-}catch(e){liberator.log(e);}})();
+})();

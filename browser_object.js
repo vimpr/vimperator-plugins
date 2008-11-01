@@ -203,7 +203,7 @@
         for (let s in browserObject.scopes){
             let scope = s;
 
-            liberator.mappings.addUserMap([liberator.modes.NORMAL], [prefix + motion.id + scope.id],
+            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [prefix + motion.id + scope.id],
                 "Browser Object Mapping",
                 function (arg) {
                     var target, targetCollection;
@@ -222,9 +222,9 @@
                 },
                 { flags: liberator.Mappings.flags.ARGUMENT});
         }
-        let map = liberator.mappings.get(null,motion.id);
+        let map = liberator.modules.mappings.get(null,motion.id);
         if(!prefix && map){
-            liberator.mappings.addUserMap([liberator.modes.NORMAL],
+            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL],
                 [motion.id + motion.id], map.description, map.action,
             {});
         }
