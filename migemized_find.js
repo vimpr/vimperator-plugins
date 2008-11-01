@@ -88,7 +88,7 @@
     // タブ毎に状態を保存するために、変数を用意
     // 初回アクセス時に初期化を行う
     get storage function () (
-      gBrowser.mCurrentTab.__migemized_find_storage || 
+      gBrowser.mCurrentTab.__migemized_find_storage ||
       (gBrowser.mCurrentTab.__migemized_find_storage = {
         highlightRemovers: {},
       })
@@ -443,8 +443,7 @@
         return MF.removeHighlight(MF.highlightColor);
       if (args == 'all')
         return [f() for each (f in MF.storage.highlightRemovers)];
-      for each (let color in args.split(/\s+/))
-        MF.removeHighlight(color);
+      args.split(/\s+/).forEach(MF.removeHighlight);
     }
   );
 
