@@ -96,12 +96,13 @@ liberator.plugins.LocalKeyMode = (function(){
   LocalKeyMode.prototype = {
     // 初期化メソッド
     initialize: function() {
-      this.storekeymaps = [];
-      this.delkeychars = [];
-      this.keymapnames = [];
-      this.localkeymaps = [];
-      this.completeNames;
-      this.tabinfo = [];
+      this.storekeymaps = [];	//キー待避用(戻し)
+      this.delkeychars = [];	//キー待避用(削除)
+      this.keymapnames = [];	// 対応URI保持
+      this.localkeymaps = [];	// キーマップ保持用
+      this.completeNames;    	// 補完用
+      this.tabinfo = [];    	// タブごとの状態保持用
+    	this.helpstring = "";
       
       var global = liberator.globalVariables;
       this.panel = this.setupStatusBar();
@@ -209,6 +210,7 @@ liberator.plugins.LocalKeyMode = (function(){
       keymaps.removekeys.forEach( function( key ){
         var org = mappings.get( modes.NORMAL, key);
         if (org) self.storekeymaps.push( cloneMap(org) );
+    		self.helpstring += key+"    -> [Delete KeyMap]\n";
         mappings.remove( modes.NORMAL, key);
       } );
       keymaps.keys.forEach( function( m ) {
@@ -219,6 +221,7 @@ liberator.plugins.LocalKeyMode = (function(){
         } );
         mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action, 
           {flags:m.flags, rhs: m.rhs, noremap: m.noremap });
+    		self.helpstring += m.names+"    -> "+m.rhs+"\n";
       } );
       this.isBinding = true;
     },
@@ -234,6 +237,9 @@ liberator.plugins.LocalKeyMode = (function(){
     },
     // ローカルキーマップセット処理
     loadKeyMap: function() {
+      // 暫定処置
+      if (liberator.plugins.feedKey && liberator.plugins.feedKey.origMap.length >0) return;
+    	this.helpstring = "";
       if (this.isBinding) this.restoreKeyMap();
       if (!this.isEnable) {
         this.clearTabCache();
@@ -290,8 +296,11 @@ liberator.plugins.LocalKeyMode = (function(){
             liberator.echoerr("localkeymode is disabled");
             return;
           }
-          var arg = args.string ? args.string: args;
-          
+        	var arg = (typeof args.string == undefined? args: args.string);
+        	if (!arg) {
+        		liberator.echo(self.helpstring);
+        		return;
+        	}
           self.releaseClosedTabCache();
           self.deleteCurrentTabCache();
           var tabId = getBrowser().selectedTab.linkedPanel;
@@ -315,7 +324,7 @@ liberator.plugins.LocalKeyMode = (function(){
       commands.addUserCommand(["clearkeymaps","clearlocalkeymaps"], "Clear local key mapping", 
         function(){
           self.clearTabCache();
-          if (self.isBinding) self.loadKeyMap();
+          self.loadKeyMap();
         }, {
       });
     },
