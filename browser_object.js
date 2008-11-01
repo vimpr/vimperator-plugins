@@ -72,7 +72,7 @@
             for(var i = 0 ; i < ary.length; i++)
                 if(typeof ary[i] == "object")
                     copyStrings.push(ary[i].linkedBrowser.contentDocument.location.href);
-            liberator.util.copyToClipboard(copyStrings.join(", "));
+            liberator.modules.util.copyToClipboard(copyStrings.join(", "));
         },
         reload: function(ary){
             for(var i = 0 ; i < ary.length; i++)

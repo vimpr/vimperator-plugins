@@ -80,7 +80,7 @@
                      '\n time: ' + m[1];
           liberator.echo(text);
           if (clipboard)
-            liberator.util.copyToClipboard(text);
+            liberator.modules.util.copyToClipboard(text);
         } else {
           //liberator.open(url);
           liberator.echoerr('parse error');

@@ -115,7 +115,7 @@ commands.addUserCommand(['lscc'], 'List XPCOM class',
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
 			let instance = tree[toKey(args[0])].interface[args[1]].create();
-			echo(liberator.util.objectToString(instance, true), true);
+			echo(liberator.modules.util.objectToString(instance, true), true);
 		} else {
 			liberator.echo(liberator.XPCOM.listClass(args[0], args[1], true), true);
 		}

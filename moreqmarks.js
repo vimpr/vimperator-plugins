@@ -117,7 +117,7 @@
     }
     function list_qmarks(marks) {
         if(use_position) {
-            var list = ":" + liberator.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
+            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
                        "<table><tr align=\"left\" class=\"hl-Title\"><th>mark</th><th>line</th><th>col</th><th>file</th></tr>";
             for (var i = 0; i < marks.length; i++)
             {
@@ -125,18 +125,18 @@
                         "<td> "                        + marks[i][0]                              +  "</td>" +
                         "<td align=\"right\">"         + Math.round(marks[i][2] * 100) + "%</td>" +
                         "<td align=\"right\">"         + Math.round(marks[i][3] * 100) + "%</td>" +
-                        "<td style=\"color: green;\">" + liberator.util.escapeHTML(marks[i][1]) + "</td>" +
+                        "<td style=\"color: green;\">" + liberator.modules.util.escapeHTML(marks[i][1]) + "</td>" +
                         "</tr>";
             }
             list += "</table>";
             return list;
         } else {
-            var list = ":" + liberator.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
+            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
                        "<table><tr align=\"left\" class=\"hl-Title\"><th>QuickMark</th><th>URL</th></tr>";
             for (var i = 0; i < marks.length; i++)
             {
                 list += "<tr><td>    " + marks[i][0] +
-                        "</td><td style=\"color: green;\">" + liberator.util.escapeHTML(marks[i][1]) + "</td></tr>";
+                        "</td><td style=\"color: green;\">" + liberator.modules.util.escapeHTML(marks[i][1]) + "</td></tr>";
             }
             list += "</table>";
             return list;
@@ -154,7 +154,7 @@
                 for (var i = 0; i < items.length; i++)
                 {
                     [number, title] = items[i][0].split(/:\s+/, 2);
-                    var marked_url = liberator.util.escapeHTML(items[i][1]);
+                    var marked_url = liberator.modules.util.escapeHTML(items[i][1]);
                     if(marked_url == url) {
                         liberator.modules.tabs.switchTo(number);
                         var win = getBrowser().selectedTab.linkedBrowser.contentWindow;
@@ -284,13 +284,13 @@
         ["gd"], "Delete QuickMark for current URL",
         function ()
         {
-            liberator.plugins.moreqmarks.remove('', liberator.buffer.URL);
+            liberator.plugins.moreqmarks.remove('', liberator.modules.buffer.URL);
         });
     liberator.modules.mappings.addUserMap(modes,
         ["gs"], "Push QuickMarkStack for current URL",
         function ()
         {
-            liberator.plugins.moreqmarks.add("", liberator.buffer.URL, "stack");
+            liberator.plugins.moreqmarks.add("", liberator.modules.buffer.URL, "stack");
         });
     liberator.modules.mappings.addUserMap(modes,
         ["gS"], "Pop QuickMarkStack and Jump",
@@ -306,7 +306,7 @@
         ["gq"], "Queue QuickMarkQueue for current URL",
         function ()
         {
-            liberator.plugins.moreqmarks.add("", liberator.buffer.URL, "queue");
+            liberator.plugins.moreqmarks.add("", liberator.modules.buffer.URL, "queue");
         });
     liberator.modules.mappings.addUserMap(modes,
         ["gQ"], "Dequeue QuickMarkStack and Jump",
@@ -323,7 +323,7 @@
     liberator.modules.commands.add(["qmarkpu[sh]", "qmpu[sh]"], "Push QuickMarkStack for current URL",
         function ()
         {
-            liberator.plugins.moreqmarks.add("", liberator.buffer.URL, "stack");
+            liberator.plugins.moreqmarks.add("", liberator.modules.buffer.URL, "stack");
         });
     liberator.modules.commands.add(["qmarkpo[p]", "qmpo[p]"], "Pop QuickMarkStack and Jump",
         function ()
@@ -339,7 +339,7 @@
     liberator.modules.commands.add(["qmarkqu[eue]", "qmqu[eue]"], "Queue QuickMarkQueue for current URL",
         function ()
         {
-            liberator.plugins.moreqmarks.add("", liberator.buffer.URL, "queue");
+            liberator.plugins.moreqmarks.add("", liberator.modules.buffer.URL, "queue");
         });
     liberator.modules.commands.add(["qmarkde[que]", "qmde[que]"], "Dequeue QuickMarkStack and Jump",
         function ()
