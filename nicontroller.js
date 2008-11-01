@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.53
+ * @version         0.54
  * @minversion      2.0pre 2008/10/16
  * ==VimperatorPlugin==
  *
@@ -280,6 +280,16 @@ NicoPlayerController.prototype = {
         (p.ext_getStatus() !== this.constants.STATE_PLAYING)
             ? p.ext_play(this.constants.PLAY)
             : p.ext_play(this.constants.PAUSE);
+
+        if (p.ext_getStatus() === 'end') {
+            var base = p.ext_getPlayheadTime();
+            var self = this;
+            setTimeout(function () {
+                base !== p.ext_getPlayheadTime()
+                    ? p.ext_play(self.constants.PAUSE)
+                    : p.ext_play(self.constants.PLAY);
+            }, 100);
+        }
     },
 
     toggleMute: function() {
