@@ -3,14 +3,14 @@
  * @name       local key mode
  * @description  assign temporary usermodemap
  * @description-ja 一時的なキーマップの割り当てを行います。
- * @version    0.11b
+ * @version    0.2.1a
  * ==/VimperatorPlugin==
  *
  * Usage:
  *
- * :togglelocalkeymode
- * 
- * 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+ * :togglelocalkeymode    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+ * :loadkeymaps           - 任意のキーマップの読み込みを行う
+ * :clearkeymaps          - loadkeymaps の読み込みを無効にする
  * 
  * .vimperatorrc
  * g:localkeymode_enable : [true=有効/false=無効(デフォルト)]
@@ -68,17 +68,25 @@ liberator.plugins.LocalKeyMode = (function(){
     +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAa0lEQVR4nGP0+OzAQApgIkk1Fg3b'
     +'efZv59mPRwMjwycU/n/e/wwMDIyfGanmJBaG16gCvAwMDAzogpTZ8AJVQImBgYEBXZAyGySwCWMV'
     +'JNcGUWzCWAWhGrABSPQhA3hUMvo9Js1JFCc+ggAAYtsQ+fmaz5UAAAAASUVORK5CYII=';
-    
+  const BINDING_ICON = 'data:image/png;base64,'
+    + 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAVElEQVR4nGP8v5eBJMBEmnIs'
+    + 'Gpz+Mzj9x6OBheEZNmGsguQ5iYXhHjZhrILk2vAVmzBWQXJt4MYmjFWQXBuUsAljFYRqwApi'
+    + 'MCJ7CSOEZqR/4iMEAOh5DfER9lQKAAAAAElFTkSuQmCC';
   const rhsRegExp = /[ \r\n]+/g;
   
   var _isEnable;
   var _isBindLocalKey = false;
-  var feedkeysfuncName = typeof liberator.modules != 'undefined'? 'liberator.modules.events.feedkeys': 'liberator.events';
+  
+  var _enableTabs = [];
+  var _names;
+  
+  var feedkeysfuncName = typeof liberator.modules != 'undefined'? 
+    'liberator.modules.events.feedkeys': 'liberator.events';
   // utility function
   function cloneMap(org){
     return new Map(
       org.modes, org.names, org.description, org.action, 
-      {flags:org.flags, rhs: org.rhs, noremap:org.noremap, bang: org.bang, count: org.count }
+      {flags:org.flags, rhs: org.rhs, noremap:org.noremap }
     );
   }
   
@@ -90,11 +98,15 @@ liberator.plugins.LocalKeyMode = (function(){
     initialize: function() {
       this.storekeymaps = [];
       this.delkeychars = [];
+      this.keymapnames = [];
       this.localkeymaps = [];
+      this.completeNames;
+      this.tabinfo = [];
       
       var global = liberator.globalVariables;
       this.panel = this.setupStatusBar();
-      this.isEnable = global.localkeymode_enable != undefined ? window.eval(global.localkeymode_enable) : false;
+      this.isEnable = global.localkeymode_enable != undefined ? 
+        window.eval(global.localkeymode_enable) : false;
       this.setupEnvironment();
       this.initLocalKeyMap();
     },
@@ -106,7 +118,8 @@ liberator.plugins.LocalKeyMode = (function(){
       panel.setAttribute('class','statusbarpanel-iconic');
       panel.setAttribute('src', self.isEnable ? ENABLE_ICON : DISABLE_ICON);
       panel.addEventListener('click', function(e){ self.isEnable = !self.isEnable; },false);
-      document.getElementById('status-bar').insertBefore(panel, document.getElementById('security-button').nextSibling);
+      document.getElementById('status-bar').insertBefore(
+        panel, document.getElementById('security-button').nextSibling);
       return panel;
     },
     get isEnable(){
@@ -116,6 +129,14 @@ liberator.plugins.LocalKeyMode = (function(){
       this.panel.setAttribute('src', value ? ENABLE_ICON : DISABLE_ICON);
       _isEnable = value;
       this.loadKeyMap();
+    },
+    get isBinding(){
+      return _isBindLocalKey;
+    },
+    set isBinding(value){
+      this.panel.setAttribute('src', value ? BINDING_ICON : 
+        this.isEnable ? ENABLE_ICON: DISABLE_ICON );
+      _isBindLocalKey = value;
     },
     // 初期処理
     initLocalKeyMap: function(){
@@ -127,13 +148,17 @@ liberator.plugins.LocalKeyMode = (function(){
         if ( !(items instanceof Array) || items.length < 2 || !(items[1] instanceof Array) ) return;
         self.addLocalKeyMap( items[0], items[1] ); 
       } );
+      this.completeNames = this.keymapnames.map(function(m){
+        m = (m+'').replace(/[\/\\]+/g,'');
+        return [m+'', 'maps for [' + m + ']']} 
+      );
     },
     // ローカルキーマップの生成
     addLocalKeyMap: function( uri, items ) {
       if (!uri) return;
       var keymaps = [];
       var delkeys = [];
-      if (!(uri instanceof RegExp) ) uri = new RegExp(uri.replace(/([^0-9A-Za-z_])/g, '\\$1'));
+      if (!(uri instanceof RegExp) ) uri = new RegExp(uri.replace(/([^0-9A-Za-z_@\-])/g, '\\$1'));
       
       for ( var i=0; i<items.length ;i++){
         var item = items[i];
@@ -144,68 +169,155 @@ liberator.plugins.LocalKeyMode = (function(){
         }
         var key = item[0] instanceof Array ? item[0] : [ item[0] ];
         var command = item[1];
-        var extend = item[2] ? item[2]:new Object();
-        if (!extend || !extend.rhs) extend.rhs = (item[1]+'').replace(rhsRegExp,' ');
+        var extra = item[2] ? item[2]:new Object();
+        if (!extra || !extra.rhs) extra.rhs = (item[1]+'').replace(rhsRegExp,' ');
         
         if (typeof command != 'function') {
           if (command.charAt(0)==':')
-            command = new Function( extend.noremap ? 
+            command = new Function( extra.noremap ? 
               'commandline.open("","'+command+'",modes.EX);'
               : 'liberator.execute("'+command+'");' );
           else 
-            command = new Function([ feedkeysfuncName, '("', command, '",', (extend.noremap? true: false) ,', true)'].join('') );
+            command = new Function([ feedkeysfuncName, '("', command, '",', 
+              (extra.noremap? true: false) ,', true)'].join('') );
         }
-        keymaps.push( {modes:[modes.NORMAL], names: key , description: 'localkeymap', action: command, extend: extend } );
+        keymaps.push(new Map([modes.NORMAL], key, 'localkeymap', command, extra) );
       }
-      this.localkeymaps.push( { uri:uri , keys:keymaps, removekeys:delkeys } );
+      this.keymapnames.push( uri );
+      this.localkeymaps.push( { keys:keymaps, removekeys:delkeys } );
     },
-    // ローカルキーマップセット処理
-    loadKeyMap: function() {
-      if (_isBindLocalKey) this.restoreKeyMap();
-      if (!this.isEnable) return;
+    releaseClosedTabCache: function(){
+      var tabs = getBrowser().mTabs;
+      var tabIds = [];
+      var tabinfo = this.tabinfo;
+      for (var i=0, l=tabs.length; i<l; i++){
+        tabIds.push( tabs[i].linkedPanel );
+      }
+      for (var i=0; i<tabinfo.length; i++){
+        var isExist = false;
+        for (var j=0, l=tabs.length; j<l; j++){
+          if (tabinfo[i].tabId == tabs[j]){
+            isExist = true;
+            break;
+          }
+        }
+        if (!isExist) tabinfo.splice(i,1);
+      }
+    },
+    setupKeyMaps: function( keymaps ) {
       var self = this;
-      for (var i=0; i<this.localkeymaps.length; i++) {
-        var keymap = this.localkeymaps[i];
-        if ( keymap.uri.test(content.location.href) ) {
-          keymap.removekeys.forEach( function( key ){
-            var org = mappings.get( modes.NORMAL, key);
-            if (org) self.storekeymaps.push( cloneMap(org) );
-            mappings.remove( modes.NORMAL, key);
-          } );
-          keymap.keys.forEach( function( m ) {
-            m.names.forEach( function( key ) {
-              var org = mappings.get(modes.NORMAL, key);
-              if (org) self.storekeymaps.push( cloneMap(org) );
-              else self.delkeychars.push( key );
-            } );
-            mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action, m.extend );
-          } );
-          _isBindLocalKey = true;
+      keymaps.removekeys.forEach( function( key ){
+        var org = mappings.get( modes.NORMAL, key);
+        if (org) self.storekeymaps.push( cloneMap(org) );
+        mappings.remove( modes.NORMAL, key);
+      } );
+      keymaps.keys.forEach( function( m ) {
+        m.names.forEach( function( key ) {
+          var org = mappings.get(modes.NORMAL, key);
+          if (org) self.storekeymaps.push( cloneMap(org) );
+          else self.delkeychars.push( key );
+        } );
+        mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action, 
+          {flags:m.flags, rhs: m.rhs, noremap: m.noremap });
+      } );
+      this.isBinding = true;
+    },
+    deleteCurrentTabCache: function(){
+      var tabId = getBrowser().selectedTab.linkedPanel;
+      var tabinfo = this.tabinfo;
+      for (var i=0; i<tabinfo.length; i++){
+        if (tabinfo[i].tabId == tabId) {
+          tabinfo.splice(i, 1);
           break;
         }
       }
     },
+    // ローカルキーマップセット処理
+    loadKeyMap: function() {
+      if (this.isBinding) this.restoreKeyMap();
+      if (!this.isEnable) {
+        this.clearTabCache();
+        return;
+      }
+      var tabinfo = this.tabinfo;
+      var settings = this.localkeymaps;
+      var tabId = getBrowser().selectedTab.linkedPanel;
+      for (var i=0, l=tabinfo.length; i<l; i++){
+        if (tabId == tabinfo[i].tabId){
+          this.setEnable = true;
+          this.setupKeyMaps( settings[ tabinfo[i].keyMapIndex ] );
+          return;
+        }
+      }
+      
+      for (var i=0, l=settings.length; i<settings.length; i++) {
+        if ( this.keymapnames[i].test(content.location.href) ) {
+          this.setupKeyMaps( settings[i] );
+          break;
+        }
+      }
+    },
+    clearTabCache: function() {
+      for (;0 < this.tabinfo.length;){
+        this.tabinfo.shift();
+      }
+    },
     // 割り当てていたローカルキーの削除処理
     restoreKeyMap: function() {
-      if (_isBindLocalKey){
+      if (this.isBinding){
         for (; 0 < this.storekeymaps.length; ) {
-          var m = this.storekeymaps.shift(); //this.storekeymaps[0];
-          mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action, {flags:m.flags, rhs: m.rhs, noremap: m.noremap, bang: m.bang, count: m.count });
+          var m = this.storekeymaps.shift();
+          mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action, 
+            {flags:m.flags, rhs: m.rhs, noremap: m.noremap});
         }
         for (; 0 < this.delkeychars.length; ) {
           var keys = this.delkeychars.shift();
           mappings.remove( modes.NORMAL, keys );
         }
-        _isBindLocalKey = false;
+        this.isBinding = false;
       }
     },
     // その他処理(ユーザコマンド追加等)
     setupEnvironment: function() {
       var self = this;
-      commands.addUserCommand(["togglelocalkeymode"], "Toggle Local/Global Key Mapping", 
+      commands.addUserCommand(["togglelocalkeymode"], "Toggle local/global key mapping", 
         function() { 
           self.isEnable = !self.isEnable;
         }, {} );
+      commands.addUserCommand(["loadkeymaps","loadlocalkeymaps"], "Load local key mapping", 
+        function(args) {
+          if (!self.isEnable) {
+            liberator.echoerr("localkeymode is disabled");
+            return;
+          }
+          var arg = args.string ? args.string: args;
+          
+          self.releaseClosedTabCache();
+          self.deleteCurrentTabCache();
+          var tabId = getBrowser().selectedTab.linkedPanel;
+          var names = self.completeNames;
+          for (var i=0, l=names.length; i<l; i++){
+            if (names[i][0] == arg){
+              self.tabinfo.push( {tabId: tabId, keyMapIndex: i} );
+              self.loadKeyMap();
+              return;
+            }
+          }
+        }, {
+          completer: function(filter) {
+            var names = self.completeNames;
+            if (!filter) return [0, names];
+            filter = filter.toLowerCase();
+            return [0, names.filter( function(el)
+              el[0].toLowerCase().indexOf(filter) == 0) ];
+          }
+        } );
+      commands.addUserCommand(["clearkeymaps","clearlocalkeymaps"], "Clear local key mapping", 
+        function(){
+          self.clearTabCache();
+          if (self.isBinding) self.loadKeyMap();
+        }, {
+      });
     },
   };
   
