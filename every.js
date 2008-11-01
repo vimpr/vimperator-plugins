@@ -1,3 +1,4 @@
+// ==VimperatorPlugin==
 // @name           every.js
 // @description    to run a specified command every time at specified interval.
 // @description-ja 指定のコマンドを指定の間隔で実行する。
