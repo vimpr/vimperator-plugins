@@ -6,7 +6,7 @@
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.12
  * @minversion      2.0pre 2008/10/16
- * ==VimperatorPlugin==
+ * ==/VimperatorPlugin==
  *
  * LICENSE
  *   New BSD License
@@ -287,7 +287,7 @@ liberator.modules.commands.addUserCommand(
 
 liberator.modules.commands.addUserCommand(
     ['ytseek'],
-    'control seek bar',
+    'controll seek bar',
     function(args, special) {
         try {
             var arg = (args.arguments.length > 1)
@@ -304,7 +304,7 @@ liberator.modules.commands.addUserCommand(
 
 liberator.modules.commands.addUserCommand(
     ['ytvolume'],
-    'control volume',
+    'controll volume',
     function(args, special) {
         try      {
             var arg = (args.arguments.length > 1)
