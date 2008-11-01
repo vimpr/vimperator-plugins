@@ -106,7 +106,7 @@ YouTubePlayerController.prototype = {
 
     _player: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            var player = this._getElementById(this.constants.PLAYER_NODE_ID);
+            let player = this._getElementById(this.constants.PLAYER_NODE_ID);
             if(! player) throw new Error('player is not found');
 
             return player;
@@ -159,8 +159,8 @@ YouTubePlayerController.prototype = {
         b.style.padding = 0;
         b.style.width = '100%';
 
-        for(var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
-            var h = this._getElementById(this.constants.HIDE_NODES[i]);
+        for(let i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
+            let h = this._getElementById(this.constants.HIDE_NODES[i]);
             if(h) { h.style.display = 'none'; }
         }
 
@@ -179,8 +179,8 @@ YouTubePlayerController.prototype = {
         b.style.padding = this.defPadding;
         b.style.width   = this.defWidth;
 
-        for(var i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
-            var h = this._getElementById(this.constants.HIDE_NODES[i]);
+        for(let i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
+            let h = this._getElementById(this.constants.HIDE_NODES[i]);
             if(h) { h.style.display = 'block'; }
         }
 
@@ -255,7 +255,7 @@ liberator.modules.commands.addUserCommand(
     'display player information',
     function() {
         try {
-            var info = [
+            let info = [
                 'controller version : ' + controller.getControllerVersion(),
             ].join('\n');
             liberator.echo(info, liberator.modules.commandline.FORCE_MULTILINE);
@@ -290,7 +290,7 @@ liberator.modules.commands.addUserCommand(
     'controll seek bar',
     function(args, special) {
         try {
-            var arg = (args.arguments.length > 1)
+            let arg = (args.arguments.length > 1)
                 ? args.arguments[0].toString()
                 : args.string;
             special ? controller.seekBy(arg) : controller.seekTo(arg);
@@ -306,8 +306,8 @@ liberator.modules.commands.addUserCommand(
     ['ytvolume'],
     'controll volume',
     function(args, special) {
-        try      {
-            var arg = (args.arguments.length > 1)
+        try {
+            let arg = (args.arguments.length > 1)
                 ? args.arguments[0].toString()
                 : args.string;
             special ? controller.volumeBy(arg) : controller.volumeTo(arg);

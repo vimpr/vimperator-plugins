@@ -6,7 +6,7 @@
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.54
  * @minversion      2.0pre 2008/10/16
- * ==VimperatorPlugin==
+ * ==/VimperatorPlugin==
  *
  * LICENSE
  *   New BSD License
@@ -66,7 +66,7 @@
  *                          - use Error object when throw exception.
  *                          - extract constant variables from code
  *                            and define in NicoPlayerController.constants.
- *   2008/10/08 ver. 0.52   - correspond vimperator specification
+ *   2008/10/08 ver. 0.52   - correspond Vimperator specification
  *                            "bang" in extra object on addUserCommand.
  * */
 
@@ -105,7 +105,7 @@ liberator.modules.mappings.addUserMap(
 EOM
 */
 
-(function(){
+(function() {
 
 // class definition
 // cookie manager
@@ -123,7 +123,7 @@ CookieManager.prototype = {
 
         this.ioService = Cc[IO_SERVICE].getService(Ci.nsIIOService);
         this.cookieService = Cc[COOKIE_SERVICE].getService(Ci.nsICookieService);
-        if (!this.ioService || !this.cookieService) {
+        if(!this.ioService || !this.cookieService) {
             throw new Error('error on CookieManager initialize.');
         }
 
@@ -131,7 +131,7 @@ CookieManager.prototype = {
     },
 
     readCookie: function (uri) {
-        if (uri) {
+        if(uri) {
             this.uri = uri;
             this.uriObject = this.ioService.newURI(uri, null, null);
             this.cookie = this._deserializeCookie(this._getCookieString());
@@ -145,7 +145,7 @@ CookieManager.prototype = {
     },
 
     _setCookieString: function (cookieString) {
-        if (this.uriObject && cookieString) {
+        if(this.uriObject && cookieString) {
             this.cookieService.setCookieString(this.uriObject, null, cookieString, null);
         }
     },
@@ -154,7 +154,7 @@ CookieManager.prototype = {
         var cookies = cookieString.split('; ');
         var cookie = {};
         var key, val;
-        for (var i=0, max=cookies.length ; i<max ; ++i) {
+        for (let i=0, max=cookies.length ; i<max ; ++i) {
             [key, val] = cookies[i].split('=');
             cookie[key] = val;
         }
@@ -265,7 +265,7 @@ NicoPlayerController.prototype = {
 
     _flvplayer: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            var flvplayer = window.content.document.getElementById(this.constants.FLVPLAYER_NODE_ID);
+            let flvplayer = window.content.document.getElementById(this.constants.FLVPLAYER_NODE_ID);
             if(! flvplayer) throw new Error('flvplayer is not found');
 
             return flvplayer.wrappedJSObject
@@ -281,9 +281,9 @@ NicoPlayerController.prototype = {
             ? p.ext_play(this.constants.PLAY)
             : p.ext_play(this.constants.PAUSE);
 
-        if (p.ext_getStatus() === 'end') {
-            var base = p.ext_getPlayheadTime();
-            var self = this;
+        if(p.ext_getStatus() === 'end') {
+            let base = p.ext_getPlayheadTime();
+            let self = this;
             setTimeout(function () {
                 base !== p.ext_getPlayheadTime()
                     ? p.ext_play(self.constants.PAUSE)
@@ -315,7 +315,7 @@ NicoPlayerController.prototype = {
     },
 
     toggleDescription: function () {
-        if (!(this.pagecheck() === this.constants.WATCH_PAGE)) {
+        if(!(this.pagecheck() === this.constants.WATCH_PAGE)) {
             return;
         }
 
@@ -327,7 +327,7 @@ NicoPlayerController.prototype = {
         this.cookieManager.readCookie(this.constants.NICO_URL);
         var val = this.cookieManager.getCookie(this.constants.COOKIE_DESCRIPTION_NAME);
 
-        if (!(hidden && displayed && val !== undefined && val !== null)) {
+        if(!(hidden && displayed && val !== undefined && val !== null)) {
             return;
         }
 
@@ -341,10 +341,10 @@ NicoPlayerController.prototype = {
             ? this.constants.DESCRIPTION_DISPLAYED_STATE
             : this.constants.DESCRIPTION_HIDDEN_STATE;
         this.cookieManager.setCookie({
-            key:        this.constants.COOKIE_DESCRIPTION_NAME,
-            value:      change,
-            domain:     this.constants.NICO_DOMAIN,
-            expires:    this.constants.COOKIE_EXPIRES,
+            key:     this.constants.COOKIE_DESCRIPTION_NAME,
+            value:   change,
+            domain:  this.constants.NICO_DOMAIN,
+            expires: this.constants.COOKIE_EXPIRES,
         });
     },
 
@@ -426,8 +426,8 @@ liberator.modules.commands.addUserCommand(
     ['nicoinfo'],
     'display player information',
     function() {
-        try {
-            var info = [
+        try      {
+            let info = [
                 'player version     : ' + controller.getPlayerVersion(),
                 'controller version : ' + controller.getControllerVersion(),
             ].join("\n");
@@ -483,7 +483,7 @@ liberator.modules.commands.addUserCommand(
     'controll seek bar',
     function(args, special) {
         try      {
-            var arg = (args.arguments.length > 1)
+            let arg = (args.arguments.length > 1)
                 ? args.arguments[0].toString()
                 : args.string;
             special ? controller.seekBy(arg) : controller.seekTo(arg);
@@ -500,7 +500,7 @@ liberator.modules.commands.addUserCommand(
     'controll volume',
     function(args, special) {
         try      {
-            var arg = (args.arguments.length > 1)
+            let arg = (args.arguments.length > 1)
                 ? args.arguments[0].toString()
                 : args.string;
             special ? controller.volumeBy(arg) : controller.volumeTo(arg);
@@ -537,9 +537,9 @@ liberator.modules.commands.addUserCommand(
     'fill comment box',
     function(args) {
         try      {
-            var arg = args.string;
+            let arg = args.string;
 
-            var command, comment;
+            let command, comment;
             [command, comment] = expandExCommand(arg);
 
             comment = comment.replace(/&emsp;/g, EMSP)
@@ -564,7 +564,7 @@ liberator.modules.commands.addUserCommand(
         catch(e) { liberator.echoerr(e); }
     },
     {
-        completer: function(args){
+        completer: function(args) {
             var arg = args.string;
 
             // get available commands by roll
@@ -582,8 +582,8 @@ liberator.modules.commands.addUserCommand(
 
             // exclude inputted word from candidates
             var candidates = availableCommands.filter( function(commandSet) {
-                for(var i=0, numofInputted=inputted.length ; i<numofInputted ; ++i) {
-                    if(commandSet[0] === inputted[i]){
+                for(let i=0, numofInputted=inputted.length ; i<numofInputted ; ++i) {
+                    if(commandSet[0] === inputted[i]) {
                         inputted.splice(i, 1);
                         return false;
                     }
@@ -643,10 +643,10 @@ function expandExCommand(arg) {
 
     // ex_command is putted in braces
     if(comment.match(/^\{([^{}]+)\}(.+)/)) {
-        var exCommand = RegExp.$1;
-        var text = RegExp.$2;
+        let exCommand = RegExp.$1;
+        let text = RegExp.$2;
 
-        var properties = analysisExCommand(exCommand);
+        let properties = analysisExCommand(exCommand);
 
         // fine tune command about comment size
         if(properties.size) {
@@ -661,7 +661,7 @@ function expandExCommand(arg) {
         // expand!!
         comment = buildLineBreakString(properties.line) + text;
         if(properties.fixFlag) {
-            var post = buildLineBreakString(properties.max - properties.line + 1);
+            let post = buildLineBreakString(properties.max - properties.line + 1);
             comment += post + NBSP;
         }
     }
@@ -673,7 +673,7 @@ function expandExCommand(arg) {
 function buildLineBreakString(numof) {
     // faster than string concatenate (+, +=)
     var string = Array(numof * 2);
-    for(var i=1 ; i<numof ; ++i) {
+    for(let i=1 ; i<numof ; ++i) {
         string.push(NBSP);
         string.push(LF);
     }
@@ -702,7 +702,7 @@ function analysisExCommand(exCommand) {
 
     // line
     if(exCommand.match(/\bline(-?\d+)\b/)) {
-        var line = parseInt(RegExp.$1, 10);
+        let line = parseInt(RegExp.$1, 10);
         if(line < 0) line = properties.max + line + 1;
         if(line > properties.max) line = properties.max;
         properties.line = line;
