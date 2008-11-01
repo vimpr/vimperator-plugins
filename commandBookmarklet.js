@@ -7,7 +7,7 @@
 
 (function(){
   var filter = "javascript:";
-  var items  = liberator.bookmarks.get(filter);
+  var items  = bookmarks.get(filter);
 
   if (items.length == 0) {
     if (filter.length > 0) {
@@ -19,18 +19,24 @@
 
   items.forEach(function(item) {
     var [url, title] = item;
+    var desc = title;
+    title = escape( title.replace(/ +/g,'').toLowerCase() );
+    if (title.match(/[^a-zA-Z]+/)) {
+        title = "bm"+title.replace(/[^a-zA-Z]+/g,'');
+        title = title.substr(0, title.length>50?50:title.length);
+    }
     if (width(title) > 50) {
       while (width(title) > 47) {
         title = title.slice(0, -2);
       }
       title += "...";
     }
-    title = liberator.util.escapeHTML(title);
+    title = util.escapeHTML(title);
 
     var command = function () { liberator.open(url); };
-    liberator.commands.addUserCommand(
+    commands.addUserCommand(
       [title],
-      "bookmarklet",
+      "bookmarklet : "+desc,
       command,
       {
         shortHelp: "Bookmarklet",

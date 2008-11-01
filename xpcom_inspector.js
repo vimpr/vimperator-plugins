@@ -104,13 +104,13 @@ for (let c in Cc){
 // ----------------------------------------------
 // Commands
 // ----------------------------------------------
-liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
+commands.addUserCommand(['lscc'], 'List XPCOM class',
 	function(arg){
 		if (!arg){
 			liberator.echoerr('No arguments');
 			return;
 		}
-		var args = liberator.commands.parseArgs(arg).arguments;
+		var args = args.arguments ? args.arguments: commands.parseArgs(arg).arguments;
 		if (args.length == 1){
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
@@ -122,7 +122,7 @@ liberator.commands.addUserCommand(['lscc'], 'List XPCOM class',
 	}, {
 		completer: function(filter){
 			if (!filter) return [];
-			var args = liberator.commands.parseArgs(filter).arguments;
+			var args = filter.arguments? filter.filter: commands.parseArgs(filter).arguments;
 			var list = [];
 			var position = 0;
 			var reg;

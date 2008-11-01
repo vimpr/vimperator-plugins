@@ -80,7 +80,8 @@ function completion(array, filter){
     return array.filter(function(v)
         v[0].toLowerCase().indexOf(filter) == 0);
 }
-liberator.commands.addUserCommand(['fileencoding','fenc'],'set the charactor encoding for the current page', function(value) {
+liberator.modules.commands.addUserCommand(['fileencoding','fenc'],'set the charactor encoding for the current page', function(args) {
+        var value = args.string == undefined ? args: args.string;
         if(!value) {
             var fenc = getBrowser().docShell.QueryInterface(Ci.nsIDocCharset).charset;
             liberator.echo("fileencoding: "+fenc);
@@ -99,7 +100,8 @@ liberator.commands.addUserCommand(['fileencoding','fenc'],'set the charactor enc
             [0,completion( encodings, filter)]
     }
 );
-liberator.commands.addUserCommand(['autodetector','audet'],'set auto detect character encoding', function(value) {
+liberator.modules.commands.addUserCommand(['autodetector','audet'],'set auto detect character encoding', function(args) {
+        var value = args.string == undefined ? args: args.string;
         var pref = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefBranch);
         if(!value) {
             var audet = pref.getComplexValue('intl.charset.detector',Ci.nsISupportsString).data;
@@ -146,17 +148,19 @@ function listCharset(arg, current, list){
     str.push('</table>');
     liberator.echo( str.join(''), true);
 }
-liberator.commands.addUserCommand(['listencoding','lsenc'],'list all encodings',
-    function(arg){
-        listCharset(arg, liberator.options.fileencoding, encodings);
+liberator.modules.commands.addUserCommand(['listencoding','lsenc'],'list all encodings',
+    function(args){
+        var arg = args.string == undefined ? args: args.string;
+        listCharset(arg, liberator.modules.options.fileencoding, encodings);
     },{
         completer: function(filter)
             [0,completion(encodings, filter)]
     }
 );
-liberator.commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
-    function(arg){
-        listCharset(arg, liberator.options.autodetector, detectors);
+liberator.modules.commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
+    function(args){
+        var arg = args.string == undefined ? args: args.string;
+        listCharset(arg, liberator.modules.options.autodetector, detectors);
     },{
         completer: function(filter)
             [0,completion(detectors, filter)]

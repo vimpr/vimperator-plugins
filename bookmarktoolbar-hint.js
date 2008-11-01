@@ -18,6 +18,7 @@
 //
 
 liberator.plugins.bookmarkToolbarHints = (function(){
+	if (typeof plugins == 'undefined') plugins = liberator.plugins; // for 2.0 pre
 	function createTooltip(){
 		var tooltip = document.createElement('tooltip');
 		tooltip.setAttribute('style','padding:0;margin:0;');
@@ -63,7 +64,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			liberator.open(target.node.uri, where);
 		}
 		closeMenus(target);
-		liberator.options.guioptions = manager.go;
+		liberator.modules.options.guioptions = manager.go;
 	}
 	function folderOpen(target){
 		target.firstChild.showPopup();
@@ -94,11 +95,11 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			this.go = options.guioptions;
 			options.guioptions += "b";
 			this.where = where;
-			liberator.modes.setCustomMode('BookmarksToolbar-Hint', function(){return;}, this.quit);
+			liberator.modules.modes.setCustomMode('BookmarksToolbar-Hint', function(){return;}, this.quit);
 			this.show();
 		},
 		show:function(node){
-			liberator.modes.set(liberator.modes.CUSTOM, liberator.modes.QUICK_HINT);
+			liberator.modules.modes.set(liberator.modules.modes.CUSTOM, liberator.modules.modes.QUICK_HINT);
 			hints = [];
 			window.addEventListener('keypress',onKeyPress,true);
 			current = node || getToolbar();
@@ -112,14 +113,15 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			updateSelector();
 		},
 		onEvent: function(event){
-			var key = liberator.events.toString(event);
+			var key = liberator.modules.events.toString(event);
 			switch(key){
 				case "<Esc>":
 				case "<C-[>":
 					closeMenus(current);
-					liberator.options.guioptions = this.go;
+					liberator.modules.options.guioptions = this.go;
 					break;
 				case "<Return>":
+				case "<Right>":
 					if (toolbarOpen(hints[currentNum])) return;
 					break;
 				case "f":
@@ -131,9 +133,11 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 					return;
 				case "<Tab>":
 				case "j":
+				case "<Down>":
 				case "<S-Tab>":
 				case "k":
-					if (key == "j" || key == "<Tab>"){
+				case "<Up>":
+					if (key == "j" || key == "<Tab>" || key == "<Down>"){
 						currentNum = hints.length -1 == currentNum ? 0 : currentNum + 1;
 					} else {
 						currentNum = currentNum == 0 ? hints.length -1 : currentNum - 1;
@@ -155,7 +159,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 				case "h":
 					if (current == this.toolbar){
 						closeMenus(current);
-						liberator.options.guioptions = this.go;
+						liberator.modules.options.guioptions = this.go;
 						this.quit();
 					} else {
 						current.hidePopup();
@@ -185,7 +189,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			currentNum = 0;
 			useShift = false;
 			window.removeEventListener('keypress',onKeyPress,true);
-			liberator.modes.reset(true);
+			liberator.modules.modes.reset(true);
 			while(tooltipbox.hasChildNodes()){
 				tooltipbox.firstChild.hidePopup();
 				tooltipbox.removeChild(tooltipbox.firstChild);
@@ -194,18 +198,19 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 	};
 	var tooltipbox = document.createElement('box');
 	tooltipbox.setAttribute('id','liberator-tooltip-container');
-	document.getElementById('liberator-container').appendChild(tooltipbox);
+	//document.getElementById('liberator-container').appendChild(tooltipbox);
+	document.getElementById('browser').appendChild(tooltipbox);
 	return manager;
 })();
 
-liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<Leader>f'],
+liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ['<Leader>f'],
 	'Start Toolbar-HINTS (open current tab)',
-	function(){ plugins.bookmarkToolbarHints.startup(liberator.CURRENT_TAB); },
+	function(){ liberator.plugins.bookmarkToolbarHints.startup(liberator.CURRENT_TAB); },
 	{ rhs: 'Bookmarks Toolbar-HINTS (current-tab)'}
 );
-liberator.mappings.addUserMap([liberator.modes.NORMAL], ['<Leader>F'],
+liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ['<Leader>F'],
 	'Start Toolbar-HINTS (open new tab)',
-	function(){ plugins.bookmarkToolbarHints.startup(liberator.NEW_TAB); },
+	function(){ liberator.plugins.bookmarkToolbarHints.startup(liberator.NEW_TAB); },
 	{ rhs: 'Bookmarks Toolbar-HINTS (new-tab)' }
 );
 

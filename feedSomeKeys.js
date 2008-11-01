@@ -41,6 +41,15 @@ EOF
  * 頭についている3の意味は3番目のフレームの意味。通常のmapと違い3回の意味ではないので注意
  *
  * Greasemonkey LDRizeの場合などにも使用可
+ *
+ * ※ 2008/11/1 に fmaps コマンドを追加
+ *
+ * .vimperatorrc に以下を追加することで、上記と同様のことができます。
+ * == LDR の場合 ==
+autocmd LocationChange http://reader\\.livedoor\\.com/reader fmaps j k s a p o v c <Space> <S-Space> z b < >
+ * == Gmail の場合 ==
+autocmd LocationChange mail\\.google\\.com/mail fmaps -d 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+ *
  */
 
 liberator.plugins.feedKey = (function(){
@@ -295,10 +304,12 @@ function feedKeyIntoContent(keys, useVkey){
 // --------------------------
 commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
     function(args, bang){
-        if(!args){
-            echo(feedMaps.map(function(map) map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;')),true);
+        var arg = args.string == undefined ? args: args.string;
+        if(!arg){
+            liberator.echo(feedMaps.map(function(map) map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;')),true);
+            return;
         }
-        var [ ,lhs,rhs] = args.match(/(\S+)(?:\s+(.+))?/);
+        var [ ,lhs,rhs] = arg.match(/(\S+)(?:\s+(.+))?/);
         if (!rhs){
             replaceUserMap(lhs,lhs,bang);
         } else {
@@ -315,6 +326,24 @@ var converter = {
     setup: init,
     reset: destroy
 };
+commands.addUserCommand(['feedmaps','fmaps'], '',
+  function(args, bang){
+    var feedkey = args["-depth"];
+    var vkey = '-vkey' in args ? true: false;
+    var keys = args.arguments;
+    if ('-' in args) keys.push('-');
+    
+    if (feedkey) keys = keys.map( function(i) [i, (feedkey+"")+i] );
+    liberator.plugins.feedKey.setup(keys, vkey);
+  }, {
+    bang : true,
+    argCount : "*",
+    options : [ [['-depth', '-d'], commands.OPTION_INT],
+                [['-vkey', '-v'], commands.OPTION_NOARG],
+                [['-'], commands.OPTION_NOARG ] 
+              ]
+  }
+);
 return converter;
 })();
 // vim: fdm=marker sw=4 ts=4 et:

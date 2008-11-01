@@ -162,7 +162,7 @@ liberator.plugins.gmperator = (function(){ //{{{
     });
     function getPanelID(win){
         var tabs = getBrowser().mTabs;
-        for (var i=0; tabs.length; i++){
+        for (var i=0; i<tabs.length; i++){
             var tab = tabs.item(i);
             if (tab.linkedBrowser.contentWindow == win){
                 return tab.linkedPanel;
