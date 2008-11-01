@@ -220,7 +220,7 @@
                     else
                         liberator.echoerr("BrowserObject: motion handler not found");
                 },
-                { flags: liberator.Mappings.flags.ARGUMENT});
+                { flags: liberator.modules.Mappings.flags.ARGUMENT});
         }
         let map = liberator.modules.mappings.get(null,motion.id);
         if(!prefix && map){
