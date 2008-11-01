@@ -6,7 +6,7 @@
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.22
  * @minversion      2.0pre 2008/10/16
- * ==VimperatorPlugin==
+ * ==/VimperatorPlugin==
  *
  * LICENSE
  *   New BSD License
@@ -42,24 +42,24 @@
  *   2008/09/05 ver. 0.10   - initial written.
  *   2008/09/24 ver. 0.20   - add URL canonicalization.
  *   2008/10/02 ver. 0.21   - fix the bug not apply encodeURI
- *                            to querystring for pathtraq API.
+ *                            to querystring for Pathtraq API.
  * */
 
-(function(){
+(function() {
 
-// twitter's URL to post
+// Twitter's URL to post
 const DOMAIN   = 'http://twitter.com/';
 const POST_URL = 'https://twitter.com/statuses/update.json';
 
 // information functions
 // change XPath query when HTML changed.
-function Scraper(){}
+function Scraper() {}
 Scraper.prototype = {
     constants: {
         VERSION:    '0.22',
     },
 
-    version: function(){ return this.constants.VERSION; },
+    version: function() { return this.constants.VERSION; },
 
     getURL: function() {
         return liberator.modules.buffer.URL;
@@ -79,19 +79,19 @@ Scraper.prototype = {
 liberator.modules.commands.addUserCommand(['reading'], "update Twitter's status to current page title, URL and comment",
     function(args, special) {
         try {
-            var arg = args.string;
+            let arg = args.string;
 
             // build post string -----
-            var post_string;
+            let post_string;
 
             // get value from global variable or set default
-            var format        = liberator.globalVariables.reading_format || '$SERVICENAME : $COMMENT "$TITLE" $URL $SELECTED';
-            var serviceName   = liberator.globalVariables.reading_servicename || 'I\'m reading now';
-            var title_default = liberator.globalVariables.reading_title_default || 'no title';
+            let format        = liberator.globalVariables.reading_format || '$SERVICENAME : $COMMENT "$TITLE" $URL $SELECTED';
+            let serviceName   = liberator.globalVariables.reading_servicename || 'I\'m reading now';
+            let title_default = liberator.globalVariables.reading_title_default || 'no title';
 
-            var scraper = new Scraper;
-            var title = scraper.getTitle() || title_default;
-            var canonicalizedURL = canonicalizeURL(scraper.getURL());
+            let scraper = new Scraper;
+            let title = scraper.getTitle() || title_default;
+            let canonicalizedURL = canonicalizeURL(scraper.getURL());
 
             // expand variable ( evaluate variable ? )
             post_string = format.replace(/\$SERVICENAME/g, serviceName)
@@ -108,17 +108,17 @@ liberator.modules.commands.addUserCommand(['reading'], "update Twitter's status 
 
             // ready posting -----
             // URI encode
-            var parameter = 'status=' + encodeURIComponent(post_string);
+            let parameter = 'status=' + encodeURIComponent(post_string);
 
-            // get user account for twitter
-            var [user, pass] = getUserAccount(DOMAIN, POST_URL, null);
+            // get user account for Twitter
+            let [user, pass] = getUserAccount(DOMAIN, POST_URL, null);
 
             // send status
-            var req = new XMLHttpRequest();
+            let req = new XMLHttpRequest();
             if(req) {
                 req.open('POST', POST_URL, true, user, pass);
                 req.onreadystatechange = function() {
-                    if (req.readyState == 4) {
+                    if(req.readyState == 4) {
                         if(req.status == 200) liberator.echo('Posted ' + post_string);
                         else throw new Error('failure in posting status to Twitter. HTTP status code : ' + req.status);
                     }
@@ -161,7 +161,7 @@ function $s(query, node) {
         null
     );
     var nodes = [];
-    for(var i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
+    for(let i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
     return nodes;
 }
 
@@ -172,7 +172,7 @@ function canonicalizeURL(url) {
     req.open('GET', PATHTRAQ_CANONICALIZE_URL_API + encodeURI(url), false);
     req.send(null);
     if(req.status === 200) {
-        var canonicalized = req.responseText.replace(/^"/, '').replace(/"$/, '');
+        let canonicalized = req.responseText.replace(/^"/, '').replace(/"$/, '');
         return canonicalized ? canonicalized : url;
     }
     else {
@@ -183,29 +183,29 @@ function canonicalizeURL(url) {
 // user account manager
 // from direct_bookmark.js
 // thanks to Trapezoid
-function getUserAccount(form,post,arg){
+function getUserAccount(form, post, arg) {
     var user, password;
-    try{
-        var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-        var logins = passwordManager.findLogins({}, form, post, arg);
-        if(logins.length > 0){
+    try {
+        let passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+        let logins = passwordManager.findLogins({}, form, post, arg);
+        if(logins.length > 0) {
             [user, password] = [logins[0].username, logins[0].password];
         } else {
-            var promptUser = { value : '' }, promptPass = { value : '' };
-            var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+            let promptUser = { value : '' }, promptPass = { value : '' };
+            let promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                 .getService(Ci.nsIPromptService);
 
-            var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+            let nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
                     Ci.nsILoginInfo,
                     "init");
 
-            var ret = promptSvc.promptUsernameAndPassword(
+            let ret = promptSvc.promptUsernameAndPassword(
                     window, form, 'Enter e-mail address and password.',
                     promptUser, promptPass, null, {}
                     );
-            if(ret){
+            if(ret) {
                 [user, password] = [promptUser.value, promptPass.value];
-                var formLoginInfo = new nsLoginInfo(form,
+                let formLoginInfo = new nsLoginInfo(form,
                         post, null,
                         user, password, '', '');
                 passwordManager.addLogin(formLoginInfo);
@@ -214,7 +214,7 @@ function getUserAccount(form,post,arg){
             }
         }
     }
-    catch(ex){
+    catch(ex) {
         liberator.echoerr("handled exception during getting username and password");
         liberator.log(ex);
     }

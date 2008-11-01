@@ -6,7 +6,7 @@
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.32
  * @minversion      2.0pre 2008/10/16
- * ==VimperatorPlugin==
+ * ==/VimperatorPlugin==
  *
  * CONSTRAINT
  *   need NicoNicoPlaylist version 1.12 or above
@@ -82,7 +82,7 @@ liberator.modules.mappings.addUserMap(
     'remove item in NicoNicoPlaylist',
     function(count) {
         if(count === -1) count = 1;
-        for(var i=0 ; i<count ; ++i) liberator.execute(':nnpremove');
+        for(let i=0 ; i<count ; ++i) liberator.execute(':nnpremove');
         liberator.execute(':nnpgetlist');
     },
     { flags: liberator.modules.Mappings.flags.COUNT }
@@ -159,10 +159,10 @@ liberator.modules.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist'
         var titleNode = $f('//h1') || $f('./html/head/title');
         var playTitle = titleNode.textContent;
         var statuses = '';
-        if ($f('.//input[contains(@id, "-checkbox-random")]', playlist).checked) statuses += 'R';
-        if ($f('.//input[contains(@id, "-checkbox-loop")]', playlist).checked)   statuses += 'L';
-        if ($f('.//input[contains(@id, "-checkbox-full")]', playlist).checked)   statuses += 'F';
-        if (statuses) statuses = ' ' + statuses;
+        if($f('.//input[contains(@id, "-checkbox-random")]', playlist).checked) statuses += 'R';
+        if($f('.//input[contains(@id, "-checkbox-loop")]', playlist).checked)   statuses += 'L';
+        if($f('.//input[contains(@id, "-checkbox-full")]', playlist).checked)   statuses += 'F';
+        if(statuses) statuses = ' ' + statuses;
 
         // check existence of items in NicoNicoPlaylist
         var nodes = $s('./div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a', playlist);
@@ -180,12 +180,12 @@ liberator.modules.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist'
         // struct display string
         // generate data
         var items = new Array;
-        for(var i=0 ; i<nodesLength && i<numofList ; ++i ) {
+        for(let i=0 ; i<nodesLength && i<numofList ; ++i ) {
             // get video id
-            var id = nodes[i].href.match(/\d+$/);
+            let id = nodes[i].href.match(/\d+$/);
             // build thumnail's URL
             // refer: http://d.hatena.ne.jp/ZIGOROu/20081014/1223991205
-            var thumbnail = thumbnailURL.replace(/\$HOSTNUMBER/g, id % 2 + 1)
+            let thumbnail = thumbnailURL.replace(/\$HOSTNUMBER/g, id % 2 + 1)
                                         .replace(/\$VIDEO_ID/g,    id);
             // evaluate variables and push to list
             items.push(
@@ -237,7 +237,7 @@ function $s(query, node) {
         null
     );
     var nodes = [];
-    for(var i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
+    for(let i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
     return nodes;
 }
 

@@ -6,7 +6,7 @@
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.62
  * @minversion      2.0pre 2008/10/16
- * ==VimperatorPlugin==
+ * ==/VimperatorPlugin==
  *
  * LICENSE
  *   New BSD License
@@ -109,7 +109,7 @@ NicoScraper.prototype = {
 
     _flvplayer: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            var flvplayer = window.content.document.getElementById('flvplayer');
+            let flvplayer = window.content.document.getElementById('flvplayer');
             if(! flvplayer) throw 'flvplayer is not found';
 
             return flvplayer.wrappedJSObject ? flvplayer.wrappedJSObject : flvplayer ? flvplayer : null;
@@ -121,7 +121,7 @@ NicoScraper.prototype = {
 
     getSubject: function() {
         if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            var subject = $f('//h1/a[contains(concat(" ",@class," "), " video ")]');
+            let subject = $f('//h1/a[contains(concat(" ",@class," "), " video ")]');
             return subject ? subject.text : null;
         }
         return null;
@@ -131,8 +131,8 @@ NicoScraper.prototype = {
         var p = this._flvplayer();
         var playtime = p ? Math.round(p.ext_getTotalTime()) : null;
         if(playtime) {
-            var min = Math.floor(playtime / 60);
-            var sec = playtime % 60;
+            let min = Math.floor(playtime / 60);
+            let sec = playtime % 60;
             if(sec < 10) sec = '0' + sec;
             return playtime ? [min, sec].join(':') : null;
         }
@@ -141,8 +141,8 @@ NicoScraper.prototype = {
 
     getTagName: function() {
         if(this.pagecheck() === this.constants.TAG_PAGE) {
-            var word_nodes = $s('id("search_words")/span[contains(concat(" ",@class," "), " search_word ")]');
-            var words = [];
+            let word_nodes = $s('id("search_words")/span[contains(concat(" ",@class," "), " search_word ")]');
+            let words = [];
             word_nodes.forEach(function(node) { words.push(node.textContent); });
             return words.length ? words.join(' ') : null;
         }
@@ -151,7 +151,7 @@ NicoScraper.prototype = {
 
     getNumofVideos: function() {
         if(this.pagecheck() === this.constants.TAG_PAGE) {
-            var numofVideos = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
+            let numofVideos = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
             return numofVideos.textContent ? numofVideos.textContent : null;
         }
         return null;
@@ -159,7 +159,7 @@ NicoScraper.prototype = {
 
     getKeyword: function() {
         if(this.pagecheck() === this.constants.RELATED_TAG_PAGE) {
-            var keyword = $f('//strong[contains(concat(" ",@class," "), " search_word ")]');
+            let keyword = $f('//strong[contains(concat(" ",@class," "), " search_word ")]');
             return keyword.textContent ? keyword.textContent : null;
         }
         return null;
@@ -167,7 +167,7 @@ NicoScraper.prototype = {
 
     getNumofTags: function() {
         if(this.pagecheck() === this.constants.RELATED_TAG_PAGE) {
-            var numofTags = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
+            let numofTags = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
             return numofTags.textContent ? numofTags.textContent : null;
         }
         return null;
@@ -179,18 +179,18 @@ var scraper = new NicoScraper;
 liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status to current video name and comment",
     function(args, special) {
         try {
-            var arg = args.string;
+            let arg = args.string;
 
             // build post string -----
-            var post_string;
+            let post_string;
             // domain check
             switch(scraper.pagecheck()) {
                 // video page
                 case scraper.constants.WATCH_PAGE:
                     {
                         // get value from global variable or set default
-                        var format      = liberator.globalVariables.matanico_status_format || '$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT';
-                        var serviceName = liberator.globalVariables.matanico_status_servicename || 'またニコニコ動画見てる';
+                        let format      = liberator.globalVariables.matanico_status_format || '$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT';
+                        let serviceName = liberator.globalVariables.matanico_status_servicename || 'またニコニコ動画見てる';
 
                         // expand variable ( evaluate variable ? )
                         post_string = format.replace(/\$SERVICENAME/g, serviceName)
@@ -205,8 +205,8 @@ liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status
                 case scraper.constants.TAG_PAGE:
                     {
                         // get value from global variable or set default
-                        var format      = liberator.globalVariables.matanico_tag_format || '$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT';
-                        var serviceName = liberator.globalVariables.matanico_tag_servicename || 'またニコニコタグ検索してる';
+                        let format      = liberator.globalVariables.matanico_tag_format || '$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT';
+                        let serviceName = liberator.globalVariables.matanico_tag_servicename || 'またニコニコタグ検索してる';
 
                         // expand variable ( evaluate variable ? )
                         post_string = format.replace(/\$SERVICENAME/g, serviceName)
@@ -221,8 +221,8 @@ liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status
                 case scraper.constants.RELATED_TAG_PAGE:
                     {
                         // get value from global variable or set default
-                        var format      = liberator.globalVariables.matanico_related_tag_format || '$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT';
-                        var serviceName = liberator.globalVariables.matanico_related_tag_servicename || 'またキーワードでニコニコタグ検索してる';
+                        let format      = liberator.globalVariables.matanico_related_tag_format || '$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT';
+                        let serviceName = liberator.globalVariables.matanico_related_tag_servicename || 'またキーワードでニコニコタグ検索してる';
 
                         // expand variable ( evaluate variable ? )
                         post_string = format.replace(/\$SERVICENAME/g, serviceName)
@@ -246,17 +246,17 @@ liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status
 
             // ready posting -----
             // URI encode
-            var parameter = 'status=' + encodeURIComponent(post_string);
+            let parameter = 'status=' + encodeURIComponent(post_string);
 
             // twitter's URL to post
-            var domain  = 'http://twitter.com/';
-            var postURL = 'https://twitter.com/statuses/update.json';
+            let domain  = 'http://twitter.com/';
+            let postURL = 'https://twitter.com/statuses/update.json';
 
             // get user account for twitter
-            var [user, pass] = getUserAccount(domain, postURL, null);
+            let [user, pass] = getUserAccount(domain, postURL, null);
 
             // send status
-            var req = new XMLHttpRequest();
+            let req = new XMLHttpRequest();
             if(req) {
                 req.open('POST', postURL, true, user, pass);
                 req.onreadystatechange = function() {
@@ -303,7 +303,7 @@ function $s(query, node) {
         null
     );
     var nodes = [];
-    for(var i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
+    for(let i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
     return nodes;
 }
 
@@ -313,26 +313,26 @@ function $s(query, node) {
 function getUserAccount(form,post,arg) {
     var user, password;
     try {
-        var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-        var logins = passwordManager.findLogins({}, form, post, arg);
+        let passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+        let logins = passwordManager.findLogins({}, form, post, arg);
         if(logins.length > 0) {
             [user, password] = [logins[0].username, logins[0].password];
         } else {
-            var promptUser = { value : '' }, promptPass = { value : '' };
-            var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+            let promptUser = { value : '' }, promptPass = { value : '' };
+            let promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
                 .getService(Ci.nsIPromptService);
 
-            var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+            let nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
                     Ci.nsILoginInfo,
                     "init");
 
-            var ret = promptSvc.promptUsernameAndPassword(
+            let ret = promptSvc.promptUsernameAndPassword(
                     window, form, 'Enter e-mail address and password.',
                     promptUser, promptPass, null, {}
                     );
             if(ret) {
                 [user, password] = [promptUser.value, promptPass.value];
-                var formLoginInfo = new nsLoginInfo(form,
+                let formLoginInfo = new nsLoginInfo(form,
                         post, null,
                         user, password, '', '');
                 passwordManager.addLogin(formLoginInfo);

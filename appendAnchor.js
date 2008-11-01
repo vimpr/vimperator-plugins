@@ -4,7 +4,7 @@
  * @description   append anchors to texts look like url.
  * @author        SAKAI, Kazuaki
  * @version       0.02
- * == VimperatorPlugin==
+ * == /VimperatorPlugin==
  */
 
 (function(){
