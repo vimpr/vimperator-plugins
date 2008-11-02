@@ -67,7 +67,11 @@ Scraper.prototype = {
 
     getTitle: function() {
         var title = $f('//title');
-        return title ? title.text : null;
+        return title
+            ? title.text.replace(/^\s+/, '')
+                        .replace(/\s+$/, '')
+                        .replace(/\n/g, ' ')
+            : null;
     },
 
     getSelected: function() {
