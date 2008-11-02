@@ -87,7 +87,7 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
                 return completion.javascript(filter);
             }
             var templates = liberator.globalVariables.copy_templates.map(function(template)
-                [template.label, template.value]
+                [template.label, liberator.modules.util.escapeString(template.value, '"')]
             );
             if (!filter){ return [0,templates]; }
             var candidates = [];
