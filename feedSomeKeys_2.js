@@ -27,18 +27,26 @@
  *
  * :f[eed]map! lhs ...      -> "!" をつけると、一旦すべてのfeedKeysを元に戻しての再定義
  *
+ * autocmdと組み合わせる場合は
+ * :autocmd LocationChange .* :fmapc
+ * を最初に登録してください。でないと対象外のページに移ったときに設定が前のものを引きずることになります。
+ *
+ * また、下記設定例はvimperator 2.0pre用で1.2の場合は\を一つに削ってください。
+ *
  * == LDR の場合 ==
- * :autcmd LocationChange reader\\.livedoor\\.com/reader :fmap! j k s a p o v c <Space> <S-Space> z b < >
+ * :autocmd LocationChange .* :fmapc
+ * :autocmd LocationChange reader\\.livedoor\\.com/reader :fmap j k s a p o v c <Space> <S-Space> z b < >
  *
  * とかやると幸せになれるかも。
  *
  * == Gmail の場合 ==
- * :autocmd LocationChange mail\\.google\\.com/mail :fmap! -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+ * :autocmd LocationChange .* :fmapc
+ * :autocmd LocationChange mail\\.google\\.com/mail :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
  *
  * とかやると幸せになれるかもしれません。
  *
  * == Google Reader の場合 ==
- * FIXME: 誰か書いてー＞＜
+ * :autocmd LocationChange .* :fmapc
  * :autocmd LocationChange www\\.google\\.co\\.jp/reader :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
  *
  * Greasemonkey LDRizeの場合などにも使用可
