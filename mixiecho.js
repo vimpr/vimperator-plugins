@@ -18,7 +18,7 @@
 			if (typeof ignoreTags == "string") ignoreTags = [ignoreTags];
 			var stripTags = [];
 			ignoreTags = ignoreTags.filter(function(tag) tag[tag.length - 1] == "/" || !stripTags.push(tag))
-								   .map(function(tag) tag.replace(/\/$/, ""));
+			                       .map(function(tag) tag.replace(/\/$/, ""));
 			if (stripTags.length > 0) {
 				stripTags = stripTags.length > 1
 						  ? "(?:" + stripTags.join("|") + ")"

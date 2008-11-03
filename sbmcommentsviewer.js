@@ -1,9 +1,9 @@
 /**
  * ==VimperatorPlugin==
  * @name           SBM Comments Viewer
- * @description    List show Social BookMark Comments
+ * @description    List show Social Bookmark Comments
  * @description-ja ソーシャル・ブックマーク・コメントを表示します
- * @version        0.1b
+ * @version        0.1c
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -26,7 +26,7 @@
  *
  * SBMタイプ:
  *  h : hatena bookmark
- *  d : del.icio.us bookmark
+ *  d : Delicious
  *  l : livedoor clip
  *  z : Buzzurl
  *  XXX:今後増やしていきたい
@@ -72,11 +72,11 @@ SBMContainer.prototype = { //{{{
         if (countOnly){
             return label;
         } else {
-            var str = [
+            let str = [
                 '<table id="liberator-sbmcommentsviewer"><caption style="text-align:left;" class="hl-Title">' + label + '</caption><tr>'
             ];
             format.forEach(function(colum){
-                var name = manager.format[colum] || '-';
+                let name = manager.format[colum] || '-';
                 str.push('<th>' + name + '</th>');
             });
             str.push('</tr>');
@@ -176,7 +176,7 @@ function openSBM(url, type, format, countOnly, openToBrowser){
     xhr.onreadystatechange = function(){
         if (xhr.readyState == 4){
             if (xhr.status == 200){
-                var sbmContainer = SBM[sbmLabel].parser.call(this, xhr);
+                let sbmContainer = SBM[sbmLabel].parser.call(this, xhr);
                 if (!sbmContainer) return;
                 cacheManager.add(sbmContainer, url, type);
                 if (openToBrowser)
@@ -187,7 +187,7 @@ function openSBM(url, type, format, countOnly, openToBrowser){
                 liberator.echoerr(sbmURL + ' ' + xhr.status, true);
             }
         }
-    }
+    };
     xhr.send(null);
 } //}}}
 /**
@@ -226,12 +226,13 @@ var SBM = { //{{{
         parser: function(xhr){
             var rss = xhr.responseXML;
             if (!rss){
-                liberator.echoerr('del.icio.us feed is none',true);
+                liberator.echoerr('Delicious feed is none',true);
                 return;
             }
+            var pageURL, items;
             try {
-            var pageURL = evaluateXPath(rss, '//rss:channel/rss:link')[0].textContent;
-            var items = evaluateXPath(rss, '//rss:item');
+                pageURL = evaluateXPath(rss, '//rss:channel/rss:link')[0].textContent;
+                items = evaluateXPath(rss, '//rss:item');
             } catch(e){
                 liberator.log(e);
             }
@@ -242,8 +243,8 @@ var SBM = { //{{{
             items.forEach(function(item){
                 var children = item.childNodes;
                 var [id,date,tags,comment,link] = ['','',[],'',''];
-                for (var i=0; i<children.length; i++){
-                    var node = children[i];
+                for (let i=0; i<children.length; i++){
+                    let node = children[i];
                     if (node.nodeType == 1){
                         switch (node.localName){
                             case 'creator': id = node.textContent; break;
@@ -271,10 +272,10 @@ var SBM = { //{{{
             var json = Components.classes['@mozilla.org/dom/json;1'].
                        getService(Components.interfaces.nsIJSON).
                        decode(xhr.responseText);
-            */
+        */
             var json = jsonDecode(xhr.reponseText);
             if (json && json.isSuccess){
-                var c = new SBMContainer('l', json.total_clip_count, {
+                let c = new SBMContainer('l', json.total_clip_count, {
                     faviconURL: 'http://clip.livedoor.com/favicon.ico',
                     pageURL:    'http://clip.livedoor.com/page/' + json.link
                 });
@@ -305,7 +306,7 @@ var SBM = { //{{{
             var url = 'http://buzzurl.jp/user/';
             var json = jsonDecode(xhr.responseText);
             if (json && json[0] && json[0].user_num){
-                var c = new SBMContainer('buzzurl', json[0].user_num, {
+                let c = new SBMContainer('buzzurl', json[0].user_num, {
                     faviconURL: 'http://buzzurl.jp/favicon.ico',
                     pageURL:    'http://buzzurl.jp/entry/' + json[0].url
                 });
@@ -323,7 +324,7 @@ var SBM = { //{{{
                 liverator.log('Faild: Buzzurl');
             }
         }
-    }, //}}}
+    } //}}}
 }; //}}}
 
 
@@ -438,10 +439,10 @@ var manager = {
 commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     function(arg){ //{{{
         var types =  liberator.globalVariables.def_sbms || 'hdlz';
-        var format = (liberator.globalVariables.def_sbm_format ||  'id,timestamp,tags,comment').split(',');
+        var format = (liberator.globalVariables.def_sbm_format || 'id,timestamp,tags,comment').split(',');
         var countOnly = false, openToBrowser = false;
         var url = buffer.URL;
-        for (var opt in arg){
+        for (let opt in arg){
             switch(opt){
                 case '-c':
                 case '-count':
@@ -463,8 +464,8 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
             }
         }
 
-        for (var i=0; i<types.length; i++){
-            var type = types.charAt(i);
+        for (let i=0; i<types.length; i++){
+            let type = types.charAt(i);
             if ( manager.type[type] ){
                 if ( cacheManager.isAvailable(url, type) ){
                     liberator.log('cache avairable');
@@ -522,8 +523,8 @@ var cacheManager = (function(){
         },
         garbage: function(){
             var date = new Date();
-            for (var url in cache){
-                for (var type in cache[url]){
+            for (let url in cache){
+                for (let type in cache[url]){
                     if (date - cache[url][type][0] > threshold) delete cache[url][type];
                 }
             }

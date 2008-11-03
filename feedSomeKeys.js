@@ -4,7 +4,7 @@
  * @description    feed some defined key events into the Web content
  * @description-ja 定義したkeyイベントをWebページ側へ送ってあげます
  * @author         teramako teramako@gmail.com
- * @version        0.1a
+ * @version        0.1b
  * ==/VimperatorPlugin==
  *
  * 英語での説明を放棄する
@@ -257,7 +257,7 @@ function feedKeyIntoContent(keys, useVkey){
             var charCode = keys.charCodeAt(i);
             keyCode = 0;
         }
-        if (keys[i] == '<'){ 
+        if (keys[i] == '<'){
             var matches = keys.substr(i + 1).match(/^((?:[ACMSacms]-)*)([^>]+)/);
             if (matches) {
                 if (matches[1]) {
@@ -329,10 +329,10 @@ var converter = {
 commands.addUserCommand(['feedmaps','fmaps'], '',
   function(args, bang){
     var feedkey = args["-depth"];
-    var vkey = '-vkey' in args ? true: false;
+    var vkey = '-vkey' in args;
     var keys = args.arguments;
     if ('-' in args) keys.push('-');
-    
+
     if (feedkey) keys = keys.map( function(i) [i, (feedkey+"")+i] );
     liberator.plugins.feedKey.setup(keys, vkey);
   }, {
@@ -340,7 +340,7 @@ commands.addUserCommand(['feedmaps','fmaps'], '',
     argCount : "*",
     options : [ [['-depth', '-d'], commands.OPTION_INT],
                 [['-vkey', '-v'], commands.OPTION_NOARG],
-                [['-'], commands.OPTION_NOARG ] 
+                [['-'], commands.OPTION_NOARG ]
               ]
   }
 );

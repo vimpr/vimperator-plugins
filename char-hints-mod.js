@@ -123,7 +123,7 @@ chh.hintchars2number = function (hintstr)//{{{
     var converted = "";
 
     // translate users hintchars into a number (chh.conversion) 0 -> 0, 1 -> 1, ...
-    for (var i = 0, l = hintstr.length; i < l; i++)
+    for (let i = 0, l = hintstr.length; i < l; i++)
         converted += "" + chh.conversion[chh.hintchars.indexOf(hintstr[i])];
 
     // add one, since hints begin with 0;
@@ -142,7 +142,7 @@ chh.number2hintchars = function (nr)//{{{
     // translate numbers into users hintchars
     // tmp might be 2e -> (chh.transval) 2 and 14 -> (chh.hintchars) according hintchars
 
-    for (var i = 0, l = tmp.length; i < l; i++)
+    for (let i = 0, l = tmp.length; i < l; i++)
         converted += "" + chh.hintchars[chh.transval[tmp[i]]];
 
     return converted;
@@ -201,10 +201,11 @@ chh.yankHint = function (text)//{{{
         return false;
 
     var elem = chh.validHints[chh.hintNumber - 1] || chh.validHints[0];
+    var loc;
     if (text)
-        var loc = elem.textContent;
+        loc = elem.textContent;
     else
-        var loc = elem.href;
+        loc = elem.href;
 
     liberator.copyToClipboard(loc);
     liberator.echo("Yanked " + loc, liberator.commandline.FORCE_SINGLELINE);
@@ -284,7 +285,7 @@ chh.generate = function (win)//{{{
     chh.docs.push({ doc: doc, start: start, end: chh.hints.length - 1 });
 
     // also generate hints for frames
-    for (var i = 0; i < win.frames.length; i++)
+    for (let i = 0; i < win.frames.length; i++)
         chh.generate(win.frames[i]);
 
     liberator.log("shints: generate() completed after: " + (Date.now() - startDate) + "ms");
@@ -317,13 +318,13 @@ chh.showHints = function ()//{{{
     var activeHint = chh.hintNumber || 1;
     chh.validHints = [];
 
-    for (var j = 0; j < chh.docs.length; j++)
+    for (let j = 0; j < chh.docs.length; j++)
     {
-        var doc = chh.docs[j].doc;
-        var start = chh.docs[j].start;
-        var end = chh.docs[j].end;
-        var scrollX = doc.defaultView.scrollX;
-        var scrollY = doc.defaultView.scrollY;
+        let doc = chh.docs[j].doc;
+        let start = chh.docs[j].start;
+        let end = chh.docs[j].end;
+        let scrollX = doc.defaultView.scrollX;
+        let scrollY = doc.defaultView.scrollY;
 
 outer:
         for (let i = start; i <= end; i++)
@@ -378,11 +379,11 @@ chh.removeHints = function (timeout)//{{{
     var firstElemselcolor = "";
     var firstElemColor = "";
 
-    for (var j = 0; j < chh.docs.length; j++)
+    for (let j = 0; j < chh.docs.length; j++)
     {
-        var doc = chh.docs[j].doc;
-        var start = chh.docs[j].start;
-        var end = chh.docs[j].end;
+        let doc = chh.docs[j].doc;
+        let start = chh.docs[j].start;
+        let end = chh.docs[j].end;
 
         for (let i = start; i <= end; i++)
         {
@@ -399,7 +400,7 @@ chh.removeHints = function (timeout)//{{{
             else
             {
                 // restore colors
-                var elem = chh.hints[i][0];
+                let elem = chh.hints[i][0];
                 elem.style.backgroundColor = chh.hints[i][4];
                 elem.style.color = chh.hints[i][5];
             }
@@ -429,7 +430,7 @@ chh.processHints = function (followFirst)//{{{
 
     if (!followFirst)
     {
-        var firstHref = chh.validHints[0].getAttribute("href") || null;
+        let firstHref = chh.validHints[0].getAttribute("href") || null;
         if (firstHref)
         {
             if (chh.validHints.some(function (e) { return e.getAttribute("href") != firstHref; }))
@@ -563,7 +564,7 @@ chh.onEvent = function (event)//{{{
             if (chh.hintNumber == 0)
                 chh.hintNumber = 1;
 
-            var oldID = chh.hintNumber;
+            let oldID = chh.hintNumber;
             if (key == "<Tab>")
             {
                 if (++chh.hintNumber > chh.validHints.length)
@@ -578,7 +579,7 @@ chh.onEvent = function (event)//{{{
             return;
 
         case "<BS>": //TODO: may tweak orig hints.js too (adding 2 lines ...)
-            var oldID = chh.hintNumber;
+            let oldID = chh.hintNumber;
             if (chh.hintNumber > 0)
             {
                 chh.hintNumber = Math.floor(chh.hintNumber / chh.hintchars.length);
@@ -606,7 +607,7 @@ chh.onEvent = function (event)//{{{
             if (/^<./.test(key) || key == ":")
             {
                 //FIXME: won't work probably
-                var map = null;
+                let map = null;
                 if ((map = liberator.mappings.get(liberator.modes.NORMAL, key)) ||
                      (map = liberator.mappings.get(liberator.modes.HINTS, key))) //TODO
                 {
@@ -621,7 +622,7 @@ chh.onEvent = function (event)//{{{
             if (chh.hintchars.indexOf(key) >= 0) // TODO: check if in hintchars
             {
                 chh.hintString += key;
-                var oldHintNumber = chh.hintNumber;
+                let oldHintNumber = chh.hintNumber;
                 if (chh.hintNumber == 0 || chh.usedTabKey)
                 {
                     chh.usedTabKey = false;
@@ -652,7 +653,7 @@ chh.onEvent = function (event)//{{{
                 if (chh.hintNumber > 0 && chh.hintNumber * chh.hintchars.length <= chh.validHints.length)
                 {
                     if (chh.timeout > 0)
-                        chh.activeTimeout = setTimeout(function () { chh.processHints(true); }, chh.timeout);
+                        chh.activeTimeout = setTimeout(chh.processHints, chh.timeout, true);
 
                     return false;
                 }

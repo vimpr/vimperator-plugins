@@ -5,13 +5,13 @@
  * @description-ja    Pukkaを使用してDeliciousにブックマークする
  * @author            otsune info@otsune.com
  * @namespace         http://www.otsune.com/
- * @minVersion        0.6pre
+ * @minVersion        2.0pre
  * @version           0.4
  * ==/VimperatorPlugin==
  *
  * see also http://codesorcery.net/pukka/
  *
- * Variable:
+ * Variables:
  *  g:pukka_normalizelink
  *      Specifies keys that use Pathtraq URL Normalizer
  *      usage: let g:pukka_normalizelink = true
@@ -29,8 +29,8 @@
 var useNormalizelink = liberator.globalVariables.pukka_normalizelink || true;
 var buf = liberator.modules.buffer;
 
-liberator.modules.commands.addUserCommand(
-    ['pukka', 'pu'], 'Post to Pukka bookmark', function(args) {
+liberator.modules.commands
+         .addUserCommand(['pukka', 'pu'], 'Post to Pukka bookmark', function(args) {
     if (!buf.title || !buf.URL || buf.URL == 'about:blank') {
         return false;
     }
@@ -43,7 +43,7 @@ liberator.modules.commands.addUserCommand(
     }
     liberator.open(scheme + 'url=' + url + '&title=' + title + '&extended=' + extend);
 }, {
-    bang: false, 
+    bang: false,
     completer: function(filter) {
         var complist = [];
 

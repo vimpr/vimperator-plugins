@@ -4,9 +4,9 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// Cooperation LDRize Mappings for vimperator0.6.*
+// Cooperation LDRize Mappings for Vimperator
 //
-// Variable:
+// Variables:
 //  g:ldrc_captureMapping
 //      Specifies keys that capture by LDRize
 //      usage: let g:ldrc_captureMappings = "['j','k','p','o','?']"
@@ -105,7 +105,7 @@
         +'lawEX19fqNVqVS/kOE6r1fI8DyHU6XT++ShjzM/Pz8HBAXx/f+/3+9X2WmvO'
         +'uVKq3GCMUUoxxlarVb1ef3h4+AWNW50eXTIBjgAAAABJRU5ErkJggg==';
 
-    var Class = function(){return function(){this.initialize.apply(this,arguments)}}
+    var Class = function() function(){this.initialize.apply(this,arguments)};
 
     var _isEnable;
 
@@ -113,7 +113,7 @@
     LDRizeCooperation.prototype = {
         initialize: function(){
             var self = this;
-            this.LDRize = {getSiteinfo: function(){return undefined;}};
+            this.LDRize = {getSiteinfo: function() undefined;};
             this.Minibuffer = null;
             this.handlerInfo = handlerInfo;
 
@@ -202,7 +202,7 @@
 
             function setHinttags(enable){
                 if(enable){
-                    var siteinfo = self.LDRize.getSiteinfo();
+                    let siteinfo = self.LDRize.getSiteinfo();
                     if(siteinfo.link && siteinfo.paragraph){
                         liberator.modules.options.hinttags = siteinfo.paragraph + "/" + siteinfo.link;
                         liberator.modules.options.extendedhinttags = siteinfo.paragraph + "/" + siteinfo.link;
@@ -224,7 +224,7 @@
                     setHinttags(true);
                     liberator.modules.hints.show("o");
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                } ,{});
+                },{});
 
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["f"],
                 "Start QuickHint mode",
@@ -256,7 +256,7 @@
                         showString += link + "<br/>";
                     });
                     liberator.modules.commandline.echo(showString, liberator.modules.commandline.HL_NORMAL, liberator.modules.commandline.FORCE_MULTILINE);
-                } ,{});
+                },{});
             liberator.modules.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
                 function(arg){self.Minibuffer.execute(arg)},
                 {
@@ -264,7 +264,7 @@
                         var completionList = [];
                         var command = self.Minibuffer.command;
                         var alias = self.Minibuffer.alias_getter();
-                        var tokens = filter.split("|").map(function(str){return str.replace(/\s+/g,"")});
+                        var tokens = filter.split("|").map(function(str) str.replace(/\s+/g,""));
                         var exp = new RegExp("^" + tokens.pop());
                         for(let i in command) if(exp.test(i))completionList.push([tokens.concat(i).join(" | "),"MinibufferCommand"]);
                         for(let i in alias) if(exp.test(i))completionList.push([i,"MinibufferAlias"]);
@@ -272,20 +272,20 @@
                     }
                 });
             liberator.modules.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
-                function(arg){ self.downloadLinksByProgram(self.getPinnedItems());} ,{});
+                function(arg){ self.downloadLinksByProgram(self.getPinnedItems());}, {});
             liberator.modules.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
             function(arg){ self.isEnable = !self.isEnable}, {});
             //Options
             liberator.modules.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',this.isEnable,
                 {
                     setter: function(value){ self.isEnable = value; },
-                    getter: function(){ return self.isEnable; }
+                    getter: function() self.isEnable;
                 }
             );
             liberator.modules.options.add(['ldrchints'],'mod hinttags for LDRize','boolean',this.isModHints,
                 {
                     setter: function(value){ self.isModHints = value; },
-                    getter: function(){ return self.isModHints; }
+                    getter: function() self.isModHints;
                 }
             );
         },
@@ -301,15 +301,13 @@
             });
         },
 
-        get isEnable(){
-            return _isEnable;
-        },
+        get isEnable() _isEnable,
         set isEnable(value){
             this.LDRizeCooperationPanel.setAttribute("src",value ? DISABLE_ICON : ENABLE_ICON);
             _isEnable = value;
         },
-        isEnableLDRize: function(){ return this.LDRize.getSiteinfo() != undefined; },
-        isEnableLDRizeCooperation: function(){ return this.isEnable && this.isEnableLDRize() },
+        isEnableLDRize: function() this.LDRize.getSiteinfo() != undefined,
+        isEnableLDRizeCooperation: function() this.isEnable && this.isEnableLDRize(),
 
         //Pin
         getPinnedItems: function(){
@@ -317,8 +315,8 @@
             var viewXpath = this.LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
             return this.LDRize.getPinnedItems().map(function(i){
                 let linkResult = i.XPath(linkXpath); let viewResult = i.XPath(viewXpath);
-                return [linkResult, viewResult ? viewResult.textContent : null]}
-            );
+                return [linkResult, viewResult ? viewResult.textContent : null];
+            });
         },
         downloadLinksByProgram: function(links){
             var self = this;
@@ -328,7 +326,7 @@
                     if(x.include.test(url)){
                         setTimeout(function(){
                             if(typeof x.handler == "object"){
-                                var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,url).replace(/%TITLE%/g,title); });
+                                let args = x.handler[1].map(function(s) s.replace(/%URL%/g,url).replace(/%TITLE%/g,title));
                                 liberator.modules.io.run(x.handler[0],args,false);
                             }else if(typeof x.handler == "string"){
                                 liberator.modules.io.run(x.handler,[url],false);
@@ -386,15 +384,16 @@
         //Utils
         addAfter: function(target,name,after){
             var original = target[name];
-            target[name] = function() {
+            target[name] = function(){
                 var tmp = original.apply(target,arguments);
                 after.apply(target,arguments);
                 return tmp;
             };
         },
         getClientPosition: function(elem){
+            var position;
             try{
-                var position = elem.getBoundingClientRect();
+                position = elem.getBoundingClientRect();
             }catch(e){
                 position = elem.parentNode.getBoundingClientRect();
             }
@@ -408,7 +407,7 @@
             evt.initKeyEvent("keypress",true,true,window.content.wrappedJSObject,false,false,false,false,keyCode,charCode);
             window.content.wrappedJSObject.document.dispatchEvent(evt);
         },
-    }
+    };
 
     liberator.plugins.LDRizeCooperation = new LDRizeCooperation();
 })();

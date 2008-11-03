@@ -2,7 +2,7 @@
 // @name           BookmarksToolbar-Hint
 // @description    Feature the BookmarksToolbar-Hint
 // @description-ja ブックマークツールバーのヒント機能を提供
-// @version        0.2b
+// @version        0.2c
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -30,32 +30,25 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 		return tooltip;
 	}
 	function clearTooltips(){
-		while(tooltipbox.hasChildNodes()){
+		while (tooltipbox.hasChildNodes()){
 			tooltipbox.firstChild.hidePopup();
 			tooltipbox.removeChild(tooltipbox.firstChild);
 		}
 	}
-	function getToolbar(){
-		if (toolbar)
-			return toolbar;
-		else
-			toolbar = document.getElementById('bookmarksBarContent');
-
-		return toolbar;
-	}
+	function getToolbar() toolbar || (toolbar = document.getElementById('bookmarksBarContent'));
 	function onKeyPress(event){
 		manager.onEvent(event);
 		event.stopPropagation();
 		event.preventDefault();
 	}
 	function updateSelector(){
-		for (var i=0; i<tooltipbox.childNodes.length; i++){
+		for (let i=0; i<tooltipbox.childNodes.length; i++){
 			tooltipbox.childNodes[i].style.color = (i+1).toString().indexOf(currentNum+1) == 0 ? "red" : "black";
 		}
 	}
 	function itemOpen(target){
 		if (target.hasAttribute('oncommand')){
-			var fn = new Function("event", target.getAttribute("oncommand"));
+			let fn = new Function("event", target.getAttribute("oncommand"));
 			if (where == liberator.CURRENT_TAB)
 				fn.call(target, {button:0, ctrlKey:false});
 			else
@@ -87,8 +80,8 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 	var useShift = false;
 	var where = liberator.CURERNT_TAB;
 	var manager = {
-		get toolbar(){ return getToolbar(); },
-		go : null,
+		get toolbar() getToolbar(),
+		go: null,
 		get where(){ return where; },
 		set where(value){ where = value; },
 		startup: function(where){
@@ -99,15 +92,15 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			this.show();
 		},
 		show:function(node){
-			liberator.modules.modes.set(liberator.modules.modes.CUSTOM, liberator.modules.modes.QUICK_HINT);
+			liberator.modules.modes.set(liberator.modules.modes.CUSTOM,liberator.modules.modes.QUICK_HINT);
 			hints = [];
 			window.addEventListener('keypress',onKeyPress,true);
 			current = node || getToolbar();
-			for (var i=0; i<current.childNodes.length; i++){
-				var button = current.childNodes[i];
+			for (let i=0,l=current.childNodes.length; i<l; i++){
+				let button = current.childNodes[i];
 				if (button.localName == "menuseparator") continue;
 				hints.push(button);
-				var tooltip = createTooltip();
+				let tooltip = createTooltip();
 				tooltip.showPopup(button, -1, -1,"tooltip","topleft","topright");
 			}
 			updateSelector();
@@ -169,7 +162,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 					return;
 				default:
 					if (/^[0-9]$/.test(key)){
-						var num = parseInt(key,10);
+						let num = parseInt(key,10);
 						if (!useShift && currentNum) num += currentNum * 10;
 
 						if (hints.length >= num*10){
@@ -190,7 +183,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			useShift = false;
 			window.removeEventListener('keypress',onKeyPress,true);
 			liberator.modules.modes.reset(true);
-			while(tooltipbox.hasChildNodes()){
+			while (tooltipbox.hasChildNodes()){
 				tooltipbox.firstChild.hidePopup();
 				tooltipbox.removeChild(tooltipbox.firstChild);
 			}

@@ -1,6 +1,6 @@
 /**
  * ==VimperatorPlugin==
- * @name inspector
+ * @name          inspector
  * @description   DOM Inspector commands
  * @depend        "DOM Inspector" inspector@mozilla.org
  * @author        teramako teramako@gmail.com
@@ -18,13 +18,13 @@
 
 (function(){
 
-const inspectorID = 'inspector@mozilla.org';
+const inspectorID = "inspector@mozilla.org";
 if (!Application.extensions.has(inspectorID) || !Application.extensions.get(inspectorID).enabled) return;
 
 /* これやるとFirefox終了時に実行されるんだけど...なぜ？ -> Ubiquityが悪さしているみたい
 Object.prototype.inspect = function(){
 	runInspector(this);
-}
+};
 */
 
 function runInspector(node){
@@ -32,7 +32,7 @@ function runInspector(node){
 		inspectDOMDocument(node);
 	} else if (node instanceof Node){
 		inspectDOMNode(node);
-	} else if (node !== null && typeof(node) != "undefined"){
+	} else if (node !== null && typeof node != "undefined"){
 		inspectObject(node);
 	}
 }
@@ -46,7 +46,7 @@ function getIDList(filter, isChrome){
 var options = [
 	[["-frame","-f"], commands.OPTION_NOARG]
 ];
-commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
+commands.addUserCommand(["inspect","dominspect"],"run DOM Inspector",
 	function(args, bang){
 		var arg = args.arguments[0];
 		var doc = bang ? document : content.document;
@@ -54,16 +54,16 @@ commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
 		if (!arg){
 			node = doc;
 		} else if (arg.charAt(0) == "#"){
-			var id = arg.substr(1);
+			let id = arg.substr(1);
 			node = doc.getElementById(id);
-			if (!node) {
+			if (!node){
 				liberator.echoerr("No such id: " + id );
 				return;
 			}
 		} else {
 			try {
 				node = __eval(args.string);
-			} catch (e) {
+			} catch (e){
 				liberator.echoerr(e);
 			}
 		}
@@ -79,7 +79,7 @@ commands.addUserCommand(['inspect','dominspect'],'run DOM Inspector',
 				return [filter.indexOf(arg), completion.filter(getIDList(arg.substr(1),bang),arg,true)];
 			}
 			return completion.javascript(filter);
-		},
+		}
 	}
 );
 

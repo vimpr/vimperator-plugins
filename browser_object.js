@@ -4,7 +4,7 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// Map behave like text-object for vimperator0.6.*
+// Map behave like text-object for Vimperator
 //
 // Variables:
 //  g:browser_object_prefix:
@@ -62,25 +62,25 @@
     function Tab(){}
     Tab.prototype = {
         close: function(ary){
-            for(var i = 0 ; i < ary.length; i++){
+            for (var i = 0 ; i < ary.length; i++){
                 let j = ary[i];
                 window.setTimeout(function(){ j.linkedBrowser.contentWindow.close(); },0);
             }
         },
         yank: function(ary){
             var copyStrings = [];
-            for(var i = 0 ; i < ary.length; i++)
+            for (var i = 0 ; i < ary.length; i++)
                 if(typeof ary[i] == "object")
                     copyStrings.push(ary[i].linkedBrowser.contentDocument.location.href);
             liberator.modules.util.copyToClipboard(copyStrings.join(", "));
         },
         reload: function(ary){
-            for(var i = 0 ; i < ary.length; i++)
+            for (var i = 0 ; i < ary.length; i++)
                 if(typeof ary[i] == "object")
                     ary[i].linkedBrowser.contentDocument.location.reload();
         },
         togglePin: function(ary){
-            for(var i = 0 ; i < ary.length; i++){
+            for (var i = 0 ; i < ary.length; i++){
                 if(typeof ary[i] == "object")
                     if(ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon == undefined){
                         var image = document.createElement('image');
@@ -92,18 +92,18 @@
                         ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false;
                     }
                     else if(ary[i].linkedBrowser.vimperatorBrowserObjectPin){
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true ;
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false;
                     }else{
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false ;
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = true ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = false;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = true;
                     }
             }
         },
         setPin: function(ary){
-            for(var i = 0 ; i < ary.length; i++){
+            for (var i = 0 ; i < ary.length; i++){
                 if(typeof ary[i] == "object"){
-                    ary[i].linkedBrowser.vimperatorBrowserObjectPin = true ;
+                    ary[i].linkedBrowser.vimperatorBrowserObjectPin = true;
                     if(ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon == undefined){
                         var image = document.createElement('image');
                         image.setAttribute('src',PINNED_ICON);
@@ -116,17 +116,17 @@
             }
         },
         unsetPin: function(ary){
-            for(var i = 0 ; i < ary.length; i++){
+            for (var i = 0 ; i < ary.length; i++){
                 if(typeof ary[i] == "object"){
                     if(ary[i].linkedBrowser.vimperatorBrowserObjectPin == true){
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true ;
-                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false ;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPinIcon.collapsed = true;
+                        ary[i].linkedBrowser.vimperatorBrowserObjectPin = false;
                     }
                 }
             }
         },
 
-        active: function() gBrowser.mTabContainer.selectedIndex ,
+        active: function() gBrowser.mTabContainer.selectedIndex,
         identify: function(i){try{return i.linkedBrowser.contentDocument.location.host}catch(e){}},
         pinned: function(i){
             if(typeof i == "object"){
@@ -134,13 +134,13 @@
             }
             return false;
         },
-        collection: function() window.gBrowser.mTabContainer.childNodes ,
+        collection: function() window.gBrowser.mTabContainer.childNodes,
     };
 
     function Container(){
         var collections = {};
         function iterator(){
-            for(var i in collections)
+            for (let i in collections)
                 yield collections[i];
             throw StopIteration;
         }
@@ -154,10 +154,8 @@
                     handler: handler,
                 };
             },
-            get: function(id){
-                return collections[id];
-            },
-        }
+            get: function(id) collections[id],
+        };
     }
 
     var browserObject = {};
@@ -174,38 +172,35 @@
 
     browserObject.scopes.add('l',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if (i < active)];
+        return [ary[i] for (i in ary) if(i < active)];
     });
     browserObject.scopes.add('r',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if (i > active)];
+        return [ary[i] for (i in ary) if(i > active)];
     });
     browserObject.scopes.add('o',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if (i != active)];
+        return [ary[i] for (i in ary) if(i != active)];
     });
     browserObject.scopes.add('c',function(ary) [ary[this.active()]]);
     browserObject.scopes.add('a',function(ary) ary);
     browserObject.scopes.add('s',function(ary){
         var activeIdentify = this.identify(ary[this.active()]);
-        return [ary[i] for (i in ary) if (this.identify(ary[i]) == activeIdentify)];
+        return [ary[i] for (i in ary) if(this.identify(ary[i]) == activeIdentify)];
     });
     browserObject.scopes.add('p',function(ary){
-        return [ary[i] for (i in ary) if (this.pinned(ary[i]) == true)];
+        return [ary[i] for (i in ary) if(this.pinned(ary[i]) == true)];
     });
 
     browserObject.targets.add('t',new Tab());
 
 
     var prefix = liberator.globalVariables.browser_object_prefix || "";
-    for (let m in browserObject.motions){
-        let motion = m;
-        for (let s in browserObject.scopes){
-            let scope = s;
-
+    for (let motion in browserObject.motions){
+        for (let scope in browserObject.scopes){
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [prefix + motion.id + scope.id],
                 "Browser Object Mapping",
-                function (arg) {
+                function (arg){
                     var target, targetCollection;
 
                     target = browserObject.targets.get(arg);
@@ -220,7 +215,7 @@
                     else
                         liberator.echoerr("BrowserObject: motion handler not found");
                 },
-                { flags: liberator.modules.Mappings.flags.ARGUMENT});
+                { flags: liberator.modules.Mappings.flags.ARGUMENT });
         }
         let map = liberator.modules.mappings.get(null,motion.id);
         if(!prefix && map){
