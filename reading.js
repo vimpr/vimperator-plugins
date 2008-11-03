@@ -56,7 +56,7 @@ const POST_URL = 'https://twitter.com/statuses/update.json';
 function Scraper() {}
 Scraper.prototype = {
     constants: {
-        VERSION:    '0.22',
+        VERSION: '0.22',
     },
 
     version: function() { return this.constants.VERSION; },
@@ -68,9 +68,8 @@ Scraper.prototype = {
     getTitle: function() {
         var title = $f('//title');
         return title
-            ? title.text.replace(/^\s+/, '')
-                        .replace(/\s+$/, '')
-                        .replace(/\n/g, ' ')
+            ? title.text.replace(/^\s+|\s+$/g, '')
+                        .replace(/\r\n|[\r\n\t]/g, ' ')
             : null;
     },
 
@@ -138,7 +137,7 @@ liberator.modules.commands.addUserCommand(['reading'], "update Twitter's status 
     },
     // complete logic is none.
     {
-        bang:   true,
+        bang: true,
     }
 );
 
@@ -176,7 +175,7 @@ function canonicalizeURL(url) {
     req.open('GET', PATHTRAQ_CANONICALIZE_URL_API + encodeURI(url), false);
     req.send(null);
     if(req.status === 200) {
-        let canonicalized = req.responseText.replace(/^"/, '').replace(/"$/, '');
+        let canonicalized = req.responseText.replace(/^"|"$/g, '');
         return canonicalized ? canonicalized : url;
     }
     else {
