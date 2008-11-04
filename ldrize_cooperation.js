@@ -279,13 +279,13 @@
             liberator.modules.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',this.isEnable,
                 {
                     setter: function(value){ self.isEnable = value; },
-                    getter: function() self.isEnable;
+                    getter: function() self.isEnable
                 }
             );
             liberator.modules.options.add(['ldrchints'],'mod hinttags for LDRize','boolean',this.isModHints,
                 {
                     setter: function(value){ self.isModHints = value; },
-                    getter: function() self.isModHints;
+                    getter: function() self.isModHints
                 }
             );
         },
