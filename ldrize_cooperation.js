@@ -113,7 +113,7 @@
     LDRizeCooperation.prototype = {
         initialize: function(){
             var self = this;
-            this.LDRize = {getSiteinfo: function() undefined;};
+            this.LDRize = {getSiteinfo: function() undefined};
             this.Minibuffer = null;
             this.handlerInfo = handlerInfo;
 
