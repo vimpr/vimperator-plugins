@@ -65,6 +65,7 @@ preExec(gUbiquity, 'openWindow', function(anchor, flag){
 // -------------------------------------------------
 commands.addUserCommand(['ubi[quity]'], 'Vimperator Ubiquity Glue',
     function(args){
+        args = (typeof args.string == 'undefined') ? args: args.string;
         if (!args){
             gUbiquity.openWindow(getBrowser(), true);
             return;
