@@ -9,16 +9,16 @@
 // If you type M-i first, the focus moves to "<input name='search' />".
 // Then if you type M-i once more, the focus moves to "<input name='name' />".
 //
-// <html><body>
+// <html>
 //     <input name="search" />
 //     <a href="xxx">xxx</a>
 //     <a href="yyy">yyy</a>
 //     <a href="zzz">zzz</a>
 //     <input name="name" />
-//     <textarea name="comment" />
-//  </body></html>
+//     <textarea name="comment"></textarea>
+//  </html>
 
-(function(){
+(function() {
 var walkinput = function() {
     var win = document.commandDispatcher.focusedWindow;
     var d = win.document;
@@ -29,8 +29,8 @@ var walkinput = function() {
     var focused = document.commandDispatcher.focusedElement;
     var current = null;
     var next = null;
-    for (var i = 0; i < list.snapshotLength; ++i) {
-        var e = list.snapshotItem(i);
+    for (let i = 0; i < list.snapshotLength; ++i) {
+        let e = list.snapshotItem(i);
         if (e == focused) {
             current = e;
         } else if (current && next == null) {
@@ -44,8 +44,8 @@ var walkinput = function() {
     }
 };
 
-liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<M-i>'], 'Walk Input Fields', function() { walkinput(); });
-liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<M-i>'], 'Walk Input Fields', function() { walkinput(); });
-liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<A-i>'], 'Walk Input Fields', function() { walkinput(); });
-liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<A-i>'], 'Walk Input Fields', function() { walkinput(); });
+liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<M-i>'], 'Walk Input Fields', walkinput);
+liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<M-i>'], 'Walk Input Fields', walkinput);
+liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<A-i>'], 'Walk Input Fields', walkinput);
+liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<A-i>'], 'Walk Input Fields', walkinput);
 })();
