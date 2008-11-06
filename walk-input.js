@@ -19,33 +19,38 @@
 //  </html>
 
 (function() {
-var walkinput = function() {
+var walkinput = function(forward) {
     var win = document.commandDispatcher.focusedWindow;
     var d = win.document;
     var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
     var list = d.evaluate(xpath, d, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (list.snapshotLength == 0) return;
+    if (list.snapshotLength == 0)
+        return;
 
     var focused = document.commandDispatcher.focusedElement;
     var current = null;
     var next = null;
+    var prev = null;
     for (let i = 0; i < list.snapshotLength; ++i) {
         let e = list.snapshotItem(i);
         if (e == focused) {
             current = e;
-        } else if (current && next == null) {
+        } else if (current && !next) {
             next = e;
+        } else if (!current) {
+            prev = e;
         }
     }
-    if (next) {
-        next.focus();
+
+    if (forward) {
+      (next || list.snapshotItem(0)).focus();
     } else {
-        list.snapshotItem(0).focus();
+      (prev || list.snapshotItem(list.snapshotLength - 1)).focus();
     }
 };
 
-liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<M-i>'], 'Walk Input Fields', walkinput);
-liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<M-i>'], 'Walk Input Fields', walkinput);
-liberator.modules.mappings.add([liberator.modules.modes.NORMAL], ['<A-i>'], 'Walk Input Fields', walkinput);
-liberator.modules.mappings.add([liberator.modules.modes.INSERT], ['<A-i>'], 'Walk Input Fields', walkinput);
+mappings.add([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'], 
+             'Walk Input Fields (Forward)', function () walkinput(true));
+mappings.add([modes.NORMAL, modes.INSERT], ['<M-I>', '<A-I>'],
+             'Walk Input Fields (Backward)', function () walkinput(false));
 })();
