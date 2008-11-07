@@ -12,15 +12,15 @@
 
   function bitly (uri, callback) {
     let req = new XMLHttpRequest();
-    req.onreadystatechange = function(){
+    req.onreadystatechange = function () {
       if (req.readyState != 4)
         return;
       if (req.status == 200)
         return callback && callback(req.responseText, req);
-      else 
-        throw new Error(req.statusText)
+      else
+        throw new Error(req.statusText);
     };
-    req.open("GET", 'http://bit.ly/api?url=' + uri, callback);
+    req.open('GET', 'http://bit.ly/api?url=' + uri, callback);
     req.send(null);
     return !callback && req.responseText;
   }
@@ -37,12 +37,10 @@
       });
     }
   );
-  
+
   // 外から使えるように
   liberator.plugins.bitly = {
-    get: bitly,
+    get: bitly
   };
 
 })();
-
-

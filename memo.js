@@ -1,3 +1,4 @@
+// ==VimperatorPlugin==
 // @name           memo
 // @description    to write a memo
 // @description-ja メモを書く
@@ -9,13 +10,13 @@
 // ==/VimperatorPlugin==
 //
 // Usage:
-//    :memo 
+//    :memo
 //      show the memo that was written.
 //    :memo fooooobar!
 //      write "fooooobar!" to the specified memo file.
 //
 // Usage-ja:
-//    :memo 
+//    :memo
 //      書かれたメモを表示する
 //    :memo fooooobar!
 //      "fooooobar!" と、メモに書く
@@ -27,18 +28,18 @@
 
 (function () {
   let localfilepath = liberator.globalVariables.memo_filepath || io.expandPath('~/.vimpmemo');
-  let charset = 'UTF-8'
+  let charset = 'UTF-8';
 
   //ネタ的
   let lz = function(s,n)(s+'').replace(new RegExp('^.{0,'+(n-1)+'}$'),function(s)lz('0'+s,n));
 
   function dateTime () {
     with (new Date())
-      return lz(getYear() + 1900, 4) + '/' +
-             lz(getMonth(), 2) + '/' +
-             lz(getDate(), 2) + ' ' + 
+      return lz(getFullYear(), 4) + '/' +
+             lz(getMonth() + 1, 2) + '/' +
+             lz(getDate(), 2) + ' ' +
              lz(getHours(), 2) + ':' +
-             lz(getMinutes(), 2) ;
+             lz(getMinutes(), 2);
   }
 
   function filepath () {
@@ -53,7 +54,7 @@
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
                             createInstance(Ci.nsIConverterOutputStream);
     out.init(filepath(), 0x02 | 0x10 | 0x08, 0664, 0);
-    conv.init(out, charset, line.length, 
+    conv.init(out, charset, line.length,
               Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
     conv.writeString(line);
     conv.close();
