@@ -19,13 +19,11 @@
  **/
 
 (function () {
-  var XMigemoCore;
-  try{
-      XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
+  var XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
                               .getService(Components.interfaces.pIXMigemoFactory)
                               .getService("ja");
-  }
-  catch(ex if ex instanceof TypeError){}
+  var XMigemoTextUtils = Components.classes['@piro.sakura.ne.jp/xmigemo/text-utility;1']
+                                   .getService(Components.interfaces.pIXMigemoTextUtils);
 
   function replaceFunction(target,symbol,f,originalArguments){
       var oldFunction = target[symbol];
@@ -42,10 +40,19 @@
   liberator.modules.completion.filter = function(array,filter,matchFromBeginning){
       if(!filter) return array;
 
-      var migemoString = XMigemoCore.getRegExp(filter);
-      if(matchFromBeginning)
-          migemoString ="^(" + migemoString + ")";
-      var migemoPattern = new RegExp(migemoString);
+      if (filter.match(/[()|]/))
+          return original_filter.apply(this, arguments);
+
+      try {
+          var original = XMigemoTextUtils.sanitize(filter);
+          var migemoString = XMigemoCore.getRegExp(filter);
+          migemoString = original + '|' + migemoString;
+          if(matchFromBeginning)
+              migemoString ="^(" + migemoString + ")";
+          var migemoPattern = new RegExp(migemoString, 'i');
+      } catch (e) {
+          return original_filter.apply(this, arguments);
+      }
 
       return array.filter(function([value,label]){
               return migemoPattern.test(value) || migemoPattern.test(label)
