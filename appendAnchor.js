@@ -4,10 +4,20 @@
  * @description   append anchors to texts look like url.
  * @author        SAKAI, Kazuaki
  * @version       0.02
+ * @minVersion    2.0pre
+ * @maxVersion    2.0pre
  * == /VimperatorPlugin==
  */
 
 (function(){
+
+  if (window.eval(liberator.globalVariables.auto_append_anchor || 'false')) {
+    let originalHintsShow = liberator.modules.hints.show;
+    hints.show = function () {
+      liberator.execute('anc');
+      originalHintsShow.apply(this, arguments);
+    };
+  }
 
   liberator.modules.commands.addUserCommand(['anc'], 'append anchors to texts look like url',
     function(arg, special) {
