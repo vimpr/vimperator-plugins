@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.3
+// @version        1.4
 // @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
@@ -72,7 +72,7 @@
 //    history
 
 
-(function () { try {
+(function () {
   liberator.log('auto_detect_link.js loading');
 
   ////////////////////////////////////////////////////////////////
@@ -106,6 +106,7 @@
     //clickButton: true,
     force: false,
     useAutoPagerize: true,
+    displayDelay: 500,
   };
 
   ////////////////////////////////////////////////////////////////
@@ -146,6 +147,9 @@
   // functions
   ////////////////////////////////////////////////////////////////
 
+  function removeSpace (str)
+    str.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+
   // Array#find
   function find (ary, f) {
     var func = (typeof f == 'function') ? f : function (v) v == f;
@@ -169,8 +173,8 @@
 
   // 開いたURIなどの表示
   function displayOpened (link) {
-    var msg = 'open: ' + link.type + ' <' + link.text + '> ' + link.uri;
-    setTimeout(function () liberator.echo(msg, commandline.FORCE_SINGLELINE), 1000);
+    var msg = 'open: ' + link.type + ' <' + removeSpace(link.text) + '> ' + link.uri;
+    setTimeout(function () liberator.echo(msg, commandline.FORCE_SINGLELINE), gv().displayDelay);
     liberator.log(msg);
   }
 
@@ -470,4 +474,4 @@
 
   liberator.log('auto_detect_link.js loaded');
 
-} catch (e) { liberator.log(e); } })();
+})();
