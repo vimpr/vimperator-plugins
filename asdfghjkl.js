@@ -19,11 +19,11 @@
 //
 //  切り替えキーを変更したい場合は、以下のように設定できます。
 //    let g:asdfghjkl_mode_change_key = "<C-c>"
-//    
+//
 //
 // Links:
 //  http://d.hatena.ne.jp/nokturnalmortum/20081021#1224543467
-//  
+//
 
 {
   let asdfghjkl_default = window.eval(liberator.globalVariables.asdfghjkl_default || "false");
