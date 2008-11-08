@@ -83,8 +83,6 @@ CookieManager.prototype = {
     },
 
     properties: function () {
-        liberator.log('debug', 0);
-        liberator.log(this.cookie, 0);
         return [k for ([k, v] in Iterator(this.cookie))];
     },
 
