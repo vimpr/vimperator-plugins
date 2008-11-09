@@ -37,6 +37,9 @@
           return migemoPattern.test(value) || migemoPattern.test(label)
           })];
   },[""]);
+
+  let original_filter = liberator.modules.completion.filter;
+
   liberator.modules.completion.filter = function(array,filter,matchFromBeginning){
       if(!filter) return array;
 
