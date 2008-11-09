@@ -1,4 +1,4 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            exShowElementInfo.js
  * @description     extend feature that show element's information when extended-hints mode ";?"
@@ -40,6 +40,6 @@ function addFeatureToMethodAfter(object, method, feature) {
         return tmp;
     };
 }
-})()
+})();
 
 // vim: set sw=4 ts=4 et;

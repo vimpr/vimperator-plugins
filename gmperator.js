@@ -198,7 +198,7 @@ liberator.plugins.gmperator = (function(){ //{{{
     }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
     getBrowser().mTabBox.addEventListener('TabSelect',dispatchGMTabSelect,false);
-    
+
     config.autocommands.push(["GMInjectedScript","Triggered when UserScript is injected"]);
     config.autocommands.push(["GMActiveScript","Triggered when location is changed and injected UserScripts are exist"]);
     config.dialogs.push(["userscriptmanager", "Greasemonkey Manager", function(){GM_openUserScriptManager();}]);
