@@ -2,7 +2,7 @@
 // @name           Nico Related Videos
 // @description-ja ニコニコ動画のオススメ動画のリスト
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.2.0
+// @version        1.3.0
 // ==/VimperatorPlugin==
 //
 //  Author:
@@ -101,7 +101,8 @@
           getRelatedTags().forEach(function (it) last.completions.push([":" + it, "tag"]));
           last.url = buffer.URL;
         }
-        return [0, last.completions.length ? last.completions : [[nothing, nothing]]];
+        return [0, last.completions.length ? completion.filter(last.completions, args)
+                                           : [[nothing, nothing]]];
       }
     }
   );
