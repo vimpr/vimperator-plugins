@@ -1,11 +1,11 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            niconicoplaylist_cooperation.js
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.32
- * @minversion      2.0pre 2008/10/16
+ * @minversion      1.2
  * ==/VimperatorPlugin==
  *
  * CONSTRAINT

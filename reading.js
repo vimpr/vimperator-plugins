@@ -1,11 +1,11 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            reading.js
  * @description     update Twitter's status to current URL and comment
  * @description-ja  今見てるページの URL とタイトルをコメントといっしょに Twitter に投稿する
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.22
- * @minversion      2.0pre 2008/10/16
+ * @minversion      1.2
  * ==/VimperatorPlugin==
  *
  * LICENSE

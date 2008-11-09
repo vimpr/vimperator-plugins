@@ -1,11 +1,11 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            youtubeamp.js
  * @description     this script gives you keyboard oprations for YouTube.com.
  * @description-ja  YouTube のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.12
- * @minversion      2.0pre 2008/10/16
+ * @minversion      1.2
  * ==/VimperatorPlugin==
  *
  * LICENSE

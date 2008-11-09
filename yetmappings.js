@@ -1,11 +1,12 @@
+// ==VimperatorPlugin==
 // @name           yet mappings
 // @description    display the keys that are not mapped yet.
 // @description-ja まだマップされていないキーを表示する
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
-// @maxVersion     1.2
-// @minVersion     2.0pre
+// @maxVersion     1.2.*
+// @minVersion     1.2
 // ==/VimperatorPlugin==
 //
 // Usage:

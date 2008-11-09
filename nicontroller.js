@@ -1,11 +1,11 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            nicontroller.js
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.54
- * @minversion      2.0pre 2008/10/16
+ * @minversion      1.2
  * ==/VimperatorPlugin==
  *
  * LICENSE

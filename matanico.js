@@ -1,11 +1,11 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name            matanico.js
  * @description     update Twitter's status to current video name and comment
  * @description-ja  今見てる動画のタイトルとコメントを Twitter に投稿する
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.62
- * @minversion      2.0pre 2008/10/16
+ * @minversion      1.2
  * ==/VimperatorPlugin==
  *
  * LICENSE

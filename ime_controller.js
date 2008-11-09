@@ -5,7 +5,7 @@
  * @description-ja    コマンドラインモード移行時にIMEの制御を行う
  * @author            teramako teramako@gmail.com
  * @namespace         http://d.hatena.ne.jp/teramako/
- * @maxVersion        0.6pre
+ * @maxVersion        1.2.*
  * @minVersion        0.6pre
  * ==/VimperatorPlugin==
  *
