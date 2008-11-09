@@ -25,14 +25,8 @@
   function exists (modes, key)
     (mappings.getCandidates(modes, key).length || mappings.get(modes, key));
 
-  function getYetMappings (pre) {
-    let result = [];
-    keys.forEach(function (key) {
-      if (!exists([modes.NORMAL], pre + key))
-        result.push(key);
-    });
-    return result;
-  }
+  function getYetMappings (pre)
+    keys.filter(function (key) (!exists([modes.NORMAL], pre + key)));
 
   commands.addUserCommand(
     ['yetmap[pings]', 'ymap'],
