@@ -2,7 +2,7 @@
  * ==VimperatorPlugin==
  * @name           feeder.js
  * @description    This plugin allows you to give feed to some feed reader.
- * @description-ja w’è‚µ‚½ feed reader ‚ÉƒtƒB[ƒh‚ğ’Ç‰Á
+ * @description-ja æŒ‡å®šã—ãŸ feed reader ã«ãƒ•ã‚£ãƒ¼ãƒ‰ã‚’è¿½åŠ 
  * @author         janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version        0.10
  * @minVersion     2.0pre
