@@ -2,7 +2,7 @@
  * ==VimperatorPlugin==
  * @name           migemo_completion.js
  * @description    replace completion function with using Migemo
- * @description-ja •âŠ®ŠÖ”‚ğMigemo‚ğg—p‚µ‚½‚à‚Ì‚Éæ‚è‘Ö‚¦‚é
+ * @description-ja è£œå®Œé–¢æ•°ã‚’Migemoã‚’ä½¿ç”¨ã—ãŸã‚‚ã®ã«å–ã‚Šæ›¿ãˆã‚‹
  * @author         Trapezoid
  * @version        0.2
  * ==/VimperatorPlugin==
