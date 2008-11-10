@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name           feeder.js
- * @description    This plugin allows you to give feed to some feed reader.
+ * @description    This plugin allows you to give feed to some feed readers.
  * @description-ja 指定した feed reader にフィードを追加
  * @author         janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version        0.10
@@ -24,7 +24,7 @@
  *         http://fastladder.com
  *
  *  :feedlivedoorreader, :fldr
- *      -> feed LiveDoor Reader
+ *      -> feed livedoor Reader
  *         http://reader.livedoor.com/
  *
  * HISTORY
@@ -37,14 +37,15 @@
 // for Google Reader
 commands.addUserCommand(
     ['feedgooglereader', 'fgr'],
-    'feed current site url to Google Reader',
+    'feed current site URL to Google Reader',
     function () {
         let doc = content.document;
         let b = doc.body;
         let GR________bookmarklet_domain = 'http://www.google.com';
         if (b && ! doc.xmlVersion){
-            z = doc.createElement('script');
+            let z = doc.createElement('script');
             z.src = 'http://www.google.com/reader/ui/subscribe-bookmarklet.js';
+			z.type = 'text/javascript';
             b.appendChild(z);
         }
         else {
@@ -62,7 +63,7 @@ commands.addUserCommand(
 // for Fastladder
 commands.addUserCommand(
     ['feedfastladder', 'ffl'],
-    'feed current site url to Fastladder',
+    'feed current site URL to Fastladder',
     function () {
         liberator.open(
             'http://fastladder.com/subscribe/' + liberator.modules.buffer.URL,
@@ -74,11 +75,10 @@ commands.addUserCommand(
     {}
 );
 
-// for LiveDoor Reader
-/* plz check this code!!
+// for livedoor Reader
 commands.addUserCommand(
     ['feedlivedoorreader', 'fldr'],
-    'feed current site url to LiveDoor Reader',
+    'feed current site URL to livedoor Reader',
     function () {
         liberator.open(
             'http://reader.livedoor.com/subscribe/' + liberator.modules.buffer.URL,
@@ -89,6 +89,5 @@ commands.addUserCommand(
     },
     {}
 );
-*/
 })();
 // vim:sw=4 ts=4 et:
