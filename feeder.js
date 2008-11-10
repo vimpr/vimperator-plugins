@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name           feeder.js
- * @description    This plugin allows you to give feed to some feed readers.
+ * @description    This plugin allows you to give feed to some feed reader.
  * @description-ja 指定した feed reader にフィードを追加
  * @author         janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version        0.10
@@ -45,7 +45,7 @@ commands.addUserCommand(
         if (b && ! doc.xmlVersion){
             let z = doc.createElement('script');
             z.src = 'http://www.google.com/reader/ui/subscribe-bookmarklet.js';
-			z.type = 'text/javascript';
+            z.type = 'text/javascript';
             b.appendChild(z);
         }
         else {
