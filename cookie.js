@@ -1,4 +1,4 @@
-/**
+/*
  * ==VimperatorPlugin==
  * @name            cookie.js
  * @description     display cookie in ':pageinfo'.
@@ -68,7 +68,7 @@ CookieManager.prototype = {
     },
 
     _deserializeCookie: function (cookieString) {
-        let cookies = cookieString.split(/; */);
+        let cookies = cookieString.split('; ');
         let cookie = {};
         let key, val;
         for (let i=0, max=cookies.length ; i<max ; ++i) {
@@ -92,7 +92,7 @@ CookieManager.prototype = {
             obj.key + '=' + obj.value,
             'domain=' + obj.domain,
             'expires=' + new Date(new Date().getTime() + obj.expires),
-        ].join('; ');
+        ].join(';');
         this._setCookieString(string);
     },
 };
@@ -101,8 +101,7 @@ liberator.modules.buffer.addPageInfoSection(
     'c',
     'Cookie',
     function (verbose) {
-        if(verbose) {
-            let p;
+        if (verbose) {
             let c = new CookieManager(liberator.modules.buffer.URL);
             for ([, p] in Iterator(c.properties())) {
                 yield [p, c.getCookie(p)];
@@ -111,6 +110,6 @@ liberator.modules.buffer.addPageInfoSection(
     }
 );
 
-})();
+})()
 
 // vim: set sw=4 ts=4 et;
