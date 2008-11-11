@@ -13,7 +13,7 @@
  *   *  各メソッドやgetterは常にvalue(またはxhr)メンバを持つObject
  *   *  メソッドやgetterはvalue値に相応しいメソッドまたはgetterである
  *
- * 
+ *
  * Example:
  *        1                                        2      3      4   5        6          7                               8
  *  :echo $x("http://d.hatena.ne.jp/teramako/rss").open().send().xml.toObject.get("item").map(function(item) item.title).value
@@ -129,6 +129,9 @@ $c.prototype = {
     },
     toString: function(){
         return this.value.toString();
+    },
+    __noSuchMethod__: function(name, args){
+        return this.value[name].apply(this.value, args);
     }
 };
 // }}}
