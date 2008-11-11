@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 22-Oct-2008. Jan 2008
+// Last Change: 11-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -100,7 +100,7 @@
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
-            img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+            img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
@@ -110,9 +110,9 @@
                          title={status.user.screen_name}
                          class="twitter photo"/>
                     <strong>{status.user.name}&#x202C;</strong>
+                    : <span class="twitter entry-content">{status.text}</span>
                 </>.toSource()
-                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                    sprintf(': <span class="twitter entry-content">%s&#x202C;</span>', status.text))
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " "))
                         .join("<br/>");
 
         //liberator.log(html);

@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 22-Oct-2008. Jan 2008
+// Last Change: 11-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -68,6 +68,7 @@
         var endPoint = target ? "http://api.wassr.jp/user_timeline.json?id=" + target
             : "http://api.wassr.jp/statuses/friends_timeline.json?id=" + username;
         xhr.open("GET", endPoint, false, username, password);
+        xhr.setRequestHeader("User-Agent", "XMLHttpRequest");
         // for debug
         //xhr.open("GET", "http://api.wassr.jp/statuses/user_timeline/otsune.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -76,7 +77,7 @@
 
         var html = <style type="text/css"><![CDATA[
             span.wassr.entry-content a { text-decoration: none; }
-            img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; }
+            img.wassr.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
@@ -86,9 +87,9 @@
                          title={status.user.screen_name}
                          class="wassr photo"/>
                     <strong>{status.user_login_id}&#x202C;</strong>
+                    : <span class="wassr entry-content">{emojiConv(status.text)}&#x202C;</span>
                 </>.toSource()
-                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', emojiConv(status.text)))
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " "))
                         .join("<br/>");
 
         //liberator.log(html);
