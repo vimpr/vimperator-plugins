@@ -1,5 +1,5 @@
 // ==VimperatorPlugin==
-// @name           echo and copy
+// @name           echopy
 // @description    echo and copy
 // @description-ja echo and copy
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
@@ -15,7 +15,7 @@
 //
 // Usage-ja:
 //    :echo <EXPRESSION>
-//      echo $B$9$k$7$FF1;~$K%/%j%C%W%\!<%I$K%3%T!<(B
+//      echo すると同時にクリップボードにコピー
 //
 // Links:
 //    http://d.hatena.ne.jp/nokturnalmortum/20081111#1226414487
