@@ -1,7 +1,7 @@
 // ==VimperatorPlugin==
 // @name           unicode escape
-// @description    Copy unicode escaped text to clipboard.
-// @description-ja Unicode エスケープされてテキストをクリップボードにコピーする
+// @description    Copy the escaped-unicode text to the clipboard.
+// @description-ja Unicode エスケープされたテキストをクリップボードにコピーする
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
@@ -10,18 +10,16 @@
 // ==/VimperatorPlugin==
 //
 // Usage:
-//    :uc <MULTI_BYTE_TEXT>
+//    :uc <MULTIBYTE_TEXT>
+//    :uc! <ESCAPED_UNICODE_TEXT>
 //
 // Links:
 //
 
 (function () {
 
-  function lz (s,n)
-    (''+s).replace(new RegExp('^.{0,'+(n-1)+'}$'),function(s)lz('0'+s,n));
-
   function escape (s)
-    Array.slice(s).map(function(c)let(d=c.charCodeAt(0))(d<=127?c:'\\u'+lz(d.toString(16),4))).join('');
+    s.toSource().replace(/^[^"]+"|"[^"]+$/g,'');
 
   function unescape (s)
     s.replace(/\\u([a-f\d]{4})/gi,function(_,c)String.fromCharCode(parseInt(c,16)));
