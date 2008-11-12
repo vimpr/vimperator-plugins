@@ -148,7 +148,7 @@ createPrototype($s, {
     get base64() $(window.btoa(this.value)),
     get encodeURICompoenent() $(encodeURIComponent(this.value)),
     get MD5Hash(){
-context converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
         converter.charset = "UTF-8";
         var result = {};
         var data = converter.convertToByteArray(this.value, result);
@@ -211,7 +211,7 @@ createPrototype($a, {
         return this;
     },
     get first() $(this.value[0]),
-    get last() $(this.value[this.length - 1])
+    get last() $(this.value[this.length - 1]),
 });
 // }}}
 
