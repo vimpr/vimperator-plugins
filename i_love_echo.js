@@ -131,7 +131,7 @@ $c.prototype = {
         return this.value.toString();
     },
     __noSuchMethod__: function(name, args){
-        return this.value[name].apply(this.value, args);
+        return $(this.value[name].apply(this.value, args));
     }
 };
 // }}}
@@ -148,7 +148,7 @@ createPrototype($s, {
     get base64() $(window.btoa(this.value)),
     get encodeURICompoenent() $(encodeURIComponent(this.value)),
     get MD5Hash(){
-        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+context converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
         converter.charset = "UTF-8";
         var result = {};
         var data = converter.convertToByteArray(this.value, result);
@@ -172,6 +172,17 @@ createPrototype($s, {
         } catch (e){
             return null;
         }
+    },
+    evaluate: function(doc,context){
+        if (!doc) doc = content.document;
+        if (!context) context = doc;
+        var result = [];
+        var nodes = doc.evaluate(this.value, context, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+        var node;
+        while (node = nodes.iterateNext()) {
+            result.push(node);
+        }
+        return $(result);
     }
 });
 // }}}
@@ -198,7 +209,9 @@ createPrototype($a, {
     unshift: function(arg){
         this.value.unshift(arg);
         return this;
-    }
+    },
+    get first() $(this.value[0]),
+    get last() $(this.value[this.length - 1])
 });
 // }}}
 
