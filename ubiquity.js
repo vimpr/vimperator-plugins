@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name         Ubiquity Glue
- * @description  viperator-plugin for Ubiquity
+ * @description  Vimperator-plugin for Ubiquity
  * @depend       Ubiquity (ubiquity@labs.mozilla.com)
  * @version      0.1.1a
  * ==/VimperatorPlugin==
@@ -32,14 +32,14 @@ if (!Application.extensions.has(ubiquityID) || !Application.extensions.get(ubiqu
     Components.utils.reportError('Vimperator: UbiquityGlue: Ubiquity is not installed');
     return null;
 }
-function preExec(target,name,func){
+function preExec(target, name, func){
     var original = target[name];
     target[name] = function(){
-        var result = func.apply(this,arguments);
+        var result = func.apply(this, arguments);
         var tmp = null;
-        if (result != false) tmp = original.apply(target,arguments);
+        if (result != false) tmp = original.apply(target, arguments);
         return tmp;
-    }
+    };
 }
 
 preExec(events, 'onEscape', function(){
@@ -63,15 +63,14 @@ preExec(gUbiquity, 'openWindow', function(anchor, flag){
 // -------------------------------------------------
 // Command
 // -------------------------------------------------
-commands.addUserCommand(['ubi[quity]'],'Vimperator Ubiquity Glue',
+commands.addUserCommand(['ubi[quity]'], 'Vimperator Ubiquity Glue',
     function(args){
-        args = (typeof args.string == 'undefined') ? args: args.string;
         if (!args){
             gUbiquity.openWindow(getBrowser(), true);
             return;
         }
         ubiquityManager.execute(args);
-    },{
+    }, {
         completer: function(filter){
             return ubiquityManager.completer(filter);
         }
@@ -110,10 +109,10 @@ var ubiquityManager = {
         }
     },
     completer: function(args){
-        var matches = args.match(/([^\s]+)(?:\s+(.+)$)?/);
+        var matches = args.match(/(\S+)(?:\s+(.+)$)?/);
         var suggestions = [];
-        for (var cmd in this.commands){
-            suggestions.push([cmd , this.commands[cmd].description]);
+        for (let cmd in this.commands){
+            suggestions.push([cmd, this.commands[cmd].description]);
         }
         if (!matches){
             return [0, suggestions];

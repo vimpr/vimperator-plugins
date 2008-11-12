@@ -16,7 +16,7 @@
 //     <a href="zzz">zzz</a>
 //     <input name="name" />
 //     <textarea name="comment"></textarea>
-//  </html>
+// </html>
 
 (function() {
 var walkinput = function(forward) {
@@ -31,7 +31,7 @@ var walkinput = function(forward) {
     var current = null;
     var next = null;
     var prev = null;
-    for (let i = 0; i < list.snapshotLength; ++i) {
+    for (let i = 0, l = list.snapshotLength; i < l; ++i) {
         let e = list.snapshotItem(i);
         if (e == focused) {
             current = e;
@@ -43,13 +43,13 @@ var walkinput = function(forward) {
     }
 
     if (forward) {
-      (next || list.snapshotItem(0)).focus();
+        (next || list.snapshotItem(0)).focus();
     } else {
-      (prev || list.snapshotItem(list.snapshotLength - 1)).focus();
+        (prev || list.snapshotItem(list.snapshotLength - 1)).focus();
     }
 };
 
-mappings.add([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'], 
+mappings.add([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'],
              'Walk Input Fields (Forward)', function () walkinput(true));
 mappings.add([modes.NORMAL, modes.INSERT], ['<M-I>', '<A-I>'],
              'Walk Input Fields (Backward)', function () walkinput(false));

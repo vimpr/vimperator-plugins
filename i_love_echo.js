@@ -4,7 +4,7 @@
  *
  * 説明
  * :echo コマンドが大好きな人用
- * とにかく、ワンラインでタブ補完しつつコード実行をするためのネタ的プラグイン
+ * とにかく、ワンラインでタブ補完しつつコードを実行するためのネタ的プラグイン
  *
  * 完成度は低い
  *
@@ -15,7 +15,7 @@
  *
  *
  * Example:
- *        1                                        2      3      4   5        6          7                               8
+ *        1                                        2      3      4   5        6           7                              8
  *  :echo $x("http://d.hatena.ne.jp/teramako/rss").open().send().xml.toObject.get("item").map(function(item) item.title).value
  *  ブログのRSSをゲットしてオブジェクト化して、各item要素内のtitle文字列を格納した配列をechoする
  *
@@ -34,7 +34,7 @@
  *  :js $x("http://example.com").open().send().xml.stack()
  *   とりあえず、http://exapmle.comのDOMドキュメントをstack
  *  :echo $_.cache.last.inspect()
- *   最後にstackしたものを取り出し、DOM Inspectorに出力(DOM Inspectorが入っている場合)
+ *   最後にstackしたものを取り出し、DOM Inspectorが入っている場合はDOM Inspectorに出力
  */
 
 (function(){
@@ -44,9 +44,9 @@ var cacheXHR = null;
 function $(arg){ //{{{
     if (!arg) return new $c();
     if (typeof arg == "string"){
-        var s = new $s(arg);
-        if (/^https?:\/\/.+(\/.*)?/.test(arg)){
-            s.open = function(){ var x = liberator.modules.$x(arg); return x.open(); }
+        let s = new $s(arg);
+        if (/^https?:\/\/./.test(arg)){
+            s.open = function(){ var x = liberator.modules.$x(arg); return x.open(); };
         }
         return s;
     } else if (typeof arg == "xml"){
@@ -66,10 +66,10 @@ liberator.modules.$x = function $x(url, method, user, password){ //{{{
     } else if (cacheXHR.success && cacheXHR.url == url){
         return cacheXHR;
     } else {
-        cacheXHR = new $xhr(url      ? url      : cacheXHR.url,
-                            method   ? method   : cacheXHR.method,
-                            user     ? user     : cacheXHR.user,
-                            password ? password : cacheXHR.password);
+        cacheXHR = new $xhr(url      || cacheXHR.url,
+                            method   || cacheXHR.method,
+                            user     || cacheXHR.user,
+                            password || cacheXHR.password);
     }
     return cacheXHR;
 }; //}}}
@@ -86,12 +86,12 @@ liberator.modules.$_ = { //{{{
         clear: function(){
             cache = [];
             cacheXHR = null;
-        },
+        }
     },
     env: {
         maxCacheLength: 20,
         autoCache: false,
-        xhr: { user: null, password: null, }
+        xhr: { user: null, password: null }
     },
     get clipboard() $(util.readFromClipboard()),
     get url() $(buffer.URL),
@@ -101,7 +101,7 @@ liberator.modules.$_ = { //{{{
             return $(buffer.lastInputField.value);
         }
         return null;
-    },
+    }
 }; // }}}
 
 const DOMINSPECTOR = Application.extensions.has("inspector@mozilla.org") && Application.extensions.get("inspector@mozilla.org").enabled;
@@ -111,12 +111,12 @@ const DOMINSPECTOR = Application.extensions.has("inspector@mozilla.org") && Appl
 // --------------------------------------------------------------------------{{{
 function $c(arg){ this.value = arg || null; }
 $c.prototype = {
-    echo: function(flag) {
+    echo: function(flag){
         liberator.echo(this.value, flag);
         return this;
     },
-    log: function(level) {
-        liberator.log(this.value, level ? level : 0);
+    log: function(level){
+        liberator.log(this.value, level || 0);
         return this;
     },
     copy: function(){
@@ -148,25 +148,26 @@ createPrototype($s, {
     get base64() $(window.btoa(this.value)),
     get encodeURICompoenent() $(encodeURIComponent(this.value)),
     get MD5Hash(){
-        var converter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].createInstance(Ci.nsIScriptableUnicodeConverter);
-        converter.charset = 'UTF-8';
+        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+        converter.charset = "UTF-8";
         var result = {};
         var data = converter.convertToByteArray(this.value, result);
-        var ch = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
+        var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
         ch.init(ch.MD5);
         ch.update(data, data.length);
         var hash = ch.finish(false);
         function toHexString(charCode){
-            return ('0' + charCode.toString(16)).slice(-2);
+            return ("0" + charCode.toString(16)).slice(-2);
         }
-        var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : '' for (i in hash)].join('');
+        var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : "" for (i in hash)].join("");
         return $(s);
     },
     s: function(from, to) $(this.value.replace(from,to)),
     split: function(reg) $(this.value.split(reg)),
     get toJSON(){
+        var json;
         try {
-            var json = Cc['@mozilla.org/dom/json;1'].getService(Ci.nsIJSON);
+            json = Cc["@mozilla.org/dom/json;1"].getService(Ci.nsIJSON);
             return $(json.decode(this.value));
         } catch (e){
             return null;
@@ -178,7 +179,7 @@ createPrototype($s, {
 // -----------------------------------------------------------------------------
 // Array
 // --------------------------------------------------------------------------{{{
-function $a(arg){this.value = arg;}
+function $a(arg){ this.value = arg; }
 $a.prototype = new $c();
 createPrototype($a, {
     get length() this.value.length,
@@ -204,7 +205,7 @@ createPrototype($a, {
 // -----------------------------------------------------------------------------
 // Object
 // --------------------------------------------------------------------------{{{
-function $o(arg){this.value = arg;}
+function $o(arg){ this.value = arg; }
 $o.prototype = new $c();
 createPrototype($o, {
     get toArrayName()  $([i             for (i in this.value)]),
@@ -215,7 +216,7 @@ createPrototype($o, {
     getItemsByKeyName: function(itemName){
         var a = [];
         function walk(obj){
-            for (var item in obj){
+            for (let item in obj){
                 if (itemName == item) a.push(obj[itemName]);
                 if (typeof obj[item] == "object") walk(obj[item]);;
             }
@@ -227,7 +228,7 @@ createPrototype($o, {
         if (typeof func != "function") throw new TypeError();
         var obj = {};
         var thisp = arguments[1];
-        for (var i in this.value){
+        for (let i in this.value){
             obj[i] = func.call(thisp, this.value[i], i, this);
         }
         return $(obj);
@@ -235,7 +236,7 @@ createPrototype($o, {
     forEach: function(func, thisp){
         if (typeof func != "function") throw new TypeError();
         var thisp = arguments[1];
-        for (var i in this.value){
+        for (let i in this.value){
             func.call(thisp, this.value[i], i, this);
         }
         return this;
@@ -244,7 +245,7 @@ createPrototype($o, {
         if (typeof func != "function") throw new TypeError();
         var obj = {};
         var thisp = arguments[1];
-        for (var i in this.value){
+        for (let i in this.value){
             if (func.call(thisp, this.value[i], i, this)){
                 obj[i] = this.value[i];
             }
@@ -252,7 +253,7 @@ createPrototype($o, {
         return $(obj);
     },
     get toJSON(){
-        var json = Cc['@mozilla.org/dom/json;1'].getService(Ci.nsIJSON);
+        var json = Cc["@mozilla.org/dom/json;1"].getService(Ci.nsIJSON);
         return $(json.encode(this.value));
     }
 });
@@ -262,7 +263,7 @@ if (DOMINSPECTOR){ createPrototype($o,{ inspect: function(){ inspectObject(this.
 // -----------------------------------------------------------------------------
 // XML
 // --------------------------------------------------------------------------{{{
-function $xml(arg){this.value = arg;}
+function $xml(arg){ this.value = arg; }
 $xml.prototype = new $c();
 createPrototype($xml, {
     get toObject(){ // {{{2
@@ -271,14 +272,14 @@ createPrototype($xml, {
             var isTextOnly = true;
             if (node.attributes && node.attributes.length > 0){
                 isTextOnly = false;
-                var attrs = node.attributes;
-                for (var i=0; i<attrs.length; i++){
+                let attrs = node.attributes;
+                for (let i=0; i<attrs.length; i++){
                     res["@"+attrs[i].nodeName] = attrs[i].nodeValue;
                 }
             }
             if (isTextOnly){
-                for (var i=0; i<node.childNodes.length; i++){
-                    var type = node.childNodes[i].nodeType;
+                for (let i=0; i<node.childNodes.length; i++){
+                    let type = node.childNodes[i].nodeType;
                     if (type != 3 && type != 4){
                         isTextOnly = false;
                     }
@@ -286,19 +287,19 @@ createPrototype($xml, {
             }
             if (isTextOnly){
                 res = "";
-                for (var i=0; i<node.childNodes.length; i++){
+                for (let i=0; i<node.childNodes.length; i++){
                     res += node.childNodes[i].nodeValue;
                 }
             } else {
-                for (var i=0; i<node.childNodes.length; i++){
-                    var child = node.childNodes[i];
-                    var name = child.nodeName;
-                    var value = parse(child);
+                for (let i=0; i<node.childNodes.length; i++){
+                    let child = node.childNodes[i];
+                    let name = child.nodeName;
+                    let value = parse(child);
                     if (!value) continue;
                     if (!res[name]){
                         res[name] = value;
                     } else {
-                        if (!(res[name] instanceof Array)) {
+                        if (!(res[name] instanceof Array)){
                             res[name] = [res[name]];
                         }
                         res[name].push(value);
@@ -329,20 +330,20 @@ createPrototype($xml, {
     evaluate: function(expression){ // {{{2
         function nsResolver(prefix){ // {{{3
             var ns = {
-                xhtml:    'http://www.w3.org/1999/xhtml',
-                rdf:      'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-                dc:       'http://purl.org/dc/elements/1.1/',
-                content:  'http://purl.org/rss/1.0/modules/content/',
-                taxo:     'http://purl.org/rss/1.0/modules/taxonomy/',
-                rss:      'http://purl.org/rss/1.0/',
-                atom:     'http://purl.org/atom/ns#'
+                xhtml:   "http://www.w3.org/1999/xhtml",
+                rdf:     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                dc:      "http://purl.org/dc/elements/1.1/",
+                content: "http://purl.org/rss/1.0/modules/content/",
+                taxo:    "http://purl.org/rss/1.0/modules/taxonomy/",
+                rss:     "http://purl.org/rss/1.0/",
+                atom:    "http://purl.org/atom/ns#"
             };
             return ns[prefix] || null;
         } // 3}}}
         var xpe = new XPathEvaluator();
+        var result, found = [], res;
         try {
-            var result = xpe.evaluate(expression, this.value, nsResolver, 0, null);
-            var found = [], res;
+            result = xpe.evaluate(expression, this.value, nsResolver, 0, null);
             while (res = result.iterateNext()) found.push(res);
             return $(found);
         } catch (e){ }
@@ -381,7 +382,8 @@ $xhr.prototype = {
         return this;
     },
     setMIME: function(type, charset){
-        this.xhr.overrideMimeType((type ? type : "text/html") +"; charset=" + charset);
+        this.xhr.overrideMimeType((type || "text/html") +
+                                  (charset ? ("; charset=" + charset) : ""));
         return this;
     },
     send: function(){
@@ -417,13 +419,13 @@ createPrototype($xhrResult, {
     get xml(){
         if (this.value.responseXML){
             return $(this.value.responseXML);
-        } else if (this.value.getResponseHeader("Content-Type").indexOf("text/html") >= 0){
-            var str = this.value.responseText.
-                                 replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig,'').
-                                 replace(/[\r\n]+/g,' ');
-            var htmlFragment = document.implementation.createDocument(null,'html',null);
-            //var range = window.content.document.createRange();
-            var range = document.getElementById('liberator-multiline-output').contentDocument.createRange();
+        } else if (this.value.getResponseHeader("Content-Type").indexOf("text/html") == 0){
+            let str = this.value.responseText.
+                                 replace(/^[\s\S]*?<html(?:\s[^>]*)?>|<\/html\s*>[\S\s]*$/ig,"").
+                                 replace(/[\r\n]+/g," ");
+            let htmlFragment = document.implementation.createDocument(null,"html",null);
+            //let range = window.content.document.createRange();
+            let range = document.getElementById("liberator-multiline-output").contentDocument.createRange();
             range.setStartAfter(window.content.document.body);
             htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str),true));
             return $(htmlFragment);
@@ -446,7 +448,7 @@ createPrototype($e4x, {
     toXMLString: function() $(this.value.toXMLString()),
     toArray: function(){
         var a = [];
-        for (var i=0; i<this.length; i++){
+        for (let i=0; i<this.length; i++){
             a.push(this.xml[i]);
         }
         return $(a);
@@ -461,13 +463,13 @@ createPrototype($e4x, {
         }
         return $(doc);
     },
-    get toHTMLDOM() $(util.xmlToDom(this.value, document)),
+    get toHTMLDOM() $(util.xmlToDom(this.value, document))
 });
 // }}}
 
 function createPrototype(class,obj){
     var flag;
-    for (var i in obj){
+    for (let i in obj){
         flag = false;
         if (obj.__lookupGetter__(i)){
             class.prototype.__defineGetter__(i,obj.__lookupGetter__(i));
