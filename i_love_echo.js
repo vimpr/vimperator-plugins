@@ -35,6 +35,14 @@
  *   とりあえず、http://exapmle.comのDOMドキュメントをstack
  *  :echo $_.cache.last.inspect()
  *   最後にstackしたものを取り出し、DOM Inspectorが入っている場合はDOM Inspectorに出力
+ *
+ *  :echo $('//a').evaluate().grep(/^http/).join("\n").copy()
+ *  リンクを抽出してクリップボードにコピー
+ *
+ *  :echo $('//a').evaluate().map(function(v)v.href.replace(/.*\//,'')).copy()
+ *  :echo $('//a').evaluate().map($f.href().replace(/.*\//,'')).copy()
+ *  リンクのファイル名部分のみをクリップボードにコピー
+ *
  */
 
 (function(){
@@ -59,6 +67,39 @@ function $(arg){ //{{{
         return new $o(arg);
     }
 } //}}}
+liberator.modules.$f = (function () { //{{{
+    const pests = [
+        '__defineGetter__', '__defineSetter__', 'hasOwnProperty', 'isPrototypeOf',
+        '__lookupGetter__', '__lookupSetter__', '__parent__', 'propertyIsEnumerable',
+        '__proto__', 'toSource', 'toString', 'toLocaleString', 'unwatch', 'valueOf', 'watch'
+    ];
+
+    function id(value)
+        value;
+
+    function memfn(parent)
+        function (name,args)
+            FFF(function(self)
+                    let (s = parent(self))
+                        let (f = s[name])
+                            (f instanceof Function ? s[name].apply(s, args) : f));
+
+    function mem(parent)
+        function (name)
+            FFF(function(self)
+                    parent(self)[name]);
+
+    function FFF(parent) {
+        parent.__noSuchMethod__ = memfn(parent)
+        parent.m = {__noSuchMethod__: mem(parent)};
+        pests.forEach(function(it) (parent[it] = function() parent.__noSuchMethod__(it, arguments)));
+        return parent;
+    };
+
+    return FFF(id);
+})(); //}}}
+
+
 liberator.modules.$ = $;
 liberator.modules.$x = function $x(url, method, user, password){ //{{{
     if (!cacheXHR){
@@ -103,7 +144,6 @@ liberator.modules.$_ = { //{{{
         return null;
     }
 }; // }}}
-
 const DOMINSPECTOR = Application.extensions.has("inspector@mozilla.org") && Application.extensions.get("inspector@mozilla.org").enabled;
 
 // -----------------------------------------------------------------------------
