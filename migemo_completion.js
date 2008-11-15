@@ -38,9 +38,11 @@
 
   let original_filter = liberator.modules.completion.filter;
 
-  liberator.modules.completion.filter = function(array,filter,matchFromBeginning){
-      if(!filter) return array;
+  liberator.modules.completion.filter = function(array,filter,matchFromBeginning,favicon){
+      if (!filter)
+          return [[a[0], a[1], favicon ? a[2] : null] for each (a in array)];
 
+      // FIXME XUL/Migemo のバグに対処。治ったら消す
       if(/[()|]/.test(filter))
           return original_filter.apply(this,arguments);
 
@@ -56,6 +58,16 @@
           return original_filter.apply(this,arguments);
       }
 
-      return array.filter(function([value,label]) migemoPattern.test(value) || migemoPattern.test(label));
+      let result = [];
+      for (let [,item] in Iterator(array)) {
+          let complist = item[0] instanceof Array ? item[0] : [item[0]];
+          for (let [,compitem] in Iterator(complist)) {
+              if (migemoPattern.test(compitem) || migemoPattern.test(item[1])) {
+                result.push([compitem,item[1],favicon ? item[2] : null]);
+                break;
+              }
+          }
+      }
+      return result;
   };
 })();
