@@ -12,32 +12,34 @@
 const SITE_DEFINITION = [{
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
-    shortHelp: 'SPACE ALC (英辞郎 on the Web)',
+    shortHelp: 'SPACE ALC (\u82F1\u8F9E\u6717 on the Web)',
     xpath: 'id("resultList")',
     dictionary: 'en-US'
 },{
     names: ['goo[dictionary]'],
     url: 'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
-    shortHelp: 'goo 辞書',
+    shortHelp: 'goo \u8F9E\u66F8',
     xpath: 'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class,"diclst")]',
     multi: true,
-    dictionary: 'en-US'
+    dictionary: 'en-US',
+    srcEncode: 'EUC-jp',
+    urlEncode: 'UTF-8'
 },{
     names: ['answers'],
     url: 'http://www.answers.com/%s',
-    shortHelp: 'Answers.com(英英辞書)',
+    shortHelp: 'Answers.com(\u82F1\u82F1\u8F9E\u66F8)',
     xpath: 'id("firstDs")',
     dictionary: 'en-US'
 },{
     names: ['wikipe[diaja]'],
     url: 'http://ja.wikipedia.org/wiki/%s',
-    shortHelp: 'ウィキペディア lite',
+    shortHelp: 'Wikipedia lite(ja)',
     xpath: 'id("bodyContent")/p[1]',
     dictionary: 'ja'
 },{
     names: ['wikipe[diaen]'],
     url: 'http://en.wikipedia.org/wiki/%s',
-    shortHelp: 'Wikipedia lite',
+    shortHelp: 'Wikipedia lite(en)',
     xpath: 'id("bodyContent")/p[1]',
     dictionary: 'en'
 }];
@@ -154,10 +156,11 @@ SITE_DEFINITION.forEach(function (dictionary) {
             if (special && sel) arg = sel;
             if (!arg) return;
             var url;
-            if (dictionary.encode) {
+            if (dictionary.urlEncode) {
                 let ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                                      .getService( Components.interfaces.nsITextToSubURI);
-                url = dictionary.url.replace(/%s/g, ttbu.ConvertAndEscape(dictionary.encode, arg));
+                url = dictionary.url.replace(/%s/g, ttbu.ConvertAndEscape(dictionary.urlEncode, arg));
+                url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             } else {
                 url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             }
@@ -171,7 +174,7 @@ SITE_DEFINITION.forEach(function (dictionary) {
                 }
                 var xs = new XMLSerializer();
                 liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<[^>]+>/g,function (all) all.toLowerCase() ) + '</div>'), true);
-            }, dictionary.encode ? dictionary.encode : null);
+            }, dictionary.srcEncode ? dictionary.srcEncode : null);
         },
         {
             completer: function (arg) {
