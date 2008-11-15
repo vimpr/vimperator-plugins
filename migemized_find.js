@@ -2,7 +2,7 @@
 // @name           Migemized Find
 // @description-ja デフォルトのドキュメント内検索をミゲマイズする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        2.5
+// @version        2.6
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -220,16 +220,10 @@
       if (backwards)
         frames = frames.reverse();
 
-      for each (let frame in frames) {
-        let ret = this.find(expr, backwards, this.makeBodyRange(frame));
-        if (ret) {
-          result = this.storage.lastResult = {
-            frame: frame,
-            range: ret,
-          };
-          break;
-        }
-      }
+      frames.some(function (frame)
+        let (ret = this.find(expr, backwards, this.makeBodyRange(frame)))
+          (ret && (result = this.storage.lastResult = { frame: frame, range: ret}))
+      , this);
 
       this.removeHighlight(color);
 
@@ -282,13 +276,10 @@
         let [head, tail] = slashArray(frames, last.frame);
         let next = backwards ? head.reverse().concat(tail.reverse())
                              : tail.concat(head);
-        for each (let frame in next) {
-          let r = this.find(str, backwards, this.makeBodyRange(frame));
-          if (r) {
-            result = {frame: frame, range: r};
-            break;
-          }
-        }
+        next.some(function (frame)
+          let (ret = this.find(str, backwards, this.makeBodyRange(frame)))
+            (ret && (result = {frame: frame, range: ret}))
+        , this);
       }
 
       this.storage.lastResult = result;
@@ -326,7 +317,7 @@
       let frames = this.currentFrames;
       let removers = [];
 
-      for each (let frame in frames) {
+      frames.forEach(function (frame) {
         let frameRange = this.makeBodyRange(frame);
         let ret, start = frameRange;
         while (ret = this.find(expr, false, frameRange, start)) {
@@ -334,7 +325,7 @@
           start = ret.cloneRange();
           start.setStart(ret.endContainer, ret.endOffset);
         }
-      }
+      }, this);
 
       this.storage.highlightRemovers[color] = function () { removers.forEach(function (it) it.call()); };
 
