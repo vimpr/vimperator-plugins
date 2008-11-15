@@ -80,8 +80,8 @@ liberator.plugins.LocalKeyMode = (function() {
   var _enableTabs = [];
   var _names;
   
-  var feedkeysfuncName = typeof liberator.modules != 'undefined' ?
-    'liberator.modules.events.feedkeys' : 'liberator.events';
+  var feedKeys = liberator.modules ? liberator.modules.events.feedkeys
+                                   : liberator.events.feedkeys;
   // utility function
   function cloneMap(org) {
     return new Map(
@@ -174,13 +174,12 @@ liberator.plugins.LocalKeyMode = (function() {
         if (!extra || !extra.rhs) extra.rhs = (item[1]+'').replace(rhsRegExp, ' ');
         
         if (typeof command != 'function') {
+          let commandName = command;
           if (command.charAt(0) == ':')
-            command = new Function( extra.noremap ?
-              'commandline.open("", "'+command+'", modes.EX);' :
-              'liberator.execute("'+command+'");' );
+            command = extra.noremap ? function () commandline.open("", commandName, modes.EX)
+                                    : function () liberator.execute(commandName);
           else
-            command = new Function([ feedkeysfuncName, '("', command, '", ',
-              (extra.noremap ? true : false), ', true)'].join('') );
+            command = function () feedKeys(command, extra.noremap, true);
         }
         keymaps.push(new Map([modes.NORMAL], key, 'localkeymap', command, extra) );
       }
