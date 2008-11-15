@@ -164,7 +164,6 @@
 
   // 要素をクリックする
   function clickElement (elem) {
-    liberator.log('click: ' + elem);
     var e = content.document.createEvent('MouseEvents');
     e.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
     elem.dispatchEvent(e);
@@ -175,13 +174,11 @@
   function displayOpened (link) {
     var msg = 'open: ' + link.type + ' <' + removeSpace(link.text) + '> ' + link.uri;
     setTimeout(function () liberator.echo(msg, commandline.FORCE_SINGLELINE), gv().displayDelay);
-    liberator.log(msg);
   }
 
 
   // リンクを開く
   function open (link) {
-    liberator.log(link);
     if (link.element) {
       clickElement(link.element);
     } else if (link.uri) {

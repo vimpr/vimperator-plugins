@@ -5,8 +5,8 @@
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
+// @minVersion     1.2
 // @maxVersion     2.0pre
-// @minVersion     2.0pre
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -66,12 +66,11 @@
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg, bang) {
-      liberator.log(arg);
-      liberator.log(io.expandPath(arg.string));
       (bang ? killWatcher : startWatching)(io.expandPath(arg.string));
     },
     {
       bang: true,
+      argCount: '1',
       completer: function (arg, bang) {
         return bang ? [0, [[filepath, ''] for (filepath in files)]]
                     : completion.file.apply(this, arguments);

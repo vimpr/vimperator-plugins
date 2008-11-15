@@ -54,7 +54,6 @@
     if (modes.extended & modes.HINTS) {
       let act = active;
       let key = events.toString(event);
-      liberator.log(act);
       if (key == mode_change_key) {
         active = !active;
         event.preventDefault();
