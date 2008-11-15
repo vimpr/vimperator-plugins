@@ -68,6 +68,8 @@ CookieManager.prototype = {
     },
 
     _deserializeCookie: function (cookieString) {
+        if (!cookieString) return {};
+
         let cookies = cookieString.split(/; */);
         let cookie = {};
         let key, val;
@@ -108,6 +110,7 @@ liberator.modules.buffer.addPageInfoSection(
                 yield [p, c.getCookie(p)];
             }
         }
+        return;
     }
 );
 
