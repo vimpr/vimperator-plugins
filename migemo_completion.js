@@ -36,8 +36,6 @@
       return [0,oldResult[1].filter(function([value,label]) migemoPattern.test(value) || migemoPattern.test(label))];
   },[""]);
 
-  let original_filter = liberator.modules.completion.filter;
-
   liberator.modules.completion.filter = function(array,filter,matchFromBeginning,favicon){
       if (!filter)
           return [[a[0], a[1], favicon ? a[2] : null] for each (a in array)];
