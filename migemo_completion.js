@@ -42,7 +42,7 @@
       if (!filter)
           return [[a[0], a[1], favicon ? a[2] : null] for each (a in array)];
 
-      // FIXME XUL/Migemo のバグに対処。治ったら消す
+      // FIXME XUL/Migemo のバグに対処。治ったら消す ←治ったぞ！！！
       if(/[()|]/.test(filter))
           return original_filter.apply(this,arguments);
 
