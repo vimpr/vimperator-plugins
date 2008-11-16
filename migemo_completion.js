@@ -42,27 +42,18 @@
       if (!filter)
           return [[a[0], a[1], favicon ? a[2] : null] for each (a in array)];
 
-      // FIXME XUL/Migemo のバグに対処。治ったら消す ←治ったぞ！！！
-      if(/[()|]/.test(filter))
-          return original_filter.apply(this,arguments);
-
-      var migemoPattern;
-      try {
-          let original = XMigemoTextUtils.sanitize(filter);
-          let migemoString = XMigemoCore.getRegExp(filter);
-          migemoString = original + "|" + migemoString;
-          if(matchFromBeginning)
-              migemoString ="^(" + migemoString + ")";
-          migemoPattern = new RegExp(migemoString,"i");
-      } catch(e) {
-          return original_filter.apply(this,arguments);
-      }
+      let original = XMigemoTextUtils.sanitize(filter);
+      let migemoString = XMigemoCore.getRegExp(filter);
+      migemoString = original + "|" + migemoString;
+      if(matchFromBeginning)
+          migemoString ="^(" + migemoString + ")";
+      var migemoPattern = new RegExp(migemoString,"i");
 
       let result = [];
-      for (let [,item] in Iterator(array)) {
+      for (let [,item] in Iterator(array)){
           let complist = item[0] instanceof Array ? item[0] : [item[0]];
-          for (let [,compitem] in Iterator(complist)) {
-              if (migemoPattern.test(compitem) || migemoPattern.test(item[1])) {
+          for (let [,compitem] in Iterator(complist)){
+              if (migemoPattern.test(compitem) || migemoPattern.test(item[1])){
                 result.push([compitem,item[1],favicon ? item[2] : null]);
                 break;
               }
