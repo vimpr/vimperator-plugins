@@ -160,7 +160,6 @@ SITE_DEFINITION.forEach(function (dictionary) {
                 let ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                                      .getService( Components.interfaces.nsITextToSubURI);
                 url = dictionary.url.replace(/%s/g, ttbu.ConvertAndEscape(dictionary.urlEncode, arg));
-                url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             } else {
                 url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             }
