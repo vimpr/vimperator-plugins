@@ -4,14 +4,14 @@
  * @description      request, and the result is displayed in the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.1.0
+ * @version          0.1.1
  * @minVersion       1.2
  * @maxVersion       1.2
  * ==/VimperatorPlugin==
  *
  * Usage:
- * :mr alc {ENY_TEXT or SELECTED_TEXT}  -> show the buffer.
- * :mr goo! {ENY_TEXT or SELECTED_TEXT} -> show the new tab.
+ * :mr alc {ANY_TEXT or SELECTED_TEXT}  -> show the buffer.
+ * :mr goo! {ANY_TEXT or SELECTED_TEXT} -> show the new tab.
  *
  * custom:
  * [COMMAND](default [mr])
