@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed in the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.1.1
+ * @version          0.1.2
  * @minVersion       1.2
  * @maxVersion       1.2
  * ==/VimperatorPlugin==
@@ -28,9 +28,9 @@
  *         description: 'local',                          // required
  *         url:         'http://localhost/index.html?%s', // required, %s <-- replace string
  *         resultXpath: '//*',                            // optional(default all)
- *         srcEncode:   'SHIFT-JIS',                      // optional(default UTF-8)
- *         urlEncode:   'SHIFT-JIS',                      // optional(default srcEncode)
- *         ignoreTags:  'img',                            // optional(default script), syntax tag1,tag2,……
+ *         srcEncode:   'SHIFT_JIS',                      // optional(default UTF-8)
+ *         urlEncode:   'SHIFT_JIS',                      // optional(default srcEncode)
+ *         ignoreTags:  'img'                             // optional(default script), syntax tag1,tag2,……
  *     },
  * ];
  * EOM
@@ -62,7 +62,7 @@ var DEFAULT_SITEINFO = [
         url:         'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0',
         resultXpath: '//div[@id="incontents"]/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
         srcEncode:   'EUC-JP',
-        urlEncode:   'EUC-JP',
+        urlEncode:   'EUC-JP'
      },
 ];
 
@@ -83,7 +83,7 @@ var $U = {
         liberator.echoerr(msg);
     },
     extend: function(dst, src) {
-        for (var prop in src)
+        for (let prop in src)
             dst[prop] = src[prop];
          return dst;
     },
@@ -95,7 +95,7 @@ var $U = {
     stripTags: function(str, tags) {
         var ignoreTags = [].concat(tags);
         ignoreTags = '(?:' + ignoreTags.join('|') + ')';
-        return str.replace(new RegExp('<' + ignoreTags + '(?:\\s[^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '\\s*>', 'img'), '');
+        return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
     stripScripts: function(str) {
         return this.stripScripts(str, 'script');
@@ -128,11 +128,11 @@ var $U = {
         }
 
         var result = [];
-        for (var v in ret)
+        for (let v in ret)
             result.push(ret[v]);
 
         return result;
-    },
+    }
 };
 
 // vimperator plugin command register
@@ -147,7 +147,7 @@ var CommandRegister = {
             $U.bind(cmdClass, cmdClass.action),
             {
                 completer: cmdClass.completer || function(filter, special) {
-                    var allSuggestions = siteinfo.map(function(s) [s.name, s.description] );
+                    var allSuggestions = siteinfo.map(function(s) [s.name, s.description]);
                     if (!filter) return [0, allSuggestions];
                     var suggestions = allSuggestions.filter(function(s) {
                         return s[0].indexOf(filter) == 0;
@@ -157,7 +157,7 @@ var CommandRegister = {
                 options: options,
                 argCount: cmdClass.argCount || undefined,
                 bang: cmdClass.bang || true,
-                count: cmdClass.count || false,
+                count: cmdClass.count || false
             }
         );
 
@@ -186,11 +186,11 @@ var CommandRegister = {
                 }
             );
         });
-    },
+    }
 };
 
 
-// like prototype.js
+// like the Prototype JavaScript framework
 var Requester = function() {
     this.initialize.apply(this, arguments);
 };
@@ -202,7 +202,7 @@ Requester.prototype = {
         this.headers = headers || {};
         this.options = $U.extend({
             asynchronous: true,
-            encoding: 'UTF-8',
+            encoding: 'UTF-8'
         }, options || {});
         this.observers = {};
     },
@@ -210,14 +210,14 @@ Requester.prototype = {
         try {
             if (typeof this.observers[name] == 'undefined') this.observers[name] = [];
             this.observers[name].push(func);
-        } catch(e) {
+        } catch (e) {
             if (!this.fireEvent('onException', e)) throw e;
         }
     },
     fireEvent: function(name, args) {
         if (!(this.observers[name] instanceof Array)) return false;
         this.observers[name].forEach(function(event) {
-            setTimeout(function() { event(args) }, 10);
+            setTimeout(event, 10, args);
         });
         return true;
     },
@@ -238,7 +238,7 @@ Requester.prototype = {
     },
     _onStateChange: function() {
         var readyState = this.transport.readyState;
-        if (readyState > 1 && !((readyState == 4) && this._complete))
+        if (readyState > 1 && !(readyState == 4 && this._complete))
             this.respondToReadyState(this.transport.readyState);
     },
     getStatus: function() {
@@ -257,7 +257,7 @@ Requester.prototype = {
             Requester.requestCount--;
             try {
                 this._complete = true;
-                this.fireEvent((this.isSuccess() ? 'onSuccess' : 'onFailure'), response);
+                this.fireEvent('on' + (this.isSuccess() ? 'Success' : 'Failure'), response);
             } catch (e) {
                 if (!this.fireEvent('onException', e)) throw e;
             }
@@ -265,21 +265,24 @@ Requester.prototype = {
     },
     setRequestHeaders: function() {
         var headers = {
-            'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+            'Accept': 'text/javascript, application/javascript, text/html, application/xhtml+xml, application/xml, text/xml, */*;q=0.1'
         };
 
         if (this.method == 'POST') {
             headers['Content-type'] = 'application/x-www-form-urlencoded' +
                 (this.options.encoding ? '; charset=' + this.options.encoding : '');
 
-            if (this.transport.overrideMimeType && (navigator.userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
-                 headers['Connection'] = 'close';
+            if (this.transport.overrideMimeType) {
+                let year = parseInt((navigator.userAgent.match(/\bGecko\/(\d{4})/) || [0, 2005])[1], 10);
+                if (0 < year && year < 2005)
+                     headers['Connection'] = 'close';
+            }
         }
 
-        for (var key in this.headers)
+        for (let key in this.headers)
             if (this.headers.hasOwnProperty(key)) headers[key] = this.headers[key];
 
-        for (var name in headers)
+        for (let name in headers)
             this.transport.setRequestHeader(name, headers[name]);
 
     },
@@ -288,7 +291,7 @@ Requester.prototype = {
     },
     post: function() {
         this._request('POST');
-    },
+    }
 };
 
 var Response = function() {
@@ -321,10 +324,10 @@ Response.prototype = {
 
     getHTMLDocument: function(xpath, xmlns) {
         if (!this.doc) {
-            this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:\s[^>]+?)?>|<\/html\s*>[\S\s]*$/ig, '').replace(/[\r\n]+/g,' ');
-            var ignoreTags = ['script'];
+            this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
+            let ignoreTags = ['script'];
             if (this.request.options.siteinfo.ignoreTags) {
-              ignoreTags.concat(this.request.options.siteinfo.ignoreTags.split(','));
+                ignoreTags.concat(this.request.options.siteinfo.ignoreTags.split(','));
             }
             this.htmlStripScriptFragmentstr = $U.stripTags(this.htmlFragmentstr, 'script');
             this.doc = this._createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
@@ -350,7 +353,7 @@ Response.prototype = {
         if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
             return this._createHTMLDocument2(str);
         } else {
-          return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
+            return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
         }
     },
     _createHTMLDocument2: function(str) {
@@ -365,9 +368,9 @@ Response.prototype = {
         var node = doc || document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         parentNode = parentNode || document.createElementNS(null, 'div');
-        for(var i = 0, l = nodesSnapshot.snapshotLength; i < l; parentNode.appendChild(nodesSnapshot.snapshotItem(i++)));
+        for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; parentNode.appendChild(nodesSnapshot.snapshotItem(i++)));
         return parentNode;
-    },
+    }
 };
 
 // main controller
@@ -388,20 +391,20 @@ var MultiRequester = {
 
         // via. lookupDictionary.js
         var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
-                        .getService(Components.interfaces.nsITextToSubURI);
+                             .getService(Components.interfaces.nsITextToSubURI);
         url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, arg.str));
         $U.debug(url);
 
         if (special) {
-            liberator.open(url, liberator.NEW_TAB)
+            liberator.open(url, liberator.NEW_TAB);
         } else {
-            var req = new Requester(url, null, {
+            let req = new Requester(url, null, {
                 encoding: srcEncode,
                 siteinfo: site,
                 args: {
                     args: args,
                     special: special,
-                    count: count,
+                    count: count
                 }
             });
             req.addEventListener('onException', $U.bind(this, this.onException));
@@ -432,25 +435,24 @@ var MultiRequester = {
         this.siteinfo.forEach(function(s) {
             if (s.name == name) ret = s;
         });
-        return ret ? ret : this.siteinfo[0];
+        return ret || this.siteinfo[0];
     },
     onSuccess: function(res) {
         if (!res.isSuccess || res.responseText == '') {
             return $U.echoerr('request error.');
         }
+        var doc, args, xs;
         try {
-            var doc = res.getHTMLDocument(res.request.options.siteinfo.resultXpath);
-            var args = res.request.options.args;
-            var xs  = new XMLSerializer();
+            doc = res.getHTMLDocument(res.request.options.siteinfo.resultXpath);
+            args = res.request.options.args;
+            xs = new XMLSerializer();
             $U.echo('<base href="' + res.request.url + '"/>' + xs.serializeToString(doc));
-
-        } catch(e) {
+        } catch (e) {
             $U.echoerr('parse error');
         }
-
     },
     onFailure: function(res) {
-        $U.echoerr('request error!!:  ' + res.statusText);
+        $U.echoerr('request error!!: ' + res.statusText);
     },
     onException: function(e) {
         $U.echoerr('error!!: ' + e);
