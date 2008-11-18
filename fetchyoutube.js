@@ -1,6 +1,6 @@
 // ==VimperatorPlugin==
-// @name           Fetch Youtube Video
-// @description    Fetch Youtube Video (fmt=22)
+// @name           Fetch YouTube Video
+// @description    Fetch YouTube Video (fmt=22)
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
@@ -10,7 +10,7 @@
 //
 // Usage:
 //    :fetchyoutube
-//      Download youtube video to default download directory.
+//      Download YouTube video to default download directory.
 //      (pref: browser.download.dir)
 //
 // Links:
@@ -19,7 +19,7 @@
 (function () {
 
     function fixFilename (filename) {
-      const badChars = /[\\\/:;\*\?\"\<\>\|]/g;
+      const badChars = /[\\\/:;*?"<>|]/g;
       return filename.replace(badChars, '_');
     }
 
@@ -36,13 +36,13 @@
     }
 
     function fetch (arg) {
+      let doc = content.document;
+      if (!doc.location.href.match(/http:\/\/(?:[^.]+\.)?youtube\.com\/watch/))
+        return;
       let filepath = arg.string;
       let dir = options.getPref('browser.download.dir');
       let as = content.document.defaultView.wrappedJSObject.swfArgs;
-      let doc = content.document;
       let title = doc.title.replace(/^YouTube - /, '');
-      if (!doc.location.href.match(/http:\/\/[a-zA-Z\.]*youtube\.com\/watch/))
-        return;
       let url = 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;
 
       let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
@@ -73,7 +73,7 @@
 
     commands.addUserCommand(
       ['fetchyoutube', 'fetchyt'],
-      'fecth youtube HD video',
+      'fecth YouTube HD video',
       fetch,
       {argCount: '*', completer: completion.file},
       true
