@@ -36,7 +36,7 @@
 		if (canvas_frame) return (canvas_frame);
 		if (use_gmail_v1)
 		{// On older versions of Gmail, The main canvas is the iframe that has the attribute left: 0pt
-			return (liberator.buffer.evaluateXPath('//iframe[contains(@style, "left: 0pt")]', window.content.frames[0].document, null, true).iterateNext());
+			return (buffer.evaluateXPath('//iframe[contains(@style, "left: 0pt")]', window.content.frames[0].document, null, true).iterateNext());
 		}
 		return null;
 	},
