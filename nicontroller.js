@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.54
+ * @version         0.55
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -186,7 +186,7 @@ NicoPlayerController.prototype = {
     },
 
     constants: {
-        VERSION:        '0.53',
+        VERSION:        '0.55',
 
         CARDINAL_NUMBER:    10,
 
@@ -268,9 +268,7 @@ NicoPlayerController.prototype = {
             let flvplayer = window.content.document.getElementById(this.constants.FLVPLAYER_NODE_ID);
             if(! flvplayer) throw new Error('flvplayer is not found');
 
-            return flvplayer.wrappedJSObject
-                ? flvplayer.wrappedJSObject
-                : flvplayer ? flvplayer : null;
+            return flvplayer.wrappedJSObject || flvplayer;
         }
         return null;
     },
