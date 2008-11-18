@@ -37,7 +37,7 @@
 
     function fetch (arg) {
       let doc = content.document;
-      if (!doc.location.href.match(/http:\/\/(?:[^.]+\.)?youtube\.com\/watch/))
+      if (!doc.location.href.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/))
         return;
       let filepath = arg.string;
       let dir = options.getPref('browser.download.dir');
