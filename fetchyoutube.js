@@ -50,14 +50,12 @@
 
       let file;
       if (filepath) {
-        filepath = io.expandPath(filepath);
-        file = io.getFile(filepath);
-        if (file.isDirectory())
-          file.appendRelativePath(title + '.mp4');
+        file = io.getFile(io.expandPath(filepath));
       } else {
         file = dm.userDownloadsDirectory;
-        file.appendRelativePath(title + '.mp4');
       }
+      if (file.isDirectory())
+        file.appendRelativePath(fixFilename(title) + '.mp4');
       if (file.exists())
         return liberator.echoerr('The file already exists! -> ' + file.path);
       file = makeFileURI(file);
@@ -69,7 +67,6 @@
       wbp.saveURI(makeURL(url), null, null, null, null, file);
       liberator.echo('maybe downloading started');
     }
-    //fetch();
 
     commands.addUserCommand(
       ['fetchyoutube', 'fetchyt'],
@@ -78,6 +75,8 @@
       {argCount: '*', completer: completion.file},
       true
     );
+
+    // fetch({});
 
 })();
 
