@@ -285,9 +285,12 @@ NicoPlayerController.prototype = {
             let base = p.ext_getPlayheadTime();
             let self = this;
             setTimeout(function () {
-                base !== p.ext_getPlayheadTime()
-                    ? p.ext_play(self.constants.PAUSE)
-                    : p.ext_play(self.constants.PLAY);
+                if (base !== p.ext_getPlayheadTime()) {
+                    p.ext_play(self.constants.PAUSE);
+                } else {
+                    p.ext_setPlayheadTime(0);
+                    p.ext_play(self.constants.PLAY);
+                }
             }, 100);
         }
     },
