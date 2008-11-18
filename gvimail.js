@@ -24,15 +24,11 @@
 	// If you have installed stylechanger.js and want to use the Vimish style, set the option below to true.
 	// If you didn't yet get the gvimail.css, download it from http://code.google.com/p/gvimail/source/browse/trunk/colors/GVimail.css
 	// and put it in ~/.vimperator/colors (or %HOMEPATH\vimperator\colors)
-	var use_gvimail_css = true;
-
-	// for compatibility with all versions of Vimperator >= 0.6pre,
-	// we use the name viberator to indicate either Vimperator or liberator namespace.
-	var viberator = (typeof liberator == 'undefined') ? vimperator : liberator;
+	var use_gvimail_css = false;
 
 
 	var GViMail = {
-	modes:viberator.config.browserModes || [viberator.modes.NORMAL],
+	modes:config.browserModes || [modes.NORMAL],
 	/// get the iframe object that contains all the visible items. This should always get focus.
 	getMainCanvas : function()
 	{ // It is simpler to find the main canvas in Gmail v2, (id='canvas_frame')
@@ -48,9 +44,9 @@
 	/// or a part of the src attribute of the img element (for Gmail v1)
 	clickImage : function (classnamev2, imgsrcv1)
 	{
-		var elem = viberator.buffer.evaluateXPath('//*[contains(concat(" ", @class, " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
+		var elem = buffer.evaluateXPath('//*[contains(concat(" ", @class, " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
 		// hmm, the code below generates a log: Invalid argument for followLink.
-		viberator.buffer.followLink(elem, viberator.CURRENT_TAB);
+		buffer.followLink(elem, liberator.CURRENT_TAB);
 	},
 	/// Gives focus to the main Canvas, to make all keys working well.
 	focusMainFrame:function ()
@@ -69,21 +65,21 @@
 	/// we will add an EventListener on keypress to avoid this.
 	preventLooseFocus:function()
 	{
-		if (viberator.mode == viberator.modes.NORMAL
-				&& !viberator.mode.isRecording
-				&& !(viberator.modes.extended & viberator.modes.MENU)
-				&& !viberator.modes.passNextKey
-				&& !viberator.modes.passAllKeys)
+		if (liberator.mode == modes.NORMAL
+				&& !liberator.mode.isRecording
+				&& !(modes.extended & modes.MENU)
+				&& !modes.passNextKey
+				&& !modes.passAllKeys)
 		{
 			GViMail.focusMainFrame();
 		}
 	}
 };
 
-viberator.mappings.addUserMap(GViMail.modes, ["zM"],
+mappings.addUserMap(GViMail.modes, ["zM"],
 	"Closes all fold",
 	function () { GViMail.clickImage('Dm2exe', 'collapse_icon'); });
-viberator.mappings.addUserMap(GViMail.modes, ["zR"],
+mappings.addUserMap(GViMail.modes, ["zR"],
 	"Opens all fold",
 	function () { GViMail.clickImage('kPoXId', 'expand_icon'); });
 // Let's build the Gmail(v2)-custom hinttags. Follow the comments to understand.
@@ -108,6 +104,10 @@ var gmail_v2_hinttags =
 	+ " | //td/span[starts-with(@class, 'lHQn1d')]/img"
 	// Delete all spam messages now
 	+ " | //*[@class='rj1J6b'"
+	// Invite x@y.z to Gmail.
+	+ " or @class='YCDlS'"
+	// When you delete any message in a thread view, there are links saying "n deleted messages in this conversation. View message or delete forever."
+	+ " or @class='u1T3K' or @class='iVE0ue'"
 	// Hide filter options (settings)
 	+ " or @class='u7uAnb']"
 	// Select message in the list
@@ -129,6 +129,7 @@ var gmail_v2_hinttags =
 	+ " | //*[contains(concat(' ', @class, ' '), ' GaVz0 ')]"
 	// Update conversation, Ignore (when someone just posted a message on the thread you're reading & editing)
 	+ " | //*[contains(concat(' ', @class, ' '), ' Gf76kb ')]"
+	+ " | //*[contains(concat(' ', @class, ' '), ' GRpVjf ')]" //Recently changed to this ...
 	// Show|Hide quoted text
 	+ " | //span[contains(concat(' ', @class, ' '), ' WQ9l9c ')]"
 	//
@@ -138,17 +139,19 @@ var gmail_v1_hinttags =
       "//*[contains(@class, 'lk ') or @class='msc' or @class='ll' or @class='setl' or @class='lkw' or starts-with(@class, 'sc ')] | //tr[@class='rr' or @class='ur']/td[position()=5] | //div/span[contains(@class, 'bz_rbbb')] | //span[@class='l' and contains(@id, 'sl_')]" ;
 var gmail_hints = use_gmail_v1 ? gmail_v1_hinttags : "";
 if (use_gmail_v2) gmail_hints = gmail_hints + (gmail_hints ? " | " : "") + gmail_v2_hinttags;
-gmail_hints = gmail_hints + (gmail_hints ? " | " : "") + viberator.options['hinttags'];
+gmail_hints = gmail_hints + (gmail_hints ? " | " : "") + options['hinttags'];
 
 // Now: override default hinttags. Override is not the true wording, I'd rather say extend.
-viberator.options.add(["hinttags", "ht"],
+/*options.add(["hinttags", "ht"],
 	"XPath string of hintable elements activated by 'f' and 'F'",
 	// Gmail uses span[@selector] for labels in the line Select: All, None, Read, Unread, Starred, Unstarred
 	"string",
-	gmail_hints);
+	gmail_hints);*/
+// This is not the most elegant solution to do this, but I don't manage to find the correct one myself...
+options.get("hinttags").value=gmail_hints;
 
 // When navigation keys (and others) no longer work, type zf to focus to the main frame
-viberator.mappings.addUserMap(GViMail.modes, ["zf"],
+mappings.addUserMap(GViMail.modes, ["zf"],
 	"Focus main frame",
 	function () { GViMail.focusMainFrame(); });
 getBrowser().mTabBox.addEventListener('TabSelect', function(event){
@@ -156,9 +159,9 @@ getBrowser().mTabBox.addEventListener('TabSelect', function(event){
  }, false);
 window.addEventListener('keypress', GViMail.preventLooseFocus, true);
 
-if (use_gvimail_css && (typeof viberator.globalVariables.styles == 'undefined' || viberator.globalVariables.styles == ''))
+if (use_gvimail_css && (typeof liberator.globalVariables.styles == 'undefined' || liberator.globalVariables.styles == ''))
 {
-	viberator.globalVariables.styles = 'style,gvimail';
+	liberator.globalVariables.styles = 'style,gvimail';
 }
 
 })();
