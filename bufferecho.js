@@ -26,7 +26,7 @@ function htmlEscape(str){
 
 commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to a buffer(browser)',
     function(args, special){
-        liberator.plugins.buffer_echo.open(args, special);
+        liberator.plugins.buffer_echo.open(args.string, special);
     },{
         completer: function(filter) completion.javascript(filter)
     },true
