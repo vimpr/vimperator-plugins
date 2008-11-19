@@ -20,13 +20,13 @@
  * Tested on:
  *	Firefox version: 3.0.3
  *	Vimperator version: 1.2
- *		url: https://addons.mozilla.org/en-US/firefox/addon/4891
+ *		URL: https://addons.mozilla.org/firefox/addon/4891
  */
 (function (){
 var queue = [];
 
 function push(strs){
-	for(var i = strs.length-1; i >= 0; i--){
+	for(let i = strs.length; i-- > 0;){
 //		if((strs[i] != "") && !(queue.some(function(s){return s==strs[i]} ))){
 		if(strs[i] != "" && queue[0] != strs[i]){
 			queue.unshift(strs[i]);
@@ -35,14 +35,14 @@ function push(strs){
 }
 
 function search(str){
-	str= str || queue[0];
+	str = str || queue[0];
 	liberator.commandline.open("/", str, modes.SEARCH_FORWARD);
 }
 
 function suggestions(str){
 	return queue
-		  .filter(function(i){return i.indexOf(str) == 0})
-		   .map(function(i){return [i, "Stored Keyword"]});
+		  .filter(function(i) i.indexOf(str) == 0)
+		   .map(function(i) [i, "Stored Keyword"]);
 }
 
 function completer(str){
@@ -51,21 +51,22 @@ function completer(str){
 
 
 /* 元のwindow.getShortcutOrURIを退避しておく。*/
+var __getShortcutOrURI;
 if(!plugins["keywordStore"] || !plugins.keywordStore["__getShortcutOrURI"]){
-	var __getShortcutOrURI = window.getShortcutOrURI
+	__getShortcutOrURI = window.getShortcutOrURI;
 }else{
-	var __getShortcutOrURI = plugins.keywordStore.__getShortcutOrURI
+	__getShortcutOrURI = plugins.keywordStore.__getShortcutOrURI;
 }
 
 /* ":open"等が呼ばれたときに、キーワードをキューに入れるようにwindow.getShortcutOrURIを置き換える */
-window.getShortcutOrURI=function(aURL, aPostDataRef){
-	push(aURL.split(" ").slice(1));
+window.getShortcutOrURI = function(aURL, aPostDataRef){
+	push(aURL.split(/[ \t\r\n]+/).slice(1));
 	return __getShortcutOrURI(aURL, aPostDataRef);
 };
 
 /***  User Command ***/
 commands.addUserCommand(['kssearch'], 'KeywordStore search',
-	function(str){search(str)},
+	search,
 	{completer: completer}, true);
 
 /***  外からも使えるように ***/
@@ -77,7 +78,7 @@ liberator.plugins.keywordStore = {
 	queue:		queue,
 
 	/* 元のwindow.getShortcutOrURIの退避先 */
-	__getShortcutOrURI:	__getShortcutOrURI,
+	__getShortcutOrURI:	__getShortcutOrURI
 };
 
 })();
