@@ -62,7 +62,7 @@ commands.addUserCommand(["inspect","dominspect"],"run DOM Inspector",
 			}
 		} else {
 			try {
-				node = __eval(args.string);
+				node = liberator.eval(args.string);
 			} catch (e){
 				liberator.echoerr(e);
 			}
