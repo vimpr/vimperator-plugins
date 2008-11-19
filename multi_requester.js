@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.2.0
+ * @version          0.2.1
  * @minVersion       1.2
  * @maxVersion       1.2
  * ==/VimperatorPlugin==
@@ -62,7 +62,6 @@
  *
  *
  * TODO:
- *    - wedata からのデータ取得を非同期に。
  *    - wedata local cache.
  *    - 複数リクエスト対応。
  */
@@ -86,6 +85,8 @@ var SITEINFO = [
      },
 ];
 
+var mergedSiteinfo = {};
+
 // utilities
 var $U = {
     log: function(msg, level) {
@@ -107,6 +108,11 @@ var $U = {
         for (let prop in src)
             dst[prop] = src[prop];
          return dst;
+    },
+    A: function(hash) {
+        var ret = [];
+        for (let v in hash) ret.push(hash[v]);
+        return ret;
     },
     bind: function(obj, func) {
         return function() {
@@ -152,6 +158,7 @@ var $U = {
 var CommandRegister = {
     register: function(cmdClass, siteinfo) {
         cmdClass.siteinfo = siteinfo;
+
         liberator.commands.addUserCommand(
             cmdClass.name,
             cmdClass.description,
@@ -169,12 +176,10 @@ var CommandRegister = {
                 argCount: cmdClass.argCount || undefined,
                 bang: cmdClass.bang || true,
                 count: cmdClass.count || false
-            }
+            },
+            true // replace
         );
 
-        if (liberator.globalVariables.multi_requester_mappings) {
-            this.addUserMaps(cmdClass.name[0], liberator.globalVariables.multi_requester_mappings);
-        }
     },
     addUserMaps: function(prefix, mapdef) {
         mapdef.forEach(function([key, command, special, args]) {
@@ -341,7 +346,6 @@ Response.prototype = {
             return this.transport.statusText || '';
         } catch (e) { return ''; }
     },
-
     getHTMLDocument: function(xpath, xmlns) {
         if (!this.doc) {
             this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
@@ -411,40 +415,36 @@ var DataAccess = {
         return ret;
     },
     getSiteInfo: function() {
-        var ret = {};
 
-        var useWedata = liberator.globalVariables.multi_requester_use_wedata ?
-                          $U.eval(liberator.globalVariables.multi_requester_use_wedata) : true;
+        var useWedata = typeof liberator.globalVariables.multi_requester_use_wedata == 'undefined' ?
+                        true : $U.eval(liberator.globalVariables.multi_requester_use_wedata);
+
         if (useWedata) {
             $U.log('use Wedata');
             this.getWedata(function(site) {
-                if (!ret[site.name]) ret[site.name] = {};
-                $U.extend(ret[site.name], site);
+                if (mergedSiteinfo[site.name]) return;
+                mergedSiteinfo[site.name] = {};
+                $U.extend(mergedSiteinfo[site.name], site);
             });
         }
 
         if (liberator.globalVariables.multi_requester_siteinfo) {
             liberator.globalVariables.multi_requester_siteinfo.forEach(function(site) {
-                if (!ret[site.name]) ret[site.name] = {};
-                $U.extend(ret[site.name], site);
+                if (!mergedSiteinfo[site.name]) mergedSiteinfo[site.name] = {};
+                $U.extend(mergedSiteinfo[site.name], site);
             });
         }
 
         SITEINFO.forEach(function(site) {
-            if (!ret[site.name]) ret[site.name] = {};
-            $U.extend(ret[site.name], site);
+            if (!mergedSiteinfo[site.name]) mergedSiteinfo[site.name] = {};
+            $U.extend(mergedSiteinfo[site.name], site);
         });
 
-        var result = [];
-        for (let v in ret)
-            result.push(ret[v]);
-
-        return result;
+        return $U.A(mergedSiteinfo);
     },
     getWedata: function(func) {
         var req = new Request(
-            'http://wedata.net/databases/Multi%20Requester/items.json',
-            null, { asynchronous: false }
+            'http://wedata.net/databases/Multi%20Requester/items.json'
         );
         req.addEventListener('onSuccess', function(res) {
             var text = res.responseText;
@@ -452,7 +452,9 @@ var DataAccess = {
             var json = $U.evalJson(text);
             if (!json) return;
 
-            json.forEach(function(item) { func(item.data); } );
+            json.forEach(function(item) func(item.data));
+            CommandRegister.register(MultiRequester, $U.A(mergedSiteinfo));
+
         });
         req.get();
     }
@@ -463,7 +465,7 @@ var MultiRequester = {
     name: DataAccess.getCommand(),
     description: 'request, and display to the buffer',
     cmdOptions: [
-            [['-s'], liberator.OPTION_NOARG]
+        [['-s'], liberator.OPTION_NOARG]
     ],
     cmdAction: function(args, special, count) {
 
@@ -480,6 +482,7 @@ var MultiRequester = {
         var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                              .getService(Components.interfaces.nsITextToSubURI);
         url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
+        $U.log(url);
 
         if (special) {
             liberator.open(url, liberator.NEW_TAB);
@@ -507,7 +510,7 @@ var MultiRequester = {
         if (!args) return null;
 
         var isOptS = args.hasOwnProperty('-s');
-        if (isOptS && args.arguments.length < 1 && args.arguments.length < 2) return null;
+        if ((isOptS && args.arguments.length < 1) || (!isOptS && args.arguments.length < 2)) return null;
 
         var siteName = args.arguments.shift();
         var str = (isOptS ? $U.getSelectedString() : args.arguments.join()).replace(/[\n\r]+/g, '');
@@ -524,6 +527,7 @@ var MultiRequester = {
         return ret;
     },
     onSuccess: function(res) {
+
         var url, escapedUrl, xpath, doc, html;
 
         try {
@@ -555,6 +559,10 @@ var MultiRequester = {
 };
 
 CommandRegister.register(MultiRequester, DataAccess.getSiteInfo());
+if (liberator.globalVariables.multi_requester_mappings) {
+    CommandRegister.addUserMaps(MultiRequester.name[0], liberator.globalVariables.multi_requester_mappings);
+}
+
 return MultiRequester;
 
 })();
