@@ -1,55 +1,75 @@
 /**
  * ==VimperatorPlugin==
  * @name             multi_requester.js
- * @description      request, and the result is displayed in the buffer.
+ * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.1.2
+ * @version          0.2.0
  * @minVersion       1.2
  * @maxVersion       1.2
  * ==/VimperatorPlugin==
  *
  * Usage:
- * :mr alc {ANY_TEXT or SELECTED_TEXT}  -> show the buffer.
- * :mr goo! {ANY_TEXT or SELECTED_TEXT} -> show the new tab.
+ *   command[!] subcommand [ANY_TEXT | -s]
  *
- * custom:
+ *     !                create new tab.
+ *     ANY_TEXT         your input text
+ *     FLAGS:
+ *       -s             use selected text
+ *
+ *   :mr  alc ANY_TEXT  -> request by the input text, and display to the buffer.
+ *   :mr! goo -s        -> request by the selected text, and display to the new tab.
+ *
+ *
+ * CUSTOMIZE .vimperatorrc:
+ *
  * [COMMAND](default [mr])
- *   let g:multi_requester_command = "ANY1, ANY2, ……";
+ *   let g:multi_requester_command = "ANY1, ANY2, ……"
  *     or
  *   liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
  *
  * [SITEINFO]
- * ex.)
- * javascript <<EOM
- * liberator.globalVariables.multi_requester_siteinfo = [
- *     {
- *         name:        'lo',                             // required
- *         description: 'local',                          // required
- *         url:         'http://localhost/index.html?%s', // required, %s <-- replace string
- *         resultXpath: '//*',                            // optional(default all)
- *         srcEncode:   'SHIFT_JIS',                      // optional(default UTF-8)
- *         urlEncode:   'SHIFT_JIS',                      // optional(default srcEncode)
- *         ignoreTags:  'img'                             // optional(default script), syntax tag1,tag2,……
- *     },
- * ];
- * EOM
+ *   ex.)
+ *   javascript <<EOM
+ *   liberator.globalVariables.multi_requester_siteinfo = [
+ *       {
+ *           name:        'ex',                             // required
+ *           description: 'example',                        // required
+ *           url:         'http://example.com/%s',          // required, %s <-- replace string
+ *           resultXpath: '//*',                            // optional(default all)
+ *           srcEncode:   'SHIFT_JIS',                      // optional(default UTF-8)
+ *           urlEncode:   'SHIFT_JIS',                      // optional(default srcEncode)
+ *           ignoreTags:  'img'                             // optional(default script), syntax 'tag1,tag2,……'
+ *       },
+ *   ];
+ *   EOM
+ *
+ *   other siteinfo by Wedata.
+ *     @see http://wedata.net/databases/Multi%20Requester/items
  *
  * [MAPPINGS]
- * ex.)
- * javascript <<EOM
- * liberator.globalVariables.multi_requester_mappings = [
- *     [',ml', 'lo'],              // <-- :mr lo
- *     [',ma', 'alc'],             // <-- :mr alc
- *     [',mg', 'goo', '!'],        // <-- :mr! goo
- * ];
- * EOM
+ *   ex.)
+ *   javascript <<EOM
+ *   liberator.globalVariables.multi_requester_mappings = [
+ *       [',ml', 'ex'],                  // == :mr  ex
+ *       [',mg', 'goo', '!'],            // == :mr! goo
+ *       [',ma', 'alc',    , 'args'],    // == :mr  alc args (however, it use a selected_text with precedence.)
+ *   ];
+ *   EOM
  *
+ * [OTHER OPTIONS]
+ *   let g:multi_requester_use_wedata = "false"             // default true
+ *
+ *
+ * TODO:
+ *    - Wedata からのデータ取得を非同期に。
+ *    - Wedata local cache.
+ *    - 複数リクエスト対応。
  */
 (function() {
 
 var DEFAULT_COMMAND = ['mr'];
-var DEFAULT_SITEINFO = [
+var SITEINFO = [
     {
         name:        'alc',
         description: 'SPACE ALC (\u82F1\u8F9E\u6717 on the Web)',
@@ -59,10 +79,10 @@ var DEFAULT_SITEINFO = [
      {
         name:        'goo',
         description: 'goo \u8F9E\u66F8',
-        url:         'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0',
-        resultXpath: '//div[@id="incontents"]/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
+        url:         'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
+        resultXpath: 'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
         srcEncode:   'EUC-JP',
-        urlEncode:   'EUC-JP'
+        urlEncode:   'UTF-8'
      },
 ];
 
@@ -75,8 +95,9 @@ var $U = {
         this.log(msg, 9);
         liberator.echo(msg);
     },
-    echo: function(msg) {
-        liberator.echo(msg, liberator.commandline.FORCE_MULTILINE);
+    echo: function(msg, flg) {
+        flg = flg || liberator.commandline.FORCE_MULTILINE
+        liberator.echo(msg, flg);
     },
     echoerr: function(msg) {
         liberator.log(msg, 5);
@@ -100,38 +121,28 @@ var $U = {
     stripScripts: function(str) {
         return this.stripScripts(str, 'script');
     },
-    getCommand: function() {
-        var c = liberator.globalVariables.multi_requester_command;
-        var ret;
-        if (typeof c == 'string') {
-            ret = [c];
-        } else if (typeof c == 'Array') {
-            ret = check;
-        } else {
-            ret = DEFAULT_COMMAND;
-        }
-        return ret;
+    eval: function(text) {
+        var fnc = window.eval;
+        try {
+            var sandbox = new Components.utils.Sandbox(window);
+            if (Components.utils.evalInSandbox("true", sandbox) === true) {
+                fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); }
+            }
+        } catch(e) { $U.log('warning: multi_requester.js is working with unsafe sandbox.'); }
+
+        return fnc(text);
     },
-    getSiteInfo: function() {
-        var ret = {};
-
-        DEFAULT_SITEINFO.forEach(function(site) {
-            if (!ret[site.name]) ret[site.name] = {};
-            $U.extend(ret[site.name], site);
-        });
-
-        if (liberator.globalVariables.multi_requester_siteinfo) {
-            liberator.globalVariables.multi_requester_siteinfo.forEach(function(site) {
-                if (!ret[site.name]) ret[site.name] = {};
-                $U.extend(ret[site.name], site);
-            });
-        }
-
-        var result = [];
-        for (let v in ret)
-            result.push(ret[v]);
-
-        return result;
+    // via. sbmcommentsviwer.js
+    evalJson: function(str, toRemove){
+        try {
+            var json = Components.classes['@mozilla.org/dom/json;1'].getService(Components.interfaces.nsIJSON);
+            if (toRemove) str = str.substring(1, str.length - 1);
+            return json.decode(str);
+        } catch (e) { return null; }
+    },
+    getSelectedString: function() {
+         var sel = (new XPCNativeWrapper(window.content.window)).getSelection();
+         return sel.toString();
     }
 };
 
@@ -139,14 +150,12 @@ var $U = {
 var CommandRegister = {
     register: function(cmdClass, siteinfo) {
         cmdClass.siteinfo = siteinfo;
-        var options = undefined;
-        if (typeof cmdClass.createOptions == 'function') options = cmdClass.createOptions();
         liberator.commands.addUserCommand(
             cmdClass.name,
             cmdClass.description,
-            $U.bind(cmdClass, cmdClass.action),
+            $U.bind(cmdClass, cmdClass.cmdAction),
             {
-                completer: cmdClass.completer || function(filter, special) {
+                completer: cmdClass.cmdCompleter || function(filter, special) {
                     var allSuggestions = siteinfo.map(function(s) [s.name, s.description]);
                     if (!filter) return [0, allSuggestions];
                     var suggestions = allSuggestions.filter(function(s) {
@@ -154,7 +163,7 @@ var CommandRegister = {
                     });
                     return [0, suggestions];
                 },
-                options: options,
+                options: cmdClass.cmdOptions,
                 argCount: cmdClass.argCount || undefined,
                 bang: cmdClass.bang || true,
                 count: cmdClass.count || false
@@ -166,16 +175,16 @@ var CommandRegister = {
         }
     },
     addUserMaps: function(prefix, mapdef) {
-        mapdef.forEach(function([key, command, special]) {
+        mapdef.forEach(function([key, command, special, args]) {
             var cmd = prefix + (special ? '! ' : ' ') + command + ' ';
             liberator.mappings.addUserMap(
                 [liberator.modes.NORMAL, liberator.modes.VISUAL],
                 [key],
                 "user defined mapping",
                 function() {
-                    var sel = (new XPCNativeWrapper(window.content.window)).getSelection();
-                    if (sel.toString().length) {
-                        liberator.execute(cmd + sel.getRangeAt(0));
+                    var str = $U.getSelectedString() || args || '';
+                    if (str.length) {
+                        liberator.execute(cmd + str);
                     } else {
                         liberator.commandline.open(':', cmd, liberator.modes.EX);
                     }
@@ -191,12 +200,12 @@ var CommandRegister = {
 
 
 // like the Prototype JavaScript framework
-var Requester = function() {
+var Request = function() {
     this.initialize.apply(this, arguments);
 };
-Requester.EVENTS = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
-Requester.requestCount = 0;
-Requester.prototype = {
+Request.EVENTS = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
+Request.requestCount = 0;
+Request.prototype = {
     initialize: function(url, headers, options) {
         this.url = url;
         this.headers = headers || {};
@@ -214,17 +223,22 @@ Requester.prototype = {
             if (!this.fireEvent('onException', e)) throw e;
         }
     },
-    fireEvent: function(name, args) {
+    fireEvent: function(name, args, asynchronous) {
         if (!(this.observers[name] instanceof Array)) return false;
         this.observers[name].forEach(function(event) {
-            setTimeout(event, 10, args);
+            if (asynchronous) {
+                setTimeout(event, 10, args);
+            } else {
+                event(args);
+            }
         });
         return true;
     },
     _complete: false,
     _request: function(method) {
 
-        Requester.requestCount++;
+        Request.requestCount++;
+
         this.transport = new XMLHttpRequest();
         this.transport.open(method, this.url, this.options.asynchronous);
 
@@ -235,6 +249,10 @@ Requester.prototype = {
         this.body = this.method == 'POST' ? this.options.postBody : null;
 
         this.transport.send(this.body);
+
+        // Force Firefox to handle ready state 4 for synchronous requests
+        if (!this.options.asynchronous && this.transport.overrideMimeType)
+            this._onStateChange();
     },
     _onStateChange: function() {
         var readyState = this.transport.readyState;
@@ -250,16 +268,16 @@ Requester.prototype = {
         return !status || (status >= 200 && status < 300);
     },
     respondToReadyState: function(readyState) {
-        var state = Requester.EVENTS[readyState];
+        var state = Request.EVENTS[readyState];
         var response = new Response(this);
 
         if (state == 'Complete') {
-            Requester.requestCount--;
+            Request.requestCount--;
             try {
                 this._complete = true;
-                this.fireEvent('on' + (this.isSuccess() ? 'Success' : 'Failure'), response);
+                this.fireEvent('on' + (this.isSuccess() ? 'Success' : 'Failure'), response, this.options.asynchronous);
             } catch (e) {
-                if (!this.fireEvent('onException', e)) throw e;
+                if (!this.fireEvent('onException', e, this.options.asynchronous)) throw e;
             }
          }
     },
@@ -315,7 +333,7 @@ Response.prototype = {
     },
     status: 0,
     statusText: '',
-    getStatus: Requester.prototype.getStatus,
+    getStatus: Request.prototype.getStatus,
     getStatusText: function() {
         try {
             return this.transport.statusText || '';
@@ -351,6 +369,7 @@ Response.prototype = {
         range.detach();
         var dom = fragment.lastChild;
         if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
+            $U.log('retry parsing.');
             return this._createHTMLDocument2(str);
         } else {
             return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
@@ -367,40 +386,105 @@ Response.prototype = {
         if (!xpath || !doc) return doc;
         var node = doc || document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+        if (nodesSnapshot.snapshotLength == 0) return parentNode;
         parentNode = parentNode || document.createElementNS(null, 'div');
         for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; parentNode.appendChild(nodesSnapshot.snapshotItem(i++)));
         return parentNode;
     }
 };
 
-// main controller
+// initial data access.
+var DataAccess = {
+    getCommand: function() {
+        var c = liberator.globalVariables.multi_requester_command;
+        var ret;
+        if (typeof c == 'string') {
+            ret = [c];
+        } else if (typeof c == 'Array') {
+            ret = check;
+        } else {
+            ret = DEFAULT_COMMAND;
+        }
+        return ret;
+    },
+    getSiteInfo: function() {
+        var ret = {};
+
+        var useWedata = liberator.globalVariables.multi_requester_use_wedata ?
+                          $U.eval(liberator.globalVariables.multi_requester_use_wedata) : true;
+        if (useWedata) {
+            $U.log('use Wedata');
+            this.getWeData(function(site) {
+                if (!ret[site.name]) ret[site.name] = {};
+                $U.extend(ret[site.name], site);
+            });
+        }
+
+        if (liberator.globalVariables.multi_requester_siteinfo) {
+            liberator.globalVariables.multi_requester_siteinfo.forEach(function(site) {
+                if (!ret[site.name]) ret[site.name] = {};
+                $U.extend(ret[site.name], site);
+            });
+        }
+
+        SITEINFO.forEach(function(site) {
+            if (!ret[site.name]) ret[site.name] = {};
+            $U.extend(ret[site.name], site);
+        });
+
+        var result = [];
+        for (let v in ret)
+            result.push(ret[v]);
+
+        return result;
+    },
+    getWeData: function(func) {
+        var req = new Request(
+            'http://wedata.net/databases/Multi%20Requester/items.json',
+            null, { asynchronous: false }
+        );
+        req.addEventListener('onSuccess', function(res) {
+            var text = res.responseText;
+            if (!text) return;
+            var json = $U.evalJson(text);
+            if (!json) return;
+
+            json.forEach(function(item) { func(item.data); } );
+        });
+        req.get();
+    }
+};
+
+// main controller.
 var MultiRequester = {
-    name: $U.getCommand(),
-    description: 'request, and show the result in the buffer',
-    action: function(args, special, count) {
+    name: DataAccess.getCommand(),
+    description: 'request, and display to the buffer',
+    cmdOptions: [
+            [['-s'], liberator.OPTION_NOARG]
+    ],
+    cmdAction: function(args, special, count) {
 
-        var arg = this.parseArgs(args);
-        if (!arg.str) { return; } // do nothing
+        var parsedArgs = this.parseArgs(args);
+        if (!parsedArgs || !parsedArgs.siteinfo || !parsedArgs.str) { return; } // do nothing
 
-        var site = arg.site;
-
-        var url = site.url;
+        var siteinfo = parsedArgs.siteinfo;
+        var url = siteinfo.url;
         // see: http://fifnel.com/2008/11/14/1980/
-        var srcEncode = site.srcEncode || 'UTF-8';
-        var urlEncode = site.urlEncode || srcEncode;
+        var srcEncode = siteinfo.srcEncode || 'UTF-8';
+        var urlEncode = siteinfo.urlEncode || srcEncode;
 
         // via. lookupDictionary.js
         var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                              .getService(Components.interfaces.nsITextToSubURI);
-        url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, arg.str));
-        $U.debug(url);
+        url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
 
         if (special) {
             liberator.open(url, liberator.NEW_TAB);
         } else {
-            let req = new Requester(url, null, {
+            let req = new Request(url, null, {
                 encoding: srcEncode,
-                siteinfo: site,
+                siteinfo: siteinfo,
                 args: {
                     args: args,
                     special: special,
@@ -410,24 +494,24 @@ var MultiRequester = {
             req.addEventListener('onException', $U.bind(this, this.onException));
             req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
             req.addEventListener('onFailure', $U.bind(this, this.onFailure));
-
             req.get();
+
+            $U.echo('Loading ' + parsedArgs.name + ' ...', liberator.commandline.FORCE_SINGLELINE);
         }
     },
-    // return {name: '', site: {}, str: ''} or null
+    // return {name: '', siteinfo: {}, str: ''} or null
     parseArgs: function(args) {
-        var ret = null;
-        if (!args) return ret;
 
-        ret = {};
-        var ary = args.split(/ +/);
-        ret.name = ary.shift();
-        if (ary.length >= 1) {
-            ret.site = this.getSite(ret.name);
-        }
-        ret.str = ary.join(' ');
+        if (!args) return null;
 
-        return ret;
+        var isOptS = args.hasOwnProperty('-s');
+        if ((isOptS && args.arguments.length < 1) && args.arguments.length < 2) return null;
+
+        var siteName = args.arguments.shift();
+        var str = (isOptS ? $U.getSelectedString() : args.arguments.join()).replace(/[\n\r]/g, '');
+        var siteinfo = this.getSite(siteName);
+
+        return {name: siteName, siteinfo: siteinfo, str: str};
     },
     getSite: function(name) {
         if (!name) this.siteinfo[0];
@@ -435,31 +519,39 @@ var MultiRequester = {
         this.siteinfo.forEach(function(s) {
             if (s.name == name) ret = s;
         });
-        return ret || this.siteinfo[0];
+        return ret;
     },
     onSuccess: function(res) {
-        if (!res.isSuccess || res.responseText == '') {
-            return $U.echoerr('request error.');
-        }
-        var doc, args, xs;
+         
         try {
-            doc = res.getHTMLDocument(res.request.options.siteinfo.resultXpath);
-            args = res.request.options.args;
-            xs = new XMLSerializer();
-            $U.echo('<base href="' + res.request.url + '"/>' + xs.serializeToString(doc));
+             
+            if (!res.isSuccess || res.responseText == '') throw 'response is fail or null';
+
+            var url = res.request.url;
+            var escapedUrl = liberator.util.escapeHTML(url);
+            var xpath = res.request.options.siteinfo.resultXpath;
+            var doc = res.getHTMLDocument(xpath);
+            if (!doc) throw 'xpath result is undefined or null.: xpath -> ' + xpath;
+                     
+            var html = '<div style="white-space:normal;"><base href="' + escapedUrl + '" />' +
+                       '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
+                       (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
+                       '</div>';
+            $U.echo(new XMLList(html));
+             
         } catch (e) {
-            $U.echoerr('parse error');
+            $U.echoerr('error!!: ' + e);
         }
     },
     onFailure: function(res) {
-        $U.echoerr('request error!!: ' + res.statusText);
+        $U.echoerr('request failure!!: ' + res.statusText);
     },
     onException: function(e) {
-        $U.echoerr('error!!: ' + e);
-    },
+        $U.echoerr('exception!!: ' + e);
+    }
 };
 
-CommandRegister.register(MultiRequester, $U.getSiteInfo());
+CommandRegister.register(MultiRequester, DataAccess.getSiteInfo());
 return MultiRequester;
 
 })();
