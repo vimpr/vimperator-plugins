@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ==VimperatorPlugin==
  * @name			KeywordStore.js
  * @description			Store the keywords when ":open" or ":tabopen" launched
@@ -14,8 +14,8 @@
  *
  * Usage:
  *  :kssearch <str>
- * if <str> is nothing, incremental search starts by last keyword on ":open" or ":tabopen".
- * <str> could be completed by using history of keywords which used on ":open" or ":tabopen".
+ * if <str> is nothing, incremental search starts by last keyword used by ":open" or ":tabopen".
+ * <str> can be completed by using history of keywords.
  * 
  * Tested on:
  *	Firefox version: 3.0.3
