@@ -89,7 +89,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const gmID = '@greasemonkey.mozdev.org/greasemonkey-service;1';
 if (!Cc[gmID]) {
-    log('Greasemonkey is not installed');
+    liberator.log('Greasemonkey is not installed',0);
     return;
 }
 
@@ -109,7 +109,7 @@ liberator.plugins.gmperator = (function(){ //{{{
                 gmCon = new GmContainer(uri,sandbox);
                 containers[panelID] = gmCon;
                 this.__defineGetter__(panelID,function() gmCon);
-                log('gmpeartor: Registered: ' + panelID + ' - ' + uri, 8);
+                //liberator.log('gmpeartor: Registered: ' + panelID + ' - ' + uri, 8);
             }
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
