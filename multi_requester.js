@@ -10,15 +10,13 @@
  * ==/VimperatorPlugin==
  *
  * Usage:
- *   command[!] subcommand [ANY_TEXT | -s]
+ *   command[!] subcommand [ANY_TEXT]
  *
  *     !                create new tab.
  *     ANY_TEXT         your input text
- *     FLAGS:
- *       -s             use selected text
  *
- *   :mr  alc ANY_TEXT  -> request by the input text, and display to the buffer.
- *   :mr! goo -s        -> request by the selected text, and display to the new tab.
+ *   :mr  alc ANY_TEXT           -> request by the input text, and display to the buffer.
+ *   :mr! goo {window.selection} -> request by the selected text, and display to the new tab.
  *
  *
  * CUSTOMIZE .vimperatorrc:
@@ -53,7 +51,7 @@
  *   liberator.globalVariables.multi_requester_mappings = [
  *       [',ml', 'ex'],                  // == :mr  ex
  *       [',mg', 'goo', '!'],            // == :mr! goo
- *       [',ma', 'alc',    , 'args'],    // == :mr  alc args (however, it uses a selected_text with precedence.)
+ *       [',ma', 'alc',    , 'args'],    // == :mr  alc args
  *   ];
  *   EOM
  *
@@ -189,11 +187,15 @@ var CommandRegister = {
                 [key],
                 "user defined mapping",
                 function() {
-                    var str = $U.getSelectedString() || args || '';
-                    if (str.length) {
-                        liberator.execute(cmd + str);
+                    if (args) {
+                        liberator.execute(cmd + args);
                     } else {
-                        commandline.open(':', cmd, modes.EX);
+                        let sel = $U.getSelectedString();
+                        if (sel.length) {
+                            liberator.execute(cmd + sel);
+                        } else {
+                            commandline.open(':', cmd, modes.EX);
+                        }
                     }
                 },
                 {
@@ -464,11 +466,9 @@ var DataAccess = {
 var MultiRequester = {
     name: DataAccess.getCommand(),
     description: 'request, and display to the buffer',
-    cmdOptions: [
-        [['-s'], liberator.OPTION_NOARG]
-    ],
     cmdAction: function(args, special, count) {
 
+        args = args.string;
         var parsedArgs = this.parseArgs(args);
         if (!parsedArgs || !parsedArgs.siteinfo || !parsedArgs.str) { return; } // do nothing
 
@@ -509,11 +509,13 @@ var MultiRequester = {
 
         if (!args) return null;
 
-        var isOptS = args.hasOwnProperty('-s');
-        if ((isOptS && args.arguments.length < 1) || (!isOptS && args.arguments.length < 2)) return null;
+        var arguments = args.split(/ +/);
+        var sel = $U.getSelectedString();
 
-        var siteName = args.arguments.shift();
-        var str = (isOptS ? $U.getSelectedString() : args.arguments.join()).replace(/[\n\r]+/g, '');
+        if ((sel && arguments.length < 1) || (!sel && arguments.length < 2)) return null;
+
+        var siteName = arguments.shift();
+        var str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
         var siteinfo = this.getSite(siteName);
 
         return {name: siteName, siteinfo: siteinfo, str: str};
