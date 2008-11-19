@@ -92,6 +92,7 @@ YouTubePlayerController.prototype = {
             'watch-main-area',
             'watch-comments-stats',
             'watch-video-response',
+            'chrome-promo',
         ],
     },
 
