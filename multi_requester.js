@@ -35,8 +35,8 @@
  *       {
  *           name:        'ex',                             // required
  *           description: 'example',                        // required
- *           url:         'http://example.com/%s',          // required, %s <-- replace string
- *           resultXpath: '//*',                            // optional(default all)
+ *           url:         'http://example.com/?%s',         // required, %s <-- replace string
+ *           xpath:       '//*',                            // optional(default all)
  *           srcEncode:   'SHIFT_JIS',                      // optional(default UTF-8)
  *           urlEncode:   'SHIFT_JIS',                      // optional(default srcEncode)
  *           ignoreTags:  'img'                             // optional(default script), syntax 'tag1,tag2,……'
@@ -73,13 +73,13 @@ var SITEINFO = [
         name:        'alc',
         description: 'SPACE ALC (\u82F1\u8F9E\u6717 on the Web)',
         url:         'http://eow.alc.co.jp/%s/UTF-8/',
-        resultXpath: 'id("resultList")'
+        xpath:       'id("resultList")'
      },
      {
         name:        'goo',
         description: 'goo \u8F9E\u66F8',
         url:         'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
-        resultXpath: 'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
+        xpath:       'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
         srcEncode:   'EUC-JP',
         urlEncode:   'UTF-8'
      },
@@ -536,7 +536,7 @@ var MultiRequester = {
 
             url = res.request.url;
             escapedUrl = liberator.util.escapeHTML(url);
-            xpath = res.request.options.siteinfo.resultXpath;
+            xpath = res.request.options.siteinfo.xpath;
             doc = res.getHTMLDocument(xpath);
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
