@@ -80,7 +80,7 @@ liberator.globalVariables.copy_templates.forEach(function(template){
 //const defaultValue = templates[0].label;
 commands.addUserCommand(['copy'],'Copy to clipboard',
     function(args, special){
-        liberator.plugins.exCopy.copy(args, special);
+        liberator.plugins.exCopy.copy(args.string, special);
     },{
         completer: function(filter, special){
             if (special){
@@ -143,8 +143,7 @@ var exCopyManager = {
     get: function(label){
         return getCopyTemplate(label);
     },
-    copy: function(args, special){
-        var arg = args.string == undefined ? args: args.string;
+    copy: function(arg, special){
         var copyString = '';
         var isError = false;
         if (special && arg){
