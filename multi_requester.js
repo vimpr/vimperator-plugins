@@ -44,7 +44,7 @@
  *   ];
  *   EOM
  *
- *   other siteinfo by Wedata.
+ *   other siteinfo by wedata.
  *     @see http://wedata.net/databases/Multi%20Requester/items
  *
  * [MAPPINGS]
@@ -53,17 +53,17 @@
  *   liberator.globalVariables.multi_requester_mappings = [
  *       [',ml', 'ex'],                  // == :mr  ex
  *       [',mg', 'goo', '!'],            // == :mr! goo
- *       [',ma', 'alc',    , 'args'],    // == :mr  alc args (however, it use a selected_text with precedence.)
+ *       [',ma', 'alc',    , 'args'],    // == :mr  alc args (however, it uses a selected_text with precedence.)
  *   ];
  *   EOM
  *
  * [OTHER OPTIONS]
- *   let g:multi_requester_use_wedata = "false"             // default true
+ *   let g:multi_requester_use_wedata = "false"             // true by default
  *
  *
  * TODO:
- *    - Wedata からのデータ取得を非同期に。
- *    - Wedata local cache.
+ *    - wedata からのデータ取得を非同期に。
+ *    - wedata local cache.
  *    - 複数リクエスト対応。
  */
 (function() {
@@ -123,19 +123,21 @@ var $U = {
     },
     eval: function(text) {
         var fnc = window.eval;
+        var sandbox;
         try {
-            var sandbox = new Components.utils.Sandbox(window);
+            sandbox = new Components.utils.Sandbox(window);
             if (Components.utils.evalInSandbox("true", sandbox) === true) {
-                fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); }
+                fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); };
             }
-        } catch(e) { $U.log('warning: multi_requester.js is working with unsafe sandbox.'); }
+        } catch (e) { $U.log('warning: multi_requester.js is working with unsafe sandbox.'); }
 
         return fnc(text);
     },
     // via. sbmcommentsviwer.js
-    evalJson: function(str, toRemove){
+    evalJson: function(str, toRemove) {
+        var json;
         try {
-            var json = Components.classes['@mozilla.org/dom/json;1'].getService(Components.interfaces.nsIJSON);
+            json = Components.classes['@mozilla.org/dom/json;1'].getService(Components.interfaces.nsIJSON);
             if (toRemove) str = str.substring(1, str.length - 1);
             return json.decode(str);
         } catch (e) { return null; }
@@ -415,7 +417,7 @@ var DataAccess = {
                           $U.eval(liberator.globalVariables.multi_requester_use_wedata) : true;
         if (useWedata) {
             $U.log('use Wedata');
-            this.getWeData(function(site) {
+            this.getWedata(function(site) {
                 if (!ret[site.name]) ret[site.name] = {};
                 $U.extend(ret[site.name], site);
             });
@@ -439,7 +441,7 @@ var DataAccess = {
 
         return result;
     },
-    getWeData: function(func) {
+    getWedata: function(func) {
         var req = new Request(
             'http://wedata.net/databases/Multi%20Requester/items.json',
             null, { asynchronous: false }
@@ -505,10 +507,10 @@ var MultiRequester = {
         if (!args) return null;
 
         var isOptS = args.hasOwnProperty('-s');
-        if ((isOptS && args.arguments.length < 1) && args.arguments.length < 2) return null;
+        if (isOptS && args.arguments.length < 1 && args.arguments.length < 2) return null;
 
         var siteName = args.arguments.shift();
-        var str = (isOptS ? $U.getSelectedString() : args.arguments.join()).replace(/[\n\r]/g, '');
+        var str = (isOptS ? $U.getSelectedString() : args.arguments.join()).replace(/[\n\r]+/g, '');
         var siteinfo = this.getSite(siteName);
 
         return {name: siteName, siteinfo: siteinfo, str: str};
@@ -522,23 +524,24 @@ var MultiRequester = {
         return ret;
     },
     onSuccess: function(res) {
-         
+        var url, escapedUrl, xpath, doc, html;
+
         try {
-             
+
             if (!res.isSuccess || res.responseText == '') throw 'response is fail or null';
 
-            var url = res.request.url;
-            var escapedUrl = liberator.util.escapeHTML(url);
-            var xpath = res.request.options.siteinfo.resultXpath;
-            var doc = res.getHTMLDocument(xpath);
-            if (!doc) throw 'xpath result is undefined or null.: xpath -> ' + xpath;
-                     
-            var html = '<div style="white-space:normal;"><base href="' + escapedUrl + '" />' +
-                       '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
-                       (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
-                       '</div>';
+            url = res.request.url;
+            escapedUrl = liberator.util.escapeHTML(url);
+            xpath = res.request.options.siteinfo.resultXpath;
+            doc = res.getHTMLDocument(xpath);
+            if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
+
+            html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
+                   '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
+                   (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
+                   '</div>';
             $U.echo(new XMLList(html));
-             
+
         } catch (e) {
             $U.echoerr('error!!: ' + e);
         }
