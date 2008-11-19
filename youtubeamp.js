@@ -93,6 +93,7 @@ YouTubePlayerController.prototype = {
             'watch-comments-stats',
             'watch-video-response',
             'chrome-promo',
+            'watch-video-quality-setting',
         ],
     },
 
