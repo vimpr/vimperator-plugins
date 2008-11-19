@@ -50,7 +50,7 @@ function completer(str){
 }
 
 
-/* Œ³‚Ìwindow.getShortcutOrURI‚ğ‘Ş”ğ‚µ‚Ä‚¨‚­B*/
+/* å…ƒã®window.getShortcutOrURIã‚’é€€é¿ã—ã¦ãŠãã€‚*/
 var __getShortcutOrURI;
 if(!plugins["keywordStore"] || !plugins.keywordStore["__getShortcutOrURI"]){
 	__getShortcutOrURI = window.getShortcutOrURI;
@@ -58,7 +58,7 @@ if(!plugins["keywordStore"] || !plugins.keywordStore["__getShortcutOrURI"]){
 	__getShortcutOrURI = plugins.keywordStore.__getShortcutOrURI;
 }
 
-/* ":open"“™‚ªŒÄ‚Î‚ê‚½‚Æ‚«‚ÉAƒL[ƒ[ƒh‚ğƒLƒ…[‚É“ü‚ê‚é‚æ‚¤‚Éwindow.getShortcutOrURI‚ğ’u‚«Š·‚¦‚é */
+/* ":open"ç­‰ãŒå‘¼ã°ã‚ŒãŸã¨ãã«ã€ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ã‚­ãƒ¥ãƒ¼ã«å…¥ã‚Œã‚‹ã‚ˆã†ã«window.getShortcutOrURIã‚’ç½®ãæ›ãˆã‚‹ */
 window.getShortcutOrURI = function(aURL, aPostDataRef){
 	push(aURL.split(/[ \t\r\n]+/).slice(1));
 	return __getShortcutOrURI(aURL, aPostDataRef);
@@ -69,7 +69,7 @@ commands.addUserCommand(['kssearch'], 'KeywordStore search',
 	search,
 	{completer: completer}, true);
 
-/***  ŠO‚©‚ç‚àg‚¦‚é‚æ‚¤‚É ***/
+/***  å¤–ã‹ã‚‰ã‚‚ä½¿ãˆã‚‹ã‚ˆã†ã« ***/
 liberator.plugins.keywordStore = {
 	push:		push,
 	search:		search,
@@ -77,7 +77,7 @@ liberator.plugins.keywordStore = {
 	completer:	completer,
 	queue:		queue,
 
-	/* Œ³‚Ìwindow.getShortcutOrURI‚Ì‘Ş”ğæ */
+	/* å…ƒã®window.getShortcutOrURIã®é€€é¿å…ˆ */
 	__getShortcutOrURI:	__getShortcutOrURI
 };
 
