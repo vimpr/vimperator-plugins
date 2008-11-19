@@ -1,7 +1,7 @@
 // Vimperator plugin: 'Walk Input'
-// Last Change: 2008-05-22.
+// Last Change: 2008-11-19
 // License: BSD
-// Version: 1.0
+// Version: 1.1
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
 
 // ------------------------------------------------------------
@@ -19,38 +19,48 @@
 // </html>
 
 (function() {
-var walkinput = function(forward) {
-    var win = document.commandDispatcher.focusedWindow;
-    var d = win.document;
-    var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
-    var list = d.evaluate(xpath, d, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (list.snapshotLength == 0)
-        return;
 
+var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
+
+var walkinput = function(forward) {
     var focused = document.commandDispatcher.focusedElement;
     var current = null;
     var next = null;
     var prev = null;
-    for (let i = 0, l = list.snapshotLength; i < l; ++i) {
-        let e = list.snapshotItem(i);
-        if (e == focused) {
-            current = e;
-        } else if (current && !next) {
-            next = e;
-        } else if (!current) {
-            prev = e;
-        }
-    }
+    var list = [];
 
-    if (forward) {
-        (next || list.snapshotItem(0)).focus();
-    } else {
-        (prev || list.snapshotItem(list.snapshotLength - 1)).focus();
-    }
+    (function (frame) {
+      var doc = frame.document;
+      if (doc.body.localName.toLowerCase() == 'body') {
+        var r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        for (let i = 0, l = r.snapshotLength; i < l; ++i) {
+            let e = r.snapshotItem(i);
+            list.push(e);
+            if (e == focused) {
+                current = e;
+            } else if (current && !next) {
+                next = e;
+            } else if (!current) {
+                prev = e;
+            }
+        }
+      }
+      for (let i = 0; i < frame.frames.length; i++)
+        arguments.callee(frame.frames[i]);
+    })(content);
+
+    if (list.length <= 0)
+      return;
+
+    let elem = forward ? (next || list[0])
+                       : (prev || list[list.length - 1]);
+    elem.focus();
+
 };
 
-mappings.add([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'],
-             'Walk Input Fields (Forward)', function () walkinput(true));
-mappings.add([modes.NORMAL, modes.INSERT], ['<M-I>', '<A-I>'],
-             'Walk Input Fields (Backward)', function () walkinput(false));
+mappings.addUserMap([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'],
+                    'Walk Input Fields (Forward)', function () walkinput(true));
+mappings.addUserMap([modes.NORMAL, modes.INSERT], ['<M-I>', '<A-I>'],
+                    'Walk Input Fields (Backward)', function () walkinput(false));
+
 })();
