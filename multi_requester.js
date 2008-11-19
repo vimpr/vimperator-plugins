@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.2.1
+ * @version          0.2.2
  * @minVersion       2.0pre
  * @maxVersion       2.0pre
  * ==/VimperatorPlugin==
@@ -482,7 +482,7 @@ var MultiRequester = {
         var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                              .getService(Components.interfaces.nsITextToSubURI);
         url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
-        $U.log(url);
+        $U.log(url + '::' + siteinfo.xpath);
 
         if (special) {
             liberator.open(url, liberator.NEW_TAB);
@@ -536,7 +536,7 @@ var MultiRequester = {
 
             url = res.request.url;
             escapedUrl = util.escapeHTML(url);
-            xpath = res.request.options.siteinfo.resultXpath;
+            xpath = res.request.options.siteinfo.xpath;
             doc = res.getHTMLDocument(xpath);
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
@@ -544,7 +544,7 @@ var MultiRequester = {
                    '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
                    (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
                    '</div>';
-            $U.echo(new XMLList(html));
+            try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
 
         } catch (e) {
             $U.echoerr('error!!: ' + e);
