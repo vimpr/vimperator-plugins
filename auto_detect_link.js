@@ -391,15 +391,16 @@
       let links = getAllLinks(window.content);
 
       // rel="prev|next"
-      if (1) {
-        let relValue = next ? /next/ : /prev/;
-        let link = find(links, function (link) ((typeof link.rel == 'string') && link.rel.match(relValue)));
+      {
+        let relValue = next ? /(?:^|[ \t\r\n])next(?:[ \t\n\r]|$)/
+                            : /(?:^|[ \t\r\n])prev(?:[ \t\n\r]|$)/;
+        let link = find(links, function (link) ((typeof link.rel == 'string') && relValue.test(link.rel.toLowerCase())));
         if (link)
           return link;
       }
 
       // keywords
-      if (1) {
+      {
         let link;
         if (patterns.some(function (pattern) {
           link = find(links, function (link) match(pattern, link));
