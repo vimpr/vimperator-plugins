@@ -147,8 +147,10 @@
   // functions
   ////////////////////////////////////////////////////////////////
 
+  // 空白を
   function removeSpace (str)
     str.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+
 
   // Array#find
   function find (ary, f) {
@@ -287,6 +289,7 @@
           type: 'link',
           frame: content,
           uri: it.href,
+          rel: it.rel,
           text: it.textContent,
           element: it
         });
@@ -387,6 +390,14 @@
       let uri = window.content.location.href;
       let links = getAllLinks(window.content);
 
+      // rel="prev|next"
+      if (1) {
+        let relValue = next ? /next/ : /prev/;
+        let link = find(links, function (link) ((typeof link.rel == 'string') && link.rel.match(relValue)));
+        if (link)
+          return link;
+      }
+
       // keywords
       if (1) {
         let link;
@@ -450,6 +461,7 @@
   ////////////////////////////////////////////////////////////////
 
   if (gv().nextMappings.length) {
+    mappings.remove([modes.NORMAL], gv().nextMappings);
     mappings.addUserMap(
       [modes.NORMAL],
       gv().nextMappings,
@@ -460,6 +472,7 @@
 
 
   if (gv().backMappings.length) {
+    mappings.remove([modes.NORMAL], gv().backMappings);
     mappings.addUserMap(
       [modes.NORMAL],
       gv().backMappings,
