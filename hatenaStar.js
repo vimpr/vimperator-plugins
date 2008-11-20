@@ -1,5 +1,5 @@
 /**
- * For Vimperator 0.7+
+ * For Vimperator 2.0pre
  * @author mattn mattn.jp@gmail.com
  */
 
@@ -7,7 +7,11 @@
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const StarXPath = './/img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]';
 var flasher = null;
+
+var nmap = (liberator.globalVariables.hatena_star_mappings || ',?s').split(/\s+/);
+var hmap = liberator.globalVariables.hatena_star_hint_mapping || 'h';
 
 function getFlasher() {
 	if (!flasher) {
@@ -35,21 +39,25 @@ function blink(aNode) {
 	}
 }
 
+function addHatenaStar (elem) {
+	let e = document.createEvent('MouseEvents');
+	e.initMouseEvent('click', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, elem);
+	elem.dispatchEvent(e);
+
+}
+
 liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
 	function (arg, special) {
 		try {
 			arg = arg.string;
-			let result = buffer.evaluateXPath('.//img[contains(concat(" ", @class, " "), " hatena-star-add-button ")]');
+			let result = buffer.evaluateXPath(StarXPath);
 			if (arg.match(/^(\d+)\?$/)) {
 				blink(result.snapshotItem(Number(RegExp.$1)-1));
 				return;
 			}
 			for (let i = 0, l = result.snapshotLength; i < l; i++) {
 				if (arg == '' || arg == 'all' || arg == (i+1)) {
-					let s = result.snapshotItem(i);
-					let e = document.createEvent('MouseEvents');
-					e.initMouseEvent('click', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, s);
-					s.dispatchEvent(e);
+					addHatenaStar(result.snapshotItem(i));
 				}
 			}
 		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
@@ -59,7 +67,7 @@ liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena
 	}
 );
 
-liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [',?s'], 'add Hatena Star',
+liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'add Hatena Star',
 	function (count) {
 		try {
 			for (let n = 0; n++ < count; liberator.modules.commands.get('hatenastar').execute("all", false, count));
@@ -70,4 +78,7 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [',?s'],
 	}
 );
 
+liberator.modules.hints.addMode(hmap, 'Add hatena star', addHatenaStar, function () StarXPath);
+
 })();
+
