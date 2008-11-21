@@ -18,7 +18,7 @@
   }
 
   items.forEach(function(item) {
-    var [url, title] = item;
+    var [url, title] = [item.url, item.title];
     var desc = title;
     title = escape( title.replace(/ +/g,'').toLowerCase() );
     if (/[^a-zA-Z]+/.test(title)) {
