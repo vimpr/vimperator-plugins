@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.21
-// Last Change: 05-Nov-2008. Jan 2008
+// Last Change: 21-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -174,7 +174,7 @@
         initLDRizeCaptureKeys: function(keys){
             var self = this;
             keys.forEach(function(x){
-                    var map = liberator.modules.mappings.getDefault(null,x) || liberator.modules.mappings.get(null,x);
+                    var map = liberator.mappings.getDefault(null,x) || liberator.mappings.get(null,x);
                     var oldAction = map.action;
                     var getter = "getPrev";
                     switch(x){
@@ -197,67 +197,67 @@
         initLDRizeCooperationFuture: function(){
             var self = this;
 
-            var originalHinttags = liberator.modules.options.hinttags;
-            var originalExtendedHinttags = liberator.modules.options.hinttags;
+            var originalHinttags = liberator.options.hinttags;
+            var originalExtendedHinttags = liberator.options.hinttags;
 
             function setHinttags(enable){
                 if(enable){
                     var siteinfo = self.LDRize.getSiteinfo();
                     if(siteinfo.link && siteinfo.paragraph){
-                        liberator.modules.options.hinttags = siteinfo.paragraph + "/" + siteinfo.link;
-                        liberator.modules.options.extendedhinttags = siteinfo.paragraph + "/" + siteinfo.link;
+                        liberator.options.hinttags = siteinfo.paragraph + "/" + siteinfo.link;
+                        liberator.options.extendedhinttags = siteinfo.paragraph + "/" + siteinfo.link;
                     }else{
-                        liberator.modules.options.hinttags = originalHinttags;
-                        liberator.modules.options.extendedhinttags = originalExtendedHinttags;
+                        liberator.options.hinttags = originalHinttags;
+                        liberator.options.extendedhinttags = originalExtendedHinttags;
                     }
                 }else{
-                    liberator.modules.options.hinttags = originalHinttags;
-                    liberator.modules.options.extendedhinttags = originalExtendedHinttags;
+                    liberator.options.hinttags = originalHinttags;
+                    liberator.options.extendedhinttags = originalExtendedHinttags;
                 }
             }
 
 
             //Mappings
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [",f"],
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], [",f"],
                 "Start QuickHint mode with LDRize",
                 function(){
                     setHinttags(true);
-                    liberator.modules.hints.show("o");
+                    liberator.hints.show("o");
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                 } ,{});
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["f"],
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], ["f"],
                 "Start QuickHint mode",
                 function(){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show("o");
+                    liberator.hints.show("o");
                 },{});
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["F"],
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], ["F"],
                 "Start QuickHint mode, but open link in a new tab",
                 function(){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show("t");
+                    liberator.hints.show("t");
                 },{});
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [";"],
+            liberator.mappings.addUserMap([liberator.modes.NORMAL], [";"],
                 "Start an extended hint mode",
                 function(arg){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show(arg);
+                    liberator.hints.show(arg);
                 },
-                { flags: liberator.modules.Mappings.flags.ARGUMENT });
+                { flags: liberator.Mappings.flags.ARGUMENT });
             //Commands
-            liberator.modules.commands.addUserCommand(["pin"], "LDRize Pinned Links",
+            liberator.commands.addUserCommand(["pin"], "LDRize Pinned Links",
                 function(){
                     var links = self.getPinnedItems();
                     var showString = links.length + " Items<br/>";
                     links.forEach(function(link){
                         showString += link + "<br/>";
                     });
-                    liberator.modules.commandline.echo(showString, liberator.modules.commandline.HL_NORMAL, liberator.modules.commandline.FORCE_MULTILINE);
+                    liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
                 } ,{});
-            liberator.modules.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
+            liberator.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
                 function(arg){self.Minibuffer.execute(arg)},
                 {
                     completer: function(filter){
@@ -271,18 +271,18 @@
                         return [0,completionList];
                     }
                 });
-            liberator.modules.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
+            liberator.commands.addUserCommand(["pindownload"], "Download pinned links by any software",
                 function(arg){ self.downloadLinksByProgram(self.getPinnedItems());} ,{});
-            liberator.modules.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
+            liberator.commands.addUserCommand(["toggleldrizecooperation","toggleldrc"], "Toggle LDRize Cooperation",
             function(arg){ self.isEnable = !self.isEnable}, {});
             //Options
-            liberator.modules.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',this.isEnable,
+            liberator.options.add(['ldrc','ldrizecooperation'],'LDRize cooperation','boolean',this.isEnable,
                 {
                     setter: function(value){ self.isEnable = value; },
                     getter: function(){ return self.isEnable; }
                 }
             );
-            liberator.modules.options.add(['ldrchints'],'mod hinttags for LDRize','boolean',this.isModHints,
+            liberator.options.add(['ldrchints'],'mod hinttags for LDRize','boolean',this.isModHints,
                 {
                     setter: function(value){ self.isModHints = value; },
                     getter: function(){ return self.isModHints; }
@@ -329,9 +329,9 @@
                         setTimeout(function(){
                             if(typeof x.handler == "object"){
                                 var args = x.handler[1].map(function(s){ return s.replace(/%URL%/g,url).replace(/%TITLE%/g,title); });
-                                liberator.modules.io.run(x.handler[0],args,false);
+                                liberator.io.run(x.handler[0],args,false);
                             }else if(typeof x.handler == "string"){
-                                liberator.modules.io.run(x.handler,[url],false);
+                                liberator.io.run(x.handler,[url],false);
                             }else if(typeof x.handler == "function"){
                                 x.handler(url.toString(),title);
                             }
