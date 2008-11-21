@@ -4,7 +4,7 @@
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
-// @minVersion     2.0pre
+// @minVersion     1.2
 // @maxVersion     2.0pre
 // ==/VimperatorPlugin==
 //
@@ -72,7 +72,7 @@
       ['fetchyoutube', 'fetchyt'],
       'fecth YouTube HD video',
       fetch,
-      {argCount: '*', completer: completion.file},
+      {argCount: '*', completer: function (arg) completion.file(arg)},
       true
     );
 

@@ -73,7 +73,7 @@
       argCount: '1',
       completer: function (arg, bang) {
         return bang ? [0, [[filepath, ''] for (filepath in files)]]
-                    : completion.file.apply(this, arguments);
+                    : completion.file(arg);
       }
     },
     true
