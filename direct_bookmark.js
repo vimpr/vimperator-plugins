@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.12
-// Last Change: 15-Nov-2008. Jan 2008
+// Version: 0.13
+// Last Change: 22-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -626,7 +626,9 @@
                     user,password,
                     isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
-                ));
+                )).next(function() {
+                  liberator.echo("[" + services[service].description + "] post completed.");
+                });
             });
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
