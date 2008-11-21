@@ -4,7 +4,7 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.10
+ * @version         0.11
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -33,6 +33,7 @@
  *  let blink_element_sparecolor='purple'
  *
  *  :bl content.document.getElementsByTagName('A');
+ *  :bl buffer.evaluateXPath('//a');
  *  :nobl
  * */
 
@@ -86,9 +87,10 @@ commands.addUserCommand(
         }
 
         if (element instanceof HTMLCollection) {
-            for (let [, e] in Iterator(element)) {
-                setBlink(e);
-            }
+            for (let [, e] in Iterator(element)) setBlink(e);
+        }
+        else if (element instanceof XPathResult) {
+            for (let e in element) setBlink(e);
         }
         else if ('style' in element) {
             setBlink(element);
