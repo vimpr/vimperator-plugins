@@ -1,6 +1,6 @@
 /*
  * ==VimperatorPlugin==
- * @name            nicontroller.js
+ * @name            blinkelement.js
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>

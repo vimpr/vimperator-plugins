@@ -1,6 +1,6 @@
 /*
  * ==VimperatorPlugin==
- * @name            nicontroller.js
+ * @name            hidecritter.js
  * @description     hide specified elements.
  * @description-ja  指定した要素を隠す。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>

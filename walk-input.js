@@ -18,11 +18,11 @@
 //     <textarea name="comment"></textarea>
 // </html>
 
-(function() {
+(function () {
 
 var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
 
-var walkinput = function(forward) {
+var walkinput = function (forward) {
     var focused = document.commandDispatcher.focusedElement;
     var current = null;
     var next = null;
@@ -32,7 +32,7 @@ var walkinput = function(forward) {
     (function (frame) {
       var doc = frame.document;
       if (doc.body.localName.toLowerCase() == 'body') {
-        var r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        let r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = r.snapshotLength; i < l; ++i) {
             let e = r.snapshotItem(i);
             list.push(e);
@@ -52,7 +52,7 @@ var walkinput = function(forward) {
     if (list.length <= 0)
       return;
 
-    let elem = forward ? (next || list[0])
+    var elem = forward ? (next || list[0])
                        : (prev || list[list.length - 1]);
     elem.focus();
 
