@@ -3,9 +3,9 @@
 // @description    Sourcing automatically when the specified file is modified.
 // @description-ja 指定のファイルが変更されたら自動で :so する。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.1
 // @author         anekos (anekos@snca.net)
-// @minVersion     1.2
+// @minVersion     2.0pre
 // @maxVersion     2.0pre
 // ==/VimperatorPlugin==
 //
@@ -31,21 +31,27 @@
 
 (function () {
 
-  let files = {};
+  let files = [];
   let firstTime = window.eval(liberator.globalVariables.auto_source_first_time || 'false');
   let interval = window.eval(liberator.globalVariables.auto_source_interval || '500');
 
   function getFileModifiedTime (filepath) {
-    let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    let file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
     file.initWithPath(filepath);
     return file.lastModifiedTime;
   }
 
+  function exists (filepath)
+    files.some(function (it) (it.path.indexOf(filepath) === 0))
+
+  function remove (filepath, func)
+    (files = files.filter(function (it) (it.path.indexOf(filepath) !== 0 && (func(it)+'-'))));
+
   function startWatching (filepath) {
-    if (files[filepath] !== undefined)
-      throw "The file has already been watched: " + filepath;
+    if (exists(filepath))
+      throw 'The file has already been watched: ' + filepath;
     let last = firstTime ? null : getFileModifiedTime(filepath);
-    files[filepath] = setInterval(function () {
+    let handle = setInterval(function () {
       let current = getFileModifiedTime(filepath);
       if (last != current) {
         liberator.log('sourcing: ' + filepath);
@@ -53,13 +59,14 @@
         io.source(filepath);
       }
     }, interval);
+    files.push({handle: handle, path: filepath});
   }
 
   function killWatcher (filepath) {
-    if (files[filepath] === undefined)
-      throw "The file is not watched: " + filepath;
-    clearInterval(files[filepath]);
-    delete files[filepath];
+    if (!exists(filepath))
+      throw 'The file is not watched: ' + filepath;
+    remove(filepath, function (it) clearInterval(it.handle));
+    liberator.echo('stopped the watching for the file');
   }
 
   commands.addUserCommand(
@@ -71,9 +78,13 @@
     {
       bang: true,
       argCount: '1',
-      completer: function (arg, bang) {
-        return bang ? [0, [[filepath, ''] for (filepath in files)]]
-                    : completion.file(arg);
+      completer: function (context, arg, bang) {
+        if (bang) {
+          context.title = ['Path'];
+          context.items = files.map(function (it) ([it.path]));
+        } else {
+          completion.file(context);
+        }
       }
     },
     true
