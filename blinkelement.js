@@ -4,7 +4,7 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.11
+ * @version         0.20
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -30,7 +30,7 @@
  * EXAMPLE
  *  let blink_element_interval='500'
  *  let blink_element_color='green'
- *  let blink_element_sparecolor='purple'
+ *  let blink_element_opacity='0.7'
  *
  *  :bl content.document.getElementsByTagName('A');
  *  :bl buffer.evaluateXPath('//a');
@@ -39,32 +39,40 @@
 
 ( function () {
 
-let intervalList = [];
 const interval = liberator.globalVariables.blink_element_interval || 800;
 const color = liberator.globalVariables.blink_element_color || 'red';
-const spareColor = liberator.globalVariables.blink_element_sparecolor || 'cyan';
+const opacity = liberator.globalVariables.blink_element_opacity || 0.5;
+const doc = content.document;
 
 function setBlink(element) {
-    let originalColor = element.style.backgroundColor || 'inherit';
-    let blinkColor = (originalColor == color) ? spareColor : color;
+    let div = doc.createElement('div');
+    div.className = 'vimp_plugin_blinkelement';
 
-    element.style.backgroundColor = blinkColor;
-    let state = false;
-    let intervalId = setInterval( function () {
-        element.style.backgroundColor = state ? blinkColor : originalColor;
-        state = !state;
-    }, interval);
+    div.style.position = 'absolute';
+    div.style.display = 'block';
+    div.style.zIndex = 2147483647;
+    div.style.top    = element.offsetTop + 'px';
+    div.style.left   = element.offsetLeft + 'px';
+    div.style.width  = element.offsetWidth + 'px';
+    div.style.height = element.offsetHeight + 'px';
+    div.style.backgroundColor = color;
+    div.style.opacity    = opacity;
+    div.style.MozOpacity = opacity;
 
-    intervalList.push({
-        id:         intervalId,
-        element:    element,
-        color:      originalColor,
-    });
+    div.intervalId = setInterval(
+        function () {
+            let d = div.style.display;
+            div.style.display = (d === 'block' ? 'none' : 'block');
+        },
+        interval
+    );
+
+    doc.body.appendChild(div);
 }
 
-function clearBlink(i) {
-    i.element.style.backgroundColor = i.color;
-    clearInterval(i.id);
+function clearBlink(element) {
+    if (element.intervalId) clearInterval(element.intervalId);
+    element.parentNode.removeChild(element);
 }
 
 commands.addUserCommand(
@@ -108,7 +116,8 @@ commands.addUserCommand(
     ['noblink', 'nobl'],
     'no blink',
     function () {
-        while (intervalList.length) clearBlink(intervalList.pop());
+        let divs = buffer.evaluateXPath('//div[contains(concat(" ", @class, " "), " vimp_plugin_blinkelement ")]');
+        for (let d in divs) clearBlink(d);
     },
     {}
 );
