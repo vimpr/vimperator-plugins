@@ -82,21 +82,18 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
     function(args, special){
         liberator.plugins.exCopy.copy(args.string, special);
     },{
-        completer: function(filter, special){
+        completer: function(context, arg, special){
             if (special){
-                return completion.javascript(filter);
+                completion.javascript(context);
+                return;
             }
+            context.title = ['Template','Value'];
             var templates = liberator.globalVariables.copy_templates.map(function(template)
                 [template.label, liberator.modules.util.escapeString(template.value, '"')]
             );
-            if (!filter){ return [0,templates]; }
+            if (!context.filter){ context.items = templates; return; }
             var candidates = [];
-            templates.forEach(function(template){
-                if (template[0].toLowerCase().indexOf(filter.toLowerCase()) == 0){
-                    candidates.push(template);
-                }
-            });
-            return [0, candidates];
+            context.items = completion.filter(templates, context.filter, true);
         },
         bang: true
     }
@@ -148,7 +145,7 @@ var exCopyManager = {
         var isError = false;
         if (special && arg){
             try {
-                copyString = window.eval('with(liberator){' + arg + '}');
+                copyString = liberator.eval( arg);
                 switch (typeof copyString){
                     case 'object':
                         copyString = copyString === null ? 'null' : copyString.toSource();
