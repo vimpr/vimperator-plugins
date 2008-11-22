@@ -68,7 +68,7 @@ SBMContainer.prototype = { //{{{
     toHTMLString: function(format, countOnly){
         var label = (this.faviconURL ? '<img src="' + this.faviconURL + '" width="16" height="16"/>' : '') +
                     manager.type[this.type] + ' ' + this.count + '(' + this.entries.length + ')' +
-                    (this.pageURL ? ' <a href="' + this.pageURL + '">' + this.pageURL + '</a>' : '');
+                    (this.pageURL ? ' <a href="#">' + this.pageURL + '</a>' : '');
         if (countOnly){
             return label;
         } else {
@@ -272,7 +272,7 @@ var SBM = { //{{{
                        getService(Components.interfaces.nsIJSON).
                        decode(xhr.responseText);
             */
-            var json = jsonDecode(xhr.reponseText);
+            var json = jsonDecode(xhr.responseText);
             if (json && json.isSuccess){
                 var c = new SBMContainer('l', json.total_clip_count, {
                     faviconURL: 'http://clip.livedoor.com/favicon.ico',
