@@ -76,10 +76,9 @@ SBMContainer.prototype = { //{{{
         } else {
             let xml = <table id="liberator-sbmcommentsviewer">
                 <caption style="text-align:left" class="hl-Title">{label}</caption>
-                <tr/>
             </table>;
             let self = this;
-            xml.*[xml.*.length()-1].* += (function(){
+            xml.* += (function(){
                 var thead = <tr/>;
                 format.forEach(function(colum){ thead.* += <th>{manager.format[colum] || '-'}</th>; });
                 var tbody = <></>;
@@ -437,6 +436,12 @@ var manager = {
     }
 }; //}}}
 
+var options = [
+    [['-type','-t'], commands.OPTION_STRING, function(str) (new RegExp('^['+[t for(t in manager.type)].join('') + ']+$')).test(str)],
+    [['-format','-f'], commands.OPTION_LIST,null, [[f,manager.format[f]] for (f in manager.format)]],
+    [['-count','-c'], commands.OPTION_NOARG],
+    [['-browser','-b'],commands.OPTION_NORARG]
+];
 commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     function(arg){ //{{{
         var types =  liberator.globalVariables.def_sbms || 'hdlz';
@@ -445,18 +450,16 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         var url = buffer.URL;
         for (let opt in arg){
             switch(opt){
-                case '-c':
                 case '-count':
                     countOnly = true;
                     break;
-                case '-b':
                 case '-browser':
                     openToBrowser = true;
                     break;
-                case '-t':
+                case '-type':
                     if (arg[opt]) types = arg[opt];
                     break;
-                case '-f':
+                case '-format':
                     if (arg[opt]) format = arg[opt];
                     break;
                 case "arguments":
@@ -486,12 +489,15 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         }
     }, //}}}
     {
-        options: [
-            [['-t','-type'], commands.OPTION_STRING],
-            [['-f','-format'], commands.OPTION_LIST],
-            [['-c','-count'], commands.OPTION_NOARG],
-            [['-b','-browser'],commands.OPTION_NORARG]
-        ]
+        argCount:"*",
+        options: options,
+        completer: function(context, args, special){
+            if (args.completeOpt)
+                return;
+
+            context.advance(args.completeStart);
+            completion.url(context, 'l');
+        }
     }
 ); //}}}
 
