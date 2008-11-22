@@ -42,9 +42,9 @@
 const interval = liberator.globalVariables.blink_element_interval || 800;
 const color = liberator.globalVariables.blink_element_color || 'red';
 const opacity = liberator.globalVariables.blink_element_opacity || 0.5;
-const doc = content.document;
 
 function setBlink(element) {
+    let doc = content.document;
     let div = doc.createElement('div');
     div.className = 'vimp_plugin_blinkelement';
 
