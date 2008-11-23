@@ -13,7 +13,7 @@ function NiconicoFlvHandler(url, title) {
     const nicoApiEndPoint = 'http://www.nicovideo.jp/api/getflv?v=';
     const nicoWatchEndPoint = 'http://www.nicovideo.jp/watch/';
     let videoId = url.match(/\w{2}\d+/)[0];
-    let fileName = title.replace(/[?\\\*\/:<>\|\"]/g, '_') + '.flv';
+    let fileName = title.replace(/[?\\*\/:<>|"]/g, '_') + '.flv';
 
     httpGET(
         nicoApiEndPoint + videoId,
@@ -88,7 +88,7 @@ liberator.modules.commands.addUserCommand(
         httpGET(
             arg.string || liberator.modules.buffer.URL,
             function (responseText) {
-                let [, title] = responseText.match(/<title>(.*?)<\/title>/i);
+                let [, title] = responseText.match(/<title(?:[ \t\r\n][^>]*)?>([^<]*)<\/title[ \t\n\r]*>/i);
                 liberator.log(title);
                 NiconicoFlvHandler(arg.string || liberator.modules.buffer.URL, title);
             }

@@ -51,7 +51,7 @@
     function () f.apply(_this, arguments);
 
   function capitalize (s)
-    s.replace(/^./, String.toUpperCase);
+    s.replace(/^[a-z]/, String.toUpperCase);
 
 
   // }}}
@@ -82,7 +82,7 @@
       play: '',
       pause: '',
       muted: '',
-      repeating: '',
+      repeating: ''
     },
 
     icon: null,
@@ -160,7 +160,7 @@
       play: 'x',
       pause: 'x',
       muted: 'rwt',
-      repeating: 'rw',
+      repeating: 'rw'
     },
 
     toggles: ['muted'],
@@ -286,7 +286,7 @@
 
   const ContextMenuVolume = [];
   for (let i = 0; i <= 100; i += 10)
-    ContextMenuVolume.push({name: 'setVolume', label:   i + '%', attributes: {volume:   i}})
+    ContextMenuVolume.push({name: 'setVolume', label: i + '%', attributes: {volume: i}})
 
   const ContextMenuTree = [
     'play',
