@@ -360,7 +360,10 @@ NicoPlayerController.prototype = {
         else position = this.constants.SEEKTO_DEFAULT;
 
         var p = this._flvplayer();
-        p.ext_setPlayheadTime(position);
+        if (position < 0)
+          p.ext_setPlayheadTime(parseInt(p.ext_getTotalTime()) + parseInt(position));
+        else
+          p.ext_setPlayheadTime(position);
     },
 
     seekBy: function(delta) {
