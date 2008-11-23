@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.2.2
+ * @version          0.2.3
  * @minVersion       2.0pre
  * @maxVersion       2.0pre
  * ==/VimperatorPlugin==
@@ -162,13 +162,12 @@ var CommandRegister = {
             cmdClass.description,
             $U.bind(cmdClass, cmdClass.cmdAction),
             {
-                completer: cmdClass.cmdCompleter || function(filter, special) {
+                completer: cmdClass.cmdCompleter || function(context, arg, bang) {
                     var allSuggestions = siteinfo.map(function(s) [s.name, s.description]);
-                    if (!filter) return [0, allSuggestions];
-                    var suggestions = allSuggestions.filter(function(s) {
-                        return s[0].indexOf(filter) == 0;
-                    });
-                    return [0, suggestions];
+                    context.title = ['Name', 'Descprition'];
+                    context.items =
+                        context.filter ? allSuggestions.filter(function(s) s[0].indexOf(context.filter) == 0)
+                                       : allSuggestions;
                 },
                 options: cmdClass.cmdOptions,
                 argCount: cmdClass.argCount || undefined,

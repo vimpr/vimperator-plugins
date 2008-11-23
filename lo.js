@@ -2,8 +2,10 @@
 // @name           Link Opener
 // @description    Open filtered link(s).
 // @description-ja リンクをフィルタリングして開く
-// @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.2
+// @license        Creative Commons Attribution-Share Alike 3.0 Unported
+// @version        1.3
+// @minVersion     2.0pre
+// @maxVersion     2.0pre
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -27,9 +29,12 @@
 //
 // Variables:
 //    let g:fopen_default_interval="<INTERVAL_SEC>"
+//
+// License:
+//    http://creativecommons.org/licenses/by-sa/3.0/
 
 
-(function () { try {
+(function () {
 
   let migemo = window.XMigemoCore;
 
@@ -95,15 +100,17 @@
       },
       {
         bang: true,
+        argCount: '1',
         options: [
           [['-interval', '-i'], commands.OPTION_INT],
           [['-where', '-w'], commands.OPTION_STRING],
         ],
-        completer: function (word) {
-          let links = filteredLinks(word);
-          return [0, [[it.href, it.textContent] for each (it in links)]];
+        completer: function (context, arg, bang) {
+          context.title = ['URL', 'Text Content'];
+          context.items = filteredLinks(context.filter).map(function (it) ([it.href, it.textContent]));
         },
-      }
+      },
+      true
     );
 
     commands.addUserCommand(
@@ -124,27 +131,37 @@
     commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
-      function (opts, bang) {
-        let where = charToWhere(opts['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
-        let arg = opts.arguments[0];
-        let m = arg.match(/^\d+(?=,)/);
-        if (m)
-          buffer.followLink(lolinks[parseInt(m[0], 10)], where);
+      function (arg, bang) {
+        let where = charToWhere(arg['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+        let numUrl = arg.arguments[0];
+        let m = numUrl.match(/^(\d+),(.+)$/);
+        if (m) {
+          let link = lolinks[parseInt(m[1], 10)];
+          if (link)
+            buffer.followLink(link, where);
+          else
+            liberator.open(m[2], where);
+        } else {
+          liberator.open(numUrl, where);
+        }
       },
       {
+        argCount: '1',
         options: looptions,
         bang: true,
-        completer: function (word) {
-          if (!word || word.match(/\s|\d+,/))
-            return [];
-          lolinks = filteredLinks(word);
-          return [0, [[i + ',' + lolinks[i].href, lolinks[i].textContent] for (i in lolinks || [])]];
+        completer: function (context) {
+          let last = context.contextList.slice(-1)[0];
+          lolinks = filteredLinks(last.filter);
+          context.title = ['URL', 'Text Content'];
+          context.advance(last.offset - last.caret);
+          context.items = lolinks.map(function (it, i) ([i + ',' + it.href, it.textContent]));
         }
-      }
+      },
+      true
     );
 
   }
 
-} catch (e) { liberator.log(e); }})();
+})();
 
-// vim:sw=2 ts=2 et:
+// vim:sw=2 ts=2 et si fdm=marker:

@@ -2,7 +2,7 @@
 // @name           Read Cat Later
 // @description-ja Read It Later 的な物
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        0.2
+// @version        1.0
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -22,7 +22,7 @@
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/20080918#1221729188
 
-(function () { try {
+(function () {
   liberator.log('readcatlater.js loading');
 
   // このプラグインでブックマークしたときに必ずつくタグ
@@ -194,12 +194,11 @@
     return liberator.globalVariables.readcatlater_reverse ? result.reverse() : result;
   } catch (e) { liberator.log(e); } }
 
-  function completer (args) {
-    var cs;
-    try {
-      cs = [ [it.URI, bookmarks.getItemTitle(it.id)] for each (it in RCL_Bookmarks(args)) if (it.id) ];
-      return [0, cs]
-    } catch (e) { liberator.log(e); }
+  function completer (context, arg, bang) {
+    context.title = ['URL', 'Title'];
+    context.items = RCL_Bookmarks(context.filter).
+                      filter(function (it) it.id).
+                      map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]);
   }
 
   function removeItems (uri) {
@@ -235,31 +234,32 @@
   commands.addUserCommand(
     ['readcatnow', 'rcn'],
     'read cat now',
-    function (uri, bang, num, extra) {
-      // for HEAD
-      if (uri.string != undefined)
-        uri = uri.string;
+    function (arg, bang, num, extra) {
+      let uri = arg.string;
       openURI(uri);
       if (!bang && removeItems(uri))
         liberator.echo('"' + uri + '" was removed.');
     },
     {
       completer: completer
-    }
+    },
+    true
   );
 
   commands.addUserCommand(
     ['deletecatnow', 'dcn'],
     'delete cat now',
-    function (uri, bang, num, extra) {
+    function (arg, bang, num, extra) {
+      let uri = arg.string;
       if (removeItems(uri))
         liberator.echo('"' + uri + '" was removed.');
     },
     {
       completer: completer
-    }
+    },
+    true
   );
 
   liberator.log('readcatlater.js loaded');
 
-} catch (e) { liberator.log(e); } })();
+})();

@@ -94,17 +94,18 @@
     },
     {
       bang: true,
-      completer: function (args) {
-        if (buffer.URL != last.url) {
+      completer: function (context, arg, bang) {
+        if ((buffer.URL != last.url) || !last.completions.length) {
           last.completions = [];
           getRelatedVideos().forEach(function (it) last.completions.push([it.url, it.title]));
           getRelatedTags().forEach(function (it) last.completions.push([":" + it, "tag"]));
           last.url = buffer.URL;
         }
-        return [0, last.completions.length ? completion.filter(last.completions, args)
-                                           : [[nothing, nothing]]];
+        context.title = ['Keyword'];
+        context.items = completion.filter(last.completions, context.filter);
       }
-    }
+    },
+    true
   );
 
 })();

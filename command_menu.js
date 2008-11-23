@@ -146,21 +146,19 @@
     commands.addUserCommand(
       cmds,
       name,
-      function (args, _, num, extra) {
-        // for HEAD (2)
-        if (args.string != undefined)
-          args = args.string;
-        var res = _find(args.replace(/-\s*$/,''), true);
+      function (arg) {
+        var res = _find(arg.string.replace(/-\s*$/,''), true);
         if (!(res && action(res)))
           liberator.echoerr('menu not found');
       },
       {
-        completer: function (args) {
+        completer: function (context, arg, bang) {
           const gps = function (it) getPathString(it, equal(root), getElementName, isClickable);
           const fp = function (it) [gps(it), it.tooltipText || ''];
-          return [0, _find(args).map(fp)];
+          return [0, _find(context.filter).map(fp)];
         }
-      }
+      },
+      true
     );
   }
 

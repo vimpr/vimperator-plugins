@@ -2,7 +2,7 @@
 // @name           Google-Kanji
 // @description-ja グーグルを使って漢字を検索
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.1
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -21,9 +21,7 @@
     var re = /[\u4e00-\u9fa0]+/g; // 一-龠
     var ignore = /\u691c\u7d22|\u95a2\u9023/; // 検索|関連
     var req = new XMLHttpRequest();
-    liberator.log(word);
     var word = encodeURIComponent(word);
-    liberator.log(word);
     req.open('GET', 'http://www.google.co.jp/search?hl=ja&q=' + word + '&lr=lang_ja', true);
     var f = function () {
       var cnt = {};
@@ -56,7 +54,9 @@
   commands.addUserCommand(
     ['gkanji', 'googlekanji'],
     'Google kanji',
-    function (arg) getKanji(arg.string)
+    function (arg) getKanji(arg.string),
+    {},
+    true
   );
 
   function copyToClipboard (copytext) {
@@ -76,7 +76,13 @@
     ['gkcopy'],
     'Google kanji',
     copyToClipboard,
-    { completer: function (args) [0, copycompl] }
+    {
+      completer: function (context) {
+        context.title = ['kanji', 'count'];
+        context.items = copycompl;
+      }
+    },
+    true
   );
 
 

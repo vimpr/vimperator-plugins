@@ -3,7 +3,7 @@
 // @description    to run a specified command every time at specified interval.
 // @description-ja 指定のコマンドを指定の間隔で実行する。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.1
 // @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
@@ -40,14 +40,19 @@
 
 (function () {
 
-  let ps = [];
+  let every = liberator.plugins.every;
+  if (every) {
+    kill('*');
+  } else {
+    liberator.plugins.every = every = {ps: []};
+  }
 
   function run (command, interval) {
     let fun = function () {
       if (liberator.mode != liberator.modules.modes.COMMAND_LINE)
         liberator.execute(command);
     };
-    ps.push({
+    every.ps.push({
       handle: setInterval(fun, interval),
       command: command
     });
@@ -55,14 +60,14 @@
 
   function kill (index) {
     if (index == '*') {
-      ps.forEach(function (process) clearInterval(process.handle));
-      liberator.echo(ps.length + ' processes were killed!');
-      ps = [];
+      every.ps.forEach(function (process) clearInterval(process.handle));
+      liberator.echo(every.ps.length + ' processes were killed!');
+      every.ps = [];
     } else {
-      let process = ps[index];
+      let process = every.ps[index];
       if (process) {
         clearInterval(process.handle);
-        ps.splice(index, index);
+        every.ps.splice(index, index);
         liberator.echo('process "' + process.command + '" was killed!');
       } else {
         liberator.echoerr('unknown process');
@@ -88,11 +93,16 @@
       count: true,
       bang: true,
       argCount: '+',
-      completer: function (str, bang) {
-        return bang ? [0, [['*', 'kill em all']].concat(ps.map(function (p, i) ([i, p.command])))]
-                    : liberator.modules.completion.ex(str);
+      completer: function (context, arg, bang) {
+        if (bang) {
+          context.title = ['PID', 'every process'];
+          context.items = [['*', 'kill em all']].concat(every.ps.map(function (p, i) ([i.toString(), p.command])));
+        } else {
+          liberator.modules.completion.ex(context);
+        }
       }
-    }
+    },
+    true
   );
 
 
@@ -113,7 +123,7 @@
     {
       count: true,
       argCount: '+',
-      completer: liberator.modules.completion.ex
+      completer: function (context) liberator.modules.completion.ex(context)
     }
   );
 

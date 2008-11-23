@@ -93,11 +93,17 @@
   let extra = {
     argCount: '+',
     bang: true,
-    completer: function (arg) {
+    completer: function (context, arg, bang) {
+      let last = context.contextList.slice(-1)[0];
+      context.title = ['Country Code'];
+      context.advance(last.offset - last.caret);
+      context.items = completion.filter(cl, last.filter);
+      /*
       if (!(arg = commands.parseArgs(arg, extra.options, extra.argCount)))
         return [0, []];
       let m = arg.string.match(/\s(\w+)$/);
       return [(m ? m.index : arg.string.length) + 1, m ? completion.filter(cl, m[1]) : cl];
+      */
     }
   };
 
@@ -110,7 +116,8 @@
       value = eval(value);
       kawase(value, clipboard, from, to);
     },
-    extra
+    extra,
+    true
   );
 
 })();
