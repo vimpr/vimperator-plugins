@@ -4,7 +4,7 @@
  * @description     this script give you keyboard opration for nicovideo.jp.
  * @description-ja  ニコニコ動画のプレーヤーをキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.55
+ * @version         0.56
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -27,6 +27,7 @@
  *   :nicoseek [position]
  *     指定した場所にシークする。秒数で指定が可能。
  *     指定なしの場合一番最初にシークする。
+ *     負数の場合終わりからの秒数指定となる。
  *   :nicoseek! delta
  *     現在の位置から delta 分離れた所にシークする。秒数で指定が可能。
  *     マイナスを指定すると戻る。指定なしの場合変化しない。
