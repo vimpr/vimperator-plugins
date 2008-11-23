@@ -38,24 +38,26 @@
  *  :nobl
  * */
 
-( function () {
+// use setTimeout to synchronize ( wait to process highlight.js )
+// "liberator.modules.plugins.highlighterFactory" is build by highlight.js .
+// it is the factory that build highlight object.
+setTimeout( function () {
+
+if (!plugins.highlighterFactory) {
+    liberator.log('blinkelement.js needs highlight.js', 0);
+    return;
+}
 
 // default settings
 const defaultColor    = 'red';
 const defaultOpacity  = 0.5;
 const defaultInterval = 800;
 
-// use setTimeout to synchronize ( wait to process highlight.js )
-// "liberator.modules.plugins.highlighterFactory" is build by highlight.js .
-// it is the factory that build highlight object.
-let highlighter;
-setTimeout( function () {
-    highlighter = liberator.modules.plugins.highlighterFactory({
-        color:    liberator.globalVariables.blink_element_color    || defaultColor,
-        opacity:  liberator.globalVariables.blink_element_opacity  || defaultOpacity,
-        interval: liberator.globalVariables.blink_element_interval || defaultInterval,
-    });
-}, 0);
+let highlighter = liberator.modules.plugins.highlighterFactory({
+    color:    liberator.globalVariables.blink_element_color    || defaultColor,
+    opacity:  liberator.globalVariables.blink_element_opacity  || defaultOpacity,
+    interval: liberator.globalVariables.blink_element_interval || defaultInterval,
+});
 
 // register commands
 commands.addUserCommand(
@@ -114,6 +116,6 @@ commands.addUserCommand(
     {}
 );
 
-})()
+}, 0); // setTimeout
 
 // vim: set sw=4 ts=4 et;

@@ -32,7 +32,15 @@
  *  let blink_element_opacity='0.7'
  * */
 
-( function () {
+// use setTimeout to synchronize ( wait to process highlight.js )
+// "liberator.modules.plugins.highlighterFactory" is build by highlight.js .
+// it is the factory that build highlight object.
+setTimeout( function () {
+
+if (!plugins.highlighterFactory) {
+    liberator.log('mouseinspect.js needs highlight.js', 0);
+    return;
+}
 
 // default settings
 const defaultColor   = 'red';
@@ -59,7 +67,7 @@ commands.addUserCommand(
     ['mouseinspect', 'mins'],
     'mouse',
     function () {
-        elementInfo.highlighter = liberator.modules.plugins.highlighterFactory({
+        elementInfo.highlighter = plugins.highlighterFactory({
             color:    liberator.globalVariables.mouse_inspect_color   || defaultColor,
             opacity:  liberator.globalVariables.mouse_inspect_opacity || defaultOpacity,
             interval: 0,
@@ -78,6 +86,7 @@ commands.addUserCommand(
     },
     {}
 );
-} )()
+
+}, 0); // setTimeout
 
 // vim: set sw=4 ts=4 et;
