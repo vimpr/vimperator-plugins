@@ -4,7 +4,7 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.20
+ * @version         0.21
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -21,11 +21,9 @@
  *      -> clear blink all elements.
  *
  * SETTING
- *  blink_element_interval:     interval time. default is 800 msec.
- *  blink_element_color:        color for blink. default is red.
- *  blink_element_sparecolor:   use this value when target's background color
- *                              is same as color specified blink_element_color
- *                              or default. default is cyan.
+ *  blink_element_interval: interval time. default is 800 msec.
+ *  blink_element_color:    color for blink. default is red.
+ *  blink_element_opacity:  opacity value. defualt is 0.5 .
  *
  * EXAMPLE
  *  let blink_element_interval='500'
@@ -45,14 +43,15 @@ const opacity = liberator.globalVariables.blink_element_opacity || 0.5;
 
 function setBlink(element) {
     let doc = content.document;
+    let [top, left] = getAbsoluteCoodinate(element);
     let div = doc.createElement('div');
     div.className = 'vimp_plugin_blinkelement';
 
     div.style.position = 'absolute';
     div.style.display = 'block';
     div.style.zIndex = 2147483647;
-    div.style.top    = element.offsetTop + 'px';
-    div.style.left   = element.offsetLeft + 'px';
+    div.style.top    = top + 'px';
+    div.style.left   = left + 'px';
     div.style.width  = element.offsetWidth + 'px';
     div.style.height = element.offsetHeight + 'px';
     div.style.backgroundColor = color;
@@ -68,6 +67,15 @@ function setBlink(element) {
     );
 
     doc.body.appendChild(div);
+}
+
+function getAbsoluteCoodinate(element) {
+    let top = 0, left = 0;
+    do {
+        top  += element.offsetTop;
+        left += element.offsetLeft;
+    } while (element = element.offsetParent);
+    return [top, left];
 }
 
 function clearBlink(element) {
