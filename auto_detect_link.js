@@ -318,6 +318,18 @@
   }
 
 
+  // 全フレームの URL を得る
+  function getAllLocations (content) {
+    let result = [content.location.href];
+    if (content.frames) {
+      for (let i = 0, l = content.frames.length; i < l; i++) {
+        result = result.concat(getAllLocations(content.frames[i]));
+      }
+    }
+    return result;
+  }
+
+
   // 上書きした設定を返す。
   function getCurrentSetting (setting) {
     if (!setting)
@@ -410,7 +422,10 @@
       }
 
       // succ
-      let succs = succURI(uri, next);
+      let succs = [];
+      getAllLocations(window.content).forEach(function (uri) {
+        succs = succs.concat(succURI(uri, next));
+      });
       if (setting.useSuccPattern) {
         let link;
         if (succs.some(function (succ) {
@@ -421,13 +436,14 @@
       }
 
       // force
-      if (setting.force && succs.length)
+      if (setting.force && succs.length) {
         return {
           type: 'force',
           uri: succs[0],
           text: '-force-',
           frame: window.content,
         };
+      }
 
     } catch (e) {
       liberator.log(e);
