@@ -29,8 +29,9 @@
   * Const                                                                        {{{
   *********************************************************************************/
 
-  const ID_PREFIX = 'ank-nico-status-';
+  const ID_PREFIX = 'anekos-stela-';
 
+  // }}}
 
   /*********************************************************************************
   * Utils                                                                        {{{
@@ -68,7 +69,11 @@
   Player.ST_ENDED   = 'ended';
   Player.ST_OTHER   = 'other';
 
-  // rwx で機能の有無を表す
+  // rwxt で機能の有無を表す
+  // r = read
+  // w = write
+  // x = function
+  // t = toggle
   Player.prototype = {
     functions: {
       currentTime: '',
@@ -80,9 +85,9 @@
       repeating: '',
     },
 
-    initialize: function () void null,
-
     icon: null,
+
+    initialize: function () void null,
 
     get currentTime () undefined,
     set currentTime (value) void value,
@@ -96,7 +101,9 @@
 
     is: function (state) (this.state == state),
 
-    has: function (name, ms) !Array.some(ms, function (m) this.functions[name].indexOf(m) < 0),
+    has: function (name, ms)
+            let (f = this.functions[name])
+              (f && !Array.some(ms, function (m) f.indexOf(m) < 0)),
 
     playOrPause: function () {
       if (this.is(Player.ST_PLAYING)) {
@@ -133,9 +140,10 @@
     }
   };
 
+  // }}}
 
   /*********************************************************************************
-  * YouTubePlayer                                                                   {{{
+  * YouTubePlayer                                                                {{{
   *********************************************************************************/
 
   function YouTubePlayer () {
@@ -151,9 +159,11 @@
       volume: 'rw',
       play: 'x',
       pause: 'x',
-      muted: 'rw',
+      muted: 'rwt',
       repeating: 'rw',
     },
+
+    toggles: ['muted'],
 
     icon: 'http://www.youtube.com/favicon.ico',
 
@@ -212,9 +222,9 @@
       volume: 'rw',
       play: 'x',
       pause: 'x',
-      muted: 'rw',
-      repeating: 'rw',
-      comment: 'rw'
+      muted: 'rwt',
+      repeating: 'rwt',
+      comment: 'rwt'
     },
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
@@ -271,7 +281,7 @@
   // }}}
 
   /*********************************************************************************
-  * ContextMenu
+  * ContextMenu                                                                  {{{
   *********************************************************************************/
 
   const ContextMenuVolume = [];
@@ -333,18 +343,18 @@
   // }}}
 
   /*********************************************************************************
-  * NicoStatusLine                                                               {{{
+  * Stella                                                                       {{{
   *********************************************************************************/
 
-  function NicoStatusLine () {
+  function Stella () {
     this.initialize.apply(this, arguments);
   }
 
-  NicoStatusLine.MAIN_PANEL_ID  = ID_PREFIX + 'panel',
-  NicoStatusLine.MAIN_MENU_ID   = ID_PREFIX + 'main-menu',
-  NicoStatusLine.VOLUME_MENU_ID = ID_PREFIX + 'volume-menu',
+  Stella.MAIN_PANEL_ID  = ID_PREFIX + 'panel',
+  Stella.MAIN_MENU_ID   = ID_PREFIX + 'main-menu',
+  Stella.VOLUME_MENU_ID = ID_PREFIX + 'volume-menu',
 
-  NicoStatusLine.prototype = {
+  Stella.prototype = {
     // new 時に呼ばれる
     initialize: function () {
       this.players = {
@@ -405,6 +415,16 @@
         }, false);
       }
 
+      function createLabel (store, name, l, r) {
+          let label = store[name] = document.createElement('label');
+          label.setAttribute('value', '-');
+          label.style.marginLeft = (l || 0) + 'px';
+          label.style.marginRight = (r || 0) + 'px';
+          label.__defineGetter__('text', function () this.getAttribute('value'));
+          label.__defineSetter__('text', function (v) this.setAttribute('value', v));
+          setClickEvent(name, label);
+      }
+
       let panel = this.panel = document.createElement('statusbarpanel');
       panel.setAttribute('id', this.panelId);
 
@@ -417,37 +437,28 @@
       setClickEvent('icon', icon);
 
       let labels = this.labels = {};
-      ['main', 'volume', 'comment', 'repeat'].forEach(function (name, index) {
-        let label = labels[name] = document.createElement('label');
-        label.setAttribute('value', '-');
-        label.style.marginLeft = (index < 2 ? 2 : 0) + 'px';
-        (index < 3) && (label.style.marginRight = '0px');
-        setClickEvent(name, label);
-      });
+      let toggles = this.toggles = {};
+      createLabel(labels, 'main', 2, 2);
+      createLabel(labels, 'volume', 0, 2);
+      for each (let player in this.players) {
+        for (let func in player.functions) {
+          if (player.has(func, 't'))
+            (func in labels) || createLabel(toggles, func);
+        }
+      }
 
       panel.appendChild(hbox);
       hbox.appendChild(icon);
       [hbox.appendChild(label) for each (label in labels)];
+      [hbox.appendChild(toggle) for each (toggle in toggles)];
 
       let menu = this.mainMenu = buildContextMenu({
-        id: NicoStatusLine.MAIN_MENU_ID,
+        id: Stella.MAIN_MENU_ID,
         parent: panel,
         set: hbox,
         tree: ContextMenuTree,
         onAppend: function (elem, menu) setClickEvent(capitalize(menu.name), elem)
       });
-
-      let volMenu = this.volumeMenu = buildContextMenu({
-        id: NicoStatusLine.VOLUME_MENU_ID,
-        parent: panel,
-        set: labels.volume,
-        tree: ContextMenuVolume,
-        onAppend: function (elem, menu) setClickEvent(capitalize(menu.name), elem)
-      });
-
-      labels.volume.setAttribute('context', volMenu.id);
-
-      liberator.log(menu.id)
 
       let stbar = document.getElementById('status-bar');
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
@@ -459,10 +470,11 @@
 
     update: function () {
       try {
-        this.setLabelText('main', this.player.statusText);
-        this.setLabelText('comment', this.player.comment ? 'C' : 'c');
-        this.setLabelText('repeat', this.player.repeating ? 'R' : 'r');
-        this.setLabelText('volume', this.player.muted ? 'M' : this.player.volume);
+        this.labels.main.text       = this.player.statusText;
+        this.labels.volume.text     = this.player.volume;
+        this.toggles.comment.text   = this.player.comment ? 'C' : 'c';
+        this.toggles.repeating.text = this.player.repeating ? 'R' : 'r';
+        this.toggles.muted.text     = this.player.muted ? 'M' : 'm';
       } catch (e) {
         liberator.log(e);
       }
@@ -471,9 +483,9 @@
     enable: function () {
       this.hidden = false;
       this.icon.setAttribute('src', this.player.icon);
-      ['comment', 'repeat', 'volume'].forEach(bindr(this, function (name) {
-        this.labels[name].hidden = !this.player.functions[name];
-      }));
+      for (let name in this.toggles) {
+        this.toggles[name].hidden = !this.player.has(name, 't');
+      }
       if (!this.timerHandle) {
         this.timerHandle = setInterval(bindr(this, this.update), 500);
       }
@@ -497,13 +509,13 @@
 
     onPauseClick: function () this.player.pause(),
 
-    onVolumeClick: function (event) (this.player.muted = !this.player.muted),
+    onMutedClick: function (event) (this.player.muted = !this.player.muted),
 
-    onSetVolumeClick: function (event) (this.player.volume = event.target.getAttribute('volume')),
+    onSetMutedClick: function (event) (this.player.volume = event.target.getAttribute('volume')),
 
     onCommentClick: function () (this.player.comment = !this.player.comment),
 
-    onRepeatClick: function () (this.player.repeating = !this.player.repeating),
+    onRepeatingClick: function () (this.player.repeating = !this.player.repeating),
 
     onMainClick: function (event) {
       if (event.button)
@@ -544,13 +556,13 @@
   let (nsl = liberator.plugins.nico_statusline) {
     if (nsl) {
       nsl.finalize();
-      liberator.plugins.nico_statusline = new NicoStatusLine();
+      liberator.plugins.nico_statusline = new Stella();
     } else {
       window.addEventListener(
         'DOMContentLoaded',
         function () {
           window.removeEventListener('DOMContentLoaded', arguments.callee, false);
-          liberator.plugins.nico_statusline = new NicoStatusLine();
+          liberator.plugins.nico_statusline = new Stella();
         },
         false
       );
