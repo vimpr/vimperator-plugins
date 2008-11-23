@@ -4,12 +4,15 @@
  * @description     display informations of the specified element and highlight it by mouse.
  * @description-ja  マウスで指定した要素の情報をコマンドラインに表示＆ハイライトする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.11
+ * @version         0.20
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
  * LICENSE
  *   New BSD License
+ *
+ * CONSTRAINT
+ *  need highlight.js
  *
  * USAGE
  *  :mouseinspect
@@ -31,66 +34,39 @@
 
 ( function () {
 
-const color = liberator.globalVariables.mouse_inspect_color || 'red';
-const opacity = liberator.globalVariables.mouse_inspect_opacity || 0.5;
-let divList = [];
+// default settings
+const defaultColor   = 'red';
+const defaultOpacity = 0.5;
 
-function unhighlight() {
-    let divs = buffer.evaluateXPath('//div[contains(concat(" ", @class, " "), " vimp_plugin_mouse ")]');
-    while (divList.length) {
-        let d = divList.pop();
-        d.parentNode.removeChild(d);
-    }
-}
-
-function highlight(element) {
-    let doc = content.document;
-    let div = doc.createElement('div');
-    let [top, left] = getAbsoluteCoodinate(element);
-    div.className = 'vimp_plugin_mouse';
-
-    div.style.position = 'absolute';
-    div.style.display = 'block';
-    div.style.zIndex = 2147483647;
-    div.style.top    = top + 'px';
-    div.style.left   = left + 'px';
-    div.style.width  = element.offsetWidth + 'px';
-    div.style.height = element.offsetHeight + 'px';
-    div.style.backgroundColor = color;
-    div.style.opacity    = opacity;
-    div.style.MozOpacity = opacity;
-    div.ignore = true;
-
-    divList.push(div);
-    doc.body.appendChild(div);
-}
-
-function getAbsoluteCoodinate(element) {
-    let top = 0, left = 0;
-    do {
-        top  += element.offsetTop;
-        left += element.offsetLeft;
-    } while (element = element.offsetParent);
-    return [top, left];
-}
-
-function elementInfo(event) {
+// main
+let elementInfo = function (event) {
     let element = event.target;
-    if (element.ignore) {
-        unhighlight();
+
+    if (element.className === 'vimp_plugin_highlightelement') {
+        elementInfo.highlighter.unhighlightAll();
         return;
     }
 
     let attributes = [a.name + '="' + a.value + '"' for (a in util.Array.iterator(element.attributes))].join(' ');
     let str = '<' + element.localName.toLowerCase() + (attributes ? ' ' + attributes : '') + '>';
-    highlight(element);
     liberator.echo(str, commandline.FORCE_SINGLELINE);
-}
 
+    elementInfo.highlighter.highlight(element);
+};
+
+// register commands
 commands.addUserCommand(
     ['mouseinspect', 'mins'],
     'mouse',
-    function () { window.addEventListener('mousemove', elementInfo, false); },
+    function () {
+        elementInfo.highlighter = liberator.modules.plugins.highlighterFactory({
+            color:    liberator.globalVariables.mouse_inspect_color   || defaultColor,
+            opacity:  liberator.globalVariables.mouse_inspect_opacity || defaultOpacity,
+            interval: 0,
+        });
+
+        window.addEventListener('mousemove', elementInfo, false);
+    },
     {}
 );
 commands.addUserCommand(
@@ -98,8 +74,10 @@ commands.addUserCommand(
     'mouse',
     function () {
         window.removeEventListener('mousemove', elementInfo, false);
-        unhighlight();
+        elementInfo.highlighter.unhighlightAll();
     },
     {}
 );
 } )()
+
+// vim: set sw=4 ts=4 et;

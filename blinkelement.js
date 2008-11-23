@@ -4,12 +4,15 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.21
+ * @version         0.30
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
  * LICENSE
- *   New BSD License
+ *  New BSD License
+ *
+ * CONSTRAINT
+ *  need highlight.js
  *
  * USAGE
  *  :blink {element[s] object}
@@ -37,52 +40,24 @@
 
 ( function () {
 
-const interval = liberator.globalVariables.blink_element_interval || 800;
-const color = liberator.globalVariables.blink_element_color || 'red';
-const opacity = liberator.globalVariables.blink_element_opacity || 0.5;
+// default settings
+const defaultColor    = 'red';
+const defaultOpacity  = 0.5;
+const defaultInterval = 800;
 
-function setBlink(element) {
-    let doc = content.document;
-    let [top, left] = getAbsoluteCoodinate(element);
-    let div = doc.createElement('div');
-    div.className = 'vimp_plugin_blinkelement';
+// use setTimeout to synchronize ( wait to process highlight.js )
+// "liberator.modules.plugins.highlighterFactory" is build by highlight.js .
+// it is the factory that build highlight object.
+let highlighter;
+setTimeout( function () {
+    highlighter = liberator.modules.plugins.highlighterFactory({
+        color:    liberator.globalVariables.blink_element_color    || defaultColor,
+        opacity:  liberator.globalVariables.blink_element_opacity  || defaultOpacity,
+        interval: liberator.globalVariables.blink_element_interval || defaultInterval,
+    });
+}, 0);
 
-    div.style.position = 'absolute';
-    div.style.display = 'block';
-    div.style.zIndex = 2147483647;
-    div.style.top    = top + 'px';
-    div.style.left   = left + 'px';
-    div.style.width  = element.offsetWidth + 'px';
-    div.style.height = element.offsetHeight + 'px';
-    div.style.backgroundColor = color;
-    div.style.opacity    = opacity;
-    div.style.MozOpacity = opacity;
-
-    div.intervalId = setInterval(
-        function () {
-            let d = div.style.display;
-            div.style.display = (d === 'block' ? 'none' : 'block');
-        },
-        interval
-    );
-
-    doc.body.appendChild(div);
-}
-
-function getAbsoluteCoodinate(element) {
-    let top = 0, left = 0;
-    do {
-        top  += element.offsetTop;
-        left += element.offsetLeft;
-    } while (element = element.offsetParent);
-    return [top, left];
-}
-
-function clearBlink(element) {
-    if (element.intervalId) clearInterval(element.intervalId);
-    element.parentNode.removeChild(element);
-}
-
+// register commands
 commands.addUserCommand(
     ['blink', 'bl'],
     'blink',
@@ -102,14 +77,26 @@ commands.addUserCommand(
             return;
         }
 
+        liberator.log(highlighter, 0);
+
+        // reflect settings ( follow dynamic change of settings )
+        highlighter.set({
+            color:    liberator.globalVariables.blink_element_color    || defaultColor,
+            opacity:  liberator.globalVariables.blink_element_opacity  || defaultOpacity,
+            interval: liberator.globalVariables.blink_element_interval || defaultInterval,
+        });
+
+        // for getElement[s]By...
         if (element instanceof HTMLCollection) {
-            for (let [, e] in Iterator(element)) setBlink(e);
+            for (let [, e] in Iterator(element)) highlighter.highlight(e);
         }
+        // for evaluate
         else if (element instanceof XPathResult) {
-            for (let e in element) setBlink(e);
+            for (let e in element) highlighter.highlight(e);
         }
-        else if ('style' in element) {
-            setBlink(element);
+        // single element
+        else if (element) {
+            highlighter.highlight(element);
         }
         else {
             liberator.echoerr('specify element[s]');
@@ -123,10 +110,7 @@ commands.addUserCommand(
 commands.addUserCommand(
     ['noblink', 'nobl'],
     'no blink',
-    function () {
-        let divs = buffer.evaluateXPath('//div[contains(concat(" ", @class, " "), " vimp_plugin_blinkelement ")]');
-        for (let d in divs) clearBlink(d);
-    },
+    function () highlighter.unhighlightAll(),
     {}
 );
 
