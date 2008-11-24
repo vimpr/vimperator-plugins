@@ -77,7 +77,7 @@
       setf('seekRelative', seek);
     }
     setf('playOrPause', this.has('play', 'x', 'pause', 'x') && 'x');
-    setf('upDownVolume', this.has('volume', 'rw') && 'x');
+    setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
     setf('maxVolume', this.has('volume', 'rw') && 'r');
   }
 
@@ -101,7 +101,7 @@
       pause: '',
       muted: '',
       repeating: ''
-      // auto setting => seek, seekRelative, playOrPause, upDownVolume, maxVolume
+      // auto setting => seek, seekRelative, playOrPause, turnUpDownVolume, maxVolume
     },
 
     icon: null,
@@ -158,7 +158,7 @@
     seekRelative: function (v)
       this.currentTime = Math.min(Math.max(this.currentTime + parseInt(v, 10), 0), this.totalTime),
 
-    upDownVolume: function (v)
+    turnUpDownVolume: function (v)
       this.volume = Math.min(Math.max(this.volume + v, 0), this.maxVolume),
 
     get repeating () undefined,
@@ -464,7 +464,7 @@
       add('mute', 'muted');
       add('repeat', 'repeating');
       add('comment', 'comment');
-      add('volume', 'volume', 'upDownVolume');
+      add('volume', 'volume', 'turnUpDownVolume');
       add('seek', 'seek', 'seekRelative');
     },
 
@@ -541,15 +541,10 @@
       autocommands.add('LocationChange', /.*/, "js liberator.plugins.nico_statusline.onLocationChange()"),
 
     update: function () {
-      try {
-        this.labels.main.text       = this.player.statusText;
-        this.labels.volume.text     = this.player.volume;
-        // FIXME this.toggles.each...
-        for (let name in this.toggles) {
-          this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
-        }
-      } catch (e) {
-        liberator.log(e);
+      this.labels.main.text = this.player.statusText;
+      this.labels.volume.text = this.player.volume;
+      for (let name in this.toggles) {
+        this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
       }
     },
 
