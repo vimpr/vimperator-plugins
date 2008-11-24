@@ -2,7 +2,7 @@
 // @name           すてら
 // @description-ja ステータスラインに動画の再生時間などを表示する。
 // @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        0.01
+// @version        0.03
 // @author         anekos (anekos@snca.net)
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
@@ -18,6 +18,7 @@
 //    Other video hosting websites
 //
 // Links:
+//    http://d.hatena.ne.jp/nokturnalmortum/
 //
 // License:
 //    http://creativecommons.org/licenses/by-sa/3.0/
@@ -53,6 +54,9 @@
   function capitalize (s)
     s.replace(/^[a-z]/, String.toUpperCase);
 
+  function id (value)
+    value;
+
 
   // }}}
 
@@ -61,7 +65,20 @@
   *********************************************************************************/
 
   function Player () {
+    let self = this;
+
     this.initialize.apply(this, arguments);
+
+    function setf (name, value)
+      ((self.functions[name] === undefined) && (self.functions[name] = value || ''));
+
+    let (seek = this.has('currentTime', 'rw', 'totalTime', 'r') && 'x') {
+      setf('seek', seek);
+      setf('seekRelative', seek);
+    }
+    setf('playOrPause', this.has('play', 'x', 'pause', 'x') && 'x');
+    setf('upDownVolume', this.has('volume', 'rw') && 'x');
+    setf('maxVolume', this.has('volume', 'rw') && 'r');
   }
 
   Player.ST_PLAYING = 'playing';
@@ -80,9 +97,11 @@
       totalTime: '',
       volume: '',
       play: '',
+      playEx: '',
       pause: '',
       muted: '',
       repeating: ''
+      // auto setting => seek, seekRelative, playOrPause, upDownVolume, maxVolume
     },
 
     icon: null,
@@ -97,13 +116,19 @@
     get volume () undefined,
     set volume (value) void value,
 
+    get maxVolume () 100,
+
     get statusText () this.timeCodes,
 
     is: function (state) (this.state == state),
 
     has: function (name, ms)
-            let (f = this.functions[name])
-              (f && !Array.some(ms, function (m) f.indexOf(m) < 0)),
+      (arguments.length < 2)
+      ||
+      let (f = this.functions[name])
+        (f && !Array.some(ms, function (m) f.indexOf(m) < 0))
+        &&
+        arguments.callee.apply(this, Array.splice(arguments, 2)),
 
     playOrPause: function () {
       if (this.is(Player.ST_PLAYING)) {
@@ -122,6 +147,19 @@
     },
 
     pause: function () undefined,
+
+    seek: function (v) {
+      v = parseInt(v, 10);
+      if (v < 0)
+        v = this.totalTime +  v;
+      return this.currentTime = Math.min(Math.max(v, 0), this.totalTime);
+    },
+
+    seekRelative: function (v)
+      this.currentTime = Math.min(Math.max(this.currentTime + parseInt(v, 10), 0), this.totalTime),
+
+    upDownVolume: function (v)
+      this.volume = Math.min(Math.max(this.volume + v, 0), this.maxVolume),
 
     get repeating () undefined,
     set repeating (value) undefined,
@@ -158,12 +196,12 @@
       totalTime: 'r',
       volume: 'rw',
       play: 'x',
+      playOrPause: 'x',
+      playEx: 'x',
       pause: 'x',
       muted: 'rwt',
       repeating: 'rw'
     },
-
-    toggles: ['muted'],
 
     icon: 'http://www.youtube.com/favicon.ico',
 
@@ -221,6 +259,8 @@
       totalTime: 'r',
       volume: 'rw',
       play: 'x',
+      playOrPause: 'x',
+      playEx: 'x',
       pause: 'x',
       muted: 'rwt',
       repeating: 'rwt',
@@ -365,6 +405,7 @@
       this.addAutoCommand();
       this.onLocationChange();
       this.__onResize = window.addEventListener('resize', bindr(this, this.onResize), false);
+      this.addUserCommands();
     },
 
     // もちろん、勝手に呼ばれたりはしない。
@@ -392,9 +433,40 @@
     get statusBarVisible () !this.statusBar.getAttribute('moz-collapsed', false),
     set statusBarVisible (value) this.statusBar.setAttribute('moz-collapsed', !value),
 
-    setLabelText: function (name, text)
-      let (label = this.labels[name])
-        (label && label.setAttribute('value', text)),
+    addUserCommands: function () {
+      let stella = this;
+      function add (cmdName, funcS, funcB) {
+        commands.addUserCommand(
+          ['st' + cmdName],
+          cmdName + ' - Stella',
+          (funcS instanceof Function)
+            ? funcS
+            : function (arg, bang) {
+                if (!stella.where)
+                  return liberator.echoerr('Stella: Current page is not supported');
+                let p = stella.player;
+                let func = bang ? funcB : funcS;
+                if (p.has(func, 'rwt'))
+                  p.toggle(func);
+                else if (p.has(func, 'rw'))
+                  p[func] = arg.arguments[0];
+                else if (p.has(func, 'x'))
+                  p[func].apply(p, arg.arguments);
+                stella.update();
+              },
+          {argCount: '*', bang: !!funcB},
+          true
+        );
+      }
+
+      add('play', 'playOrPause');
+      add('pause', 'pause');
+      add('mute', 'muted');
+      add('repeat', 'repeating');
+      add('comment', 'comment');
+      add('volume', 'volume', 'upDownVolume');
+      add('seek', 'seek', 'seekRelative');
+    },
 
     removeStatusPanel: function () {
       let e = this.panel || document.getElementById(this.panelId);
@@ -472,9 +544,10 @@
       try {
         this.labels.main.text       = this.player.statusText;
         this.labels.volume.text     = this.player.volume;
-        this.toggles.comment.text   = this.player.comment ? 'C' : 'c';
-        this.toggles.repeating.text = this.player.repeating ? 'R' : 'r';
-        this.toggles.muted.text     = this.player.muted ? 'M' : 'm';
+        // FIXME this.toggles.each...
+        for (let name in this.toggles) {
+          this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
+        }
       } catch (e) {
         liberator.log(e);
       }
@@ -509,17 +582,20 @@
 
     onPauseClick: function () this.player.pause(),
 
-    onMutedClick: function (event) (this.player.muted = !this.player.muted),
+    onMutedClick: function (event) (this.player.toggle('muted')),
 
     onSetMutedClick: function (event) (this.player.volume = event.target.getAttribute('volume')),
 
-    onCommentClick: function () (this.player.comment = !this.player.comment),
+    onCommentClick: function () (this.player.toggle('comment')),
 
-    onRepeatingClick: function () (this.player.repeating = !this.player.repeating),
+    onRepeatingClick: function () (this.player.toggle('repeating')),
 
     onMainClick: function (event) {
       if (event.button)
         return;
+      if (!(this.player && this.player.has('currentTime', 'rw', 'totalTime', 'r')))
+        return;
+
       let rect = event.target.getBoundingClientRect();
       let x = event.screenX;
       let per = (x - rect.left) / (rect.right - rect.left);
