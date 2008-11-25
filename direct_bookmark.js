@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.13
-// Last Change: 22-Nov-2008. Jan 2008
+// Last Change: 25-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -352,7 +352,7 @@
                 xhr.send(null);
 
                 var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
-                var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
+                var tags = getElementsByXPath('id("tags")/li/a',mypage_html);
 
                 tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
