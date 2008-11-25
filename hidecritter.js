@@ -4,7 +4,7 @@
  * @description     hide specified elements.
  * @description-ja  指定した要素を隠す。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.10
+ * @version         0.11
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -15,7 +15,7 @@
  *   hit ';h'
  *
  * TODO
- *  use wedate.net... ?
+ *  use wedata.net... ?
  * */
 
 ( function () {
@@ -34,7 +34,7 @@ const defaultSITEINFO = {
 };
 
 hints.addMode(
-    'h',
+    liberator.globalVariables.hidecritter_mapping || 'h',
     'hide look like header, footer, sidebar and so on',
     function (element) {
         element.style.display = 'none';
