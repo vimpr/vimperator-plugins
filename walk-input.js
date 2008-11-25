@@ -35,13 +35,14 @@ var walkinput = function (forward) {
         let r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = r.snapshotLength; i < l; ++i) {
             let e = r.snapshotItem(i);
-            list.push(e);
+            let ef = {element: e, frame: frame};
+            list.push(ef);
             if (e == focused) {
-                current = e;
+                current = ef;
             } else if (current && !next) {
-                next = e;
+                next = ef;
             } else if (!current) {
-                prev = e;
+                prev = ef;
             }
         }
       }
@@ -54,7 +55,10 @@ var walkinput = function (forward) {
 
     var elem = forward ? (next || list[0])
                        : (prev || list[list.length - 1]);
-    elem.focus();
+
+    if (!current || current.frame != elem.frame)
+      elem.frame.focus();
+    elem.element.focus();
 
 };
 
