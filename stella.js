@@ -2,7 +2,7 @@
 // @name           すてら
 // @description-ja ステータスラインに動画の再生時間などを表示する。
 // @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        0.03
+// @version        0.05
 // @author         anekos (anekos@snca.net)
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
@@ -38,6 +38,8 @@
   * Utils                                                                        {{{
   *********************************************************************************/
 
+  const InVimperator = !!(liberator && modules && modules.liberator);
+
   function isNum (v)
     (typeof v === 'number' && !isNaN(v));
 
@@ -57,6 +59,67 @@
   function id (value)
     value;
 
+  function makeURL (s) {
+    let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
+    url.spec = s;
+    return url;
+  }
+
+  function fixFilename (filename) {
+    const badChars = /[\\\/:;*?"<>|]/g;
+    return filename.replace(badChars, '_');
+  }
+
+  function makeFile (s) {
+    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    file.initWithPath(s);
+    return file;
+  }
+
+  function download (url, filepath, ext, title) {
+    let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
+    let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
+    let file;
+
+    if (filepath) {
+      file = io.getFile(io.expandPath(filepath));
+    } else {
+      file = dm.userDownloadsDirectory;
+    }
+    if (file.isDirectory() && title)
+      file.appendRelativePath(fixFilename(title) + ext);
+    if (file.exists())
+      return liberator.echoerr('The file already exists! -> ' + file.path);
+    file = makeFileURI(file);
+
+    let dl = dm.addDownload(0, makeURL(url, null, null), file, title, null, null, null, null, wbp);
+    wbp.progressListener = dl;
+    wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+    wbp.saveURI(makeURL(url), null, null, null, null, file);
+
+    return true;
+  }
+
+  function httpRequest (uri, onComplete) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200)
+          onComplete && onComplete(xhr);
+        else
+          raise(xhr.statusText);
+      }
+    };
+    xhr.open('GET', uri, !!onComplete);
+    xhr.send(null);
+    return xhr;
+  }
+
+  function currentURL ()
+    content.document.location.href;
+
+  let raise = InVimperator ? function (error) {throw new Error(error)}
+                           : function (error) liberator.echoerr(error);
 
   // }}}
 
@@ -79,6 +142,7 @@
     setf('playOrPause', this.has('play', 'x', 'pause', 'x') && 'x');
     setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
     setf('maxVolume', this.has('volume', 'rw') && 'r');
+    setf('fetch', this.has('fileURL', 'r') && 'x');
   }
 
   Player.ST_PLAYING = 'playing';
@@ -100,8 +164,11 @@
       playEx: '',
       pause: '',
       muted: '',
-      repeating: ''
-      // auto setting => seek, seekRelative, playOrPause, turnUpDownVolume, maxVolume
+      repeating: '',
+      fileURL: '',
+      title: '',
+      fileExtension: 'r',
+      // auto setting => seek, seekRelative, playOrPause, turnUpDownVolume, maxVolume, fetch
     },
 
     icon: null,
@@ -119,6 +186,12 @@
     get maxVolume () 100,
 
     get statusText () this.timeCodes,
+
+    get fileURL () undefined,
+
+    get title () undefined,
+
+    get fileExtension () '',
 
     is: function (state) (this.state == state),
 
@@ -169,12 +242,18 @@
 
     get state () undefined,
 
+    get FileURL() undefined,
+
     toggle: function (name) {
       if (!this.has(name, 'rw'))
         return;
       let v = this[name];
       this[name] = !v;
       return !v;
+    },
+
+    fetch: function (filepath) {
+      download(this.fileURL, filepath, this.fileExtension, this.title);
     }
   };
 
@@ -200,7 +279,9 @@
       playEx: 'x',
       pause: 'x',
       muted: 'rwt',
-      repeating: 'rw'
+      repeating: 'rw',
+      title: 'r',
+      fileURL: 'r'
     },
 
     icon: 'http://www.youtube.com/favicon.ico',
@@ -217,12 +298,21 @@
     get volume () parseInt(this.player.getVolume()),
     set volume (value) parseInt(this.player.setVolume(value)),
 
+    get fileURL ()
+      let (as = content.document.defaultView.wrappedJSObject.swfArgs)
+        ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
+
+    get title ()
+      content.document.title.replace(/^YouTube - /, ''),
+
     play: function () this.player.playVideo(),
 
     pause: function () this.player.pauseVideo(),
 
     get muted () this.player.isMuted(),
     set muted (value) (value ? this.player.mute() : this.player.unMute()),
+
+    get fileExtension () '.mp4',
 
     get state () {
       switch (this.player.getPlayerState()) {
@@ -264,7 +354,12 @@
       pause: 'x',
       muted: 'rwt',
       repeating: 'rwt',
-      comment: 'rwt'
+      comment: 'rwt',
+      title: 'r',
+      fileURL: '',
+      id: 'r',
+      fetch: 'x',
+      title: 'r'
     },
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
@@ -280,6 +375,10 @@
 
     get volume () parseInt(this.player.ext_getVolume()),
     set volume (value) parseInt(this.player.ext_setVolume(value)),
+
+    get title () content.document.title.replace(/\s*\u2010\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
+
+    get fileExtension () '.flv',
 
     playOrPause: function () {
       if (this.is(Player.ST_PLAYING)) {
@@ -303,6 +402,10 @@
     get muted () this.player.ext_isMute(),
     set muted (value) this.player.ext_setMute(value),
 
+    get id ()
+      let (m = currentURL().match(/\/watch\/([a-z]{2}\d+)/))
+        (m && m[1]),
+
     get state () {
       switch (this.player.ext_getStatus()) {
         case 'end':
@@ -315,6 +418,17 @@
         default:
           return Player.ST_OTHER;
       }
+    },
+
+    fetch: function (filepath) {
+      liberator.log(this.id)
+      let onComplete = function (xhr) {
+          let res = xhr.responseText;
+          let info = {};
+          res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
+          download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
+      };
+      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, bindr(this, onComplete));
     }
   };
 
@@ -383,6 +497,33 @@
   // }}}
 
   /*********************************************************************************
+  * Event                                                                        {{{
+  *********************************************************************************/
+
+  function WebProgressListener (listeners) {
+    let self = this;
+    for (let [name, listener] in Iterator(listeners))
+      this[name] = listener;
+    getBrowser().addProgressListener(this);
+    // これは必要？
+    window.addEventListener('unload', bindr(this.uninstall), false);
+  }
+
+  WebProgressListener.prototype = {
+    onStatusChange: function (webProgress, request, stateFlags, staus) undefined,
+    onProgressChange: function (webProgress, request, curSelfProgress,
+                               maxSelfProgress, curTotalProgress, maxTotalProgress) undefined,
+    onLocationChange: function (webProgress, request, location) undefined,
+    onStateChange: function(webProgress, request, status, message) undefined,
+    onSecurityChange: function(webProgress, request, state) undefined,
+    uninstall: function () {
+      getBrowser().removeProgressListener(this);
+    }
+  };
+
+  // }}}
+
+  /*********************************************************************************
   * Stella                                                                       {{{
   *********************************************************************************/
 
@@ -397,21 +538,25 @@
   Stella.prototype = {
     // new 時に呼ばれる
     initialize: function () {
+      let self = this;
+
       this.players = {
         niconico: new NicoPlayer(),
         youtube: new YouTubePlayer()
       };
+
       this.createStatusPanel();
-      this.addAutoCommand();
       this.onLocationChange();
+
       this.__onResize = window.addEventListener('resize', bindr(this, this.onResize), false);
-      this.addUserCommands();
+      this.progressListener = new WebProgressListener({onLocationChange: bindr(this, this.onLocationChange)});
     },
 
     // もちろん、勝手に呼ばれたりはしない。
     finalize: function () {
       this.removeStatusPanel();
       this.disable();
+      this.progressListener.uninstall();
       window.removeEventListener('resize', this.__onResize, false);
     },
 
@@ -442,8 +587,8 @@
           (funcS instanceof Function)
             ? funcS
             : function (arg, bang) {
-                if (!stella.where)
-                  return liberator.echoerr('Stella: Current page is not supported');
+                if (!stella.valid)
+                  raise('Stella: Current page is not supported');
                 let p = stella.player;
                 let func = bang ? funcB : funcS;
                 if (p.has(func, 'rwt'))
@@ -466,6 +611,7 @@
       add('comment', 'comment');
       add('volume', 'volume', 'turnUpDownVolume');
       add('seek', 'seek', 'seekRelative');
+      add('fetch', 'fetch');
     },
 
     removeStatusPanel: function () {
@@ -535,10 +681,6 @@
       let stbar = document.getElementById('status-bar');
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
     },
-
-    // FIXME
-    addAutoCommand: function ()
-      autocommands.add('LocationChange', /.*/, "js liberator.plugins.nico_statusline.onLocationChange()"),
 
     update: function () {
       this.labels.main.text = this.player.statusText;
@@ -625,15 +767,20 @@
   *********************************************************************************/
 
   let (nsl = liberator.plugins.nico_statusline) {
+    let install = function () {
+      let stella = liberator.plugins.nico_statusline = new Stella();
+      stella.addUserCommands();
+      liberator.log('Stella: installed.')
+    }
     if (nsl) {
       nsl.finalize();
-      liberator.plugins.nico_statusline = new Stella();
+      install();
     } else {
       window.addEventListener(
         'DOMContentLoaded',
         function () {
           window.removeEventListener('DOMContentLoaded', arguments.callee, false);
-          liberator.plugins.nico_statusline = new Stella();
+          install();
         },
         false
       );
