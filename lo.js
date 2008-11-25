@@ -107,7 +107,7 @@
         ],
         completer: function (context, arg, bang) {
           context.title = ['URL', 'Text Content'];
-          context.items = filteredLinks(context.filter).map(function (it) ([it.href, it.textContent]));
+          context.completions = filteredLinks(context.filter).map(function (it) ([it.href, it.textContent]));
         },
       },
       true
@@ -154,7 +154,7 @@
           lolinks = filteredLinks(last.filter);
           context.title = ['URL', 'Text Content'];
           context.advance(last.offset - last.caret);
-          context.items = lolinks.map(function (it, i) ([i + ',' + it.href, it.textContent]));
+          context.completions = lolinks.map(function (it, i) ([i + ',' + it.href, it.textContent]));
         }
       },
       true
