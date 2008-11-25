@@ -81,7 +81,7 @@
       completer: function (context, arg, bang) {
         if (bang) {
           context.title = ['Path'];
-          context.items = files.map(function (it) ([it.path]));
+          context.completions = files.map(function (it) ([it.path]));
         } else {
           completion.file(context);
         }
