@@ -36,9 +36,11 @@
       return [0,oldResult[1].filter(function([value,label]) migemoPattern.test(value) || migemoPattern.test(label))];
   },[""]);
 
+  let orignalFilter = liberator.modules.completion.filter;
+
   liberator.modules.completion.filter = function(array,filter,matchFromBeginning,favicon){
       if (!filter)
-          return [[a[0], a[1], favicon ? a[2] : null] for each (a in array)];
+          return orignalFilter.apply(this, arguments);
 
       let original = XMigemoTextUtils.sanitize(filter);
       let migemoString = XMigemoCore.getRegExp(filter);
@@ -49,10 +51,12 @@
 
       let result = [];
       for (let [,item] in Iterator(array)){
-          let complist = item[0] instanceof Array ? item[0] : [item[0]];
+          let text = completion.getKey(item, 'text');
+          let complist = text instanceof Array ? text : [text];
           for (let [,compitem] in Iterator(complist)){
               if (migemoPattern.test(compitem) || migemoPattern.test(item[1])){
-                result.push([compitem,item[1],favicon ? item[2] : null]);
+                item.text = compitem;
+                result.push(item);
                 break;
               }
           }
