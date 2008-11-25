@@ -227,7 +227,7 @@
 
 
             //Mappings
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [",f"],
+            liberator.modules.mappings.add([liberator.modules.modes.NORMAL], [",f"],
                 "Start QuickHint mode with LDRize",
                 function(){
                     setHinttags(true);
