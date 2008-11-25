@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.13
-// Last Change: 22-Nov-2008. Jan 2008
+// Version: 0.12
+// Last Change: 25-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -353,7 +353,8 @@
                 xhr.send(null);
 
                 var mypage_html = parseHTML(xhr.responseText, ['img', 'script']);
-                var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
+                //var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
+                var tags = getElementsByXPath('id("tags")/li/a', mypage_html);
 
                 tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
@@ -626,9 +627,7 @@
                     user,password,
                     isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
-                )).next(function() {
-                  liberator.echo("[" + services[service].description + "] post completed.");
-                });
+                ));
             });
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
