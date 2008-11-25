@@ -31,6 +31,7 @@
   *********************************************************************************/
 
   const ID_PREFIX = 'anekos-stela-';
+  const InVimperator = !!(liberator && modules && modules.liberator);
 
   // }}}
 
@@ -38,43 +39,14 @@
   * Utils                                                                        {{{
   *********************************************************************************/
 
-  const InVimperator = !!(liberator && modules && modules.liberator);
-
-  function isNum (v)
-    (typeof v === 'number' && !isNaN(v));
-
-  function lz (s,n)
-    String(Math.pow(10,n ) + s).substring(1);
-
-  function toTimeCode(v)
-    (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
-              : '??:??');
-
   function bindr (_this, f)
     function () f.apply(_this, arguments);
 
   function capitalize (s)
     s.replace(/^[a-z]/, String.toUpperCase);
 
-  function id (value)
-    value;
-
-  function makeURL (s) {
-    let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
-    url.spec = s;
-    return url;
-  }
-
-  function fixFilename (filename) {
-    const badChars = /[\\\/:;*?"<>|]/g;
-    return filename.replace(badChars, '_');
-  }
-
-  function makeFile (s) {
-    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-    file.initWithPath(s);
-    return file;
-  }
+  function currentURL ()
+    content.document.location.href;
 
   function download (url, filepath, ext, title) {
     let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
@@ -100,6 +72,11 @@
     return true;
   }
 
+  function fixFilename (filename) {
+    const badChars = /[\\\/:;*?"<>|]/g;
+    return filename.replace(badChars, '_');
+  }
+
   function httpRequest (uri, onComplete) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -114,12 +91,33 @@
     xhr.send(null);
     return xhr;
   }
+  function id (value)
+    value;
 
-  function currentURL ()
-    content.document.location.href;
+  function isNum (v)
+    (typeof v === 'number' && !isNaN(v));
+
+  function lz (s,n)
+    String(Math.pow(10,n ) + s).substring(1);
+
+  function makeFile (s) {
+    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    file.initWithPath(s);
+    return file;
+  }
+
+  function makeURL (s) {
+    let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
+    url.spec = s;
+    return url;
+  }
 
   let raise = InVimperator ? function (error) {throw new Error(error)}
                            : function (error) liberator.echoerr(error);
+
+  function toTimeCode(v)
+    (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
+              : '??:??');
 
   // }}}
 
@@ -158,40 +156,22 @@
   Player.prototype = {
     functions: {
       currentTime: '',
-      totalTime: '',
-      volume: '',
+      fileExtension: 'r',
+      fileURL: '',
+      muted: '',
+      pause: '',
       play: '',
       playEx: '',
-      pause: '',
-      muted: '',
       repeating: '',
-      fileURL: '',
       title: '',
-      fileExtension: 'r',
+      totalTime: '',
+      volume: '',
       // auto setting => seek, seekRelative, playOrPause, turnUpDownVolume, maxVolume, fetch
     },
 
     icon: null,
 
     initialize: function () void null,
-
-    get currentTime () undefined,
-    set currentTime (value) void value,
-
-    get timeCodes () (toTimeCode(this.currentTime) + '/' + toTimeCode(this.totalTime)),
-
-    get volume () undefined,
-    set volume (value) void value,
-
-    get maxVolume () 100,
-
-    get statusText () this.timeCodes,
-
-    get fileURL () undefined,
-
-    get title () undefined,
-
-    get fileExtension () '',
 
     is: function (state) (this.state == state),
 
@@ -203,13 +183,36 @@
         &&
         arguments.callee.apply(this, Array.splice(arguments, 2)),
 
-    playOrPause: function () {
-      if (this.is(Player.ST_PLAYING)) {
-        this.pause();
-      } else {
-        this.playEx();
-      }
-    },
+    get currentTime () undefined,
+    set currentTime (value) void value,
+
+    get fileExtension () '',
+
+    get fileURL () undefined,
+
+    get maxVolume () 100,
+
+    get muted () undefined,
+    set muted (value) undefined,
+
+    get repeating () undefined,
+    set repeating (value) undefined,
+
+    get state () undefined,
+
+    get statusText () this.timeCodes,
+
+    get timeCodes () (toTimeCode(this.currentTime) + '/' + toTimeCode(this.totalTime)),
+
+    get title () undefined,
+
+    get volume () undefined,
+    set volume (value) void value,
+
+    fetch: function (filepath)
+      download(this.fileURL, filepath, this.fileExtension, this.title),
+
+    pause: function () undefined,
 
     play: function () undefined,
 
@@ -219,7 +222,13 @@
       this.play();
     },
 
-    pause: function () undefined,
+    playOrPause: function () {
+      if (this.is(Player.ST_PLAYING)) {
+        this.pause();
+      } else {
+        this.playEx();
+      }
+    },
 
     seek: function (v) {
       v = parseInt(v, 10);
@@ -231,19 +240,6 @@
     seekRelative: function (v)
       this.currentTime = Math.min(Math.max(this.currentTime + parseInt(v, 10), 0), this.totalTime),
 
-    turnUpDownVolume: function (v)
-      this.volume = Math.min(Math.max(this.volume + v, 0), this.maxVolume),
-
-    get repeating () undefined,
-    set repeating (value) undefined,
-
-    get muted () undefined,
-    set muted (value) undefined,
-
-    get state () undefined,
-
-    get FileURL() undefined,
-
     toggle: function (name) {
       if (!this.has(name, 'rw'))
         return;
@@ -252,9 +248,8 @@
       return !v;
     },
 
-    fetch: function (filepath) {
-      download(this.fileURL, filepath, this.fileExtension, this.title);
-    }
+    turnUpDownVolume: function (v)
+      this.volume = Math.min(Math.max(this.volume + v, 0), this.maxVolume)
   };
 
   // }}}
@@ -272,47 +267,35 @@
 
     functions: {
       currentTime: 'rw',
-      totalTime: 'r',
-      volume: 'rw',
-      play: 'x',
-      playOrPause: 'x',
-      playEx: 'x',
-      pause: 'x',
+      fileURL: 'r',
       muted: 'rwt',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
       repeating: 'rw',
       title: 'r',
-      fileURL: 'r'
+      totalTime: 'r',
+      volume: 'rw'
     },
 
     icon: 'http://www.youtube.com/favicon.ico',
 
-    get player ()
-      let (p = content.document.getElementById('movie_player'))
-        (p && (p.wrappedJSObject || p)),
-
     get currentTime () parseInt(this.player.getCurrentTime()),
     set currentTime (value) this.player.seekTo(value),
 
-    get totalTime () parseInt(this.player.getDuration()),
-
-    get volume () parseInt(this.player.getVolume()),
-    set volume (value) parseInt(this.player.setVolume(value)),
+    get fileExtension () '.mp4',
 
     get fileURL ()
       let (as = content.document.defaultView.wrappedJSObject.swfArgs)
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
 
-    get title ()
-      content.document.title.replace(/^YouTube - /, ''),
-
-    play: function () this.player.playVideo(),
-
-    pause: function () this.player.pauseVideo(),
-
     get muted () this.player.isMuted(),
     set muted (value) (value ? this.player.mute() : this.player.unMute()),
 
-    get fileExtension () '.mp4',
+    get player ()
+      let (p = content.document.getElementById('movie_player'))
+        (p && (p.wrappedJSObject || p)),
 
     get state () {
       switch (this.player.getPlayerState()) {
@@ -328,7 +311,19 @@
         default:
           return Player.ST_OTHER;
       }
-    }
+    },
+
+    get title ()
+      content.document.title.replace(/^YouTube - /, ''),
+
+    get totalTime () parseInt(this.player.getDuration()),
+
+    get volume () parseInt(this.player.getVolume()),
+    set volume (value) parseInt(this.player.setVolume(value)),
+
+    play: function () this.player.playVideo(),
+
+    pause: function () this.player.pauseVideo()
   };
 
   // }}}
@@ -364,47 +359,27 @@
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
 
-    get player ()
-      let (p = content.document.getElementById('flvplayer'))
-        (p && (p.wrappedJSObject || p)),
+    get comment () this.player.ext_isCommentVisible(),
+    set comment (value) this.player.ext_setCommentVisible(value),
 
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
     set currentTime (value) this.player.ext_setPlayheadTime(value),
 
-    get totalTime () parseInt(this.player.ext_getTotalTime()),
-
-    get volume () parseInt(this.player.ext_getVolume()),
-    set volume (value) parseInt(this.player.ext_setVolume(value)),
-
-    get title () content.document.title.replace(/\s*\u2010\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
-
     get fileExtension () '.flv',
-
-    playOrPause: function () {
-      if (this.is(Player.ST_PLAYING)) {
-        this.pause();
-      } else {
-        let base = this.currentTime;
-        setTimeout(bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
-      }
-    },
-
-    play: function () this.player.ext_play(true),
-
-    pause: function () this.player.ext_play(false),
-
-    get comment () this.player.ext_isCommentVisible(),
-    set comment (value) this.player.ext_setCommentVisible(value),
-
-    get repeating () this.player.ext_isRepeat(),
-    set repeating (value) this.player.ext_setRepeat(value),
-
-    get muted () this.player.ext_isMute(),
-    set muted (value) this.player.ext_setMute(value),
 
     get id ()
       let (m = currentURL().match(/\/watch\/([a-z]{2}\d+)/))
         (m && m[1]),
+
+    get muted () this.player.ext_isMute(),
+    set muted (value) this.player.ext_setMute(value),
+
+    get player ()
+      let (p = content.document.getElementById('flvplayer'))
+        (p && (p.wrappedJSObject || p)),
+
+    get repeating () this.player.ext_isRepeat(),
+    set repeating (value) this.player.ext_setRepeat(value),
 
     get state () {
       switch (this.player.ext_getStatus()) {
@@ -420,6 +395,13 @@
       }
     },
 
+    get title () content.document.title.replace(/\s*\u2010\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
+
+    get totalTime () parseInt(this.player.ext_getTotalTime()),
+
+    get volume () parseInt(this.player.ext_getVolume()),
+    set volume (value) parseInt(this.player.ext_setVolume(value)),
+
     fetch: function (filepath) {
       liberator.log(this.id)
       let onComplete = function (xhr) {
@@ -429,6 +411,19 @@
           download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
       };
       httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, bindr(this, onComplete));
+    },
+
+    pause: function () this.player.ext_play(false),
+
+    play: function () this.player.ext_play(true),
+
+    playOrPause: function () {
+      if (this.is(Player.ST_PLAYING)) {
+        this.pause();
+      } else {
+        let base = this.currentTime;
+        setTimeout(bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
+      }
     }
   };
 
@@ -560,12 +555,6 @@
       window.removeEventListener('resize', this.__onResize, false);
     },
 
-    get where () (
-      (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/') && 'niconico')
-      ||
-      (buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/) && 'youtube')
-    ),
-
     get hidden () (this.panel.hidden),
     set hidden (v) (this.panel.hidden = v),
 
@@ -577,6 +566,13 @@
 
     get statusBarVisible () !this.statusBar.getAttribute('moz-collapsed', false),
     set statusBarVisible (value) this.statusBar.setAttribute('moz-collapsed', !value),
+
+    get where () (
+      (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/') && 'niconico')
+      ||
+      (buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/) && 'youtube')
+    ),
+
 
     addUserCommands: function () {
       let stella = this;
@@ -612,12 +608,6 @@
       add('volume', 'volume', 'turnUpDownVolume');
       add('seek', 'seek', 'seekRelative');
       add('fetch', 'fetch');
-    },
-
-    removeStatusPanel: function () {
-      let e = this.panel || document.getElementById(this.panelId);
-      if (e && e.parentNode)
-        e.parentNode.removeChild(e);
     },
 
     createStatusPanel: function () {
@@ -682,11 +672,11 @@
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
     },
 
-    update: function () {
-      this.labels.main.text = this.player.statusText;
-      this.labels.volume.text = this.player.volume;
-      for (let name in this.toggles) {
-        this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
+    disable: function () {
+      this.hidden = true;
+      if (this.timerHandle) {
+        clearInterval(this.timerHandle);
+        this.timerHandle = null;
       }
     },
 
@@ -701,31 +691,40 @@
       }
     },
 
-    disable: function () {
-      this.hidden = true;
-      if (this.timerHandle) {
-        clearInterval(this.timerHandle);
-        this.timerHandle = null;
+    removeStatusPanel: function () {
+      let e = this.panel || document.getElementById(this.panelId);
+      if (e && e.parentNode)
+        e.parentNode.removeChild(e);
+    },
+
+    update: function () {
+      this.labels.main.text = this.player.statusText;
+      this.labels.volume.text = this.player.volume;
+      for (let name in this.toggles) {
+        this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
       }
     },
+
+    onCommentClick: function () (this.player.toggle('comment')),
+
+    // フルスクリーン時にステータスバーを隠さないようにする
+    onFullScreen: function () {
+      if (window.fullScreen) {
+        this.__statusBarVisible = this.statusBarVisible;
+        this.statusBarVisible = true;
+      } else {
+        if (this.__statusBarVisible !== undefined)
+          this.statusBarVisible = this.__statusBarVisible;
+      }
+    },
+
+    onIconClick: function () this.player.playOrPause(),
 
     onLocationChange: function () {
       if (this.__valid !== this.valid) {
         (this.__valid = this.valid) ? this.enable() : this.disable();
       }
     },
-
-    onPlayClick: function () this.player.play(),
-
-    onPauseClick: function () this.player.pause(),
-
-    onMutedClick: function (event) (this.player.toggle('muted')),
-
-    onSetMutedClick: function (event) (this.player.volume = event.target.getAttribute('volume')),
-
-    onCommentClick: function () (this.player.toggle('comment')),
-
-    onRepeatingClick: function () (this.player.toggle('repeating')),
 
     onMainClick: function (event) {
       if (event.button)
@@ -739,25 +738,22 @@
       this.player.currentTime = this.player.totalTime * per;
     },
 
-    onIconClick: function () this.player.playOrPause(),
+    onMutedClick: function (event) (this.player.toggle('muted')),
 
-    // フルスクリーン時にステータスバーを隠さないようにする
-    onFullScreen: function () {
-      if (window.fullScreen) {
-        this.__statusBarVisible = this.statusBarVisible;
-        this.statusBarVisible = true;
-      } else {
-        if (this.__statusBarVisible !== undefined)
-          this.statusBarVisible = this.__statusBarVisible;
-      }
-    },
+    onPauseClick: function () this.player.pause(),
+
+    onPlayClick: function () this.player.play(),
+
+    onRepeatingClick: function () (this.player.toggle('repeating')),
 
     onResize: function () {
       if (this.__fullScreen !== window.fullScreen) {
         this.__fullScreen = window.fullScreen;
         this.onFullScreen(this.__fullScreen);
       }
-    }
+    },
+
+    onSetMutedClick: function (event) (this.player.volume = event.target.getAttribute('volume'))
   };
 
   // }}}
