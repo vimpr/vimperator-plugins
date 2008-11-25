@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
-// Version: 0.21
-// Last Change: 21-Oct-2008. Jan 2008
+// Version: 0.22
+// Last Change: 21-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -108,6 +108,15 @@
     var Class = function() function(){this.initialize.apply(this,arguments)};
 
     var _isEnable;
+
+    function replaceMap (mode, key, desc, aroundFunc, extra) {
+      let old = liberator.modules.mappings.getDefault(mode, key);
+      let oldAction = old.action;
+      old.description = desc;
+      old.action = function ()
+                      let (self = this, args = arguments)
+                        aroundFunc(function () oldAction.apply(self, args));
+    }
 
     var LDRizeCooperation = new Class();
     LDRizeCooperation.prototype = {
@@ -226,27 +235,26 @@
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
                 },{});
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["f"],
+            replaceMap(liberator.modules.modes.NORMAL, "f",
                 "Start QuickHint mode",
-                function(){
+                function(f){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show("o");
-                },{});
+                    f();
+                });
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], ["F"],
+            replaceMap(liberator.modules.modes.NORMAL, "F",
                 "Start QuickHint mode, but open link in a new tab",
-                function(){
+                function(f){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show("t");
-                },{});
+                    f();
+                });
 
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [";"],
+            replaceMap(liberator.modules.modes.NORMAL, ";",
                 "Start an extended hint mode",
-                function(arg){
+                function(f){
                     setHinttags(self.isEnableLDRizeCooperation() && self.isModHints);
-                    liberator.modules.hints.show(arg);
-                },
-                { flags: liberator.modules.Mappings.flags.ARGUMENT });
+                    f();
+                });
             //Commands
             liberator.modules.commands.addUserCommand(["pin"], "LDRize Pinned Links",
                 function(){
