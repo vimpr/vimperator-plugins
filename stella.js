@@ -120,6 +120,24 @@
     (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
               : '??:??');
 
+  function setWithBackup (target, values) {
+    let backup = target.__stella_backup = {};
+    for (let [name, value] in Iterator(values)) {
+      backup[name] = target[name];
+      target[name] = value;
+    }
+    liberator.log(target.__stella_backup)
+  }
+
+  function restoreFromBackup (target, doDelete) {
+    if (!target.__stella_backup)
+      return;
+    for (let [name, value] in Iterator(target.__stella_backup))
+      target[name] = value;
+    if (doDelete)
+      delete target.__stella_backup;
+  }
+
   // }}}
 
   /*********************************************************************************
@@ -159,6 +177,7 @@
       currentTime: '',
       fileExtension: 'r',
       fileURL: '',
+      fullscreen: '',
       muted: '',
       pause: '',
       play: '',
@@ -166,7 +185,7 @@
       repeating: '',
       title: '',
       totalTime: '',
-      volume: ''
+      volume: '',
       // auto setting => fetch maxVolume playOrPause seek seekRelative turnUpDownVolume
     },
 
@@ -269,6 +288,7 @@
     functions: {
       currentTime: 'rw',
       fileURL: 'r',
+      fullscreen: 'rwt',
       muted: 'rwt',
       pause: 'x',
       play: 'x',
@@ -290,6 +310,25 @@
     get fileURL ()
       let (as = content.document.defaultView.wrappedJSObject.swfArgs)
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
+
+    get fullscreen () this.player.__stella_fullscreen,
+    // FIXME - 元に戻らない
+    set fullscreen () {
+      this.player.__stella_fullscreen = !this.player.__stella_fullscreen;
+      if (this.fullscreen) {
+        liberator.log('full')
+        setWithBackup(this.player.style, {
+          position: 'fixed',
+          left: '0px',
+          top: '0px',
+          width: content.innerWidth + 'px',
+          height: content.innerHeight + 'px'
+        });
+      } else {
+        liberator.log('normal')
+        restoreFromBackup(this.player.style);
+      }
+    },
 
     get muted () this.player.isMuted(),
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
@@ -609,6 +648,7 @@
       add('volume', 'volume', 'turnUpDownVolume');
       add('seek', 'seek', 'seekRelative');
       add('fetch', 'fetch');
+      add('fullscreen', 'fullscreen');
     },
 
     createStatusPanel: function () {
