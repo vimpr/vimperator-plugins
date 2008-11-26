@@ -134,7 +134,7 @@ function init(){
 
   if (acmanager.length > 0) {
     autocommands.add("LocationChange", '.*', 'js liberator.plugins.AutoProxyChanger.autoApplyProxy()');
-    window.addEventListener("unload", function() applyProxyByName('default'), false);
+    //window.addEventListener("unload", function() applyProxyByName('default'), false);
   }
 
   manager.isEnable = eval(liberator.globalVariables.autochanger_proxy_enabled) || false;
@@ -206,11 +206,11 @@ commands.addUserCommand(["proxy"], 'Proxy settings',
   }, {
     bang: true,
     completer: function(context, arg, special){
-    	context.title = ['Name','Usage'];
-      var list = context.filter ? 
-    		proxy_settings.filter( function(el) this.test(el.name), new RegExp("^"+context.filter))
-    		: proxy_settings;
-    	context.completions = list.map( function(v) [v.name, v.usage] );
+      context.title = ['Name','Usage'];
+      var list = context.filter ?
+        proxy_settings.filter( function(el) this.test(el.name), new RegExp("^"+context.filter))
+        : proxy_settings;
+      context.completions = list.map( function(v) [v.name, v.usage] );
     }
 });
 
