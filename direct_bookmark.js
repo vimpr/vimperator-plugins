@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Direct Post to Social Bookmarks'
 // Version: 0.12
-// Last Change: 25-Nov-2008. Jan 2008
+// Last Change: 27-Nov-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 // Parts:
@@ -420,8 +420,14 @@
             loginPrompt:{ user:'', password:'apikey', description:'Enter username and apikey.\nyou can get "api-key" from\n\thttp://clip.livedoor.com/config/api' },
             entryPage:'http://clip.livedoor.com/page/%URL%',
             poster:function(user,password,url,title,comment,tags){
+                var rate=0;
+                var starFullRate=5;
+                if(comment.match(/\*+$/)){
+                    comment = RegExp.leftContext;
+                    rate = (RegExp.lastMatch.length > starFullRate)? starFullRate : RegExp.lastMatch.length;
+                }
                 var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
-                    ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
+                    ['url', url], ['description', title], ['extended', comment], ['rate', rate], ['tags', tags.join(' ')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "get",
@@ -627,7 +633,10 @@
                     user,password,
                     isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
-                ));
+                //));
+                )).next(function(){
+                    liberator.echo("[" + services[service].description + "] post completed.");
+                });
             });
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
