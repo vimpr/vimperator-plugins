@@ -116,7 +116,7 @@ var ubiquityManager = {
         }
         context.title = ['Command','Description'];
         if (!matches){
-            context.items = suggestions;
+            context.completions = suggestions;
             return;
         }
         var [cmd, arg] = [matches[1], matches[2]];
@@ -130,7 +130,7 @@ var ubiquityManager = {
                 gUbiquity.__updatePreview();
             }
         } else if (cmd){
-            context.items = suggestions.filter(function(command){return command[0].indexOf(cmd) == 0;});
+            context.completions = suggestions.filter(function(command){return command[0].indexOf(cmd) == 0;});
             return;
         }
         return [0, []];
