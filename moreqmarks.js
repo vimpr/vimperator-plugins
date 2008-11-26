@@ -148,9 +148,7 @@
         var y = item.y;
         if (url) {
             if(find) {
-                for (let [number, browser] in Iterator(liberator.modules.tabs.browsers))
-                {
-                    var tab = tabs.getTab(i);
+                for (let [number, browser] in Iterator(liberator.modules.tabs.browsers)) {
                     var marked_url = browser.contentDocument.location.href;
                     if(marked_url == url) {
                         liberator.modules.tabs.select(number, false);
