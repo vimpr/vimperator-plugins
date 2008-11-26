@@ -71,8 +71,8 @@ commands.addUserCommand(['ubi[quity]'], 'Vimperator Ubiquity Glue',
         }
         ubiquityManager.execute(args);
     }, {
-        completer: function(filter){
-            return ubiquityManager.completer(filter);
+        completer: function(context, arg, special){
+            ubiquityManager.completer(context, arg.string)
         }
     },
     true
@@ -108,14 +108,16 @@ var ubiquityManager = {
             liberator.echoerr(e);
         }
     },
-    completer: function(args){
+    completer: function(context, args){
         var matches = args.match(/(\S+)(?:\s+(.+)$)?/);
         var suggestions = [];
         for (let cmd in this.commands){
             suggestions.push([cmd, this.commands[cmd].description]);
         }
+        context.title = ['Command','Description'];
         if (!matches){
-            return [0, suggestions];
+            context.items = suggestions;
+            return;
         }
         var [cmd, arg] = [matches[1], matches[2]];
         if (arg || (cmd && cmd in this.commands) ){
@@ -128,7 +130,8 @@ var ubiquityManager = {
                 gUbiquity.__updatePreview();
             }
         } else if (cmd){
-            return [0, suggestions.filter(function(command){return command[0].indexOf(cmd) == 0;}) ];
+            context.items = suggestions.filter(function(command){return command[0].indexOf(cmd) == 0;});
+            return;
         }
         return [0, []];
     },
