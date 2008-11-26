@@ -81,6 +81,12 @@ var SITEINFO = [
         srcEncode:   'EUC-JP',
         urlEncode:   'UTF-8'
      },
+     {
+       name: 'metalarchive-band',
+       url: 'http://www.metal-archives.com/search.php?string=%s&type=band',
+       description: 'Metal Archive (band)',
+       xpath: '//table',
+     }
 ];
 
 var mergedSiteinfo = {};
@@ -165,7 +171,7 @@ var CommandRegister = {
                 completer: cmdClass.cmdCompleter || function(context, arg, bang) {
                     var allSuggestions = siteinfo.map(function(s) [s.name, s.description]);
                     context.title = ['Name', 'Descprition'];
-                    context.items =
+                    context.completions =
                         context.filter ? allSuggestions.filter(function(s) s[0].indexOf(context.filter) == 0)
                                        : allSuggestions;
                 },
@@ -538,6 +544,7 @@ var MultiRequester = {
             url = res.request.url;
             escapedUrl = util.escapeHTML(url);
             xpath = res.request.options.siteinfo.xpath;
+            liberator.log(res.responseText)
             doc = res.getHTMLDocument(xpath);
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
