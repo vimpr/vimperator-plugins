@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.2.2
+ * @version          0.2.3
  * @minVersion       1.2
  * @maxVersion       1.2
  * ==/VimperatorPlugin==
@@ -469,7 +469,7 @@ var MultiRequester = {
     cmdAction: function(args, special, count) {
 
         var parsedArgs = this.parseArgs(args);
-        if (!parsedArgs || !parsedArgs.siteinfo || !parsedArgs.str) { return; } // do nothing
+        if (!parsedArgs || !parsedArgs.siteinfo) { return; } // do nothing
 
         var siteinfo = parsedArgs.siteinfo;
         var url = siteinfo.url;
@@ -477,9 +477,14 @@ var MultiRequester = {
         var srcEncode = siteinfo.srcEncode || 'UTF-8';
         var urlEncode = siteinfo.urlEncode || srcEncode;
 
+        var idxRepStr = url.indexOf('%s');
+        if (idxRepStr > -1 && !parsedArgs.str) return;
+
         // via. lookupDictionary.js
         var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                              .getService(Components.interfaces.nsITextToSubURI);
+
+
         url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
         $U.log(url + '::' + siteinfo.xpath);
 
@@ -511,7 +516,7 @@ var MultiRequester = {
         var arguments = args.split(/ +/);
         var sel = $U.getSelectedString();
 
-        if ((sel && arguments.length < 1) || (!sel && arguments.length < 2)) return null;
+        if (arguments.length < 1) return null;
 
         var siteName = arguments.shift();
         var str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
@@ -568,3 +573,4 @@ return MultiRequester;
 
 })();
 // vim: set fdm=marker sw=4 ts=4 sts=0 et:
+
