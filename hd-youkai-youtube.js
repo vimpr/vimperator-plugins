@@ -1,7 +1,7 @@
 // ==VimperatorPlugin==
 // @name           YouTube HD
 // @description    High-Quality Movie Monster YoUTuBe
-// @description-ja $B9b2h<AME2x$h$&$D$Y(B
+// @description-ja 高画質妖怪ようつべ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
 // @version        1.0
 // @author         anekos (anekos@snca.net)
