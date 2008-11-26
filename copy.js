@@ -91,9 +91,9 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
             var templates = liberator.globalVariables.copy_templates.map(function(template)
                 [template.label, liberator.modules.util.escapeString(template.value, '"')]
             );
-            if (!context.filter){ context.items = templates; return; }
+            if (!context.filter){ context.completions = templates; return; }
             var candidates = [];
-            context.items = completion.filter(templates, context.filter, true);
+            context.completions = completion.filter(templates, context.filter, true);
         },
         bang: true
     }

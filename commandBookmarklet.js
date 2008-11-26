@@ -17,11 +17,12 @@
     }
   }
 
+  const regex = /[^a-zA-Z]/;
   items.forEach(function(item) {
     var [url, title] = [item.url, item.title];
     var desc = title;
     title = escape( title.replace(/ +/g,'').toLowerCase() );
-    if (/[^a-zA-Z]+/.test(title)) {
+    if (regex.test(title)) {
         title = "bm"+title.replace(/[^a-zA-Z]+/g,'');
         title = title.substr(0, title.length>50?50:title.length);
     }

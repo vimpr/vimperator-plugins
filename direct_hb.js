@@ -148,7 +148,7 @@
         httpGET("http://b.hatena.ne.jp/my",
                 function(mypage_text){
                     var mypage_html = parseHTML(mypage_text);
-                    var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
+                    var tags = getElementsByXPath("//ul[@id=\"tags\"]/li/a",mypage_html);
                     tags.forEach(function(tag){
                         liberator.plugins.hatena_tags.push(tag.innerHTML);
                     });
@@ -185,7 +185,8 @@
         {}
     );
     commands.addUserCommand(['hb'],"Post to HatenaBookmark",
-        function(arg){
+        function(args){
+            var arg = args.string;
             try {
                 var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
                 var logins = passwordManager.findLogins({}, 'https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null);
@@ -196,9 +197,10 @@
             }
             catch(ex){
             }
-            addHatenaBookmarks(hatenaUser,hatenaPassword,liberator.buffer.URL,arg,isNormalize);
+            addHatenaBookmarks(hatenaUser,hatenaPassword,modules.buffer.URL,arg,isNormalize);
         },{
-            completer: function(filter){
+            completer: function(context, arg, special){
+                let filter = context.filter;
                 //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited, now inputting]
                 var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]
                 //var m = new RegExp("^" + match_result[2]);
@@ -209,7 +211,9 @@
                         completionList.push([(match_result[1] || "") + "[" + tag + "]","Tag"]);
                     }
                 });
-                return [0, completionList];
+                context.title = ['Tag','Description'];
+//                context.advance(match_result[1].length);
+                context.completions = completionList;
             }
         }
     );

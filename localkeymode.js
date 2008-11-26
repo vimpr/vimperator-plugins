@@ -42,28 +42,16 @@
  *  EOM
  *
  *  備考:
- *   * 
+ *   *
  */
 liberator.plugins.LocalKeyMode = (function() {
-  
+
   // アイコン定義
   const DISABLE_ICON = 'data:image/png;base64,'
-    +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAADAFBMVEUAAAABAQECAgIDAwMEBAQF'
-    +'BQUGBgYHBwcICAgJCQkKCgoLCwsMDAwNDQ0ODg4PDw8QEBARERESEhITExMUFBQVFRUWFhYXFxcY'
-    +'GBgZGRkaGhobGxscHBwdHR0eHh4fHx8gICAhISEiIiIjIyMkJCQlJSUmJiYnJycoKCgpKSkqKior'
-    +'KyssLCwtLS0uLi4vLy8wMDAxMTEyMjIzMzM0NDQ1NTU2NjY3Nzc4ODg5OTk6Ojo7Ozs8PDw9PT0+'
-    +'Pj4/Pz9AQEBBQUFCQkJDQ0NERERFRUVGRkZHR0dISEhJSUlKSkpLS0tMTExNTU1OTk5PT09QUFBR'
-    +'UVFSUlJTU1NUVFRVVVVWVlZXV1dYWFhZWVlaWlpbW1tcXFxdXV1eXl5fX19gYGBhYWFiYmJjY2Nk'
-    +'ZGRlZWVmZmZnZ2doaGhpaWlqampra2tsbGxtbW1ubm5vb29wcHBxcXFycnJzc3N0dHR1dXV2dnZ3'
-    +'d3d4eHh5eXl6enp7e3t8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmK'
-    +'ioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJyd'
-    +'nZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+w'
-    +'sLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLD'
-    +'w8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW'
-    +'1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp'
-    +'6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8'
-    +'/Pz9/f3+/v7////isF19AAAAPElEQVR4nGNYgwYYsAv8/48Q6AeB///7YQBToAkE/v9vggFMgRIQ'
-    +'+P+/BAYwBQibgcsdEAASmIsGCAsAAE8ZnUuRMbA8AAAAAElFTkSuQmCC';
+    +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAZ0lEQVR4nGNcvXo1AymAiSTV'
+    +'WDSEhISEhITg0cDy+PFjTFGsgmQ6ieXz58+YolgFybXh06dPmKJYBcm1gY+PD1MUqyC5NvDy'
+    +'8mKKYhWEasAqWlhYiCbS398PYTDOmTOHJCdRnPgIAgBfBxpKyax43AAAAABJRU5ErkJg'
+    +'gg==';
   const ENABLE_ICON = 'data:image/png;base64,'
     +'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAa0lEQVR4nGP0+OzAQApgIkk1Fg3b'
     +'efZv59mPRwMjwycU/n/e/wwMDIyfGanmJBaG16gCvAwMDAzogpTZ8AJVQImBgYEBXZAyGySwCWMV'
@@ -73,7 +61,7 @@ liberator.plugins.LocalKeyMode = (function() {
     + 'Gpz+Mzj9x6OBheEZNmGsguQ5iYXhHjZhrILk2vAVmzBWQXJt4MYmjFWQXBuUsAljFYRqwApi'
     + 'MCJ7CSOEZqR/4iMEAOh5DfER9lQKAAAAAElFTkSuQmCC';
   const rhsRegExp = /[ \r\n]+/g;
-  
+
   var _isEnable;
   var _isBindLocalKey = false;
   
@@ -312,12 +300,16 @@ liberator.plugins.LocalKeyMode = (function() {
             }
           }
         }, {
-          completer: function(filter) {
+          completer: function(context, arg, special){
+            let filter = context.filter;
             var names = self.completeNames;
-            if (!filter) return [0, names];
+            context.title = ['Name','Description'];
+            if (!filter) {
+              context.completions = names;
+              return;
+            }
             filter = filter.toLowerCase();
-            return [0, names.filter( function(el)
-              el[0].toLowerCase().indexOf(filter) == 0) ];
+            context.completions = names.filter( function(el) el[0].toLowerCase().indexOf(filter) == 0);
           }
         } );
       commands.addUserCommand(['clearkeymaps', 'clearlocalkeymaps'], 'Clear local key mapping',

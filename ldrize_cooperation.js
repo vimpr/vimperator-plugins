@@ -268,7 +268,8 @@
             liberator.modules.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
                 function(arg){self.Minibuffer.execute(arg.string)},
                 {
-                    completer: function(filter){
+                    completer: function(context, arg, special){
+                        let filter = context.filter;
                         var completionList = [];
                         var command = self.Minibuffer.command;
                         var alias = self.Minibuffer.alias_getter();
@@ -276,7 +277,8 @@
                         var exp = new RegExp("^" + tokens.pop());
                         for(let i in command) if(exp.test(i))completionList.push([tokens.concat(i).join(" | "),"MinibufferCommand"]);
                         for(let i in alias) if(exp.test(i))completionList.push([i,"MinibufferAlias"]);
-                        return [0,completionList];
+                        context.title = ['Minibuffer Command', 'Description'];
+                        context.completions = completionList;
                     }
                 });
             liberator.modules.commands.addUserCommand(["pindownload"], "Download pinned links by any software",

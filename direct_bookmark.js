@@ -632,14 +632,17 @@
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
         },{
-            completer: function(filter){
+            completer: function(context, arg, special){
+                let filter = context.filter;
                 var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
                 if(liberator.plugins.direct_bookmark.tags.length == 0)
                     getTags().call([]);
-                return [match_result[1].length, [["[" + tag + "]","Tag"]
-                            for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0)]];
+                context.title = ['Tag','Description'];
+                context.advance( match_result[1].length );
+                context.completions = [["[" + tag + "]","Tag"]
+                            for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0)];
             },
             options: [
                 [['-s','-service'], liberator.modules.commands.OPTION_STRING],
