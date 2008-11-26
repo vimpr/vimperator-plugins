@@ -2,7 +2,7 @@
 // @name           すてら
 // @description-ja ステータスラインに動画の再生時間などを表示する。
 // @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        0.05
+// @version        0.06
 // @author         anekos (anekos@snca.net)
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
@@ -91,6 +91,7 @@
     xhr.send(null);
     return xhr;
   }
+
   function id (value)
     value;
 
@@ -165,8 +166,8 @@
       repeating: '',
       title: '',
       totalTime: '',
-      volume: '',
-      // auto setting => seek, seekRelative, playOrPause, turnUpDownVolume, maxVolume, fetch
+      volume: ''
+      // auto setting => fetch maxVolume playOrPause seek seekRelative turnUpDownVolume
     },
 
     icon: null,
@@ -184,7 +185,7 @@
         arguments.callee.apply(this, Array.splice(arguments, 2)),
 
     get currentTime () undefined,
-    set currentTime (value) void value,
+    set currentTime (value) value,
 
     get fileExtension () '',
 
@@ -193,10 +194,10 @@
     get maxVolume () 100,
 
     get muted () undefined,
-    set muted (value) undefined,
+    set muted (value) value,
 
     get repeating () undefined,
-    set repeating (value) undefined,
+    set repeating (value) value,
 
     get state () undefined,
 
@@ -207,7 +208,7 @@
     get title () undefined,
 
     get volume () undefined,
-    set volume (value) void value,
+    set volume (value) value,
 
     fetch: function (filepath)
       download(this.fileURL, filepath, this.fileExtension, this.title),
@@ -282,7 +283,7 @@
     icon: 'http://www.youtube.com/favicon.ico',
 
     get currentTime () parseInt(this.player.getCurrentTime()),
-    set currentTime (value) this.player.seekTo(value),
+    set currentTime (value) (this.player.seekTo(value), value),
 
     get fileExtension () '.mp4',
 
@@ -291,7 +292,7 @@
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
 
     get muted () this.player.isMuted(),
-    set muted (value) (value ? this.player.mute() : this.player.unMute()),
+    set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
     get player ()
       let (p = content.document.getElementById('movie_player'))
@@ -319,7 +320,7 @@
     get totalTime () parseInt(this.player.getDuration()),
 
     get volume () parseInt(this.player.getVolume()),
-    set volume (value) parseInt(this.player.setVolume(value)),
+    set volume (value) (this.player.setVolume(value), value),
 
     play: function () this.player.playVideo(),
 
@@ -360,10 +361,10 @@
     icon: 'http://www.nicovideo.jp/favicon.ico',
 
     get comment () this.player.ext_isCommentVisible(),
-    set comment (value) this.player.ext_setCommentVisible(value),
+    set comment (value) (this.player.ext_setCommentVisible(value), value),
 
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
-    set currentTime (value) this.player.ext_setPlayheadTime(value),
+    set currentTime (value) (this.player.ext_setPlayheadTime(value), value),
 
     get fileExtension () '.flv',
 
@@ -372,14 +373,14 @@
         (m && m[1]),
 
     get muted () this.player.ext_isMute(),
-    set muted (value) this.player.ext_setMute(value),
+    set muted (value) (this.player.ext_setMute(value), value),
 
     get player ()
       let (p = content.document.getElementById('flvplayer'))
         (p && (p.wrappedJSObject || p)),
 
     get repeating () this.player.ext_isRepeat(),
-    set repeating (value) this.player.ext_setRepeat(value),
+    set repeating (value) (this.player.ext_setRepeat(value), value),
 
     get state () {
       switch (this.player.ext_getStatus()) {
@@ -400,7 +401,7 @@
     get totalTime () parseInt(this.player.ext_getTotalTime()),
 
     get volume () parseInt(this.player.ext_getVolume()),
-    set volume (value) parseInt(this.player.ext_setVolume(value)),
+    set volume (value) (this.player.ext_setVolume(value), value),
 
     fetch: function (filepath) {
       liberator.log(this.id)
@@ -565,7 +566,7 @@
     get statusBar () document.getElementById('status-bar'),
 
     get statusBarVisible () !this.statusBar.getAttribute('moz-collapsed', false),
-    set statusBarVisible (value) this.statusBar.setAttribute('moz-collapsed', !value),
+    set statusBarVisible (value) (this.statusBar.setAttribute('moz-collapsed', !value), value),
 
     get where () (
       (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/') && 'niconico')
