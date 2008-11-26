@@ -148,15 +148,12 @@
         var y = item.y;
         if (url) {
             if(find) {
-                var items = liberator.modules.completion.buffer("")[1];
-                var number, title;
-
-                for (var i = 0; i < items.length; i++)
+                for (let [number, browser] in Iterator(liberator.modules.tabs.browsers))
                 {
-                    [number, title] = items[i][0].split(/:\s+/, 2);
-                    var marked_url = liberator.modules.util.escapeHTML(items[i][1]);
+                    var tab = tabs.getTab(i);
+                    var marked_url = browser.contentDocument.location.href;
                     if(marked_url == url) {
-                        liberator.modules.tabs.switchTo(number);
+                        liberator.modules.tabs.select(number, false);
                         var win = getBrowser().selectedTab.linkedBrowser.contentWindow;
                         if(use_position) {
                             if(x!=0 || y!=0) {
