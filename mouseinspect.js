@@ -4,7 +4,7 @@
  * @description     display informations of the specified element and highlight it by mouse.
  * @description-ja  マウスで指定した要素の情報をコマンドラインに表示＆ハイライトする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.20
+ * @version         0.21
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -62,17 +62,22 @@ let elementInfo = function (event) {
     elementInfo.highlighter.highlight(element);
 };
 
+let setupHighlighter = function () {
+    elementInfo.highlighter = plugins.highlighterFactory({
+        color:    liberator.globalVariables.mouse_inspect_color   || defaultColor,
+        opacity:  liberator.globalVariables.mouse_inspect_opacity || defaultOpacity,
+        interval: 0,
+    });
+}
+
+setupHighlighter();
+
 // register commands
 commands.addUserCommand(
     ['mouseinspect', 'mins'],
     'mouse',
     function () {
-        elementInfo.highlighter = plugins.highlighterFactory({
-            color:    liberator.globalVariables.mouse_inspect_color   || defaultColor,
-            opacity:  liberator.globalVariables.mouse_inspect_opacity || defaultOpacity,
-            interval: 0,
-        });
-
+        setupHighlighter();
         window.addEventListener('mousemove', elementInfo, false);
     },
     {}
