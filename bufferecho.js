@@ -18,17 +18,12 @@ function execute(str){
     }
     return result;
 }
-function htmlEscape(str){
-    return str.replace("&","&amp;","g")
-              .replace("<","&lt;","g")
-              .replace(">","&gt;","g");
-}
 
 commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to a buffer(browser)',
-    function(args, special){
-        liberator.plugins.buffer_echo.open(args.string, special);
+    function(args){
+        liberator.plugins.buffer_echo.open(args.string, args.bang);
     },{
-        completer: function(filter) completion.javascript(filter)
+        completer: function(context) completion.javascript(context)
     },true
 );
 var manager = {
@@ -39,7 +34,7 @@ var manager = {
     open: function(str, forceNewTab) {
         var result = execute(str);
         if (typeof(result) == "object") result = util.objectToString(result,true);
-        var data = '<div><h1>' + htmlEscape(str) + '</h1><pre>' + result + '</pre></div>';
+        var data = '<div><h1>' + util.escapeHTML(str) + '</h1><pre>' + result + '</pre></div>';
         if (buffer.title == title && !forceNewTab){
             this.append(data);
             return;
