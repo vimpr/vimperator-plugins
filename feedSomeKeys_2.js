@@ -303,16 +303,16 @@ function feedKeyIntoContent(keys, useVkey){
 // Command
 // --------------------------
 commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
-    function(args, bang){
+    function(args){
         if(!args.string){
             liberator.echo(template.table("feedmap list",feedMaps.map(function(map) [map.names[0], map.rhs])), true);
             return;
         }
-        if (bang) destroy();
+        if (args.bang) destroy();
         var depth = args["-depth"] ? args["-depth"] : "";
         var useVkey = "-vkey" in args;
         
-        args.arguments.forEach(function(keypair){
+        args.forEach(function(keypair){
             var [lhs, rhs] = keypair.split(",");
             if (!rhs) rhs = lhs;
             replaceUserMap(lhs, depth + rhs, useVkey);
