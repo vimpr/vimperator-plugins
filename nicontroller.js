@@ -488,8 +488,8 @@ liberator.modules.commands.addUserCommand(
     'controll seek bar',
     function(args, special) {
         try      {
-            let arg = (args.arguments.length > 1)
-                ? args.arguments[0].toString()
+            let arg = (args.length > 1)
+                ? args[0].toString()
                 : args.string;
             special ? controller.seekBy(arg) : controller.seekTo(arg);
         }
@@ -505,8 +505,8 @@ liberator.modules.commands.addUserCommand(
     'controll volume',
     function(args, special) {
         try      {
-            let arg = (args.arguments.length > 1)
-                ? args.arguments[0].toString()
+            let arg = (args.length > 1)
+                ? args[0].toString()
                 : args.string;
             special ? controller.volumeBy(arg) : controller.volumeTo(arg);
         }
