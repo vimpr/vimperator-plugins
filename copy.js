@@ -94,11 +94,7 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
             if (!context.filter){ context.completions = templates; return; }
             var candidates = [];
             var filter = context.filter.toLowerCase();
-            templates.forEach(function(template){
-                if (template[0].toLowerCase().indexOf(filter) == 0)
-                    candidates.push(template);
-            });
-            context.completions = candidates;
+            context.completions = templates.filter(function(template) template[0].toLowerCase().indexOf(filter) == 0);
         },
         bang: true
     }
