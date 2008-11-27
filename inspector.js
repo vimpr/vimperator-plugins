@@ -47,9 +47,9 @@ var options = [
 	[["-frame","-f"], commands.OPTION_NOARG]
 ];
 commands.addUserCommand(["inspect","dominspect"],"run DOM Inspector",
-	function(args, bang){
-		var arg = args.arguments[0];
-		var doc = bang ? document : content.document;
+	function(args){
+		var arg = args[0];
+		var doc = args.bang ? document : content.document;
 		var node;
 		if (!arg){
 			node = doc;
@@ -73,12 +73,14 @@ commands.addUserCommand(["inspect","dominspect"],"run DOM Inspector",
 		bang: true,
 		argCount: "*",
 		options: options,
-		completer: function(filter, bang){
-			var arg = commands.parseArgs(filter, options, "*").arguments[0];
-			if (arg.charAt(0) == "#"){
-				return [filter.indexOf(arg), completion.filter(getIDList(arg.substr(1),bang),arg,true)];
+		completer: function(context, args){
+			if (args[0] && args[0].charAt(0) == "#"){
+				var arg = args[0];
+				var list = getIDList(arg.substr(1), args.bang);
+				context.completions = list.filter(function(elem) elem[0].indexOf(arg) == 0);
+			} else {
+				completion.javascript(context);
 			}
-			return completion.javascript(filter);
 		}
 	}
 );
