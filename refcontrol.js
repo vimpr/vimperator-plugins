@@ -37,7 +37,7 @@
  *  備考:
  *
  */
-liberator.plugins.RefControl = (function(){
+liberator.plugins.RefControl = (function() {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -69,23 +69,23 @@ var sites;
 var _isEnable = false;
 
 const completer_params = [['', 'send referrer:nothing'],
-    ['@FORGE', 'send referrer:top domain url'],
-    ['@NORMAL','send referrer:normal']];
+    ['@FORGE', 'send referrer:top domain URL'],
+    ['@NORMAL', 'send referrer:normal']];
 
 // icon manager object
-var Class = function(){ return function(){this.initialize.apply(this, arguments);}};
+var Class = function() function() {this.initialize.apply(this, arguments);};
 var RefControl = new Class();
 
 RefControl.prototype = {
-  initialize : function(){
+  initialize : function() {
     this.panel = this.createPanel();
     this.isEnable = eval(liberator.globalVariables.refcontrol_enabled) || false;
   },
-  createPanel: function(){
+  createPanel: function() {
     var self = this;
     var panel = document.getElementById('refcontrol-status-panel');
     if (panel) {
-      var parent = panel.parentNode;
+      let parent = panel.parentNode;
       parent.removeChild(panel);
     }
     panel = document.createElement('statusbarpanel');
@@ -97,54 +97,54 @@ RefControl.prototype = {
       panel, document.getElementById('security-button').nextSibling);
     return panel;
   },
-  get isEnable(){ return _isEnable },
-  set isEnable(val){
+  get isEnable() _isEnable,
+  set isEnable(val) {
     this.panel.setAttribute('src', val ? ENABLE_ICON : DISABLE_ICON);
     _isEnable = val;
   },
-}
+};
 
 // some utilities
-var init = function(){
+var init = function() {
   // read settings
   sites = liberator.globalVariables.refcontrol;
   if (typeof sites == 'undefined') sites = new Object();
   if (typeof sites['@DEFAULT'] == 'undefined') sites['@DEFAULT'] = '@NORMAL';
-}
+};
 
-var dump = function(obj){
-  var m="";
-  for (var key in obj){
-    m+=key+":"+obj[key]+"\n";
+var dump = function(obj) {
+  var m = '';
+  for (let key in obj) {
+    m+=key+':'+obj[key]+'\n';
   }
   return m;
-}
+};
 
 init();
 var manager = new RefControl();
 
 // add user command
-commands.addUserCommand(['addref'], 'add referrer control setting' , function(args){
-  let domain = args.arguments[0];
-  let perf = args.arguments[1] || '';
+commands.addUserCommand(['addref'], 'add referrer control setting', function(args) {
+  var domain = args.arguments[0];
+  var perf = args.arguments[1] || '';
   if (!domain || /[:\/]/.test(domain)) {
     liberator.echo(dump(sites)+'usage: addref [domain] [@NORMAL or @FORGE or empty]');
     return;
   }
   sites[domain] = perf;
-  },{
-    completer: function(context, arg, special){
-      let last = context.contextList.slice(-1)[0];
+  }, {
+    completer: function(context, arg, special) {
+      //var last = context.contextList.slice(-1)[0];
       var args = arg.arguments;
-      let list;
+      var list;
       var pos = 0;
       if (args.length == 2) {
-        context.title = ['Params','Description'];
+        context.title = ['Params', 'Description'];
         list = completer_params;
         //pos = 1;
       } else if (args.length <= 1) {
-        context.title = ['Url','Description'];
-        list = [['@DEFAULT','default preference'], [window.content.location.host, '']];
+        context.title = ['URL', 'Description'];
+        list = [['@DEFAULT', 'default preference'], [window.content.location.host, '']];
       }
       context.completions = list;
       context.advance(pos);
@@ -152,48 +152,48 @@ commands.addUserCommand(['addref'], 'add referrer control setting' , function(ar
   }
 );
 
-commands.addUserCommand(['togglerefcontrol'], 'toggle referrer control on/off', 
+commands.addUserCommand(['togglerefcontrol'], 'toggle referrer control on/off',
   function() {
     manager.isEnable = !manager.isEnable;
-  },{}
+  }, {}
 );
 
-// regist refcontrol
-var adjustRef = function (http, site) {
+// register refcontrol
+var adjustRef = function(http, site) {
+  var sRef, refAction;
   try {
-    var sRef;
-    var refAction = sites[site];
+    refAction = sites[site];
     if (refAction == undefined) return false;
-    if (refAction.charAt(0) == '@'){
-      switch (refAction){
+    if (refAction.charAt(0) == '@') {
+      switch (refAction) {
         case '@NORMAL':
           return true;
         case '@FORGE':
-          sRef = http.URI.scheme + "://" + http.URI.hostPort + "/";
+          sRef = http.URI.scheme + '://' + http.URI.hostPort + '/';
           break;
         default:
           return false;
       }
     } else if (refAction.length > 0) sRef = refAction;
-    
-    http.setRequestHeader("Referer", sRef, false);
+
+    http.setRequestHeader('Referer', sRef, false);
     if (http.referrer)
       http.referrer.spec = sRef;
     return true;
   } catch (e) {}
   return false;
-}
+};
 
 Cc['@mozilla.org/observer-service;1'].getService(Ci.nsIObserverService).addObserver({
-  observe: function(subject,topic,data){
+  observe: function(subject, topic, data) {
     if (topic != 'http-on-modify-request') return;
     if (!_isEnable) return;
     var http = subject.QueryInterface(Ci.nsIHttpChannel);
-    for (var s = http.URI.host; s != ""; s = s.replace(/^.*?(\.|$)/, ""))
+    for (let s = http.URI.host; s != ''; s = s.replace(/^[^.]*(?:\.|$)/, ''))
       if (adjustRef(http, s)) return;
     adjustRef( http, '@DEFAULT');
   }
-},'http-on-modify-request',false);
+}, 'http-on-modify-request', false);
 
 return manager;
 
