@@ -4,7 +4,7 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.30
+ * @version         0.31
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -65,14 +65,7 @@ commands.addUserCommand(
     'blink',
     function (args) {
         let arg = args.string;
-        let element;
-        try {
-            element = eval(arg);
-        }
-        catch (e) {
-            liberator.log(e);
-            liberator.echoerr(e);
-        }
+        let element = liberator.eval(arg);
 
         if (!element) {
             liberator.echoerr('specify element[s]');
