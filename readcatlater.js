@@ -196,9 +196,9 @@
 
   function completer (context, arg, bang) {
     context.title = ['URL', 'Title'];
-    context.items = RCL_Bookmarks(context.filter).
-                      filter(function (it) it.id).
-                      map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]);
+    context.completions = RCL_Bookmarks(context.filter).
+                            filter(function (it) it.id).
+                            map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]);
   }
 
   function removeItems (uri) {

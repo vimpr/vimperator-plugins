@@ -40,7 +40,6 @@
       if (!doc.location.href.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/))
         return;
       let filepath = arg.string;
-      let dir = options.getPref('browser.download.dir');
       let as = content.document.defaultView.wrappedJSObject.swfArgs;
       let title = doc.title.replace(/^YouTube - /, '');
       let url = 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;

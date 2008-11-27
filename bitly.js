@@ -25,7 +25,6 @@
     return !callback && req.responseText;
   }
 
-  // commands.removeUserCommand('bitly');
   commands.addUserCommand(
     ['bitly'],
     'Copy bitly url',
@@ -35,7 +34,8 @@
         util.copyToClipboard(short);
         liberator.echo('`' + short + "' was copied to clipboard.");
       });
-    }
+    },
+    true
   );
 
   // 外から使えるように

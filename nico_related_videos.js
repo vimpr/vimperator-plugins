@@ -102,7 +102,7 @@
           last.url = buffer.URL;
         }
         context.title = ['Keyword'];
-        context.completions = completion.filter(last.completions, context.filter);
+        context.completions = last.completions;
       }
     },
     true
