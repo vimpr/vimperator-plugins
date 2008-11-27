@@ -79,11 +79,11 @@ liberator.globalVariables.copy_templates.forEach(function(template){
 // used when argument is none
 //const defaultValue = templates[0].label;
 commands.addUserCommand(['copy'],'Copy to clipboard',
-    function(args, special){
-        liberator.plugins.exCopy.copy(args.string, special);
+    function(args){
+        liberator.plugins.exCopy.copy(args.string, args.bang);
     },{
-        completer: function(context, arg, special){
-            if (special){
+        completer: function(context, args){
+            if (args.bang){
                 completion.javascript(context);
                 return;
             }
@@ -93,7 +93,12 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
             );
             if (!context.filter){ context.completions = templates; return; }
             var candidates = [];
-            context.completions = completion.filter(templates, context.filter, true);
+            var filter = context.filter.toLowerCase();
+            templates.forEach(function(template){
+                if (template[0].toLowerCase().indexOf(filter) == 0)
+                    candidates.push(template);
+            });
+            context.completions = candidates;
         },
         bang: true
     }
