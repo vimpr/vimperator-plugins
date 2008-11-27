@@ -105,12 +105,11 @@ for (let c in Cc){
 // Commands
 // ----------------------------------------------
 commands.addUserCommand(['lscc'], 'List XPCOM class',
-	function(arg){
-		if (!arg){
+	function(args){
+		if (!args.length){
 			liberator.echoerr('No arguments');
 			return;
 		}
-		var args = args.arguments ? args.arguments: commands.parseArgs(arg).arguments;
 		if (args.length == 1){
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
@@ -120,9 +119,8 @@ commands.addUserCommand(['lscc'], 'List XPCOM class',
 			liberator.echo(liberator.XPCOM.listClass(args[0], args[1], true), true);
 		}
 	}, {
-		completer: function(filter){
-			if (!filter) return [];
-			var args = filter.arguments? filter.filter: commands.parseArgs(filter).arguments;
+		completer: function(context, args){
+			if (!args.length) return;
 			var list = [];
 			var position = 0;
 			var reg;
@@ -138,7 +136,9 @@ commands.addUserCommand(['lscc'], 'List XPCOM class',
 				}
 				position = args[0].length + 1;
 			}
-			return [position, list];
+			context.title = ['Name', 'Number'];
+			context.advance(position);
+			context.completions = list;
 		}
 	}
 );

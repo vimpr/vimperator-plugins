@@ -303,17 +303,17 @@ function feedKeyIntoContent(keys, useVkey){
 // Command
 // --------------------------
 commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
-    function(args, bang){
-        var arg = args.string == undefined ? args: args.string;
+    function(args){
+        var arg = args.string;
         if(!arg){
             liberator.echo(feedMaps.map(function(map) map.description.replace(/</g,'&lt;').replace(/>/g,'&gt;')),true);
             return;
         }
         var [ ,lhs,rhs] = arg.match(/(\S+)(?:\s+(.+))?/);
         if (!rhs){
-            replaceUserMap(lhs,lhs,bang);
+            replaceUserMap(lhs,lhs,args.bang);
         } else {
-            replaceUserMap(lhs,rhs,bang);
+            replaceUserMap(lhs,rhs,args.bang);
         }
     },{
         bang: true
@@ -327,10 +327,10 @@ var converter = {
     reset: destroy
 };
 commands.addUserCommand(['feedmaps','fmaps'], '',
-  function(args, bang){
+  function(args){
     var feedkey = args["-depth"];
     var vkey = '-vkey' in args;
-    var keys = args.arguments;
+    var keys = args;
     if ('-' in args) keys.push('-');
 
     if (feedkey) keys = keys.map( function(i) [i, (feedkey+"")+i] );

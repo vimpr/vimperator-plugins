@@ -311,7 +311,7 @@ commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
         if (args.bang) destroy();
         var depth = args["-depth"] ? args["-depth"] : "";
         var useVkey = "-vkey" in args;
-        
+
         args.forEach(function(keypair){
             var [lhs, rhs] = keypair.split(",");
             if (!rhs) rhs = lhs;

@@ -33,7 +33,7 @@
         return str;
     }
     function makeinc(f, p)
-        function(arg) {
+        function(args) {
             var l = window.content.location;
             var part = l[p];
             if(p == "port" && part == "") {
@@ -42,7 +42,7 @@
                 })[l.protocol] || part;
             }
             if(numreg.test(part)) {
-                arg = arg.arguments[0];
+                arg = args[0];
                 let num = RegExp.$2;
                 let quantity = !arg || isNaN(arg) ? 1 : parseInt(arg);
                 let nextnum = numstr(f(parseInt(num, 10), quantity), num.length);

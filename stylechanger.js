@@ -194,15 +194,15 @@ liberator.plugins.styleSheetsManger = (function(){
 	var CSSData = {};
 	commands.addUserCommand(['hi[ghlight]'], 'temporary style changer',
 		function(args){
-			if (args.arguments.length == 0){
+			if (args.length == 0){
 				var str = ['show highlight list'];
 				for (let name in CSSData){
 					str.push('<span class="hl-Title">' + name + '</span>');
 					str.push(CSSData[name]);
 				}
 				echo(str.join('\n'), true);
-			} else if (args.arguments.length == 1){
-				var arg = args.arguments[0];
+			} else if (args.length == 1){
+				var arg = args[0];
 				if (arg == 'clear'){
 					for (let name in CSSData){
 						manager.unload(getURIFromCSS(CSSData[name]));
@@ -211,10 +211,10 @@ liberator.plugins.styleSheetsManger = (function(){
 				} else if (arg in CSSData){
 					echo('<span class="hl-Title">' + rel.args[0] + '</span>\n' + CSSData[rel.args[0]], true);
 				}
-			} else if (args.arguments.length > 1){
-				var groupName = args.arguments.shift();
+			} else if (args.length > 1){
+				var groupName = args.shift();
 				if (groupName == 'clear'){
-					args.arguments.forEach(function(name){
+					args.forEach(function(name){
 						if (name in CSSData){
 							manager.unload(getURIFromCSS(CSSData[name]));
 							delete CSSData[name];
@@ -222,31 +222,30 @@ liberator.plugins.styleSheetsManger = (function(){
 					});
 				} else {
 					if (groupName in CSSData) manager.unload(getURIFromCSS(CSSData[groupName]));
-					CSSData[groupName] = args.arguments.join(' ');
+					CSSData[groupName] = args.join(' ');
 					manager.load(getURIFromCSS(CSSData[groupName]));
 				}
 			}
 		}, {
-			completer: function(aFilter){
-				var rel = commands.parseArgs(aFilter, null, '*');
+			completer: function(context, args){
 				var list1 = [['clear', 'clear all or specified group']];
 				var list2 = [];
-				if (!rel){
+				if (!args){
 					for (let name in CSSData){
 						list2.push([name, CSSData[name]]);
 					}
 					return [0, list1.concat(list2)];
 				}
-				if (rel.arguments.length == 2 && rel.arguments[0] == 'clear'){
+				if (args.length == 2 && args[0] == 'clear'){
 					for (let name in CSSData){
-						if (name.indexOf(rel.arguments[1]) == 0) list2.push([name, CSSData[name]]);
+						if (name.indexOf(args[1]) == 0) list2.push([name, CSSData[name]]);
 					}
 					return [6, list2];
-				} else if (rel.args.length == 1){
+				} else if (args.args.length == 1){
 					for (let name in CSSData){
-						if (name.indexOf(rel.arguments[0]) == 0) list2.push([name, CSSData[name]]);
+						if (name.indexOf(args[0]) == 0) list2.push([name, CSSData[name]]);
 					}
-					if ('clear'.indexOf(rel.arguments[0]) == 0)
+					if ('clear'.indexOf(args[0]) == 0)
 						return [0, list1.concat(list2)];
 					else
 						return [0, list2];

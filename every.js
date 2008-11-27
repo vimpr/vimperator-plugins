@@ -82,21 +82,21 @@
   liberator.modules.commands.addUserCommand(
     ['every', 'ev'],
     'every',
-    function (arg, bang, count) {
-      if (bang) {
-        kill(arg.arguments[0]);
+    function (args) {
+      if (args.bang) {
+        kill(args[0]);
       } else {
-        run(arg.string, msec(count));
+        run(args.string, msec(args.count));
       }
     },
     {
       count: true,
       bang: true,
       argCount: '+',
-      completer: function (context, arg, bang) {
-        if (bang) {
+      completer: function (context, args) {
+        if (args.bang) {
           context.title = ['PID', 'every process'];
-          context.items = [['*', 'kill em all']].concat(every.ps.map(function (p, i) ([i.toString(), p.command])));
+          context.completions = [['*', 'kill em all']].concat(every.ps.map(function (p, i) ([i.toString(), p.command])));
         } else {
           liberator.modules.completion.ex(context);
         }

@@ -145,8 +145,8 @@ const itemHTML = [
 // scrape from div element that inserted by NicoNicoPlaylist
 liberator.modules.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
     function (args) {
-        var arg = (args.arguments.length > 1)
-            ? args.arguments[0].toString()
+        var arg = (args.length > 1)
+            ? args[0].toString()
             : args.string;
 
         // check existence of NicoNicoPlaylist

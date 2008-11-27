@@ -79,15 +79,15 @@
     commands.addUserCommand(
       ['fo[pen]', 'filteropen'],
       'Filtered open',
-      function (opts, bang) {
-        let where = charToWhere(opts['-where'], bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
-        let [i, links] = [1, filteredLinks(opts.arguments.join(''))];
+      function (args, bang) {
+        let where = charToWhere(args['-where'], bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
+        let [i, links] = [1, filteredLinks(args.join(''))];
         if (!links.length)
           return;
         liberator.open(links[0].href, where);
         if (links.length <= 1)
           return;
-        let interval = (opts['-interval'] || liberator.globalVariables.fopen_default_interval || 1) * 1000;
+        let interval = (args['-interval'] || liberator.globalVariables.fopen_default_interval || 1) * 1000;
         foihandle = setInterval(function () {
           try {
             liberator.open(links[i].href, where);
@@ -131,9 +131,9 @@
     commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
-      function (arg, bang) {
-        let where = charToWhere(arg['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
-        let numUrl = arg.arguments[0];
+      function (args, bang) {
+        let where = charToWhere(args['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+        let numUrl = args[0];
         let m = numUrl.match(/^(\d+),(.+)$/);
         if (m) {
           let link = lolinks[parseInt(m[1], 10)];

@@ -630,9 +630,9 @@
                 if (p.has(func, 'rwt'))
                   p.toggle(func);
                 else if (p.has(func, 'rw'))
-                  p[func] = arg.arguments[0];
+                  p[func] = arg[0];
                 else if (p.has(func, 'x'))
-                  p[func].apply(p, arg.arguments);
+                  p[func].apply(p, arg);
                 stella.update();
               },
           {argCount: '*', bang: !!funcB},

@@ -404,12 +404,12 @@
   commands.addUserCommand(
     ['ml', 'migelight'],
     'Migelight matched words',
-    function (opts, bang) {
-      if (bang) {
-        let colors = opts.arguments.join(' ') + ' ' + (opts['-color'] || '');
+    function (args) {
+      if (args.bang) {
+        let colors = args.join(' ') + ' ' + (args['-color'] || '');
         liberator.execute('removemigelight ' + colors);
       } else {
-        let r = MF.highlightAll(opts.arguments.join(' '), opts['-color']);
+        let r = MF.highlightAll(args.join(' '), args['-color']);
         liberator.echo(r ? r.length + ' words migelighted.'
                : 'word not found.');
       }
@@ -442,8 +442,8 @@
   commands.addUserCommand(
     ['mf[ind]'],
     'Migemized find',
-    function (opts) {
-      if (!MF.findSubmit(opts.arguments.join(' '), opts['-backward'], opts['-color']))
+    function (args) {
+      if (!MF.findSubmit(args.join(' '), args['-backward'], args['-color']))
         liberator.echoerr('not found: ' + MF.currentSearchText);
     },
     {

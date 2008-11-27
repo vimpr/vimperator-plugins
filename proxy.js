@@ -91,7 +91,7 @@
     commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
         const prefs = Components.classes["@mozilla.org/preferences-service;1"]
                       .getService(Components.interfaces.nsIPrefService);
-        var name = (args.arguments.length > 1) ? args.arguments[0].toString() : args.string;
+        var name = (args.length > 1) ? args[0].toString() : args.string;
 
         if (!name) {
             liberator.echo("Usage: proxy {setting name}");

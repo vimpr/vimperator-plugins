@@ -125,17 +125,16 @@ var manager = new RefControl();
 
 // add user command
 commands.addUserCommand(['addref'], 'add referrer control setting', function(args) {
-  var domain = args.arguments[0];
-  var perf = args.arguments[1] || '';
+  var domain = args[0];
+  var perf = args[1] || '';
   if (!domain || /[:\/]/.test(domain)) {
     liberator.echo(dump(sites)+'usage: addref [domain] [@NORMAL or @FORGE or empty]');
     return;
   }
   sites[domain] = perf;
   }, {
-    completer: function(context, arg, special) {
+    completer: function(context, args, special) {
       //var last = context.contextList.slice(-1)[0];
-      var args = arg.arguments;
       var list;
       var pos = 0;
       if (args.length == 2) {

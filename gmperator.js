@@ -210,11 +210,11 @@ liberator.plugins.gmperator = (function(){ //{{{
 // User Command
 // ---------------------------
 commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
-    function(arg,special){
+    function(arg){
         var str = '';
         var scripts = GM_getConfig().scripts;
         var reg;
-        if (special || arg == 'full'){
+        if (arg.bang || arg == 'full'){
             reg = new RegExp('.*');
         } else if( arg ){
             reg = new RegExp(arg,'i');
@@ -268,7 +268,7 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
     }
 ); //}}}
 commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
-    function(arg, special){
+    function(arg){
         if (!arg) {
             echoerr('Usage: :gmlo[ad][!] {name|filename}');
             return;
@@ -284,7 +284,7 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         if (!script) {
             echoerr('no such a user script');
             return;
-        } else if (liberator.plugins.gmperator.currentContainer.hasScript(script._filename) && !special){
+        } else if (liberator.plugins.gmperator.currentContainer.hasScript(script._filename) && !arg.bang){
             echoerr(script._filename + ' is already loaded!');
             return;
         } else {
@@ -311,16 +311,15 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
     }
 ); //}}}
 commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', //{{{
-    function(args, special){
+    function(args){
         var options = [ [['-name','-n'],    commands.OPTION_STRING],
                         [['-include','-i'], commands.OPTION_LIST],
                         [['-exclude','-e'], commands.OPTION_LIST] ];
-        var res = commands.parseArgs(args, options);
-        if (res.arguments.length == 0) {
-            if (special) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable Greasemonkey
+        if (args.length == 0) {
+            if (args.bang) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable Greasemonkey
             return;
         }
-        var filename = res.arguments[0];
+        var filename = args[0];
         var config = GM_getConfig();
         var script;
         for (var i=0; i<config.scripts.length; i++){
@@ -330,12 +329,12 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
             }
         }
         if (!script) return;
-        if (special){ // toggle enable/disable the script if {filename} is exist
+        if (args.bang){ // toggle enable/disable the script if {filename} is exist
             script.enabled = !script.enabled;
         }
-        if (res['-name']) script.name = res['-name'];
-        if (res['-include']) script.include = res['-include'];
-        if (res['-exclude']) script.exclude = res['-exclude'];
+        if (args['-name']) script.name = args['-name'];
+        if (args['-include']) script.include = args['-include'];
+        if (args['-exclude']) script.exclude = args['-exclude'];
         config._save();
     },{
         completer: function(filter)
