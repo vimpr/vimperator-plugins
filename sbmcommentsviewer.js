@@ -491,13 +491,7 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     {
         argCount:"*",
         options: options,
-        completer: function(context, args, special){
-            if (args.completeOpt)
-                return;
-
-            context.advance(args.completeStart);
-            completion.url(context, 'l');
-        }
+        completer: function(context) completion.url(context, 'l')
     }
 ); //}}}
 
