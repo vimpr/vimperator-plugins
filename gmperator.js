@@ -344,7 +344,7 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
             scriptsCompleter(filter, false)
     }
 ); //}}}
-liberator.commands.addUserCommand(["gmcommand", "gmcmd"], "run Greasemonkey Command", //{{{
+commands.addUserCommand(["gmcommand", "gmcmd"], "run Greasemonkey Command", //{{{
     function(args, special) {
         var commander = GM_BrowserUI.getCommander(getBrowser().selectedTab.linkedBrowser.contentWindow);
         for (var i = 0; i < commander.menuItems.length; i++) {
