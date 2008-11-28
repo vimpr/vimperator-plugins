@@ -13,7 +13,7 @@
  *  New BSD License
  *
  * USAGE
- *  This plugin change Pathtraq indicators to non-display,
+ *  this plugin change Pathtraq indicators to non-display,
  *  and display the icon of Pathtraq.
  *  you can use value 'p' in option 'pageinfo'.
  *  it will display ratings of current page.

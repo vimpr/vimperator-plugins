@@ -57,7 +57,7 @@
  *
  * */
 
-(function(){
+(function() {
 
 const style = [
     'padding:    1px;',
