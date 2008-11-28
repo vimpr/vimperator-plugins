@@ -4,9 +4,10 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.2.3
+ * @version          0.3.0
  * @minVersion       1.2
  * @maxVersion       1.2
+ * Last Change:      29-Nov-2008.
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -15,9 +16,11 @@
  *     !                create new tab.
  *     ANY_TEXT         your input text
  *
- *   :mr  alc ANY_TEXT           -> request by the input text, and display to the buffer.
- *   :mr! goo {window.selection} -> request by the selected text, and display to the new tab.
+ *   :mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
+ *   :mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
  *
+ *   other siteinfo by wedata.
+ *     @see http://wedata.net/databases/Multi%20Requester/items
  *
  * CUSTOMIZE .vimperatorrc:
  *
@@ -42,9 +45,6 @@
  *   ];
  *   EOM
  *
- *   other siteinfo by wedata.
- *     @see http://wedata.net/databases/Multi%20Requester/items
- *
  * [MAPPINGS]
  *   ex.)
  *   javascript <<EOM
@@ -61,7 +61,6 @@
  *
  * TODO:
  *    - wedata local cache.
- *    - 複数リクエスト対応。
  */
 (function() {
 
@@ -72,15 +71,15 @@ var SITEINFO = [
         description: 'SPACE ALC (\u82F1\u8F9E\u6717 on the Web)',
         url:         'http://eow.alc.co.jp/%s/UTF-8/',
         xpath:       'id("resultList")'
-     },
-     {
+    },
+    {
         name:        'goo',
         description: 'goo \u8F9E\u66F8',
         url:         'http://dictionary.goo.ne.jp/search.php?MT=%s&kind=all&mode=0&IE=UTF-8',
         xpath:       'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
         srcEncode:   'EUC-JP',
         urlEncode:   'UTF-8'
-     },
+    }
 ];
 
 var mergedSiteinfo = {};
@@ -88,10 +87,10 @@ var mergedSiteinfo = {};
 // utilities
 var $U = {
     log: function(msg, level) {
-        liberator.log(msg, (level || 9));
+        liberator.log(msg, (level || 8));
     },
     debug: function(msg) {
-        this.log(msg, 9);
+        this.log(msg, 8);
         liberator.echo(msg);
     },
     echo: function(msg, flg) {
@@ -162,13 +161,14 @@ var CommandRegister = {
             cmdClass.description,
             $U.bind(cmdClass, cmdClass.cmdAction),
             {
-                completer: cmdClass.cmdCompleter || function(filter, special) {
-                    var allSuggestions = siteinfo.map(function(s) [s.name, s.description]);
+                completer: cmdClass.cmdCompleter || function(filter, bang) {
+                    let filters = filter.split(',');
+                    let prefilters = filters.slice(0, filters.length - 1);
+                    let prefilter = !prefilters.length ? '' : prefilters.join(',') + ',';
+                    let subfilters = siteinfo.filter(function(s) prefilters.every(function(p) s.name != p));
+                    var allSuggestions = subfilters.map(function(s) [prefilter + s.name, s.description]);
                     if (!filter) return [0, allSuggestions];
-                    var suggestions = allSuggestions.filter(function(s) {
-                        return s[0].indexOf(filter) == 0;
-                    });
-                    return [0, suggestions];
+                    return [0, allSuggestions.filter(function(s) s[0].indexOf(filter) == 0)]
                 },
                 options: cmdClass.cmdOptions,
                 argCount: cmdClass.argCount || undefined,
@@ -466,63 +466,77 @@ var DataAccess = {
 var MultiRequester = {
     name: DataAccess.getCommand(),
     description: 'request, and display to the buffer',
-    cmdAction: function(args, special, count) {
+    cmdAction: function(args, bang, count) {
 
         var parsedArgs = this.parseArgs(args);
-        if (!parsedArgs || !parsedArgs.siteinfo) { return; } // do nothing
-
+        if (parsedArgs.count == 0) { return; } // do nothing
         var siteinfo = parsedArgs.siteinfo;
-        var url = siteinfo.url;
-        // see: http://fifnel.com/2008/11/14/1980/
-        var srcEncode = siteinfo.srcEncode || 'UTF-8';
-        var urlEncode = siteinfo.urlEncode || srcEncode;
+        for (let i = 0, len = parsedArgs.count; i < len; i++) {
 
-        var idxRepStr = url.indexOf('%s');
-        if (idxRepStr > -1 && !parsedArgs.str) return;
+            let info = siteinfo[i];
+            var url = info.url;
+            // see: http://fifnel.com/2008/11/14/1980/
+            var srcEncode = info.srcEncode || 'UTF-8';
+            var urlEncode = info.urlEncode || srcEncode;
 
-        // via. lookupDictionary.js
-        var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
-                             .getService(Components.interfaces.nsITextToSubURI);
+            var idxRepStr = url.indexOf('%s');
+            if (idxRepStr > -1 && !parsedArgs.str) continue;
 
+            // via. lookupDictionary.js
+            var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
+                                 .getService(Components.interfaces.nsITextToSubURI);
+            url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
+            $U.log(url + '[' + srcEncode + '][' + urlEncode + ']::' + info.xpath);
 
-        url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
-        $U.log(url + '::' + siteinfo.xpath);
-
-        if (special) {
-            liberator.open(url, liberator.NEW_TAB);
-        } else {
-            let req = new Request(url, null, {
-                encoding: srcEncode,
-                siteinfo: siteinfo,
-                args: {
-                    args: args,
-                    special: special,
-                    count: count
-                }
-            });
-            req.addEventListener('onException', $U.bind(this, this.onException));
-            req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
-            req.addEventListener('onFailure', $U.bind(this, this.onFailure));
-            req.get();
-
-            $U.echo('Loading ' + parsedArgs.name + ' ...', liberator.commandline.FORCE_SINGLELINE);
-        }
+            if (bang) {
+                liberator.open(url, liberator.NEW_TAB);
+            } else {
+                let req = new Request(url, null, {
+                    encoding: srcEncode,
+                    siteinfo: info,
+                    args: {
+                        args: args,
+                        bang: bang,
+                        count: count
+                    }
+                });
+                req.addEventListener('onException', $U.bind(this, this.onException));
+                req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
+                req.addEventListener('onFailure', $U.bind(this, this.onFailure));
+                req.get();
+            }
+            $U.echo('Loading ' + parsedArgs.names + ' ...', commandline.FORCE_SINGLELINE);
+         }
     },
-    // return {name: '', siteinfo: {}, str: ''} or null
+    // return {names: '', str: '', count: 0, siteinfo: [{}]}
     parseArgs: function(args) {
 
-        if (!args) return null;
+        var self = this;
+        var ret = {};
+        ret.names = '';
+        ret.str = '';
+        ret.count = 0;
+        ret.siteinfo = [];
+
+        if (!args) return ret;
 
         var arguments = args.split(/ +/);
         var sel = $U.getSelectedString();
 
-        if (arguments.length < 1) return null;
+        if (arguments.length < 1) return ret;
 
-        var siteName = arguments.shift();
-        var str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
-        var siteinfo = this.getSite(siteName);
+        ret.names = arguments.shift();
+        ret.str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
 
-        return {name: siteName, siteinfo: siteinfo, str: str};
+        ret.names.split(',').forEach(function(name) {
+            let site = self.getSite(name);
+            if (site) {
+                ret.count++;
+                ret.siteinfo.push(site);
+            }
+        });
+
+        return ret;
     },
     getSite: function(name) {
         if (!name) this.siteinfo[0];
