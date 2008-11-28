@@ -4,7 +4,7 @@
  * @description     clock.
  * @description-ja  とけい。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.10
+ * @version         0.11
  * @minversion      2.0pre
  * @maxversion      2.0pre
  * ==/VimperatorPlugin==
@@ -53,10 +53,10 @@
 const format   = liberator.globalVariables.clock_format   || '[%t]';
 const position = liberator.globalVariables.clock_position || 'liberator-commandline-command';
 let atemp      = liberator.globalVariables.clock_after;
-const after =   (atemp === undefined)    ? true
-              : (/^false$/i.test(atemp)) ? false
-              : (/^\d+$/i.test(atemp))   ? parseInt(atemp, 10)
-              :                            true;
+const after =   (atemp === undefined)             ? true
+              : (atemp.toLowerCase() === 'false') ? false
+              : (/^\d+$/.test(atemp))             ? parseInt(atemp, 10)
+              :                                     true;
 
 // class definitions
 function Clock() {
@@ -76,7 +76,7 @@ Clock.prototype = {
         style: [
             'margin: 0;',
             'padding: 1px;',
-            'border: none;',
+            'border: 0 none;',
             'color: black;',
             'background-color: white;',
             'font-family: monospace;',
@@ -245,9 +245,7 @@ function day() {
     return month + '/' + date;
 }
 function year() {
-    let now = new Date();
-    let year = (now.getYear() + 1900).toString(10);
-    return year;
+    return new Date().getFullYear().toString(10);
 }
 
 // node control
