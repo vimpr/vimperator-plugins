@@ -4,7 +4,7 @@
  * @description    Vimperator plugin for Greasemonkey
  * @author         teramako teramako@gmail.com
  * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.5b
+ * @version        0.6b
  * ==/VimperatorPlugin==
  *
  * ---------------------------
