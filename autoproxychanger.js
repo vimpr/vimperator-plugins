@@ -36,9 +36,9 @@
  *        http      : 'localhost',
  *        http_port : 8080,
  *      },
- *      url   : /http:\/\/www.nicovideo.jp/,
+ *      url   : /^http:\/\/www\.nicovideo\.jp/,
  *      run   : 'java.exe',
- *      args  : ['C:\Personal\Apps\Internet\NicoCacheNl\NicoCache_nl.jar'],
+ *      args  : ['C:\\Personal\\Apps\\Internet\\NicoCacheNl\\NicoCache_nl.jar'],
  *    }];
  * EOM
  *
@@ -50,17 +50,17 @@ if (!proxy_settings) {
   proxy_settings = [{
     name  : 'disable',
     usage : 'direct connection',
-    proxy :{
-      type      : 0,
-    },
-  },{
+    proxy : {
+      type      : 0
+    }
+  }, {
     name  : 'http',
     usage : 'localhost:8080',
-    proxy :{
+    proxy : {
       type      : 1,
       http      : 'localhost',
-      http_port : 8080,
-    },
+      http_port : 8080
+    }
   }];
 }
 
@@ -88,19 +88,19 @@ const DISABLE_ICON = 'data:image/png;base64,'
 
 var acmanager = [];
 
-const prefkeys = ['ftp','gopher','http','ssl'];
+const prefkeys = ['ftp', 'gopher', 'http', 'ssl'];
 var prevSetting = null;
 var _isEnable = false;
 var ProxyChanger = function() this.initialize.apply(this, arguments);
 ProxyChanger.prototype = {
-  initialize: function(){
+  initialize: function() {
     this.panel = this.createPanel();
   },
-  createPanel: function(){
+  createPanel: function() {
     var self = this;
     var panel = document.getElementById('proxychanger-status');
     if (panel) {
-      var parent = panel.parentNode;
+      let parent = panel.parentNode;
       parent.removeChild(panel);
     }
     panel = document.createElement('statusbarpanel');
@@ -112,9 +112,7 @@ ProxyChanger.prototype = {
       panel, document.getElementById('security-button').nextSibling);
     return panel;
   },
-  get isEnable(){
-    return _isEnable
-  },
+  get isEnable() _isEnable,
   set isEnable(val) {
     this.panel.setAttribute('src', val ? ENABLE_ICON : DISABLE_ICON);
     _isEnable = val;
@@ -123,43 +121,43 @@ ProxyChanger.prototype = {
 };
 var manager = new ProxyChanger();
 
-function init(){
+function init() {
   // initialize manager
-  proxy_settings.forEach(function(s){
+  proxy_settings.forEach(function(s) {
     if (s.url instanceof RegExp && s.name)
       acmanager.push( {url: s.url, name: s.name, run: s.run || '', args: s.args || [] } );
   });
 
-  proxy_settings.splice(0,0, {name:'default', usage:'default setting', proxy: restore() });
+  proxy_settings.splice(0, 0, {name: 'default', usage: 'default setting', proxy: restore() });
 
   if (acmanager.length > 0) {
-    autocommands.add("LocationChange", '.*', 'js liberator.plugins.AutoProxyChanger.autoApplyProxy()');
-    //window.addEventListener("unload", function() applyProxyByName('default'), false);
+    autocommands.add('LocationChange', '.*', 'js liberator.plugins.AutoProxyChanger.autoApplyProxy()');
+    //window.addEventListener('unload', function() applyProxyByName('default'), false);
   }
 
   manager.isEnable = eval(liberator.globalVariables.autochanger_proxy_enabled) || false;
 }
-function restore(){
-  let opt = new Object();
-  opt['type'] = options.getPref("network.proxy.type",0);
-  prefkeys.forEach(function(key){
-    opt[key] = options.getPref("network.proxy." + key, '');
-    opt[key+"_port"] = options.getPref("network.proxy." + key + "_port", 0);
+function restore() {
+  var opt = new Object();
+  opt['type'] = options.getPref('network.proxy.type', 0);
+  prefkeys.forEach(function(key) {
+    opt[key] = options.getPref('network.proxy.' + key, '');
+    opt[key+'_port'] = options.getPref('network.proxy.' + key + '_port', 0);
   });
   return opt;
 }
 function dump(obj) {
-  var m='';
-  for (var key in obj) m+=key+":"+obj[key]+"\n";
-  return m
+  var m = '';
+  for (let key in obj) m+=key+':'+obj[key]+'\n';
+  return m;
 }
-function checkApplyProxy(){
+function checkApplyProxy() {
   if (prevSetting != null) {
     applyProxy(prevSetting);
     prevSetting = null;
   }
   if (!_isEnable) return;
-  acmanager.some( function( manager ){
+  acmanager.some( function( manager ) {
     if (manager.url.test(content.location.href)) {
       prevSetting = restore();
       applyProxyByName(manager.name);
@@ -173,49 +171,48 @@ function checkApplyProxy(){
   });
 }
 
-function applyProxyByName( name ){
+function applyProxyByName( name ) {
   if (!name) {
-      liberator.echo( dump(restore())+'usage:proxy [setting name]' );
+    liberator.echo( dump(restore())+'usage:proxy [setting name]' );
     return;
   }
-  proxy_settings.some( function(setting){
+  proxy_settings.some( function(setting) {
     if (setting.name.toLowerCase() != name.toLowerCase()) return false;
     // delete setting
-    prefkeys.forEach( function(key){
-      options.setPref("network.proxy."+key, '');
-      options.setPref("network.proxy."+key+"_port", 0);
+    prefkeys.forEach( function(key) {
+      options.setPref('network.proxy.'+key, '');
+      options.setPref('network.proxy.'+key+'_port', 0);
     });
 
-    // apply proxy
-    applyProxy(setting.proxy)
+    applyProxy(setting.proxy);
     return true;
   });
 }
 
-function applyProxy(proxy){
-  for (var key in proxy){
+function applyProxy(proxy) {
+  for (let key in proxy) {
     if (typeof proxy[key] != 'undefined')
-      options.setPref("network.proxy."+key, proxy[key]);
+      options.setPref('network.proxy.'+key, proxy[key]);
   }
 }
 
-commands.addUserCommand(["proxy"], 'Proxy settings',
+commands.addUserCommand(['proxy'], 'Proxy settings',
   function(args, bang) {
     if (bang) applyProxyByName('default');
     else applyProxyByName(args.string);
   }, {
     bang: true,
-    completer: function(context, arg, special){
-      context.title = ['Name','Usage'];
+    completer: function(context, arg, special) {
+      context.title = ['Name', 'Usage'];
       var list = context.filter ?
-        proxy_settings.filter( function(el) this.test(el.name), new RegExp("^"+context.filter))
+        proxy_settings.filter( function(el) this.test(el.name), new RegExp('^'+context.filter))
         : proxy_settings;
       context.completions = list.map( function(v) [v.name, v.usage] );
     }
 });
 
-commands.addUserCommand(["toggleautoproxy","aprxy"], "Toggle auto proxy changer on/off",
-  function(){manager.isEnable = !manager.isEnable}, {}
+commands.addUserCommand(['toggleautoproxy', 'aprxy'], 'Toggle auto proxy changer on/off',
+  function() {manager.isEnable = !manager.isEnable}, {}
 );
 
 init();
