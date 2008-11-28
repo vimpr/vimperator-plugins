@@ -4,7 +4,7 @@
  * @description     Factory for the object to highlight specified element[s]. this set in plugins.highlighterFactory.
  * @description-ja  指定した要素をハイライトするオブジェクトを返す Factory 。 plugins.highlighterFactory に構築される。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.10
+ * @version         0.11
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -85,7 +85,11 @@ Highlighter.prototype = {
     highlight: function (element) {
         if (!this._isDisplay(element)) return;
 
-        let doc = content.document;
+        let doc = element.ownerDocument;
+
+        // TODO: highlight XUL elements
+        if (!doc.body) return;
+
         let scrollX = doc.defaultView.scrollX;
         let scrollY = doc.defaultView.scrollY;
 
