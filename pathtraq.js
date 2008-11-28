@@ -1,8 +1,8 @@
 /*
  * ==VimperatorPlugin==
  * @name            pathtraq.js
- * @description     optimize the indicator of Pathtraq addon.
- * @description-ja  Pathtraq addon の表示をいい感じにする。
+ * @description     optimize the indicator of Pathtraq add-on.
+ * @description-ja  Pathtraq アドオンの表示をいい感じにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.10
  * @minversion      2.0pre
@@ -13,7 +13,7 @@
  *  New BSD License
  *
  * USAGE
- *  this plugin change Pathtraq indicators to non-display,
+ *  This plugin change Pathtraq indicators to non-display,
  *  and display the icon of Pathtraq.
  *  you can use value 'p' in option 'pageinfo'.
  *  it will display ratings of current page.
@@ -28,10 +28,10 @@
 
 ( function () {
 
-// addon check
+// add-on check
 const doc = window.document;
 if (!doc.getElementById('pathtraq-status')) {
-    liberator.log('pathtraq.js is need pathtraq addon: http://pathtraq.com/install', 0);
+    liberator.log('pathtraq.js is need Pathtraq add-on: http://pathtraq.com/install', 0);
     return;
 }
 

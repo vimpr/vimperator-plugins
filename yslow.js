@@ -1,8 +1,8 @@
 /*
  * ==VimperatorPlugin==
  * @name            yslow.js
- * @description     optimize the indicator of YSlow addon.
- * @description-ja  YSlow addon の表示をいい感じにする。
+ * @description     optimize the indicator of YSlow add-on.
+ * @description-ja  YSlow アドオンの表示をいい感じにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.10
  * @minversion      2.0pre
@@ -25,10 +25,10 @@
 
 ( function () {
 
-// addon check
+// add-on check
 const doc = window.document;
 if (!doc.getElementById('yslowStatusBar')) {
-    liberator.log('yslow.js is need YSlow addon: https://addons.mozilla.org/ja/firefox/addon/5369', 0);
+    liberator.log('yslow.js is need YSlow add-on: https://addons.mozilla.org/firefox/addon/5369', 0);
     return;
 }
 
@@ -42,8 +42,8 @@ liberator.modules.buffer.addPageInfoSection(
     function (verbose) {
         if(verbose) {
             if (grade.value && grade.value !== 'YSlow') yield ['Grade', grade.value];
-            if (size.value)  yield ['Size', size.value];
-            if (time.value)  yield ['Time', time.value];
+            if (size.value) yield ['Size', size.value];
+            if (time.value) yield ['Time', time.value];
         }
         return;
     }
