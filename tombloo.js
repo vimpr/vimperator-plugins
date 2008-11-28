@@ -43,14 +43,13 @@ function getContext(){
 
 commands.addUserCommand(['tomblooAction'],'Execute Tombloo actions',
     function(arg){
-        TomblooService.Tombloo.Service.actions[arg].execute();
+        TomblooService.Tombloo.Service.actions[arg.string].execute();
     },{
-        completer: function(filter){
-            var completionList = new Array();
-            for(let name in TomblooService.Tombloo.Service.actions)
-                if(name.indexOf(filter) > -1)
-                    completionList.push([name,name]);
-            return [0,completionList];
+        completer: function(context){
+			context.title = ['Tombloo Actions'];
+			context.completions = [[name,name] for(name in TomblooService.Tombloo.Service.actions)].filter(function($_){
+				return this.test($_[0]);
+			}, new RegExp(context.filter, 'i'));
         }
     }
 );
@@ -60,13 +59,11 @@ commands.addUserCommand(['tombloo'],'Post by Tombloo',
         TomblooService.Tombloo.Service.share(getContext(),TomblooService.Tombloo.Service.extractors[arg.string],special);
     },{
         bang: true,
-        completer: function(filter){
+        completer: function(context){
             var completionList = new Array();
             var exts = TomblooService.Tombloo.Service.check(getContext());
-            for(let i=0,l=exts.length; i < l; i++)
-                if(exts[i].name.indexOf(filter) > -1)
-                    completionList.push([exts[i].name,exts[i].name]);
-            return [0,completionList];
+			context.title = ['Tombloo'];
+			context.completions = [[exts[i].name, exts[i].name] for(i in exts)].filter(function($_) this.test($_[0]), new RegExp(context.filter, 'i'))
         }
     }
 );
