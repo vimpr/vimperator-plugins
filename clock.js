@@ -4,7 +4,7 @@
  * @description     clock.
  * @description-ja  とけい。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.11
+ * @version         0.12
  * @minversion      2.0pre
  * @maxversion      2.0pre
  * ==/VimperatorPlugin==
@@ -20,6 +20,7 @@
  *                          %t: time hh:mm
  *                          %d: day  MM/DD
  *                          %y: year YYYY
+ *                          %a: A abbreviation for the day of the week.
  *      clock_position: id of element that is marker of insert position.
  *                      default is 'liberator-commandline-command' ( after commandline )
  *      clock_after:    boolean that show insert after of the element
@@ -90,6 +91,9 @@ Clock.prototype = {
             t: function (label) {
                 return setInterval(function () label.setAttribute('value', time()), 100);
             },
+            a: function (label) {
+                return setInterval(function () label.setAttribute('value', wday()), 60 * 1000);
+            },
             d: function (label) {
                 return setInterval(function () label.setAttribute('value', day()), 60 * 1000);
             },
@@ -104,6 +108,16 @@ Clock.prototype = {
                 l.setAttribute('id', self._constants.prefix + 'clock');
                 l.setAttribute('value', time());
                 let id = self._constants.driver.t(l);
+                return {
+                    node: l,
+                    intervalId: id,
+                };
+            },
+            a: function (self) {
+                let l = self._master.cloneNode(false);
+                l.setAttribute('id', self._constants.prefix + 'wday');
+                l.setAttribute('value', weekDay());
+                let id = self._constants.driver.a(l);
                 return {
                     node: l,
                     intervalId: id,
@@ -235,6 +249,12 @@ function time() {
     if (hour.length < 2) hour = '0' + hour;
     if (min.length < 2)  min  = '0' + min;
     return hour + (now.getMilliseconds() < 400 ? ' ' : ':') + min;
+}
+function weekDay() {
+    const wdays = 'sun mon tue wed thu fri sat'.split(/%s/);
+    let now = new Date();
+    return now.toLocaleFormat ? now.toLocaleFormat('%a')
+                              : wdays[now.getDay()];
 }
 function day() {
     let now = new Date();
