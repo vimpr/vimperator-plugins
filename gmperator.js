@@ -4,7 +4,7 @@
  * @description    Vimperator plugin for Greasemonkey
  * @author         teramako teramako@gmail.com
  * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.5b
+ * @version        0.6b
  * ==/VimperatorPlugin==
  *
  * ---------------------------
@@ -28,6 +28,8 @@
  *       -n[ame] {value}              -> change name to {value}
  *       -i[nclude] {expr[,expr,...]} -> change includes to expr list ("," demiliter)
  *       -e[xclude] {expr[,expr,...]} -> change excludes to expr list ("," demiliter)
+ *
+ * :gmcommand {command name}          -> run Greasemonkey Command
  *
  * Caution:
  * The change is permanent, not only the session.
@@ -340,6 +342,33 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
     },{
         completer: function(filter)
             scriptsCompleter(filter, false)
+    }
+); //}}}
+liberator.commands.addUserCommand(["gmcommand", "gmcmd"], "run Greasemonkey Command", //{{{
+    function(args, special) {
+        var commander = GM_BrowserUI.getCommander(getBrowser().selectedTab.linkedBrowser.contentWindow);
+        for (var i = 0; i < commander.menuItems.length; i++) {
+            var menuItem = commander.menuItems[i];
+            if (menuItem.getAttribute("label") == args) {
+                menuItem._commandFunc();
+                return;
+            }
+        }
+        liberator.echoerr(args+" is not defined userscript command.");
+    },
+    {
+        completer: function(filter) {
+            var commander = GM_BrowserUI.getCommander(getBrowser().selectedTab.linkedBrowser.contentWindow);
+            var completions = [];
+            var exp = new RegExp(".*" + filter + ".*");
+            for (var i = 0; i < commander.menuItems.length; i++) {
+                var label = commander.menuItems[i].getAttribute("label");
+                if (!filter || exp.test(label)) {
+                    completions.push([label, label]);
+                }
+            }
+            return [0, completions];
+        }
     }
 ); //}}}
 
