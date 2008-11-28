@@ -4,7 +4,7 @@
  * @description    Vimperator plugin for Greasemonkey
  * @author         teramako teramako@gmail.com
  * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.6b
+ * @version        0.6c
  * ==/VimperatorPlugin==
  *
  * ---------------------------
@@ -90,7 +90,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const gmID = '@greasemonkey.mozdev.org/greasemonkey-service;1';
-if (!Cc[gmID]) {
+if (!Cc[gmID]){
     liberator.log('Greasemonkey is not installed',0);
     return;
 }
@@ -111,14 +111,14 @@ liberator.plugins.gmperator = (function(){ //{{{
                 gmCon = new GmContainer(uri,sandbox);
                 containers[panelID] = gmCon;
                 this.__defineGetter__(panelID,function() gmCon);
-                //liberator.log('gmpeartor: Registered: ' + panelID + ' - ' + uri, 8);
+                //liberator.log('gmpeartor: Registered: ' + panelID + ' - ' + uri,8);
             }
             gmCon.sandbox = sandbox;
             gmCon.addScript(script);
             gmCon.uri = uri;
-            triggerGMEvent('GMInjectedScript', uri, script._filename);
+            triggerGMEvent('GMInjectedScript',uri,script._filename);
             if (panelID == this.currentPanel){
-                triggerGMEvent('GMActiveScript', uri, script._filename);
+                triggerGMEvent('GMActiveScript',uri,script._filename);
             }
         },
         get gmScripts() GM_getConfig().scripts,
@@ -130,18 +130,18 @@ liberator.plugins.gmperator = (function(){ //{{{
             return containers[id] ? containers[id].sandbox : null;
         },
         getSandboxFromWindow: function(win){
-            for each(var c in containers){
-                if(c.sandbox.window == win) return sandbox;
+            for each (let c in containers){
+                if (c.sandbox.window == win) return sandbox;
             }
             return null;
         },
         getContainersFromURI: function(uri){
             var list = [];
-            for each(var c in containers){
+            for each (let c in containers){
                 if (c.uri == uri) list.push(c);
             }
             return list.length > 0 ? list : null;
-        },
+        }
     };
     // }}}
     // -----------------------
@@ -159,13 +159,13 @@ liberator.plugins.gmperator = (function(){ //{{{
             return tmp;
         };
     }
-    appendCode(gmSvc, 'evalInSandbox', function(code,uri,sandbox,script){
+    appendCode(gmSvc,'evalInSandbox',function(code,uri,sandbox,script){
         liberator.plugins.gmperator.register(uri,sandbox,script);
     });
     function getPanelID(win){
         var tabs = getBrowser().mTabs;
-        for (var i=0; i<tabs.length; i++){
-            var tab = tabs.item(i);
+        for (let i=0,l=tabs.length; i<l; i++){
+            let tab = tabs.item(i);
             if (tab.linkedBrowser.contentWindow == win){
                 return tab.linkedPanel;
             }
@@ -182,9 +182,9 @@ liberator.plugins.gmperator = (function(){ //{{{
         var panelID = event.originalTarget.linkedPanel;
         var container;
         if (container = containers[panelID]){
-            liberator.log(panelID + '\n' + container.uri +'\n'+ container.scripts.length, 8);
+            liberator.log(panelID + '\n' + container.uri +'\n'+ container.scripts.length,8);
             container.scripts.forEach(function(script){
-                triggerGMEvent('GMActiveScript', container.uri, script._filename);
+                triggerGMEvent('GMActiveScript',container.uri,script._filename);
             });
         }
     }
@@ -194,16 +194,16 @@ liberator.plugins.gmperator = (function(){ //{{{
      * @param {String} uri
      * @param {String} filename script filename
      */
-    function triggerGMEvent(name, uri, filename){
-        autocommands.trigger(name, uri+'\n'+filename);
-        liberator.log('gmpeartor: '+ name + ' ' + uri+'\n'+filename, 8);
+    function triggerGMEvent(name,uri,filename){
+        autocommands.trigger(name,uri+'\n'+filename);
+        liberator.log('gmpeartor: '+ name + ' ' + uri+'\n'+filename,8);
     }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
     getBrowser().mTabBox.addEventListener('TabSelect',dispatchGMTabSelect,false);
 
-    config.autocommands.push(["GMInjectedScript","Triggered when UserScript is injected"]);
-    config.autocommands.push(["GMActiveScript","Triggered when location is changed and injected UserScripts are exist"]);
-    config.dialogs.push(["userscriptmanager", "Greasemonkey Manager", function(){GM_openUserScriptManager();}]);
+    config.autocommands.push(['GMInjectedScript','Triggered when UserScript is injected']);
+    config.autocommands.push(['GMActiveScript','Triggered when location is changed and injected UserScripts are exist']);
+    config.dialogs.push(['userscriptmanager','Greasemonkey Manager',function(){GM_openUserScriptManager();}]);
     // }}}
     return manager;
 })(); //}}}
@@ -211,26 +211,26 @@ liberator.plugins.gmperator = (function(){ //{{{
 // ---------------------------
 // User Command
 // ---------------------------
-commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
+commands.addUserCommand(['gmli[st]','lsgm'],'list Greasemonkey scripts', //{{{
     function(args){
         var xml = <></>;
         var scripts = GM_getConfig().scripts;
         var reg;
         if (args.bang || args.string == 'full'){
-            reg = new RegExp('.*');
-        } else if(args.string){
+            reg = new RegExp();
+        } else if (args.string){
             reg = new RegExp(args.string,'i');
         }
         if (reg){
-            for each(var s in scripts){
-                if (reg.test(s.name) || reg.test(s._filename)) {
+            for each (let s in scripts){
+                if (reg.test(s.name) || reg.test(s._filename)){
                     xml += scriptToString(s);
                 }
             }
         } else {
-            var table = <table/>;
-            var tr;
-            for each(var script in scripts){
+            let table = <table/>;
+            let tr;
+            for each (let script in scripts){
                 tr = <tr/>;
                 if (script.enabled){
                     tr.* += <td style="font-weight:bold;">{script.name}</td>;
@@ -247,17 +247,17 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
             var table = <table>
                 <caption class="hl-Title" style="text-align:left">{script.name}</caption>
             </table>;
-            [['FileName','_filename'], ['NameSpace','namespace'], ['Description','description'],
-             ['Includes','includes'], ['Excludes','excludes'], ['Enabled','enabled']].forEach(function(prop){
-                var tr = <tr>
+            [['FileName','_filename'],['NameSpace','namespace'],['Description','description'],
+             ['Includes','includes'],['Excludes','excludes'],['Enabled','enabled']].forEach(function(prop){
+                let tr = <tr>
                     <th style="font-weight:bold;text-align:left;vertical-align:top">{prop[0]}</th>
                 </tr>;
-                var contents = script[prop[1]];
-                if (typeof contents == "string" || typeof contents == "boolean"){
+                let contents = script[prop[1]];
+                if (typeof contents == 'string' || typeof contents == 'boolean'){
                     tr.* += <td>{contents}</td>;
                 } else {
-                    var td = <td/>;
-                    for (var i=0; i<contents.length; i++){
+                    let td = <td/>;
+                    for (let i=0,l=contents.length; i<l; i++){
                         td.* += contents[i];
                         if (contents[i+1]) td.* += <br/>;
                     }
@@ -271,21 +271,21 @@ commands.addUserCommand(['gmli[st]','lsgm'], 'list Greasemonkey scripts', //{{{
         bang:true
     }
 ); //}}}
-commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
+commands.addUserCommand(['gmlo[ad]'],'load Greasemonkey scripts', //{{{
     function(args){
-        if (!args.string) {
+        if (!args.string){
             liberator.echoerr('Usage: :gmlo[ad][!] {name|filename}');
             return;
         }
         var scripts = GM_getConfig().scripts;
         var script;
-        for (var i=0; i<scripts.length; i++){
+        for (let i=0,l=scripts.length; i<l; i++){
             if (scripts[i]._filename == args.string || scripts[i].name == args.string){
                 script = scripts[i];
                 break;
             }
         }
-        if (!script) {
+        if (!script){
             liberator.echoerr('no such a user script');
             return;
         } else if (liberator.plugins.gmperator.currentContainer.hasScript(script._filename) && !args.bang){
@@ -294,11 +294,12 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         } else {
             liberator.echo('loading: ' +script._filename);
         }
+        var href,unsafewin;
         try {
-            var href = buffer.URL;
-            var unsafewin = window.content.document.defaultView.wrappedJSObject;
+            href = buffer.URL;
+            unsafewin = window.content.document.defaultView.wrappedJSObject;
             GM_BrowserUI.gmSvc.wrappedJSObject.injectScripts([script],href,unsafewin,window);
-        } catch(e){
+        } catch (e){
             liberator.log(e);
             liberator.echoerr(e);
         }
@@ -306,7 +307,7 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         // do you have idea how to dispatch load event to only the script ?
         window.setTimeout(function(){
             var loadEvent = document.createEvent('Event');
-            loadEvent.initEvent('load',true,true, window.content.document,1);
+            loadEvent.initEvent('load',true,true,window.content.document,1);
             window.content.document.dispatchEvent(loadEvent);
         },100);
         */
@@ -314,16 +315,16 @@ commands.addUserCommand(['gmlo[ad]'], 'load Greasemonkey scripts', //{{{
         completer: function(context) scriptsCompleter(context.filter,true)
     }
 ); //}}}
-commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', //{{{
+commands.addUserCommand(['gmset'],'change settings for Greasemonkey scripts', //{{{
     function(args){
-        if (args.length == 0) {
+        if (args.length == 0){
             if (args.bang) GM_setEnabled(!GM_getEnabled()); // toggle enable/disable Greasemonkey
             return;
         }
         var filename = args[0];
         var config = GM_getConfig();
         var script;
-        for (var i=0; i<config.scripts.length; i++){
+        for (let i=0,l=config.scripts.length; i<l; i++){
             if (config.scripts[i]._filename == filename){
                 script = config.scripts[i];
                 break;
@@ -338,7 +339,7 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
         if (args['-exclude']) script.exclude = args['-exclude'];
         config._save();
     },{
-        completer: function(context) scriptsCompleter(context.filter, false),
+        completer: function(context) scriptsCompleter(context.filter,false),
         options: [
             [['-name','-n'],    commands.OPTION_STRING],
             [['-include','-i'], commands.OPTION_LIST],
@@ -347,27 +348,27 @@ commands.addUserCommand(['gmset'], 'change settings for Greasemonkey scripts', /
         bang:true
     }
 ); //}}}
-commands.addUserCommand(["gmcommand", "gmcmd"], "run Greasemonkey Command", //{{{
-    function(args, special) {
+commands.addUserCommand(['gmcommand','gmcmd'],'run Greasemonkey Command', //{{{
+    function(args,special){
         var commander = GM_BrowserUI.getCommander(content);
-        for (var i = 0; i < commander.menuItems.length; i++) {
-            var menuItem = commander.menuItems[i];
-            if (menuItem.getAttribute("label") == args.string) {
+        for (let i=0,l=commander.menuItems.length; i<l; i++){
+            let menuItem = commander.menuItems[i];
+            if (menuItem.getAttribute('label') == args.string){
                 menuItem._commandFunc();
                 return;
             }
         }
-        liberator.echoerr(args.string + " is not defined userscript command.");
+        liberator.echoerr(args.string + ' is not defined userscript command.');
     },
     {
-        completer: function(context) {
+        completer: function(context){
             var items = GM_BrowserUI.getCommander(content).menuItems;
             var completions = [];
-            var exp = new RegExp(".*" + context.filter + ".*","i");
+            var exp = new RegExp(context.filter,'i');
             context.title = ["UserScript's Commands"];
             context.completions = [[items[i].getAttribute('label'),'-'] for (i in items)].filter(function(item){
                 return this.test(item[0]);
-            }, new RegExp(".*"+context.filter+".*","i"));
+            },exp);
         }
     }
 ); //}}}
@@ -386,15 +387,15 @@ function GmContainer(uri,sandbox){
     this.scripts = [];
 }
 GmContainer.prototype = {
-    addScript : function(script) {
+    addScript : function(script){
         if (!this.hasScript(script)){
-            return this.scripts.push(script)
+            return this.scripts.push(script);
         }
         return false;
     },
     hasScript : function(script){
         var filename;
-        switch( typeof(script) ){
+        switch (typeof script){
             case 'object': filename = script._filename; break;
             case 'string': filename = script; break;
             default: return null;
@@ -408,19 +409,19 @@ function scriptsCompleter(filter,flag){ //{{{
     var isAll = false;
     if (!filter) isAll=true;
     if (flag){
-        for each(var s in scripts){
+        for each (let s in scripts){
             if (isAll || s.name.toLowerCase().indexOf(filter) == 0 ||
                 s._filename.indexOf(filter) == 0)
             {
-                candidates.push([s.name, s.description]);
-                candidates.push([s._filename, s.description]);
+                candidates.push([s.name,s.description]);
+                candidates.push([s._filename,s.description]);
             }
         }
     } else {
-        for each(var s in scripts){
+        for each (let s in scripts){
             if (isAll || s._filename.indexOf(filter) == 0)
             {
-                candidates.push([s._filename, s.description]);
+                candidates.push([s._filename,s.description]);
             }
         }
     }
