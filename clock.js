@@ -92,7 +92,7 @@ Clock.prototype = {
                 return setInterval(function () label.setAttribute('value', time()), 100);
             },
             a: function (label) {
-                return setInterval(function () label.setAttribute('value', wday()), 60 * 1000);
+                return setInterval(function () label.setAttribute('value', weekDay()), 60 * 1000);
             },
             d: function (label) {
                 return setInterval(function () label.setAttribute('value', day()), 60 * 1000);
