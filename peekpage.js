@@ -1,6 +1,6 @@
 /**
  * ==VimperatorPlugin==
- * @name            tmpview.js
+ * @name            peekpage.js
  * @description     peek page in commandline
  * @author          hogelog
  * @version         0.1
