@@ -598,15 +598,8 @@
             var comment = "";
             var targetServices = useServicesByPost;
 
-            for(var opt in arg){
-                switch(opt){
-                    case '-s':
-                        if (arg[opt]) targetServices = arg[opt];
-                        break;
-                    case 'arguments':
-                        if(arg[opt].length > 0) comment = arg[opt].join(" ");
-                }
-            }
+            if (arg["-s"]) targetServices = arg["-s"];
+            if (arg.length > 0) comment = arg.join(" ");
 
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
