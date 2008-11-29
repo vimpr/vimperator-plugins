@@ -3,7 +3,7 @@
  * @name            peekpage.js
  * @description     peek page in commandline
  * @author          hogelog
- * @version         0.1
+ * @version         0.2
  * ==/VimperatorPlugin==
  *
  * COMMANDS:
@@ -48,12 +48,12 @@
     commands.addUserCommand(['peekpage'],
         'Peek Page in Commandline',
         function (args){
-            peekview(args.string);
+            peekview(args.string || buffer.URL);
         }, option);
     commands.addUserCommand(['peeksrc'],
         'Peek Page Source in Commandline',
         function (args){
-            var http = util.httpGet(args.string);
+            var http = util.httpGet(args.string || buffer.URL);
             if (http){
                 liberator.echo(http.responseText, commandline.FORCE_MULTILINE);
             }
