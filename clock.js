@@ -4,7 +4,7 @@
  * @description     clock.
  * @description-ja  とけい。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.12
+ * @version         0.13
  * @minversion      2.0pre
  * @maxversion      2.0pre
  * ==/VimperatorPlugin==
@@ -53,11 +53,7 @@
 // default settings
 const format   = liberator.globalVariables.clock_format   || '[%t]';
 const position = liberator.globalVariables.clock_position || 'liberator-commandline-command';
-let atemp      = liberator.globalVariables.clock_after;
-const after =   (atemp === undefined)             ? true
-              : (atemp.toLowerCase() === 'false') ? false
-              : (/^\d+$/.test(atemp))             ? parseInt(atemp, 10)
-              :                                     true;
+const after    = stringToBoolean(liberator.globalVariables.clock_after, true);
 
 // class definitions
 function Clock() {
@@ -227,18 +223,18 @@ if (!insertBase) {
 let clock = new Clock(format);
 clock.generate();
 
-// appendChild
+// insert
 after
     ? insertNodeAfterSpecified(clock.instance, insertBase)
     : insertNodeBeforeSpecified(clock.instance, insertBase);
 
 // register command
 [
-    [['clockhide'],   'hide clock',   function () clock.hide(), ],
+    [['clockhide'],   'hide clock',   function () clock.hide(),   ],
     [['clockappear'], 'clock appear', function () clock.appear(), ],
-    [['clockstart'],  'start clock',  function () clock.start(), ],
-    [['clockstop'],   'stop clock',   function () clock.stop(), ],
-].forEach( function ([names, desc, func]) commands.addUserCommand(names, desc, func, {}) );
+    [['clockstart'],  'start clock',  function () clock.start(),  ],
+    [['clockstop'],   'stop clock',   function () clock.stop(),   ],
+].forEach( function ([n, d, f]) commands.addUserCommand(n, d, f, {}) );
 
 
 // stuff functions ---
@@ -280,6 +276,14 @@ function insertNodeAfterSpecified(inserted, specified) {
     else {
         return specified.parentNode.appendChild(inserted);
     }
+}
+
+// type conversion
+function stringToBoolean(str, defaultValue) {
+return !str                          ? (defaultValue ? true : false)
+     : str.toLowerCase() === 'false' ? false
+     : /^\d+$/.test(str)             ? (parseInt(str) ? true : false)
+     :                                 true;
 }
 } )();
 
