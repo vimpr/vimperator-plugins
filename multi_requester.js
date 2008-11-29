@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.3.0
+ * @version          0.3.1
  * @minVersion       2.0pre
  * @maxVersion       2.0pre
  * Last Change:      29-Nov-2008.
@@ -79,7 +79,7 @@ var SITEINFO = [
         xpath:       'id("incontents")/*[@class="ch04" or @class="fs14" or contains(@class, "diclst")]',
         srcEncode:   'EUC-JP',
         urlEncode:   'UTF-8'
-    }
+    },
 ];
 
 var mergedSiteinfo = {};
@@ -378,7 +378,7 @@ Response.prototype = {
         var fragment = range.extractContents();
         range.detach();
         var dom = fragment.lastChild;
-        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
+        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml' || fragment instanceof DocumentFragment) {
             $U.log('retry parsing.');
             return this._createHTMLDocument2(str);
         } else {
