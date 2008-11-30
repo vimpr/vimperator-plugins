@@ -4,10 +4,10 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.3.0
+ * @version          0.3.1
  * @minVersion       1.2
  * @maxVersion       1.2
- * Last Change:      29-Nov-2008.
+ * Last Change:      01-Dec-2008.
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -376,7 +376,7 @@ Response.prototype = {
         var fragment = range.extractContents();
         range.detach();
         var dom = fragment.lastChild;
-        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
+        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml' || fragment instanceof DocumentFragment) {
             $U.log('retry parsing.');
             return this._createHTMLDocument2(str);
         } else {
