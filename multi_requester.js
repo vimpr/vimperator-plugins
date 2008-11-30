@@ -376,11 +376,12 @@ Response.prototype = {
         var fragment = range.extractContents();
         range.detach();
         var dom = fragment.lastChild;
-        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml' || fragment instanceof DocumentFragment) {
+        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
             $U.log('retry parsing.');
             return this._createHTMLDocument2(str);
         } else {
-            return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
+            $U.log('return document fragment');
+            return fragment.firstChild;
         }
     },
     _createHTMLDocument2: function(str) {
