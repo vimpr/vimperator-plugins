@@ -4,7 +4,7 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.3.2
+ * @version          0.3.3
  * @minVersion       2.0pre
  * @maxVersion       2.0pre
  * Last Change:      01-Dec-2008.
@@ -367,26 +367,7 @@ Response.prototype = {
         }
         return ret;
     },
-    _createHTMLDocument: function(str, xmlns) {
-        //str = '<html><title>hoge</title><body><span id="resultList">fuga</span></body></html>';
-        var doc = (new DOMParser).parseFromString(
-            '<root' + (xmlns ? ' xmlns="' + xmlns + '"' : '') + '>' + str + '</root>',
-            'application/xml');
-        var imported = document.importNode(doc.documentElement, true);
-        var range = document.createRange();
-        range.selectNodeContents(imported);
-        var fragment = range.extractContents();
-        range.detach();
-        var dom = fragment.lastChild;
-        if (dom.tagName == 'parserError' || dom.namespaceURI == 'http://www.mozilla.org/newlayout/xml/parsererror.xml') {
-            $U.log('retry parsing.');
-            return this._createHTMLDocument2(str);
-        } else {
-            $U.log('return document fragment');
-            return fragment.firstChild;
-        }
-    },
-    _createHTMLDocument2: function(str) {
+    _createHTMLDocument: function(str) {
         var htmlFragment = document.implementation.createDocument(null, 'html', null);
         var range = document.createRange();
         range.setStartAfter(window.content.document.body);
@@ -467,9 +448,14 @@ var DataAccess = {
 
 // main controller.
 var MultiRequester = {
+    doProcess: false,
+    requestCount: 0,
+    echoList: [],
     name: DataAccess.getCommand(),
     description: 'request, and display to the buffer',
     cmdAction: function(args) {
+
+        if (MultiRequester.doProcess) return;
 
         var argstr = args.string;
         var bang = args.bang;
@@ -478,6 +464,9 @@ var MultiRequester = {
         var parsedArgs = this.parseArgs(argstr);
         if (parsedArgs.count == 0) { return; } // do nothing
 
+        MultiRequester.doProcess = true;
+        MultiRequester.requestCount = 0;
+        MultiRequester.echoList = [];
         var siteinfo = parsedArgs.siteinfo;
         for (let i = 0, len = parsedArgs.count; i < len; i++) {
 
@@ -512,9 +501,11 @@ var MultiRequester = {
                 req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
                 req.addEventListener('onFailure', $U.bind(this, this.onFailure));
                 req.get();
+                MultiRequester.requestCount++;
             }
-            $U.echo('Loading ' + parsedArgs.names + ' ...', commandline.FORCE_SINGLELINE);
-         }
+        }
+
+        $U.echo('Loading ' + parsedArgs.names + ' ...', commandline.FORCE_SINGLELINE);
     },
     // return {names: '', str: '', count: 0, siteinfo: [{}]}
     parseArgs: function(args) {
@@ -556,8 +547,14 @@ var MultiRequester = {
     },
     onSuccess: function(res) {
 
+        if (!MultiRequester.doProcess) {
+            MultiRequester.requestCount = 0;
+            return;
+        }
+
         var url, escapedUrl, xpath, doc, html;
-        $U.debug('success!!!' + res.request.url);
+        $U.log('success!!!' + res.request.url);
+        MultiRequester.requestCount--;
 
         try {
 
@@ -573,16 +570,26 @@ var MultiRequester = {
                    '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
                    (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
                    '</div>';
-            try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
+
+            MultiRequester.echoList.push(html);
+
+            if (MultiRequester.requestCount == 0) {
+                MultiRequester.doProcess = false;
+                let html = MultiRequester.echoList.join('');
+                try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
+            }
 
         } catch (e) {
-            $U.echoerr('error!!: ' + e);
+            $U.log('error!!: ' + e);
+            MultiRequester.echoList.push('error!!:' + e);
         }
     },
     onFailure: function(res) {
+        MultiRequester.doProcess = false;
         $U.echoerr('request failure!!: ' + res.statusText);
     },
     onException: function(e) {
+        MultiRequester.doProcess = false;
         $U.echoerr('exception!!: ' + e);
     }
 };
