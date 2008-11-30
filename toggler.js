@@ -1,4 +1,4 @@
-/*
+/**
  * ==VimperatorPlugin==
  * @name toggler
  * @version 0.1
@@ -40,22 +40,21 @@ function Toggler(name, cmds){
 }
 Toggler.prototype = {
 	next: function(notUpdate){
-		let index = this.index + 1;
+		var index = this.index + 1;
 		if (index >= this.cmds.length) index = 0;
 		if (!notUpdate) this.index = index;
 		return this.cmds[index];
 	},
 	previous: function(notUpdate){
-		let index = this.index - 1;
+		var index = this.index - 1;
 		if (index < 0) index = this.cmds.length -1;
 		if (!notUpdate) this.index = index;
 		return this.cmds[this.index];
 	},
 	list: function(){
-		var data = [];
-		for (var i = 0; i<this.cmds.length; i++){
-			data.push([i==this.index ? "*":"", this.cmds[i]]);
-		}
+		var data = this.cmds.map(function(cmd, i){
+			return [i==this.index ? "*" : "", cmd];
+		});
 		liberator.echo(template.table(this.name, data), true);
 	}
 };
@@ -75,13 +74,11 @@ var manager = {
 		return false;
 	},
 	toggle: function(name, isPrevious){
-		let toggler = this.get(name);
+		var toggler = this.get(name);
 		if (!toggler) return;
-		let cmd = isPrevious ? toggler.previous() : toggler.next();
+		var cmd = isPrevious ? toggler.previous() : toggler.next();
 		if (cmd instanceof Array){
-			cmd.forEach(function(str){
-				liberator.execute(str);
-			});
+			cmd.forEach(liberator.execute);
 		} else if (typeof cmd == "function"){
 			cmd();
 		} else {
@@ -93,19 +90,19 @@ var manager = {
 			settings[name].list();
 			return;
 		}
-		for (let i in settings){
-			settings[i].list();
+		for each (let setting in settings){
+			setting.list();
 		}
 	}
 };
 
-commands.addUserCommand(['toggle'],'setting toggler',
+commands.addUserCommand(["toggle"],"setting toggler",
 	function(args){
 		if (args["-list"] || args.length == 0){
 			if (args.length == 0)
 				liberator.plugins.toggler.list();
 			else
-				args.forEach(function(name) liberator.plugins.toggler.list(name));
+				args.forEach(liberator.plugins.toggler.list);
 			return;
 		}
 		args.forEach(function(name){
@@ -118,13 +115,13 @@ commands.addUserCommand(['toggle'],'setting toggler',
 			[["-list","-l"], commands.OPTION_NOARG]
 		],
 		completer: function(context,args){
-			let filter = context.filter.split(/\s+/).pop();
-			let reg = new RegExp(filter ? "^" + flter : ".*", "i");
+			var filter = context.filter.split(/\s+/).pop();
+			var reg = new RegExp(filter ? "^" + flter : "");
 			context.title= ["Name", args.bang ? "Previous" : "Next"];
-			let list = [];
+			var list = [];
 			for (let i in settings){
 				let toggler = settings[i];
-				if (reg.test(i) && !args.some(function(arg) arg==i))
+				if (reg.test(i.toLowerCase()) && !args.some(function(arg) arg==i))
 					list.push([i, args.bang ? toggler.previous(true) : toggler.next(true)]);
 			}
 			context.completions = list;
