@@ -5,9 +5,9 @@
  * @author teramako <teramako at gmail.com>
  * ==/VimperatorPlugin==
  *
- * �������������򥯥륯���ѹ��������ͤ�
+ * 何かしらの設定をクルクル変更したい人へ
  * 
- * �ޤ����ǽ�˰ʲ�����褦��.vimperatorrc���������
+ * まず、最初に以下の例ように.vimperatorrcに定義する
 js <<EOM
 liberator.globalVariables.toggler = [
   ["name",[ setting commands ]],
@@ -18,16 +18,16 @@ liberator.globalVariables.toggler = [
 ];
 EOM
  * 
- * ����
+ * 次に
  * :toggle go
- * �ȥ��ޥ�ɤ�¹Ԥ����setting commands����μ���¹Ԥ���
- * �Ǹ�ޤǤ����Ⱥǽ�����
- * �Ĥޤꡢ�ǽ�� :toggle go �򤹤�� set go=m ���¹Ԥ����
- * �⤦���ټ¹Ԥ���ȡ�set go=b ���¹Ԥ����
- * �⤦���٤���ȡ��ǽ����äơ�set go= ���¹Ԥ����
+ * とコマンドを実行するとsetting commands配列の次を実行する
+ * 最後までいくと最初に戻る
+ * つまり、最初に :toggle go をすると set go=m が実行される
+ * もう一度実行すると、set go=b が実行される
+ * もう一度すると、最初に戻って、set go= が実行される
  *
  * :map <F2> :toggle go<CR>
- * �ʤɤȤ�äƤ����ȥܥ����Ĥǥ��륯���ؤ��
+ * などとやっておくとボタン一つでクルクル替わる
  */
 liberator.plugins.toggler = (function(){
 
