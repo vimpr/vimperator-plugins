@@ -106,8 +106,7 @@ function stringToBoolean(str, defaultValue) {
 function saveImage(imgElement, skipPrompt) {
     let doc = imgElement.ownerDocument;
     let url = imgElement.src;
-    let filename = url.split(/\//g);
-    filename = filename[filename.length - 1];
+    let filename = url.split(/\/+/g).pop();
 
     urlSecurityCheck(url, doc.nodePrincipal);
     // we always want to save that link relative to the current working directory
