@@ -54,13 +54,7 @@
 		GViMail.getMainCanvas().contentWindow.focus();
 	},
 	/// On TabSelect (if Gmail Tab), we will give focus to the main canvas.
-	isGmail:function(uri, even)
-	{
-		if (/^https?:\/\/mail\.google\.com\//.test(uri))
-		{
-			window.setTimeout(function(){GViMail.focusMainFrame();}, 100);
-		}
-	},
+	get isGmail () (/^https?:\/\/mail\.google\.com\//.test(buffer.URL)),
 	/// when you type some key to make an action, habitually, the main canvas looses focus.
 	/// we will add an EventListener on keypress to avoid this.
 	preventLooseFocus:function()
@@ -155,10 +149,13 @@ mappings.addUserMap(GViMail.modes, ["zf"],
 	"Focus main frame",
 	function () { GViMail.focusMainFrame(); });
 getBrowser().mTabBox.addEventListener('TabSelect', function(event){
- GViMail.isGmail(this.parentNode.currentURI.spec, event);
+	if (GViMail.isGmail)
+		window.setTimeout(function(){GViMail.focusMainFrame();}, 100);
  }, false);
-window.addEventListener('keypress', GViMail.preventLooseFocus, true);
-
+window.addEventListener('keypress', function () {
+	if (GViMail.isGmail)
+		GViMail.preventLooseFocus();
+}, true);
 if (use_gvimail_css && (typeof liberator.globalVariables.styles == 'undefined' || liberator.globalVariables.styles == ''))
 {
 	liberator.globalVariables.styles = 'style,gvimail';
