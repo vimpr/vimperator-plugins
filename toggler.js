@@ -1,7 +1,7 @@
 /**
  * ==VimperatorPlugin==
  * @name toggler
- * @version 0.1
+ * @version 0.2
  * @author teramako <teramako at gmail.com>
  * ==/VimperatorPlugin==
  *
@@ -9,13 +9,16 @@
  * 
  * まず、最初に以下の例ように.vimperatorrcに定義する
 js <<EOM
-liberator.globalVariables.toggler = [
-  ["name",[ setting commands ]],
-  ["go",["set go=","set go=m","set go=b"]],
-  ["sb",["sbclose","sbar Console"]]
-  ["go_and_sb", [["set go=","sbclose"],["set go=mTb","sbar Console"]]]
-  ...
-];
+liberator.globalVariables.toggler = {
+  name: [ setting commands ]],
+  go: ["set go=","set go=m","set go=b"],
+  sb: ["sbclose","sbar Console"],
+  go_and_sb: [
+    ["set go=","sbclose"],
+    ["set go=mTb","sbar Console"]
+  ],
+  //...
+};
 EOM
  * 
  * 次に
@@ -52,10 +55,8 @@ Toggler.prototype = {
 		return this.cmds[this.index];
 	},
 	list: function(){
-		var data = this.cmds.map(function(cmd, i){
-			return [i==this.index ? "*" : "", cmd];
-		});
-		liberator.echo(template.table(this.name, data), true);
+		var data = this.cmds.map(function(cmd, i) [i==this.index ? "*" : "", cmd], this);
+		return template.table(this.name, data);
 	}
 };
 var manager = {
@@ -85,14 +86,23 @@ var manager = {
 			liberator.execute(cmd);
 		}
 	},
+	reload: function(){
+		if (liberator.globalVariables.toggler){
+			settings = {};
+			for (var [name, toggler] in Iterator(liberator.globalVariables.toggler))
+				this.add(name, toggler);
+		}
+	},
 	list: function(name){
+		var xml = <></>;
 		if (name && (name in settings)){
-			settings[name].list();
-			return;
+			xml += settings[name].list();
+		} else {
+			for each (let setting in settings){
+				xml += setting.list();
+			}
 		}
-		for each (let setting in settings){
-			setting.list();
-		}
+		liberator.echo(xml, true);
 	}
 };
 
@@ -115,7 +125,7 @@ commands.addUserCommand(["toggle"],"setting toggler",
 			[["-list","-l"], commands.OPTION_NOARG]
 		],
 		completer: function(context,args){
-			var filter = context.filter.split(/\s+/).pop();
+			var filter = args.length > 0 ? args[args.length-1] : "";
 			var reg = new RegExp(filter ? "^" + flter : "");
 			context.title= ["Name", args.bang ? "Previous" : "Next"];
 			var list = [];
@@ -129,11 +139,7 @@ commands.addUserCommand(["toggle"],"setting toggler",
 	},
 	true);
 
-if (liberator.globalVariables.toggler){
-	liberator.globalVariables.toggler.forEach(function(toggler){
-		manager.add(toggler[0], toggler[1]);
-	});
-}
+manager.reload();
 return manager;
 })();
 
