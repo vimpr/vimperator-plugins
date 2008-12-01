@@ -108,7 +108,7 @@ var $U = {
     },
     A: function(hash) {
         var ret = [];
-        for (let v in hash) ret.push(hash[v]);
+        for each (let item in hash) ret.push(item);
         return ret;
     },
     bind: function(obj, func) {
@@ -126,7 +126,7 @@ var $U = {
         var sandbox;
         try {
             sandbox = new Components.utils.Sandbox(window);
-            if (Components.utils.evalInSandbox("true", sandbox) === true) {
+            if (Components.utils.evalInSandbox('true', sandbox) === true) {
                 fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); };
             }
         } catch (e) { $U.log('warning: multi_requester.js is working with unsafe sandbox.'); }
@@ -146,7 +146,7 @@ var $U = {
          return (new XPCNativeWrapper(window.content.window)).getSelection().toString();
     },
     pathToURL: function(path) {
-        if (path.match(/^http:\/\//)) return path;
+        if (/^https?:\/\//.test(path)) return path;
         var link = document.createElement('a');
         link.href= path;
         return link.href;
@@ -154,7 +154,7 @@ var $U = {
 };
 //}}}
 
-// vimperator plugin command register {{{
+// Vimperator plugin command register {{{
 var CommandRegister = {
     register: function(cmdClass, siteinfo) {
         cmdClass.siteinfo = siteinfo;
@@ -165,10 +165,11 @@ var CommandRegister = {
             $U.bind(cmdClass, cmdClass.cmdAction),
             {
                 completer: cmdClass.cmdCompleter || function(filter, bang) {
-                    let filters = filter.split(',');
-                    let prefilters = filters.slice(0, filters.length - 1);
-                    let prefilter = !prefilters.length ? '' : prefilters.join(',') + ',';
-                    let subfilters = siteinfo.filter(function(s) prefilters.every(function(p) s.name != p));
+
+                    var filters = filter.split(',');
+                    var prefilters = filters.slice(0, filters.length - 1);
+                    var prefilter = !prefilters.length ? '' : prefilters.join(',') + ',';
+                    var subfilters = siteinfo.filter(function(s) prefilters.every(function(p) s.name != p));
                     var allSuggestions = subfilters.map(function(s) [prefilter + s.name, s.description]);
                     if (!filter) return [0, allSuggestions];
                     return [0, allSuggestions.filter(function(s) s[0].indexOf(filter) == 0)]
@@ -188,7 +189,7 @@ var CommandRegister = {
             liberator.mappings.addUserMap(
                 [liberator.modes.NORMAL, liberator.modes.VISUAL],
                 [key],
-                "user defined mapping",
+                'user defined mapping',
                 function() {
                     if (args) {
                         liberator.execute(cmd + args);
@@ -470,16 +471,16 @@ var MultiRequester = {
         for (let i = 0, len = parsedArgs.count; i < len; i++) {
 
             let info = siteinfo[i];
-            var url = info.url;
+            let url = info.url;
             // see: http://fifnel.com/2008/11/14/1980/
-            var srcEncode = info.srcEncode || 'UTF-8';
-            var urlEncode = info.urlEncode || srcEncode;
+            let srcEncode = info.srcEncode || 'UTF-8';
+            let urlEncode = info.urlEncode || srcEncode;
 
-            var idxRepStr = url.indexOf('%s');
+            let idxRepStr = url.indexOf('%s');
             if (idxRepStr > -1 && !parsedArgs.str) continue;
 
             // via. lookupDictionary.js
-            var ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
+            let ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                                  .getService(Components.interfaces.nsITextToSubURI);
             url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
             $U.log(url + '[' + srcEncode + '][' + urlEncode + ']::' + info.xpath);
@@ -531,7 +532,7 @@ var MultiRequester = {
         ret.str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
 
         ret.names.split(',').forEach(function(name) {
-            let site = self.getSite(name);
+            var site = self.getSite(name);
             if (site) {
                 ret.count++;
                 ret.siteinfo.push(site);
@@ -570,13 +571,13 @@ var MultiRequester = {
             return;
         }
 
-        var url, escapedUrl, xpath, doc, html;
-
         $U.log('success!!!' + res.request.url);
         MultiRequester.requestCount--;
         if (MultiRequester.requestCount == 0) {
             MultiRequester.doProcess = false;
         }
+
+        var url, escapedUrl, xpath, doc, html, extractLink;
 
         try {
 
@@ -610,7 +611,7 @@ var MultiRequester = {
             let html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
                         MultiRequester.echoList.join('') +
                         '</div>';
-            try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
+            try { $U.echo(new XMLList(html)); } catch (e) { $U.log(e); $U.echo(html); }
         }
 
     },
