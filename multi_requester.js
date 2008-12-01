@@ -4,12 +4,13 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.3.3
+ * @version          0.4.0
  * @minVersion       1.2
  * @maxVersion       1.2
  * Last Change:      01-Dec-2008.
  * ==/VimperatorPlugin==
  *
+ * HEAD COMMENT {{{
  * Usage:
  *   command[!] subcommand [ANY_TEXT]
  *
@@ -34,13 +35,14 @@
  *   javascript <<EOM
  *   liberator.globalVariables.multi_requester_siteinfo = [
  *       {
- *           name:        'ex',                             // required
- *           description: 'example',                        // required
- *           url:         'http://example.com/?%s',         // required, %s <-- replace string
- *           xpath:       '//*',                            // optional(default all)
- *           srcEncode:   'SHIFT_JIS',                      // optional(default UTF-8)
- *           urlEncode:   'SHIFT_JIS',                      // optional(default srcEncode)
- *           ignoreTags:  'img'                             // optional(default script), syntax 'tag1,tag2,……'
+ *           name:          'ex',                           // required
+ *           description:   'example',                      // required
+ *           url:           'http://example.com/?%s',       // required, %s <-- replace string
+ *           xpath:         '//*',                          // optional(default all)
+ *           srcEncode:     'SHIFT_JIS',                    // optional(default UTF-8)
+ *           urlEncode:     'SHIFT_JIS',                    // optional(default srcEncode)
+ *           ignoreTags:    'img'                           // optional(default script), syntax 'tag1,tag2,……'
+ *           extractLink:   '//xpath'                       // optional extract permalink'
  *       },
  *   ];
  *   EOM
@@ -61,9 +63,11 @@
  *
  * TODO:
  *    - wedata local cache.
+ *  }}}
  */
 (function() {
 
+// global variables {{{
 var DEFAULT_COMMAND = ['mr'];
 var SITEINFO = [
     {
@@ -81,17 +85,13 @@ var SITEINFO = [
         urlEncode:   'UTF-8'
     },
 ];
-
 var mergedSiteinfo = {};
+//}}}
 
-// utilities
+// utility class {{{
 var $U = {
     log: function(msg, level) {
         liberator.log(msg, (level || 8));
-    },
-    debug: function(msg) {
-        this.log(msg, 8);
-        liberator.echo(msg);
     },
     echo: function(msg, flg) {
         flg = flg || liberator.commandline.FORCE_MULTILINE
@@ -121,9 +121,6 @@ var $U = {
         ignoreTags = '(?:' + ignoreTags.join('|') + ')';
         return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
-    stripScripts: function(str) {
-        return this.stripScripts(str, 'script');
-    },
     eval: function(text) {
         var fnc = window.eval;
         var sandbox;
@@ -146,12 +143,18 @@ var $U = {
         } catch (e) { return null; }
     },
     getSelectedString: function() {
-         var sel = (new XPCNativeWrapper(window.content.window)).getSelection();
-         return sel.toString();
+         return (new XPCNativeWrapper(window.content.window)).getSelection().toString();
+    },
+    pathToURL: function(path) {
+        if (path.match(/^http:\/\//)) return path;
+        var link = document.createElement('a');
+        link.href= path;
+        return link.href;
     }
 };
+//}}}
 
-// vimperator plugin command register
+// vimperator plugin command register {{{
 var CommandRegister = {
     register: function(cmdClass, siteinfo) {
         cmdClass.siteinfo = siteinfo;
@@ -206,9 +209,9 @@ var CommandRegister = {
         });
     }
 };
+//}}}
 
-
-// like the Prototype JavaScript framework
+// Request and Response class. like the Prototype JavaScript framework {{{
 var Request = function() {
     this.initialize.apply(this, arguments);
 };
@@ -383,8 +386,9 @@ Response.prototype = {
         return parentNode;
     }
 };
+//}}}
 
-// initial data access.
+// initial data access class {{{
 var DataAccess = {
     getCommand: function() {
         var c = liberator.globalVariables.multi_requester_command;
@@ -443,8 +447,9 @@ var DataAccess = {
         req.get();
     }
 };
+//}}}
 
-// main controller.
+// main controller {{{
 var MultiRequester = {
     doProcess: false,
     requestCount: 0,
@@ -499,7 +504,11 @@ var MultiRequester = {
             }
         }
 
-        $U.echo('Loading ' + parsedArgs.names + ' ...', commandline.FORCE_SINGLELINE);
+        if (MultiRequester.requestCount) {
+            $U.echo('Loading ' + parsedArgs.names + ' ...', commandline.FORCE_SINGLELINE);
+        } else {
+            MultiRequester.doProcess = false;
+        }
     },
     // return {names: '', str: '', count: 0, siteinfo: [{}]}
     parseArgs: function(args) {
@@ -539,6 +548,21 @@ var MultiRequester = {
         });
         return ret;
     },
+    extractLink: function(res, extractLink) {
+
+        var el = res.getHTMLDocument(extractLink);
+        if (!el) throw 'extract link failed.: extractLink -> ' + extractLink;
+        var a = el.firstChild;
+        var url = $U.pathToURL((a.href || a.action || a.value));
+        var req = new Request(url, null, $U.extend(res.request.options, {extractLink: true}));
+        req.addEventListener('onException', $U.bind(this, this.onException));
+        req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
+        req.addEventListener('onFailure', $U.bind(this, this.onFailure));
+        req.get();
+        MultiRequester.requestCount++;
+        MultiRequester.doProcess = true;
+
+    },
     onSuccess: function(res) {
 
         if (!MultiRequester.doProcess) {
@@ -547,8 +571,12 @@ var MultiRequester = {
         }
 
         var url, escapedUrl, xpath, doc, html;
+
         $U.log('success!!!' + res.request.url);
         MultiRequester.requestCount--;
+        if (MultiRequester.requestCount == 0) {
+            MultiRequester.doProcess = false;
+        }
 
         try {
 
@@ -557,26 +585,34 @@ var MultiRequester = {
             url = res.request.url;
             escapedUrl = liberator.util.escapeHTML(url);
             xpath = res.request.options.siteinfo.xpath;
+            extractLink = res.request.options.siteinfo.extractLink;
+
+            if (extractLink && !res.request.options.extractLink) {
+                this.extractLink(res, extractLink);
+                return;
+            }
+
             doc = res.getHTMLDocument(xpath);
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
-            html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
-                   '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
-                   (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g, function(all) all.toLowerCase()) +
-                   '</div>';
+            html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
+                   (new XMLSerializer()).serializeToString(doc).replace(/<[^>]+>/g,
+                            function(all) all.toLowerCase());
 
             MultiRequester.echoList.push(html);
 
-            if (MultiRequester.requestCount == 0) {
-                MultiRequester.doProcess = false;
-                let html = MultiRequester.echoList.join('');
-                try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
-            }
-
         } catch (e) {
             $U.log('error!!: ' + e);
-            MultiRequester.echoList.push('error!!:' + e);
+            MultiRequester.echoList.push('<span style="color: red;">error!!:' + e + '</span>');
         }
+
+        if (MultiRequester.requestCount == 0) {
+            let html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
+                        MultiRequester.echoList.join('') +
+                        '</div>';
+            try { $U.echo(new XMLList(html)); } catch (e) { $U.echo(html); }
+        }
+
     },
     onFailure: function(res) {
         MultiRequester.doProcess = false;
@@ -587,11 +623,14 @@ var MultiRequester = {
         $U.echoerr('exception!!: ' + e);
     }
 };
+//}}}
 
+// boot strap {{{
 CommandRegister.register(MultiRequester, DataAccess.getSiteInfo());
 if (liberator.globalVariables.multi_requester_mappings) {
     CommandRegister.addUserMaps(MultiRequester.name[0], liberator.globalVariables.multi_requester_mappings);
 }
+//}}}
 
 return MultiRequester;
 
