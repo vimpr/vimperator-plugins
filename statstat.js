@@ -1,7 +1,7 @@
 // ==VimperatorPlugin==
 // @name           Stat Stat
 // @description    Show information on statusline.
-// @description-ja $B%9%F!<%?%9%i%$%s$K>pJs$rI=<((B
+// @description-ja ステータスラインに情報を表示
 // @license        Creative Commons Attribution-Share Alike 3.0 Unported
 // @version        1.0
 // @author         anekos (anekos@snca.net)
