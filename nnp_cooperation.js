@@ -1,11 +1,12 @@
 /*
  * ==VimperatorPlugin==
- * @name            niconicoplaylist_cooperation.js
+ * @name            nnp_cooperation.js
  * @description     this script give you keyboard opration for NicoNicoPlaylist.
  * @description-ja  NicoNicoPlaylist をキーボードで操作できるようにする。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.32
- * @minversion      2.0pre 2008/10/16
+ * @version         0.33
+ * @minversion      2.0pre
+ * @maxversion      2.0pre
  * ==/VimperatorPlugin==
  *
  * CONSTRAINT
@@ -38,7 +39,7 @@
  *
  * VARIABLES
  *   g:nnp_coop_numoflist
- *     :NNPGetList で表示するリストの個数を指定する。デフォルトは 10 。
+ *     :nnpgetlist で表示するリストの個数を指定する。デフォルトは 10 。
  *
  * HISTORY
  *   2008/07/11 ver. 0.10   - initial written.
@@ -94,129 +95,97 @@ EOM
 
 (function(){
 
-// thumbnail URL
-const thumbnailURL = 'http://tn-skr$HOSTNUMBER.smilevideo.jp/smile?i=$VIDEO_ID';
-
-// style
-const styles = [
-    '<style type="text/css">',
-        'table.nnp_coop .index     { text-align:right; width:2em; }',
-        'table.nnp_coop .thumbnail { text-align:center; }',
-        'table.nnp_coop caption    { color:green; }',
-        'table.nnp_coop thead      { text-align:center; }',
-    '</style>',
-].join('');
-
-// table
-const tableTemplate = [
-    '<table class="nnp_coop">',
-        '$CAPTION',
-        '$THEAD',
-        '<tbody>$ITEMS</tbody>',
-    '</table>',
-].join('');
-
-// table caption
-const captionTemplate = '<caption>now playing: $PLAYTITLE (display $NUMOFDISPLAY / $NUMOFTOTAL$STATUSES)</caption>';
-
-// table head
-const thead = [
-    '<thead>',
-        '<tr>',
-            '<td> </td>',
-            '<td>thumbnail</td>',
-            '<td>title</td>',
-            '<td>url</td>',
-        '</tr>',
-    '</thead>',
-].join('');
-
-// item
-const itemHTML = [
-    '<tr>',
-        '<td class="index">$INDEX:</td>',
-        '<td class="thumbnail"><img src="$THUMBNAILURL" width="33" height="25" /></td>',
-        '<td>$TITLE</td>',
-        '<td>$URL</td>',
-    '</tr>',
-].join('');
-
-
 // scrape from div element that inserted by NicoNicoPlaylist
-liberator.modules.commands.addUserCommand(['nnpgetlist'], 'get NicoNicoPlaylist',
+liberator.modules.commands.addUserCommand(
+    ['nnpgetlist'],
+    'get NicoNicoPlaylist',
     function (args) {
-        var arg = (args.length > 1)
-            ? args[0].toString()
-            : args.string;
-
         // check existence of NicoNicoPlaylist
-        var playlist = $f('//div[contains(@id, "playlistcontroller_")]');
-        if(!playlist) {
+        let playlistNode = $f('//div[starts-with(@id, "playlistcontroller_")]');
+        if(!playlistNode) {
             liberator.echoerr('NicoNicoPlaylist is not found.');
             return;
         }
 
-        var titleNode = $f('//h1') || $f('./html/head/title');
-        var playTitle = titleNode.textContent;
-        var statuses = '';
-        if($f('.//input[contains(@id, "-checkbox-random")]', playlist).checked) statuses += 'R';
-        if($f('.//input[contains(@id, "-checkbox-loop")]', playlist).checked)   statuses += 'L';
-        if($f('.//input[contains(@id, "-checkbox-full")]', playlist).checked)   statuses += 'F';
-        if(statuses) statuses = ' ' + statuses;
-
         // check existence of items in NicoNicoPlaylist
-        var nodes = $s('./div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a', playlist);
-        var nodesLength = nodes.length
-        if(nodesLength === 0) {
+        let nodes = buffer.evaluateXPath(
+            'id("' + playlistNode.id + '")/div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a'
+        );
+        let nodesLength = nodes.snapshotLength;
+        if(!nodesLength) {
             liberator.echoerr('no items in NicoNicoPlaylist.');
             return;
         }
 
         // get number of displayed items
-        var numofList = arg.match(/^\d+$/)
-            ? arg
-            : (liberator.globalVariables.nnp_coop_numoflist || 10);
+        let numofList = liberator.globalVariables.nnp_coop_numoflist || 10;
+        let arg = args[0];
+        if (arg && /^\d+$/.test(arg)) numofList = arg;
 
-        // struct display string
         // generate data
-        var items = new Array;
-        for(let i=0 ; i<nodesLength && i<numofList ; ++i ) {
+        let items = [], length = 0;
+        for(let node in nodes) {
+            if (length >= numofList) break;
+
             // get video id
-            let id = nodes[i].href.match(/\d+$/);
-            // build thumnail's URL
-            // refer: http://d.hatena.ne.jp/ZIGOROu/20081014/1223991205
-            let thumbnail = thumbnailURL.replace(/\$HOSTNUMBER/g, id % 2 + 1)
-                                        .replace(/\$VIDEO_ID/g,    id);
+            let id = node.href.match(/\d+$/);
+
             // evaluate variables and push to list
-            items.push(
-                itemHTML.replace(/\$INDEX/g,        i + 1)
-                        .replace(/\$THUMBNAILURL/g, thumbnail)
-                        .replace(/\$TITLE/g,        nodes[i].textContent)
-                        .replace(/\$URL/g,          nodes[i].href)
-            );
+            items.push({
+                index:        ++length,
+                thumbnailURL: thumbnailURL(id),
+                title:        node.textContent,
+                url:          node.href,
+            });
         }
 
         // evaluate variables
-        var caption = captionTemplate
-            .replace(/\$NUMOFDISPLAY/g, (nodesLength < numofList) ? nodesLength : numofList)
-            .replace(/\$NUMOFTOTAL/g,   nodesLength)
-            .replace(/\$PLAYTITLE/g,    playTitle)
-            .replace(/\$STATUSES/g,     statuses);
+        let xml = <>
+            {style()}
+            {table({
+                numofDisplay: (nodesLength < numofList) ? nodesLength : numofList,
+                numofTotal:   nodesLength,
+                playTitle:    getPlayTitle(),
+                statuses:     getStatusText(playlistNode.id),
+                items:        items,
+            })}
+        </>
 
-        // final processing
-        var str = styles + tableTemplate.replace(/\$CAPTION/g, caption)
-                                        .replace(/\$THEAD/g,   thead)
-                                        .replace(/\$ITEMS/g,   items.join(''));
-
-        liberator.echo(str, liberator.modules.commandline.FORCE_MULTILINE);
-    },{}
+        liberator.echo(xml, liberator.modules.commandline.FORCE_MULTILINE);
+    },
+    {}
 );
 
-// stuff functions
+// define other commands
+// only send CommandEvent to NicoNicoPlaylist script
+[
+    [['nnppushallvideos'], 'push all videos to NicoNicoPlaylist',        'GMNNPPushAllVideos'],
+    [['nnppushthisvideo'], 'push current video to NicoNicoPlaylist',     'GMNNPPushThisVideo'],
+    [['nnpplaynext'],      'play next in NicoNicoPlaylist',              'GMNNPPlayNext'],
+    [['nnpremove'],        'remove item in NicoNicoPlaylist',            'GMNNPRemove'],
+    [['nnpclear'],         'clear all items in NicoNicoPlaylist',        'GMNNPClear'],
+    [['nnprandom'],        'toggle random mode of NicoNicoPlaylist',     'GMNNPRandom'],
+    [['nnploop'],          'toggle loop mode of NicoNicoPlaylist',       'GMNNPLoop'],
+    [['nnpfullscreen'],    'toggle fullscreen mode of NicoNicoPlaylist', 'GMNNPFullScreen'],
+].forEach( function ([command, description, eventname]){
+    liberator.modules.commands.addUserCommand(
+        command,
+        description,
+        function (arg) {
+            let r = document.createEvent('CommandEvent');
+            r.initCommandEvent(eventname, true, true, arg[0]);
+            window.content.dispatchEvent(r);
+        },
+        {}
+    );
+});
+
+
+// stuff functions ---
 // return first node
 function $f(query, node) {
     node = node || window.content.document;
-    var result = (node.ownerDocument || node).evaluate(
+    let result = (node.ownerDocument || node).evaluate(
         query,
         node,
         null,
@@ -226,43 +195,80 @@ function $f(query, node) {
     return result.singleNodeValue ? result.singleNodeValue : null;
 }
 
-// return snapshot nodes list
-function $s(query, node) {
-    node = node || window.content.document;
-    var result = (node.ownerDocument || node).evaluate(
-        query,
-        node,
-        null,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
-    );
-    var nodes = [];
-    for(let i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
-    return nodes;
+function getPlayTitle() {
+    let titleNode = $f('//h1') || $f('//title');
+    return titleNode.textContent;
 }
 
-// define other commands
-// only send CommandEvent to NicoNicoPlaylist script
-[
-    [['nnppushallvideos'], "push all videos to NicoNicoPlaylist",        'GMNNPPushAllVideos'],
-    [['nnppushthisvideo'], "push current video to NicoNicoPlaylist",     'GMNNPPushThisVideo'],
-    [['nnpplaynext'],      "play next in NicoNicoPlaylist",              'GMNNPPlayNext'],
-    [['nnpremove'],        "remove item in NicoNicoPlaylist",            'GMNNPRemove'],
-    [['nnpclear'],         "clear all items in NicoNicoPlaylist",        'GMNNPClear'],
-    [['nnprandom'],        "toggle random mode of NicoNicoPlaylist",     'GMNNPRandom'],
-    [['nnploop'],          "toggle loop mode of NicoNicoPlaylist",       'GMNNPLoop'],
-    [['nnpfullscreen'],    "toggle fullscreen mode of NicoNicoPlaylist", 'GMNNPFullScreen'],
-].forEach(
-    function ([command, description, eventname]){
-        liberator.modules.commands.addUserCommand(command, description,
-            function (arg) {
-                var r = document.createEvent("CommandEvent");
-                r.initCommandEvent(eventname, true, true, arg.string);
-                window.content.dispatchEvent(r);
-            },{}
-        );
-    }
-);
+function getStatusText(idPrefix) {
+    let statuses = [];
+    [
+        ['//input[starts-with(@id, "playlist") and contains(@id, "-checkbox-random")]', 'R'],
+        ['//input[starts-with(@id, "playlist") and contains(@id, "-checkbox-loop")]',   'L'],
+        ['//input[starts-with(@id, "playlist") and contains(@id, "-checkbox-full")]',   'F'],
+    ].forEach(function ([query, text]) {
+        if ($f(query).checked) statuses.push(text);
+    });
+    return (statuses.length) ? ' ' + statuses.join('') : '';
+}
+
+// thumbnail URL
+// refer: http://d.hatena.ne.jp/ZIGOROu/20081014/1223991205
+function thumbnailURL(videoId) {
+    return [
+        'http://tn-skr',
+        (videoId % 2 + 1),
+        '.smilevideo.jp/smile?i=',
+        videoId
+    ].join('');
+}
+
+// E4X hell ---
+// style
+function style(css) {
+    return <style type="text/css">{[
+        'table.nnp_coop .index     { text-align:right; width:2em; }',
+        'table.nnp_coop .thumbnail { text-align:center; }',
+        'table.nnp_coop caption    { color:green; }',
+        'table.nnp_coop thead      { text-align:center; }',
+    ].join('')}</style>
+}
+
+// table
+function table(data) {
+    return <table class="nnp_coop">
+        {caption(data)}
+        {thead()}
+        <tbody>{liberator.modules.template.map(data.items, item)}</tbody>
+    </table>
+}
+
+// table caption
+function caption(data) {
+    return <caption>now playing: {data.playTitle} (display {data.numofDisplay} / {data.numofTotal}{data.statuses})</caption>
+}
+
+// table head
+function thead() {
+    return <thead>
+        <tr>
+            <td> </td>
+            <td>thumbnail</td>
+            <td>title</td>
+            <td>url</td>
+        </tr>
+    </thead>
+}
+
+// item
+function item(datum) {
+    return <tr>
+        <td class="index">{datum.index}:</td>
+        <td class="thumbnail"><img src={datum.thumbnailURL} width="33" height="25" /></td>
+        <td>{datum.title}</td>
+        <td>{datum.url}</td>
+    </tr>
+}
 
 })();
 
