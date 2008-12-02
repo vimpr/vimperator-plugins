@@ -618,7 +618,8 @@ var MultiRequester = {
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
                    (new XMLSerializer()).serializeToString(doc)
                             .replace(/<[^>]+>/g, function(all) all.toLowerCase())
-                            .replace(/<!--[^>]*-->/g, '');
+                            .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
+                            //.replace(/<!--(?:[^-]|-(?!-))*-->/g, ''); // strictly
 
             MultiRequester.echoHash[res.req.options.siteinfo.name] = html;
 
