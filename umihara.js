@@ -22,7 +22,7 @@
 
   const re = /<td nowrap>(\d+:\d+)<\/td><td>([\d,]+\.[\d,]+)<\/td><td><b>([\d,]+\.[\d,]+)<\/b><\/td><\/tr><\/table><\/div>/;
 
-  const cl = [
+  const ContryCodes = [
     ['USD', '\u30a2\u30e1\u30ea\u30ab\u30c9\u30eb'],
     ['GBP', '\u30a4\u30ae\u30ea\u30b9 \u30dd\u30f3\u30c9'],
     ['INR', '\u30a4\u30f3\u30c9 \u30eb\u30d4\u30fc'],
@@ -93,17 +93,11 @@
   let extra = {
     argCount: '+',
     bang: true,
-    completer: function (context, arg, bang) {
+    completer: function (context, args) {
       let last = context.contextList.slice(-1)[0];
-      context.title = ['Country Code'];
+      context.title = ['Country Code', 'Country Name'];
       context.advance(last.offset - last.caret);
-      context.items = completion.filter(cl, last.filter);
-      /*
-      if (!(arg = commands.parseArgs(arg, extra.options, extra.argCount)))
-        return [0, []];
-      let m = arg.string.match(/\s(\w+)$/);
-      return [(m ? m.index : arg.string.length) + 1, m ? completion.filter(cl, m[1]) : cl];
-      */
+      context.completions = ContryCodes;
     }
   };
 
@@ -111,10 +105,10 @@
   commands.addUserCommand(
     ['kawase'],
     'Umihara Kawase Meow',
-    function (arg, clipboard) {
-      let [value, from, to] = arg.arguments;
+    function (args) {
+      let [value, from, to] = args;
       value = eval(value);
-      kawase(value, clipboard, from, to);
+      kawase(value, args.bang, from, to);
     },
     extra,
     true

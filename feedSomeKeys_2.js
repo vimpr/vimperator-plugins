@@ -203,7 +203,7 @@ function destroy(){
         feedMaps.forEach(function(map){
             mappings.remove(map.modes[0],map.names[0]);
         });
-    }catch(e){ log(map); }
+    }catch(e){ liberator.log(map); }
     origMaps.forEach(function(map){
         addUserMap(map);
     });
@@ -257,7 +257,7 @@ function feedKeyIntoContent(keys, useVkey){
             var charCode = keys.charCodeAt(i);
             keyCode = 0;
         }
-        if (keys[i] == '<'){ 
+        if (keys[i] == '<'){
             var matches = keys.substr(i + 1).match(/^((?:[ACMSacms]-)*)([^>]+)/);
             if (matches) {
                 if (matches[1]) {

@@ -1,9 +1,9 @@
 // Vimperator plugin: 'Statusbar Twitter'
-// Last Change: 09-May-2008. Jan 2008
+// Last Change: 02-Dec-2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// show Twitter on statusesbar script for Vimperator 0.6.*
+// show Twitter on statusesbar script for Vimperator 2.0pre
 
 (function(){
     const checkTime = 90 * 1000;
@@ -106,10 +106,10 @@
         }
     }
 
-    liberator.mappings.addUserMap([liberator.modes.NORMAL],[",r"],
+    liberator.modules.mappings.add([liberator.modules.modes.NORMAL],[",r"],
         "Reply to current user",
-        function (){ liberator.commandline.open(":","twitter @" + lastestStatus.user.screen_name + " ",liberator.modes.EX); });
-    liberator.mappings.addUserMap([liberator.modes.NORMAL],[",f"],
+        function (){ liberator.modules.commandline.open(":","twitter @" + lastestStatus.user.screen_name + " ",liberator.modules.modes.EX); });
+    liberator.modules.mappings.add([liberator.modules.modes.NORMAL],[",f"],
         "Favorite to current user",
         function (){ favoriteStatus(lastestStatus.id); });
 })();

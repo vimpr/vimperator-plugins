@@ -6,7 +6,7 @@
  * ==/VimperatorPlugin==
  *
  * 何かしらの設定をクルクル変更したい人へ
- * 
+ *
  * まず、最初に以下の例ように.vimperatorrcに定義する
 js <<EOM
 liberator.globalVariables.toggler = {
@@ -20,7 +20,7 @@ liberator.globalVariables.toggler = {
   //...
 };
 EOM
- * 
+ *
  * 次に
  * :toggle go
  * とコマンドを実行するとsetting commands配列の次を実行する
