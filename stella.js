@@ -472,7 +472,6 @@
 
     get fullscreen () !!this.storage.fullscreen,
     set fullscreen (value) {
-      let self = this;
       value = !!value;
 
       if (this.storage.fullscreen === value)
@@ -480,69 +479,75 @@
 
       this.storage.fullscreen = value;
 
-      let variablesSetter = function () {
-        NicoPlayer.Variables.forEach(function ([name, normal, full]) {
-          let v = value ? full : normal;
-          if (v !== null)
-            self.player.SetVariable(name, v);
-        });
-      };
-
-      let doc = content.document.wrappedJSObject;
-      let win = content.wrappedJSObject;
-      let player = getElementByIdEx('flvplayer');
+      let self = this, player = this.player,
+          win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
 
       win.toggleMaximizePlayer();
-
       if(value)  {
-        let f = function () {
-          let viewer = {w: 544, h: 384};
-          let screen = {
-            w: content.innerWidth,
-            h: content.innerHeight
-          };
-          let scale = {
-            w: Math.max(1, screen.w / viewer.w),
-            h: Math.max(1, screen.h / viewer.h)
-          };
-          scale.v = Math.min(scale.w, scale.h);
-          storeStyle(doc.body, {
-            backgroundImage: 'url()',
-            backgroundRepeat: '',
-            backgroundColor: 'black'
-          });
-          player.SetVariable('videowindow.video_mc.video.smoothing' , 1);
-          player.SetVariable('videowindow.video_mc.video.deblocking', 5);
-          storeStyle(
-            player,
-            (scale.w >= scale.h) ? {
-              width:       Math.floor(viewer.w * scale.h) + 'px',
-              height:      screen.h + 'px',
-              marginLeft:  ((screen.w - viewer.w * scale.h) / 2) + 'px',
-              marginTop:   '0px'
-            } : {
-              width:       screen.w + 'px',
-              height:      Math.floor(viewer.h * scale.w) + 'px',
-              marginLeft:  '0px',
-              marginTop:   ((screen.h - viewer.h * scale.w) / 2) + 'px'
-            }
-          );
-          player.SetVariable('videowindow._xscale', 100 * scale.v);
-          player.SetVariable('videowindow._yscale', 100 * scale.v);
-          variablesSetter();
-        };
-        f();
-        win.onresize = function ()
-          (InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(f, 1000);
+        turnOn();
+        win.onresize = fixFullscreen;
       } else {
-        restoreStyle(doc.body);
-        //restoreStyle(player);
-        player.style.marginLeft = '';
-        player.style.marginTop  = '';
-        variablesSetter();
+        turnOff();
         delete win.onresize;
       }
       win.scrollTo(0, 0);
+
+      // 以下関数定義のみ - setVariables turnOn/Off fixFullscreen
+
+      function setVariables (fullscreen) {
+        NicoPlayer.Variables.forEach(function ([name, normal, full]) {
+          let v = fullscreen ? full : normal;
+          if (v !== null)
+            self.player.SetVariable(name, v);
+        });
+      }
+
+      function turnOn () {
+        let viewer = {w: 544, h: 384};
+        let screen = {
+          w: content.innerWidth,
+          h: content.innerHeight
+        };
+        let scale = {
+          w: Math.max(1, screen.w / viewer.w),
+          h: Math.max(1, screen.h / viewer.h)
+        };
+        scale.v = Math.min(scale.w, scale.h);
+        storeStyle(doc.body, {
+          backgroundImage: 'url()',
+          backgroundRepeat: '',
+          backgroundColor: 'black'
+        });
+        storeStyle(
+          player,
+          (scale.w >= scale.h) ? {
+            width:       Math.floor(viewer.w * scale.h) + 'px',
+            height:      screen.h + 'px',
+            marginLeft:  ((screen.w - viewer.w * scale.h) / 2) + 'px',
+            marginTop:   '0px'
+          } : {
+            width:       screen.w + 'px',
+            height:      Math.floor(viewer.h * scale.w) + 'px',
+            marginLeft:  '0px',
+            marginTop:   ((screen.h - viewer.h * scale.w) / 2) + 'px'
+          }
+        );
+        player.SetVariable('videowindow._xscale', 100 * scale.v);
+        player.SetVariable('videowindow._yscale', 100 * scale.v);
+        setVariables(true);
+      }
+
+      function turnOff () {
+        restoreStyle(content.document.wrappedJSObject.body);
+        //restoreStyle(player);
+        player.style.marginLeft = '';
+        player.style.marginTop  = '';
+        setVariables(false);
+      }
+
+      function fixFullscreen ()
+        ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOn, 500));
+
     },
 
     get id ()
@@ -599,7 +604,8 @@
         let base = this.currentTime;
         setTimeout(bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
       }
-    }
+    },
+
   };
 
   // }}}
@@ -618,6 +624,7 @@
     'comment',
     'repeat',
     'fullscreen',
+    'fetch',
     {
       name: 'volume-root',
       label: 'Volume',
@@ -886,6 +893,8 @@
 
     onCommentClick: function () (this.player.toggle('comment')),
 
+    onFetchClick: function () this.player.fetch(),
+
     // フルスクリーン時にステータスバーを隠さないようにする
     onFullScreen: function () {
       if (window.fullScreen) {
@@ -927,7 +936,7 @@
 
     onPlayClick: function () this.player.play(),
 
-    onRepeatingClick: function () this.player.toggle('repeating'),
+    onRepeatClick: function () this.player.toggle('repeating'),
 
     onResize: function () {
       if (this.__fullScreen !== window.fullScreen) {
