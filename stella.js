@@ -2,7 +2,7 @@
 // @name           すてら
 // @description-ja ステータスラインに動画の再生時間などを表示する。
 // @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        0.06
+// @version        0.07
 // @author         anekos (anekos@snca.net)
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
@@ -12,13 +12,18 @@
 //    作成中
 //
 // TODO
-//    user command
-//    :fetchvideo
 //    Icons
 //    Other video hosting websites
+//    auto fullscreen
 //
-// Links:
+// Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/
+//
+// Refs:
+//    http://yuichis.homeip.net/nicodai.user.html
+//    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/nicontroller.js
+//    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/youtubeamp.js
+//    Thanks!
 //
 // License:
 //    http://creativecommons.org/licenses/by-sa/3.0/
@@ -32,6 +37,7 @@
 
   const ID_PREFIX = 'anekos-stela-';
   const InVimperator = !!(liberator && modules && modules.liberator);
+  const DOUBLE_CLICK_INTERVAL = 300;
 
   // }}}
 
@@ -120,22 +126,48 @@
     (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
               : '??:??');
 
-  function setWithBackup (target, values) {
-    let backup = target.__stella_backup = {};
+  function storeStyle (target, values) {
+    let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
+    let backup = style.__stella_backup = {};
     for (let [name, value] in Iterator(values)) {
-      backup[name] = target[name];
-      target[name] = value;
+      backup[name] = cstyle[name];
+      style[name] = value;
     }
-    liberator.log(target.__stella_backup)
   }
 
-  function restoreFromBackup (target, doDelete) {
-    if (!target.__stella_backup)
+  function restoreStyle (target, doDelete) {
+    let style = target.style;
+    if (!style.__stella_backup)
       return;
-    for (let [name, value] in Iterator(target.__stella_backup))
-      target[name] = value;
+    let backup = style.__stella_backup;
+    for (let name in Iterator(backup))
+      style[name] = backup[name];
     if (doDelete)
-      delete target.__stella_backup;
+      delete style.__stella_backup;
+  }
+
+  function getElementByIdEx (id)
+    let (p = content.document.getElementById(id))
+      (p && (p.wrappedJSObject || p));
+
+  function fixDoubleClick (obj, click, dblClick) {
+    let clicked = 0;
+    let original = {click: obj[click], dblClick: obj[dblClick]};
+    liberator.log(original);
+    obj[click] = function () {
+      let self = this, args = arguments;
+      let _clicked = ++clicked;
+      setTimeout(function () {
+        if (_clicked == clicked--)
+          original.click.apply(self, args);
+        else
+          clicked = 0;
+      }, DOUBLE_CLICK_INTERVAL);
+    };
+    obj[dblClick] = function () {
+      clicked = 0;
+      original.dblClick.apply(this, arguments);
+    };
   }
 
   // }}}
@@ -193,6 +225,12 @@
 
     initialize: function () void null,
 
+    finalize: function () {
+      // 念のためフルスクリーンは解除しておく
+      if (this.has('fullscreen', 'rwt') && this.isValid && this.fullscreen)
+        this.fullscreen = false;
+    },
+
     is: function (state) (this.state == state),
 
     has: function (name, ms)
@@ -222,9 +260,14 @@
 
     get statusText () this.timeCodes,
 
+    get storage ()
+      (content.document.__stella_storage || (content.document.__stella_storage = {})),
+
     get timeCodes () (toTimeCode(this.currentTime) + '/' + toTimeCode(this.totalTime)),
 
     get title () undefined,
+
+    get isValid () (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/')),
 
     get volume () undefined,
     set volume (value) value,
@@ -317,7 +360,7 @@
       this.player.__stella_fullscreen = !this.player.__stella_fullscreen;
       if (this.fullscreen) {
         liberator.log('full')
-        setWithBackup(this.player.style, {
+        storeStyle(this.player, {
           position: 'fixed',
           left: '0px',
           top: '0px',
@@ -326,7 +369,7 @@
         });
       } else {
         liberator.log('normal')
-        restoreFromBackup(this.player.style);
+        restoreStyle(this.player);
       }
     },
 
@@ -358,6 +401,8 @@
 
     get totalTime () parseInt(this.player.getDuration()),
 
+    get isValid () buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/),
+
     get volume () parseInt(this.player.getVolume()),
     set volume (value) (this.player.setVolume(value), value),
 
@@ -376,25 +421,41 @@
     Player.apply(this, arguments);
   }
 
+  // Normal / Fullscreen
+  NicoPlayer.Variables = [
+    ['videowindow._xscale',                     100,   null],
+    ['videowindow._yscale',                     100,   null],
+    ['videowindow._x',                            6,      0],
+    ['videowindow._y',                           65,      0],
+    ['controller._x',                             6,  -1000],
+    ['inputArea._x',                              4,  -1000],
+    ['controller._visible',                       1,      1],
+    ['inputArea._visible',                        1,      1],
+    ['waku._visible',                             1,      0],
+    ['tabmenu._visible',                          1,      0],
+    ['videowindow.video_mc.video.smoothing',   null,      1],
+    ['videowindow.video_mc.video.deblocking',  null,      5]
+  ];
+
   NicoPlayer.prototype = {
     __proto__: Player.prototype,
 
     functions: {
-      currentTime: 'rw',
-      totalTime: 'r',
-      volume: 'rw',
-      play: 'x',
-      playOrPause: 'x',
-      playEx: 'x',
-      pause: 'x',
-      muted: 'rwt',
-      repeating: 'rwt',
       comment: 'rwt',
-      title: 'r',
-      fileURL: '',
-      id: 'r',
+      currentTime: 'rw',
       fetch: 'x',
-      title: 'r'
+      fileURL: '',
+      fullscreen: 'rwt',
+      id: 'r',
+      muted: 'rwt',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
+      repeating: 'rwt',
+      title: 'r',
+      totalTime: 'r',
+      volume: 'rw'
     },
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
@@ -402,10 +463,87 @@
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
 
+    get playerContainer () getElementByIdEx('flvplayer_container'),
+
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
     set currentTime (value) (this.player.ext_setPlayheadTime(value), value),
 
     get fileExtension () '.flv',
+
+    get fullscreen () !!this.storage.fullscreen,
+    set fullscreen (value) {
+      let self = this;
+      value = !!value;
+
+      if (this.storage.fullscreen === value)
+        return;
+
+      this.storage.fullscreen = value;
+
+      let variablesSetter = function () {
+        NicoPlayer.Variables.forEach(function ([name, normal, full]) {
+          let v = value ? full : normal;
+          if (v !== null)
+            self.player.SetVariable(name, v);
+        });
+      };
+
+      let doc = content.document.wrappedJSObject;
+      let win = content.wrappedJSObject;
+      let player = getElementByIdEx('flvplayer');
+
+      win.toggleMaximizePlayer();
+
+      if(value)  {
+        let f = function () {
+          let viewer = {w: 544, h: 384};
+          let screen = {
+            w: content.innerWidth,
+            h: content.innerHeight
+          };
+          let scale = {
+            w: Math.max(1, screen.w / viewer.w),
+            h: Math.max(1, screen.h / viewer.h)
+          };
+          scale.v = Math.min(scale.w, scale.h);
+          storeStyle(doc.body, {
+            backgroundImage: 'url()',
+            backgroundRepeat: '',
+            backgroundColor: 'black'
+          });
+          player.SetVariable('videowindow.video_mc.video.smoothing' , 1);
+          player.SetVariable('videowindow.video_mc.video.deblocking', 5);
+          storeStyle(
+            player,
+            (scale.w >= scale.h) ? {
+              width:       Math.floor(viewer.w * scale.h) + 'px',
+              height:      screen.h + 'px',
+              marginLeft:  ((screen.w - viewer.w * scale.h) / 2) + 'px',
+              marginTop:   '0px'
+            } : {
+              width:       screen.w + 'px',
+              height:      Math.floor(viewer.h * scale.w) + 'px',
+              marginLeft:  '0px',
+              marginTop:   ((screen.h - viewer.h * scale.w) / 2) + 'px'
+            }
+          );
+          player.SetVariable('videowindow._xscale', 100 * scale.v);
+          player.SetVariable('videowindow._yscale', 100 * scale.v);
+          variablesSetter();
+        };
+        f();
+        win.onresize = function ()
+          (InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(f, 1000);
+      } else {
+        restoreStyle(doc.body);
+        //restoreStyle(player);
+        player.style.marginLeft = '';
+        player.style.marginTop  = '';
+        variablesSetter();
+        delete win.onresize;
+      }
+      win.scrollTo(0, 0);
+    },
 
     get id ()
       let (m = currentURL().match(/\/watch\/([a-z]{2}\d+)/))
@@ -414,9 +552,7 @@
     get muted () this.player.ext_isMute(),
     set muted (value) (this.player.ext_setMute(value), value),
 
-    get player ()
-      let (p = content.document.getElementById('flvplayer'))
-        (p && (p.wrappedJSObject || p)),
+    get player () getElementByIdEx('flvplayer'),
 
     get repeating () this.player.ext_isRepeat(),
     set repeating (value) (this.player.ext_setRepeat(value), value),
@@ -443,7 +579,6 @@
     set volume (value) (this.player.ext_setVolume(value), value),
 
     fetch: function (filepath) {
-      liberator.log(this.id)
       let onComplete = function (xhr) {
           let res = xhr.responseText;
           let info = {};
@@ -482,6 +617,7 @@
     'pause',
     'comment',
     'repeat',
+    'fullscreen',
     {
       name: 'volume-root',
       label: 'Volume',
@@ -592,13 +728,15 @@
       this.removeStatusPanel();
       this.disable();
       this.progressListener.uninstall();
+      for each (let player in this.players)
+        player.finalize();
       window.removeEventListener('resize', this.__onResize, false);
     },
 
     get hidden () (this.panel.hidden),
     set hidden (v) (this.panel.hidden = v),
 
-    get valid () (this.where),
+    get isValid () (this.where),
 
     get player () this.players[this.where],
 
@@ -607,12 +745,11 @@
     get statusBarVisible () !this.statusBar.getAttribute('moz-collapsed', false),
     set statusBarVisible (value) (this.statusBar.setAttribute('moz-collapsed', !value), value),
 
-    get where () (
-      (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/') && 'niconico')
-      ||
-      (buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/) && 'youtube')
-    ),
-
+    get where () {
+      for (let [name, player] in Iterator(this.players))
+        if (player.isValid)
+          return name;
+    },
 
     addUserCommands: function () {
       let stella = this;
@@ -623,7 +760,7 @@
           (funcS instanceof Function)
             ? funcS
             : function (arg, bang) {
-                if (!stella.valid)
+                if (!stella.isValid)
                   raise('Stella: Current page is not supported');
                 let p = stella.player;
                 let func = bang ? funcB : funcS;
@@ -684,6 +821,7 @@
       icon.setAttribute('class', 'statusbarpanel-iconic');
       icon.style.marginRight = '4px';
       setClickEvent('icon', icon);
+      icon.addEventListener('dblclick', bindr(this, this.onIconDblClick), false);
 
       let labels = this.labels = {};
       let toggles = this.toggles = {};
@@ -759,11 +897,15 @@
       }
     },
 
+    onFullscreenClick: function () this.player.toggle('fullscreen'),
+
     onIconClick: function () this.player.playOrPause(),
 
+    onIconDblClick: function () this.player.toggle('fullscreen'),
+
     onLocationChange: function () {
-      if (this.__valid !== this.valid) {
-        (this.__valid = this.valid) ? this.enable() : this.disable();
+      if (this.__valid !== this.isValid) {
+        (this.__valid = this.isValid) ? this.enable() : this.disable();
       }
     },
 
@@ -779,13 +921,13 @@
       this.player.currentTime = this.player.totalTime * per;
     },
 
-    onMutedClick: function (event) (this.player.toggle('muted')),
+    onMutedClick: function (event) this.player.toggle('muted'),
 
     onPauseClick: function () this.player.pause(),
 
     onPlayClick: function () this.player.play(),
 
-    onRepeatingClick: function () (this.player.toggle('repeating')),
+    onRepeatingClick: function () this.player.toggle('repeating'),
 
     onResize: function () {
       if (this.__fullScreen !== window.fullScreen) {
@@ -794,8 +936,10 @@
       }
     },
 
-    onSetMutedClick: function (event) (this.player.volume = event.target.getAttribute('volume'))
+    onSetVolumeClick: function (event) (this.player.volume = event.target.getAttribute('volume'))
   };
+
+  fixDoubleClick(Stella.prototype, 'onIconClick', 'onIconDblClick');
 
   // }}}
 
@@ -803,14 +947,19 @@
   * Install                                                                      {{{
   *********************************************************************************/
 
-  let (nsl = liberator.plugins.nico_statusline) {
+  if (InVimperator) {
+    let estella = liberator.plugins.stella;
+
     let install = function () {
-      let stella = liberator.plugins.nico_statusline = new Stella();
+      let stella = liberator.plugins.stella = new Stella();
       stella.addUserCommands();
       liberator.log('Stella: installed.')
     }
-    if (nsl) {
-      nsl.finalize();
+
+    // すでにインストール済みの場合は、一度ファイナライズする
+    // (デバッグ時に前のパネルが残ってしまうため)
+    if (estella) {
+      estella.finalize();
       install();
     } else {
       window.addEventListener(
@@ -822,6 +971,8 @@
         false
       );
     }
+  } else {
+    /* do something */
   }
 
   // }}}
