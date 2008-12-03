@@ -126,7 +126,7 @@ commands.addUserCommand(["toggle"],"setting toggler",
 		],
 		completer: function(context,args){
 			var filter = args.length > 0 ? args[args.length-1] : "";
-			var reg = new RegExp(filter ? "^" + flter : "");
+			var reg = new RegExp(filter ? "^" + filter : "");
 			context.title= ["Name", args.bang ? "Previous" : "Next"];
 			var list = [];
 			for (let i in settings){
