@@ -211,7 +211,6 @@
                         return;
                     }
 
-                    liberator.log(motion.handler)
                     targetCollection = scope.handler.call(target.handler,target.handler.collection());
                     if(target.handler[motion.handler])
                         target.handler[motion.handler].call(target.handler,targetCollection);
