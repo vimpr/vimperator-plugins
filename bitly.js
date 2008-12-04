@@ -30,7 +30,6 @@
     'Copy bitly url',
     function () {
       bitly(buffer.URL, function (short) {
-        alert(short);
         util.copyToClipboard(short);
         liberator.echo('`' + short + "' was copied to clipboard.");
       });
