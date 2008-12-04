@@ -273,8 +273,8 @@ var manager = {
         var urls = [];
         var position = defPosition || SplitBrowser.POSITION_TOP;
         position = getPositionForOpen(args) || position;
-        if (args.arguments.length > 0){
-            urls = util.stringToURLArray(args.arguments.join(', '));
+        if (args.length > 0){
+            urls = util.stringToURLArray(args.join(', '));
             if (urls.length == 0) {
                 url = buffer.URL;
             } else {
