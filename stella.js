@@ -126,13 +126,15 @@
     (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
               : '??:??');
 
-  function storeStyle (target, values) {
+  function storeStyle (target, values, overwrite) {
     let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
-    let backup = style.__stella_backup = {};
+    let backup =  {};
     for (let [name, value] in Iterator(values)) {
       backup[name] = cstyle[name];
       style[name] = value;
     }
+    if(overwrite || !style.__stella_backup)
+      style.__stella_backup = backup;
   }
 
   function restoreStyle (target, doDelete) {
@@ -153,7 +155,6 @@
   function fixDoubleClick (obj, click, dblClick) {
     let clicked = 0;
     let original = {click: obj[click], dblClick: obj[dblClick]};
-    liberator.log(original);
     obj[click] = function () {
       let self = this, args = arguments;
       let _clicked = ++clicked;
@@ -304,7 +305,7 @@
       this.currentTime = Math.min(Math.max(this.currentTime + parseInt(v, 10), 0), this.totalTime),
 
     toggle: function (name) {
-      if (!this.has(name, 'rw'))
+      if (!this.has(name, 'rwt'))
         return;
       let v = this[name];
       this[name] = !v;
@@ -473,7 +474,6 @@
     get fullscreen () !!this.storage.fullscreen,
     set fullscreen (value) {
       value = !!value;
-
       if (this.storage.fullscreen === value)
         return;
 
@@ -481,6 +481,9 @@
 
       let self = this, player = this.player,
           win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
+
+      if (player.ext_getVideoSize() === 'fit')
+        player.ext_setVideoSize('normal');
 
       win.toggleMaximizePlayer();
       if(value)  {
@@ -538,8 +541,8 @@
       }
 
       function turnOff () {
-        restoreStyle(content.document.wrappedJSObject.body);
-        //restoreStyle(player);
+        restoreStyle(doc.body, true);
+        restoreStyle(player, true);
         player.style.marginLeft = '';
         player.style.marginTop  = '';
         setVariables(false);
