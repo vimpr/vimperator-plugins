@@ -196,8 +196,10 @@
 
 
     var prefix = liberator.globalVariables.browser_object_prefix || "";
-    for (let motion in browserObject.motions){
-        for (let scope in browserObject.scopes){
+    for (let it in browserObject.motions){
+        let motion = it;
+        for (let it in browserObject.scopes){
+            let scope = it;
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [prefix + motion.id + scope.id],
                 "Browser Object Mapping",
                 function (arg){
@@ -209,6 +211,7 @@
                         return;
                     }
 
+                    liberator.log(motion.handler)
                     targetCollection = scope.handler.call(target.handler,target.handler.collection());
                     if(target.handler[motion.handler])
                         target.handler[motion.handler].call(target.handler,targetCollection);
