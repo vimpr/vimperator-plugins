@@ -2,7 +2,7 @@
 // @name           Fetch YouTube Video
 // @description    Fetch YouTube Video (fmt=22)
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
+// @version        1.1
 // @author         anekos (anekos@snca.net)
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
@@ -15,6 +15,9 @@
 //
 // Links:
 //    http://d.hatena.ne.jp/nokturnalmortum/20081118#1227004197
+//
+// Refs:
+//    http://creazy.net/2008/11/another_way_to_find_youtube_hd_file.html
 
 (function () {
 
@@ -42,7 +45,9 @@
       let filepath = arg.string;
       let as = content.document.defaultView.wrappedJSObject.swfArgs;
       let title = doc.title.replace(/^YouTube - /, '');
-      let url = 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;
+      // XXX 今が、fmt=22 じゃなかったら確認した方が良い？
+      let fmt = /^22/.test(as.fmt_map) ? '22' : '18';
+      let url = 'http://www.youtube.com/get_video?fmt=' + fmt + '&video_id=' + as.video_id + '&t=' + as.t;
 
       let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
       let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
