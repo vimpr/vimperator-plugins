@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.4
+// @version        1.5
 // @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
@@ -165,11 +165,8 @@
 
 
   // 要素をクリックする
-  function clickElement (elem) {
-    var e = content.document.createEvent('MouseEvents');
-    e.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-    elem.dispatchEvent(e);
-  }
+  function clickElement (elem)
+    buffer.followLink(elem);
 
 
   // 開いたURIなどの表示
