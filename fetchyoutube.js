@@ -45,7 +45,7 @@
       let filepath = arg.string;
       let as = content.document.defaultView.wrappedJSObject.swfArgs;
       let title = doc.title.replace(/^YouTube - /, '');
-      // XXX $B:#$,!"(Bfmt=22 $B$8$c$J$+$C$?$i3NG'$7$?J}$,NI$$!)(B
+      // XXX 今が、fmt=22 じゃなかったら確認した方が良い？
       let fmt = /^22/.test(as.fmt_map) ? '22' : '18';
       let url = 'http://www.youtube.com/get_video?fmt=' + fmt + '&video_id=' + as.video_id + '&t=' + as.t;
 
