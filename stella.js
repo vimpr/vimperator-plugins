@@ -49,7 +49,7 @@
     function () f.apply(_this, arguments);
 
   function capitalize (s)
-    s.replace(/^[a-z]/, String.toUpperCase);
+    s.replace(/^[a-z]/, String.toUpperCase).replace(/-[a-z]/, function (s) s.slice(1).toUpperCase());
 
   function currentURL ()
     content.document.location.href;
@@ -193,12 +193,22 @@
     setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
     setf('maxVolume', this.has('volume', 'rw') && 'r');
     setf('fetch', this.has('fileURL', 'r') && 'x');
+    setf('relations', [name for each (name in Player.RELATIONS) if (this.has(name, 'r'))].length && 'r');
   }
 
   Player.ST_PLAYING = 'playing';
   Player.ST_PAUSED  = 'paused';
   Player.ST_ENDED   = 'ended';
   Player.ST_OTHER   = 'other';
+
+  Player.URL_TAG    = 'tag';
+  Player.URL_ID     = 'id';
+  Player.URL_SEARCH = 'search';
+
+  Player.RELATIONS = {
+    URL_TAG: 'relatedTags',
+    URL_ID: 'relatedIDs'
+  };
 
   // rwxt で機能の有無を表す
   // r = read
@@ -211,15 +221,19 @@
       fileExtension: 'r',
       fileURL: '',
       fullscreen: '',
+      makeURL: '',
       muted: '',
       pause: '',
       play: '',
       playEx: '',
+      relatedIDs: '',
+      relatedTags: '',
       repeating: '',
+      tags: '',
       title: '',
       totalTime: '',
       volume: '',
-      // auto setting => fetch maxVolume playOrPause seek seekRelative turnUpDownVolume
+      // auto setting => fetch maxVolume playOrPause relations seek seekRelative turnUpDownVolume
     },
 
     icon: null,
@@ -254,6 +268,21 @@
     get muted () undefined,
     set muted (value) value,
 
+    // [{name: ..., title: ...}, ...]
+    get relatedIDs () undefined,
+
+    // [{type: ..., value: ...}, ...]
+    get relations () {
+      if (!this.has('relations', 'r'))
+        return [];
+      let result = [];
+      for (let [type, name] in Iterator(Player.RELATIONS)) {
+        if (this.has(name, 'r'))
+          result = result.concat(this[name].map(function (it) ({type: Player[type], value: it})));
+      }
+      return result;
+    },
+
     get repeating () undefined,
     set repeating (value) value,
 
@@ -275,6 +304,8 @@
 
     fetch: function (filepath)
       download(this.fileURL, filepath, this.fileExtension, this.title),
+
+    makeURL: function () undefined,
 
     pause: function () undefined,
 
@@ -453,7 +484,10 @@
       play: 'x',
       playEx: 'x',
       playOrPause: 'x',
+      relatedIDs: 'r',
+      relatedTags: 'r',
       repeating: 'rwt',
+      tags: 'r',
       title: 'r',
       totalTime: 'r',
       volume: 'rw'
@@ -562,6 +596,32 @@
 
     get player () getElementByIdEx('flvplayer'),
 
+    get relatedIDs () {
+      if (this.__rid_last_url == currentURL())
+        return this.__rid_cache;
+      this.__rid_last_url = currentURL();
+      let videos = [];
+      let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', uri, false);
+      xhr.send(null);
+      let xml = xhr.responseXML;
+      let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
+      while (v = vs.iterateNext()) {
+        let [cs, video] = [v.childNodes, {}];
+        for each (let c in cs)
+          if (c.nodeName != '#text')
+            video[c.nodeName] = c.textContent;
+        videos.push(video);
+      }
+      return this.__rid_cache = videos;
+    },
+
+    get relatedTags() {
+      let nodes = content.document.getElementsByClassName('nicopedia');
+      return [it.textContent for each (it in nodes) if (it.rel == 'tag')];
+    },
+
     get repeating () this.player.ext_isRepeat(),
     set repeating (value) (this.player.ext_setRepeat(value), value),
 
@@ -594,6 +654,17 @@
           download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
       };
       httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, bindr(this, onComplete));
+    },
+
+    makeURL: function (value, type) {
+      switch (type) {
+        case Player.URL_ID:
+          return 'http://www.nicovideo.jp/watch/' + value;
+        case Player.URL_TAG:
+          return 'http://www.nicovideo.jp/tag/' + encodeURIComponent(value);
+        case Player.URL_SEARCH:
+          return 'http://www.nicovideo.jp/search/' + encodeURIComponent(value);
+      }
     },
 
     pause: function () this.player.ext_play(false),
@@ -633,6 +704,12 @@
       label: 'Volume',
       id: ID_PREFIX + 'volume-menupopup',
       sub: ContextMenuVolume
+    },
+    {
+      name: 'relations-root',
+      label: 'Relations',
+      id: ID_PREFIX + 'relations-menupopup',
+      sub: []
     }
   ];
 
@@ -712,7 +789,7 @@
     this.initialize.apply(this, arguments);
   }
 
-  Stella.MAIN_PANEL_ID  = ID_PREFIX + 'panel',
+  Stella.MAIN_PANEL_ID  = ID_PREFIX + 'main-panel',
   Stella.MAIN_MENU_ID   = ID_PREFIX + 'main-menu',
   Stella.VOLUME_MENU_ID = ID_PREFIX + 'volume-menu',
 
@@ -801,14 +878,18 @@
     createStatusPanel: function () {
       let self = this;
 
-      function setClickEvent (name, elem) {
-        let onClick = self['on' + capitalize(name) + 'Click'];
-        onClick && elem.addEventListener('click', function (event) {
-          if (event.button == 0) {
-            onClick.apply(self, arguments);
-            self.update();
-          }
-        }, false);
+      // FIXME
+      function setEvents (name, elem) {
+        ['click', 'popupshowing'].forEach(function (eventName) {
+          let onEvent = self['on' + capitalize(name) + capitalize(eventName)];
+          //onEvent && liberator.log('on' + capitalize(name) + capitalize(eventName))
+          onEvent && elem.addEventListener(eventName, function (event) {
+            if (eventName != 'click' || event.button == 0) {
+              onEvent.apply(self, arguments);
+              self.update();
+            }
+          }, false);
+        });
       }
 
       function createLabel (store, name, l, r) {
@@ -818,11 +899,11 @@
           label.style.marginRight = (r || 0) + 'px';
           label.__defineGetter__('text', function () this.getAttribute('value'));
           label.__defineSetter__('text', function (v) this.setAttribute('value', v));
-          setClickEvent(name, label);
+          setEvents(name, label);
       }
 
       let panel = this.panel = document.createElement('statusbarpanel');
-      panel.setAttribute('id', this.panelId);
+      panel.setAttribute('id', Stella.MAIN_PANEL_ID);
 
       let hbox = document.createElement('hbox');
       hbox.setAttribute('align', 'center');
@@ -830,7 +911,7 @@
       let icon = this.icon = document.createElement('image');
       icon.setAttribute('class', 'statusbarpanel-iconic');
       icon.style.marginRight = '4px';
-      setClickEvent('icon', icon);
+      setEvents('icon', icon);
       icon.addEventListener('dblclick', bindr(this, this.onIconDblClick), false);
 
       let labels = this.labels = {};
@@ -854,11 +935,14 @@
         parent: panel,
         set: hbox,
         tree: ContextMenuTree,
-        onAppend: function (elem, menu) setClickEvent(capitalize(menu.name), elem)
+        onAppend: function (elem, menu) setEvents(capitalize(menu.name), elem)
       });
 
       let stbar = document.getElementById('status-bar');
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
+
+      let relmenu = document.getElementById('anekos-stela-relations-menupopup');
+      liberator.log(relmenu)
     },
 
     disable: function () {
@@ -940,6 +1024,10 @@
     onPlayClick: function () this.player.play(),
 
     onRepeatClick: function () this.player.toggle('repeating'),
+
+    onRelationsRootPopupshowing: function () {
+      /* build */
+    },
 
     onResize: function () {
       if (this.__fullScreen !== window.fullScreen) {
