@@ -1,6 +1,6 @@
 /**
  * ==VimperatorPlugin==
- * @name            _libly.js
+ * @name            libly.js
  * @description     suvene's library
  * @description-ja  適当なライブラリっぽいものたち
  * @author          suVene suvene@zeromemory.info
@@ -27,7 +27,7 @@ lib.$U = {//{{{
             };
             this.echo = function(msg, flg) {
                 flg = flg || commandline.FORCE_MULTILINE;
-                this.log(msg);
+                // this.log(msg);
                 liberator.echo(msg, flg);
             };
             this.echoerr = function(msg) {
