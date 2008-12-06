@@ -14,6 +14,7 @@
  *  }}}
  */
 (function() {
+io.sourceFromRuntimePath(['libly.js']);
 if (!liberator.plugins.libly) {
     liberator.log('notifier: needs _libly.js');
     return;
@@ -45,7 +46,7 @@ function bootstrap() {
         },
         load: function(name) {
             io.getRuntimeDirectories('plugin/notifier').forEach(function(dir) {
-                $U.readDirectory(io.expandPath(dir.path), '^' + name, function(f) {
+                $U.readDirectory(io.expandPath(dir.path), '^' + name + '_', function(f) {
                     try {
                         io.source(f.path, true)
                         logger.log('plugin load success: ' + f.leafName);

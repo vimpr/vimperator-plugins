@@ -26,7 +26,7 @@ var Growl = function() {//{{{
 }
 Growl.prototype = {
     defaults: {
-        life: 3000
+        life: 5000
     },
     initialize: function(dom, container) {
         this.dom = dom;
@@ -48,7 +48,7 @@ notifier.observer.register({
 
         io.getRuntimeDirectories('').forEach(function(dir) {
             let path = io.expandPath(dir.path + '/plugin/notifier');
-            $U.readDirectory(path, '^jquery' , function(f) {
+            $U.readDirectory(path, '^growl' , function(f) {
                 try {
                     io.source(f.path, true)
                     logger.log('load success: ' + f.leafName);
