@@ -31,7 +31,7 @@ var tags = {
 		var length = info.description.length();
 		if (length > 1){
 			desc = info.description[0];
-			for (var i=0; i<length; i++){
+			for (let i=0; i<length; i++){
 				if (info.description[i].@lang == lang)
 					desc = info.description[i];
 			}
@@ -41,7 +41,7 @@ var tags = {
 	version: function(info) info.version || null,
 	maxVersion: function(info) info.maxVersion || null,
 	minVersion: function(info) info.minVersion || null,
-	detail: function(info) {
+	detail: function(info){
 		if (!info.detail)
 			return null;
 
@@ -55,7 +55,7 @@ var tags = {
 			}));
 		}
 		function escapeUnicode(str){
-			return str.replace(/[^ -~]|\\/g,function(m0){
+			return str.replace(/[^\u0020-\u005B\u005D-\u007E]/g, function(m0){
 				var code = m0.charCodeAt(0);
 				return '\\u'+ ((code < 0x10)? '000' :
 								(code < 0x100)? '00':
@@ -63,7 +63,7 @@ var tags = {
 			});
 		}
 		function unescapeUnicode(str){
-			return str.replace(/\\u([a-fA-F0-9]{4})/g, function(m0,m1){
+			return str.replace(/\\u([a-fA-F0-9]{4})/g, function(m0, m1){
 				return String.fromCharCode(parseInt(m1, 16));
 			});
 		}
@@ -71,31 +71,31 @@ var tags = {
 		//var text = fromUTF8Octets(info.detail.*.toString());
 		var text = info.detail.*.toString();
 		/*
-		var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter)
-		converter.charset="UTF-16";
+		var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+		converter.charset = "UTF-16";
 		text = converter.ConvertFromUnicode(text);
 		*/
-		var lines = text.split("\n");
+		var lines = text.split(/\r\n|[\r\n]/);
 		var xml = <></>;
 		var ite = Iterator(lines);
 		var num, line;
-		try{
+		try {
 		while ([num, line] = ite.next()){
 			if (!line) continue;
 			if (/^\s*==(.*)==\s*$/.test(line)){
 				line = RegExp.$1;
-				xml += <h1 style="font-weight:bold;font-size:mediam;">{line}</h1>;
+				xml += <h1 style="font-weight:bold;font-size:medium;">{line}</h1>;
 				continue;
 			}
-			var reg = /^\s*(.*)\s*:\s*$/;
+			let reg = /^\s*(.*)\s*:\s*$/;
 			if (reg.test(line)){
-				var dl = <dl><dt>{RegExp.$1}</dt></dl>;
+				let dl = <dl><dt>{RegExp.$1}</dt></dl>;
 				while ([num, line] = ite.next()){
 					if (!line) break;
 					if (reg.test(line)){
 						dl.* += <dt>{RegExp.$1}</dt>;
 					} else {
-						dl.* += <dd>{line.replace(/^\s*|\s*$/g,"")}</dd>;
+						dl.* += <dd>{line.replace(/^\s+|\s+$/g, "")}</dd>;
 					}
 				}
 				xml += dl;
@@ -103,23 +103,23 @@ var tags = {
 			}
 			xml += <>{line}<br/></>;
 		}
-		}catch(e){}
+		} catch (e){}
 		return xml;
 	}
 };
 function getPlugins(){
 	var list = [];
 	var contexts = liberator.plugins.contexts;
-	for (var path in contexts){
-		var context = contexts[path];
-		var info = context.PLUGIN_INFO || null;
-		var plugin = [
+	for (let path in contexts){
+		let context = contexts[path];
+		let info = context.PLUGIN_INFO || null;
+		let plugin = [
 			["path", path]
 		];
 		plugin["name"] = context.NAME;
 		if (info){
-			for (var tag in tags){
-				var value = tags[tag](info);
+			for (let tag in tags){
+				let value = tags[tag](info);
 				if (value.toString().length > 0)
 					plugin.push([tag, value]);
 			}
@@ -135,18 +135,18 @@ function itemFormater(plugin, showDetail){
 	var data = plugin.filter(function($_) $_[0] != 'detail');
 	return template.table(plugin.name, data);
 }
-commands.addUserCommand(['plugin[help]'], 'list vimperator plugin ',
+commands.addUserCommand(['plugin[help]'], 'list Vimperator plugin ',
 	function(args){
 		liberator.plugins.pluginManager.list(args[0], args['-verbose']);
-	},{
+	}, {
 		argCount: "*",
 		options: [
-			[['-verbose','-v'], commands.OPTION_NOARG],
+			[['-verbose', '-v'], commands.OPTION_NOARG],
 		],
 		completer: function(context){
 			var all = getPlugins().map(function(plugin){
-				var desc = '-';
-				for (var i=0; i<plugin.length; i++){
+				let desc = '-';
+				for (let i=0; i<plugin.length; i++){
 					if (plugin[i][0]== 'description')
 						desc = plugin[i][1];
 				}
@@ -156,13 +156,13 @@ commands.addUserCommand(['plugin[help]'], 'list vimperator plugin ',
 			context.completions = all.filter(function(row) row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
 
 		}
-	},true);
+	}, true);
 var public = {
 	list: function(name, showDetail){
 		var xml = <></>;
 		var plugins = getPlugins();
 		if (name){
-			var plugin = plugins.filter(function(plugin) plugin.name == name)[0];
+			let plugin = plugins.filter(function(plugin) plugin.name == name)[0];
 			if (plugin){
 				xml = itemFormater(plugin, showDetail);
 			}
@@ -170,7 +170,7 @@ var public = {
 			plugins.forEach(function(plugin) xml += itemFormater(plugin, showDetail));
 		}
 		liberator.echo(xml, true);
-	},
+	}
 };
 return public;
 })();
