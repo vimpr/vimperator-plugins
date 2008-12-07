@@ -2,7 +2,7 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Manage Vimperator Plugin</description>
-<description lang="ja">{"Vimpeator\u30D7\u30E9\u30B0\u30A4\u30F3\u7BA1\u7406"}</description>
+<description lang="ja">Vimpeatorプラグインの管理</description>
 <version>0.1a</version>
 <detail><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
@@ -16,7 +16,8 @@ var PLUGIN_INFO =
 none
 
 == ToDo ==
-* hogehoge
+* E-Mail and URL link
+* 更新通知&アップデート機能
 ]]></detail>
 </VimperatorPlugin>;
 
@@ -24,19 +25,20 @@ liberator.plugins.pluginManager = (function(){
 
 var lang = window.navigator.language;
 var tags = {
-	name: function(info) info.name ? info.name[0] : null,
+	name: function(info) info.name ? fromUTF8Octets(info.name.toString()) : null,
+	author: function(info) info.author || null,
 	description: function(info){
 		if (!info.description) return null;
 		var desc = "";
 		var length = info.description.length();
 		if (length > 1){
-			desc = info.description[0];
+			desc = info.description[0].toString();
 			for (let i=0; i<length; i++){
 				if (info.description[i].@lang == lang)
-					desc = info.description[i];
+					desc = info.description[i].toString();
 			}
 		}
-		return desc;
+		return fromUTF8Octets(desc);
 	},
 	version: function(info) info.version || null,
 	maxVersion: function(info) info.maxVersion || null,
@@ -48,33 +50,7 @@ var tags = {
 		if (info.detail.* && info.detail.*[0].nodeKind() == 'element')
 			return info.detail.*;
 
-		/*
-		function fromUTF8Octets(octets){
-			return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
-				return "%" + c.charCodeAt(0).toString(16);
-			}));
-		}
-		function escapeUnicode(str){
-			return str.replace(/[^\u0020-\u005B\u005D-\u007E]/g, function(m0){
-				var code = m0.charCodeAt(0);
-				return '\\u'+ ((code < 0x10)? '000' :
-								(code < 0x100)? '00':
-								(code < 0x100)? '0' : '') + code.toString(16);
-			});
-		}
-		function unescapeUnicode(str){
-			return str.replace(/\\u([a-fA-F0-9]{4})/g, function(m0, m1){
-				return String.fromCharCode(parseInt(m1, 16));
-			});
-		}
-		*/
-		//var text = fromUTF8Octets(info.detail.*.toString());
-		var text = info.detail.*.toString();
-		/*
-		var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-		converter.charset = "UTF-16";
-		text = converter.ConvertFromUnicode(text);
-		*/
+		var text = fromUTF8Octets(info.detail.*.toString());
 		var lines = text.split(/\r\n|[\r\n]/);
 		var xml = <></>;
 		var ite = Iterator(lines);
@@ -107,6 +83,11 @@ var tags = {
 		return xml;
 	}
 };
+function fromUTF8Octets(octets){
+	return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
+		return "%" + c.charCodeAt(0).toString(16);
+	}));
+}
 function getPlugins(){
 	var list = [];
 	var contexts = liberator.plugins.contexts;
