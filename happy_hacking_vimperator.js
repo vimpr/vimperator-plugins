@@ -20,6 +20,16 @@
 // License:
 //    http://creativecommons.org/licenses/by-sa/3.0/
 
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>Happy Happy Vimperator</name>
+<description>This plugin makes you to True Vimperatorer</description>
+<version>1.0</version>
+<detail><![CDATA[
+DON NOT THINK. FEEL!
+]]></detail>
+</VimperatorPlugin>;
+
 (function () {
 
   let enabled = s2b(liberator.globalVariables.happy_hacking_vimperator_enable, true);
