@@ -3,7 +3,10 @@ var PLUGIN_INFO =
 <name>{NAME}</name>
 <description>Manage Vimperator Plugin</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
-<version>0.1a</version>
+<author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
+<version>0.1</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
 == Command ==
@@ -12,12 +15,40 @@ var PLUGIN_INFO =
 	省略すると全てのプラグインの詳細を表示します。
 	オプション -v はより細かなデータを表示します
 
-== Mapping ==
-none
+== for plugin Developer ==
+プラグインの先頭に
+ var PLUGIN_INFO = ... とE4X形式でXMLを記述してください
+ 各要素は下記参照
+
+== 要素 ==
+name:
+	プラグイン名
+description:
+	簡易説明
+	属性langに"ja"などと言語を指定するとFirefoxのlocaleに合わせたものになります。
+author:
+	製作者名
+	属性mailにE-Mail、homepageにURLを付けるとリンクされます
+version:
+	プラグインのバージョン
+maxVersion:
+	プラグインが使用できるvimperatorの最大バージョン
+minVersion:
+	プラグインが使用できるvimperatorの最小バージョン
+detail:
+	ここにコマンドやマップ、プラグインの説明
+	CDATAセクションにwikit的に記述可能
+
+== wiki書式 ==
+* == title == でh1
+* definition: (最後に":")で定義リストのdt
+  後続が空行でない、かつ、最後が":"でないならば、定義リストのdd
+* mailto: ... , http:// ... はリンクになります
 
 == ToDo ==
-* E-Mail and URL link
-* 更新通知&アップデート機能
+* 更新通知 と アップデート機能
+* wiki書式の追加
+
 ]]></detail>
 </VimperatorPlugin>;
 
@@ -26,7 +57,15 @@ liberator.plugins.pluginManager = (function(){
 var lang = window.navigator.language;
 var tags = {
 	name: function(info) info.name ? fromUTF8Octets(info.name.toString()) : null,
-	author: function(info) info.author || null,
+	author: function(info) {
+		if (!info.author) return null;
+		var xml = <>{info.author.toString()}</>;
+		if (info.author.@homepage.toString() != '')
+			xml += <><span> </span>{makeLink(info.author.@homepage.toString())}</>;
+		if (info.author.@mail.toString() != '')
+			xml += <><span> </span>({makeLink("mailto:"+info.author.@mail)})</>;
+		return xml;
+	},
 	description: function(info){
 		if (!info.description) return null;
 		var desc = info.description[0].toString();
@@ -42,7 +81,7 @@ var tags = {
 				break;
 			}
 		}
-		return fromUTF8Octets(desc);
+		return makeLink(fromUTF8Octets(desc));
 	},
 	version: function(info) info.version || null,
 	maxVersion: function(info) info.maxVersion || null,
@@ -63,30 +102,32 @@ var tags = {
 		while ([num, line] = ite.next()){
 			if (!line) continue;
 			if (/^\s*==(.*)==\s*$/.test(line)){
-				line = RegExp.$1;
-				xml += <h1 style="font-weight:bold;font-size:medium;">{line}</h1>;
+				xml += <h1 style="font-weight:bold;font-size:medium;">{makeLink(RegExp.$1)}</h1>;
 				continue;
 			}
 			let reg = /^\s*(.*)\s*:\s*$/;
 			if (reg.test(line)){
-				let dl = <dl/>;
+				let dl = <dl><dt>{makeLink(RegExp.$1)}</dt></dl>;
 				while ([num, line] = ite.next()){
 					if (!line) break;
 					if (reg.test(line)){
-						dl.* += <dt>{RegExp.$1}</dt>;
+						dl.* += <dt>{makeLink(RegExp.$1)}</dt>;
 					} else {
-						dl.* += <dd>{line.replace(/^\s+|\s+$/g, "")}</dd>;
+						dl.* += <dd>{makeLink(line.replace(/^\s+|\s+$/g, ""))}</dd>;
 					}
 				}
 				xml += dl;
 				continue;
 			}
-			xml += <>{line}<br/></>;
+			xml += <>{makeLink(line)}<br/></>;
 		}
 		} catch (e){}
 		return xml;
 	}
 };
+function makeLink(str){
+	return XMLList(str.replace(/(https?:\/\/|mailto:)[^\s]+/g, '<a href="#" highlight="URL">$&</a>'));
+}
 function fromUTF8Octets(octets){
 	return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
 		return "%" + c.charCodeAt(0).toString(16);
