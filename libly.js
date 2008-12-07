@@ -37,9 +37,9 @@ lib.$U = {//{{{
         }
     },
     extend: function(dst, src) {
-    for (let prop in src)
-        dst[prop] = src[prop];
-     return dst;
+        for (let prop in src)
+            dst[prop] = src[prop];
+         return dst;
     },
     A: function(hash, iter) {
         var ret = [];
@@ -86,19 +86,20 @@ lib.$U = {//{{{
         return link.href;
     },
     dateFormat: function(dtm, fmt) {
-        var y = dtm.getFullYear();
-        var M = dtm.getMonth() + 1;
-        var d = dtm.getDay();
-        var h = dtm.getHours();
-        var m = dtm.getMinutes();
-        var s = dtm.getSeconds();
-
-        if (M < 10) M = '0' + M;
-        if (d < 10) d = '0' + d;
-        if (h < 10) h = '0' + h;
-        if (m < 10) m = '0' + m;
-        if (s < 10) s = '0' + s;
-        return y + '/' + M + '/' + d + ' ' + h + ':' + m + ':' + s;
+        var d = {
+            y: dtm.getFullYear(),
+            M: dtm.getMonth() + 1,
+            d: dtm.getDay(),
+            h: dtm.getHours(),
+            m: dtm.getMinutes(),
+            s: dtm.getSeconds(),
+            '%': '%'
+        };
+        for (let [n, v] in Iterator(d)) {
+            if (v < 10)
+                d[n] = '0' + v;
+        }
+        return (fmt || '%y/%M/%d %h:%m:%s').replace(/%([yMdhms%])/g, function (_, n) d[n]);
     },
     readDirectory: function(path, filter, func) {
         var d = io.getFile(path);
