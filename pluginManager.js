@@ -28,22 +28,22 @@ description:
 	属性langに"ja"などと言語を指定するとFirefoxのlocaleに合わせたものになります。
 author:
 	製作者名
-	属性mailにE-Mail、homepageにURLを付けるとリンクされます
+	属性mailにe-mail、homepageにURLを付けるとリンクされます
 version:
 	プラグインのバージョン
 maxVersion:
-	プラグインが使用できるvimperatorの最大バージョン
+	プラグインが使用できるVimperatorの最大バージョン
 minVersion:
-	プラグインが使用できるvimperatorの最小バージョン
+	プラグインが使用できるVimperatorの最小バージョン
 detail:
 	ここにコマンドやマップ、プラグインの説明
-	CDATAセクションにwikit的に記述可能
+	CDATAセクションにwiki的に記述可能
 
 == wiki書式 ==
 * == title == でh1
 * definition: (最後に":")で定義リストのdt
   後続が空行でない、かつ、最後が":"でないならば、定義リストのdd
-* mailto: ... , http:// ... はリンクになります
+* mailto: ... , http:// ... , https:// ...  はリンクになります
 
 == ToDo ==
 * 更新通知 と アップデート機能
@@ -126,7 +126,7 @@ var tags = {
 	}
 };
 function makeLink(str){
-	return XMLList(str.replace(/(https?:\/\/|mailto:)[^\s]+/g, '<a href="#" highlight="URL">$&</a>'));
+	return XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="#" highlight="URL">$&</a>'));
 }
 function fromUTF8Octets(octets){
 	return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
