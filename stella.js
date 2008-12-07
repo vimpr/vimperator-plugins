@@ -299,7 +299,7 @@ var PLUGIN_INFO =
           try{
           result = this[name].map(function (it) ({type: Player[type], value: it})).concat(result);
           } catch (e){
-            liberator.log(name)
+            liberator.log(name);
           }
         }
       }
@@ -351,7 +351,7 @@ var PLUGIN_INFO =
     seek: function (v) {
       v = parseInt(v, 10);
       if (v < 0)
-        v = this.totalTime +  v;
+        v = this.totalTime + v;
       return this.currentTime = Math.min(Math.max(v, 0), this.totalTime);
     },
 
@@ -414,7 +414,7 @@ var PLUGIN_INFO =
     set fullscreen () {
       this.player.__stella_fullscreen = !this.player.__stella_fullscreen;
       if (this.fullscreen) {
-        liberator.log('full')
+        liberator.log('full');
         storeStyle(this.player, {
           position: 'fixed',
           left: '0px',
@@ -423,7 +423,7 @@ var PLUGIN_INFO =
           height: content.innerHeight + 'px'
         });
       } else {
-        liberator.log('normal')
+        liberator.log('normal');
         restoreStyle(this.player);
       }
     },
@@ -641,7 +641,7 @@ var PLUGIN_INFO =
             video[c.nodeName] = c.textContent;
         videos.push({
           title: video.title,
-          id: video.url.replace(/^.+watch\//, ''),
+          id: video.url.replace(/^.+?\/watch\//, ''),
           raw: video
         });
       }
@@ -722,7 +722,7 @@ var PLUGIN_INFO =
 
   const ContextMenuVolume = [];
   for (let i = 0; i <= 100; i += 10)
-    ContextMenuVolume.push({name: 'setVolume', label: i + '%', attributes: {volume: i}})
+    ContextMenuVolume.push({name: 'setVolume', label: i + '%', attributes: {volume: i}});
 
   const ContextMenuTree = [
     'play',
@@ -808,7 +808,7 @@ var PLUGIN_INFO =
     onSecurityChange: function(webProgress, request, state) undefined,
     uninstall: function () {
       getBrowser().removeProgressListener(this);
-    }
+    },
   };
 
   // }}}
@@ -876,7 +876,7 @@ var PLUGIN_INFO =
       function add (cmdName, funcS, funcB) {
         commands.addUserCommand(
           ['st' + cmdName],
-          cmdName.replace(/[\[\]]/g, '') + ' - Stella',
+          cmdName.replace(/[\[\]]+/g, '') + ' - Stella',
           (funcS instanceof Function)
             ? funcS
             : function (arg, bang) {
@@ -943,7 +943,7 @@ var PLUGIN_INFO =
                   return [rel.value.url, rel.value.title];
               }
             });
-          }
+          },
         },
         true
       );
@@ -1125,8 +1125,8 @@ var PLUGIN_INFO =
     let install = function () {
       let stella = liberator.plugins.stella = new Stella();
       stella.addUserCommands();
-      liberator.log('Stella: installed.')
-    }
+      liberator.log('Stella: installed.');
+    };
 
     // すでにインストール済みの場合は、一度ファイナライズする
     // (デバッグ時に前のパネルが残ってしまうため)
