@@ -17,8 +17,8 @@
 var notifier = liberator.plugins.notifier;
 if (!notifier) return;
 
-var lib = notifier.lib;
-var $U = lib.$U;
+var libly = notifier.libly;
+var $U = libly.$U;
 var logger = $U.getLogger('observer_growl');
 
 var Growl = function() {//{{{

@@ -29,8 +29,8 @@ if (liberator.plugins.notifier && liberator.plugins.notifier._self) {
 
 function bootstrap() {
 
-    var lib = liberator.plugins.libly;
-    var $U = lib.$U;
+    var libly = liberator.plugins.libly;
+    var $U = libly.$U;
     var logger = $U.getLogger('notifier');
 
     var Loader = function() {//{{{
@@ -160,7 +160,7 @@ function bootstrap() {
                 $U.bind(this, function(args) { this.stop() }), null, true
             );
 
-            liberator.plugins.notifier.lib = lib;
+            liberator.plugins.notifier.libly = libly;
             liberator.plugins.notifier.Message = Message;
 
             this.observers = new Loader('observer', function(args) new Observer(args));
@@ -213,7 +213,6 @@ function bootstrap() {
                 logger.echo('notifier[' + this.id + '] stopped.(' + start + ')', commandline.force_singleline);
             }), 10);
 
-            logger.log('start end');
         },//}}}
         stop: function(finallycallback) {//{{{
             if (!this.timer) {

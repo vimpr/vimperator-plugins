@@ -4,10 +4,10 @@
  * @description     suvene's library
  * @description-ja  適当なライブラリっぽいものたち
  * @author          suVene suvene@zeromemory.info
- * @version         0.1.0
+ * @version         0.1.1
  * @minVersion      1.2
  * @maxVersion      2.0pre
- * Last Change:     07-Dec-2008.
+ * Last Change:     08-Dec-2008.
  * ==/VimperatorPlugin==
  *
  * HEAD COMMENT {{{
@@ -246,7 +246,7 @@ lib.Response.prototype = {
     initialize: function(req) {
         this.req = req;
         this.transport = req.transport;
-        this.isSuccess = req.isSuccess();
+        this.isSuccess = req.isSuccess;
         this.readyState = this.transport.readyState;
 
         if (this.readyState == 4) {
@@ -266,14 +266,14 @@ lib.Response.prototype = {
             return this.transport.statusText || '';
         } catch (e) { return ''; }
     },
-    getHTMLDocument: function(xpath, xmlns) {
+    getHTMLDocument: function(xpath, xmlns, ignoreTags) {
         if (!this.doc) {
             this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
-            let ignoreTags = ['script'];
-            if (this.req.options.siteinfo.ignoreTags) {
-                ignoreTags.concat(this.req.options.siteinfo.ignoreTags.split(','));
+            var iTags = ['script'];
+            if (ignoreTags) {
+                iTags.concat(ignoreTags.split(','));
             }
-            this.htmlStripScriptFragmentstr = lib.$U.stripTags(this.htmlFragmentstr, 'script');
+            this.htmlStripScriptFragmentstr = lib.$U.stripTags(this.htmlFragmentstr, iTags);
             this.doc = this._createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
         }
 
