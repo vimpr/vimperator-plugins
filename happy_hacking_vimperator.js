@@ -24,6 +24,7 @@
 
   let enabled = s2b(liberator.globalVariables.happy_hacking_vimperator_enable, true);
   let ignore = false;
+  let mousedownTime = new Date();
 
   function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
 
@@ -66,10 +67,28 @@
 
   [
     ['mousemove', 'DOMMouseScroll'],
-    ['mousedown', 'mouseup', 'dblclick', 'click']
+    ['mouseup', 'dblclick']
   ].forEach(
     function (names, msg)
       names.forEach(function (name) window.addEventListener(name, kill(msg), true))
+  );
+
+  window.addEventListener(
+    'mousedown',
+    function (event) {
+      mousedownTime = new Date().getTime();
+      kill(true)(event);
+    },
+    true
+  );
+
+  window.addEventListener(
+    'click',
+    function (event) {
+      if ((new Date().getTime() - mousedownTime) < 500)
+        kill(true)(event);
+    },
+    true
   );
 
 
