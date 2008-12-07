@@ -4,10 +4,10 @@
  * @description      request, and the result is displayed to the buffer.
  * @description-ja   リクエストの結果をバッファに出力する。
  * @author           suVene suvene@zeromemory.info
- * @version          0.4.2
+ * @version          0.4.3
  * @minVersion       1.2
  * @maxVersion       1.2
- * Last Change:      07-Dec-2008.
+ * Last Change:      08-Dec-2008.
  * ==/VimperatorPlugin==
  *
  * HEAD COMMENT {{{
@@ -360,7 +360,7 @@ var MultiRequester = {
 
         try {
 
-            if (!res.isSuccess || res.responseText == '') throw 'response is fail or null';
+            if (!res.isSuccess() || res.responseText == '') throw 'response is fail or null';
 
             url = res.req.url;
             escapedUrl = liberator.util.escapeHTML(url);
@@ -372,7 +372,7 @@ var MultiRequester = {
                 return;
             }
 
-            doc = res.getHTMLDocument(xpath);
+            doc = res.getHTMLDocument(xpath, null, res.req.options.siteinfo.ignoreTags);
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
