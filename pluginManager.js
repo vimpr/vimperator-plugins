@@ -29,13 +29,17 @@ var tags = {
 	author: function(info) info.author || null,
 	description: function(info){
 		if (!info.description) return null;
-		var desc = "";
-		var length = info.description.length();
-		if (length > 1){
-			desc = info.description[0].toString();
-			for (let i=0; i<length; i++){
-				if (info.description[i].@lang == lang)
-					desc = info.description[i].toString();
+		var desc = info.description[0].toString();
+		for (let i=info.description.length(), lang=lang.split('-', 2).shift(); i-->1;){
+			if (info.description[i].@lang == lang){
+				desc = info.description[i].toString();
+				break;
+			}
+		}
+		for (let i=info.description.length(); i-->1;){
+			if (info.description[i].@lang == lang){
+				desc = info.description[i].toString();
+				break;
 			}
 		}
 		return fromUTF8Octets(desc);
@@ -65,7 +69,7 @@ var tags = {
 			}
 			let reg = /^\s*(.*)\s*:\s*$/;
 			if (reg.test(line)){
-				let dl = <dl><dt>{RegExp.$1}</dt></dl>;
+				let dl = <dl/>;
 				while ([num, line] = ite.next()){
 					if (!line) break;
 					if (reg.test(line)){
@@ -112,11 +116,11 @@ function getPlugins(){
 function itemFormater(plugin, showDetail){
 	if (showDetail)
 		return template.table(plugin.name, plugin);
-	
+
 	var data = plugin.filter(function($_) $_[0] != 'detail');
 	return template.table(plugin.name, data);
 }
-commands.addUserCommand(['plugin[help]'], 'list Vimperator plugin ',
+commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
 	function(args){
 		liberator.plugins.pluginManager.list(args[0], args['-verbose']);
 	}, {
@@ -127,9 +131,11 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugin ',
 		completer: function(context){
 			var all = getPlugins().map(function(plugin){
 				let desc = '-';
-				for (let i=0; i<plugin.length; i++){
-					if (plugin[i][0]== 'description')
+				for (let i=plugin.length; i-->0;){
+					if (plugin[i][0] == 'description'){
 						desc = plugin[i][1];
+						break;
+					}
 				}
 				return [plugin.name, desc];
 			});
