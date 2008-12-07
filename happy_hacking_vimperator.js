@@ -21,7 +21,6 @@
 //    http://creativecommons.org/licenses/by-sa/3.0/
 
 (function () {
-  return;
 
   let enabled = s2b(liberator.globalVariables.happy_hacking_vimperator_enable, true);
   let ignore = false;
