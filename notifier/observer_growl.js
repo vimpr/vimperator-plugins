@@ -7,7 +7,7 @@
  * @version         0.1.0
  * Last Change:     07-Dec-2008.
  *
- * use JQuery
+ * use jQuery
  *   http://jquery.com/
  * use JGrowl
  *   http://stanlemon.net/projects/jgrowl.html
@@ -47,8 +47,8 @@ notifier.observer.register({
         this.count = 1;
 
         io.getRuntimeDirectories('').forEach(function(dir) {
-            let path = io.expandPath(dir.path + '/plugin/notifier');
-            $U.readDirectory(path, '^growl' , function(f) {
+            var path = io.expandPath(dir.path + '/plugin/notifier');
+            $U.readDirectory(path, '^growl', function(f) {
                 try {
                     io.source(f.path, true)
                     logger.log('load success: ' + f.leafName);
@@ -64,7 +64,7 @@ notifier.observer.register({
         var doc = window.content.document;
         var container = doc.getElementById("observer_growl");
         if (!container) {
-            doc.body.appendChild(util.xmlToDom(<div id="observer_growl" class="observer_growl top-right" />, doc));
+            doc.body.appendChild(util.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
             container = doc.getElementById("observer_growl");
         }
 
@@ -72,7 +72,7 @@ notifier.observer.register({
         container.appendChild(this.createPopup(doc, message, container));
 
         if (container.childNodes.length == 1) {
-            var interval = setInterval($U.bind(this, this.checkStatus), 1000);
+            let interval = setInterval($U.bind(this, this.checkStatus), 1000);
             container.__interval__ = interval;
         }
 
@@ -89,7 +89,6 @@ notifier.observer.register({
         dom = util.xmlToDom(html, doc, nodes);
         dom.__data__ = new Growl(dom, nodes);
 
-        let count = this.count;
         return dom;
     },
     checkStatus: function() {
