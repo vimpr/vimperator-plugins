@@ -28,6 +28,23 @@
 // License:
 //    http://creativecommons.org/licenses/by-sa/3.0/
 
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>Show the time of movie on status line</description>
+<description lang="ja">{"ステータスラインに動画の再生時間などを表示する。"}</description>
+<version>0.08</version>
+<detail><![CDATA[
+:stfetch
+:stfullscreen
+:stpause
+:stplay
+:strelations
+:strepeat
+:stseek
+:stvolume
+]]></detail>
+</VimperatorPlugin>;
 
 (function () {
 
@@ -201,13 +218,14 @@
   Player.ST_ENDED   = 'ended';
   Player.ST_OTHER   = 'other';
 
-  Player.URL_TAG    = 'tag';
-  Player.URL_ID     = 'id';
-  Player.URL_SEARCH = 'search';
+  Player.REL_TAG    = 'tag';
+  Player.REL_ID     = 'id';
+  Player.REL_SEARCH = 'search';
+  Player.REL_URL    = 'url';
 
   Player.RELATIONS = {
-    URL_TAG: 'relatedTags',
-    URL_ID: 'relatedIDs'
+    REL_TAG: 'relatedTags',
+    REL_ID: 'relatedIDs'
   };
 
   // rwxt で機能の有無を表す
@@ -277,8 +295,13 @@
         return [];
       let result = [];
       for (let [type, name] in Iterator(Player.RELATIONS)) {
-        if (this.has(name, 'r'))
-          result = result.concat(this[name].map(function (it) ({type: Player[type], value: it})));
+        if (this.has(name, 'r')) {
+          try{
+          result = this[name].map(function (it) ({type: Player[type], value: it})).concat(result);
+          } catch (e){
+            liberator.log(name)
+          }
+        }
       }
       return result;
     },
@@ -344,7 +367,7 @@
     },
 
     turnUpDownVolume: function (v)
-      this.volume = Math.min(Math.max(this.volume + v, 0), this.maxVolume)
+      this.volume = Math.min(Math.max(this.volume + parseInt(v), 0), this.maxVolume)
   };
 
   // }}}
@@ -414,15 +437,18 @@
 
     get state () {
       switch (this.player.getPlayerState()) {
-        case 'ended':
+        case 0:
           return Player.ST_ENDED;
-        case 'playing':
+        case 1:
           return Player.ST_PLAYING;
-        case 'paused':
+        case 2:
           return Player.ST_PAUSED;
-        case 'buffering':
-        case 'video cued':
-        case 'unstarted':
+        case 3:
+          // buffering
+        case 5:
+          //video cued
+        case -1:
+          //unstarted
         default:
           return Player.ST_OTHER;
       }
@@ -436,7 +462,7 @@
     get isValid () buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/),
 
     get volume () parseInt(this.player.getVolume()),
-    set volume (value) (this.player.setVolume(value), value),
+    set volume (value) (this.player.setVolume(value), this.volume),
 
     play: function () this.player.playVideo(),
 
@@ -479,6 +505,7 @@
       fileURL: '',
       fullscreen: 'rwt',
       id: 'r',
+      makeURL: 'x',
       muted: 'rwt',
       pause: 'x',
       play: 'x',
@@ -598,7 +625,7 @@
 
     get relatedIDs () {
       if (this.__rid_last_url == currentURL())
-        return this.__rid_cache;
+        return this.__rid_cache || [];
       this.__rid_last_url = currentURL();
       let videos = [];
       let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
@@ -612,7 +639,11 @@
         for each (let c in cs)
           if (c.nodeName != '#text')
             video[c.nodeName] = c.textContent;
-        videos.push(video);
+        videos.push({
+          title: video.title,
+          id: video.url.replace(/^.+watch\//, ''),
+          raw: video
+        });
       }
       return this.__rid_cache = videos;
     },
@@ -644,7 +675,7 @@
     get totalTime () parseInt(this.player.ext_getTotalTime()),
 
     get volume () parseInt(this.player.ext_getVolume()),
-    set volume (value) (this.player.ext_setVolume(value), value),
+    set volume (value) (this.player.ext_setVolume(value), this.volume),
 
     fetch: function (filepath) {
       let onComplete = function (xhr) {
@@ -658,13 +689,14 @@
 
     makeURL: function (value, type) {
       switch (type) {
-        case Player.URL_ID:
+        case Player.REL_ID:
           return 'http://www.nicovideo.jp/watch/' + value;
-        case Player.URL_TAG:
+        case Player.REL_TAG:
           return 'http://www.nicovideo.jp/tag/' + encodeURIComponent(value);
-        case Player.URL_SEARCH:
+        case Player.REL_SEARCH:
           return 'http://www.nicovideo.jp/search/' + encodeURIComponent(value);
       }
+      return value;
     },
 
     pause: function () this.player.ext_play(false),
@@ -839,17 +871,18 @@
     },
 
     addUserCommands: function () {
-      let stella = this;
+      let self = this;
+
       function add (cmdName, funcS, funcB) {
         commands.addUserCommand(
           ['st' + cmdName],
-          cmdName + ' - Stella',
+          cmdName.replace(/[\[\]]/g, '') + ' - Stella',
           (funcS instanceof Function)
             ? funcS
             : function (arg, bang) {
-                if (!stella.isValid)
+                if (!self.isValid)
                   raise('Stella: Current page is not supported');
-                let p = stella.player;
+                let p = self.player;
                 let func = bang ? funcB : funcS;
                 if (p.has(func, 'rwt'))
                   p.toggle(func);
@@ -857,22 +890,63 @@
                   p[func] = arg[0];
                 else if (p.has(func, 'x'))
                   p[func].apply(p, arg);
-                stella.update();
+                self.update();
               },
           {argCount: '*', bang: !!funcB},
           true
         );
       }
 
-      add('play', 'playOrPause');
-      add('pause', 'pause');
-      add('mute', 'muted');
-      add('repeat', 'repeating');
-      add('comment', 'comment');
-      add('volume', 'volume', 'turnUpDownVolume');
-      add('seek', 'seek', 'seekRelative');
-      add('fetch', 'fetch');
-      add('fullscreen', 'fullscreen');
+      add('pl[ay]', 'playOrPause', 'play');
+      add('pa[use]', 'pause');
+      add('mu[te]', 'muted');
+      add('re[peat]', 'repeating');
+      add('co[mment]', 'comment');
+      add('vo[lume]', 'volume', 'turnUpDownVolume');
+      add('se[ek]', 'seek', 'seekRelative');
+      add('fe[tch]', 'fetch');
+      add('fu[llscreen]', 'fullscreen');
+
+      commands.addUserCommand(
+        ['strel[ations]'],
+        'relations - Stella',
+        function (args) {
+          let arg = args.string;
+          let url = (function () {
+            if (self.player.has('makeURL', 'x')) {
+              if (arg.match(/^[#\uff03]/))
+                return self.player.makeURL(arg.slice(1), Player.REL_ID);
+              if (arg.match(/^[:\uff1a]/))
+                return self.player.makeURL(arg.slice(1), Player.REL_TAG);
+              if (arg.indexOf('http://') == -1)
+                return self.player.makeURL(encodeURIComponent(arg), Player.REL_TAG);
+            }
+            return arg;
+          })();
+          liberator.open(url, arg.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+        },
+        {
+          argCount: '*',
+          completer: function (context, args) {
+            if (!self.isValid)
+              raise('Stella: Current page is not supported');
+            if (!self.player.has('relations', 'r'))
+              return;
+            context.title = ['Tag/ID', 'Description'];
+            context.completions = self.player.relations.map(function (rel) {
+              switch (rel.type) {
+                case Player.REL_ID:
+                  return ['#' + rel.value.id, rel.value.title];
+                case Player.REL_TAG:
+                  return [':' + rel.value, 'Tag'];
+                case Player.REL_URL:
+                  return [rel.value.url, rel.value.title];
+              }
+            });
+          }
+        },
+        true
+      );
     },
 
     createStatusPanel: function () {
@@ -882,7 +956,6 @@
       function setEvents (name, elem) {
         ['click', 'popupshowing'].forEach(function (eventName) {
           let onEvent = self['on' + capitalize(name) + capitalize(eventName)];
-          //onEvent && liberator.log('on' + capitalize(name) + capitalize(eventName))
           onEvent && elem.addEventListener(eventName, function (event) {
             if (eventName != 'click' || event.button == 0) {
               onEvent.apply(self, arguments);
@@ -942,7 +1015,6 @@
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
 
       let relmenu = document.getElementById('anekos-stela-relations-menupopup');
-      liberator.log(relmenu)
     },
 
     disable: function () {
