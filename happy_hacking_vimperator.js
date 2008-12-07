@@ -11,7 +11,7 @@
 // ==/VimperatorPlugin==
 //
 // Usage:
-//    DON NOT THINK. FEEL!
+//    DO NOT THINK. FEEL!
 //
 // Links:
 //    Unbroken keyboard:
@@ -26,7 +26,7 @@ var PLUGIN_INFO =
 <description>This plugin makes you to True Vimperatorer</description>
 <version>1.0</version>
 <detail><![CDATA[
-DON NOT THINK. FEEL!
+DO NOT THINK. FEEL!
 ]]></detail>
 </VimperatorPlugin>;
 
