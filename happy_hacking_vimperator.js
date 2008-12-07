@@ -39,7 +39,7 @@
 
   function kill (msg) {
     return function (event) {
-      if (ignore || !enabled)
+      if (ignore)
         return;
       event.preventDefault();
       event.stopPropagation();
