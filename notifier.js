@@ -16,7 +16,7 @@
 (function() {
 io.sourceFromRuntimePath(['libly.js']);
 if (!liberator.plugins.libly) {
-    liberator.log('notifier: needs _libly.js');
+    liberator.log('notifier: needs libly.js');
     return;
 }
 
@@ -180,7 +180,7 @@ function bootstrap() {
             }
 
             if (this.isBusy) {
-                logger.log('bussy.' + this.id);
+                logger.log('busy.' + this.id);
                 return;
             }
 
@@ -210,7 +210,7 @@ function bootstrap() {
                     liberator.sleep(3 * 1000);
                 }//}}}
                 if (typeof this.finallycallback == 'function') this.finallycallback();
-                logger.echo('notifier[' + this.id + '] stoped.(' + start + ')', commandline.force_singleline);
+                logger.echo('notifier[' + this.id + '] stopped.(' + start + ')', commandline.force_singleline);
             }), 10);
 
             logger.log('start end');
