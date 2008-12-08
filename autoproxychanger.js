@@ -5,7 +5,7 @@
  * @description-ja プロクシ設定
  * @minVersion     2.0pre
  * @author         pekepeke
- * @version        0.1.1
+ * @version        0.1.2
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -36,31 +36,32 @@
  *        http      : 'localhost',
  *        http_port : 8080,
  *      },
- *      url   : /^http:\/\/www\.nicovideo\.jp/,
+ *      url   : /http:\/\/www.nicovideo.jp/,
  *      run   : 'java.exe',
- *      args  : ['C:\\Personal\\Apps\\Internet\\NicoCacheNl\\NicoCache_nl.jar'],
+ *      args  : ['C:\Personal\Apps\Internet\NicoCacheNl\NicoCache_nl.jar'],
  *    }];
  * EOM
  *
  */
 
 liberator.plugins.AutoProxyChanger = (function() {
-var proxy_settings = liberator.globalVariables.autochanger_proxy_settings;
+var gVar = liberator.globalVariables;
+var proxy_settings = gVar.autochanger_proxy_settings;
 if (!proxy_settings) {
   proxy_settings = [{
     name  : 'disable',
     usage : 'direct connection',
     proxy : {
-      type      : 0
-    }
+      type      : 0,
+    },
   }, {
     name  : 'http',
     usage : 'localhost:8080',
     proxy : {
       type      : 1,
       http      : 'localhost',
-      http_port : 8080
-    }
+      http_port : 8080,
+    },
   }];
 }
 
@@ -88,9 +89,54 @@ const DISABLE_ICON = 'data:image/png;base64,'
 
 var acmanager = [];
 
-const prefkeys = ['ftp', 'gopher', 'http', 'ssl'];
+const prefkeys = ['ftp','gopher','http','ssl'];
 var prevSetting = null;
 var _isEnable = false;
+var exec = (function(){
+  const Cc = Components.classes;
+  const Ci = Components.interfaces;
+  var getFile = function(){
+    if (arguments.length <= 0) return null;
+    var file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
+    if (!file) return null;
+
+    file.initWithPath(arguments[0]);
+    for (var i=1; i<arguments.length; i++) file.append(arguments[i]);
+    if (file.exists() && file.isFile) return file;
+    return null;
+  };
+  var getPathSplitChar = function(){
+    var os = Cc["@mozilla.org/xre/app-info;1"].createInstance(Ci.nsIXULRuntime).OS;
+    if (os == "WINNT") return ";";
+    return ":";
+  };
+  var run = function(file, arg, async){
+    arg = arg || [];
+    var process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
+    process.init(file);
+    process.run(false, arg, arg.length);
+    return process.exitValue;
+  };
+  const spchar = getPathSplitChar();
+  return function(cmd, arg, async){
+    var file;
+    if ( (cmd.indexOf('/') >= 0 || cmd.indexOf('\\') >= 0) && (file=getFile(cmd)) ) return run(file, arg, async);
+
+    var env = Cc["@mozilla.org/process/environment;1"].getService(Ci.nsIEnvironment);
+    var exitValue = null;
+    env.get('PATH').split(spchar).some(
+      function(path){
+        if (file=getFile( path, cmd)){
+          exitValue = run(file, arg, async);
+          return true;
+        }
+        return false;
+      }
+    );
+    return exitValue;
+  };
+})();
+
 var ProxyChanger = function() this.initialize.apply(this, arguments);
 ProxyChanger.prototype = {
   initialize: function() {
@@ -131,11 +177,13 @@ function init() {
   proxy_settings.splice(0, 0, {name: 'default', usage: 'default setting', proxy: restore() });
 
   if (acmanager.length > 0) {
-    autocommands.add('LocationChange', '.*', 'js liberator.plugins.AutoProxyChanger.autoApplyProxy()');
-    //window.addEventListener('unload', function() applyProxyByName('default'), false);
+    autocommands.add("LocationChange", '.*', 'js liberator.plugins.AutoProxyChanger.autoApplyProxy()');
+    window.addEventListener("unload", function() {
+      if (prevSetting != null) applyProxy(prevSetting)
+    }, false);
   }
 
-  manager.isEnable = eval(liberator.globalVariables.autochanger_proxy_enabled) || false;
+  manager.isEnable = eval(gVar.autochanger_proxy_enabled) || false;
 }
 function restore() {
   var opt = new Object();
@@ -160,12 +208,17 @@ function checkApplyProxy() {
   acmanager.some( function( manager ) {
     if (manager.url.test(content.location.href)) {
       prevSetting = restore();
-      applyProxyByName(manager.name);
-      if (manager.run) {
-        io.run(manager.run, manager.args, false);
-        manager.run = null; manager.args = null;
+      try {
+        if (manager.run) {
+          if (exec(manager.run, manager.args, false) == null) throw "run process failed...";
+          manager.run = null; manager.args = null;
+        }
+        applyProxyByName(manager.name);
+        return true;
+      } catch(e) {
+        liberator.echoerr(e);
+        return true;
       }
-      return true;
     }
     return false;
   });
@@ -184,6 +237,7 @@ function applyProxyByName( name ) {
       options.setPref('network.proxy.'+key+'_port', 0);
     });
 
+    // apply proxy
     applyProxy(setting.proxy);
     return true;
   });
@@ -211,8 +265,11 @@ commands.addUserCommand(['proxy'], 'Proxy settings',
     }
 });
 
-commands.addUserCommand(['toggleautoproxy', 'aprxy'], 'Toggle auto proxy changer on/off',
-  function() {manager.isEnable = !manager.isEnable}, {}
+commands.addUserCommand(['toggleautoproxy','aprxy'], 'Toggle auto proxy changer on/off',
+  function() {
+    manager.isEnable = !manager.isEnable
+    liberator.echo('autoproxy:'+ manager.isEnable ? 'ON' : 'OFF');
+  }, {}
 );
 
 init();
