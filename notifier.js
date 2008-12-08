@@ -229,6 +229,7 @@ function bootstrap() {
                 this.options.extra
             );
             req.addEventListener('onSuccess', $U.bind(this, function(res) {
+                logger.log('initialized');
                 if (typeof this.parse == 'function') this.cache = this.parse(res);
                 if (this.cache)
                     this.initialized = true;
@@ -249,11 +250,11 @@ function bootstrap() {
                 if (typeof this.parse == 'function') parsed = this.parse(res);
                 if (parsed && typeof this.diff == 'function') diff = this.diff(this.cache, parsed);
                 if (diff && (typeof diff.length != 'undefined' && diff.length > 0)) {
+                    this.cache = parsed;
                     if (typeof this.buildMessages == 'function') {
                         let messages = this.buildMessages([].concat(diff));
                         [].concat(messages).forEach($U.bind(this, function(m) this.notify(m)));
                     }
-                    this.cache = parsed;
                 }
             }));
             req.get();

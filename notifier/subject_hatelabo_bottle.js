@@ -50,15 +50,10 @@ notifier.subject.register(notifier.SubjectHttp, {
     diff: function(cache, parsed) {
         var ret = [];
         parsed.forEach(function(element) {
-           if (!cache.some(function(c) { if (c.toString() == element.toString()) return true }))
+           if (!cache.some(function(c) { if (c.textContent == element.textContent) return true }))
                ret.push(element); 
         });
-
         return ret;
-        var text = (new XMLSerializer()).serializeToString(parsed[0])
-                            .replace(/<[^>]+>/g, function(all) all.toLowerCase())
-                            .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
-        return text;
     },
     buildMessages: function(diff) {
         var ret = [];
