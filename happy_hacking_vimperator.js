@@ -146,8 +146,15 @@ http://creativecommons.org/licenses/by-sa/3.0/
     }
   }
 
+  if (liberator.plugins.happy_hacking_vimperator) {
+    meows.forEach(fuck);
+    return;
+  } else {
+    liberator.plugins.happy_hacking_vimperator = 'Happy Hacking!';
+  }
+
   let (opt = options.get('go'))
-    opt.set(opt.get().replace(/rlb/g, ''));
+    opt.set(opt.get().replace(/[rlb]/g, ''));
 
   around(buffer, 'followLink', function (next) {
     ignore = true;
