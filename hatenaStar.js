@@ -43,7 +43,6 @@ function addHatenaStar (elem) {
 	let e = document.createEvent('MouseEvents');
 	e.initMouseEvent('click', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, elem);
 	elem.dispatchEvent(e);
-
 }
 
 liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
@@ -78,7 +77,14 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 	}
 );
 
-liberator.modules.hints.addMode(hmap, 'Add hatena star', addHatenaStar, function () StarXPath);
+liberator.modules.hints.addMode(hmap, 'Add hatena star',
+	function (elem, _, count) {
+		liberator.log('map:'+count)
+		for (let i = 0; i < Math.max(count, 1); i++)
+			addHatenaStar(elem);
+	},
+	function () StarXPath
+);
 
 })();
 
