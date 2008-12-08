@@ -1,7 +1,7 @@
 // PLUGIN_INFO//{{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-    <name>{NAME}</name>
+    <name>multi_requester</name>
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
