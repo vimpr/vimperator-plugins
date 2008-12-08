@@ -23,7 +23,7 @@
 ( function () {
 hints.addMode(
     liberator.globalVariables.googledocs_mapping || 'd',
-    'operate google doc',
+    'operate Google Docs',
     function (element) {
         if (element.localName.toLowerCase() === 'div') {
             let mousedown = document.createEvent('MouseEvent');
@@ -58,7 +58,7 @@ hints.addMode(
         }
     },
     function () {
-        if (!/http:\/\/docs\.google\.com\//.test(buffer.URL)) return;
+        if (!/^https?:\/\/docs\.google\.com\//.test(buffer.URL)) return;
         const divClassNames = [
             'goog-listitem-content',
             'goog-listheaderitem-content',
