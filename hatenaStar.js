@@ -79,7 +79,6 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 
 liberator.modules.hints.addMode(hmap, 'Add hatena star',
 	function (elem, _, count) {
-		liberator.log('map:'+count)
 		for (let i = 0; i < Math.max(count, 1); i++)
 			addHatenaStar(elem);
 	},
