@@ -1,18 +1,48 @@
-/**
- * ==VimperatorPlugin==
- * @name            libly.js
- * @description     suvene's library
- * @description-ja  適当なライブラリっぽいものたち
- * @author          suVene suvene@zeromemory.info
- * @version         0.1.1
- * @minVersion      1.2
- * @maxVersion      2.0pre
- * Last Change:     08-Dec-2008.
- * ==/VimperatorPlugin==
- *
- * HEAD COMMENT {{{
- *  }}}
- */
+// PLUGIN_INFO//{{{
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>libly(filename _libly.js)</name>
+    <description>vimperator plugins library?</description>
+    <description lang="ja">適当なライブラリっぽいものたち。</description>
+    <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
+    <version>0.1.1</version>
+    <minVersion>1.2</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+== メソッド一覧 ==
+* liberator.plugins.libly.$U
+getLogger(prefix):
+  log(msg, level), echo(msg, flg), echoerr(msg)
+  ログの書式は prefix + ' ' + yyyy/MM/dd + msg となります。
+extend(dst, src):
+  オブジェクトを拡張します。
+A(hash):
+  オブジェクトを配列にします。
+bind(obj, func):
+  func に obj を bind します。
+  func内からは this で obj が参照できるようになります。
+stripTags(str, tags):
+  str から tags で指定されたタグを取り除いて返却します。
+  tags は文字列、または配列で指定して下さい。
+eval(text):
+  Sandbox による、window.eval を極力利用するようにします。
+  Snadbox が利用できない場合は、unsafe な window の eval が直接利用されます。
+evalJson(str, toRemove):
+  str を decode します。
+  toRemove が true の場合、文字列の前後を1文字削除します。
+  "(key:value)" 形式の場合などに true を指定して下さい。
+pathToURL(path):
+  相対パスを絶対パスに変換します。
+deteFormat(dtm, fmt):
+  Date型インスタンスを、指定されたフォーマットで文字列に変換します。
+  fmt を省略した場合、"%y/%M/%d %h:%m:%s" となります。
+readDirectory(path, fileter, func):
+  path で指定したディレクトリから、filter で指定された正規表現に match する場合、
+  func をファイル名を引数にコールバックします。
+  filter は Function を指定することも可能です。
+     ]]></detail>
+</VimperatorPlugin>;
+//}}}
 if (!liberator.plugins.libly) {
 
 liberator.plugins.libly = {};
@@ -64,7 +94,7 @@ lib.$U = {//{{{
             if (Components.utils.evalInSandbox('true', sandbox) === true) {
                 fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); };
             }
-        } catch (e) { $U.log('warning: multi_requester.js is working with unsafe sandbox.'); }
+        } catch (e) { liberator.log('warning: multi_requester.js is working with unsafe sandbox.'); }
 
         return fnc(text);
     },
