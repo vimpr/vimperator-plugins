@@ -12,6 +12,7 @@ var flasher = null;
 
 var nmap = (liberator.globalVariables.hatena_star_mappings || ',?s').split(/\s+/);
 var hmap = liberator.globalVariables.hatena_star_hint_mapping || 'h';
+var hmax = parseInt(liberator.globalVariables.hatena_star_hint_max || '10', 10);
 
 function getFlasher() {
 	if (!flasher) {
@@ -79,7 +80,7 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 
 liberator.modules.hints.addMode(hmap, 'Add hatena star',
 	function (elem, _, count) {
-		for (let i = 0; i < Math.max(count, 1); i++)
+    for (let i = 0; i < Math.min(hmax, Math.max(count, 1)); i++)
 			addHatenaStar(elem);
 	},
 	function () StarXPath
