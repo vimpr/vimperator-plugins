@@ -108,6 +108,7 @@ var tags = {
 			let reg = /^\s*(.*)\s*:\s*$/;
 			if (reg.test(line)){
 				let dl = <dl><dt>{makeLink(RegExp.$1)}</dt></dl>;
+				try {
 				while ([num, line] = ite.next()){
 					if (!line) break;
 					if (reg.test(line)){
@@ -116,6 +117,7 @@ var tags = {
 						dl.* += <dd>{makeLink(line.replace(/^\s+|\s+$/g, ""))}</dd>;
 					}
 				}
+				} catch (e){}
 				xml += dl;
 				continue;
 			}
