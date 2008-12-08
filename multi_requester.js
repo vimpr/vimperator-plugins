@@ -1,75 +1,74 @@
-/**
- * ==VimperatorPlugin==
- * @name             multi_requester.js
- * @description      request, and the result is displayed to the buffer.
- * @description-ja   リクエストの結果をバッファに出力する。
- * @author           suVene suvene@zeromemory.info
- * @version          0.4.3
- * @minVersion       2.0pre
- * @maxVersion       2.0pre
- * Last Change:      08-Dec-2008.
- * ==/VimperatorPlugin==
- *
- * HEAD COMMENT {{{
- * Usage:
- *   command[!] subcommand [ANY_TEXT]
- *
- *     !                create new tab.
- *     ANY_TEXT         your input text
- *
- *   :mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
- *   :mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
- *
- *   other siteinfo by wedata.
- *     @see http://wedata.net/databases/Multi%20Requester/items
- *
- * CUSTOMIZE .vimperatorrc:
- *
- * [COMMAND](default [mr])
- *   let g:multi_requester_command = "ANY1, ANY2, ……"
- *     or
- *   liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
- *
- * [SITEINFO]
- *   ex.)
- *   javascript <<EOM
- *   liberator.globalVariables.multi_requester_siteinfo = [
- *       {
- *           map:           ',me',                          // optional: keymap for this siteinfo call
- *           bang:          true,                           // optional:
- *           args:          'any'                           // optional:
- *           name:          'ex',                           // required: subcommand name
- *           description:   'example',                      // required: commandline short help
- *           url:           'http://example.com/?%s',       // required: %s <-- replace string
- *           xpath:         '//*',                          // optional: default all
- *           srcEncode:     'SHIFT_JIS',                    // optional: default UTF-8
- *           urlEncode:     'SHIFT_JIS',                    // optional: default srcEncode
- *           ignoreTags:    'img',                          // optional: default script, syntax 'tag1,tag2,……'
- *           extractLink:   '//xpath'                       // optional: extract permalink
- *       },
- *   ];
- *   EOM
- *
- * [MAPPINGS]
- *   ex.)
- *   javascript <<EOM
- *   liberator.globalVariables.multi_requester_mappings = [
- *       [',ml', 'ex'],                  // == :mr  ex
- *       [',mg', 'goo', '!'],            // == :mr! goo
- *       [',ma', 'alc',    , 'args'],    // == :mr  alc args
- *   ];
- *   EOM
- *
- * [OTHER OPTIONS]
- *   let g:multi_requester_use_wedata = "false"             // true by default
- *
- *
- * TODO:
- *    - wedata local cache.
- *  }}}
- */
+// PLUGIN_INFO//{{{
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>{NAME}</name>
+    <description>request, and the result is displayed to the buffer.</description>
+    <description lang="ja">リクエストの結果をバッファに出力する。</description>
+    <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
+    <version>0.4.3</version>
+    <minVersion>2.0pre</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+== NEEDS LIBLARY ==
+_libly.js
+  @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
+== Usage ==
+command[!] subcommand [ANY_TEXT]
+- !                create new tab.
+- ANY_TEXT         your input text
+
+ex.)
+:mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
+:mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
+
+== CUSTUMIZE .vimperatorrc ==
+== COMMAND(default [mr]) ==
+let g:multi_requester_command = "ANY1, ANY2, ……"
+or
+liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
+
+== SITEINFO ==
+ex.)
+javascript &lt;&lt;EOM
+liberator.globalVariables.multi_requester_siteinfo = [
+    {
+        map:            ',me',                          // optional: keymap for this siteinfo call
+        bang:           true,                           // optional:
+        args:           'any'                           // optional:
+        name:           'ex',                           // required: subcommand name
+        description:    'example',                      // required: commandline short help
+        url:            'http://example.com/?%s',       // required: %s <-- replace string
+        xpath:          '//*',                          // optional: default all
+        srcEncode:      'SHIFT_JIS',                    // optional: default UTF-8
+        urlEncode:      'SHIFT_JIS',                    // optional: default srcEncode
+        ignoreTags:     'img',                          // optional: default script, syntax 'tag1,tag2,……'
+        extractLink:    '//xpath'                       // optional: extract permalink
+    },
+];
+EOM
+
+* other siteinfo by wedata.
+    @see http://wedata.net/databases/Multi%20Requester/items
+
+== MAPPINGS ==
+ex.)
+javascript <<EOM
+liberator.globalVariables.multi_requester_mappings = [
+    [',ml', 'ex'],                  // == :mr  ex
+    [',mg', 'goo', '!'],            // == :mr! goo
+    [',ma', 'alc',    , 'args'],    // == :mr  alc args
+];
+EOM
+
+== OTHER OPTIONS ==
+let g:multi_requester_use_wedata = "false"             // true by default
+
+== TODO ==
+* wedata local cache.
+     ]]></detail>
+</VimperatorPlugin>;
+//}}}
 (function() {
-io.sourceFromRuntimePath(['libly.js']);
 if (!liberator.plugins.libly) {
     liberator.log('multi_requester: needs libly.js');
     return;

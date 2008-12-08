@@ -13,7 +13,8 @@ var PLUGIN_INFO =
 * liberator.plugins.libly.$U
 getLogger(prefix):
   log(msg, level), echo(msg, flg), echoerr(msg)
-  ログの書式は prefix + ' ' + yyyy/MM/dd + msg となります。
+  のメソッドを持つ logger インスタンスを取得します。
+  ログの書式は prefix + ': ' + yyyy/MM/dd + msg となります。
 extend(dst, src):
   オブジェクトを拡張します。
 A(hash):
