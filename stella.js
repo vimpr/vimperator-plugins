@@ -409,22 +409,25 @@ var PLUGIN_INFO =
       let (as = content.document.defaultView.wrappedJSObject.swfArgs)
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
 
-    get fullscreen () this.player.__stella_fullscreen,
-    // FIXME - 元に戻らない
+    get fullscreen () this.storage.fullscreen,
+    // FIXME - 元に戻らない＆スクロールバーが出たまま
     set fullscreen () {
-      this.player.__stella_fullscreen = !this.player.__stella_fullscreen;
+      this.storage.fullscreen = !this.storage.fullscreen;
+      let p = this.player;
+      let r = p.getBoundingClientRect();
       if (this.fullscreen) {
-        liberator.log('full');
-        storeStyle(this.player, {
-          position: 'fixed',
-          left: '0px',
-          top: '0px',
+        if (this.storage.r === undefined)
+          this.storage.r = /r/.test(options['guioptions']);
+        storeStyle(p, {
+          marginLeft: -r.left + 'px',
+          marginTop: -r.top + 'px',
           width: content.innerWidth + 'px',
-          height: content.innerHeight + 'px'
+          height: content.innerHeight + 'px',
         });
+        p.setSize(content.innerWidth, content.innerHeight);
       } else {
-        liberator.log('normal');
-        restoreStyle(this.player);
+        p.setSize(640, 385);
+        restoreStyle(p);
       }
     },
 
@@ -923,10 +926,11 @@ var PLUGIN_INFO =
             }
             return arg;
           })();
-          liberator.open(url, arg.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+          liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         },
         {
           argCount: '*',
+          bang: true,
           completer: function (context, args) {
             if (!self.isValid)
               raise('Stella: Current page is not supported');
