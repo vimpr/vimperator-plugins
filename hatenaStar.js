@@ -1,6 +1,6 @@
 /**
  * For Vimperator 2.0pre
- * @author mattn mattn.jp@gmail.com
+ * @author mattn <mattn.jp@gmail.com>
  */
 
 (function() {
@@ -25,7 +25,7 @@ function getFlasher() {
 
 function blink(aNode) {
 	if (!aNode) {
-		liberator.echoerr('hatenastar not found');
+		liberator.echoerr('Hatena Star not found');
 		return;
 	}
 	if (aNode.nodeType == 3) aNode = aNode.parentNode;
@@ -41,7 +41,7 @@ function blink(aNode) {
 }
 
 function addHatenaStar (elem) {
-	let e = document.createEvent('MouseEvents');
+	var e = document.createEvent('MouseEvents');
 	e.initMouseEvent('click', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, elem);
 	elem.dispatchEvent(e);
 }
@@ -51,8 +51,9 @@ liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena
 		try {
 			arg = arg.string;
 			let result = buffer.evaluateXPath(StarXPath);
-			if (arg.match(/^(\d+)\?$/)) {
-				blink(result.snapshotItem(Number(RegExp.$1)-1));
+			let m      = arg.match(/^(\d+)\?$/);
+			if (m) {
+				blink(result.snapshotItem(Number(m[1])-1));
 				return;
 			}
 			for (let i = 0, l = result.snapshotLength; i < l; i++) {
@@ -78,9 +79,9 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 	}
 );
 
-liberator.modules.hints.addMode(hmap, 'Add hatena star',
+liberator.modules.hints.addMode(hmap, 'Add Hatena star',
 	function (elem, _, count) {
-    for (let i = 0; i < Math.min(hmax, Math.max(count, 1)); i++)
+		for (let i = 0, l = Math.min(hmax, Math.max(count, 1)); i < l; i++)
 			addHatenaStar(elem);
 	},
 	function () StarXPath
