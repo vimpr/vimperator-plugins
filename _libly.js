@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -150,6 +150,14 @@ lib.$U = {//{{{
             }
         }
     },
+    xmlSerialize: function(xml) {
+        try {
+           return (new XMLSerializer()).serializeToString(xml)
+                    .replace(/<[^>]+>/g, function(all) all.toLowerCase())
+                    .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
+                    //.replace(/<!--(?:[^-]|-(?!-))*-->/g, ''); // strictly
+        } catch (e) { return '' }
+    }
 };
 //}}}
 

@@ -1,17 +1,17 @@
-/**
- * notifier.js plugin observer
- * @name            observer_growl.js
- * @description     growl when notified.
- * @description-ja  Growl風通知。
- * @author          suVene suvene@zeromemory.info
- * @version         0.1.0
- * Last Change:     07-Dec-2008.
- *
- * use jQuery
- *   http://jquery.com/
- * use JGrowl
- *   http://stanlemon.net/projects/jgrowl.html
- */
+// PLUGIN_INFO//{{{
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>{name}</name>
+    <description>notification from the subjects is notified to you by the Growl style.</description>
+    <description lang="ja">Growl風通知。</description>
+    <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
+    <version>0.1.0</version>
+    <minVersion>2.0pre</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+    ]]></detail>
+</VimperatorPlugin>;
+//}}}
 (function() {
 
 var notifier = liberator.plugins.notifier;
@@ -28,22 +28,23 @@ Growl.prototype = {
     defaults: {
         life: 5000
     },
-    initialize: function(dom, container) {
+    initialize: function(dom, container, options) {
         this.dom = dom;
         this.container = container;
         this.created = new Date();
-        this.life = this.defaults.life;
+        this.options = $U.extend(this.defaults, (options || {}));
+        this.life = this.options.life;
         dom.childNodes[0].addEventListener("click", $U.bind(this, this.remove), false);
     },
     remove: function() {
+        // TODO: animation!!!!
         this.container.removeChild(this.dom);
     },
 
 }//}}}
 
-notifier.observer.register({
+notifier.observer.register(notifier.Observer, {
     initialize: function () {
-        logger.log('initialize');
         this.count = 1;
 
         io.getRuntimeDirectories('').forEach(function(dir) {
@@ -59,7 +60,6 @@ notifier.observer.register({
         });
     },
     update: function(message) {
-        logger.log('update:' + this.count);
 
         var doc = window.content.document;
         var container = doc.getElementById("observer_growl");
@@ -68,8 +68,9 @@ notifier.observer.register({
             container = doc.getElementById("observer_growl");
         }
 
-        this.createPopup(doc, message, container);
-        container.appendChild(this.createPopup(doc, message, container));
+        var notification = this.createPopup(message, doc, container);
+        // TODO: animation!!!
+        container.appendChild(notification);
 
         if (container.childNodes.length == 1) {
             let interval = setInterval($U.bind(this, this.checkStatus), 1000);
@@ -78,17 +79,16 @@ notifier.observer.register({
 
         this.count++;
     },
-    createPopup: function(doc, message, nodes) {
+    createPopup: function(message, doc, nodes) {
         var dom;
         var html =
-        <div class="observer_growl_notification" style="display: block;">
-            <div class="close">&#215;</div>
-            <div class="header">{util.escapeHTML(this.count + ': ' + message.title)}</div>
-            <div class="message">{util.escapeHTML(message.message)}</div>
-        </div>;
+            <div class="observer_growl_notification" style="display: block;">
+                <div class="close">&#215;</div>
+                <div class="header">{new XMLList(this.count + ': ' + message.title)}</div>
+                <div class="message">{new XMLList(message.message || '')}</div>
+            </div>;
         dom = util.xmlToDom(html, doc, nodes);
-        dom.__data__ = new Growl(dom, nodes);
-
+        dom.__data__ = new Growl(dom, nodes, message.options.growl);
         return dom;
     },
     checkStatus: function() {
@@ -106,7 +106,7 @@ notifier.observer.register({
                 removeNodes.push(item);
             }
         }
-        removeNodes.forEach(function(n) container.removeChild(n));
+        removeNodes.forEach(function(element) element.__data__.remove());
 
         if (container.childNodes.length == 0)
             clearInterval(container.__interval__);

@@ -1,22 +1,112 @@
-/**
- * ==VimperatorPlugin==
- * @name            notifier.js
- * @description     notice of change framework.
- * @description-ja  変更通知フレームワーク。
- * @author          suVene suvene@zeromemory.info
- * @version         0.1.0
- * @minVersion      2.0pre
- * @maxVersion      2.0pre
- * Last Change:     07-Dec-2008.
- * ==/VimperatorPlugin==
- *
- * HEAD COMMENT {{{
- *  }}}
- */
+// PLUGIN_INFO//{{{
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>{name}</name>
+    <description>notice of change framework.</description>
+    <description lang="ja">変更通知フレームワーク。</description>
+    <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
+    <version>0.1.0</version>
+    <minVersion>2.0pre</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+== Command ==
+:notifierstart:
+  変更通知をスタートします。
+:notifierrestart:
+  変更通知をリスタートします。
+:notifierstop:
+  変更通知をストップします。
+
+== Observer ==
+* 通知された変更を扱うオブジェクトを定義します。
+Subject からの Message オブジェクトを解析し、何らかの動作を行います。
+Observer ⇒ Subject への依存は高くて OK です。
+
+* 命名規約
+prefix に 'observer_' を付け、'rumtimepath/notifier' の下にインストールして下さい。
+ex.)'${rumtimepath}/notifier/observer_XXX.js'
+
+* 登録方法
+liberator.plugins.notifier.observer.register(baseClass, extendsMethods)
+baseClass:
+  基底クラスとなります。現在以下の基底クラスが存在します。
+  - liberator.plugins.notifier.Observer
+extendsMethosd:
+  基底クラスの拡張となるメソッドをハッシュ形式で渡します。
+  実装するメソッドは基底クラスのルールに従って下さい。
+
+* 基底クラスの説明
+** librator.plugins.notifier.Observer
+Observerの基本クラスです。
+initialize():
+  必要の無い場合、実装しなくても OK です。
+  インスタンス生成時に1度だけフレームワークによって呼び出されます。
+  初期化処理など必要な処理を実装して下さい。
+update(liberator.plugins.notifier.Message):
+  必ず実装して下さい。
+  Subject からの変更通知がなされた場合、引数 Message と共にフレームワークより呼び出されます。
+
+== Subject ==
+* 変更を検知し Observer に通知します。
+原則、observer との依存を少なくして下さい。
+(Message の解析の役割は Observer にある)
+
+* 命名規約
+prefix に 'subject_' を付け、'rumtimepath/notifier' の下にインストールして下さい。
+ex.)'${rumtimepath}/notifier/subject_XXX.js'
+
+* 登録方法
+liberator.plugins.notifier.subject.register(baseClass, extendsMethods)
+baseClass:
+  基底クラスとなります。現在以下の基底クラスが存在します。
+  - liberator.plugins.notifier.Subject
+  - liberator.plugins.notifier.SubjectHttp
+extendsMethosd:
+  基底クラスへの拡張をハッシュ形式で渡します。
+
+* 基底クラスの説明
+** librator.plugins.notifier.Subject
+Subject の基本クラスです。
+interval:
+  秒で変更チェックするインターバルを指定します。デフォルトは 60 です。
+initialize():
+  必要の無い場合、実装しなくても OK です。
+  インスタンス生成時に1度だけフレームワークによって呼び出されます。
+  初期化処理など必要な処理を実装して下さい。
+check():
+  必ず実装して下さい。
+  指定したインターバルごとにフレームワークによって呼び出されます。
+  変更を検知した場合、liberator.plugins.notifier.Message のインスタンスを引数に
+  this.notify(message) を呼び出してください。
+
+** librator.plugins.notifier.SubjectHttp
+Httpを利用した変更検知の基底クラスです。
+リクエスト内容をキャッシュします。
+options{}:
+  url:
+    URL を指定します。
+  headers{}:
+    リクエストに header が必要な場合ハッシュで指定します。
+  extra{}:
+    リクエストのオプションです。ハッシュで指定します。
+    以下の key が有効です。
+    asynchronose (false), encoding(default utf-8)
+parse(liberator.pluginsnotifier.Request):
+  必ず実装して下さい。
+  リクエストを解析した結果を返却して下さい。
+diff(cache, parsed):
+  必ず実装して下さい。
+  this.parse() による解析結果と、そのキャッシュとの差分を抽出して返却して下さい。
+buildMessages(diff):
+  必ず実装して下さい。
+  this.diff() により抽出されたオブジェクトを元に、liberator.plugins.notifier.Message のインスタンス、
+  または、その配列を返却して下さい。
+  ]]></detail>
+</VimperatorPlugin>;
+//}}}
 (function() {
-io.sourceFromRuntimePath(['libly.js']);
 if (!liberator.plugins.libly) {
-    liberator.log('notifier: needs libly.js');
+    liberator.log('notifier: needs _libly.js');
     return;
 }
 
@@ -37,11 +127,10 @@ function bootstrap() {
         this.initialize.apply(this, arguments);
     };
     Loader.prototype = {
-        initialize: function(name, registerHook) {
+        initialize: function(name) {
             liberator.plugins.notifier[name] = this;
             this.name = name;
             this.plugins = [];
-            this.registerHook = registerHook;
             this.load(name);
         },
         load: function(name) {
@@ -56,8 +145,8 @@ function bootstrap() {
                 });
             });
         },
-        register: function(plugin) {
-            this.plugins.push(this.registerHook(plugin));
+        register: function(baseClass, pluginExtends) {
+            this.plugins.push(new baseClass(pluginExtends));
         },
         unregister: function(plugin) {
             var ret = [];
@@ -105,8 +194,7 @@ function bootstrap() {
         __initialize__: function(args) {
             this.isActive = false;
             this.observers = [];
-            this.interval = 0;
-            //if (this.interval < 60) this.interval = 60;
+            this.interval = 60;
             this.__nextTime = new Date();
             $U.extend(this, args);
             if (typeof this.initialize == 'function') this.initialize();
@@ -128,6 +216,50 @@ function bootstrap() {
         check: function() { throw 'needs override.' }
     };//}}}
 
+    var SubjectHttp = Subject;//{{{
+    $U.extend(SubjectHttp.prototype, {
+        initialize: function() {
+            this.initialized = false;
+            this.count = 0;
+            this.cache;
+
+            var req = new libly.Request(
+                this.options.url,
+                this.options.headers,
+                this.options.extra
+            );
+            req.addEventListener('onSuccess', $U.bind(this, function(res) {
+                if (typeof this.parse == 'function') this.cache = this.parse(res);
+                if (this.cache)
+                    this.initialized = true;
+            }));
+            req.get();
+        },
+        check: function() {
+            if (!this.initialized) return;
+
+            this.count++;
+            var req = new libly.Request(
+                this.options.url,
+                this.options.headers,
+                this.options.extra
+            );
+            req.addEventListener('onSuccess', $U.bind(this, function(res) {
+                var parsed, diff;
+                if (typeof this.parse == 'function') parsed = this.parse(res);
+                if (parsed && typeof this.diff == 'function') diff = this.diff(this.cache, parsed);
+                if (diff && (typeof diff.length != 'undefined' && diff.length > 0)) {
+                    if (typeof this.buildMessages == 'function') {
+                        let messages = this.buildMessages([].concat(diff));
+                        [].concat(messages).forEach($U.bind(this, function(m) this.notify(m)));
+                    }
+                    this.cache = parsed;
+                }
+            }));
+            req.get();
+        }
+    });//}}}
+
     var Notifier = function() {//{{{
         this.initialize.apply(this, arguments);
     };
@@ -143,7 +275,7 @@ function bootstrap() {
         setup: function() {//{{{
 
             if (this.isBusy) {
-                logger.log('bussy.' + this.id);
+                logger.log('busy.' + this.id);
                 return;
             }
 
@@ -161,6 +293,9 @@ function bootstrap() {
             );
 
             liberator.plugins.notifier.libly = libly;
+            liberator.plugins.notifier.Observer = Observer;
+            liberator.plugins.notifier.Subject = Subject;
+            liberator.plugins.notifier.SubjectHttp = SubjectHttp;
             liberator.plugins.notifier.Message = Message;
 
             this.observers = new Loader('observer', function(args) new Observer(args));
@@ -204,7 +339,7 @@ function bootstrap() {
                                 s.isActive = false;
                                 s.__nextTime = new Date(s.__nextTime.getTime() + s.interval * 1000);
                                 if (s.__nextTime < now) s.__nextTime = now;
-                            }, 10);
+                            }, 1000);
                         }
                     });
                     liberator.sleep(3 * 1000);
