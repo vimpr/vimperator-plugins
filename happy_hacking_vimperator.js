@@ -137,7 +137,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
   function kill (msg) {
     return function (event) {
-      if (ignore)
+      if (ignore || !damn(event))
         return;
       event.preventDefault();
       event.stopPropagation();
@@ -146,12 +146,8 @@ http://creativecommons.org/licenses/by-sa/3.0/
     }
   }
 
-  if (liberator.plugins.happy_hacking_vimperator) {
-    meows.forEach(fuck);
-    return;
-  } else {
-    liberator.plugins.happy_hacking_vimperator = 'Happy Hacking!';
-  }
+  function damn (event)
+    !/^(script|embed)$/i.test(event.target.tagName);
 
   let (opt = options.get('go'))
     opt.set(opt.get().replace(/[rlb]/g, ''));
