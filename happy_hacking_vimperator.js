@@ -1,32 +1,21 @@
-// ==VimperatorPlugin==
-// @name           Happy Hacking Vimperator
-// @description    for True Vimperatorer!!
-// @description-ja for True Vimperatorer!!
-// @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        2.0
-// @author         anekos (anekos@snca.net)
-// @minVersion     2.0pre
-// @maxVersion     2.0pre
-// @requirements   Steel Heart
-// ==/VimperatorPlugin==
-//
-// Usage:
-//    DO NOT THINK. FEEL!
-//
-// Links:
-//    Unbroken keyboard:
-//        http://www.pfu.fujitsu.com/hhkeyboard/
-//
-// License:
-//    http://creativecommons.org/licenses/by-sa/3.0/
-
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>Happy Happy Vimperator</name>
 <description>This plugin makes you to True Vimperatorer</description>
 <version>2.0</version>
+<author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
+== Usage ==
 DO NOT THINK. FEEL!
+== Unbroken keyboard ==
+http://www.pfu.fujitsu.com/hhkeyboard/
+== Requirements ==
+Steel Heart
+== License ==
+Creative Commons Attribution-Share Alike 3.0 Unported
+http://creativecommons.org/licenses/by-sa/3.0/
 ]]></detail>
 </VimperatorPlugin>;
 
