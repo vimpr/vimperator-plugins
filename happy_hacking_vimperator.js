@@ -24,6 +24,8 @@ http://creativecommons.org/licenses/by-sa/3.0/
   let enabled = s2b(liberator.globalVariables.happy_hacking_vimperator_enable, true);
   let ignore = false;
   let mousedownTime = new Date();
+  let sound = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
+  sound.init();
 
   let meows = [
     // mouse kara
@@ -141,8 +143,10 @@ http://creativecommons.org/licenses/by-sa/3.0/
         return;
       event.preventDefault();
       event.stopPropagation();
-      if (msg)
+      if (msg) {
         fuck(shit());
+        sound.play(makeURI('http://www.kurinton.net/~snca/files/meow.wav'));
+      }
     }
   }
 
