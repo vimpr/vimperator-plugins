@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.3</version>
+    <version>0.4.4</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -17,7 +17,7 @@ command[!] subcommand [ANY_TEXT]
 - !                create new tab.
 - ANY_TEXT         your input text
 
-ex.)
+e.g.)
 :mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
 :mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
 
@@ -28,7 +28,7 @@ or
 liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
 
 == SITEINFO ==
-ex.)
+e.g.)
 javascript &lt;&lt;EOM
 liberator.globalVariables.multi_requester_siteinfo = [
     {
@@ -51,7 +51,7 @@ EOM
     @see http://wedata.net/databases/Multi%20Requester/items
 
 == MAPPINGS ==
-ex.)
+e.g.)
 javascript <<EOM
 liberator.globalVariables.multi_requester_mappings = [
     [',ml', 'ex'],                  // == :mr  ex
@@ -73,7 +73,7 @@ if (!liberator.plugins.libly) {
     liberator.log('multi_requester: needs libly.js');
     return;
 }
- 
+
 // global variables {{{
 var DEFAULT_COMMAND = ['mr'];
 var SITEINFO = [
@@ -381,9 +381,8 @@ var MultiRequester = {
 
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
                    (new XMLSerializer()).serializeToString(doc)
-                            .replace(/<[^>]+>/g, function(all) all.toLowerCase())
-                            .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
-                            //.replace(/<!--(?:[^-]|-(?!-))*-->/g, ''); // strictly
+                                        .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
+                                        .replace(/<[^>]+>/g, function(all) all.toLowerCase());
 
             MultiRequester.echoHash[res.req.options.siteinfo.name] = html;
 
@@ -396,7 +395,7 @@ var MultiRequester = {
         if (MultiRequester.requestCount == 0) {
             let echoList = [];
             MultiRequester.requestNames.split(',').forEach(function(name) {
-                echoList.push(MultiRequester.echoHash[name])
+                echoList.push(MultiRequester.echoHash[name]);
             });
             html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
                    echoList.join('') +
