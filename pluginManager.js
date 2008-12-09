@@ -80,7 +80,7 @@ var tags = {
 	maxVersion: id,
 	minVersion: id,
 	detail: function(info){
-		if (info.* && info.*[0].nodeKind() == 'element')
+		if (info.* && info.*[0] && info.*[0].nodeKind() == 'element')
 			return info.*;
 
 		var text = fromUTF8Octets(info.*.toString());
