@@ -5,11 +5,10 @@ var PLUGIN_INFO =
     <description>notifies if hatena bottle was changed.</description>
     <description lang="ja">はてなボトルの変更通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <detail><![CDATA[
-    ]]></detail>
+    <detail/>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -32,42 +31,23 @@ notifier.subject.register(notifier.SubjectHttp, {
         extra: null
     },
     parse: function(res) {
+        if (!res.isSuccess() || res.responseText == '') return;
 
-        var ret, dom;
+        var dom = res.getHTMLDocument('id("body")//div[contains(concat(" ", @class, " "), " entry ")]');
+        if (!dom) return;
 
-        if (!res.isSuccess() || res.responseText == '') return ret;
-
-        dom = res.getHTMLDocument('id("body")//div[contains(concat(" ", @class, " "), " entry ")]');
-        if (!dom) return ret;
-
-        ret = [];
-        for (let i = 0, len = dom.childNodes.length; i < len; i++) {
-            ret.push(dom.childNodes[i]);
-        }
-
+        var ret = [];
+        for (let i = 0, len = dom.childNodes.length; i < len; ret.push(dom.childNodes[i++]));
         return ret;
     },
-    diff: function(cache, parsed) {
-        var ret = [];
-        parsed.forEach(function(element) {
-           if (!cache.some(function(c) { if (c.textContent == element.textContent) return true }))
-               ret.push(element); 
-        });
-        return ret;
-    },
-    buildMessages: function(diff) {
-        var ret = [];
-        diff.forEach(function(d) {
-            ret.push(
-                new notifier.Message('Hatelab bottle', $U.xmlSerialize(d), {
-                        growl: {
-                            life: 7000
-                        }
-                })
-            );
-        });
-        return ret;
-    }
+    diff: function(cache, parsed)
+        parsed.filter(function(element)
+            !cache.some(function(c) c.textContent == element.textContent)),
+    buildMessages: function(diff)
+        diff.map(function(d)
+            new notifier.Message('Hatelab bottle', $U.xmlSerialize(d), {
+                growl: { life: 7000 }
+            }))
 });
 
 })();

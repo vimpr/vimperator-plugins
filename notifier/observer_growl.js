@@ -23,7 +23,7 @@ var logger = $U.getLogger('observer_growl');
 
 var Growl = function() {//{{{
     this.initialize.apply(this, arguments);
-}
+};
 Growl.prototype = {
     defaults: {
         life: 5000
@@ -41,7 +41,7 @@ Growl.prototype = {
         this.container.removeChild(this.dom);
     },
 
-}//}}}
+};//}}}
 
 notifier.observer.register(notifier.Observer, {
     initialize: function () {
@@ -51,7 +51,7 @@ notifier.observer.register(notifier.Observer, {
             var path = io.expandPath(dir.path + '/plugin/notifier');
             $U.readDirectory(path, '^growl', function(f) {
                 try {
-                    io.source(f.path, true)
+                    io.source(f.path, true);
                     logger.log('load success: ' + f.leafName);
                 } catch (e) {
                     logger.log('load failed: ' + f.leafName);
