@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -41,7 +41,7 @@ readDirectory(path, fileter, func):
   path で指定したディレクトリから、filter で指定された正規表現に match する場合、
   func をファイル名を引数にコールバックします。
   filter は Function を指定することも可能です。
-     ]]></detail>
+    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 if (!liberator.plugins.libly) {
@@ -50,7 +50,7 @@ liberator.plugins.libly = {};
 var lib = liberator.plugins.libly;
 
 lib.$U = {//{{{
-    getLogger:  function(prefix) {
+    getLogger: function(prefix) {
         return new function() {
             this.log = function(msg, level) {
                 if (typeof msg == 'object') msg = util.objectToString(msg);
@@ -83,8 +83,7 @@ lib.$U = {//{{{
         }
     },
     stripTags: function(str, tags) {
-        var ignoreTags = [].concat(tags);
-        ignoreTags = '(?:' + ignoreTags.join('|') + ')';
+        var ignoreTags = '(?:' + tags.join('|') + ')';
         return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
     eval: function(text) {
@@ -152,17 +151,16 @@ lib.$U = {//{{{
     },
     xmlSerialize: function(xml) {
         try {
-           return (new XMLSerializer()).serializeToString(xml)
-                    .replace(/<[^>]+>/g, function(all) all.toLowerCase())
-                    .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
-                    //.replace(/<!--(?:[^-]|-(?!-))*-->/g, ''); // strictly
+            return (new XMLSerializer()).serializeToString(xml)
+                                        .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
+                                        .replace(/<[^>]+>/g, function(all) all.toLowerCase());
         } catch (e) { return '' }
     }
 };
 //}}}
 
 lib.Request = function() {//{{{
-        this.initialize.apply(this, arguments);
+    this.initialize.apply(this, arguments);
 };
 lib.Request.EVENTS = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
 lib.Request.requestCount = 0;
@@ -245,7 +243,7 @@ lib.Request.prototype = {
             } catch (e) {
                 if (!this.fireEvent('onException', e, this.options.asynchronous)) throw e;
             }
-         }
+        }
     },
     setRequestHeaders: function() {
         var headers = {
@@ -308,7 +306,7 @@ lib.Response.prototype = {
     getHTMLDocument: function(xpath, xmlns, ignoreTags) {
         if (!this.doc) {
             this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
-            var iTags = ['script'];
+            let iTags = ['script'];
             if (ignoreTags) {
                 iTags.concat(ignoreTags.split(','));
             }
