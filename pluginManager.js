@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugin</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.1</version>
+<version>0.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
@@ -29,6 +29,9 @@ description:
 author:
 	製作者名
 	属性mailにe-mail、homepageにURLを付けるとリンクされます
+license:
+	ライセンスについて
+	属性documentにURLを付けるとリンクされます
 version:
 	プラグインのバージョン
 maxVersion:
@@ -54,46 +57,33 @@ detail:
 
 liberator.plugins.pluginManager = (function(){
 
+function id (value) value;
 var lang = window.navigator.language;
 var tags = {
-	name: function(info) info.name ? fromUTF8Octets(info.name.toString()) : null,
+	name: function(info) fromUTF8Octets(info.toString()),
 	author: function(info) {
-		if (!info.author) return null;
-		var xml = <>{info.author.toString()}</>;
-		if (info.author.@homepage.toString() != '')
-			xml += <><span> </span>{makeLink(info.author.@homepage.toString())}</>;
-		if (info.author.@mail.toString() != '')
-			xml += <><span> </span>({makeLink("mailto:"+info.author.@mail)})</>;
+		var xml = <>{info.toString()}</>;
+		if (info.@homepage.toString() != '')
+			xml += <><span> </span>{makeLink(info.@homepage.toString())}</>;
+		if (info.@mail.toString() != '')
+			xml += <><span> </span>({makeLink("mailto:"+info.@mail)})</>;
 		return xml;
 	},
-	description: function(info){
-		if (!info.description) return null;
-		var desc = info.description[0].toString();
-		for (let i=info.description.length(), lang=lang.split('-', 2).shift(); i-->1;){
-			if (info.description[i].@lang == lang){
-				desc = info.description[i].toString();
-				break;
-			}
-		}
-		for (let i=info.description.length(); i-->1;){
-			if (info.description[i].@lang == lang){
-				desc = info.description[i].toString();
-				break;
-			}
-		}
-		return makeLink(fromUTF8Octets(desc));
+	description: function(info) makeLink(fromUTF8Octets(info.toString())),
+	license: function(info) {
+		var xml = <>{info.toString()}</>;
+		if (info.@document.toString() != '')
+			xml += <><span> </span>{makeLink(info.@document.toString())}</>;
+		return xml;
 	},
-	version: function(info) info.version || null,
-	maxVersion: function(info) info.maxVersion || null,
-	minVersion: function(info) info.minVersion || null,
+	version: id,
+	maxVersion: id,
+	minVersion: id,
 	detail: function(info){
-		if (!info.detail)
-			return null;
+		if (info.* && info.*[0].nodeKind() == 'element')
+			return info.*;
 
-		if (info.detail.* && info.detail.*[0].nodeKind() == 'element')
-			return info.detail.*;
-
-		var text = fromUTF8Octets(info.detail.*.toString());
+		var text = fromUTF8Octets(info.*.toString());
 		var lines = text.split(/\r\n|[\r\n]/);
 		var xml = <></>;
 		var ite = Iterator(lines);
@@ -127,6 +117,25 @@ var tags = {
 		return xml;
 	}
 };
+function chooseByLang (elems) {
+	if (!elems)
+		return null;
+	function get (lang) {
+		for (let i=elems.length(); i-->1;){
+			if (elems[i].@lang == lang)
+				return elems[i];
+		}
+	}
+	return get(lang) || get(lang.split('-', 2).shift()) || elems[0] || elems;
+}
+for (let it in Iterator(tags)) {
+	let [name, value] = it;
+	tags[name] = function (info) {
+		if (!info[name])
+			return null;
+		return value.call(tags, chooseByLang(info[name]));
+	};
+}
 function makeLink(str){
 	return XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="#" highlight="URL">$&</a>'));
 }
