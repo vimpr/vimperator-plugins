@@ -1,30 +1,35 @@
-// ==VimperatorPlugin==
-// @name           Auto Source
-// @description    Sourcing automatically when the specified file is modified.
-// @description-ja 指定のファイルが変更されたら自動で :so する。
-// @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.1
-// @author         anekos (anekos@snca.net)
-// @minVersion     2.0pre
-// @maxVersion     2.0pre
-// ==/VimperatorPlugin==
-//
-// Usage:
-//    Start watching
-//      :aso taro.js
-//      :autoso[urce] taro.js
-//    Stop watching
-//      :aso! taro.js
-//      :autoso[urce]! taro.js
-//
-// Usage-ja:
-//    監視を開始
-//      :aso taro.js
-//      :autoso[urce] taro.js
-//    監視を中止
-//      :aso! taro.js
-//      :autoso[urce]! taro.js
-//
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name> Auto Source </name>
+  <description>Sourcing automatically when the specified file is modified.</description>
+  <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
+  <version>1.2</version>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <license document="http://creativecommons.org/licenses/by-sa/3.0/">
+    Creative Commons Attribution-Share Alike 3.0 Unported
+  </license>
+  <detail><![CDATA[
+    == Commands ==
+    Start watching:
+      :aso taro.js
+      :autoso[urce] taro.js
+    Stop watching:
+      :aso! taro.js
+      :autoso[urce]! taro.js
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    == Commands ==
+   監視を開始:
+     :aso taro.js
+     :autoso[urce] taro.js
+   監視を中止:
+     :aso! taro.js
+     :autoso[urce]! taro.js
+  ]]></detail>
+</VimperatorPlugin>;
+
 // Links:
 //    http://d.hatena.ne.jp/nokturnalmortum/20081114#1226652163
 //    http://p-pit.net/rozen/
@@ -73,15 +78,15 @@
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg, bang) {
-      (bang ? killWatcher : startWatching)(io.expandPath(arg.string));
+      (bang ? killWatcher : startWatching)(io.expandPath(arg[0]));
     },
     {
       bang: true,
       argCount: '1',
-      completer: function (context, arg, bang) {
-        if (bang) {
+      completer: function (context, args) {
+        if (args.bang) {
           context.title = ['Path'];
-          context.completions = files.map(function (it) ([it.path]));
+          context.completions = files.map(function (it) ([it.path, '']));
         } else {
           completion.file(context);
         }
@@ -91,3 +96,5 @@
   );
 
 })();
+
+// vim:sw=2 ts=2 et si fdm=marker:
