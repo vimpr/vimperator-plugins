@@ -112,13 +112,13 @@
 
     var _isEnable;
 
-    function replaceMap (mode, key, desc, aroundFunc, extra) {
-      let old = liberator.modules.mappings.getDefault(mode, key);
-      let oldAction = old.action;
+    function replaceMap (mode, key, desc, aroundFunc, extra){
+      var old = liberator.modules.mappings.getDefault(mode, key);
+      var oldAction = old.action;
       old.description = desc;
-      old.action = function ()
+      old.action = function()
                       let (self = this, args = arguments)
-                        aroundFunc(function () oldAction.apply(self, args));
+                        aroundFunc(function() oldAction.apply(self, args));
     }
 
     var LDRizeCooperation = new Class();
@@ -168,9 +168,10 @@
             return LDRizeCooperationPanel;
         },
         hookGreasemonkey: function(){
+            var self = this;
+            var GreasemonkeyService;
             try{
-                var self = this;
-                var GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
+                GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
                 this.addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
                     if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
                         sandbox.window.addEventListener("focus",function(){
@@ -204,7 +205,9 @@
                                     };
                                     break;
                         default:    map.action = function(){
-                                        self.isEnableLDRizeCooperation() ? self.sendRawKeyEvent(0,x.charCodeAt(0)):oldAction.apply(this,arguments);
+                                        self.isEnableLDRizeCooperation()
+                                            ? self.sendRawKeyEvent(0,x.charCodeAt(0))
+                                            : oldAction.apply(this,arguments);
                                     };
                                     break;
                     }
@@ -219,8 +222,8 @@
                 ["L","LDRize paragraphes (in a new tab", liberator.NEW_TAB]
             ].forEach(function([mode,prompt,target]){
                 liberator.modules.hints.addMode(mode,prompt,
-                        function (elem) liberator.modules.buffer.followLink(elem, target),
-                        function () {
+                        function(elem) liberator.modules.buffer.followLink(elem, target),
+                        function(){
                             var siteinfo = self.LDRize.getSiteinfo();
                             return siteinfo.paragraph + "/" + siteinfo.link;
                         });
@@ -241,7 +244,7 @@
                 function(arg){self.Minibuffer.execute(arg.string)},
                 {
                     completer: function(context, arg, special){
-                        let filter = context.filter;
+                        var filter = context.filter;
                         var completionList = [];
                         var command = self.Minibuffer.command;
                         var alias = self.Minibuffer.alias_getter();
@@ -296,7 +299,7 @@
             var linkXpath = this.LDRize.getSiteinfo()['link'];
             var viewXpath = this.LDRize.getSiteinfo()['view'] || linkXpath + "/text()";
             return this.LDRize.getPinnedItems().map(function(i){
-                let linkResult = i.XPath(linkXpath); let viewResult = i.XPath(viewXpath);
+                var linkResult = i.XPath(linkXpath), viewResult = i.XPath(viewXpath);
                 return [linkResult, viewResult ? viewResult.textContent : null];
             });
         },
@@ -323,28 +326,29 @@
             });
         },
         isScrollOrBind: function(getter){
+            var self = this;
+            var paragraphes, paragraph, current, next, innerHeight, scrollY, limit, p, np, cp;
             try{
-                var self = this;
-                var paragraphes = this.LDRize.getParagraphes();
-                var paragraph = paragraphes[getter]();
-                var current = paragraphes.current;
-                var next = paragraphes.getNext();
+                paragraphes = this.LDRize.getParagraphes();
+                paragraph = paragraphes[getter]();
+                current = paragraphes.current;
+                next = paragraphes.getNext();
 
-                var innerHeight = window.content.innerHeight;
-                var scrollY = window.content.scrollY;
+                innerHeight = window.content.innerHeight;
+                scrollY = window.content.scrollY;
 
-                var limit = window.content.innerHeight * (self.skipHeight + 0.5);
+                limit = window.content.innerHeight * (self.skipHeight + 0.5);
 
                 if(paragraph.paragraph == undefined) return true;                                 // scroll
                 if(current.paragraph == undefined) return false;                                  // bind
                 if(current.paragraph.y - window.content.scrollY == this.LDRize.getScrollHeight()
                         && getter == "getPrev") return false;                                     // bind
 
-                var p = this.getClientPosition(paragraph.paragraph.node);
-                var np = next && next.paragraph.node != undefined ?
+                p = this.getClientPosition(paragraph.paragraph.node);
+                np = next && next.paragraph.node != undefined ?
                     this.getClientPosition(next.paragraph.node) :
                     {top: window.content.scrollMaxY + window.content.innerHeight,left: 0};
-                var cp = this.getClientPosition(current.paragraph.node);
+                cp = this.getClientPosition(current.paragraph.node);
 
                 /*
                  *log(p);
@@ -353,11 +357,11 @@
                  */
 
                 //check current paragraph
-                if(!(scrollY < np.top && cp.top < scrollY + innerHeight)) return false;            // bind
+                if(!(scrollY < np.top && cp.top < scrollY + innerHeight)) return false;           // bind
                 //check next/prev paragraph
                 if(Math.abs(p.top - (scrollY + innerHeight/2)) < innerHeight * 0.5) return false; // bind
                 if(Math.abs(p.top - (scrollY + innerHeight/2)) > limit) return true;              // scroll
-                else return false;                                                                // bind
+                return false;                                                                     // bind
             }catch(e){
                 liberator.log(e);
             }
@@ -380,9 +384,9 @@
                 position = elem.parentNode.getBoundingClientRect();
             }
             return {
-                left:Math.round(window.content.scrollX+position.left),
-                top:Math.round(window.content.scrollY+position.top)
-            }
+                left: Math.round(window.content.scrollX+position.left),
+                top:  Math.round(window.content.scrollY+position.top)
+            };
         },
         sendRawKeyEvent: function(keyCode,charCode){
             var evt = window.content.wrappedJSObject.document.createEvent("KeyEvents");
