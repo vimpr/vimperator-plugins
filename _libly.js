@@ -102,6 +102,9 @@ libly.$U = {//{{{
     },
     A: function(hash, iter) {
         var ret = [];
+        if (typeof hash == 'undefined') return ret;
+        if (typeof hash == 'string') return [hash];
+        if (hash.toArray) return hash.toArray();
         for each (let item in hash) ret.push(item);
         return ret;
     },

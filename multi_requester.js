@@ -5,13 +5,14 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.4</version>
+    <version>0.4.5</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == NEEDS LIBLARY ==
-_libly.js
+_libly.js(ver.0.1.4)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
+
 == Usage ==
 command[!] subcommand [ANY_TEXT]
 - !                create new tab.
@@ -70,7 +71,7 @@ let g:multi_requester_use_wedata = "false"             // true by default
 //}}}
 (function() {
 if (!liberator.plugins.libly) {
-    liberator.log('multi_requester: needs libly.js');
+    liberator.log('multi_requester: needs _libly.js');
     return;
 }
 
@@ -92,8 +93,8 @@ var SITEINFO = [
         urlEncode:   'UTF-8'
     },
 ];
-var lib = liberator.plugins.libly;
-var $U = lib.$U;
+var libly = liberator.plugins.libly;
+var $U = libly.$U;
 var logger = $U.getLogger('multi_requester');
 var mergedSiteinfo = {};
 //}}}
@@ -209,7 +210,7 @@ var DataAccess = {
         return $U.A(mergedSiteinfo);
     },
     getWedata: function(func) {
-        var req = new lib.Request(
+        var req = new libly.Request(
             'http://wedata.net/databases/Multi%20Requester/items.json'
         );
         req.addEventListener('onSuccess', function(res) {
@@ -271,7 +272,7 @@ var MultiRequester = {
             if (bang) {
                 liberator.open(url, liberator.NEW_TAB);
             } else {
-                let req = new lib.Request(url, null, {
+                let req = new libly.Request(url, null, {
                     encoding: srcEncode,
                     siteinfo: info,
                     args: {
@@ -336,9 +337,8 @@ var MultiRequester = {
 
         var el = res.getHTMLDocument(extractLink);
         if (!el) throw 'extract link failed.: extractLink -> ' + extractLink;
-        var a = el.firstChild;
-        var url = $U.pathToURL((a.href || a.action || a.value));
-        var req = new lib.Request(url, null, $U.extend(res.req.options, {extractLink: true}));
+        var url = $U.pathToURL(el[0]);
+        var req = new libly.Request(url, null, $U.extend(res.req.options, {extractLink: true}));
         req.addEventListener('onException', $U.bind(this, this.onException));
         req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
         req.addEventListener('onFailure', $U.bind(this, this.onFailure));
@@ -375,14 +375,13 @@ var MultiRequester = {
                 this.extractLink(res, extractLink);
                 return;
             }
-
-            doc = res.getHTMLDocument(xpath, null, res.req.options.siteinfo.ignoreTags);
+            var ignoreTags = ['script'].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
+            doc = document.createElementNS(null, 'div');
+            res.getHTMLDocument(xpath, null, ignoreTags, function(node, i) { doc.appendChild(node) } );
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
-                   (new XMLSerializer()).serializeToString(doc)
-                                        .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
-                                        .replace(/<[^>]+>/g, function(all) all.toLowerCase());
+                   $U.xmlSerialize(doc);
 
             MultiRequester.echoHash[res.req.options.siteinfo.name] = html;
 
