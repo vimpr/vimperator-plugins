@@ -2,7 +2,7 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>Happy Happy Vimperator</name>
 <description>This plugin makes you to True Vimperatorer</description>
-<version>2.0</version>
+<version>2.1</version>
 <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
@@ -119,7 +119,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
   };
 
   function shit ()
-    meows[Math.round(Math.random() * meows.length + 0.5)];
+    meows[Math.floor(Math.random() * meows.length)];
 
   function fuck (msg) {
     let sz = innerWidth / msg.length / 1.5;
