@@ -5,16 +5,22 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
-== メソッド一覧 ==
-* liberator.plugins.libly.$U
+== Objects ==
+- liberator.plugins.libly.$U
+- liberator.plugins.libly.Request
+- liberator.plugins.libly.Response
+
+== Logger ==
 getLogger(prefix):
   log(msg, level), echo(msg, flg), echoerr(msg)
   のメソッドを持つ logger インスタンスを取得します。
   ログの書式は prefix + ': ' + yyyy/MM/dd + msg となります。
+
+== Object Utility ==
 extend(dst, src):
   オブジェクトを拡張します。
 A(hash):
@@ -22,9 +28,6 @@ A(hash):
 bind(obj, func):
   func に obj を bind します。
   func内からは this で obj が参照できるようになります。
-stripTags(str, tags):
-  str から tags で指定されたタグを取り除いて返却します。
-  tags は文字列、または配列で指定して下さい。
 eval(text):
   Sandbox による、window.eval を極力利用するようにします。
   Snadbox が利用できない場合は、unsafe な window の eval が直接利用されます。
@@ -32,29 +35,52 @@ evalJson(str, toRemove):
   str を decode します。
   toRemove が true の場合、文字列の前後を1文字削除します。
   "(key:value)" 形式の場合などに true を指定して下さい。
-pathToURL(path):
-  相対パスを絶対パスに変換します。
 deteFormat(dtm, fmt):
   Date型インスタンスを、指定されたフォーマットで文字列に変換します。
   fmt を省略した場合、"%y/%M/%d %h:%m:%s" となります。
+
+==  Browser ==
+getSelectedString:
+  window の選択文字列を返却します。
+getUserAndPassword(hostname, formSubmitURL, username):
+  login-manager から [username, password] を取得します。
+  引数の username が省略された場合、検索された 1件目を返却します。
+  データが存在しない場合は、null を返却します。
+
+== System ==
 readDirectory(path, fileter, func):
   path で指定したディレクトリから、filter で指定された正規表現に match する場合、
   func をファイル名を引数にコールバックします。
   filter は Function を指定することも可能です。
+
+== HTML, XML, DOM, E4X ==
+pathToURL(path):
+  相対パスを絶対パスに変換します。
+getHTMLFragment(html):
+  <html>※1</html>
+  ※1 の文字列を取得します。
+stripTags(str, tags):
+  str から tags で指定されたタグを取り除いて返却します。
+  tags は文字列、または配列で指定して下さい。
+createHTMLDocument(str):
+  引数 str より、HTMLFragment を作成します。
+getNodesFromXPath(xpath, doc, callback, obj):
+  xpath を評価し snapshot の配列を返却します。
     ]]></detail>
 </VimperatorPlugin>;
 //}}}
 if (!liberator.plugins.libly) {
 
 liberator.plugins.libly = {};
-var lib = liberator.plugins.libly;
+var libly = liberator.plugins.libly;
 
-lib.$U = {//{{{
+libly.$U = {//{{{
+    // Logger {{{
     getLogger: function(prefix) {
         return new function() {
             this.log = function(msg, level) {
                 if (typeof msg == 'object') msg = util.objectToString(msg);
-                liberator.log(lib.$U.dateFormat(new Date()) + ': ' + (prefix || '') + ': ' + msg, (level || 0));
+                liberator.log(libly.$U.dateFormat(new Date()) + ': ' + (prefix || '') + ': ' + msg, (level || 0));
             };
             this.echo = function(msg, flg) {
                 flg = flg || commandline.FORCE_MULTILINE;
@@ -67,6 +93,8 @@ lib.$U = {//{{{
             };
         }
     },
+    // }}}
+    // Object Utility {{{
     extend: function(dst, src) {
         for (let prop in src)
             dst[prop] = src[prop];
@@ -81,10 +109,6 @@ lib.$U = {//{{{
         return function() {
             return func.apply(obj, arguments);
         }
-    },
-    stripTags: function(str, tags) {
-        var ignoreTags = '(?:' + tags.join('|') + ')';
-        return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
     eval: function(text) {
         var fnc = window.eval;
@@ -106,15 +130,6 @@ lib.$U = {//{{{
             return json.decode(str);
         } catch (e) { return null; }
     },
-    getSelectedString: function() {
-         return (new XPCNativeWrapper(window.content.window)).getSelection().toString();
-    },
-    pathToURL: function(path) {
-        if (/^https?:\/\//.test(path)) return path;
-        var link = document.createElement('a');
-        link.href= path;
-        return link.href;
-    },
     dateFormat: function(dtm, fmt) {
         var d = {
             y: dtm.getFullYear(),
@@ -131,6 +146,35 @@ lib.$U = {//{{{
         }
         return (fmt || '%y/%M/%d %h:%m:%s').replace(/%([yMdhms%])/g, function (_, n) d[n]);
     },
+    // }}}
+    // Browser {{{
+    getSelectedString: function() {
+         return (new XPCNativeWrapper(window.content.window)).getSelection().toString();
+    },
+    getUserAndPassword: function(hostname, formSubmitURL, username) {
+        try {
+            var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+            var logins = passwordManager.findLogins({}, hostname, formSubmitURL, null);
+            if (logins.length) {
+                if (username) {
+                    for (let i = 0, len = logins.lengh; i < len; i++) {
+                        if (logins[i].username == username)
+                            return [logins[i].username, logins[i].password]
+                    }
+                    throw 'username notfound.';
+                } else {
+                    return [logins[0].username, logins[0].password];
+                }
+            } else {
+                throw 'account notfound.';
+            }
+        } catch (e) {
+            liberator.log('[getUserAndPassword] error: ' + e, 0);
+            return null;
+        }
+    },
+    // }}}
+    // System {{{
     readDirectory: function(path, filter, func) {
         var d = io.getFile(path);
         if (d.exists() && d.isDirectory()) {
@@ -149,6 +193,41 @@ lib.$U = {//{{{
             }
         }
     },
+    // }}}
+    // HTML, XML, DOM, E4X {{{
+    pathToURL: function(a) {
+        var path = (a.href || a.action || a.value || a);
+        if (/^https?:\/\//.test(path)) return path;
+        var link = document.createElement('a');
+        link.href = path;
+        return link.href;
+    },
+    getHTMLFragment: function(html) {
+        if (!html) return html;
+        return html.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
+    },
+    stripTags: function(str, tags) {
+        var ignoreTags = '(?:' + [].concat(tags).join('|') + ')';
+        return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
+    },
+    createHTMLDocument: function(str) {
+        var htmlFragment = document.implementation.createDocument(null, 'html', null);
+        var range = document.createRange();
+        range.setStartAfter(window.content.document.body);
+        htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str), true));
+        return htmlFragment;
+    },
+    getNodesFromXPath: function(xpath, doc, callback, obj) {
+        var ret = [];
+        if (!xpath || !doc) return ret;
+        var node = doc || document;
+        var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; i++) {
+            if (typeof callback == 'function') callback.call(obj, nodesSnapshot.snapshotItem(i), i);
+            ret.push(nodesSnapshot.snapshotItem(i));
+        }
+        return ret;
+    },
     xmlSerialize: function(xml) {
         try {
             return (new XMLSerializer()).serializeToString(xml)
@@ -156,19 +235,20 @@ lib.$U = {//{{{
                                         .replace(/<[^>]+>/g, function(all) all.toLowerCase());
         } catch (e) { return '' }
     }
+    // }}}
 };
 //}}}
 
-lib.Request = function() {//{{{
+libly.Request = function() {//{{{
     this.initialize.apply(this, arguments);
 };
-lib.Request.EVENTS = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
-lib.Request.requestCount = 0;
-lib.Request.prototype = {
+libly.Request.EVENTS = ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
+libly.Request.requestCount = 0;
+libly.Request.prototype = {
     initialize: function(url, headers, options) {
         this.url = url;
         this.headers = headers || {};
-        this.options = lib.$U.extend({
+        this.options = libly.$U.extend({
             asynchronous: true,
             encoding: 'UTF-8'
         }, options || {});
@@ -197,12 +277,12 @@ lib.Request.prototype = {
     _request: function(method) {
 
         try {
-            lib.Request.requestCount++;
+            libly.Request.requestCount++;
 
             this.transport = new XMLHttpRequest();
             this.transport.open(method, this.url, this.options.asynchronous);
 
-            this.transport.onreadystatechange = lib.$U.bind(this, this._onStateChange);
+            this.transport.onreadystatechange = libly.$U.bind(this, this._onStateChange);
             this.setRequestHeaders();
             this.transport.overrideMimeType('text/html; charset=' + this.options.encoding);
 
@@ -232,11 +312,11 @@ lib.Request.prototype = {
         return !status || (status >= 200 && status < 300);
     },
     respondToReadyState: function(readyState) {
-        var state = lib.Request.EVENTS[readyState];
-        var res = new lib.Response(this);
+        var state = libly.Request.EVENTS[readyState];
+        var res = new libly.Response(this);
 
         if (state == 'Complete') {
-            lib.Request.requestCount--;
+            libly.Request.requestCount--;
             try {
                 this._complete = true;
                 this.fireEvent('on' + (this.isSuccess() ? 'Success' : 'Failure'), res, this.options.asynchronous);
@@ -276,10 +356,10 @@ lib.Request.prototype = {
     }
 };//}}}
 
-lib.Response = function() {//{{{
+libly.Response = function() {//{{{
     this.initialize.apply(this, arguments);
 };
-lib.Response.prototype = {
+libly.Response.prototype = {
     initialize: function(req) {
         this.req = req;
         this.transport = req.transport;
@@ -297,45 +377,20 @@ lib.Response.prototype = {
     },
     status: 0,
     statusText: '',
-    getStatus: lib.Request.prototype.getStatus,
+    getStatus: libly.Request.prototype.getStatus,
     getStatusText: function() {
         try {
             return this.transport.statusText || '';
         } catch (e) { return ''; }
     },
-    getHTMLDocument: function(xpath, xmlns, ignoreTags) {
+    getHTMLDocument: function(xpath, xmlns, ignoreTags, callback) {
         if (!this.doc) {
-            this.htmlFragmentstr = this.responseText.replace(/^[\s\S]*?<html(?:[ \t\n\r][^>]*)?>|<\/html[ \t\r\n]*>[\S\s]*$/ig, '').replace(/[\r\n]+/g, ' ');
-            let iTags = ['script'];
-            if (ignoreTags) {
-                iTags.concat(ignoreTags.split(','));
-            }
-            this.htmlStripScriptFragmentstr = lib.$U.stripTags(this.htmlFragmentstr, iTags);
-            this.doc = this._createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
+            this.htmlFragmentstr = libly.$U.getHTMLFragment(this.responseText);
+            this.htmlStripScriptFragmentstr = libly.$U.stripTags(this.htmlFragmentstr, ignoreTags);
+            this.doc = libly.$U.createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
         }
-
-        var ret = this.doc;
-        if (xpath) {
-            ret = this.getNodeFromXPath(xpath, this.doc);
-        }
-        return ret;
-    },
-    _createHTMLDocument: function(str) {
-        var htmlFragment = document.implementation.createDocument(null, 'html', null);
-        var range = document.createRange();
-        range.setStartAfter(window.content.document.body);
-        htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str), true));
-        return htmlFragment;
-    },
-    getNodeFromXPath: function(xpath, doc, parentNode) {
-        if (!xpath || !doc) return doc;
-        var node = doc || document;
-        var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-        if (nodesSnapshot.snapshotLength == 0) return parentNode;
-        parentNode = parentNode || document.createElementNS(null, 'div');
-        for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; parentNode.appendChild(nodesSnapshot.snapshotItem(i++)));
-        return parentNode;
+        if (!xpath) return this.doc;
+        return libly.$U.getNodesFromXPath(xpath, this.doc, callback);
     }
 };
 //}}}
