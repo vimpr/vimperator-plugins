@@ -5,10 +5,14 @@ var PLUGIN_INFO =
     <description>notice of change framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
+== NEEDS LIBLARY ==
+_libly.js(ver.0.1.4)
+  @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
+
 == Command ==
 :notifierstart:
   変更通知をスタートします。
@@ -223,6 +227,8 @@ function bootstrap() {
             this.count = 0;
             this.cache;
 
+            if (typeof this.preInitialize == 'function') this.preInitialize();
+
             var req = new libly.Request(
                 this.options.url,
                 this.options.headers,
@@ -253,7 +259,10 @@ function bootstrap() {
                     this.cache = parsed;
                     if (typeof this.buildMessages == 'function') {
                         let messages = this.buildMessages([].concat(diff));
-                        [].concat(messages).forEach($U.bind(this, function(m) this.notify(m)));
+                        [].concat(messages).forEach($U.bind(this, function(m) {
+                            this.notify(m);
+                            liberator.sleep(1500);
+                        }));
                     }
                 }
             }));

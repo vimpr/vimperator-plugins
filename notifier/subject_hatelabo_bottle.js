@@ -8,7 +8,6 @@ var PLUGIN_INFO =
     <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <detail/>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -21,24 +20,21 @@ var $U = libly.$U;
 var logger = $U.getLogger('subject_hatelabo_bottle');
 
 var URL = 'http://bottle.hatelabo.jp';
-//var URL = 'http://localhost/index.html?a';
 
 notifier.subject.register(notifier.SubjectHttp, {
-    interval: 40,
+    interval: 60,
     options: {
         url: URL,
         headers: null,
         extra: null
     },
+    preInitialize: function() {
+        logger.log('preInitialize: ');
+    },
     parse: function(res) {
-        if (!res.isSuccess() || res.responseText == '') return;
-
-        var dom = res.getHTMLDocument('id("body")//div[contains(concat(" ", @class, " "), " entry ")]');
-        if (!dom) return;
-
-        var ret = [];
-        for (let i = 0, len = dom.childNodes.length; i < len; ret.push(dom.childNodes[i++]));
-        return ret;
+        // if (this.count == 0) return []; for debug
+        if (!res.isSuccess() || res.responseText == '') return null;
+        return res.getHTMLDocument('id("body")//div[contains(concat(" ", @class, " "), " entry ")]');
     },
     diff: function(cache, parsed)
         parsed.filter(function(element)

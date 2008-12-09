@@ -8,8 +8,6 @@ var PLUGIN_INFO =
     <version>0.1.0</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <detail><![CDATA[
-    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 (function() {
