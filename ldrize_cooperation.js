@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.23
-// Last Change: 06-Dec-2008. Jan 2008
+// Last Change: 09-Dec-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -168,20 +168,24 @@
             return LDRizeCooperationPanel;
         },
         hookGreasemonkey: function(){
-            var self = this;
-            var GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
-            this.addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
-                if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
-                    sandbox.window.addEventListener("focus",function(){
-                        self.LDRize = sandbox.LDRize;
-                        self.Minibuffer = sandbox.Minibuffer.command;
-                    },false);
-                    if(window.content.wrappedJSObject == sandbox.unsafeWindow){
-                        self.LDRize = sandbox.LDRize;
-                        self.Minibuffer = sandbox.Minibuffer.command;
+            try{
+                var self = this;
+                var GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
+                this.addAfter(GreasemonkeyService,'evalInSandbox',function(code,codebase,sandbox){
+                    if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
+                        sandbox.window.addEventListener("focus",function(){
+                            self.LDRize = sandbox.LDRize;
+                            self.Minibuffer = sandbox.Minibuffer.command;
+                        },false);
+                        if(window.content.wrappedJSObject == sandbox.unsafeWindow){
+                            self.LDRize = sandbox.LDRize;
+                            self.Minibuffer = sandbox.Minibuffer.command;
+                        }
                     }
-                }
-            });
+                });
+            }catch(e){
+                liberator.log(e);
+            }
         },
         initLDRizeCaptureKeys: function(keys){
             var self = this;
@@ -355,7 +359,7 @@
                 if(Math.abs(p.top - (scrollY + innerHeight/2)) > limit) return true;              // scroll
                 else return false;                                                                // bind
             }catch(e){
-                log(e);
+                liberator.log(e);
             }
         },
 
