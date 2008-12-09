@@ -5,19 +5,20 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.3</version>
+    <version>0.4.4</version>
     <minVersion>1.2</minVersion>
     <maxVersion>1.2</maxVersion>
     <detail><![CDATA[
 == NEEDS LIBLARY ==
-_libly.js
+_libly.js(ver.0.1.4)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
+
 == Usage ==
 command[!] subcommand [ANY_TEXT]
 - !                create new tab.
 - ANY_TEXT         your input text
 
-ex.)
+e.g.)
 :mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
 :mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
 
@@ -28,7 +29,7 @@ or
 liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
 
 == SITEINFO ==
-ex.)
+e.g.)
 javascript &lt;&lt;EOM
 liberator.globalVariables.multi_requester_siteinfo = [
     {
@@ -51,7 +52,7 @@ EOM
     @see http://wedata.net/databases/Multi%20Requester/items
 
 == MAPPINGS ==
-ex.)
+e.g.)
 javascript <<EOM
 liberator.globalVariables.multi_requester_mappings = [
     [',ml', 'ex'],                  // == :mr  ex
@@ -93,8 +94,8 @@ var SITEINFO = [
         urlEncode:   'UTF-8'
     },
 ];
-var lib = liberator.plugins.libly;
-var $U = lib.$U;
+var libly = liberator.plugins.libly;
+var $U = libly.$U;
 var logger = $U.getLogger('multi_requester');
 var mergedSiteinfo = {};
 //}}}
@@ -209,7 +210,7 @@ var DataAccess = {
         return $U.A(mergedSiteinfo);
     },
     getWedata: function(func) {
-        var req = new lib.Request(
+        var req = new libly.Request(
             'http://wedata.net/databases/Multi%20Requester/items.json'
         );
         req.addEventListener('onSuccess', function(res) {
@@ -235,7 +236,7 @@ var MultiRequester = {
     requestNames: '',
     requestCount: 0,
     echoHash: {},
-    cmdAction: function(args, bang, count) { // {{{
+    cmdAction: function(args, bang, count) { //{{{
 
         if (MultiRequester.doProcess) return;
 
@@ -267,7 +268,7 @@ var MultiRequester = {
             if (bang) {
                 liberator.open(url, liberator.NEW_TAB);
             } else {
-                let req = new lib.Request(url, null, {
+                let req = new libly.Request(url, null, {
                     encoding: srcEncode,
                     siteinfo: info,
                     args: {
@@ -327,14 +328,13 @@ var MultiRequester = {
             if (s.name == name) ret = s;
         });
         return ret;
-    }, // }}}
+    },//}}}
     extractLink: function(res, extractLink) { //{{{
 
         var el = res.getHTMLDocument(extractLink);
         if (!el) throw 'extract link failed.: extractLink -> ' + extractLink;
-        var a = el.firstChild;
-        var url = $U.pathToURL((a.href || a.action || a.value));
-        var req = new Request(url, null, $U.extend(res.req.options, {extractLink: true}));
+        var url = $U.pathToURL(el[0]);
+        var req = new libly.Request(url, null, $U.extend(res.req.options, {extractLink: true}));
         req.addEventListener('onException', $U.bind(this, this.onException));
         req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
         req.addEventListener('onFailure', $U.bind(this, this.onFailure));
@@ -342,7 +342,7 @@ var MultiRequester = {
         MultiRequester.requestCount++;
         MultiRequester.doProcess = true;
 
-    }, //}}}
+    },//}}}
     onSuccess: function(res) { //{{{
 
         if (!MultiRequester.doProcess) {
@@ -372,14 +372,13 @@ var MultiRequester = {
                 return;
             }
 
-            doc = res.getHTMLDocument(xpath, null, res.req.options.siteinfo.ignoreTags);
+            var ignoreTags = ['script'].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
+            doc = document.createElementNS(null, 'div');
+            res.getHTMLDocument(xpath, null, ignoreTags, function(node, i) { doc.appendChild(node) } );
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
-                   (new XMLSerializer()).serializeToString(doc)
-                            .replace(/<[^>]+>/g, function(all) all.toLowerCase())
-                            .replace(/<!--(?:[^-]|-(?!->))*-->/g, ''); // actually
-                            //.replace(/<!--(?:[^-]|-(?!-))*-->/g, ''); // strictly
+                   $U.xmlSerialize(doc);
 
             MultiRequester.echoHash[res.req.options.siteinfo.name] = html;
 
@@ -392,7 +391,7 @@ var MultiRequester = {
         if (MultiRequester.requestCount == 0) {
             let echoList = [];
             MultiRequester.requestNames.split(',').forEach(function(name) {
-                echoList.push(MultiRequester.echoHash[name])
+                echoList.push(MultiRequester.echoHash[name]);
             });
             html = '<div style="white-space:normal;"><base href="' + escapedUrl + '"/>' +
                    echoList.join('') +
