@@ -26,7 +26,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
   let mousedownTime = new Date();
 
   let meows = [
-    //mouse kara
+    // mouse kara
     '\u30DE\u30A6\u30B9\u304B\u3089\u624B\u3092\u96E2\u3059\u307E\u3067\u306F\u30A6\u30B8\u866B\u3060\uFF01 \u5730\u7403\u4E0A\u3067\u6700\u4E0B\u7B49\u306E\u751F\u547D\u4F53\u3060\uFF01',
     // itumade
     '\u3044\u3064\u307E\u3067\u305D\u306E\u7CDE\u3092\u63E1\u308A\u3057\u3081\u3066\u3044\u308B\u3064\u3082\u308A\u3060\uFF01',
@@ -127,8 +127,8 @@ http://creativecommons.org/licenses/by-sa/3.0/
       <div style="background: white; color: black;">
         <table>
           <tr>
-            <td><img src={gunsou} /></td>
-            <td style={"font-size: " + sz + "px; white-space: wrap;"}>{msg}</td>
+            <td><img src={gunsou}/></td>
+            <td style={"font-size: " + sz + "px; white-space: nowrap;"}>{msg}</td>
           </tr>
         </table>
       </div>
@@ -150,7 +150,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
     !/^(script|embed)$/i.test(event.target.tagName);
 
   let (opt = options.get('go'))
-    opt.set(opt.get().replace(/[rlb]/g, ''));
+    opt.set(opt.get().replace(/[rlb]+/g, ''));
 
   around(buffer, 'followLink', function (next) {
     ignore = true;
@@ -161,7 +161,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
     }
   });
 
-  window.addEventListener('keypress', function  (event) {
+  window.addEventListener('keypress', function (event) {
     let elem = window.document.commandDispatcher.focusedElement;
     if (events.toString(event) == '<Return>' && elem && elem.form) {
       ignore = true;
