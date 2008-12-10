@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -100,12 +100,13 @@ libly.$U = {//{{{
             dst[prop] = src[prop];
          return dst;
     },
-    A: function(hash, iter) {
+    A: function(iterable) {
         var ret = [];
-        if (typeof hash == 'undefined') return ret;
-        if (typeof hash == 'string') return [hash];
-        if (hash.toArray) return hash.toArray();
-        for each (let item in hash) ret.push(item);
+        if (typeof iterable == 'undefined') return ret;
+        if (typeof iterable == 'string') return [iterable];
+        if (!(typeof iterable == 'function' && iterable == '[object NodeList]') &&
+            iterable.toArray) return iterable.toArray();
+        for (let i = 0, len = iterable.length || 0; i < len; ret.push(iterable++));
         return ret;
     },
     bind: function(obj, func) {
@@ -121,7 +122,7 @@ libly.$U = {//{{{
             if (Components.utils.evalInSandbox('true', sandbox) === true) {
                 fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); };
             }
-        } catch (e) { liberator.log('warning: multi_requester.js is working with unsafe sandbox.'); }
+        } catch (e) { liberator.log('warning: _libly.js is working with unsafe sandbox.'); }
 
         return fnc(text);
     },
@@ -312,6 +313,7 @@ libly.Request.prototype = {
         } catch (e) { return 0; }
     },
     isSuccess: function() {
+        var status = this.getStatus();
         return !status || (status >= 200 && status < 300);
     },
     respondToReadyState: function(readyState) {
