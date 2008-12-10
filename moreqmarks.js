@@ -117,7 +117,7 @@
     }
     function list_qmarks(marks) {
         if(use_position) {
-            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
+            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.command) + "<br/>" +
                        "<table><tr align=\"left\" class=\"hl-Title\"><th>mark</th><th>line</th><th>col</th><th>file</th></tr>";
             for (var i = 0; i < marks.length; i++)
             {
@@ -131,7 +131,7 @@
             list += "</table>";
             return list;
         } else {
-            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.getCommand()) + "<br/>" +
+            var list = ":" + liberator.modules.util.escapeHTML(liberator.modules.commandline.command) + "<br/>" +
                        "<table><tr align=\"left\" class=\"hl-Title\"><th>QuickMark</th><th>URL</th></tr>";
             for (var i = 0; i < marks.length; i++)
             {
