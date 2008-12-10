@@ -76,7 +76,7 @@
             ["In", 1], ["De", -1]
         ].forEach(function(direction) {
             var [prefix, dir] = direction;
-            liberator.commands
+            commands
                      .add([prefix.toLowerCase() + "c" + suffix],
                           prefix + "crement the number in the " + name + ".",
                           makeinc(function(x, q) x + dir * q, prop),
