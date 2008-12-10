@@ -3,7 +3,7 @@
 // @description    Inputting numbers by asdfghjkl; keys in hint mode.
 // @description-ja Hintモードで、asdfghjkl;キーを使って数字入力をする。
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.3
+// @version        1.4
 // @minVersion     2.0pre
 // @maxVersion     2.0pre
 // @author         anekos (anekos@snca.net)
@@ -45,12 +45,16 @@
   let asdfghjkl_hintchars = liberator.globalVariables.asdfghjkl_hintchars || ";asdfghjkl";
   let active = false;
 
-  let original = {
-    show: hints.show,
-    onKeyPress: events.onKeyPress,
-  };
+  function around (obj, name, func) {
+    let next = obj[name];
+    obj[name] = function ()
+      let (self = this, args = arguments)
+        func.call(self,
+                  function () next.apply(self, args),
+                  args);
+  }
 
-  events.onKeyPress = function (event) {
+  around(events, 'onKeyPress', function (next, [event]) {
     if (modes.extended & modes.HINTS) {
       let act = active;
       let key = events.toString(event);
@@ -76,12 +80,12 @@
         }
       }
     }
-    return original.onKeyPress.call(this, event);
-  };
+    return next();
+  });
 
-  hints.show = function () {
+  around(hints, 'show', function (next) {
     active = asdfghjkl_default;
-    return original.show.apply(this, arguments);
-  };
+    return next();
+  });
 
 })();
