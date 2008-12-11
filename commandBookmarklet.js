@@ -2,7 +2,7 @@
  * bookmarklet wo command ni suru plugin
  *
  * @author halt feits <halt.feits@gmail.com>
- * @version 0.6.2
+ * @version 0.6.3
  */
 
 let PLUGIN_INFO =
@@ -11,7 +11,7 @@ let PLUGIN_INFO =
 <description>convert bookmarklets to commands</description>
 <description lang="ja">ブックマークレットをコマンドにする</description>
 <author mail="halt.feits@gmail.com">halt feits</author>
-<version>0.6.2</version>
+<version>0.6.3</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
@@ -24,14 +24,18 @@ Nothing built-in command, but each bookmarklets convert to commands that start w
 == EXAMPLE ==
 "Hatena-Bookmark" -> bmlhatena-bookmark
 
-== KNOWN BUGS ==
+== GLOBAL VARIABLES ==
+command_bookmarklet_prefix:
+This variable determines the prefix of a command name.
+
+== KNOWN ISSUES ==
 When title has non-ASCII characters, it converts to unaccountable command.
-You should rewrite title of bookmarklet to ASCII characters, to escape this bug.
+You should rewrite title of bookmarklet to ASCII characters, to escape this issue.
 
 ]]></detail>
 <detail lang="ja"><![CDATA[
 == SYNOPSIS ==
-このプラグインはブックマークレットを Vimpertor で実行可能なコマンドに自動的に変換します。
+このプラグインはブックマークレットを Vimperator で実行可能なコマンドに自動的に変換します。
 
 == COMMAND ==
 固有のコマンドはありませんが、それぞれのブックマークレットは "bml" ではじまるコマンドに変換されます。
@@ -39,14 +43,21 @@ You should rewrite title of bookmarklet to ASCII characters, to escape this bug.
 == EXAMPLE ==
 "Hatena-Bookmark" -> bmlhatena-bookmark
 
-== KNOWN BUGS ==
+== GLOBAL VARIABLES ==
+command_bookmarklet_prefix:
+コマンドの先頭に付加される文字列を規定します。
+デフォルトは "bml"
+
+== KNOWN ISSUES ==
 タイトルに ASCII 文字以外が含まれている場合、わけのわからないコマンドになります。
-このバグを避けるためにブックマークレットのタイトルを ASCII 文字のみに書き換えることをおすすめします。
+この問題を避けるためにブックマークレットのタイトルを ASCII 文字のみに書き換えることをおすすめします。
 
 ]]></detail>
 </VimperatorPlugin>;
 
 ( function () {
+
+let prefix = liberator.globalVariables.command_bookmarklet_prefix || 'bml';
 
 let items = bookmarks.get('javascript:');
 if (!items.length) {
@@ -65,7 +76,7 @@ for (let item in util.Array.iterator(items)) {
 }
 
 function toValidCommandName(str) {
-    str = 'bml' + escape(str.replace(/ +/g, '').toLowerCase()).replace(/[^a-zA-Z]+/g,'');
+    str = prefix + escape(str.replace(/ +/g, '').toLowerCase()).replace(/[^a-zA-Z]+/g,'');
     return str.substr(0, str.length > 50 ? 50 : str.length);
 }
 
