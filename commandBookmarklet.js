@@ -2,7 +2,7 @@
  * bookmarklet wo command ni suru plugin
  *
  * @author halt feits <halt.feits@gmail.com>
- * @version 0.6.1
+ * @version 0.6.2
  */
 
 let PLUGIN_INFO = 
@@ -11,26 +11,36 @@ let PLUGIN_INFO =
 <description>convert bookmarklets to command</description>
 <description lang="ja">ブックマークレットをコマンドにする</description>
 <author mail="halt.feits@gmail.com">halt feits</author>
-<version>0.6.1</version>
+<version>0.6.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
 == SYNOPSIS ==
 This plugin automatically convert bookmarklets to valid command for vimperator.
-このプラグインはブックマークレットを vimpertor で実行可能なコマンドに自動的に変換します。
 
 == COMMAND ==
 Nothing built-in command, but each bookmarklets convert to commands that start with "bml".
-固有のコマンドはありませんが、それぞれのブックマークレットは "bml" ではじまるコマンドに変換されます。
 
 == EXAMPLE ==
 "Hatena-Bookmark" -> bmlhatena-bookmark
 
 == KNOWN BUGS ==
 When title has non-ASCII characters, it convert to unaccountable command.
-タイトルに ASCII 文字以外が含まれている場合、わけのわからないコマンドになります。
-
 You should rewrite title of bookmarklet to ASCII characters, to escape this bug.
+
+]]></detail>
+<detail lang="ja"><![CDATA[
+== SYNOPSIS ==
+このプラグインはブックマークレットを vimpertor で実行可能なコマンドに自動的に変換します。
+
+== COMMAND ==
+固有のコマンドはありませんが、それぞれのブックマークレットは "bml" ではじまるコマンドに変換されます。
+
+== EXAMPLE ==
+"Hatena-Bookmark" -> bmlhatena-bookmark
+
+== KNOWN BUGS ==
+タイトルに ASCII 文字以外が含まれている場合、わけのわからないコマンドになります。
 このバグを避けるためにブックマークレットのタイトルを ASCII 文字のみに書き換えることをおすすめします。
 
 ]]></detail>
