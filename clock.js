@@ -1,57 +1,106 @@
-/*
- * ==VimperatorPlugin==
- * @name            clock.js
- * @description     clock.
- * @description-ja  とけい。
- * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.14
- * @minversion      2.0pre
- * @maxversion      2.0pre
- * ==/VimperatorPlugin==
- *
- * LICENSE
- *  New BSD License
- *
- * USAGE
- *  you can customize below variables
- *
- *      clock_format:   clock format. default is '[%t]'.
- *                      available special tokens:
- *                          %t: time hh:mm
- *                          %d: day  MM/DD
- *                          %y: year YYYY
- *                          %a: A abbreviation for the day of the week.
- *      clock_position: id of element that is marker of insert position.
- *                      default is 'liberator-commandline-command' ( after commandline )
- *      clock_after:    boolean that show insert after of the element
- *                      specified by 'clock_position'.
- *                      default is true.
- *
- *  refer: http://d.hatena.ne.jp/janus_wel/20081128/1227849365
- *
- *  available commands
- *
- *      :clockhide
- *      :clockappear
- *      :clockstop
- *      :clockstart
- *
- * EXAMPLE
- *  in .vimperatorrc
- *
- *      let clock_format='(%t %d)'
- *      let clock_position='liberator-commandline-prompt'
- *      let clock_after='false'
- *
- *  this exapmple show clock in before prompt.
- *
- * */
+let PLUGIN_INFO = 
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>clock</description>
+<description lang="ja">とけい</description>
+<author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
+<license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+<version>0.15</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
+<detail><![CDATA[
+== USAGE ==
+you can customize below variable.
+
+clock_format: clock format. default is '[%t]'. available below special tokens.
+%t:
+    time hh:mm
+%d:
+    day  MM/DD
+%y:
+    year YYYY
+%a:
+    A abbreviation for the day of the week.
+
+refer:
+    http://d.hatena.ne.jp/janus_wel/20081128/1227849365
+
+== EX-COMMANDS ==
+:clockhide
+    hide clock
+:clockappear
+    appear clock
+:clockstop
+    stop clock
+:clockstart
+    start clock
+:clockjustify
+    justify clock position. this has bug.
+
+== EXAMPLE ==
+in .vimperatorrc
+
+    let clock_format='(%t %d)'
+
+this exapmple show clock like below
+
+    (20:34 12/12)
+
+== KNOWN BUGS ==
+clock position is out of alignment when window was resized.
+use :clockjustify to fix alignment, but the ex-command may not work.
+
+]]></detail>
+<detail lang="ja"><![CDATA[
+== USAGE ==
+以下の設定を変更することができます。
+
+clock_format: 時計の書式。設定なしの場合 '[%t]' として扱われます。以下の特殊な識別子が使えます。
+%t:
+    時間 hh:mm 形式
+%d:
+    月日 MM/DD 形式
+%y:
+    西暦年 YYYY 形式
+%a:
+    曜日
+
+参考:
+    http://d.hatena.ne.jp/janus_wel/20081128/1227849365
+
+== EX-COMMANDS ==
+:clockhide
+    時計を隠します。
+:clockappear
+    時計を出します。
+:clockstop
+    時計を止めます。
+:clockstart
+    時計を動かします。
+:clockjustify
+    時計の位置を調節します。バグがあります。
+
+== EXAMPLE ==
+.vimperatorrc に、
+
+    let clock_format='(%t %d)'
+
+と書くと以下のように表示されます。
+
+    (20:34 12/12)
+
+== KNOWN BUGS ==
+ウィンドウのサイズを変更すると時計の位置がずれます。
+:clockjustify を使うことで調節できることがあります。
+
+]]></detail>
+</VimperatorPlugin>;
 
 ( function () {
 
 // definitions ---
 // default settings
-const format   = liberator.globalVariables.clock_format   || '[%t]';
+const format = liberator.globalVariables.clock_format || '[%t]';
 
 // class definitions
 function Clock() {
@@ -152,6 +201,8 @@ Clock.prototype = {
     generate: function () {
         let box = window.document.createElement('hbox');
         box.setAttribute('id', this._constants.prefix + 'box');
+        box.setAttribute('style', 'display: block;');
+        box.setAttribute('class', 'liberator-container');
         let format = this._format;
         let generator = this._constants.generator;
 
@@ -188,8 +239,13 @@ Clock.prototype = {
     },
 
     get instance() this._box,
+    get width() this._box.boxObject.width,
+
     hide:   function () this._box.setAttribute('style', 'display: none;'),
     appear: function () this._box.setAttribute('style', 'display: block;'),
+
+    justify: function (parentWidth) this._box.setAttribute('left', parentWidth - this.width),
+
     start: function () {
         let info = this._intervalInfo;
         for (let [k, i] in Iterator(info)) {
@@ -210,26 +266,32 @@ Clock.prototype = {
 };
 
 
+// main ---
+let commandlineStack = getCommandlineStack();
+if (!commandlineStack) {
+    let errmsg = 'clock.js: not found the commandline.';
+    liberator.log(errmsg, 0);
+    liberator.echoerr(errmsg);
+    return;
+}
+
+// build clock
 let clock = new Clock(format);
 clock.generate();
 
 // insert
-{
-  let msg = window.document.getElementById('liberator-message');
-  let stack = msg.parentNode;
-  let box = window.document.createElement('hbox');
-  stack.replaceChild(box, msg);
-  box.appendChild(msg);
-  box.appendChild(clock.instance);
-  msg.inputField.QueryInterface(Components.interfaces.nsIDOMNSEditableElement);
-}
+commandlineStack.appendChild(clock.instance);
+// why double?
+clock.justify(commandlineStack.boxObject.width);
+clock.justify(commandlineStack.boxObject.width);
 
 // register command
 [
-    [['clockhide'],   'hide clock',   function () clock.hide(),   ],
-    [['clockappear'], 'clock appear', function () clock.appear(), ],
-    [['clockstart'],  'start clock',  function () clock.start(),  ],
-    [['clockstop'],   'stop clock',   function () clock.stop(),   ],
+    [['clockhide'],    'hide clock',   function () clock.hide()   ],
+    [['clockappear'],  'clock appear', function () clock.appear() ],
+    [['clockstart'],   'start clock',  function () clock.start()  ],
+    [['clockstop'],    'stop clock',   function () clock.stop()   ],
+    [['clockjustify'], 'justify',      function () clock.justify(getCommandlineStack().boxObject.width) ],
 ].forEach( function ([n, d, f]) commands.addUserCommand(n, d, f, {}) );
 
 
@@ -258,6 +320,13 @@ function day() {
 }
 function year() {
     return new Date().getFullYear().toString(10);
+}
+
+// node control
+function getCommandlineStack() {
+    let messageTextarea = window.document.getElementById('liberator-message');
+    let commandlineStack = messageTextarea.parentNode;
+    return commandlineStack.localName === 'stack' ? commandlineStack : null;
 }
 
 // type conversion
