@@ -2,49 +2,62 @@
  * bookmarklet wo command ni suru plugin
  *
  * @author halt feits <halt.feits@gmail.com>
- * @version 0.6.0
+ * @version 0.6.1
  */
 
-(function(){
-  var filter = "javascript:";
-  var items  = bookmarks.get(filter);
+let PLUGIN_INFO = 
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>convert bookmarklets to command</description>
+<description lang="ja">ブックマークレットをコマンドにする</description>
+<author mail="halt.feits@gmail.com">halt feits</author>
+<version>0.6.1</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
+<detail><![CDATA[
+== SYNOPSIS ==
+This plugin automatically convert bookmarklets to valid command for vimperator.
+このプラグインはブックマークレットを vimpertor で実行可能なコマンドに自動的に変換します。
 
-  if (items.length == 0) {
-    if (filter.length > 0) {
-      liberator.echoerr('E283: No bookmarks matching "' + filter + '"');
-    } else {
-      liberator.echoerr("No bookmarks set");
-    }
-  }
+== COMMAND ==
+Nothing built-in command, but each bookmarklets convert to commands that start with "bml".
+固有のコマンドはありませんが、それぞれのブックマークレットは "bml" ではじまるコマンドに変換されます。
 
-  const regex = /[^a-zA-Z]/;
-  items.forEach(function(item) {
-    var [url, title] = [item.url, item.title];
-    var desc = title;
-    title = escape( title.replace(/ +/g,'').toLowerCase() );
-    if (regex.test(title)) {
-        title = "bm"+title.replace(/[^a-zA-Z]+/g,'');
-        title = title.substr(0, title.length>50?50:title.length);
-    }
-    if (width(title) > 50) {
-      while (width(title) > 47) {
-        title = title.slice(0, -2);
-      }
-      title += "...";
-    }
-    title = util.escapeHTML(title);
+== EXAMPLE ==
+"Hatena-Bookmark" -> bmlhatena-bookmark
 
-    var command = function () { liberator.open(url); };
+== KNOWN BUGS ==
+When title has non-ASCII characters, it convert to unaccountable command.
+タイトルに ASCII 文字以外が含まれている場合、わけのわからないコマンドになります。
+
+You should rewrite title of bookmarklet to ASCII characters, to escape this bug.
+このバグを避けるためにブックマークレットのタイトルを ASCII 文字のみに書き換えることをおすすめします。
+
+]]></detail>
+</VimperatorPlugin>;
+
+( function () {
+
+let items = bookmarks.get('javascript:');
+if (!items.length) {
+    liberator.echoerr('No bookmarks set');
+    return;
+}
+
+for (let item in util.Array.iterator(items)) {
     commands.addUserCommand(
-      [title],
-      "bookmarklet : "+desc,
-      command,
-      {
-        shortHelp: "Bookmarklet",
-      }
+        [toValidCommandName(item.title)],
+        'bookmarklet : ' + item.title,
+        function () { liberator.open(item.url); },
+        { shortHelp: 'Bookmarklet' },
+        false
     );
-  });
+}
 
-  function width(str) str.replace(/[^\x20-\xFF]/g, "  ").length;
-})();
+function toValidCommandName(str) {
+    str = 'bml' + escape(str.replace(/ +/g, '').toLowerCase()).replace(/[^a-zA-Z]/g,'');
+    return str.substr(0, str.length > 50 ? 50 : str.length);
+}
+
+} )();
 // vim:sw=2 ts=2 et:
