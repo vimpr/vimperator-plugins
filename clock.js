@@ -4,7 +4,7 @@
  * @description     clock.
  * @description-ja  とけい。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.13
+ * @version         0.14
  * @minversion      2.0pre
  * @maxversion      2.0pre
  * ==/VimperatorPlugin==
@@ -52,8 +52,6 @@
 // definitions ---
 // default settings
 const format   = liberator.globalVariables.clock_format   || '[%t]';
-const position = liberator.globalVariables.clock_position || 'liberator-commandline-command';
-const after    = stringToBoolean(liberator.globalVariables.clock_after, true);
 
 // class definitions
 function Clock() {
@@ -212,21 +210,19 @@ Clock.prototype = {
 };
 
 
-// main ---
-let insertBase = window.document.getElementById(position);
-if (!insertBase) {
-    let errmsg = 'clock.js: not found the element that id is "' + position + '". check variable clock_position.';
-    liberator.log(errmsg, 0);
-    liberator.echoerr(errmsg, 0);
-}
-
 let clock = new Clock(format);
 clock.generate();
 
 // insert
-after
-    ? insertNodeAfterSpecified(clock.instance, insertBase)
-    : insertNodeBeforeSpecified(clock.instance, insertBase);
+{
+  let msg = window.document.getElementById('liberator-message');
+  let stack = msg.parentNode;
+  let box = window.document.createElement('hbox');
+  stack.replaceChild(box, msg);
+  box.appendChild(msg);
+  box.appendChild(clock.instance);
+  msg.inputField.QueryInterface(Components.interfaces.nsIDOMNSEditableElement);
+}
 
 // register command
 [
@@ -262,20 +258,6 @@ function day() {
 }
 function year() {
     return new Date().getFullYear().toString(10);
-}
-
-// node control
-function insertNodeBeforeSpecified(inserted, specified) {
-    return specified.parentNode.insertBefore(inserted, specified);
-}
-function insertNodeAfterSpecified(inserted, specified) {
-    var next = specified.nextSibling;
-    if(next) {
-        return specified.parentNode.insertBefore(inserted, next);
-    }
-    else {
-        return specified.parentNode.appendChild(inserted);
-    }
 }
 
 // type conversion
