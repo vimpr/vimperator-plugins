@@ -67,8 +67,7 @@ if (!items.length) {
     return;
 }
 
-for (let it in util.Array.iterator(items)) {
-    let item = it;
+items.forEach(function (item) {
     commands.addUserCommand(
         [toValidCommandName(item.title)],
         'bookmarklet : ' + item.title,
@@ -76,7 +75,7 @@ for (let it in util.Array.iterator(items)) {
         { shortHelp: 'Bookmarklet' },
         false
     );
-}
+});
 
 function toValidCommandName(str) {
     str = prefix + escape(str.replace(/ +/g, '').toLowerCase()).replace(/[^a-zA-Z]+/g,'');
