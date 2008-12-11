@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.6</version>
+    <version>0.1.7</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -102,7 +102,7 @@ libly.$U = {//{{{
     },
     A: function(iterable) {
         var ret = [];
-        if (typeof iterable == 'undefined') return ret;
+        if (!iterable) return ret;
         if (typeof iterable == 'string') return [iterable];
         if (!(typeof iterable == 'function' && iterable == '[object NodeList]') &&
             iterable.toArray) return iterable.toArray();
