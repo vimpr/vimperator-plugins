@@ -29,6 +29,9 @@ liberator.plugins.nextlink = (function() {
     var $U = libly.$U;
     var logger = $U.getLogger('nextlink');
 
+    var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == 'undefined' ?
+                       true : $U.eval(liberator.globalVariables.nextlink_followlink);
+
     var NextLink = function() {//{{{
         this.initialize.apply(this, arguments);
     };
@@ -46,8 +49,8 @@ liberator.plugins.nextlink = (function() {
                 function(res) {
                     var json = $U.evalJson(res.responseText);
                     if (!json) return;
-                    this.siteinfo = json.map(function(item) [item.data.url, item.data.nextLink])
-                                    .sort(function(a, b) b[0].length - a[0].length); // sort url.length desc
+                    this.siteinfo = json.map(function(item) item.data)
+                                    .sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
                     this.initialized = true;
                 }
             ));
@@ -75,8 +78,8 @@ liberator.plugins.nextlink = (function() {
             }
 
             for (let i = 0, len = this.siteinfo.length; i < len; i++) {
-                if (url.match(this.siteinfo[i][0])) {
-                    this.setCache(url, 'xpath', this.siteinfo[i][1]);
+                if (url.match(this.siteinfo[i].url)) {
+                    this.setCache(url, 'xpath', this.siteinfo[i].nextLink)
                     this.onLocationChange(url);
                     return;
                 }
@@ -111,17 +114,24 @@ liberator.plugins.nextlink = (function() {
             if (!prevUrl) {
                 mappings.remove(config.browserModes, "[[");
             } else {
-                mappings.addUserMap(config.browserModes, ["[["], "customize by nextlink.js",
-                    function(count) { liberator.open(prevUrl, liberator.CURRENT_TAB); },
-                    { flags: Mappings.flags.COUNT });
+                if (isFollowLink) {
+                    mappings.addUserMap(config.browserModes, ["[["], "customize by nextlink.js", 
+                        function(count) { liberator.open(prevUrl, liberator.CURRENT_TAB); }, 
+                        { flags: Mappings.flags.count });
+                } else {
+                }
             }
 
             if (!nextUrl) {
                 mappings.remove(config.browserModes, "]]");
             } else {
-                mappings.addUserMap(config.browserModes, ["]]"], "customize by nextlink.js",
-                    function(count) { buffer.followLink(elem, liberator.CURRENT_TAB); },
-                    { flags: Mappings.flags.COUNT });
+                if (isFollowLink) {
+                    mappings.addUserMap(config.browserModes, ["]]"], "customize by nextlink.js",
+                        function(count) { buffer.followLink(elem, liberator.CURRENT_TAB); },
+                        { flags: Mappings.flags.COUNT });
+                } else {
+                    // TODO: pagirize!
+                }
             }
 
             this.isCurOriginalMap = false;
