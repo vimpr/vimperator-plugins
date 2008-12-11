@@ -67,7 +67,8 @@ if (!items.length) {
     return;
 }
 
-for (let item in util.Array.iterator(items)) {
+for (let it in util.Array.iterator(items)) {
+    let item = it;
     commands.addUserCommand(
         [toValidCommandName(item.title)],
         'bookmarklet : ' + item.title,
