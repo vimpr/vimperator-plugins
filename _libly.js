@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -23,7 +23,7 @@ getLogger(prefix):
 == Object Utility ==
 extend(dst, src):
   オブジェクトを拡張します。
-A(hash):
+A(iterable):
   オブジェクトを配列にします。
 bind(obj, func):
   func に obj を bind します。
@@ -106,7 +106,11 @@ libly.$U = {//{{{
         if (typeof iterable == 'string') return [iterable];
         if (!(typeof iterable == 'function' && iterable == '[object NodeList]') &&
             iterable.toArray) return iterable.toArray();
-        for (let i = 0, len = iterable.length || 0; i < len; ret.push(iterable++));
+        if (typeof iterable.length != 'undefined') {
+            for (let i = 0, len = iterable.length; i < len; ret.push(iterable[i++]));
+        } else {
+            for each (let item in iterable) ret.push(item);
+        }
         return ret;
     },
     bind: function(obj, func) {
@@ -199,10 +203,11 @@ libly.$U = {//{{{
     },
     // }}}
     // HTML, XML, DOM, E4X {{{
-    pathToURL: function(a) {
+    pathToURL: function(a, doc) {
+        if (!a) return '';
         var path = (a.href || a.action || a.value || a);
         if (/^https?:\/\//.test(path)) return path;
-        var link = document.createElement('a');
+        var link = (doc || window.content.documtent).createElement('a');
         link.href = path;
         return link.href;
     },
@@ -214,17 +219,18 @@ libly.$U = {//{{{
         var ignoreTags = '(?:' + [].concat(tags).join('|') + ')';
         return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
-    createHTMLDocument: function(str) {
-        var htmlFragment = document.implementation.createDocument(null, 'html', null);
-        var range = document.createRange();
-        range.setStartAfter(window.content.document.body);
+    createHTMLDocument: function(str, doc) {
+        doc = doc || window.content.document;
+        var htmlFragment = doc.implementation.createDocument(null, 'html', null);
+        var range = doc.createRange();
+        range.setStartAfter(doc.body);
         htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str), true));
         return htmlFragment;
     },
     getNodesFromXPath: function(xpath, doc, callback, obj) {
         var ret = [];
         if (!xpath || !doc) return ret;
-        var node = doc || document;
+        var node = doc || window.content.document;
         var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; i++) {
             if (typeof callback == 'function') callback.call(obj, nodesSnapshot.snapshotItem(i), i);
@@ -394,7 +400,7 @@ libly.Response.prototype = {
             this.htmlStripScriptFragmentstr = libly.$U.stripTags(this.htmlFragmentstr, ignoreTags);
             this.doc = libly.$U.createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
         }
-        if (!xpath) return this.doc;
+        if (!xpath) xpath = '//*';
         return libly.$U.getNodesFromXPath(xpath, this.doc, callback);
     }
 };
