@@ -35,7 +35,7 @@ refer:
 :clockstart
     start clock
 :clockjustify
-    justify clock position. this has bug.
+    justify clock position
 
 == EXAMPLE ==
 in .vimperatorrc
@@ -45,10 +45,6 @@ in .vimperatorrc
 this exapmple show clock like below
 
     (20:34 12/12)
-
-== KNOWN BUGS ==
-clock position is out of alignment when window was resized.
-use :clockjustify to fix alignment, but the ex-command may not work.
 
 ]]></detail>
 <detail lang="ja"><![CDATA[
@@ -78,7 +74,7 @@ clock_format: 時計の書式。設定なしの場合 '[%t]' として扱われ�
 :clockstart
     時計を動かします。
 :clockjustify
-    時計の位置を調節します。バグがあります。
+    時計の位置を調節します。
 
 == EXAMPLE ==
 .vimperatorrc に、
@@ -88,10 +84,6 @@ clock_format: 時計の書式。設定なしの場合 '[%t]' として扱われ�
 と書くと以下のように表示されます。
 
     (20:34 12/12)
-
-== KNOWN BUGS ==
-ウィンドウのサイズを変更すると時計の位置がずれます。
-:clockjustify を使うことで調節できることがあります。
 
 ]]></detail>
 </VimperatorPlugin>;
@@ -282,8 +274,7 @@ clock.generate();
 // insert
 commandlineStack.appendChild(clock.instance);
 // why double?
-clock.justify(commandlineStack.boxObject.width);
-clock.justify(commandlineStack.boxObject.width);
+clock.justify(window.innerWidth);
 
 // register command
 [
@@ -291,9 +282,16 @@ clock.justify(commandlineStack.boxObject.width);
     [['clockappear'],  'clock appear', function () clock.appear() ],
     [['clockstart'],   'start clock',  function () clock.start()  ],
     [['clockstop'],    'stop clock',   function () clock.stop()   ],
-    [['clockjustify'], 'justify',      function () clock.justify(getCommandlineStack().boxObject.width) ],
+    [['clockjustify'], 'justify',      function () clock.justify(window.innerWidth) ],
 ].forEach( function ([n, d, f]) commands.addUserCommand(n, d, f, {}) );
 
+window.addEventListener(
+    'resize',
+    function () {
+        clock.justify(window.innerWidth);
+    },
+    false
+);
 
 // stuff functions ---
 function time() {
@@ -329,13 +327,6 @@ function getCommandlineStack() {
     return commandlineStack.localName === 'stack' ? commandlineStack : null;
 }
 
-// type conversion
-function stringToBoolean(str, defaultValue) {
-return !str                          ? (defaultValue ? true : false)
-     : str.toLowerCase() === 'false' ? false
-     : /^\d+$/.test(str)             ? (parseInt(str) ? true : false)
-     :                                 true;
-}
 } )();
 
 // vim: set sw=4 ts=4 et;
