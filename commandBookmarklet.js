@@ -57,7 +57,9 @@ command_bookmarklet_prefix:
 
 ( function () {
 
-let prefix = liberator.globalVariables.command_bookmarklet_prefix || 'bml';
+let prefix = liberator.globalVariables.command_bookmarklet_prefix;
+if (prefix === undefined)
+  prefix = 'bml';
 
 let items = bookmarks.get('javascript:');
 if (!items.length) {
