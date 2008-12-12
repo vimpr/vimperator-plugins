@@ -10,13 +10,17 @@ var PLUGIN_INFO =
     <detail><![CDATA[
 
 == Usage ==
-lowercase => select hint-matcher.
-UpperCase => select char-hint.
+LowerCase => input hint command line.
+UpperCase => select char-hint label.
+
+小文字は候補を絞るためのテキスト入力に使います。
+大文字は文字ラベルの選択に使います。
 
 == OPTIONS ==
 set histchars="hjkl" => show char-hint use h, j, k, l.
-let g:multi_requester_use_wedata = "false"             // true by default
 
+== TODO ==
+ * support hinttimeout.
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -62,29 +66,34 @@ let g:multi_requester_use_wedata = "false"             // true by default
     } //}}}
 
     let hintContext = hints.addMode;
+    let hintChars = [];
     let charhints = plugins.charhints = {
         show: function(minor, filter, win) //{{{
         {
             charhints.original.show(minor, filter, win);
+            hintChars = [];
             showCharHints();
         }, //}}}
         onInput: function(event) //{{{
         {
             let hintString = commandline.command;
             commandline.command = hintString.replace(/[A-Z]/g, "");
-            for(let i=0;i<hintString.length;++i) {
-                if (/^[A-Z]$/.test(hintString[i])) {
-                    let numstr = String(chars2num(hintString[i]));
-                    for(let j=0;j<numstr.length;++j) {
-                        let num = numstr[j];
-                        let alt = new Object;
-                        alt.liberatorString = num;
-                        hints.onEvent(alt);
-                    }
-                }
-            }
             charhints.original.onInput(event);
             showCharHints();
+            for(let i=0;i<hintString.length;++i) {
+                if (/^[A-Z]$/.test(hintString[i])) {
+                    hintChars.push(hintString[i]);
+                }
+            }
+            if(hintChars.length>0) {
+                let numstr = String(chars2num(hintChars.join('')));
+                for(let i=0;i<numstr.length;++i) {
+                    let num = numstr[i];
+                    let alt = new Object;
+                    alt.liberatorString = num;
+                    hints.onEvent(alt);
+                }
+            }
         }, //}}}
     };
 
