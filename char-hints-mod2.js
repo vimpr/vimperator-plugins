@@ -87,12 +87,14 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
             }
             if(hintChars.length>0) {
                 let numstr = String(chars2num(hintChars.join('')));
-                for(let i=0;i<numstr.length;++i) {
-                    let num = numstr[i];
-                    let alt = new Object;
-                    alt.liberatorString = num;
-                    hints.onEvent(alt);
-                }
+                setTimeout(function() {
+                    for(let i=0;i<numstr.length;++i) {
+                        let num = numstr[i];
+                        let alt = new Object;
+                        alt.liberatorString = num;
+                        hints.onEvent(alt);
+                    }
+                }, 10);
             }
         }, //}}}
     };
