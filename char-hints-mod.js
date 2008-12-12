@@ -1,849 +1,710 @@
-/***** BEGIN LICENSE BLOCK ***** {{{
-Version: MPL 1.1/GPL 2.0/LGPL 2.1
+// Vimperator plugin: 'Char Hints Mod'
+// Last Change: 06-Apr-2008. Jan 2008
+// License: GPL
+// Version: 0.3
+// Maintainer: Trapezoid <trapezoid.g@gmail.com>
 
-The contents of this file are subject to the Mozilla Public License Version
-1.1 (the "License"); you may not use this file except in compliance with
-the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+// This file is a tweak based on char-hints.js by:
+// (c) 2008: marco candrian <mac@calmar.ws>
+// This file is a tweak based on hints.js by:
+// (c) 2006-2008: Martin Stubenschrott <stubenschrott@gmx.net>
 
-Software distributed under the License is distributed on an "AS IS" basis,
-WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-for the specific language governing rights and limitations under the
-License.
+// Tested with vimperator 0.6pre from 2008-03-07
+// (won't work with older versions)
 
-(c) 2006-2008: Martin Stubenschrott <stubenschrott@gmx.net>
+// INSTALL: put this file into ~/.vimperator/plugin/  (create folders if necessary)
+// and restart firefox or :source that file
 
-Alternatively, the contents of this file may be used under the terms of
-either the GNU General Public License Version 2 or later (the "GPL"), or
-the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-in which case the provisions of the GPL or the LGPL are applicable instead
-of those above. If you wish to allow use of your version of this file only
-under the terms of either the GPL or the LGPL, and not to allow others to
-use your version of this file under the terms of the MPL, indicate your
-decision by deleting the provisions above and replace them with the notice
-and other provisions required by the GPL or the LGPL. If you do not delete
-the provisions above, a recipient may use your version of this file under
-the terms of any one of the MPL, the GPL or the LGPL.
-}}} ***** END LICENSE BLOCK *****/
-/**
- * ==VimperatorPlugin==
- * @name            char-hints-mod.js
- * @description     Character Hints mode
- * ==/VimperatorPlugin==
- *
- * It's based on vimperator-2.0pre(2008/11/28) hints.js
- *
- **/
-(function () //{{{
+// plugin-setup
+liberator.plugins.charhints = {};
+var chh = liberator.plugins.charhints;
+
+//<<<<<<<<<<<<<<<< EDIT USER SETTINGS HERE
+
+//chh.hintchars = "asdfjkl";      // chars to use for generating hints
+chh.hintchars = "hjklasdfgyuiopqwertnmzxcvb";      // chars to use for generating hints
+
+chh.showcapitals = true;        // show capital letters, even with lowercase hintchars
+chh.timeout = 500;              // in 1/000sec; when set to 0, press <RET> to follow
+
+chh.fgcolor = "black";          // hints foreground color
+chh.bgcolor = "yellow";         // hints background color
+chh.selcolor = "#99FF00";       // selected/active hints background color
+
+chh.mapNormal = "f";            // trigger normal mode with...
+chh.mapNormalNewTab = "F";      // trigger and open in new tab
+chh.mapExtended = ";";          // open in extended mode (see notes below)
+
+chh.hinttags = "//*[@onclick or @onmouseover or @onmousedown or @onmouseup or @oncommand or @class='lk' or @class='s'] | " +
+"//input[not(@type='hidden')] | //a | //area | //iframe | //textarea | //button | //select | " +
+"//xhtml:*[@onclick or @onmouseover or @onmousedown or @onmouseup or @oncommand or @class='lk' or @class='s'] | " +
+"//xhtml:input[not(@type='hidden')] | //xhtml:a | //xhtml:area | //xhtml:iframe | //xhtml:textarea | " +
+"//xhtml:button | //xhtml:select";
+
+//========================================
+//  extended hints mode arguments
+//
+// ; to focus a link and hover it with the mouse
+// a to save its destination (prompting for save location)
+// s to save its destination
+// o to open its location in the current tab
+// t to open its location in a new tab
+// O to open its location in an :open query
+// T to open its location in a :tabopen query
+// v to view its destination source
+// w to open its destination in a new window
+// W to open its location in a :winopen query
+// y to yank its location
+// Y to yank its text description
+
+// variables etc//{{{
+
+
+// ignorecase when showcapitals = true
+// (input keys on onEvent gets lowercased too
+
+if (chh.showcapitals)
+    chh.hintchars = chh.hintchars.toLowerCase();
+
+
+chh.submode    = ""; // used for extended mode, can be "o", "t", "y", etc.
+chh.hintString = ""; // the typed string part of the hint is in this string
+chh.hintNumber = 0;  // only the numerical part of the hint
+chh.usedTabKey = false; // when we used <Tab> to select an element
+
+chh.hints = [];
+chh.validHints = []; // store the indices of the "hints" array with valid elements
+
+chh.activeTimeout = null;  // needed for hinttimeout > 0
+chh.canUpdate = false;
+
+// used in number2hintchars
+chh.transval = {"0":0,  "1":1, "2":2,  "3":3,  "4":4,  "5":5,  "6":6,  "7":7,  "8":8,  "9":9,  "a":10, "b":11,
+                "c":12, "d":13,"e":14, "f":15, "g":16, "h":17, "i":18, "j":19, "k":20, "l":21, "m":22, "n":23,
+                "o":24, "p":25,"q":26, "r":27, "s":28, "t":29, "u":30, "v":31, "w":32, "x":33, "y":34, "z":35};
+
+// used in hintchars2number
+chh.conversion = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+// keep track of the documents which we generated the hints for
+// docs = { doc: document, start: start_index in hints[], end: end_index in hints[] }
+chh.docs = [];
+//}}}
+// reset all important variables
+chh.reset = function ()//{{{
 {
-    ////////////////////////////////////////////////////////////////////////////////
-    ////////////////////// PRIVATE SECTION /////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////{{{
+    liberator.statusline.updateInputBuffer("");
+    chh.hintString = "";
+    chh.hintNumber = 0;
+    chh.usedTabKey = false;
+    chh.hints = [];
+    chh.validHints = [];
+    chh.canUpdate = false;
+    chh.docs = [];
 
-    const ELEM = 0, TEXT = 1, SPAN = 2, IMGSPAN = 3;
+    if (chh.activeTimeout)
+        clearTimeout(chh.activeTimeout);
+    chh.activeTimeout = null;
+}
+//}}}
+chh.updateStatusline = function ()//{{{
+{
+    liberator.statusline.updateInputBuffer(("") +
+            (chh.hintString ? "\"" + chh.hintString + "\"" : "") +
+            (chh.hintNumber > 0 ? " <" + chh.hintNumber + ">" : ""));
+}
+//}}}
+// this function 'click' an element, which also works
+// for javascript links
+chh.hintchars2number = function (hintstr)//{{{
+{
+    // convert into 'normal number then make it decimal-based
 
-    var myModes = config.browserModes;
+    var converted = "";
 
-    var hintMode;
-    var submode    = ""; // used for extended mode, can be "o", "t", "y", etc.
-    var hintString = ""; // the typed string part of the hint is in this string
-    var hintNumber = 0;  // only the numerical part of the hint
-    var usedTabKey = false; // when we used <Tab> to select an element
-    var prevInput = "";    // record previous user input type, "text" || "number"
+    // translate users hintchars into a number (chh.conversion) 0 -> 0, 1 -> 1, ...
+    for (let i = 0, l = hintstr.length; i < l; i++)
+        converted += "" + chh.conversion[chh.hintchars.indexOf(hintstr[i])];
 
-    // hints[] = [elem, text, span, imgspan, elem.style.backgroundColor, elem.style.color]
-    var pageHints = [];
-    var validHints = []; // store the indices of the "hints" array with valid elements
+    // add one, since hints begin with 0;
 
-    var escapeNumbers = false; // escape mode for numbers. true -> treated as hint-text
-    var activeTimeout = null;  // needed for hinttimeout > 0
-    var canUpdate = false;
+    return parseInt(converted, chh.hintchars.length); // hintchars.length is the base/radix
+}
+//}}}
+chh.number2hintchars = function (nr)//{{{
+{
+    var oldnr = nr;
+    var converted = "";
+    var tmp = "";
 
-    // keep track of the documents which we generated the hints for
-    // docs = { doc: document, start: start_index in hints[], end: end_index in hints[] }
-    var docs = [];
+    tmp = nr.toString(chh.hintchars.length); // hintchars.length is the base/radix)
 
-    const Mode = new Struct("prompt", "action", "tags");
-    Mode.defaultValue("tags", function () function () options.hinttags);
-    function extended() options.extendedhinttags;
-    const hintModes = {
-        ";": Mode("Focus hint",		    		 function (elem) buffer.focusElement(elem),                             extended),
-        a: Mode("Save hint with prompt",		 function (elem) buffer.saveLink(elem, false)),
-        s: Mode("Save hint",					 function (elem) buffer.saveLink(elem, true)),
-        o: Mode("Follow hint",					 function (elem) buffer.followLink(elem, liberator.CURRENT_TAB)),
-        t: Mode("Follow hint in a new tab",		 function (elem) buffer.followLink(elem, liberator.NEW_TAB)),
-        b: Mode("Follow hint in a background tab",	 function (elem) buffer.followLink(elem, liberator.NEW_BACKGROUND_TAB)),
-        v: Mode("View hint source",				 function (elem, loc) buffer.viewSource(loc, false),                    extended),
-        V: Mode("View hint source",				 function (elem, loc) buffer.viewSource(loc, true),                     extended),
-        w: Mode("Follow hint in a new window",	 function (elem) buffer.followLink(elem, liberator.NEW_WINDOW),         extended),
+    // translate numbers into users hintchars
+    // tmp might be 2e -> (chh.transval) 2 and 14 -> (chh.hintchars) according hintchars
 
-        "?": Mode("Show information for hint",	 function (elem) buffer.showElementInfo(elem),                          extended),
-        O: Mode("Open location based on hint",	 function (elem, loc) commandline.open(":", "open " + loc, modes.EX)),
-        T: Mode("Open new tab based on hint",	 function (elem, loc) commandline.open(":", "tabopen " + loc, modes.EX)),
-        W: Mode("Open new window based on hint", function (elem, loc) commandline.open(":", "winopen " + loc, modes.EX)),
-        y: Mode("Yank hint location",			 function (elem, loc) util.copyToClipboard(loc, true)),
-        Y: Mode("Yank hint description",		 function (elem) util.copyToClipboard(elem.textContent || "", true),    extended),
-    };
+    for (let i = 0, l = tmp.length; i < l; i++)
+        converted += "" + chh.hintchars[chh.transval[tmp[i]]];
 
-    // reset all important variables
-    function reset()
+    return converted;
+}
+//}}}
+chh.openHint = function (where)//{{{
+{
+    if (chh.validHints.length < 1)
+        return false;
+
+    var x = 1, y = 1;
+    var elem = chh.validHints[chh.hintNumber - 1] || chh.validHints[0];
+    var elemTagName = elem.localName.toLowerCase();
+    elem.focus();
+
+    liberator.buffer.followLink(elem, where);
+    return true;
+}
+//}}}
+chh.focusHint = function ()//{{{
+{
+    if (chh.validHints.length < 1)
+        return false;
+
+    var elem = chh.validHints[chh.hintNumber - 1] || chh.validHints[0];
+    var doc = window.content.document;
+    var elemTagName = elem.localName.toLowerCase();
+    if (elemTagName == "frame" || elemTagName == "iframe")
     {
-        statusline.updateInputBuffer("");
-        hintString = "";
-        hintNumber = 0;
-        usedTabKey = false;
-        prevInput = "";
-        pageHints = [];
-        validHints = [];
-        canUpdate = false;
-        docs = [];
-        escapeNumbers = false;
-
-        if (activeTimeout)
-            clearTimeout(activeTimeout);
-        activeTimeout = null;
+        elem.contentWindow.focus();
+        return false;
+    }
+    else
+    {
+        elem.focus();
     }
 
-    function updateStatusline()
+    var evt = doc.createEvent("MouseEvents");
+    var x = 0;
+    var y = 0;
+    // for imagemap
+    if (elemTagName == "area")
     {
-        statusline.updateInputBuffer((escapeNumbers ? mappings.getMapLeader() : "") + (hintNumber || ""));
+        [x, y] = elem.getAttribute("coords").split(",");
+        x = Number(x);
+        y = Number(y);
     }
 
-    function generate(win)
+    evt.initMouseEvent("mouseover", true, true, doc.defaultView, 1, x, y, 0, 0, 0, 0, 0, 0, 0, null);
+    elem.dispatchEvent(evt);
+}
+//}}}
+chh.yankHint = function (text)//{{{
+{
+    if (chh.validHints.length < 1)
+        return false;
+
+    var elem = chh.validHints[chh.hintNumber - 1] || chh.validHints[0];
+    var loc;
+    if (text)
+        loc = elem.textContent;
+    else
+        loc = elem.href;
+
+    liberator.copyToClipboard(loc);
+    liberator.echo("Yanked " + loc, liberator.commandline.FORCE_SINGLELINE);
+}
+//}}}
+chh.saveHint = function (skipPrompt)//{{{
+{
+    if (chh.validHints.length < 1)
+        return false;
+
+    var elem = chh.validHints[chh.hintNumber - 1] || chh.validHints[0];
+
+    try
     {
-        if (!win)
-            win = window.content;
+        liberator.buffer.saveLink(elem,skipPrompt);
+    }
+    catch (e)
+    {
+        liberator.echoerr(e);
+    }
+}
+//}}}
+chh.generate = function (win)//{{{
+{
+    var startDate = Date.now();
 
-        var doc = win.document;
-        var height = win.innerHeight;
-        var width  = win.innerWidth;
-        var scrollX = doc.defaultView.scrollX;
-        var scrollY = doc.defaultView.scrollY;
+    if (!win)
+        win = window.content;
 
-        var baseNodeAbsolute = util.xmlToDom(<span highlight="Hint"/>, doc);
+    var doc = win.document;
+    var height = win.innerHeight;
+    var width  = win.innerWidth;
+    var scrollX = doc.defaultView.scrollX;
+    var scrollY = doc.defaultView.scrollY;
 
-        var elem, tagname, text, span, rect;
-        var res = buffer.evaluateXPath(hintMode.tags(), doc, null, true);
+    var baseNodeAbsolute = doc.createElementNS("http://www.w3.org/1999/xhtml", "span");
+    baseNodeAbsolute.style.backgroundColor = "red";
+    baseNodeAbsolute.style.color = "white";
+    baseNodeAbsolute.style.position = "absolute";
+    baseNodeAbsolute.style.fontSize = "10px";
+    baseNodeAbsolute.style.fontWeight = "bold";
+    baseNodeAbsolute.style.lineHeight = "10px";
+    baseNodeAbsolute.style.padding = "0px 1px 0px 0px";
+    baseNodeAbsolute.style.zIndex = "10000001";
+    baseNodeAbsolute.style.display = "none";
+    baseNodeAbsolute.className = "vimperator-hint";
 
-        var fragment = util.xmlToDom(<div highlight="hints"/>, doc);
-        var start = pageHints.length;
-        for (let elem in res)
+    var elem, tagname, text, span, rect;
+    var res = liberator.buffer.evaluateXPath(chh.hinttags, doc, null, true);
+    liberator.log("shints: evaluated XPath after: " + (Date.now() - startDate) + "ms");
+
+    var fragment = doc.createDocumentFragment();
+    var start = chh.hints.length;
+    while ((elem = res.iterateNext()) != null)
+    {
+        // TODO: for frames, this calculation is wrong
+        rect = elem.getBoundingClientRect();
+        if (!rect || rect.top > height || rect.bottom < 0 || rect.left > width || rect.right < 0)
+            continue;
+
+        rect = elem.getClientRects()[0];
+        if (!rect)
+            continue;
+
+        // TODO: mozilla docs recommend localName instead of tagName
+        tagname = elem.tagName.toLowerCase();
+        text = "";
+        span = baseNodeAbsolute.cloneNode(true);
+        span.style.left = (rect.left + scrollX) + "px";
+        span.style.top = (rect.top + scrollY) + "px";
+        fragment.appendChild(span);
+
+        chh.hints.push([elem, text, span, null, elem.style.backgroundColor, elem.style.color]);
+    }
+
+    doc.body.appendChild(fragment);
+    chh.docs.push({ doc: doc, start: start, end: chh.hints.length - 1 });
+
+    // also generate hints for frames
+    for (let i = 0; i < win.frames.length; i++)
+        chh.generate(win.frames[i]);
+
+    liberator.log("shints: generate() completed after: " + (Date.now() - startDate) + "ms");
+    return true;
+}
+//}}}
+// TODO: make it aware of imgspans
+chh.showActiveHint = function (newID, oldID)//{{{
+{
+    var oldElem = chh.validHints[oldID - 1];
+    if (oldElem)
+        oldElem.style.backgroundColor = chh.bgcolor;
+
+    var newElem = chh.validHints[newID - 1];
+    if (newElem)
+        newElem.style.backgroundColor = chh.selcolor;
+}
+//}}}
+chh.showHints = function ()//{{{
+{
+    var startDate = Date.now();
+    var win = window.content;
+    var height = win.innerHeight;
+    var width  = win.innerWidth;
+
+
+    var elem, tagname, text, rect, span, imgspan;
+    var hintnum = 1;
+    //var findTokens = chh.hintString.split(/ +/);
+    var activeHint = chh.hintNumber || 1;
+    chh.validHints = [];
+
+    for (let j = 0; j < chh.docs.length; j++)
+    {
+        let doc = chh.docs[j].doc;
+        let start = chh.docs[j].start;
+        let end = chh.docs[j].end;
+        let scrollX = doc.defaultView.scrollX;
+        let scrollY = doc.defaultView.scrollY;
+
+outer:
+        for (let i = start; i <= end; i++)
         {
-            // TODO: for iframes, this calculation is wrong
-            rect = elem.getBoundingClientRect();
-            if (!rect || rect.top > height || rect.bottom < 0 || rect.left > width || rect.right < 0)
-                continue;
+            [elem, , span, imgspan] = chh.hints[i];
+            text = "";
 
-            rect = elem.getClientRects()[0];
-            if (!rect)
-                continue;
-
-            var computedStyle = doc.defaultView.getComputedStyle(elem, null);
-            if (computedStyle.getPropertyValue("visibility") == "hidden" || computedStyle.getPropertyValue("display") == "none")
-                continue;
-
-            // TODO: mozilla docs recommend localName instead of tagName
-            tagname = elem.tagName.toLowerCase();
-            if (tagname == "input" || tagname == "textarea")
-                text = elem.value;
-            else if (tagname == "select")
+            if (elem.firstChild && elem.firstChild.tagName == "IMG")
             {
-                if (elem.selectedIndex >= 0)
-                    text = elem.item(elem.selectedIndex).text;
-                else
-                    text = "";
+                if (!imgspan)
+                {
+                    rect = elem.firstChild.getBoundingClientRect();
+                    if (!rect)
+                        continue;
+
+                    imgspan = doc.createElementNS("http://www.w3.org/1999/xhtml", "span");
+                    imgspan.style.position = "absolute";
+                    imgspan.style.opacity = 0.5;
+                    imgspan.style.zIndex = "10000000";
+                    imgspan.style.left = (rect.left + scrollX) + "px";
+                    imgspan.style.top = (rect.top + scrollY) + "px";
+                    imgspan.style.width = (rect.right - rect.left) + "px";
+                    imgspan.style.height = (rect.bottom - rect.top) + "px";
+                    imgspan.className = "vimperator-hint";
+                    chh.hints[i][3] = imgspan;
+                    doc.body.appendChild(imgspan);
+                }
+                imgspan.style.backgroundColor = (activeHint == hintnum) ? chh.selcolor : chh.bgcolor;
+                imgspan.style.display = "inline";
+            }
+
+            if (!imgspan)
+                elem.style.backgroundColor = (activeHint == hintnum) ? chh.selcolor : chh.bgcolor;
+            elem.style.color = chh.fgcolor;
+            if (chh.showcapitals)
+                span.textContent = chh.number2hintchars(hintnum++).toUpperCase();
+            else
+                span.textContent = chh.number2hintchars(hintnum++);
+
+            span.style.display = "inline";
+            chh.validHints.push(elem);
+        }
+    }
+
+    liberator.log("shints: showHints() completed after: " + (Date.now() - startDate) + "ms");
+    return true;
+}
+//}}}
+chh.removeHints = function (timeout)//{{{
+{
+    var firstElem = chh.validHints[0] || null;
+    var firstElemselcolor = "";
+    var firstElemColor = "";
+
+    for (let j = 0; j < chh.docs.length; j++)
+    {
+        let doc = chh.docs[j].doc;
+        let start = chh.docs[j].start;
+        let end = chh.docs[j].end;
+
+        for (let i = start; i <= end; i++)
+        {
+            // remove the span for the numeric display part
+            doc.body.removeChild(chh.hints[i][2]);
+            if (chh.hints[i][3]) // a transparent span for images
+                doc.body.removeChild(chh.hints[i][3]);
+
+            if (timeout && firstElem == chh.hints[i][0])
+            {
+                firstElemselcolor = chh.hints[i][4];
+                firstElemColor = chh.hints[i][5];
             }
             else
-                text = elem.textContent.toLowerCase();
-
-            span = baseNodeAbsolute.cloneNode(true);
-            span.style.left = (rect.left + scrollX) + "px";
-            span.style.top = (rect.top + scrollY) + "px";
-            fragment.appendChild(span);
-
-            pageHints.push([elem, text, span, null, elem.style.backgroundColor, elem.style.color]);
-        }
-
-        if (doc.body)
-        {
-            doc.body.appendChild(fragment);
-            docs.push({ doc: doc, start: start, end: pageHints.length - 1 });
-        }
-
-        // also generate hints for frames
-        Array.forEach(win.frames, function (frame) { generate(frame); });
-
-        return true;
-    }
-
-    // TODO: make it aware of imgspans
-    function showActiveHint(newID, oldID)
-    {
-        var oldElem = validHints[oldID - 1];
-        if (oldElem)
-            setClass(oldElem, false);
-
-        var newElem = validHints[newID - 1];
-        if (newElem)
-            setClass(newElem, true);
-    }
-
-    function setClass(elem, active)
-    {
-        let prefix = (elem.getAttributeNS(NS.uri, "class") || "") + " ";
-        if (active)
-            elem.setAttributeNS(NS.uri, "highlight", prefix + "HintActive");
-        else
-            elem.setAttributeNS(NS.uri, "highlight", prefix + "HintElem");
-    }
-
-    function showHints()
-    {
-
-        let elem, tagname, text, rect, span, imgspan;
-        let hintnum = 1;
-        let validHint = hintMatcher(hintString.toLowerCase());
-        let activeHint = hintNumber || 1;
-        validHints = [];
-
-        for (let [,{ doc: doc, start: start, end: end }] in Iterator(docs))
-        {
-            let scrollX = doc.defaultView.scrollX;
-            let scrollY = doc.defaultView.scrollY;
-
-        inner:
-            for (let i in (util.interruptableRange(start, end + 1, 500)))
             {
-                let hint = pageHints[i];
-                [elem, text, span, imgspan] = hint;
-
-                // if (!validHint(text))
-                // {
-                //     span.style.display = "none";
-                //     if (imgspan)
-                //         imgspan.style.display = "none";
-
-                //     elem.removeAttributeNS(NS.uri, "highlight");
-                //     continue inner;
-                // }
-
-                if (text == "" && elem.firstChild && elem.firstChild.tagName == "IMG")
-                {
-                    if (!imgspan)
-                    {
-                        rect = elem.firstChild.getBoundingClientRect();
-                        if (!rect)
-                            continue;
-
-                        imgspan = util.xmlToDom(<span highlight="Hint"/>, doc);
-                        imgspan.setAttributeNS(NS.uri, "class", "HintImage");
-                        imgspan.style.left = (rect.left + scrollX) + "px";
-                        imgspan.style.top = (rect.top + scrollY) + "px";
-                        imgspan.style.width = (rect.right - rect.left) + "px";
-                        imgspan.style.height = (rect.bottom - rect.top) + "px";
-                        hint[IMGSPAN] = imgspan;
-                        span.parentNode.appendChild(imgspan);
-                    }
-                    setClass(imgspan, activeHint == hintnum)
-                }
-
-                var chars = num2chars(hintnum++);
-                span.setAttribute("number", chars);
-                elem.setAttribute("number", chars);
-                ++hintnum;
-                if (imgspan)
-                    imgspan.setAttribute("number", num2chars(hintnum));
-                else
-                    setClass(elem, hintString == chars);
-                    //setClass(elem, activeHint == chars);
-                if(chars.indexOf(hintString)==0) {
-                    validHints.push(elem);
-                }
+                // restore colors
+                let elem = chh.hints[i][0];
+                elem.style.backgroundColor = chh.hints[i][4];
+                elem.style.color = chh.hints[i][5];
             }
         }
 
-        if (options.usermode)
+        // animate the disappearance of the first hint
+        if (timeout && firstElem)
         {
-            let css = [];
-            // FIXME: Broken for imgspans.
-            for (let [,{ doc: doc }] in Iterator(docs))
-            {
-                for (let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", doc))
-                {
-                    let group = elem.getAttributeNS(NS.uri, "highlight");
-                    css.push(highlight.selector(group) + "[number='" + elem.getAttribute("number") + "'] { " + elem.style.cssText + " }");
-                }
-            }
-            styles.addSheet("hint-positions", "*", css.join("\n"), true, true);
+            setTimeout(function () {
+                    firstElem.style.backgroundColor = firstElemselcolor;
+                    firstElem.style.color = firstElemColor;
+                    }, timeout);
         }
-
-        return true;
     }
 
-    function removeHints(timeout)
+    liberator.log("shints: removeHints() done");
+    chh.reset();
+}
+//}}}
+chh.processHints = function (followFirst)//{{{
+{
+    if (chh.validHints.length == 0)
     {
-        var firstElem = validHints[0] || null;
-
-        for (let [,{ doc: doc, start: start, end: end }] in Iterator(docs))
-        {
-            for (let elem in buffer.evaluateXPath("//*[@liberator:highlight='hints']", doc))
-                elem.parentNode.removeChild(elem);
-            for (let i in util.range(start, end + 1))
-            {
-                let hint = pageHints[i];
-                if (!timeout || hint[ELEM] != firstElem)
-                    hint[ELEM].removeAttributeNS(NS.uri, "highlight");
-            }
-
-            // animate the disappearance of the first hint
-            if (timeout && firstElem)
-            {
-                // USE THIS FOR MAKING THE SELECTED ELEM RED
-                //                firstElem.style.backgroundColor = "red";
-                //                firstElem.style.color = "white";
-                //                setTimeout(function () {
-                //                        firstElem.style.backgroundColor = firstElemBgColor;
-                //                        firstElem.style.color = firstElemColor;
-                //                }, 200);
-                // OR USE THIS FOR BLINKING:
-                //                var counter = 0;
-                //                var id = setInterval(function () {
-                //                    firstElem.style.backgroundColor = "red";
-                //                    if (counter % 2 == 0)
-                //                        firstElem.style.backgroundColor = "yellow";
-                //                    else
-                //                        firstElem.style.backgroundColor = "#88FF00";
-                //
-                //                    if (counter++ >= 2)
-                //                    {
-                //                        firstElem.style.backgroundColor = firstElemBgColor;
-                //                        firstElem.style.color = firstElemColor;
-                //                        clearTimeout(id);
-                //                    }
-                //                }, 100);
-                setTimeout(function () { firstElem.removeAttributeNS(NS.uri, "highlight") }, timeout);
-            }
-        }
-        styles.removeSheet("hint-positions", null, null, null, true);
-
-        reset();
+        liberator.beep();
+        return false;
     }
 
-    function processHints(followFirst)
+    if (!followFirst)
     {
-        if (validHints.length == 0)
+        let firstHref = chh.validHints[0].getAttribute("href") || null;
+        if (firstHref)
         {
-            liberator.beep();
-            return false;
-        }
-
-        if (options["followhints"] > 0)
-        {
-            if (!followFirst)
-                return false; // no return hit; don't examine uniqueness
-
-            // OK. return hit. But there's more than one hint. And
-            // there's no tab-selected current link. Do not follow in mode 2
-            if ((options["followhints"] == 2) && validHints.length > 1 && !hintNumber)
-                return liberator.beep();
-        }
-    
-        if (!followFirst)
-        {
-            var firstHref = validHints[0].getAttribute("href") || null;
-            if (firstHref)
-            {
-                if (validHints.some(function (e) e.getAttribute("href") != firstHref))
-                    return false;
-            }
-            else if (validHints.length > 1)
-            {
+            if (chh.validHints.some(function (e) { return e.getAttribute("href") != firstHref; }))
                 return false;
-            }
         }
+        else if (chh.validHints.length > 1)
+            return false;
+    }
 
-        var timeout = followFirst || events.feedingKeys ? 0 : 500;
-        var elems = [];
-        for (let [,{ doc: doc }] in Iterator(docs))
-        {
-            for (let elem in buffer.evaluateXPath("//*[@number=\""+hintString+"\"]", doc))
-            {
-                elems.push(elem);
-            }
-        }
-        var elem = elems[0];
-        removeHints(timeout);
+    var activeNum = chh.hintNumber || 1;
+    var loc = chh.validHints[activeNum - 1].href || "";
+    switch (chh.submode)
+    {
+        case ";": chh.focusHint(); break;
+        case "a": chh.saveHint(false); break;
+        case "s": chh.saveHint(true); break;
+        case "o": chh.openHint(liberator.CURRENT_TAB); break;
+        case "O": liberator.commandline.open(":", "open " + loc, liberator.modes.EX); break;
+        case "t": chh.openHint(liberator.NEW_TAB); break;
+        case "T": liberator.commandline.open(":", "tabopen " + loc, liberator.modes.EX); break;
+        case "w": chh.openHint(liberator.NEW_WINDOW);  break;
+        case "W": liberator.commandline.open(":", "winopen " + loc, liberator.modes.EX); break;
+        case "y": chh.yankHint(false); break;
+        case "Y": chh.yankHint(true); break;
+        default:
+        liberator.echoerr("INTERNAL ERROR: unknown submode: " + chh.submode);
+    }
 
-        if (timeout == 0)
-            // force a possible mode change, based on wheter an input field has focus
-            events.onFocusChange();
+    var timeout = followFirst ? 0 : 500;
+    chh.removeHints(timeout);
+
+    if (liberator.modes.extended & liberator.modes.ALWAYS_HINT)
+    {
         setTimeout(function () {
-            if (modes.extended & modes.HINTS)
-                modes.reset();
-            hintMode.action(elem, elem.href || "");
-        }, timeout);
+                chh.canUpdate = true;
+                chh.hintString = "";
+                chh.hintNumber = 0;
+                liberator.statusline.updateInputBuffer("");
+                }, timeout);
+    }
+    else
+    {
+        if (timeout == 0 || liberator.modes.isReplaying)
+        {
+            // force a possible mode change, based on wheter an input field has focus
+            liberator.events.onFocusChange();
+            if (liberator.mode == liberator.modes.HINTS)
+                liberator.modes.reset(false);
+        }
+        else
+        {
+            liberator.modes.add(liberator.modes.INACTIVE_HINT);
+            setTimeout(function () {
+                    if (liberator.mode == liberator.modes.HINTS)
+                        liberator.modes.reset(false);
+                    }, timeout);
+        }
+    }
+
+    return true;
+}
+//}}}
+// TODO: implement framesets
+chh.show = function (mode, minor, filter)//{{{
+{
+    if (mode == liberator.modes.EXTENDED_HINT && !/^[;asoOtTwWyY]$/.test(minor))
+    {
+        liberator.beep();
+        return;
+    }
+
+    liberator.modes.set(liberator.modes.HINTS, mode);
+    chh.submode = minor || "o"; // open is the default mode
+    chh.hintString = filter || "";
+    chh.hintNumber = 0;
+    chh.canUpdate = false;
+
+    chh.generate();
+
+    // get all keys from the input queue
+    var mt = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    while (mt.hasPendingEvents())
+        mt.processNextEvent(true);
+
+    chh.canUpdate = true;
+    chh.showHints();
+
+    if (chh.validHints.length == 0)
+    {
+        liberator.beep();
+        liberator.modes.reset();
+        return false;
+    }
+    else if (chh.validHints.length == 1)
+    {
+        chh.processHints(true);
+        return false;
+    }
+    else // still hints visible
         return true;
+}
+//}}}
+chh.hide = function ()//{{{
+{
+    chh.removeHints(0);
+}
+//}}}
+chh.onEvent = function (event)//{{{
+{
+    var key = liberator.events.toString(event);
+
+    if (chh.showcapitals && key.length == 1)
+        key = key.toLowerCase();
+
+    // clear any timeout which might be active after pressing a number
+    if (chh.activeTimeout)
+    {
+        clearTimeout(chh.activeTimeout);
+        chh.activeTimeout = null;
     }
 
-    function onInput (event)
+    switch (key)
     {
-        prevInput = "text";
+        case "<Return>":
+            chh.processHints(true);
+            break;
 
-        // clear any timeout which might be active after pressing a number
-        if (activeTimeout)
-        {
-            clearTimeout(activeTimeout);
-            activeTimeout = null;
-        }
+        case "<Tab>":
+        case "<S-Tab>":
+            chh.usedTabKey = true;
+            if (chh.hintNumber == 0)
+                chh.hintNumber = 1;
 
-        hintNumber = 0;
-        hintString = commandline.getCommand().toUpperCase();
-        updateStatusline();
-        showHints();
-        if (validHints.length == 1)
-            processHints(false);
-    }
-
-    function hintMatcher(hintString) //{{{
-    {
-        function containsMatcher(hintString) //{{{
-        {
-            var tokens = hintString.split(/ +/);
-            return function (linkText) tokens.every(function (token) linkText.indexOf(token) >= 0);
-        } //}}}
-
-        function wordStartsWithMatcher(hintString, allowWordOverleaping) //{{{
-        {
-            var hintStrings    = hintString.split(/ +/);
-            var wordSplitRegex = new RegExp(options["wordseparators"]);
-
-            // What the **** does this do? --Kris
-            function charsAtBeginningOfWords(chars, words, allowWordOverleaping)
+            let oldID = chh.hintNumber;
+            if (key == "<Tab>")
             {
-                var charIdx         = 0;
-                var numMatchedWords = 0;
-                for (let [,word] in Iterator(words))
-                {
-                    if (word.length == 0)
-                        continue;
-
-                    let wcIdx = 0;
-                    // Check if the current word matches same characters as the previous word.
-                    // Each already matched word has matched at least one character.
-                    if (charIdx > numMatchedWords)
-                    {
-                        let matchingStarted = false;
-                        for (let i in util.range(numMatchedWords, charIdx))
-                        {
-                            if (chars[i] == word[wcIdx])
-                            {
-                                matchingStarted = true;
-                                wcIdx++;
-                            }
-                            else if (matchingStarted)
-                            {
-                                wcIdx = 0;
-                                break;
-                            }
-                        }
-                    }
-
-                    // the current word matches same characters as the previous word
-                    var prevCharIdx;
-                    if (wcIdx > 0)
-                    {
-                        prevCharIdx = charIdx;
-                        // now check if it matches additional characters
-                        for (; wcIdx < word.length && charIdx < chars.length; wcIdx++, charIdx++)
-                        {
-                            if (word[wcIdx] != chars[charIdx])
-                                break;
-                        }
-
-                        // the word doesn't match additional characters, now check if the
-                        // already matched characters are equal to the next characters for matching,
-                        // if yes, then consume them
-                        if (prevCharIdx == charIdx)
-                        {
-                            for (let i = 0; i < wcIdx && charIdx < chars.length; i++, charIdx++)
-                            {
-                                if (word[i] != chars[charIdx])
-                                    break;
-                            }
-                        }
-
-                        numMatchedWords++;
-                    }
-                    // the current word doesn't match same characters as the previous word, just
-                    // try to match the next characters
-                    else
-                    {
-                        prevCharIdx = charIdx;
-                        for (let i = 0; i < word.length && charIdx < chars.length; i++, charIdx++)
-                        {
-                            if (word[i] != chars[charIdx])
-                                break;
-                        }
-
-                        if (prevCharIdx == charIdx)
-                        {
-                            if (!allowWordOverleaping)
-                                return false;
-                        }
-                        else
-                            numMatchedWords++;
-                    }
-
-                    if (charIdx == chars.length)
-                        return true;
-                }
-
-                return (charIdx == chars.length);
+                if (++chh.hintNumber > chh.validHints.length)
+                    chh.hintNumber = 1;
             }
-
-            function stringsAtBeginningOfWords(strings, words, allowWordOverleaping)
+            else
             {
-                var strIdx = 0;
-                for (let [,word] in Iterator(words))
-                {
-                    if (word.length == 0)
-                        continue;
-
-                    let str = strings[strIdx];
-                    if (str.length == 0 || word.indexOf(str) == 0)
-                        strIdx++;
-                    else if (!allowWordOverleaping)
-                        return false;
-
-                    if (strIdx == strings.length)
-                        return true;
-                }
-
-                for (; strIdx < strings.length; strIdx++)
-                {
-                    if (strings[strIdx].length != 0)
-                        return false;
-                }
-                return true;
+                if (--chh.hintNumber < 1)
+                    chh.hintNumber = chh.validHints.length;
             }
+            chh.showActiveHint(chh.hintNumber, oldID);
+            return;
 
-            function wordStartsWith(linkText)
+        case "<BS>": //TODO: may tweak orig hints.js too (adding 2 lines ...)
+            let oldID = chh.hintNumber;
+            if (chh.hintNumber > 0)
             {
-                if (hintStrings.length == 1 && hintStrings[0].length == 0)
-                    return true;
-
-                let words = linkText.split(wordSplitRegex).map(String.toLowerCase);
-                if (hintStrings.length == 1)
-                    return charsAtBeginningOfWords(hintStrings[0], words, allowWordOverleaping);
-                else
-                    return stringsAtBeginningOfWords(hintStrings, words, allowWordOverleaping);
+                chh.hintNumber = Math.floor(chh.hintNumber / chh.hintchars.length);
+                chh.hintString = chh.hintString.substr(0, chh.hintString.length - 1);
+                chh.usedTabKey = false;
             }
-
-            return wordStartsWith;
-        } //}}}
-
-        var hintMatching = options["hintmatching"];
-        switch (hintMatching)
-        {
-            case "contains"      : return containsMatcher(hintString);
-            case "wordstartswith": return wordStartsWithMatcher(hintString, /*allowWordOverleaping=*/ true);
-            case "firstletters"  : return wordStartsWithMatcher(hintString, /*allowWordOverleaping=*/ false);
-            case "custom"        : return liberator.plugins.customHintMatcher(hintString);
-            default              : liberator.echoerr("Invalid hintmatching type: " + hintMatching);
-        }
-        return null;
-    } //}}}
-
-    function histchars() // {{{
-    {
-        return options["hintchars"].toUpperCase();
-    } // }}}
-    function chars2num(chars) //{{{
-    {
-        var num = 0;
-        var hintchars = histchars();
-        var base = hintchars.length;
-        for(var i=0;i<chars.length;++i) {
-            num = base*num + hintchars.indexOf(chars[i]);
-        }
-        return num;
-    } //}}}
-    function num2chars(num) //{{{
-    {
-        var chars = "";
-        var hintchars = histchars();
-        var base = hintchars.length;
-        do {
-            chars = hintchars[((num % base))] + chars;
-            num = Math.floor(num/base);
-        } while(num>0);
-        
-        return chars;
-    } //}}}
-    /////////////////////////////////////////////////////////////////////////////}}}
-    ////////////////////// OPTIONS /////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////{{{
-
-    const DEFAULT_HINTTAGS = "//*[@onclick or @onmouseover or @onmousedown or @onmouseup or @oncommand or @class='lk' or @class='s'] | " +
-                             "//input[not(@type='hidden')] | //a | //area | //iframe | //textarea | //button | //select | " +
-                             "//xhtml:*[@onclick or @onmouseover or @onmousedown or @onmouseup or @oncommand or @class='lk' or @class='s'] | " +
-                             "//xhtml:input[not(@type='hidden')] | //xhtml:a | //xhtml:area | //xhtml:iframe | //xhtml:textarea | //xhtml:button | //xhtml:select";
-
-    options.add(["extendedhinttags", "eht"],
-        "XPath string of hintable elements activated by ';'",
-        "string", DEFAULT_HINTTAGS);
-
-    options.add(["hinttags", "ht"],
-        "XPath string of hintable elements activated by 'f' and 'F'",
-        "string", DEFAULT_HINTTAGS);
-
-    options.add(["hinttimeout", "hto"],
-        "Automatically follow non unique numerical hint",
-        "number", 0,
-        { validator: function (value) value >= 0 });
-
-    options.add(["followhints", "fh"],
-        "Change the way when to automatically follow hints",
-        "number", 0,
-        { validator: function (value) value >= 0 && value < 3 });
-
-    options.add(["hintmatching", "hm"],
-        "How links are matched",
-        "string", "contains",
-        {
-            completer: function (filter)
+            else
             {
-                return [[m, ""] for each (m in ["contains", "wordstartswith", "firstletters", "custom"])];
-            },
-            validator: options.validateCompleter
-        });
-
-    options.add(["wordseparators", "wsp"],
-        "How words are split for hintmatching",
-        "string", '[.,!?:;/"^$%&?()[\\]{}<>#*+|=~ _-]');
-
-    options.add(["hintchars", "hchar"],
-        "Hints character",
-        "string", "hjklasdfgyuiopqwertnmzxcvb");
-
-    /////////////////////////////////////////////////////////////////////////////}}}
-    ////////////////////// MAPPINGS ////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////{{{
-
-    mappings.addUserMap(myModes, ["f"],
-        "Start QuickHint mode",
-        function () { chh.show("o"); });
-
-    mappings.addUserMap(myModes, ["F"],
-        "Start QuickHint mode, but open link in a new tab",
-        function () { chh.show("t"); });
-
-    mappings.addUserMap(myModes, [";"],
-        "Start an extended hint mode",
-        function (arg) { chh.show(arg); },
-        { flags: Mappings.flags.ARGUMENT });
-
-    /////////////////////////////////////////////////////////////////////////////}}}
-    ////////////////////// PUBLIC SECTION //////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////{{{
-
-    
-    var chh = liberator.plugins.charhints = {
-
-        addMode: function (mode)
-        {
-            hintModes[mode] = Mode.apply(Mode, Array.slice(arguments, 1));
-        },
-
-        show: function (minor, filter, win)
-        {
-            removeHints();
-            hintMode = hintModes[minor];
-            if (!hintMode)
-            {
+                chh.usedTabKey = false;
+                chh.hintNumber = 0;
                 liberator.beep();
                 return;
             }
-            commandline.input(hintMode.prompt + ":", null, { onChange: onInput });
-            modes.extended = modes.HINTS;
+            chh.showActiveHint(chh.hintNumber, oldID);
+            break;
 
-            submode = minor;
-            hintString = filter || "";
-            hintNumber = 0;
-            usedTab = false;
-            prevInput = "";
-            canUpdate = false;
+        case "<C-w>":
+        case "<C-u>":
+            chh.hintString = "";
+            chh.hintNumber = 0;
+            break;
 
-            generate(win);
-
-            // get all keys from the input queue
-            liberator.threadYield(true);
-
-            canUpdate = true;
-            showHints();
-
-            if (validHints.length == 0)
+        default:
+        // pass any special or ctrl- etc. prefixed key back to the main vimperator loop
+            if (/^<./.test(key) || key == ":")
             {
+                //FIXME: won't work probably
+                let map = null;
+                if ((map = liberator.mappings.get(liberator.modes.NORMAL, key)) ||
+                     (map = liberator.mappings.get(liberator.modes.HINTS, key))) //TODO
+                {
+                    map.execute(null, -1);
+                    return;
+                }
+
                 liberator.beep();
-                modes.reset();
-                return false;
-            }
-            else if (validHints.length == 1)
-            {
-                processHints(true);
-                return false;
-            }
-            else // still hints visible
-                return true;
-        },
-
-        hide: function ()
-        {
-            removeHints(0);
-        },
-
-        onEvent: function (event)
-        {
-            var key = events.toString(event);
-            var followFirst = false;
-
-            // clear any timeout which might be active after pressing a number
-            if (activeTimeout)
-            {
-                clearTimeout(activeTimeout);
-                activeTimeout = null;
+                return;
             }
 
-            switch (key)
+            if (chh.hintchars.indexOf(key) >= 0) // TODO: check if in hintchars
             {
-                case "<Return>":
-                    followFirst = true;
-                    break;
+                chh.hintString += key;
+                let oldHintNumber = chh.hintNumber;
+                if (chh.hintNumber == 0 || chh.usedTabKey)
+                {
+                    chh.usedTabKey = false;
+                }
 
-                case "<Tab>":
-                case "<S-Tab>":
-                    usedTabKey = true;
-                    if (hintNumber == 0)
-                        hintNumber = 1;
+                chh.hintNumber = chh.hintchars2number(chh.hintString);
 
-                    var oldID = hintNumber;
-                    if (key == "<Tab>")
-                    {
-                        if (++hintNumber > validHints.length)
-                            hintNumber = 1;
-                    }
-                    else
-                    {
-                        if (--hintNumber < 1)
-                            hintNumber = validHints.length;
-                    }
-                    hintString = num2chars(hintNumber);
-                    showActiveHint(hintNumber, oldID);
-                    updateStatusline();
+                chh.updateStatusline();
+
+                if (!chh.canUpdate)
                     return;
 
-                case "<BS>":
-                    if (hintNumber > 0 && !usedTabKey)
-                    {
-                        hintNumber = Math.floor(hintNumber / 10);
-                        if (hintNumber == 0)
-                            prevInput = "text";
-                    }
-                    else
-                    {
-                        usedTabKey = false;
-                        hintNumber = 0;
-                        liberator.beep();
-                        return;
-                    }
-                    break;
+                if (chh.docs.length == 0)
+                {
+                    chh.generate();
+                    chh.showHints();
+                }
+                chh.showActiveHint(chh.hintNumber, oldHintNumber || 1);
 
-               case mappings.getMapLeader():
-                   escapeNumbers = !escapeNumbers;
-                   if (escapeNumbers && usedTabKey) // hintNumber not used normally, but someone may wants to toggle
-                       hintNumber = 0;            // <tab>s ? reset. Prevent to show numbers not entered.
+                if (chh.hintNumber == 0 || chh.hintNumber > chh.validHints.length)
+                {
+                    liberator.beep();
+                    return;
+                }
 
-                   updateStatusline();
-                   return;
+                // orig hints.js comment: if we write a numeric part like 3, but we have 45 hints, only follow
+                // the hint after a timeout, as the user might have wanted to follow link 34
+                if (chh.hintNumber > 0 && chh.hintNumber * chh.hintchars.length <= chh.validHints.length)
+                {
+                    if (chh.timeout > 0)
+                        chh.activeTimeout = setTimeout(chh.processHints, chh.timeout, true);
 
-                default:
-                    var hintchars = histchars();
-                    if (hintchars.indexOf(key)==0)
-                    {
-                        // FIXME: Kludge.
-                        if (escapeNumbers)
-                        {
-                            let cmdline = document.getElementById("liberator-commandline-command");
-                            let start = cmdline.selectionStart;
-                            let end = cmdline.selectionEnd;
-                            cmdline.value = cmdline.value.substr(0, start) + key + cmdline.value.substr(start);
-                            cmdline.selectionStart = start + 1;
-                            cmdline.selectionEnd = end + 1;
-                            return;
-                        }
-
-                        prevInput = "number";
-
-                        var oldHintNumber = hintNumber;
-                        if (hintNumber == 0 || usedTabKey)
-                        {
-                            usedTabKey = false;
-                            hintNumber = parseInt(key, 10);
-                        }
-                        else
-                            hintNumber = (hintNumber * 10) + parseInt(key, 10);
-
-                        updateStatusline();
-
-                        if (!canUpdate)
-                            return;
-
-                        if (docs.length == 0)
-                        {
-                            generate();
-                            showHints();
-                        }
-                        showActiveHint(hintNumber, oldHintNumber || 1);
-
-                        if (hintNumber == 0 || hintNumber > validHints.length)
-                        {
-                            liberator.beep();
-                            return;
-                        }
-
-                        // if we write a numeric part like 3, but we have 45 hints, only follow
-                        // the hint after a timeout, as the user might have wanted to follow link 34
-                        if (hintNumber > 0 && hintNumber * 10 <= validHints.length)
-                        {
-                            var timeout = options["hinttimeout"];
-                            if (timeout > 0)
-                                activeTimeout = setTimeout(function () { processHints(true); }, timeout);
-
-                            return false;
-                        }
-                        // we have a unique hint
-                        processHints(true);
-                        return;
-                    }
+                    return false;
+                }
+                // we have a unique hint
+                chh.processHints(true);
+                return;
             }
 
-            updateStatusline();
-
-            if (canUpdate)
+            if (chh.usedTabKey)
             {
-                if (docs.length == 0 && hintString.length > 0)
-                    generate();
-
-                showHints();
-                processHints(followFirst);
+                chh.usedTabKey = false;
+                chh.showActiveHint(1, chh.hintNumber);
             }
-        },
-    };
-
-    for(let name in chh) {
-        hints[name] = chh[name];
     }
-    //}}}
-})(); //}}}
+
+    chh.updateStatusline();
+}//}}}
+
+
+// <<<<<<<<<<<<<<< registering/setting up this plugin
+
+//liberator.modes.setCustomMode ("CHAR-HINTS", liberator.plugins.charhints.onEvent,
+//                                liberator.plugins.charhints.hide);
+liberator.hints = chh;
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapNormal],
+        "Start Custum-QuickHint mode",
+        function () { liberator.plugins.charhints.show(liberator.modes.QUICK_HINT); },
+        { noremap: true }
+);
+
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapNormalNewTab],
+        "Start Custum-QuickHint mode, but open link in a new tab",
+        function () { liberator.plugins.charhints.show(liberator.modes.QUICK_HINT, "t"); },
+        { noremap: true }
+);
+
+liberator.mappings.addUserMap([liberator.modes.NORMAL], [chh.mapExtended],
+        "Start an extended hint mode",
+        function (arg)
+        {
+            if (arg == "f")
+                liberator.plugins.charhints.show(liberator.modes.ALWAYS_HINT, "o");
+            else if (arg == "F")
+                liberator.plugins.charhints.show(liberator.modes.ALWAYS_HINT, "t");
+            else
+                liberator.plugins.charhints.show(liberator.modes.EXTENDED_HINT, arg);
+        },
+        {
+            flags: liberator.Mappings.flags.ARGUMENT,
+            noremap: true
+        }
+);
 
 // vim: set fdm=marker sw=4 ts=4 et:
