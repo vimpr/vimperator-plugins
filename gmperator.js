@@ -351,14 +351,15 @@ commands.addUserCommand(['gmset'],'change settings for Greasemonkey scripts', //
 commands.addUserCommand(['gmcommand','gmcmd'],'run Greasemonkey Command', //{{{
     function(args,special){
         var commander = GM_BrowserUI.getCommander(content);
+        var commandName = args[0];
         for (let i=0,l=commander.menuItems.length; i<l; i++){
             let menuItem = commander.menuItems[i];
-            if (menuItem.getAttribute('label') == args.string){
+            if (menuItem.getAttribute('label') == commandName){
                 menuItem._commandFunc();
                 return;
             }
         }
-        liberator.echoerr(args.string + ' is not defined userscript command.');
+        liberator.echoerr(commandName + ' is not defined userscript command.');
     },
     {
         completer: function(context){
@@ -369,7 +370,8 @@ commands.addUserCommand(['gmcommand','gmcmd'],'run Greasemonkey Command', //{{{
             context.completions = [[items[i].getAttribute('label'),'-'] for (i in items)].filter(function(item){
                 return this.test(item[0]);
             },exp);
-        }
+        },
+        argCount: "1"
     }
 ); //}}}
 
