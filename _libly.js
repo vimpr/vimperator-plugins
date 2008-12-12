@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.7</version>
+    <version>0.1.8</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -66,6 +66,11 @@ createHTMLDocument(str):
   引数 str より、HTMLFragment を作成します。
 getNodesFromXPath(xpath, doc, callback, obj):
   xpath を評価し snapshot の配列を返却します。
+xmlSerialize(xml):
+  xml を文字列化します。 
+getElementPosition(elem):
+  elem の offset を返却します。
+  {top: 0, left: 0}
     ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -244,6 +249,19 @@ libly.$U = {//{{{
                                         .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
                                         .replace(/<[^>]+>/g, function(all) all.toLowerCase());
         } catch (e) { return '' }
+    },
+    getElementPosition: function(elem) {
+        var offsetTrail = elem;
+        var offsetLeft  = 0;
+        var offsetTop   = 0;
+        while (offsetTrail) {
+            offsetLeft += offsetTrail.offsetLeft;
+            offsetTop  += offsetTrail.offsetTop;
+            offsetTrail = offsetTrail.offsetParent;
+        }
+        offsetTop = offsetTop || null;
+        offsetLeft = offsetLeft || null;
+        return {top: offsetTop, left: offsetLeft};
     }
     // }}}
 };
