@@ -1,352 +1,427 @@
-/*
- * ==VimperatorPlugin==
- * @name            matanico.js
- * @description     update Twitter's status to current video name and comment
- * @description-ja  今見てる動画のタイトルとコメントを Twitter に投稿する
- * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.62
- * @minversion      2.0pre 2008/10/16
- * ==/VimperatorPlugin==
- *
- * LICENSE
- *   New BSD License
- *
- * USAGE
- *   :matanico [comment]
- *     Twitter に今見ている動画の情報をポストする。 comment はなくてもかまわない。
- *     動画ページではみている動画の情報を、タグ検索ページでは検索結果をポストする。
- *   :matanico! [comment]
- *     Twitter に送られる文字列をクリップボードにコピーする。 twitter には送られない。
- *     動画ページではみている動画の情報を、タグ検索ページでは検索結果をコピーする。
- *
- * VALIABLE
- *   g:matanico_status_format
- *     動画閲覧ページで投稿する文章の書式設定。動画ページで適用される。以下の変数指定が可能。
- *       $SERVICENAME : このプラグインが付加する文字列。 g:matanico_status_servicename で指定する。
- *       $SUBJECT     : 動画の名前。
- *       $PLAYTIME    : 再生時間。
- *       $URL         : 動画の URL。
- *       $COMMENT     : コメント。これがないとコメントを書いても反映されない。
- *     default
- *       let g:matanico_status_format='$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT'
- *
- *   g:matanico_status_servicename
- *     このプラグインが固定で付加する文字列。動画ページで適用される。
- *     default
- *       let g:matanico_status_servicename='またニコニコ動画見てる'
- *
- *   g:matanico_tag_format
- *     タグ検索ページで投稿する文章の書式設定。以下の変数指定が可能。
- *       $SERVICENAME : このプラグインが付加する文字列。 g:matanico_tag_servicename で指定する。
- *       $TAG         : 検索したタグ。複数の場合は半角スペースで区切られる。
- *       $NUMOFVIDEOS : 検索結果の件数。
- *       $URL         : 検索結果の URL。
- *       $COMMENT     : コメント。これがないとコメントを書いても反映されない。
- *     default
- *       let g:matanico_tag_format='$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT'
- *
- *   g:matanico_tag_servicename
- *     このプラグインが固定で付加する文字列。タグ検索ページで適用される。
- *     default
- *       let g:matanico_tag_servicename='またニコニコタグ検索してる'
- *
- *   g:matanico_related_tag_format
- *     キーワードによるタグ検索ページで投稿する文章の書式設定。以下の変数指定が可能。
- *       $SERVICENAME : このプラグインが付加する文字列。 g:matanico_tag_servicename で指定する。
- *       $KEYWORD     : 検索したタグ。複数の場合は半角スペースで区切られる。
- *       $NUMOFTAGS   : 検索結果の件数。
- *       $URL         : 検索結果の URL。
- *       $COMMENT     : コメント。これがないとコメントを書いても反映されない。
- *     default
- *       let g:matanico_related_tag_format='$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT'
- *
- *   g:matanico_tag_servicename
- *     このプラグインが固定で付加する文字列。キーワードによるタグ検索ページで適用される。
- *     default
- *       let g:matanico_related_tag_servicename='またキーワードでニコニコタグ検索してる'
- *
- * HISTORY
- *   2008/06/14 ver. 0.10   - initial written.
- *   2008/06/27 ver. 0.20   - change replace argument to regexp with 'g' option.
- *                          - add matanico! command.
- *                          - refactoring
- *                          - display sended status if succeed.
- *   2008/06/28 ver. 0.21   - change display strings, 'Yanked ' and 'Posted '.
- *   2008/07/13 ver. 0.30   - change xpath function and xpath query.
- *   2008/07/14 ver. 0.40   - change url checking.
- *   2008/07/15 ver. 0.50   - make NicoScraper class.
- *                          - add function to post tag page.
- *                            refer : http://nicovideo.g.hatena.ne.jp/koizuka/20080322/matanico_tag
- *   2008/09/04 ver. 0.60   - add function to post related tag page.
- *   2008/10/08 ver. 0.61   - correspond vimperator specification
- *                            "bang" in extra object on addUserCommand.
- * */
+let PLUGIN_INFO = 
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>update Twitter status to current video/search page information and comment.</description>
+<description lang="ja">今見ている動画 / 検索結果の情報を Twitter に投稿する。</description>
+<author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
+<license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+<version>0.70</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
+<detail><![CDATA[
+== EX-COMMANDS ==
+:matanico [comment]:
+    This command posts the information of current video/search result to Twitter. "comment" is optional.
+:matanico! [comment]:
+    This command copies string that be posted to Twitter, to clipboard. This is emulate command.
 
-(function() {
+== SETTINGS ==
+matanico_watch_format:
+    This is the format that be used on video page. Following special tokens are available. default setting is "$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT".
+        $SERVICENAME: the value of "matanico_watch_servicename".
+        $SUBJECT:     video name.
+        $PLAYTIME:    video duration.
+        $URL:         video URL.
+        $COMMENT:     comment. if this token is not specified, ex-command ":matanico" ignore any comments.
 
-// information functions
+matanico_watch_servicename:
+    the token "$SERVICENAME" specified by "matanico_watch_format" will be expanded to this value. this variable facilitate to change posted string without modefication of format. default value is "またニコニコ動画見てる".
+
+matanico_live_format:
+    This is the format that be used on live page. Following special tokens are available. default setting is "$SERVICENAME : $SUBJECT - $URL $COMMENT".
+        $SERVICENAME: matanico_live_servicename で指定した文字列に展開されます。
+        $SUBJECT:     live name.
+        $URL:         live URL.
+        $COMMENT:     comment. if this token is not specified, ex-command ":matanico" ignore any comments.
+
+matanico_live_servicename:
+    the token "$SERVICENAME" specified by "matanico_live_format" will be expanded to this value. this variable facilitate to change posted string without modefication of format. default value is "またニコニコ生放送見てる".
+
+matanico_tag_format:
+    This is the format that be used on tag search page. Following special tokens are available. default setting is "$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT".
+        $SERVICENAME: the value of "matanico_tag_servicename".
+        $TAG:         search tags. that will be separated by a space, when specified multiple tags.
+        $NUMOFVIDEOS: the number of search result.
+        $URL:         search result URL.
+        $COMMENT:     comment. if this token is not specified, ex-command ":matanico" ignore any comments.
+
+matanico_tag_servicename:
+    the token "$SERVICENAME" specified by "matanico_tag_format" will be expanded to this value. this variable facilitate to change posted string without modefication of format. default value is "またニコニコタグ検索してる".
+
+matanico_related_tag_format:
+    This is the format that be used on tag search by keyword page. Following special tokens are available. default setting is "$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT".
+        $SERVICENAME: the value of "matanico_related_tag_servicename".
+        $KEYWORD:     search keyword.
+        $NUMOFVIDEOS: the number of search result.
+        $URL:         search result URL.
+        $COMMENT:     comment. if this token is not specified, ex-command ":matanico" ignore any comments.
+
+matanico_related_tag_servicename:
+    the token "$SERVICENAME" specified by "matanico_related_tag_format" will be expanded to this value. this variable facilitate to change posted string without modefication of format. default value is "またキーワードでニコニコタグ検索してる".
+]]></detail>
+<detail lang="ja"><![CDATA[
+== EX-COMMANDS ==
+:matanico [comment]:
+    今見ている動画 / 検索した結果の情報を Twitter に投稿します。 comment はなくてもかまいません。
+:matanico! [comment]:
+    Twitter に投稿される文字列をクリップボードにコピーします。 Twitter には投稿しません。
+
+== SETTINGS ==
+matanico_watch_format:
+    動画ページにおいて投稿される文章の書式設定です。以下の特殊な文字列を指定可能です。設定なしの場合 "$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT" になります。
+        $SERVICENAME: matanico_watch_servicename で指定した文字列に展開されます。
+        $SUBJECT:     動画の名前に展開されます。
+        $PLAYTIME:    再生時間に展開されます。
+        $URL:         動画の URL に展開されます。
+        $COMMENT:     コメントに展開されます。この指定がないと :matanico コマンドでコメントを書いても反映されません。
+
+matanico_watch_servicename:
+    matanico_watch_format で指定した $SERVICENAME 部分がこの値で展開されます。書式はそのままで投稿する文字列のみを変更したい場合にこの値を変更することで設定が容易になります。設定なしの場合 "またニコニコ動画見てる" が使用されます。
+
+matanico_live_format:
+    生放送ページにおいて投稿される文章の書式設定です。以下の特殊な文字列を指定可能です。設定なしの場合 "$SERVICENAME : $SUBJECT - $URL $COMMENT" になります。
+        $SERVICENAME: matanico_live_servicename で指定した文字列に展開されます。
+        $SUBJECT:     動画の名前に展開されます。
+        $URL:         動画の URL に展開されます。
+        $COMMENT:     コメントに展開されます。この指定がないと :matanico コマンドでコメントを書いても反映されません。
+
+matanico_live_servicename:
+    matanico_live_format で指定した $SERVICENAME 部分がこの値で展開されます。書式はそのままで投稿する文字列のみを変更したい場合にこの値を変更することで設定が容易になります。設定なしの場合 "またニコニコ生放送見てる" が使用されます。
+
+matanico_tag_format:
+    タグ検索ページにおいて投稿される文章の書式設定です。以下の特殊な文字列を指定可能です。設定なしの場合 "$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT" が使用されます。
+        $SERVICENAME: matanico_tag_servicename で指定した文字列に展開されます。
+        $TAG:         検索したタグ名に展開されます。複数指定の場合、半角スペースで区切られます。
+        $NUMOFVIDEOS: 検索結果の件数に展開されます。
+        $URL:         検索結果の URL に展開されます。
+        $COMMENT:     コメント展開されます。この指定がないと :matnico コマンドでコメントを書いても反映されません。
+
+matanico_tag_servicename:
+    matanico_tag_format で指定した $SERVICENAME 部分がこの値で展開されます。書式はそのままで投稿する文字列のみを変更したい場合にこの値を変更することで設定が容易になります。設定なしの場合 "またニコニコタグ検索してる" が使用されます。
+
+matanico_related_tag_format:
+    キーワードによるタグ検索ページにおいて投稿される文章の書式設定です。以下の特殊な文字列を指定可能です。設定なしの場合 "$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT" が使用されます。
+        $SERVICENAME: matanico_related_tag_servicename で指定した文字列に展開されます。。
+        $KEYWORD:     検索したキーワードに展開されます。
+        $NUMOFVIDEOS: 検索結果の件数に展開されます。
+        $URL:         検索結果の URL に展開されます。
+        $COMMENT:     コメント展開されます。この指定がないと :matnico コマンドでコメントを書いても反映されません。
+
+matanico_related_tag_servicename:
+    matanico_related_tag_format で指定した $SERVICENAME 部分がこの値で展開されます。書式はそのままで投稿する文字列のみを変更したい場合にこの値を変更することで設定が容易になります。設定なしの場合 "またキーワードでニコニコタグ検索してる" が使用されます。
+]]></detail>
+</VimperatorPlugin>;
+
+(function () {
+
+// class definitions
 // change XPath query when html changed.
 function NicoScraper() {}
 NicoScraper.prototype = {
-    constants: {
-        VERSION:          '0.62',
-        WATCH_PAGE:       1,
-        WATCH_URL:        '^http://www\\.nicovideo\\.jp/watch/[a-z]{2}\\d+',
-        TAG_PAGE:         2,
-        TAG_URL:          '^http://www\\.nicovideo\\.jp/tag/',
-        RELATED_TAG_PAGE: 3,
-        RELATED_TAG_URL:  '^http://www\\.nicovideo\\.jp/related_tag/',
+    _constants: {
+        VERSION:          '0.70',
+        PAGECHECK: {
+            watch:      '^http://www\\.nicovideo\\.jp/watch/',
+            live:       '^http://live\\.nicovideo\\.jp/watch/',
+            tag:        '^http://www\\.nicovideo\\.jp/tag/',
+            relatedTag: '^http://www\\.nicovideo\\.jp/related_tag/',
+        },
     },
 
-    version: function() { return this.constants.VERSION; },
+    version: function () { return this.constants.VERSION; },
 
-    pagecheck: function() {
-        if(this.getURL().match(this.constants.WATCH_URL))       return this.constants.WATCH_PAGE;
-        if(this.getURL().match(this.constants.TAG_URL))         return this.constants.TAG_PAGE;
-        if(this.getURL().match(this.constants.RELATED_TAG_URL)) return this.constants.RELATED_TAG_PAGE;
-        throw 'current tab is not nicovideo.jp';
+    pagecheck: function () {
+        const pageCheckData = this._constants.PAGECHECK;
+        const currentURL = this.getURL();
+        for (let [name, url] in Iterator(pageCheckData)) {
+            if (currentURL.match(url)) return name;
+        }
+        throw new Error('current tab is not nicovideo.jp');
     },
 
-    _flvplayer: function() {
-        if(this.pagecheck() === this.constants.WATCH_PAGE) {
+    _flvplayer: function () {
+        if (this.pagecheck() === 'watch') {
             let flvplayer = window.content.document.getElementById('flvplayer');
-            if(! flvplayer) throw 'flvplayer is not found';
-
-            return flvplayer.wrappedJSObject ? flvplayer.wrappedJSObject : flvplayer ? flvplayer : null;
+            if (!flvplayer) throw new Error('video player is not found');
+            return flvplayer.wrappedJSObject || flvplayer;
         }
-        return null;
+        throw new Error('current tab is not watch page on nicovideo.jp');
     },
 
-    getURL: function() { return liberator.modules.buffer.URL; },
+    getURL: function () { return liberator.modules.buffer.URL; },
 
-    getSubject: function() {
-        if(this.pagecheck() === this.constants.WATCH_PAGE) {
-            let subject = $f('//h1/a[contains(concat(" ",@class," "), " video ")]');
-            return subject ? subject.text : null;
+    getSubject: function () {
+        let subjectNode;
+        switch (this.pagecheck()) {
+            case 'watch':
+                subjectNode = $f('//h1/a[contains(concat(" ", @class, " "), " video ")]');
+                break;
+            case 'live':
+                subjectNode = $f('//h1[contains(concat(" ", @class, " "), " title ")]');
+                break;
+            default:
+                break;
         }
-        return null;
+
+        if (subjectNode) return subjectNode.textContent;
+        throw new Error('current tab is not watch page on nicovideo.jp');
     },
 
-    getPlaytime: function() {
-        var p = this._flvplayer();
-        var playtime = p ? Math.round(p.ext_getTotalTime()) : null;
-        if(playtime) {
+    getPlaytime: function () {
+        let p = this._flvplayer();
+        if (p && p.ext_getTotalTime) {
+            let playtime = Math.round(p.ext_getTotalTime());
             let min = Math.floor(playtime / 60);
             let sec = playtime % 60;
-            if(sec < 10) sec = '0' + sec;
-            return playtime ? [min, sec].join(':') : null;
+            if (sec < 10) sec = '0' + sec;
+            return [min, sec].join(':');
         }
-        else return null;
+        throw new Error('current tab is not watch page on nicovideo.jp');
     },
 
-    getTagName: function() {
-        if(this.pagecheck() === this.constants.TAG_PAGE) {
-            let word_nodes = $s('id("search_words")/span[contains(concat(" ",@class," "), " search_word ")]');
+    getTagName: function () {
+        if (this.pagecheck() === 'tag') {
+            let wordNodes = liberator.modules.buffer.evaluateXPath('id("search_words")/span[contains(concat(" ", @class, " "), " search_word ")]');
             let words = [];
-            word_nodes.forEach(function(node) { words.push(node.textContent); });
-            return words.length ? words.join(' ') : null;
+            for (let wordNode in wordNodes) words.push(wordNode.textContent);
+            return words.join(' ');
         }
-        return null;
+        throw new Error('current tab is not tag search page on nicovideo.jp');
     },
 
-    getNumofVideos: function() {
-        if(this.pagecheck() === this.constants.TAG_PAGE) {
-            let numofVideos = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
-            return numofVideos.textContent ? numofVideos.textContent : null;
+    getNumofVideos: function () {
+        if (this.pagecheck() === 'tag') {
+            let numofVideos = $f('//strong[contains(concat(" ", @class, " "), " result_total ")]');
+            return numofVideos.textContent;
         }
-        return null;
+        throw new Error('current tab is not tag search page on nicovideo.jp');
     },
 
-    getKeyword: function() {
-        if(this.pagecheck() === this.constants.RELATED_TAG_PAGE) {
-            let keyword = $f('//strong[contains(concat(" ",@class," "), " search_word ")]');
-            return keyword.textContent ? keyword.textContent : null;
+    getKeyword: function () {
+        if (this.pagecheck() === 'relatedTag') {
+            let keyword = $f('//strong[contains(concat(" ", @class, " "), " search_word ")]');
+            return keyword.textContent;
         }
-        return null;
+        throw new Error('current tab is not related tag search page on nicovideo.jp');
     },
 
-    getNumofTags: function() {
-        if(this.pagecheck() === this.constants.RELATED_TAG_PAGE) {
-            let numofTags = $f('//strong[contains(concat(" ",@class," "), " result_total ")]');
-            return numofTags.textContent ? numofTags.textContent : null;
+    getNumofTags: function () {
+        if (this.pagecheck() === 'relatedTag') {
+            let numofTags = $f('//strong[contains(concat(" ", @class, " "), " result_total ")]');
+            return numofTags.textContent;
         }
-        return null;
+        throw new Error('current tab is not related tag search page on nicovideo.jp');
     },
 };
 
-var scraper = new NicoScraper;
+function TwitterUpdaterFactory() {
+    let pUsername, pPassword;
+    let pEndPoint = 'https://twitter.com/statuses/update.json';
 
-liberator.modules.commands.addUserCommand(['matanico'], "update Twitter's status to current video name and comment",
-    function(args, special) {
+    function TwitterUpdater() {}
+    TwitterUpdater.prototype.update = function (data) {
+        let parameter = 'status=' + encodeURIComponent(data.newStatus);
+
+        let req = new XMLHttpRequest();
+        if (req) {
+            req.open('POST', pEndPoint, true, pUsername, pPassword);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4 && req.status === 200) {
+                    data.onSuccess();
+                    return;
+                }
+                throw new Error('failure to update status in Twitter. HTTP status code : ' + req.status);
+            }
+            req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            req.send(parameter);
+        }
+    };
+    TwitterUpdater.prototype.__defineSetter__(
+        'username',
+        function (username) {
+            pUsername = username;
+            return this;
+        }
+    );
+    TwitterUpdater.prototype.__defineSetter__(
+        'password',
+        function (password) {
+            pPassword = password;
+            return this;
+        }
+    );
+    return new TwitterUpdater();
+}
+
+// main ---
+let scraper = new NicoScraper();
+
+liberator.modules.commands.addUserCommand(
+    ['matanico'],
+    'update Twitter status to current video/search page information and comment',
+    function (args, special) {
+        let arg = args.string;
         try {
-            let arg = args.string;
-
             // build post string -----
-            let post_string;
+            let postString;
             // domain check
             switch(scraper.pagecheck()) {
-                // video page
-                case scraper.constants.WATCH_PAGE:
-                    {
-                        // get value from global variable or set default
-                        let format      = liberator.globalVariables.matanico_status_format || '$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT';
-                        let serviceName = liberator.globalVariables.matanico_status_servicename || 'またニコニコ動画見てる';
-
-                        // expand variable ( evaluate variable ? )
-                        post_string = format.replace(/\$SERVICENAME/g, serviceName)
-                                            .replace(/\$SUBJECT/g,     scraper.getSubject())
-                                            .replace(/\$PLAYTIME/g,    scraper.getPlaytime())
-                                            .replace(/\$URL/g,         scraper.getURL())
-                                            .replace(/\$COMMENT/g,     arg);
-                    }
+                case 'watch':
+                    postString = onWatch(scraper, arg);
                     break;
-
-                // tag search page
-                case scraper.constants.TAG_PAGE:
-                    {
-                        // get value from global variable or set default
-                        let format      = liberator.globalVariables.matanico_tag_format || '$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT';
-                        let serviceName = liberator.globalVariables.matanico_tag_servicename || 'またニコニコタグ検索してる';
-
-                        // expand variable ( evaluate variable ? )
-                        post_string = format.replace(/\$SERVICENAME/g, serviceName)
-                                            .replace(/\$TAG/g,         scraper.getTagName())
-                                            .replace(/\$NUMOFVIDEOS/g, scraper.getNumofVideos())
-                                            .replace(/\$URL/g,         scraper.getURL())
-                                            .replace(/\$COMMENT/g,     arg);
-                    }
+                case 'live':
+                    postString = onLive(scraper, arg);
                     break;
-
-                // related_tag search page
-                case scraper.constants.RELATED_TAG_PAGE:
-                    {
-                        // get value from global variable or set default
-                        let format      = liberator.globalVariables.matanico_related_tag_format || '$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT';
-                        let serviceName = liberator.globalVariables.matanico_related_tag_servicename || 'またキーワードでニコニコタグ検索してる';
-
-                        // expand variable ( evaluate variable ? )
-                        post_string = format.replace(/\$SERVICENAME/g, serviceName)
-                                            .replace(/\$KEYWORD/g,     scraper.getKeyword())
-                                            .replace(/\$NUMOFTAGS/g,   scraper.getNumofTags())
-                                            .replace(/\$URL/g,         scraper.getURL())
-                                            .replace(/\$COMMENT/g,     arg);
-                    }
+                case 'tag':
+                    postString = onTagSearch(scraper, arg);
                     break;
-
+                case 'relatedTag':
+                    postString = onRelatedTagSearch(scraper, arg);
+                    break;
                 default:
-                    throw 'current tab is not nicovideo.jp';
+                    throw new Error('current tab is not nicovideo.jp');
                     break;
             }
 
             // ':matanico!' display the evaluated format.
-            if(special) {
-                liberator.modules.util.copyToClipboard(post_string, true);
+            if (special) {
+                liberator.modules.util.copyToClipboard(postString, true);
                 return;
             }
 
-            // ready posting -----
-            // URI encode
-            let parameter = 'status=' + encodeURIComponent(post_string);
-
-            // twitter's URL to post
-            let domain  = 'http://twitter.com/';
-            let postURL = 'https://twitter.com/statuses/update.json';
-
-            // get user account for twitter
-            let [user, pass] = getUserAccount(domain, postURL, null);
-
-            // send status
-            let req = new XMLHttpRequest();
-            if(req) {
-                req.open('POST', postURL, true, user, pass);
-                req.onreadystatechange = function() {
-                    if(req.readyState == 4) {
-                        if(req.status == 200) liberator.echo('Posted ' + post_string)
-                        else throw 'failure in posting status to Twitter. HTTP status code : ' + req.status;
-                    }
-                }
-                req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                req.send(parameter);
-            }
+            // get username/password and set TwitterUpdater
+            let t = TwitterUpdaterFactory();
+            [t.username, t.password] = getUserAccount({
+                hostname:      'http://twitter.com/',
+                formSubmitURL: 'https://twitter.com/statuses/update.json',
+                httpRealm:     null,
+                description:   'Enter e-mail address and password. This information is cached and use from next time.',
+            });
+            t.update({
+                newStatus: postString,
+                onSuccess: function () liberator.echo('Posted ' + postString),
+            });
         }
-        catch(e) {
+        catch (e) {
             liberator.echoerr(e);
             liberator.log(e);
         }
     },
-    // complete logic is none.
     {
         bang: true,
     }
 );
 
+// sub
+function onWatch(scraper, comment) {
+    let format      = liberator.globalVariables.matanico_watch_format || '$SERVICENAME : $SUBJECT($PLAYTIME) - $URL $COMMENT';
+    let serviceName = liberator.globalVariables.matanico_watch_servicename || fromUTF8Octets('またニコニコ動画見てる');
+
+    return format.replace(/\$SERVICENAME/g, serviceName)
+                 .replace(/\$SUBJECT/g,     scraper.getSubject())
+                 .replace(/\$PLAYTIME/g,    scraper.getPlaytime())
+                 .replace(/\$URL/g,         scraper.getURL())
+                 .replace(/\$COMMENT/g,     comment);
+}
+
+function onLive(scraper, comment) {
+    let format      = liberator.globalVariables.matanico_live_format || '$SERVICENAME : $SUBJECT - $URL $COMMENT';
+    let serviceName = liberator.globalVariables.matanico_live_servicename || fromUTF8Octets('またニコニコ生放送見てる');
+
+    return format.replace(/\$SERVICENAME/g, serviceName)
+                 .replace(/\$SUBJECT/g,     scraper.getSubject())
+                 .replace(/\$URL/g,         scraper.getURL())
+                 .replace(/\$COMMENT/g,     comment);
+}
+
+function onTagSearch(scraper, comment) {
+    let format      = liberator.globalVariables.matanico_tag_format || fromUTF8Octets('$SERVICENAME : $TAG($NUMOFVIDEOS件) - $URL $COMMENT');
+    let serviceName = liberator.globalVariables.matanico_tag_servicename || fromUTF8Octets('またニコニコタグ検索してる');
+
+    return format.replace(/\$SERVICENAME/g, serviceName)
+                 .replace(/\$TAG/g,         scraper.getTagName())
+                 .replace(/\$NUMOFVIDEOS/g, scraper.getNumofVideos())
+                 .replace(/\$URL/g,         scraper.getURL())
+                 .replace(/\$COMMENT/g,     comment);
+}
+
+function onRelatedTagSearch(scraper, comment) {
+    let format      = liberator.globalVariables.matanico_related_tag_format || fromUTF8Octets('$SERVICENAME : $KEYWORD($NUMOFTAGS件) - $URL $COMMENT');
+    let serviceName = liberator.globalVariables.matanico_related_tag_servicename || fromUTF8Octets('またキーワードでニコニコタグ検索してる');
+
+    return format.replace(/\$SERVICENAME/g, serviceName)
+                 .replace(/\$KEYWORD/g,     scraper.getKeyword())
+                 .replace(/\$NUMOFTAGS/g,   scraper.getNumofTags())
+                 .replace(/\$URL/g,         scraper.getURL())
+                 .replace(/\$COMMENT/g,     comment);
+}
+
 // stuff functions
 function $f(query, node) {
     node = node || window.content.document;
-    var result = (node.ownerDocument || node).evaluate(
+    let result = (node.ownerDocument || node).evaluate(
         query,
         node,
         null,
         XPathResult.FIRST_ORDERED_NODE_TYPE,
         null
     );
-    return result.singleNodeValue ? result.singleNodeValue : null;
+    return result.singleNodeValue || null;
 }
 
-function $s(query, node) {
-    node = node || window.content.document;
-    var result = (node.ownerDocument || node).evaluate(
-        query,
-        node,
-        null,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
+function fromUTF8Octets(octets)
+    decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function (c)
+        '%' + c.charCodeAt(0).toString(16)));
+
+function getUserAccount(accountInfo) {
+    // refer:
+    // https://developer.mozilla.org/ja/Using_nsILoginManager
+    let loginManager = Cc['@mozilla.org/login-manager;1'].getService(Ci.nsILoginManager);
+    let logins = loginManager.findLogins(
+        {},
+        accountInfo.hostname,
+        accountInfo.formSubmitURL,
+        accountInfo.httpRealm
     );
-    var nodes = [];
-    for(let i=0 ; i<result.snapshotLength ; ++i) nodes.push(result.snapshotItem(i));
-    return nodes;
-}
 
-// user account manager
-// from direct_bookmark.js
-// thanks to Trapezoid
-function getUserAccount(form,post,arg) {
-    var user, password;
-    try {
-        let passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-        let logins = passwordManager.findLogins({}, form, post, arg);
-        if(logins.length > 0) {
-            [user, password] = [logins[0].username, logins[0].password];
-        } else {
-            let promptUser = { value : '' }, promptPass = { value : '' };
-            let promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                .getService(Ci.nsIPromptService);
+    if (logins.length > 0) {
+        // found
+        return [logins[0].username, logins[0].password];
+    }
+    else {
+        // not found, so register
+        // refer: https://developer.mozilla.org/Ja/Code_snippets/Dialogs_and_Prompts
+        let promptSvc = Cc['@mozilla.org/embedcomp/prompt-service;1'].getService(Ci.nsIPromptService);
+        let promptUsername = {value: ''};
+        let promptPassword = {value: ''};
+        let isOK = promptSvc.promptUsernameAndPassword(
+            window, accountInfo.hostname, accountInfo.description,
+            promptUsername, promptPassword, null, {}
+        );
 
-            let nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
-                    Ci.nsILoginInfo,
-                    "init");
+        if (isOK) {
+            let nsLoginInfo = new Components.Constructor(
+                '@mozilla.org/login-manager/loginInfo;1',
+                Ci.nsILoginInfo, 'init'
+            );
 
-            let ret = promptSvc.promptUsernameAndPassword(
-                    window, form, 'Enter e-mail address and password.',
-                    promptUser, promptPass, null, {}
-                    );
-            if(ret) {
-                [user, password] = [promptUser.value, promptPass.value];
-                let formLoginInfo = new nsLoginInfo(form,
-                        post, null,
-                        user, password, '', '');
-                passwordManager.addLogin(formLoginInfo);
-            } else {
-                liberator.echoerr("account not found - " + form);
-            }
+            // refer: https://developer.mozilla.org/ja/NsILoginInfo
+            loginManager.addLogin(new nsLoginInfo(
+                accountInfo.hostname,
+                accountInfo.formSubmitURL,
+                accountInfo.httpRealm,
+                promptUsername.value,
+                promptPassword.value,
+                '', ''
+            ));
+
+            return [promptUsername.value, promptPassword.value];
         }
     }
-    catch(ex) {
-        liberator.echoerr("handled exception during getting username and password");
-        liberator.log(ex);
-    }
-    return [user, password];
+
+    throw new Error('account is not found: ' + accountInfo.hostname);
 }
 
 })();
+
 // vim:sw=4 ts=4 et:
