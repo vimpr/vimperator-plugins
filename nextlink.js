@@ -5,12 +5,12 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.0</version>
-    <minVersion>2.0</minVersion>
+    <version>0.2.1</version>
+    <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == NEEDS LIBLARY ==
-_libly.js(ver.0.1.8)
+_libly.js(ver.0.1.9)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Option ==
@@ -28,6 +28,7 @@ let g:nextlink_followlink = "true"
 </VimperatorPlugin>;
 //}}}
 liberator.plugins.nextlink = (function() {
+    // initialize //{{{
     if (!liberator.plugins.libly) {
         liberator.log('nextlink: needs _libly.js');
         return;
@@ -43,12 +44,13 @@ liberator.plugins.nextlink = (function() {
     var pageNaviCss =
             <style type="text/css"><![CDATA[
                 .vimperator-nextlink-page {
-                    background-color: #333;
+                    background-color: #555;
                     color: #fff;
                     opacity: .85;
                     padding: 10px;
                     margin-top: 5px;
                     margin-bottom: 5px;
+                    height: 1em;
                     font-weight: bold;
                     text-align: left;
                     -moz-border-radius: 5px;
@@ -60,6 +62,7 @@ liberator.plugins.nextlink = (function() {
                     color: #A50000;
                 }
             ]]></style>;
+    //}}}
 
     var NextLink = function() {//{{{
         this.initialize.apply(this, arguments);
@@ -73,6 +76,8 @@ liberator.plugins.nextlink = (function() {
             this.siteinfo = [];
             this.cache = {}; // {url: {xpath: xpath, next: element, prev: url}} or null
             this.pager = pager;
+            this.browserModes = config.browserModes || [modes.NORMAL, modes.VISUAL];
+            this.isNew = autocommands['DOMLoad'] ? false : true; // toriaezu
 
             var req = new libly.Request(this.WEDATA_AUTOPAGERIZE);
             req.addEventListener('onSuccess', $U.bind(this,
@@ -85,13 +90,21 @@ liberator.plugins.nextlink = (function() {
                 }
             ));
             req.get();
-            /* // for debug
+            // for debug
+            /*
             this.initialized = true;
-            this.siteinfo = [{
-                url: '^http:\\/\\/192\\.168\\.',
-                nextLink: 'id("next")',
-                pageElement: '//*'
-            }];
+            this.siteinfo = [
+                {
+                    url: '^http:\\/\\/192\\.168\\.',
+                    nextLink: 'id("next")',
+                    pageElement: '//*'
+                },
+                {
+                    url: '^http:\\/\\/localhost',
+                    nextLink: 'id("next")',
+                    pageElement: '//*'
+                }
+            ];
             */
 
             commands.addUserCommand(['nextlink'], 'map ]] by AutoPagerize XPath.',
@@ -117,7 +130,7 @@ liberator.plugins.nextlink = (function() {
             }
 
             for (let i = 0, len = this.siteinfo.length; i < len; i++) {
-                if (url.match(this.siteinfo[i].url)) {
+                if (url.match(this.siteinfo[i].url) && !/^\^https\?:\/\/\.$/.test(this.siteinfo[i].url)) {
                     this.setCache(url,
                             ['doc', 'xpath', 'siteinfo'],
                             [window.content.document, this.siteinfo[i].nextLink, this.siteinfo[i]]
@@ -129,7 +142,6 @@ liberator.plugins.nextlink = (function() {
             this.setCache(url, ['doc', 'xpath', 'prev', 'next'], [null, null, null, null]);
         },
         onLocationChange: function(url, isCallerLoaded) {
-
 
             if (!this.initialized ||
                 !this.cache[url] ||
@@ -151,27 +163,36 @@ liberator.plugins.nextlink = (function() {
             var next = cache.next;
 
             if (!prev)
-                mappings.remove(config.browserModes, '[[');
+                this.removeMap('[[');
 
             if (!next)
-                mappings.remove(config.browserModes, ']]');
+                this.removeMap(']]');
 
             this.pager.customizeMap(context, url, prev, next);
         },
         restorOrginalMap: function() {
 
             if (this.isCurOriginalMap) return;
-            mappings.remove(config.browserModes, '[[');
-            mappings.remove(config.browserModes, ']]');
+            this.removeMap('[[');
+            this.removeMap(']]');
             this.isCurOriginalMap = true;
         },
         setCache: function(key, subKeys, values) {
-
             if (!this.cache[key]) this.cache[key] = {};
             values = [].concat(values);
             [].concat(subKeys).forEach($U.bind(this, function(subKey, i) {
                 this.cache[key][subKey] = values[i];
             }));
+        },
+        removeMap: function(cmd) {
+            try {
+                if (mappings.hasMap(this.browserModes, cmd)) {;
+                    mappings.remove(this.browserModes, cmd);
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
     };//}}}
 
@@ -196,8 +217,13 @@ liberator.plugins.nextlink = (function() {
                         insertPoint = lastPageElement.nextSibling ||
                                       lastPageElement.parentNode.appendChild(doc.createTextNode(' '))
 
-                let css = util.xmlToDom(pageNaviCss, doc);
-                doc.body.appendChild(util.xmlToDom(pageNaviCss, doc));
+
+                if (context.isNew) {
+                    let css = $U.xmlToDom(pageNaviCss, doc);
+                    let node = doc.importNode(css, true);
+                    doc.body.insertBefore(node, doc.body.firstChild);
+                    //doc.body.appendChild(css);
+                }
 
                 $U.getNodesFromXPath(cache.xpath, doc, function(item) elem = item, this);
 
@@ -212,7 +238,7 @@ liberator.plugins.nextlink = (function() {
             var cache = context.cache[url];
             var doc = cache.doc;
 
-            mappings.addUserMap(config.browserModes, ['[['], 'customize by nextlink.js',
+            mappings.addUserMap(context.browserModes, ['[['], 'customize by nextlink.js',
                 $U.bind(this, function(count) {
                     if (cache.curPage == 1) {
                         return;
@@ -225,15 +251,21 @@ liberator.plugins.nextlink = (function() {
                         }
                     }
                 }),
-                { flags: Mappings.flags.count });
+                { flags: Mappings.flags.COUNT });
 
-            mappings.addUserMap(config.browserModes, [']]'], 'customize by nextlink.js',
+            mappings.addUserMap(context.browserModes, [']]'], 'customize by nextlink.js',
                 $U.bind(this, function(count) {
                     var reqUrl, lastReqUrl;
                     reqUrl = $U.pathToURL(cache.next[cache.curPage - 1], doc);
                     lastReqUrl = cache.lastReqUrl;
 
+                    if (cache.isLoading) {
+                        logger.echo('loading now...');
+                        return;
+                    }
+
                     if (!reqUrl || cache.curPage == cache.terminate) {
+                        logger.echo('end of pages.');
                         return;
                     }
                     if (cache.loadedURLs[reqUrl]) {
@@ -241,15 +273,15 @@ liberator.plugins.nextlink = (function() {
                         this.focusPagenavi(context, url, cache.curPage);
                         return;
                     }
-                    context.setCache(url, 'lastReqUrl', reqUrl);
+                    context.setCache(url, ['lastReqUrl', 'isLoading'], [reqUrl, true]);
                     var req = new libly.Request(
-                                    //reqUrl + '?' + new Date(), null,
                                     reqUrl, null,
-                                    { asynchronous: false, encoding: doc.characterSet,
+                                    { asynchronous: true, encoding: doc.characterSet,
                                       context: context, url: url }
                                   );
                     req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
                     req.addEventListener('onFailure', $U.bind(this, this.onFailure));
+                    req.addEventListener('onException', $U.bind(this, this.onFailure));
                     req.get();
                 }),
                 { flags: Mappings.flags.COUNT }
@@ -266,6 +298,7 @@ liberator.plugins.nextlink = (function() {
             var prev = cache.next[cache.curPage];
             var next = $U.getNodesFromXPath(cache.xpath, htmlDoc);
 
+            cache.isLoading = false;
             cache.loadedURLs[res.req.url] = true;
 
             if (!page || page.length < 1) {
@@ -287,12 +320,15 @@ liberator.plugins.nextlink = (function() {
         addPage: function(context, doc, url, page, reqUrl) {
 
             var cache = context.cache[url];
-            //var doc = cache.doc;
             var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-            var hr = doc.createElementNS(HTML_NAMESPACE, 'hr');
+            //var hr = doc.createElementNS(HTML_NAMESPACE, 'hr');
             var p = doc.createElementNS(HTML_NAMESPACE, 'p');
+            var tagName;
 
-            if (page[0] && page[0].tagName == 'TR') {
+            if (page[0] && page[0].tagName)
+                tagName = page[0].tagName.toLowerCase();
+
+            if (tagName == 'tr') {
                 let insertParent = cache.insertPoint.parentNode;
                 let colNodes = getElementsByXPath('child::tr[1]/child::*[self::td or self::th]', insertParent);
 
@@ -308,24 +344,35 @@ liberator.plugins.nextlink = (function() {
                 td.setAttribute('colspan', colums);
                 tr.appendChild(td);
                 insertParent.insertBefore(tr, cache.insertPoint);
+            } else if (tagName == 'li') {
+                let li = doc.createElementNS(HTML_NAMESPACE, 'li');
+                li.id = 'vimp' + cache.curPage;
+                cache.insertPoint.parentNode.insertBefore(li, cache.insertPoint);
+                li.appendChild(p);
             } else {
-                cache.insertPoint.parentNode.insertBefore(hr, cache.insertPoint);
+                //cache.insertPoint.parentNode.insertBefore(hr, cache.insertPoint);
                 cache.insertPoint.parentNode.insertBefore(p, cache.insertPoint);
             }
 
-            hr.id = 'vimperator-nextlink-' + cache.curPage;
+            p.id = 'vimperator-nextlink-' + cache.curPage;
             p.innerHTML = 'page: <a href="' + reqUrl + '">' + cache.curPage + '</a>';
             p.className = 'vimperator-nextlink-page';
             cache.mark.push(p);
 
-            return page.map(function(i) {
-                var pe = doc.importNode(i, true);
+            return page.map(function(elem) {
+                var pe = doc.importNode(elem, true);
                 cache.insertPoint.parentNode.insertBefore(pe, cache.insertPoint);
                 return pe;
             });
         },
         onFailure: function(res) {
-            res.res.options.context.setCache(res.req.options.url, 'terminate', cache.curPage);
+            logger.log('onFailure');
+            var context = res.req.options.context;
+            var url = res.req.options.url;
+            var cache = context.cache[url];
+            cache.isLoading = false;
+            logger.echoerr('nextlink: loading failed. ' + '[' + res.status + ']' + res.statusText);
+            res.req.options.context.setCache(res.req.options.url, 'terminate', cache.curPage);
         },
         focusPagenavi: function(context, url, page) {
            var elem, p;
@@ -352,6 +399,10 @@ liberator.plugins.nextlink = (function() {
             $U.getNodesFromXPath(cache.xpath, doc, function(item) elem = item, this);
 
             var nextUrl = $U.pathToURL(elem, doc);
+            var prev = $U.getNodesFromXPath('//a[@rel="prev"] | //link[@rel="prev"]', doc);
+            if (prev.length) {
+                context.setCache(url, 'prev', prev[0]);
+            }
             context.setCache(nextUrl, 'prev', url);
             context.setCache(url, 'next', elem);
         },
@@ -361,12 +412,18 @@ liberator.plugins.nextlink = (function() {
             var doc = cache.doc;
 
             if (prev)
-                mappings.addUserMap(config.browserModes, ['[['], 'customize by nextlink.js',
-                    function(count) { liberator.open(prev, liberator.CURRENT_TAB); },
-                    { flags: Mappings.flags.count });
+                mappings.addUserMap(context.browserModes, ['[['], 'customize by nextlink.js',
+                    function(count) {
+                        if (prev.href) {
+                            buffer.followLink(prev, liberator.CURRENT_TAB);
+                        } else {
+                            liberator.open(prev, liberator.CURRENT_TAB);
+                        }
+                    },
+                    { flags: Mappings.flags.COUNT });
 
             if (next)
-                mappings.addUserMap(config.browserModes, [']]'], 'customize by nextlink.js',
+                mappings.addUserMap(context.browserModes, [']]'], 'customize by nextlink.js',
                     function(count) { buffer.followLink(next, liberator.CURRENT_TAB); },
                     { flags: Mappings.flags.COUNT });
         }

@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.8</version>
+    <version>0.1.9</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -67,7 +67,10 @@ createHTMLDocument(str):
 getNodesFromXPath(xpath, doc, callback, obj):
   xpath を評価し snapshot の配列を返却します。
 xmlSerialize(xml):
-  xml を文字列化します。 
+  xml を文字列化します。
+xmlToDom(node, doc, nodes):
+  for vimperator1.2.
+  @see vimperator2.0pre util.
 getElementPosition(elem):
   elem の offset を返却します。
   {top: 0, left: 0}
@@ -251,6 +254,24 @@ libly.$U = {//{{{
                                         .replace(/<[^>]+>/g, function(all) all.toLowerCase());
         } catch (e) { return '' }
     },
+    xmlToDom: function xmlToDom(node, doc, nodes)
+    {
+        XML.prettyPrinting = false;
+        switch (node.nodeKind())
+        {
+            case "text":
+                return doc.createTextNode(node);
+            case "element":
+                let domnode = doc.createElementNS(node.namespace(), node.localName());
+                for each (let attr in node.@*)
+                    domnode.setAttributeNS(attr.name() == "highlight" ? NS.uri : attr.namespace(), attr.name(), String(attr));
+                for each (let child in node.*)
+                    domnode.appendChild(arguments.callee(child, doc, nodes));
+                if (nodes && node.@key)
+                    nodes[node.@key] = domnode;
+                return domnode;
+        }
+    },
     getElementPosition: function(elem) {
         var offsetTrail = elem;
         var offsetLeft  = 0;
@@ -288,7 +309,7 @@ libly.Request.prototype = {
             if (typeof this.observers[name] == 'undefined') this.observers[name] = [];
             this.observers[name].push(func);
         } catch (e) {
-            if (!this.fireEvent('onException', e)) throw e;
+            if (!this.fireEvent('onException', new libly.Response(this), e)) throw e;
         }
     },
     fireEvent: function(name, args, asynchronous) {
@@ -324,7 +345,7 @@ libly.Request.prototype = {
                 this._onStateChange();
 
         } catch (e) {
-            if (!this.fireEvent('onException', e, this.options.asynchronous)) throw e;
+            if (!this.fireEvent('onException', new libly.Response(this), e)) throw e;
         }
     },
     _onStateChange: function() {
@@ -351,7 +372,7 @@ libly.Request.prototype = {
                 this._complete = true;
                 this.fireEvent('on' + (this.isSuccess() ? 'Success' : 'Failure'), res, this.options.asynchronous);
             } catch (e) {
-                if (!this.fireEvent('onException', e, this.options.asynchronous)) throw e;
+                if (!this.fireEvent('onException', res, e)) throw e;
             }
         }
     },
