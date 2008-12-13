@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -39,7 +39,6 @@ liberator.plugins.nextlink = (function() {
 
     var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == 'undefined' ?
                        false : $U.eval(liberator.globalVariables.nextlink_followlink);
-
     var pageNaviCss =
             <style type="text/css"><![CDATA[
                 .vimperator-nextlink-page {
@@ -298,7 +297,7 @@ liberator.plugins.nextlink = (function() {
             cache.curPage++;
             if (next && next.length) {
                 cache.prev.push(prev);
-                cache.next.push(next);
+                cache.next.push(next[0]);
             } else {
                 context.setCache(url, 'terminate', cache.curPage);
             }
@@ -359,7 +358,7 @@ liberator.plugins.nextlink = (function() {
             var url = res.req.options.url;
             var cache = context.cache[url];
             cache.isLoading = false;
-            logger.echoerr('nextlink: loading failed. ' + '[' + res.status + ']' + res.statusText);
+            logger.echoerr('nextlink: loading failed. ' + '[' + res.status + ']' + res.statusText + ' > ' + res.req.url);
             res.req.options.context.setCache(res.req.options.url, 'terminate', cache.curPage);
         },
         focusPagenavi: function(context, url, page) {
