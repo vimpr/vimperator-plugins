@@ -1,16 +1,77 @@
-// ==VimperatorPlugin==
-// @name           すてら
-// @description-ja ステータスラインに動画の再生時間などを表示する。
-// @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        0.07
-// @author         anekos (anekos@snca.net)
-// @minVersion     2.0pre
-// @maxVersion     2.0pre
-// ==/VimperatorPlugin==
-//
-// Usage-ja:
-//    作成中
-//
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>Stella</name>
+  <name lang="ja">すてら</name>
+  <description>Show video informations on the status line.</description>
+  <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
+  <version>0.09</version>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <license document="http://creativecommons.org/licenses/by-sa/3.0/">
+    Creative Commons Attribution-Share Alike 3.0 Unported
+  </license>
+  <detail><![CDATA[
+    == Commands ==
+      :stpl[ay]:
+        play or pause
+      :stpa[use]:
+        pause
+      :stvolume <VOLUME>:
+        set to the specified volume.
+      :stmu[te]:
+        turn on/off mute.
+      :stre[peat]:
+        turn on/off mute.
+      :stco[mment]:
+        turn on/off comment visible.
+      :stse[ek] <TIMECODE>:
+        seek to specified position.
+        TIMECODE formats
+          :stseek 1:30 # 1分30秒
+          :stseek 1.5  # 1.5分。90秒
+          :stseek 90   # 90秒
+      :stse[ek]! <TIMECODE>:
+        seek to the specified position from current position at relatively.
+      :stfe[tch]:
+        fetch and save the video.
+      :stla[rge]:
+        enlarge video screen.
+      :stfu[llscreen]:
+        turn on/off fullscreen.
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    == Commands ==
+      :stpl[ay]:
+        再生/ポーズの解除を行う。
+      :stpa[use]:
+        一時停止する。
+      :stvolume <VOLUME>:
+        指定の音量にする。
+        0から100の数字で指定する。
+      :stmu[te]:
+        ミュートのOn/Offを切り替える。
+      :stre[peat]:
+        リピートモードのOn/Offを切り替える。
+      :stco[mment]:
+        コメントのOn/Offを切り替える。
+      :stse[ek] <TIMECODE>:
+        指定の秒数までシークスする。
+        TIMECODE は以下の様に指定できる。
+          :stseek 1:30 # 1分30秒
+          :stseek 1.5  # 1.5分。90秒
+          :stseek 90   # 90秒
+      :stse[ek]! <TIMECODE>:
+        現在の位置から TIMECODE 分移動する。
+      :stfe[tch]:
+        動画をファイルとして保存する。
+      :stla[rge]:
+        画面を大きくする/戻す。
+      :stfu[llscreen]:
+        フルスクリーン表示のOn/Offを切り替える。
+  ]]></detail>
+</VimperatorPlugin>;
+
 // TODO
 //    Icons
 //    Other video hosting websites
@@ -25,26 +86,6 @@
 //    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/youtubeamp.js
 //    Thanks!
 //
-// License:
-//    http://creativecommons.org/licenses/by-sa/3.0/
-
-var PLUGIN_INFO =
-<VimperatorPlugin>
-<name>{NAME}</name>
-<description>Show the time of movie on status line</description>
-<description lang="ja">{"ステータスラインに動画の再生時間などを表示する。"}</description>
-<version>0.08</version>
-<detail><![CDATA[
-:stfetch
-:stfullscreen
-:stpause
-:stplay
-:strelations
-:strepeat
-:stseek
-:stvolume
-]]></detail>
-</VimperatorPlugin>;
 
 (function () {
 
@@ -188,6 +229,18 @@ var PLUGIN_INFO =
     };
   }
 
+  // 上手い具合に病数に直すよ
+  function fromTimeCode (code) {
+    let m;
+    function sign (s, v)
+      (s == '-' ? -v : v);
+    if (m = code.match(/^([-+])?(\d+):(\d+)$/))
+      return sign(m[1], parseInt(m[2]) * 60 + parseInt(m[3]));
+    if (m = code.match(/^([-+])?(\d+.\d+)$/))
+      return sign(m[1], parseFloat(m[2]) * 60);
+    return parseInt(code);
+  }
+
   // }}}
 
   /*********************************************************************************
@@ -211,6 +264,8 @@ var PLUGIN_INFO =
     setf('maxVolume', this.has('volume', 'rw') && 'r');
     setf('fetch', this.has('fileURL', 'r') && 'x');
     setf('relations', [name for each (name in Player.RELATIONS) if (this.has(name, 'r'))].length && 'r');
+    if (!this.functions.large)
+      this.functions.large = this.functions.fullscreen;
   }
 
   Player.ST_PLAYING = 'playing';
@@ -247,6 +302,7 @@ var PLUGIN_INFO =
       relatedIDs: '',
       relatedTags: '',
       repeating: '',
+      large: '',
       tags: '',
       title: '',
       totalTime: '',
@@ -279,6 +335,9 @@ var PLUGIN_INFO =
 
     get fileExtension () '',
 
+    get fullscreen () undefined,
+    set fullscreen (value) value,
+
     get fileURL () undefined,
 
     get maxVolume () 100,
@@ -308,6 +367,9 @@ var PLUGIN_INFO =
 
     get repeating () undefined,
     set repeating (value) value,
+
+    get large () this.fullscreen,
+    set large (value) (this.fullscreen = value),
 
     get state () undefined,
 
@@ -349,14 +411,14 @@ var PLUGIN_INFO =
     },
 
     seek: function (v) {
-      v = parseInt(v, 10);
+      v = fromTimeCode(v);
       if (v < 0)
         v = this.totalTime + v;
       return this.currentTime = Math.min(Math.max(v, 0), this.totalTime);
     },
 
     seekRelative: function (v)
-      this.currentTime = Math.min(Math.max(this.currentTime + parseInt(v, 10), 0), this.totalTime),
+      this.currentTime = Math.min(Math.max(this.currentTime + fromTimeCode(v), 0), this.totalTime),
 
     toggle: function (name) {
       if (!this.has(name, 'rwt'))
@@ -401,7 +463,7 @@ var PLUGIN_INFO =
     icon: 'http://www.youtube.com/favicon.ico',
 
     get currentTime () parseInt(this.player.getCurrentTime()),
-    set currentTime (value) (this.player.seekTo(value), value),
+    set currentTime (value) (this.player.seekTo(fromTimeCode(value)), this.currentTime),
 
     get fileExtension () '.mp4',
 
@@ -498,6 +560,9 @@ var PLUGIN_INFO =
     ['videowindow.video_mc.video.deblocking',  null,      5]
   ];
 
+  NicoPlayer.SIZE_NORMAL  = 'normal';
+  NicoPlayer.SIZE_LARGE   = 'fit';
+
   NicoPlayer.prototype = {
     __proto__: Player.prototype,
 
@@ -510,6 +575,7 @@ var PLUGIN_INFO =
       id: 'r',
       makeURL: 'x',
       muted: 'rwt',
+      large: 'rwt',
       pause: 'x',
       play: 'x',
       playEx: 'x',
@@ -531,7 +597,7 @@ var PLUGIN_INFO =
     get playerContainer () getElementByIdEx('flvplayer_container'),
 
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
-    set currentTime (value) (this.player.ext_setPlayheadTime(value), value),
+    set currentTime (value) (this.player.ext_setPlayheadTime(fromTimeCode(value)), this.currentTime),
 
     get fileExtension () '.flv',
 
@@ -659,6 +725,13 @@ var PLUGIN_INFO =
     get repeating () this.player.ext_isRepeat(),
     set repeating (value) (this.player.ext_setRepeat(value), value),
 
+    get large () this.player.ext_getVideoSize() === NicoPlayer.SIZE_LARGE,
+    set large (value) {
+        liberator.log(value)
+        this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL)
+        return this.large;
+    },
+
     get state () {
       switch (this.player.ext_getStatus()) {
         case 'end':
@@ -681,13 +754,13 @@ var PLUGIN_INFO =
     set volume (value) (this.player.ext_setVolume(value), this.volume),
 
     fetch: function (filepath) {
-      let onComplete = function (xhr) {
+      let onComplete = bindr(this, function (xhr) {
           let res = xhr.responseText;
           let info = {};
           res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
           download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
-      };
-      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, bindr(this, onComplete));
+      });
+      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, onComplete);
     },
 
     makeURL: function (value, type) {
@@ -908,6 +981,7 @@ var PLUGIN_INFO =
       add('vo[lume]', 'volume', 'turnUpDownVolume');
       add('se[ek]', 'seek', 'seekRelative');
       add('fe[tch]', 'fetch');
+      add('la[rge]', 'large');
       add('fu[llscreen]', 'fullscreen');
 
       commands.addUserCommand(
