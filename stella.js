@@ -84,8 +84,14 @@ var PLUGIN_INFO =
 //    http://yuichis.homeip.net/nicodai.user.html
 //    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/nicontroller.js
 //    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/youtubeamp.js
-//    Thanks!
 //
+// Thanks:
+//    参考にさせてもらった人々。THANKS!!
+//      janus_wel 氏
+//        http://d.hatena.ne.jp/janus_wel/
+//      ゆういち 氏
+//        http://yuichis.homeip.net/nicodai.user.html
+
 
 (function () {
 
