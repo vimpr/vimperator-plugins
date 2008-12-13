@@ -75,7 +75,7 @@ liberator.plugins.nextlink = (function() {
             this.cache = {}; // {url: {xpath: xpath, next: element, prev: url}} or null
             this.pager = pager;
             this.browserModes = config.browserModes || [modes.NORMAL, modes.VISUAL];
-            this.isNew = autocommands['DOMLoad'] ? false : true; // toriaezu
+            this.is2_0later = config.autocommands.some(function ([k, v]) k == 'DOMLoad'); // toriaezu
 
             var req = new libly.Request(this.WEDATA_AUTOPAGERIZE);
             req.addEventListener('onSuccess', $U.bind(this,
@@ -104,7 +104,8 @@ liberator.plugins.nextlink = (function() {
                 $U.bind(this, function(args) { this.handler(args); }), null, true
             );
             var loadEvent = autocommands['DOMLoad'] || 'PageLoad'; // for 1.2
-            liberator.execute(':autocmd! ' + loadEvent + ' .* :nextlink onLoad');
+logger.log('event:' + loadEvent + (this.is2_0later ? 'DOMLoad' : 'PageLoad') );
+            liberator.execute(':autocmd! ' + (this.is2_0later ? 'DOMLoad' : 'PageLoad') + ' .* :nextlink onLoad');
             liberator.execute(':autocmd! LocationChange .* :nextlink onLocationChange');
         },
         handler: function(args) {
@@ -113,7 +114,6 @@ liberator.plugins.nextlink = (function() {
             commandline.echo('');
         },
         onLoad: function(url) {
-
             if (!this.initialized) return;
             if (this.cache[url] &&
                 this.cache[url].hasOwnProperty('xpath')) {
@@ -210,7 +210,7 @@ liberator.plugins.nextlink = (function() {
                         insertPoint = lastPageElement.nextSibling ||
                                       lastPageElement.parentNode.appendChild(doc.createTextNode(' '));
 
-                if (context.isNew) {
+                if (context.is2_0later) {
                     let css = $U.xmlToDom(pageNaviCss, doc);
                     let node = doc.importNode(css, true);
                     doc.body.insertBefore(node, doc.body.firstChild);
