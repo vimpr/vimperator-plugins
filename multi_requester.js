@@ -199,7 +199,7 @@ var DataAccess = {
         });
 
         if (useWedata) {
-            logger.log('use Wedata');
+            logger.log('use wedata');
             this.getWedata(function(site) {
                 if (mergedSiteinfo[site.name]) return;
                 mergedSiteinfo[site.name] = {};

@@ -2,8 +2,8 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>nextlink</name>
-    <description>mapping "[[", "]]" by Autopagerize XPath.</description>
-    <description lang="ja">Autopagerize 用の XPath より "[[", "]]" をマッピングします。</description>
+    <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
+    <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <version>0.2.0</version>
     <minVersion>2.0</minVersion>
@@ -46,21 +46,18 @@ liberator.plugins.nextlink = (function() {
                     background-color: #333;
                     color: #fff;
                     opacity: .85;
-                    filter: alpha(opacity = 85);
-                    zoom: 1;
                     padding: 10px;
                     margin-top: 5px;
                     margin-bottom: 5px;
                     font-weight: bold;
                     text-align: left;
                     -moz-border-radius: 5px;
-                    -webkit-border-radius: 5px;
                 }
                 .vimperator-nextlink-page a:link {
                     color: #EF6D29;
                 }
                 .vimperator-nextlink-page a:visited {
-                    color: #A5000;
+                    color: #A50000;
                 }
             ]]></style>;
 
@@ -70,7 +67,7 @@ liberator.plugins.nextlink = (function() {
     NextLink.prototype = {
         initialize: function(pager) {
 
-            this.WEDATA_AUTOPAGERIZE = 'http://wedata.net/databases/Autopagerize/items.json';
+            this.WEDATA_AUTOPAGERIZE = 'http://wedata.net/databases/AutoPagerize/items.json';
             this.initialized = false;
             this.isCurOriginalMap = true;
             this.siteinfo = [];
@@ -91,16 +88,16 @@ liberator.plugins.nextlink = (function() {
             /* // for debug
             this.initialized = true;
             this.siteinfo = [{
-                url: 'http:\/\/192\.168\.',
+                url: '^http:\\/\\/192\\.168\\.',
                 nextLink: 'id("next")',
                 pageElement: '//*'
             }];
             */
 
-            commands.addUserCommand(['nextlink'], 'map ]] by Autopagerize XPath.',
+            commands.addUserCommand(['nextlink'], 'map ]] by AutoPagerize XPath.',
                 $U.bind(this, function(args) { this.handler(args); }), null, true
             );
-            var loadEvent = autocommands["DOMLoad"] || "PageLoad"; // for 1.2
+            var loadEvent = autocommands['DOMLoad'] || 'PageLoad'; // for 1.2
             liberator.execute(':autocmd! ' + loadEvent + ' .* :nextlink onLoad');
             liberator.execute(':autocmd! LocationChange .* :nextlink onLocationChange');
         },
@@ -154,28 +151,29 @@ liberator.plugins.nextlink = (function() {
             var next = cache.next;
 
             if (!prev)
-                mappings.remove(config.browserModes, "[[");
+                mappings.remove(config.browserModes, '[[');
 
             if (!next)
-                mappings.remove(config.browserModes, "]]");
+                mappings.remove(config.browserModes, ']]');
 
             this.pager.customizeMap(context, url, prev, next);
         },
         restorOrginalMap: function() {
 
             if (this.isCurOriginalMap) return;
-            mappings.remove(config.browserModes, "[[");
-            mappings.remove(config.browserModes, "]]");
+            mappings.remove(config.browserModes, '[[');
+            mappings.remove(config.browserModes, ']]');
             this.isCurOriginalMap = true;
         },
         setCache: function(key, subKeys, values) {
 
             if (!this.cache[key]) this.cache[key] = {};
-            subKeys = [].concat(subKeys);
             values = [].concat(values);
-            for (let i = 0, len = subKeys.length; i < len; i++) this.cache[key][subKeys[i]] = values[i];
+            [].concat(subKeys).forEach(function(subKey, i) {
+                this.cache[key][subKey] = values[i];
+            });
         }
-    }//}}}
+    };//}}}
 
     var Autopager = function() {};//{{{
     Autopager.prototype = {
@@ -213,8 +211,8 @@ liberator.plugins.nextlink = (function() {
 
             var cache = context.cache[url];
             var doc = cache.doc;
-             
-            mappings.addUserMap(config.browserModes, ["[["], "customize by nextlink.js",
+
+            mappings.addUserMap(config.browserModes, ['[['], 'customize by nextlink.js',
                 $U.bind(this, function(count) {
                     if (cache.curPage == 1) {
                         return;
@@ -229,7 +227,7 @@ liberator.plugins.nextlink = (function() {
                 }),
                 { flags: Mappings.flags.count });
 
-            mappings.addUserMap(config.browserModes, ["]]"], "customize by nextlink.js",
+            mappings.addUserMap(config.browserModes, [']]'], 'customize by nextlink.js',
                 $U.bind(this, function(count) {
                     var reqUrl, lastReqUrl;
                     reqUrl = $U.pathToURL(cache.next[cache.curPage - 1], doc);
@@ -263,12 +261,10 @@ liberator.plugins.nextlink = (function() {
             var url = res.req.options.url;
             var cache = context.cache[url];
             var doc = cache.doc;
-            var page, htmlDoc, prev, next;
-
-            page = res.getHTMLDocument(cache.siteinfo.pageElement);
-            htmlDoc = res.doc;
-            prev = cache.next[cache.curPage];
-            next = $U.getNodesFromXPath(cache.xpath, htmlDoc);
+            var page = res.getHTMLDocument(cache.siteinfo.pageElement);
+            var htmlDoc = res.doc;
+            var prev = cache.next[cache.curPage];
+            var next = $U.getNodesFromXPath(cache.xpath, htmlDoc);
 
             cache.loadedURLs[res.req.url] = true;
 
@@ -276,7 +272,7 @@ liberator.plugins.nextlink = (function() {
                 context.setCache(url, 'terminate', cache.curPage);
                 return;
             }
-             
+
             cache.curPage++;
             if (next && next.length) {
                 cache.prev.push(prev);
@@ -289,7 +285,7 @@ liberator.plugins.nextlink = (function() {
             this.focusPagenavi(context, url, cache.curPage);
         },
         addPage: function(context, doc, url, page, reqUrl) {
-     
+
             var cache = context.cache[url];
             //var doc = cache.doc;
             var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
@@ -300,7 +296,7 @@ liberator.plugins.nextlink = (function() {
                 let insertParent = cache.insertPoint.parentNode;
                 let colNodes = getElementsByXPath('child::tr[1]/child::*[self::td or self::th]', insertParent);
 
-                let colums = 0
+                let colums = 0;
                 for (let i = 0, l = colNodes.length; i < l; i++) {
                     let col = colNodes[i].getAttribute('colspan');
                     colums += parseInt(col, 10) || 1;
@@ -332,15 +328,16 @@ liberator.plugins.nextlink = (function() {
             res.res.options.context.setCache(res.req.options.url, 'terminate', cache.curPage);
         },
         focusPagenavi: function(context, url, page) {
+           var elem, p;
            try {
-               var elem = context.cache[url].mark[page - 2];
-               var p = $U.getElementPosition(elem);
+               elem = context.cache[url].mark[page - 2];
+               p = $U.getElementPosition(elem);
                window.content.scrollTo(0, p.top);
            } catch (e) {
                logger.log('focusPagenavi: err ' + page + ' ' + e);
            }
        }
-    }//}}}
+    };//}}}
 
     var FollowLink = function() {};//{{{
     FollowLink.prototype = {
@@ -364,16 +361,16 @@ liberator.plugins.nextlink = (function() {
             var doc = cache.doc;
 
             if (prev)
-                mappings.addUserMap(config.browserModes, ["[["], "customize by nextlink.js",
+                mappings.addUserMap(config.browserModes, ['[['], 'customize by nextlink.js',
                     function(count) { liberator.open(prev, liberator.CURRENT_TAB); },
                     { flags: Mappings.flags.count });
 
             if (next)
-                mappings.addUserMap(config.browserModes, ["]]"], "customize by nextlink.js",
+                mappings.addUserMap(config.browserModes, [']]'], 'customize by nextlink.js',
                     function(count) { buffer.followLink(next, liberator.CURRENT_TAB); },
                     { flags: Mappings.flags.COUNT });
         }
-    }//}}}
+    };//}}}
 
     var instance = new NextLink((isFollowLink ? new FollowLink() : new Autopager()));
     return instance;

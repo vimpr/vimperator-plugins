@@ -165,9 +165,10 @@ libly.$U = {//{{{
          return (new XPCNativeWrapper(window.content.window)).getSelection().toString();
     },
     getUserAndPassword: function(hostname, formSubmitURL, username) {
+        var passwordManager, logins;
         try {
-            var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-            var logins = passwordManager.findLogins({}, hostname, formSubmitURL, null);
+            passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+            logins = passwordManager.findLogins({}, hostname, formSubmitURL, null);
             if (logins.length) {
                 if (username) {
                     for (let i = 0, len = logins.lengh; i < len; i++) {
