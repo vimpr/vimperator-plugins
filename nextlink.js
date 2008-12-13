@@ -95,12 +95,7 @@ liberator.plugins.nextlink = (function() {
             this.initialized = true;
             this.siteinfo = [
                 {
-                    url: '^http:\\/\\/192\\.168\\.',
-                    nextLink: 'id("next")',
-                    pageElement: '//*'
-                },
-                {
-                    url: '^http:\\/\\/localhost',
+                    url: '^https?://(?:192\\.168(?:\\.\\d+){2}|localhost)(?::\\d+)?/',
                     nextLink: 'id("next")',
                     pageElement: '//*'
                 }
@@ -130,7 +125,7 @@ liberator.plugins.nextlink = (function() {
             }
 
             for (let i = 0, len = this.siteinfo.length; i < len; i++) {
-                if (url.match(this.siteinfo[i].url) && !/^\^https\?:\/\/\.$/.test(this.siteinfo[i].url)) {
+                if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != '^https?://.') {
                     this.setCache(url,
                             ['doc', 'xpath', 'siteinfo'],
                             [window.content.document, this.siteinfo[i].nextLink, this.siteinfo[i]]
@@ -186,7 +181,7 @@ liberator.plugins.nextlink = (function() {
         },
         removeMap: function(cmd) {
             try {
-                if (mappings.hasMap(this.browserModes, cmd)) {;
+                if (mappings.hasMap(this.browserModes, cmd)) {
                     mappings.remove(this.browserModes, cmd);
                 }
                 return true;
@@ -242,13 +237,10 @@ liberator.plugins.nextlink = (function() {
                 $U.bind(this, function(count) {
                     if (cache.curPage == 1) {
                         return;
+                    } else if (--cache.curPage == 1) {
+                        window.content.scrollTo(0, 0);
                     } else {
-                        cache.curPage--;
-                        if (cache.curPage == 1) {
-                            window.content.scrollTo(0, 0);
-                        } else {
-                            this.focusPagenavi(context, url, cache.curPage);
-                        }
+                        this.focusPagenavi(context, url, cache.curPage);
                     }
                 }),
                 { flags: Mappings.flags.COUNT });
@@ -269,8 +261,7 @@ liberator.plugins.nextlink = (function() {
                         return;
                     }
                     if (cache.loadedURLs[reqUrl]) {
-                        cache.curPage++;
-                        this.focusPagenavi(context, url, cache.curPage);
+                        this.focusPagenavi(context, url, ++cache.curPage);
                         return;
                     }
                     context.setCache(url, ['lastReqUrl', 'isLoading'], [reqUrl, true]);
@@ -398,12 +389,14 @@ liberator.plugins.nextlink = (function() {
             //for each (let match in matches) elem = match;
             $U.getNodesFromXPath(cache.xpath, doc, function(item) elem = item, this);
 
-            var nextUrl = $U.pathToURL(elem, doc);
-            var prev = $U.getNodesFromXPath('//a[@rel="prev"] | //link[@rel="prev"]', doc);
+            var nextURL = $U.pathToURL(elem, doc);
+            var xpath = ['a', 'link'].map(function(e) '//' + e + '[translate(normalize-space(@rel), "EPRV", "eprv")="prev"]')
+                                     .join(' | ');
+            var prev = $U.getNodesFromXPath(xpath, doc);
             if (prev.length) {
                 context.setCache(url, 'prev', prev[0]);
             }
-            context.setCache(nextUrl, 'prev', url);
+            context.setCache(nextURL, 'prev', url);
             context.setCache(url, 'next', elem);
         },
         customizeMap: function(context, url, prev, next) {
