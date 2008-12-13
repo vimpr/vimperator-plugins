@@ -168,8 +168,8 @@ var PLUGIN_INFO =
   function isNum (v)
     (typeof v === 'number' && !isNaN(v));
 
-  function lz (s,n)
-    String(Math.pow(10,n ) + s).substring(1);
+  function lz (s, n)
+    String(Math.pow(10, n) + s).substring(1);
 
   function makeFile (s) {
     var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
@@ -192,12 +192,12 @@ var PLUGIN_INFO =
 
   function storeStyle (target, values, overwrite) {
     let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
-    let backup =  {};
+    let backup = {};
     for (let [name, value] in Iterator(values)) {
       backup[name] = cstyle[name];
       style[name] = value;
     }
-    if(overwrite || !style.__stella_backup)
+    if (overwrite || !style.__stella_backup)
       style.__stella_backup = backup;
   }
 
@@ -237,17 +237,12 @@ var PLUGIN_INFO =
 
   // 上手い具合に病数に直すよ
   function fromTimeCode (code) {
-    let m;
-    function sign (s, v)
-      (s == '-' ? -v : v);
-    if (typeof code != 'number') {
-      code = code.toString();
-      if (m = code.match(/^([-+])?(\d+):(\d+)$/))
-        return sign(m[1], parseInt(m[2]) * 60 + parseInt(m[3]));
-      if (m = code.match(/^([-+])?(\d+.\d+)$/))
-        return sign(m[1], parseFloat(m[2]) * 60);
-    }
-    return parseInt(code);
+    var m;
+    if (m = /^(([-+]?)\d+):(\d+)$/(code))
+      return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
+    if (m = /^([-+]?\d+\.\d+)$/(code))
+      return Math.round(parseFloat(m[1], 10) * 60);
+    return parseInt(code, 10);
   }
 
   // }}}
@@ -364,9 +359,9 @@ var PLUGIN_INFO =
       let result = [];
       for (let [type, name] in Iterator(Player.RELATIONS)) {
         if (this.has(name, 'r')) {
-          try{
-          result = this[name].map(function (it) ({type: Player[type], value: it})).concat(result);
-          } catch (e){
+          try {
+            result = this[name].map(function (it) ({type: Player[type], value: it})).concat(result);
+          } catch (e) {
             liberator.log(name);
           }
         }
@@ -488,7 +483,7 @@ var PLUGIN_INFO =
       let r = p.getBoundingClientRect();
       if (this.fullscreen) {
         if (this.storage.r === undefined)
-          this.storage.r = /r/.test(options['guioptions']);
+          this.storage.r = options['guioptions'].indexOf('r') >= 0;
         storeStyle(p, {
           marginLeft: -r.left + 'px',
           marginTop: -r.top + 'px',
@@ -569,8 +564,8 @@ var PLUGIN_INFO =
     ['videowindow.video_mc.video.deblocking',  null,      5]
   ];
 
-  NicoPlayer.SIZE_NORMAL  = 'normal';
-  NicoPlayer.SIZE_LARGE   = 'fit';
+  NicoPlayer.SIZE_NORMAL = 'normal';
+  NicoPlayer.SIZE_LARGE  = 'fit';
 
   NicoPlayer.prototype = {
     __proto__: Player.prototype,
@@ -625,7 +620,7 @@ var PLUGIN_INFO =
         player.ext_setVideoSize('normal');
 
       win.toggleMaximizePlayer();
-      if(value)  {
+      if (value) {
         turnOn();
         win.onresize = fixFullscreen;
       } else {
@@ -656,22 +651,22 @@ var PLUGIN_INFO =
         };
         scale.v = Math.min(scale.w, scale.h);
         storeStyle(doc.body, {
-          backgroundImage: 'url()',
+          backgroundImage:  'url()',
           backgroundRepeat: '',
-          backgroundColor: 'black'
+          backgroundColor:  'black'
         });
         storeStyle(
           player,
           (scale.w >= scale.h) ? {
-            width:       Math.floor(viewer.w * scale.h) + 'px',
-            height:      screen.h + 'px',
-            marginLeft:  ((screen.w - viewer.w * scale.h) / 2) + 'px',
-            marginTop:   '0px'
+            width:      Math.floor(viewer.w * scale.h) + 'px',
+            height:     screen.h + 'px',
+            marginLeft: ((screen.w - viewer.w * scale.h) / 2) + 'px',
+            marginTop:  '0px'
           } : {
-            width:       screen.w + 'px',
-            height:      Math.floor(viewer.h * scale.w) + 'px',
-            marginLeft:  '0px',
-            marginTop:   ((screen.h - viewer.h * scale.w) / 2) + 'px'
+            width:      screen.w + 'px',
+            height:     Math.floor(viewer.h * scale.w) + 'px',
+            marginLeft: '0px',
+            marginTop:  ((screen.h - viewer.h * scale.w) / 2) + 'px'
           }
         );
         player.SetVariable('videowindow._xscale', 100 * scale.v);
@@ -711,7 +706,7 @@ var PLUGIN_INFO =
       xhr.open('GET', uri, false);
       xhr.send(null);
       let xml = xhr.responseXML;
-      let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
+      let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
       while (v = vs.iterateNext()) {
         let [cs, video] = [v.childNodes, {}];
         for each (let c in cs)
@@ -736,7 +731,7 @@ var PLUGIN_INFO =
 
     get large () this.player.ext_getVideoSize() === NicoPlayer.SIZE_LARGE,
     set large (value) {
-        liberator.log(value)
+        liberator.log(value);
         this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL)
         return this.large;
     },
@@ -887,10 +882,10 @@ var PLUGIN_INFO =
   WebProgressListener.prototype = {
     onStatusChange: function (webProgress, request, stateFlags, staus) undefined,
     onProgressChange: function (webProgress, request, curSelfProgress,
-                               maxSelfProgress, curTotalProgress, maxTotalProgress) undefined,
+                                maxSelfProgress, curTotalProgress, maxTotalProgress) undefined,
     onLocationChange: function (webProgress, request, location) undefined,
-    onStateChange: function(webProgress, request, status, message) undefined,
-    onSecurityChange: function(webProgress, request, state) undefined,
+    onStateChange: function (webProgress, request, status, message) undefined,
+    onSecurityChange: function (webProgress, request, state) undefined,
     uninstall: function () {
       getBrowser().removeProgressListener(this);
     },
