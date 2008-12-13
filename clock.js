@@ -1,4 +1,4 @@
-let PLUGIN_INFO = 
+let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>clock</description>
@@ -273,8 +273,6 @@ clock.generate();
 
 // insert
 commandlineStack.appendChild(clock.instance);
-// why double?
-clock.justify(window.innerWidth);
 
 // register command
 [
