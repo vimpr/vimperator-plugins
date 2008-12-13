@@ -25,7 +25,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
 </VimperatorPlugin>;
 //}}}
 
-(function (){
+(function () {
 
     const DEFAULT_HINTCHARS = "HJKLASDFGYUIOPQWERTNMZXCVB";
 
@@ -38,7 +38,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         var num = 0;
         var hintchars = options.hintchars.toUpperCase();
         var base = hintchars.length;
-        for(let i=0;i<chars.length;++i) {
+        for(let i=0,l=chars.length;i<l;++i) {
             num = base*num + hintchars.indexOf(chars[i]);
         }
         return num;
@@ -52,12 +52,12 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
             chars = hintchars[((num % base))] + chars;
             num = Math.floor(num/base);
         } while(num>0);
-        
+
         return chars;
     } //}}}
     function showCharHints() //{{{
     {
-        for (let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", window.content.document))
+        for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", window.content.document))
         {
             let num = elem.getAttribute("number");
             let hintchar = num2chars(parseInt(num, 10));
@@ -65,30 +65,30 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         }
     } //}}}
 
-    let hintContext = hints.addMode;
-    let hintChars = [];
-    let charhints = plugins.charhints = {
-        show: function(minor, filter, win) //{{{
+    var hintContext = hints.addMode;
+    var hintChars = [];
+    var charhints = plugins.charhints = {
+        show: function (minor, filter, win) //{{{
         {
             charhints.original.show(minor, filter, win);
             hintChars = [];
             showCharHints();
         }, //}}}
-        onInput: function(event) //{{{
+        onInput: function (event) //{{{
         {
-            let hintString = commandline.command;
-            commandline.command = hintString.replace(/[A-Z]/g, "");
+            var hintString = commandline.command;
+            commandline.command = hintString.replace(/[A-Z]+/g, "");
             charhints.original.onInput(event);
             showCharHints();
-            for(let i=0;i<hintString.length;++i) {
-                if (/^[A-Z]$/.test(hintString[i])) {
+            for(let i=0,l=hintString.length;i<l;++i) {
+                if(/^[A-Z]$/.test(hintString[i])) {
                     hintChars.push(hintString[i]);
                 }
             }
             if(hintChars.length>0) {
-                let numstr = String(chars2num(hintChars.join('')));
-                setTimeout(function() {
-                    for(let i=0;i<numstr.length;++i) {
+                let numstr = String(chars2num(hintChars.join("")));
+                setTimeout(function () {
+                    for(let i=0,l=numstr.length;i<l;++i) {
                         let num = numstr[i];
                         let alt = new Object;
                         alt.liberatorString = num;
@@ -99,7 +99,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         }, //}}}
     };
 
-    if(!charhints.original){
+    if(!charhints.original) {
         charhints.original = {
             show: hints.show,
             onInput: liberator.eval("onInput", hintContext),
@@ -108,21 +108,21 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         charhints.install = function () //{{{
         {
             hints.show = charhints.show;
-            liberator.eval('onInput = plugins.charhints.onInput', hintContext);
+            liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
             highlight.CSS = highlight.CSS.replace(
-                    'Hint::after,,*  content: attr(number);',
-                    'Hint::after,,*  content: attr(hintchar);');
+                    "Hint::after,,*  content: attr(number);",
+                    "Hint::after,,*  content: attr(hintchar);");
             highlight.reload();
         }; //}}}
         charhints.uninstall = function () //{{{
         {
             hints.show = charhints.original.show;
-            liberator.eval('onInput = plugins.charhints.original.onInput', hintContext);
+            liberator.eval("onInput = plugins.charhints.original.onInput", hintContext);
 
             highlight.CSS = highlight.CSS.replace(
-                    'Hint::after,,*  content: attr(hintchar);',
-                    'Hint::after,,*  content: attr(number);');
+                    "Hint::after,,*  content: attr(hintchar);",
+                    "Hint::after,,*  content: attr(number);");
             highlight.reload();
         }; //}}}
     }
