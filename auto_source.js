@@ -3,7 +3,7 @@ var PLUGIN_INFO =
   <name> Auto Source </name>
   <description>Sourcing automatically when the specified file is modified.</description>
   <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
-  <version>1.2</version>
+  <version>1.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -52,16 +52,30 @@ var PLUGIN_INFO =
   function remove (filepath, func)
     (files = files.filter(function (it) (it.path.indexOf(filepath) !== 0 && (func(it)+'-'))));
 
+  function expandPath (filepath) {
+    filepath = io.expandPath(filepath);
+    if (filepath.match(/\/|\w:[\\\/]/))
+      return filepath;
+    let cur = io.getCurrentDirectory();
+    cur.appendRelativePath(filepath);
+    return cur.path;
+  }
+
   function startWatching (filepath) {
     if (exists(filepath))
       throw 'The file has already been watched: ' + filepath;
     let last = firstTime ? null : getFileModifiedTime(filepath);
     let handle = setInterval(function () {
-      let current = getFileModifiedTime(filepath);
-      if (last != current) {
-        liberator.log('sourcing: ' + filepath);
-        last = current;
-        io.source(filepath);
+      try {
+        let current = getFileModifiedTime(filepath);
+        if (last != current) {
+          liberator.log('sourcing: ' + filepath);
+          last = current;
+          io.source(filepath);
+        }
+      } catch (e) {
+        killWatcher(filepath);
+        liberator.echoerr('Error! ' + filepath);
       }
     }, interval);
     files.push({handle: handle, path: filepath});
@@ -78,7 +92,7 @@ var PLUGIN_INFO =
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg, bang) {
-      (bang ? killWatcher : startWatching)(io.expandPath(arg[0]));
+      (bang ? killWatcher : startWatching)(expandPath(arg[0]));
     },
     {
       bang: true,
