@@ -15,7 +15,7 @@ var PLUGIN_INFO =
 	省略すると全てのプラグインの詳細を表示します。
 	オプション -v はより細かなデータを表示します
 
-== for plugin Developer ==
+== For plugin Developer ==
 プラグインの先頭に
  var PLUGIN_INFO = ... とE4X形式でXMLを記述してください
  各要素は下記参照
@@ -42,26 +42,26 @@ detail:
 	ここにコマンドやマップ、プラグインの説明
 	CDATAセクションにwiki的に記述可能
 
-== wiki書式 ==
+== Wiki書式 ==
 * == title == でh1
-* definition: (最後に":")で定義リストのdt
-  後続が空行でない、かつ、最後が":"でないならば、定義リストのdd
-* mailto: ... , http:// ... , https:// ...  はリンクになります
+* 末尾が「:」で終わる行は定義リストのdt
+* dtに続く行が空行でなく、かつ、末尾が「:」でない行は定義リストのdd
+* mailtoとhttp、httpsスキームのURLはリンクになります
 
 == ToDo ==
-* 更新通知 と アップデート機能
-* wiki書式の追加
+* 更新通知とアップデート機能
+* Wiki書式の追加
 
 ]]></detail>
 </VimperatorPlugin>;
 
 liberator.plugins.pluginManager = (function(){
 
-function id (value) value;
+function id(value) value;
 var lang = window.navigator.language;
 var tags = {
 	name: function(info) fromUTF8Octets(info.toString()),
-	author: function(info) {
+	author: function(info){
 		var xml = <>{info.toString()}</>;
 		if (info.@homepage.toString() != '')
 			xml += <><span> </span>{makeLink(info.@homepage.toString())}</>;
@@ -70,7 +70,7 @@ var tags = {
 		return xml;
 	},
 	description: function(info) makeLink(fromUTF8Octets(info.toString())),
-	license: function(info) {
+	license: function(info){
 		var xml = <>{info.toString()}</>;
 		if (info.@document.toString() != '')
 			xml += <><span> </span>{makeLink(info.@document.toString())}</>;
@@ -88,49 +88,47 @@ var tags = {
 		var xml = <></>;
 		var ite = Iterator(lines);
 		var num, line;
-		try {
-		while ([num, line] = ite.next()){
+		try { while ([num, line] = ite.next()){
 			if (!line) continue;
 			if (/^\s*==(.*)==\s*$/.test(line)){
 				xml += <h1 style="font-weight:bold;font-size:medium;">{makeLink(RegExp.$1)}</h1>;
 				continue;
 			}
-			let reg = /^\s*(.*)\s*:\s*$/;
+			let reg = /^\s*(.+?)\s*:\s*$/;
 			if (reg.test(line)){
 				let dl = <dl><dt>{makeLink(RegExp.$1)}</dt></dl>;
-				try {
-				while ([num, line] = ite.next()){
+				try { while ([num, line] = ite.next()){
 					if (!line) break;
 					if (reg.test(line)){
 						dl.* += <dt>{makeLink(RegExp.$1)}</dt>;
 					} else {
-						dl.* += <dd>{makeLink(line.replace(/^\s+|\s+$/g, ""))}</dd>;
+						dl.* += <dd>{makeLink(line.replace(/^\s+|\s+$/g, ''))}</dd>;
 					}
-				}
-				} catch (e){}
+				} } catch (e){}
 				xml += dl;
 				continue;
 			}
 			xml += <>{makeLink(line)}<br/></>;
-		}
-		} catch (e){}
+		} } catch (e){}
 		return xml;
 	}
 };
-function chooseByLang (elems) {
+function chooseByLang(elems){
 	if (!elems)
 		return null;
-	function get (lang) {
-		for (let i=elems.length(); i-->1;){
-			if (elems[i].@lang == lang)
+	function get(lang){
+		var i = elems.length();
+		while (i-->0){
+			if (elems[i].@lang.toString() == lang)
 				return elems[i];
 		}
 	}
-	return get(lang) || get(lang.split('-', 2).shift()) || elems[0] || elems;
+	return get(lang) || get(lang.split('-', 2).shift()) || get('') ||
+	       get('en-US') || get('en') || elems[0] || elems;
 }
-for (let it in Iterator(tags)) {
+for (let it in Iterator(tags)){
 	let [name, value] = it;
-	tags[name] = function (info) {
+	tags[name] = function(info){
 		if (!info[name])
 			return null;
 		return value.call(tags, chooseByLang(info[name]));
@@ -141,7 +139,7 @@ function makeLink(str){
 }
 function fromUTF8Octets(octets){
 	return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
-		return "%" + c.charCodeAt(0).toString(16);
+		return '%' + c.charCodeAt(0).toString(16);
 	}));
 }
 function getPlugins(){
@@ -151,9 +149,9 @@ function getPlugins(){
 		let context = contexts[path];
 		let info = context.PLUGIN_INFO || null;
 		let plugin = [
-			["path", path]
+			['path', path]
 		];
-		plugin["name"] = context.NAME;
+		plugin['name'] = context.NAME;
 		if (info){
 			for (let tag in tags){
 				let value = tags[tag](info);
@@ -165,8 +163,8 @@ function getPlugins(){
 	}
 	return list;
 }
-function itemFormater(plugin, showDetail){
-	if (showDetail)
+function itemFormater(plugin, showDetails){
+	if (showDetails)
 		return template.table(plugin.name, plugin);
 
 	var data = plugin.filter(function($_) $_[0] != 'detail');
@@ -176,7 +174,7 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
 	function(args){
 		liberator.plugins.pluginManager.list(args[0], args['-verbose']);
 	}, {
-		argCount: "*",
+		argCount: '*',
 		options: [
 			[['-verbose', '-v'], commands.OPTION_NOARG],
 		],
@@ -197,16 +195,16 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
 		}
 	}, true);
 var public = {
-	list: function(name, showDetail){
+	list: function(name, showDetails){
 		var xml = <></>;
 		var plugins = getPlugins();
 		if (name){
 			let plugin = plugins.filter(function(plugin) plugin.name == name)[0];
 			if (plugin){
-				xml = itemFormater(plugin, showDetail);
+				xml = itemFormater(plugin, showDetails);
 			}
 		} else {
-			plugins.forEach(function(plugin) xml += itemFormater(plugin, showDetail));
+			plugins.forEach(function(plugin) xml += itemFormater(plugin, showDetails));
 		}
 		liberator.echo(xml, true);
 	}
