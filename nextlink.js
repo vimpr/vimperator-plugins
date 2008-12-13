@@ -390,12 +390,12 @@ liberator.plugins.nextlink = (function() {
             $U.getNodesFromXPath(cache.xpath, doc, function(item) elem = item, this);
 
             var nextURL = $U.pathToURL(elem, doc);
-            var xpath = ['a', 'link'].map(function(e) '//' + e + '[translate(normalize-space(@rel), "EPRV", "eprv")="prev"]')
+            var xpath = ['a', 'link'].map(function(e) 
+                                     '//' + e + '[translate(normalize-space(@rel), "PREV", "prev")="prev"]')
                                      .join(' | ');
             var prev = $U.getNodesFromXPath(xpath, doc);
-            if (prev.length) {
+            if (prev.length)
                 context.setCache(url, 'prev', prev[0]);
-            }
             context.setCache(nextURL, 'prev', url);
             context.setCache(url, 'next', elem);
         },
