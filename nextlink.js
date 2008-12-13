@@ -169,9 +169,9 @@ liberator.plugins.nextlink = (function() {
 
             if (!this.cache[key]) this.cache[key] = {};
             values = [].concat(values);
-            [].concat(subKeys).forEach(function(subKey, i) {
+            [].concat(subKeys).forEach($U.bind(this, function(subKey, i) {
                 this.cache[key][subKey] = values[i];
-            });
+            }));
         }
     };//}}}
 
