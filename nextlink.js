@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -22,7 +22,6 @@ let g:nextlink_followlink = "true"
   autocmd によって呼び出されます。
 
 == TODO ==
-- microformats prev 対応.
 - document cache clear.
   ]]></detail>
 </VimperatorPlugin>;
@@ -127,8 +126,8 @@ liberator.plugins.nextlink = (function() {
             for (let i = 0, len = this.siteinfo.length; i < len; i++) {
                 if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != '^https?://.') {
                     this.setCache(url,
-                            ['doc', 'xpath', 'siteinfo'],
-                            [window.content.document, this.siteinfo[i].nextLink, this.siteinfo[i]]
+                        ['doc', 'xpath', 'siteinfo'],
+                        [window.content.document, this.siteinfo[i].nextLink, this.siteinfo[i]]
                     );
                     this.onLocationChange(url, true);
                     return;
@@ -210,8 +209,7 @@ liberator.plugins.nextlink = (function() {
                     lastPageElement = $U.getNodesFromXPath(cache.siteinfo.pageElement, doc).pop();
                     if (lastPageElement)
                         insertPoint = lastPageElement.nextSibling ||
-                                      lastPageElement.parentNode.appendChild(doc.createTextNode(' '))
-
+                                      lastPageElement.parentNode.appendChild(doc.createTextNode(' '));
 
                 if (context.isNew) {
                     let css = $U.xmlToDom(pageNaviCss, doc);
@@ -337,7 +335,6 @@ liberator.plugins.nextlink = (function() {
                 insertParent.insertBefore(tr, cache.insertPoint);
             } else if (tagName == 'li') {
                 let li = doc.createElementNS(HTML_NAMESPACE, 'li');
-                li.id = 'vimp' + cache.curPage;
                 cache.insertPoint.parentNode.insertBefore(li, cache.insertPoint);
                 li.appendChild(p);
             } else {
