@@ -240,10 +240,13 @@ var PLUGIN_INFO =
     let m;
     function sign (s, v)
       (s == '-' ? -v : v);
-    if (m = code.match(/^([-+])?(\d+):(\d+)$/))
-      return sign(m[1], parseInt(m[2]) * 60 + parseInt(m[3]));
-    if (m = code.match(/^([-+])?(\d+.\d+)$/))
-      return sign(m[1], parseFloat(m[2]) * 60);
+    if (typeof code != 'number') {
+      code = code.toString();
+      if (m = code.match(/^([-+])?(\d+):(\d+)$/))
+        return sign(m[1], parseInt(m[2]) * 60 + parseInt(m[3]));
+      if (m = code.match(/^([-+])?(\d+.\d+)$/))
+        return sign(m[1], parseFloat(m[2]) * 60);
+    }
     return parseInt(code);
   }
 
