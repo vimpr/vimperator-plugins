@@ -1,49 +1,49 @@
-/**
- * ==VimperatorPlugin==
- * @name       local key mode
- * @description  assign temporary usermodemap
- * @description-ja 一時的なキーマップの割り当てを行います。
- * @version    0.2.1a
- * ==/VimperatorPlugin==
- *
- * Usage:
- *
- * :togglelocalkeymode    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
- * :loadkeymaps           - 任意のキーマップの読み込みを行う
- * :clearkeymaps          - loadkeymaps の読み込みを無効にする
- *
- * .vimperatorrc
- * g:localkeymode_enable : [true=有効/false=無効(デフォルト)]
- *
- *  .vimperatorrrc 設定例:
- *   let g:localkeymode_enable = "true"
- *   javascript <<EOM
- *   //[ [url regexp, [ [removekeys], [key, command/function, {noremap:true, count: true, ...}], ... ]], ... ]
- *   liberator.globalVariables.localKeyMappings=
- *   [
- *     [/www\.nicovideo\.jp\/watch/, [
- *       ['p', ':nicopause'],
- *       ['m', ':nicomute'],
- *       ['v', ':nicommentvisible'],
- *       ['s', ':nicoseek! +10'],
- *       ['S', ':nicoseek! -10'],
- *       ['z', ':nicosize ', true],
- *       ['c', ':nicomment ', true],
- *       ['C', ':nicommand ', true],
- *       ['t', function() {alert('test');}],
- *     ]],
- *     [/www\.hoge\.com/, [
- *       ['h l'],                  // 一時的に削除するキーマップ(スペース区切)
- *       [['1','0'], ':open http://www.google.com'],
- *       ['e', '<C-v>?', {noremap:true}],
- *       ['q', 'd', {noremap:true}],
- *     ],
- *   ];
- *  EOM
- *
- *  備考:
- *   *
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>localkeymode</name>
+  <description>assign temporary keymap</description>
+  <description lang="ja">一時的なキーマップの割り当て</description>
+  <version>0.2.1b</version>
+  <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <detail><![CDATA[
+Usage:
+
+:togglelocalkeymode    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+:loadkeymaps           - 任意のキーマップの読み込みを行う
+:clearkeymaps          - loadkeymaps の読み込みを無効にする
+
+.vimperatorrc:
+g:localkeymode_enable : [true=有効/false=無効(デフォルト)]
+
+.vimperatorrrc 設定例:
+let g:localkeymode_enable = "true"
+javascript <<EOM
+//[ [url regexp, [ [removekeys], [key, command/function, {noremap:true, count: true, ...}], ... ]], ... ]
+liberator.globalVariables.localKeyMappings=
+[
+  [ Url_RegExp, 
+    [ key, command/function, {extra} ],
+    [...]
+  ],
+  [/www\.hoge\.com/, [
+    ['h l'],                  // 一時的に削除するキーマップ(スペース区切で指定)
+    [['1','0'], ':open http://www.google.com'],
+    ['e', '<C-v>?', {noremap:true}],
+    ['q', 'd', {noremap:true}],
+  ],
+];
+EOM
+
+Url_RegExp       : 設定を有効にしたいURL(正規表現での指定)
+key              : 割り当てたいキー名(Arrayで複数指定可能)
+command/function : キーに割り当てたいコマンド/メソッド。
+                   コマンドは ':hoge' のように先頭に':'を付加してください。
+extra            : noremap, count 等の指定。addUserMap にて使用されます。
+  ]]></detail>
+</VimperatorPlugin>;
+
 liberator.plugins.LocalKeyMode = (function() {
 
   // アイコン定義
@@ -197,7 +197,7 @@ liberator.plugins.LocalKeyMode = (function() {
       keymaps.removekeys.forEach( function( key ) {
         var org = mappings.get( modes.NORMAL, key);
         if (org) self.storekeymaps.push( cloneMap(org, [key]) );
-        self.helpstring += key+'    -> [Delete KeyMap]\n';
+        self.helpstring += key+'    -> [Delete KeyMap]<br/>\n';
         mappings.remove( modes.NORMAL, key);
       } );
       keymaps.keys.forEach( function( m ) {
@@ -208,7 +208,7 @@ liberator.plugins.LocalKeyMode = (function() {
         } );
         mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action,
           {flags:m.flags, rhs:m.rhs, noremap:m.noremap });
-        self.helpstring += m.names+'    -> '+m.rhs+'\n';
+        self.helpstring += m.names+'    -> '+m.rhs+'<br/>\n';
       } );
       this.isBinding = true;
     },

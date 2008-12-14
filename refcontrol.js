@@ -1,42 +1,38 @@
-/**
- * ==VimperatorPlugin==
- * @name           refcontrol
- * @description    control referrer
- * @description-ja リファラー制御
- * @version        0.1.0
- * ==/VimperatorPlugin==
- *
- * Usage:
- *
- * :togglerefcontrol    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
- * :addref              - リファラー設定追加(再起動すると消えます)
- *
- * .vimperatorrc
- * g:localkeymode_enable : [true=有効/false=無効(デフォルト)]
- *
- *  .vimperatorrrc 設定例:
- * let g:refcontrol_enabled = "true"
- * javascript <<EOM
- * liberator.globalVariables.refcontrol={
- *  '@DEFAULT'   : '@FORGE',
- *  'tumblr.com' : '@FORGE',
- *  'del.icio.us': '@NORMAL',
- * //domain       : param,
- * };
- * EOM
- *
- * domain>
- *  '@DEFAULT' はデフォルト設定を指します。
- *
- * param>
- *  @NORMAL : 通常の動作です。
- *  @FORGE  : ドメインのルートをリファラにセットします。
- *  ''      : リファラーを送信しません
- *  url     : 指定したURLでリファラーを送信します。
- *
- *  備考:
- *
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>refcontrol</name>
+  <description>control referrer</description>
+  <description lang="ja">リファラー制御</description>
+  <version>0.1.0a</version>
+  <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <detail><![CDATA[
+:togglerefcontrol    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+:addref              - リファラー設定追加(再起動すると消えます)
+
+ .vimperatorrrc 設定例:
+let g:refcontrol_enabled = "true"
+javascript <<EOM
+liberator.globalVariables.refcontrol={
+ [domain]     : [param],
+ '@DEFAULT'   : '@FORGE',
+ 'tumblr.com' : '@FORGE',
+ 'del.icio.us': '@NORMAL',
+};
+EOM
+
+domain:
+ '@DEFAULT' はデフォルト設定を指します。
+
+param:
+ @NORMAL : 通常の動作です。
+ @FORGE  : ドメインのルートをリファラにセットします。
+ ''      : リファラーを送信しません
+ url     : 指定したURLでリファラーを送信します。
+  ]]></detail>
+</VimperatorPlugin>;
+
 liberator.plugins.RefControl = (function() {
 
 const Cc = Components.classes;
@@ -44,15 +40,15 @@ const Ci = Components.interfaces;
 
 const ENABLE_ICON = 'data:image/png;base64,'
       + 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMA/wAAAP+JwC+QAAAB'
-      + 't0lEQVR4nI1RTWsTURQ9d96bTJpMW8bY0pEspB80IBJtQzctkpWI4KrgHxAFQXDlxh8gKBTc'
-      + 'uHXRje78Af6AoqCCVSjBfi9MGakyJiZ5X9dFFZPpIl7O5r17zj3vnkcMlkFhbvX29LWbU5eX'
-      + 'hO9jsNjZo80Pe69fbb14pto/JJE3e/1O7f7jcCwvPIAzfJAQ5WqtNFu1lrx1X4xPX7x0d22y'
-      + 'POU0XA9WDcBpWAVY5ITITVSSTxsyiOJCKTYK7LKz/5kQLGG0NBlEsSSSYGkU+NRjMmUMeX5e'
-      + 'Omaj2eghbABGMzNLZjba6f8UOJYAWct2mIAZ1sAxpNXt7q+fQb5I5P3dMcMFwMxOKWW6qew0'
-      + 'd1rHh+MTsemaP79ARCAQgZnBJ2mIQKTJbqe543WSw8bzB0myz5F0YeDCwAXSglWvp7TW2tq8'
-      + 'jzO54/Sosf6wdfCZGAxgdKYWziyG5xdAVCzPR5WVEc+adi/99vX77tvW9pvW9vu0scHsTiwH'
-      + 'QMKPFm9Un3ysv9RLT7+MVer9XXk6EGcV3qHQvHC2fiu+eq8wt4ytgQyyDv0I56+cW33UfzNE'
-      + 'wGBRjPqPvwHSQByM8Fg+IQAAAABJRU5ErkJggg==';
+      + 'qklEQVR4nI1RPWgUYRSct/stexc3xvX8udV4BhPUiI1RUsnVglgJCh52aaxs0llrpZVNWhVr'
+      + 'wdZCFGwsohCRJKAmqLnoheDd5X52v2+/sUiEzfoTh6mGmfeY94RgVK3tGd537MKV8plJ1/Ow'
+      + 'HbTpt7k3S8+eNBaX6i8fS7l6bWL60d6DSbC74DoAc36IICV6Hf39qzt797rqfZnjj8Xg6Enb'
+      + 'h7Ug824A4qCoPM+s6PVl5YfRQCkyCWjzs7ctEQyWDvhhpEQUqEySn/07jBHHKyhLGk2jd3AD'
+      + 'MJokFUmjrf7PgKUCJE2Z7hQgkRpYQqW60++2/cIuEedXx5wXAEmbJInpt5QfDm+sfx7aH5m+'
+      + '2fqCiEAgApLg5jVc3201PvVWPwrBofHzp6cfhpURagcAjEVs0kRDBBAn8N0BadZX3t+/sfb6'
+      + 'qRAEMDh6Lhg9G4xMQOT4xaluzKKTmk7cWquXxsbeztzc+DDbXHgFYCuQRVStxZ125ertsDLe'
+      + 'XV2en5lqzj/PVuIfWTx86kjt3uSDuHzpVlb/a2CTwYnqoct3soqDf6K98MI23mWVn59g+pcs'
+      + 'KKOSAAAAAElFTkSuQmCC';
 
 const DISABLE_ICON = 'data:image/png;base64,'
       + 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMA/wAAAP+JwC+QAAAB'
