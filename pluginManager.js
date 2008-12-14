@@ -7,9 +7,10 @@ var PLUGIN_INFO =
 <version>0.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
-<detail><![CDATA[
+<detail lang="ja"><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
 == Command ==
+
 :plugin[help] [pluginName] [-v]:
     {pluginName}を入れるとそのプラグインの詳細を表示します。
     省略すると全てのプラグインの詳細を表示します。
@@ -164,7 +165,7 @@ function getPlugins(){
         if (info){
             for (let tag in tags){
                 let value = tags[tag](info);
-                if (value.toString().length > 0)
+                if (value && value.toString().length > 0)
                     plugin.push([tag, value]);
             }
         }
@@ -183,6 +184,7 @@ function WikiParser(text){
     this.mode = '';
     this.lines = text.split(/\n\r|[\r\n]/);
     this.preCount = 0;
+    this.pendingMode = '';
     this.xmlstack = new HTMLStack();
 }
 WikiParser.prototype = {
@@ -223,6 +225,7 @@ WikiParser.prototype = {
             return <>{line}</>;
         } else if (this.wikiReg.preStart.test(line)){
             this.mode = 'pre';
+            this.pendingMode = prevMode;
             return <pre/>;
         } else if (this.wikiReg.hn.test(line)){
             var hn = RegExp.$1.length - 1;
@@ -263,8 +266,7 @@ WikiParser.prototype = {
                     this.xmlstack.appendLastChild(indent.substr(prevIndent) + line + "\n");
                 } else {
                     this.xmlstack.reorg(-2);
-                    this.mode = this.xmlstack.lastLocalName;
-                    if (this.mode == 'pre') this.mode = '';
+                    this.mode = this.pendingMode;
                     indentList.pop();
                     if (indentList.length == 0) indentList = [0];
                 }
@@ -284,7 +286,7 @@ WikiParser.prototype = {
                     this.xmlstack.push(bufXML);
                     indentList.push(currentIndent);
                 } else {
-                    if (this.xmlstack.length > 0){
+                    if (prevMode && this.xmlstack.length > 0){
                         this.xmlstack.appendLastChild(bufXML);
                     } else {
                         this.xmlstack.append(bufXML);
@@ -425,4 +427,4 @@ var public = {
 };
 return public;
 })();
-// vim: sw=4 ts=4 fdm=marker:
+// vim: sw=4 ts=4 et fdm=marker:
