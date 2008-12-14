@@ -64,16 +64,16 @@ liberator.plugins.LocalKeyMode = (function() {
 
   var _isEnable;
   var _isBindLocalKey = false;
-  
+
   var _enableTabs = [];
   var _names;
   
   var feedKeys = liberator.modules ? liberator.modules.events.feedkeys
                                    : liberator.events.feedkeys;
   // utility function
-  function cloneMap(org) {
+  function cloneMap(org, key) {
     return new Map(
-      org.modes, org.names, org.description, org.action,
+      org.modes, key ? key : org.names, org.description, org.action,
       {flags:org.flags, rhs:org.rhs, noremap:org.noremap }
     );
   }
@@ -102,7 +102,12 @@ liberator.plugins.LocalKeyMode = (function() {
     // ステータスバーにアイコンを生成
     setupStatusBar: function() {
       var self = this;
-      var panel = document.createElement('statusbarpanel');
+      var panel = document.getElementById('localkeymode-status');
+      if (panel) {
+        let parent = panel.parentNode;
+        parent.removeChild(panel);
+      }
+      panel = document.createElement('statusbarpanel');
       panel.setAttribute('id', 'localkeymode-status');
       panel.setAttribute('class', 'statusbarpanel-iconic');
       panel.setAttribute('src', self.isEnable ? ENABLE_ICON : DISABLE_ICON);
@@ -111,17 +116,13 @@ liberator.plugins.LocalKeyMode = (function() {
         panel, document.getElementById('security-button').nextSibling);
       return panel;
     },
-    get isEnable() {
-      return _isEnable;
-    },
+    get isEnable() _isEnable,
     set isEnable(value) {
       this.panel.setAttribute('src', value ? ENABLE_ICON : DISABLE_ICON);
       _isEnable = value;
       this.loadKeyMap();
     },
-    get isBinding() {
-      return _isBindLocalKey;
-    },
+    get isBinding() _isBindLocalKey,
     set isBinding(value) {
       this.panel.setAttribute('src', value ? BINDING_ICON :
         this.isEnable ? ENABLE_ICON : DISABLE_ICON );
@@ -133,14 +134,17 @@ liberator.plugins.LocalKeyMode = (function() {
       var list = liberator.globalVariables.localKeyMappings;
       if (!list) return;
       var self = this;
+      // キーマップの生成
       list.forEach( function( items ) {
         if ( !(items instanceof Array) || items.length < 2 || !(items[1] instanceof Array) ) return;
         self.addLocalKeyMap( items[0], items[1] );
       } );
+      // 補完用アイテムの抽出
       this.completeNames = this.keymapnames.map( function(m) {
         m = (m+'').replace(/[\/\\]+/g, '');
         return [m+'', 'maps for [' + m + ']'];
       } );
+      autocommands.add('LocationChange', '.*', 'js liberator.plugins.LocalKeyMode.loadKeyMap();');
     },
     // ローカルキーマップの生成
     addLocalKeyMap: function( uri, items ) {
@@ -149,28 +153,24 @@ liberator.plugins.LocalKeyMode = (function() {
       var delkeys = [];
       if (!(uri instanceof RegExp) ) uri = new RegExp(uri.replace(/(?=[^-0-9A-Za-z_@])/g, '\\'));
       
-      for (let i=0; i<items.length; i++) {
-        var item = items[i];
-        if (item.length < 1 || !item[0]) continue;
-        if (item.length < 2) {
-          delkeys = delkeys.concat( item[0].split(' ') );
-          continue;
+      items.forEach( function( [key, command, extra] ){
+        if (!key) return;
+        else if (!command) delkeys = delkeys.concat( key.split(' '));
+        else {
+          key = key instanceof Array ? key : [key];
+          extra = extra ? extra : new Object();
+          if (!extra || !extra.rhs) extra.rhs = (command+'').replace(rhsRegExp, ' ');
+          if (typeof command != 'function'){
+            let cmdName = command;
+            if (command.charAt(0) == ':')
+            command = extra.noremap ? function () commandline.open("", cmdName, modex.EX)
+                                    : function () liberator.execute(cmdName);
+            else
+              command = function () feedKeys( command, extra.noremap, true);
+          }
+          keymaps.push( new Map([modes.NORMAL], key, 'localkeymap', command, extra) );
         }
-        var key = item[0] instanceof Array ? item[0] : [ item[0] ];
-        var command = item[1];
-        var extra = item[2] ? item[2]:new Object();
-        if (!extra || !extra.rhs) extra.rhs = (item[1]+'').replace(rhsRegExp, ' ');
-        
-        if (typeof command != 'function') {
-          let commandName = command;
-          if (command.charAt(0) == ':')
-            command = extra.noremap ? function () commandline.open("", commandName, modes.EX)
-                                    : function () liberator.execute(commandName);
-          else
-            command = function () feedKeys(command, extra.noremap, true);
-        }
-        keymaps.push(new Map([modes.NORMAL], key, 'localkeymap', command, extra) );
-      }
+      });
       this.keymapnames.push( uri );
       this.localkeymaps.push( { keys:keymaps, removekeys:delkeys } );
     },
@@ -196,14 +196,14 @@ liberator.plugins.LocalKeyMode = (function() {
       var self = this;
       keymaps.removekeys.forEach( function( key ) {
         var org = mappings.get( modes.NORMAL, key);
-        if (org) self.storekeymaps.push( cloneMap(org) );
+        if (org) self.storekeymaps.push( cloneMap(org, [key]) );
         self.helpstring += key+'    -> [Delete KeyMap]\n';
         mappings.remove( modes.NORMAL, key);
       } );
       keymaps.keys.forEach( function( m ) {
         m.names.forEach( function( key ) {
           var org = mappings.get(modes.NORMAL, key);
-          if (org) self.storekeymaps.push( cloneMap(org) );
+          if (org) self.storekeymaps.push( cloneMap(org, [key]) );
           else self.delkeychars.push( key );
         } );
         mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action,
@@ -224,8 +224,9 @@ liberator.plugins.LocalKeyMode = (function() {
     },
     // ローカルキーマップセット処理
     loadKeyMap: function() {
+      var self = this;
       // 暫定処置
-      if (liberator.plugins.feedKey && liberator.plugins.feedKey.origMap.length >0) return;
+      //if (liberator.plugins.feedKey && liberator.plugins.feedKey.origMap.length >0) return;
       this.helpstring = '';
       if (this.isBinding) this.restoreKeyMap();
       if (!this.isEnable) {
@@ -258,6 +259,7 @@ liberator.plugins.LocalKeyMode = (function() {
     // 割り当てていたローカルキーの削除処理
     restoreKeyMap: function() {
       if (this.isBinding) {
+        var msg = "";
         for (; 0 < this.storekeymaps.length; ) {
           let m = this.storekeymaps.shift();
           mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action,
@@ -323,5 +325,3 @@ liberator.plugins.LocalKeyMode = (function() {
   
   return new LocalKeyMode();
 })();
-
-autocommands.add('LocationChange', '.*', 'js liberator.plugins.LocalKeyMode.loadKeyMap();');
