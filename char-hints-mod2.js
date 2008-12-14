@@ -55,14 +55,18 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
 
         return chars;
     } //}}}
-    function showCharHints() //{{{
+    function showCharHints(win) //{{{
     {
-        for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", window.content.document))
+
+        if (!win)
+            win = window.content;
+        for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))
         {
             let num = elem.getAttribute("number");
             let hintchar = num2chars(parseInt(num, 10));
             elem.setAttribute("hintchar", hintchar);
         }
+        Array.forEach(win.frames, showCharHints);
     } //}}}
 
     var hintContext = hints.addMode;
