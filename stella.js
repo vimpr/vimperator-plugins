@@ -73,9 +73,20 @@ var PLUGIN_INFO =
 </VimperatorPlugin>;
 
 // TODO
-//    Icons
-//    Other video hosting websites
-//    auto fullscreen
+//    ・Icons
+//    ・Other video hosting websites
+//    ・auto fullscreen
+//    ・動的な command の追加削除 (nice rabbit!)
+//    ・ツールチップみたいな物で、マウスオー馬したときに動画情報を得られるようにしておく。
+//    ・外から呼ぶべきでない関数(プライベート)をわかりやすくしたい
+//    ・argCount の指定が適当なのを修正 (動的な userCommand と平行でうまくできそう？)
+//    ・実際のプレイヤーが表示されるまで待機できようにしたい(未表示に時にフルスクリーン化すると…)
+//    ・関連動画まわりがイマイチな仕様
+//
+// MEMO
+//    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
+//    ・関数やプロパティは基本的にアルファベット順にならべる。
+//
 //
 // Link:
 //    http://d.hatena.ne.jp/nokturnalmortum/
@@ -142,10 +153,43 @@ var PLUGIN_INFO =
     return true;
   }
 
+  function fixDoubleClick (obj, click, dblClick) {
+    let clicked = 0;
+    let original = {click: obj[click], dblClick: obj[dblClick]};
+    obj[click] = function () {
+      let self = this, args = arguments;
+      let _clicked = ++clicked;
+      setTimeout(function () {
+        if (_clicked == clicked--)
+          original.click.apply(self, args);
+        else
+          clicked = 0;
+      }, DOUBLE_CLICK_INTERVAL);
+    };
+    obj[dblClick] = function () {
+      clicked = 0;
+      original.dblClick.apply(this, arguments);
+    };
+  }
+
   function fixFilename (filename) {
     const badChars = /[\\\/:;*?"<>|]/g;
     return filename.replace(badChars, '_');
   }
+
+  // 上手い具合に秒数に直すよ
+  function fromTimeCode (code) {
+    var m;
+    if (m = /^(([-+]?)\d+):(\d+)$/(code))
+      return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
+    if (m = /^([-+]?\d+\.\d+)$/(code))
+      return Math.round(parseFloat(m[1], 10) * 60);
+    return parseInt(code, 10);
+  }
+
+  function getElementByIdEx (id)
+    let (p = content.document.getElementById(id))
+      (p && (p.wrappedJSObject || p));
 
   function httpRequest (uri, onComplete) {
     var xhr = new XMLHttpRequest();
@@ -183,12 +227,16 @@ var PLUGIN_INFO =
     return url;
   }
 
-  let raise = InVimperator ? function (error) {throw new Error(error)}
-                           : function (error) liberator.echoerr(error);
-
-  function toTimeCode(v)
-    (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
-              : '??:??');
+  function restoreStyle (target, doDelete) {
+    let style = target.style;
+    if (!style.__stella_backup)
+      return;
+    let backup = style.__stella_backup;
+    for (let name in Iterator(backup))
+      style[name] = backup[name];
+    if (doDelete)
+      delete style.__stella_backup;
+  }
 
   function storeStyle (target, values, overwrite) {
     let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
@@ -201,49 +249,12 @@ var PLUGIN_INFO =
       style.__stella_backup = backup;
   }
 
-  function restoreStyle (target, doDelete) {
-    let style = target.style;
-    if (!style.__stella_backup)
-      return;
-    let backup = style.__stella_backup;
-    for (let name in Iterator(backup))
-      style[name] = backup[name];
-    if (doDelete)
-      delete style.__stella_backup;
-  }
+  function toTimeCode(v)
+    (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
+              : '??:??');
 
-  function getElementByIdEx (id)
-    let (p = content.document.getElementById(id))
-      (p && (p.wrappedJSObject || p));
-
-  function fixDoubleClick (obj, click, dblClick) {
-    let clicked = 0;
-    let original = {click: obj[click], dblClick: obj[dblClick]};
-    obj[click] = function () {
-      let self = this, args = arguments;
-      let _clicked = ++clicked;
-      setTimeout(function () {
-        if (_clicked == clicked--)
-          original.click.apply(self, args);
-        else
-          clicked = 0;
-      }, DOUBLE_CLICK_INTERVAL);
-    };
-    obj[dblClick] = function () {
-      clicked = 0;
-      original.dblClick.apply(this, arguments);
-    };
-  }
-
-  // 上手い具合に病数に直すよ
-  function fromTimeCode (code) {
-    var m;
-    if (m = /^(([-+]?)\d+):(\d+)$/(code))
-      return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
-    if (m = /^([-+]?\d+\.\d+)$/(code))
-      return Math.round(parseFloat(m[1], 10) * 60);
-    return parseInt(code, 10);
-  }
+  let raise = InVimperator ? function (error) {throw new Error(error)}
+                           : function (error) liberator.echoerr(error);
 
   // }}}
 
@@ -272,14 +283,14 @@ var PLUGIN_INFO =
       this.functions.large = this.functions.fullscreen;
   }
 
-  Player.ST_PLAYING = 'playing';
-  Player.ST_PAUSED  = 'paused';
   Player.ST_ENDED   = 'ended';
   Player.ST_OTHER   = 'other';
+  Player.ST_PAUSED  = 'paused';
+  Player.ST_PLAYING = 'playing';
 
-  Player.REL_TAG    = 'tag';
   Player.REL_ID     = 'id';
   Player.REL_SEARCH = 'search';
+  Player.REL_TAG    = 'tag';
   Player.REL_URL    = 'url';
 
   Player.RELATIONS = {
@@ -298,6 +309,7 @@ var PLUGIN_INFO =
       fileExtension: 'r',
       fileURL: '',
       fullscreen: '',
+      large: '',
       makeURL: '',
       muted: '',
       pause: '',
@@ -306,7 +318,6 @@ var PLUGIN_INFO =
       relatedIDs: '',
       relatedTags: '',
       repeating: '',
-      large: '',
       tags: '',
       title: '',
       totalTime: '',
@@ -548,7 +559,8 @@ var PLUGIN_INFO =
     Player.apply(this, arguments);
   }
 
-  // Normal / Fullscreen
+  // name, Normal, Fullscreen
+  // 任意の順で設定できるように配列で持つ
   NicoPlayer.Variables = [
     ['videowindow._xscale',                     100,   null],
     ['videowindow._yscale',                     100,   null],
@@ -564,8 +576,8 @@ var PLUGIN_INFO =
     ['videowindow.video_mc.video.deblocking',  null,      5]
   ];
 
-  NicoPlayer.SIZE_NORMAL = 'normal';
   NicoPlayer.SIZE_LARGE  = 'fit';
+  NicoPlayer.SIZE_NORMAL = 'normal';
 
   NicoPlayer.prototype = {
     __proto__: Player.prototype,
@@ -577,9 +589,9 @@ var PLUGIN_INFO =
       fileURL: '',
       fullscreen: 'rwt',
       id: 'r',
+      large: 'rwt',
       makeURL: 'x',
       muted: 'rwt',
-      large: 'rwt',
       pause: 'x',
       play: 'x',
       playEx: 'x',
@@ -1034,7 +1046,6 @@ var PLUGIN_INFO =
     createStatusPanel: function () {
       let self = this;
 
-      // FIXME
       function setEvents (name, elem) {
         ['click', 'popupshowing'].forEach(function (eventName) {
           let onEvent = self['on' + capitalize(name) + capitalize(eventName)];
