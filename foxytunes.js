@@ -3,7 +3,7 @@ var PLUGIN_INFO =
   <name>Foxy Tunes</name>
   <description>for FoxyTunes</description>
   <description lang="ja">for FoxyTunes</description>
-  <version>1.2</version>
+  <version>0.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -14,12 +14,16 @@ var PLUGIN_INFO =
     == Commands ==
     +:ftplay
     +:ftpause
+    +:ftnext
+    +:ftprevious
     +:ftvolume <VOLUME>
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Commands ==
     +:ftplay
     +:ftpause
+    +:ftnext
+    +:ftprevious
     +:ftvolume <VOLUME>
   ]]></detail>
 </VimperatorPlugin>;
@@ -41,9 +45,11 @@ var PLUGIN_INFO =
   let player = Components.classes['@foxytunes.org/FoxyTunesEngine/FoxyTunesService;1'].getService();
 
   // foxytunesDispatchPlayerCommand
-  ['Pause', 'Play'].forEach(function (name) {
+  ['Pause', 'Play', 'Next', 'Previous'].forEach(function (name) {
+    let ln = name.toLowerCase();
+    let lnm = ln.match(/(..)(.*)/);
     commands.addUserCommand(
-      ['ft' + name.toLowerCase()],
+      ['ft' + lnm[1] + '[' + lnm[2] + ']'],
       name + ' - FoxyTunes',
       function () foxytunesDispatchPlayerCommand(name, true),
       true
