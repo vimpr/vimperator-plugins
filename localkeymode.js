@@ -163,7 +163,7 @@ liberator.plugins.LocalKeyMode = (function() {
           if (typeof command != 'function'){
             let cmdName = command;
             if (command.charAt(0) == ':')
-            command = extra.noremap ? function () commandline.open("", cmdName, modex.EX)
+            command = extra.noremap ? function () commandline.open("", cmdName, modes.EX)
                                     : function () liberator.execute(cmdName);
             else
               command = function () feedKeys( command, extra.noremap, true);
