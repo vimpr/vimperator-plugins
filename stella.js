@@ -28,9 +28,9 @@ var PLUGIN_INFO =
       :stse[ek] <TIMECODE>:
         seek to specified position.
         TIMECODE formats
-          :stseek 1:30 # 1分30秒
-          :stseek 1.5  # 1.5分。90秒
-          :stseek 90   # 90秒
+          - :stseek 1:30 # 1分30秒
+          - :stseek 1.5  # 1.5分。90秒
+          - :stseek 90   # 90秒
       :stse[ek]! <TIMECODE>:
         seek to the specified position from current position at relatively.
       :stfe[tch]:
@@ -56,11 +56,11 @@ var PLUGIN_INFO =
       :stco[mment]:
         コメントのOn/Offを切り替える。
       :stse[ek] <TIMECODE>:
-        指定の秒数までシークスする。
+        指定の秒数までシークする。
         TIMECODE は以下の様に指定できる。
-          :stseek 1:30 # 1分30秒
-          :stseek 1.5  # 1.5分。90秒
-          :stseek 90   # 90秒
+          - :stseek 1:30 # 1分30秒
+          - :stseek 1.5  # 1.5分。90秒
+          - :stseek 90   # 90秒
       :stse[ek]! <TIMECODE>:
         現在の位置から TIMECODE 分移動する。
       :stfe[tch]:
@@ -69,6 +69,8 @@ var PLUGIN_INFO =
         画面を大きくする/戻す。
       :stfu[llscreen]:
         フルスクリーン表示のOn/Offを切り替える。
+    == Link ==
+      http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
 </VimperatorPlugin>;
 
@@ -86,10 +88,6 @@ var PLUGIN_INFO =
 // MEMO
 //    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
 //    ・関数やプロパティは基本的にアルファベット順にならべる。
-//
-//
-// Link:
-//    http://d.hatena.ne.jp/nokturnalmortum/
 //
 // Refs:
 //    http://yuichis.homeip.net/nicodai.user.html
@@ -360,22 +358,15 @@ var PLUGIN_INFO =
     get muted () undefined,
     set muted (value) value,
 
-    // [{name: ..., title: ...}, ...]
     get relatedIDs () undefined,
 
-    // [{type: ..., value: ...}, ...]
     get relations () {
       if (!this.has('relations', 'r'))
         return [];
       let result = [];
       for (let [type, name] in Iterator(Player.RELATIONS)) {
-        if (this.has(name, 'r')) {
-          try {
-            result = this[name].map(function (it) ({type: Player[type], value: it})).concat(result);
-          } catch (e) {
-            liberator.log(name);
-          }
-        }
+        if (this.has(name, 'r'))
+          result = result.concat(this[name]);
       }
       return result;
     },
@@ -445,6 +436,67 @@ var PLUGIN_INFO =
 
     turnUpDownVolume: function (v)
       this.volume = Math.min(Math.max(this.volume + parseInt(v), 0), this.maxVolume)
+  };
+
+  // }}}
+
+  /*********************************************************************************
+  * Relation                                                                     {{{
+  *********************************************************************************/
+
+  function Relation () {
+  }
+
+  Relation.prototype = {
+    get command () undefined,
+    get description () undefined,
+    get completionItem () ([this.command, this.description]),
+  };
+
+
+  // }}}
+
+  /*********************************************************************************
+  * Relation - Sub                                                               {{{
+  *********************************************************************************/
+
+  function RelatedTag (tag) {
+    this.tag = tag;
+    Relation.apply(this, arguments);
+  }
+
+  RelatedTag.prototype = {
+    __proto__: Relation.prototype,
+    get command () (':' + this.tag),
+    get description () (this.tag)
+  };
+
+
+
+  function RelatedID (id, title) {
+    this.id = id;
+    this.title = title;
+    Relation.apply(this, arguments);
+  }
+
+  RelatedID.prototype = {
+    __proto__: Relation.prototype,
+    get command () ('#' + this.id),
+    get description () this.title
+  };
+
+
+
+  function RelatedURL (url, title) {
+    this.url = url;
+    this.title = title;
+    Relation.apply(this, arguments);
+  }
+
+  RelatedURL.prototype = {
+    __proto__: Relation.prototype,
+    get command () this.url,
+    get description () this.title
   };
 
   // }}}
@@ -724,18 +776,14 @@ var PLUGIN_INFO =
         for each (let c in cs)
           if (c.nodeName != '#text')
             video[c.nodeName] = c.textContent;
-        videos.push({
-          title: video.title,
-          id: video.url.replace(/^.+?\/watch\//, ''),
-          raw: video
-        });
+        videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
       }
       return this.__rid_cache = videos;
     },
 
     get relatedTags() {
       let nodes = content.document.getElementsByClassName('nicopedia');
-      return [it.textContent for each (it in nodes) if (it.rel == 'tag')];
+      return [new RelatedTag(it.textContent) for each (it in nodes) if (it.rel == 'tag')];
     },
 
     get repeating () this.player.ext_isRepeat(),
@@ -743,7 +791,6 @@ var PLUGIN_INFO =
 
     get large () this.player.ext_getVideoSize() === NicoPlayer.SIZE_LARGE,
     set large (value) {
-        liberator.log(value);
         this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL)
         return this.large;
     },
@@ -1005,17 +1052,7 @@ var PLUGIN_INFO =
         'relations - Stella',
         function (args) {
           let arg = args.string;
-          let url = (function () {
-            if (self.player.has('makeURL', 'x')) {
-              if (arg.match(/^[#\uff03]/))
-                return self.player.makeURL(arg.slice(1), Player.REL_ID);
-              if (arg.match(/^[:\uff1a]/))
-                return self.player.makeURL(arg.slice(1), Player.REL_TAG);
-              if (arg.indexOf('http://') == -1)
-                return self.player.makeURL(encodeURIComponent(arg), Player.REL_TAG);
-            }
-            return arg;
-          })();
+          let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;
           liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         },
         {
@@ -1027,16 +1064,7 @@ var PLUGIN_INFO =
             if (!self.player.has('relations', 'r'))
               return;
             context.title = ['Tag/ID', 'Description'];
-            context.completions = self.player.relations.map(function (rel) {
-              switch (rel.type) {
-                case Player.REL_ID:
-                  return ['#' + rel.value.id, rel.value.title];
-                case Player.REL_TAG:
-                  return [':' + rel.value, 'Tag'];
-                case Player.REL_URL:
-                  return [rel.value.url, rel.value.title];
-              }
-            });
+            context.completions = self.player.relations.map(function (rel) rel.completionItem);
           },
         },
         true
@@ -1205,6 +1233,24 @@ var PLUGIN_INFO =
   };
 
   fixDoubleClick(Stella.prototype, 'onIconClick', 'onIconDblClick');
+
+  // }}}
+
+  /*********************************************************************************
+  * Functions                                                                    {{{
+  *********************************************************************************/
+
+  function makeRelationURL (player, command) {
+    if (player.has('makeURL', 'x'))
+      raise('Mysterious Error! makeURL has been not implmented.');
+    if (command.match(/^[#\uff03]/))
+      return player.makeURL(command.slice(1), Player.REL_ID);
+    if (command.match(/^[:\uff1a]/))
+      return player.makeURL(command.slice(1), Player.REL_TAG);
+    if (command.indexOf('http://') == -1)
+      return player.makeURL(encodeURIComponent(command), Player.REL_TAG);
+    return command;
+  }
 
   // }}}
 
