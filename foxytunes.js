@@ -1,8 +1,8 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Foxy Tunes</name>
-  <description>for Foxy Tunes</description>
-  <description lang="ja">for Foxy Tunes</description>
+  <description>for FoxyTunes</description>
+  <description lang="ja">for FoxyTunes</description>
   <version>1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
@@ -26,14 +26,14 @@ var PLUGIN_INFO =
 
 (function () {
 
-  // $B>e<j$$6q9g$KIB?t$KD>$9$h(B
+  // 上手い具合に病数に直すよ
   function fromTimeCode (code) {
     let m;
     function sign (s, v)
       (s == '-' ? -v : v);
     if (m = code.match(/^([-+])?(\d+):(\d+)$/))
       return sign(m[1], parseInt(m[2]) * 60 + parseInt(m[3]));
-    if (m = code.match(/^([-+])?(\d+.\d+)$/))
+    if (m = code.match(/^([-+])?(\d+\.\d+)$/))
       return sign(m[1], parseFloat(m[2]) * 60);
     return parseInt(code);
   }
@@ -70,7 +70,7 @@ var PLUGIN_INFO =
 })();
 
 /*
-  foxytunes $B$,(B window $B$K@_CV$9$k4X?t$N?t!9!D(B
+  FoxyTunes が window に設置する関数の数々…
   gFoxytunesYMPPageAnalyzer
   FoxyTunesHTMLTooltip
   FoxyTunesTooltipInfo
