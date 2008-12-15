@@ -1,11 +1,11 @@
 // PLUGIN_INFO//{{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-    <name>{name}</name>
+    <name>{NAME}</name>
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
 </VimperatorPlugin>;
@@ -24,7 +24,7 @@ var Growl = function() {//{{{
 };
 Growl.prototype = {
     defaults: {
-        life: 5000
+        life: 10000
     },
     initialize: function(dom, container, options) {
         this.dom = dom;
@@ -62,12 +62,13 @@ notifier.observer.register(notifier.Observer, {
         var doc = window.content.document;
         var container = doc.getElementById("observer_growl");
         if (!container) {
-            doc.body.appendChild(util.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
+            doc.body.appendChild($U.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
             container = doc.getElementById("observer_growl");
         }
 
         var notification = this.createPopup(message, doc, container);
         // TODO: animation!!!
+        var node = doc.importNode(notification, true);
         container.appendChild(notification);
 
         if (container.childNodes.length == 1) {
@@ -82,11 +83,17 @@ notifier.observer.register(notifier.Observer, {
         var html =
             <div class="observer_growl_notification" style="display: block;">
                 <div class="close">&#215;</div>
-                <div class="header">{new XMLList(this.count + ': ' + message.title)}</div>
+                <div class="header">{new XMLList(
+                    (message.link ? '<a href="' + message.link + '">' : '') +
+                    this.count + ': ' + message.title +
+                    (message.link ? '</a>' : '')
+                    )}</div>
                 <div class="message">{new XMLList(message.message || '')}</div>
             </div>;
-        dom = util.xmlToDom(html, doc, nodes);
-        dom.__data__ = new Growl(dom, nodes, message.options.growl);
+        dom = $U.xmlToDom(html, doc, nodes);
+        // TODO: get settings
+        var options = {};
+        dom.__data__ = new Growl(dom, nodes, {});
         return dom;
     },
     checkStatus: function() {

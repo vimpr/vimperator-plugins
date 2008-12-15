@@ -1,110 +1,113 @@
 // PLUGIN_INFO//{{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-    <name>{name}</name>
+    <name>{NAME}</name>
     <description>notice of change framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == NEEDS LIBLARY ==
-_libly.js(ver.0.1.4)
+- _libly.js(ver.0.1.9)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
-== Command ==
+== Commands ==
 :notifierstart:
-  変更通知をスタートします。
+    変更通知をスタートします。
 :notifierrestart:
-  変更通知をリスタートします。
+    変更通知をリスタートします。
 :notifierstop:
-  変更通知をストップします。
+    変更通知をストップします。
 
 == Observer ==
-* 通知された変更を扱うオブジェクトを定義します。
+=== 概要 ===
+通知された変更を扱うオブジェクトを定義します
 Subject からの Message オブジェクトを解析し、何らかの動作を行います。
 Observer ⇒ Subject への依存は高くて OK です。
 
-* 命名規約
-prefix に 'observer_' を付け、'rumtimepath/notifier' の下にインストールして下さい。
-ex.)'${rumtimepath}/notifier/observer_XXX.js'
+=== 命名規約 ===
+prefix に 'observer_' を付け、'rumtimepath/plugin/notifier' の下にインストールして下さい。
+e.g.)'${rumtimepath}/notifier/observer_XXX.js'
 
-* 登録方法
+=== 登録方法 ===
 liberator.plugins.notifier.observer.register(baseClass, extendsMethods)
 baseClass:
-  基底クラスとなります。現在以下の基底クラスが存在します。
-  - liberator.plugins.notifier.Observer
+    基底クラスとなります。現在以下の基底クラスが存在します。
+    - liberator.plugins.notifier.Observer
 extendsMethosd:
-  基底クラスの拡張となるメソッドをハッシュ形式で渡します。
-  実装するメソッドは基底クラスのルールに従って下さい。
+    基底クラスの拡張となるメソッドをハッシュ形式で渡します。
+    実装するメソッドは基底クラスのルールに従って下さい。
 
-* 基底クラスの説明
-** librator.plugins.notifier.Observer
+=== 基底クラスの説明 ===
+==== librator.plugins.notifier.Observer ====
 Observerの基本クラスです。
 initialize():
-  必要の無い場合、実装しなくても OK です。
-  インスタンス生成時に1度だけフレームワークによって呼び出されます。
-  初期化処理など必要な処理を実装して下さい。
+    必要の無い場合、実装しなくても OK です。
+    インスタンス生成時に1度だけフレームワークによって呼び出されます。
+    初期化処理など必要な処理を実装して下さい。
 update(liberator.plugins.notifier.Message):
-  必ず実装して下さい。
-  Subject からの変更通知がなされた場合、引数 Message と共にフレームワークより呼び出されます。
+    必ず実装して下さい。
+    Subject からの変更通知がなされた場合、引数 Message と共にフレームワークより呼び出されます。
 
 == Subject ==
-* 変更を検知し Observer に通知します。
+=== 概要 ===
+変更を検知し Observer に通知します。
 原則、observer との依存を少なくして下さい。
 (Message の解析の役割は Observer にある)
 
-* 命名規約
-prefix に 'subject_' を付け、'rumtimepath/notifier' の下にインストールして下さい。
-ex.)'${rumtimepath}/notifier/subject_XXX.js'
+=== 命名規約 ===
+prefix に 'subject_' を付け、'rumtimepath/plugin/notifier' の下にインストールして下さい。
+e.g.)'${rumtimepath}/notifier/subject_XXX.js'
 
-* 登録方法
+=== 登録方法 ===
 liberator.plugins.notifier.subject.register(baseClass, extendsMethods)
 baseClass:
-  基底クラスとなります。現在以下の基底クラスが存在します。
-  - liberator.plugins.notifier.Subject
-  - liberator.plugins.notifier.SubjectHttp
+    基底クラスとなります。現在以下の基底クラスが存在します。
+    - liberator.plugins.notifier.Subject
+    - liberator.plugins.notifier.SubjectHttp
 extendsMethosd:
-  基底クラスへの拡張をハッシュ形式で渡します。
+    基底クラスへの拡張をハッシュ形式で渡します。
 
-* 基底クラスの説明
-** librator.plugins.notifier.Subject
+=== 基底クラスの説明 ===
+==== librator.plugins.notifier.Subject ====
 Subject の基本クラスです。
 interval:
-  秒で変更チェックするインターバルを指定します。デフォルトは 60 です。
+    秒で変更チェックするインターバルを指定します。デフォルトは 60 です。
 initialize():
-  必要の無い場合、実装しなくても OK です。
-  インスタンス生成時に1度だけフレームワークによって呼び出されます。
-  初期化処理など必要な処理を実装して下さい。
+    必要の無い場合、実装しなくても OK です。
+    インスタンス生成時に1度だけフレームワークによって呼び出されます。
+    初期化処理など必要な処理を実装して下さい。
 check():
-  必ず実装して下さい。
-  指定したインターバルごとにフレームワークによって呼び出されます。
-  変更を検知した場合、liberator.plugins.notifier.Message のインスタンスを引数に
-  this.notify(message) を呼び出してください。
+    必ず実装して下さい。
+    指定したインターバルごとにフレームワークによって呼び出されます。
+    変更を検知した場合、liberator.plugins.notifier.Message のインスタンスを引数に
+    this.notify(message) を呼び出してください。
 
-** librator.plugins.notifier.SubjectHttp
+==== librator.plugins.notifier.SubjectHttp ====
 Httpを利用した変更検知の基底クラスです。
 リクエスト内容をキャッシュします。
 options{}:
-  url:
-    URL を指定します。
-  headers{}:
-    リクエストに header が必要な場合ハッシュで指定します。
-  extra{}:
-    リクエストのオプションです。ハッシュで指定します。
-    以下の key が有効です。
-    asynchronose (false), encoding(default utf-8)
+    url:
+        URL を指定します。
+    headers{}:
+        リクエストに header が必要な場合ハッシュで指定します。
+    extra{}:
+        リクエストのオプションです。ハッシュで指定します。
+        以下の key が有効です。
+        asynchronous (false), encoding(default utf-8)
 parse(liberator.pluginsnotifier.Request):
-  必ず実装して下さい。
-  リクエストを解析した結果を返却して下さい。
+    必ず実装して下さい。
+    リクエストを解析した結果を返却して下さい。
 diff(cache, parsed):
-  必ず実装して下さい。
-  this.parse() による解析結果と、そのキャッシュとの差分を抽出して返却して下さい。
+    必要の無い場合、実装しなくても OK です。
+    デフォルトの実装は cache を返却します。
+    this.parse() による解析結果と、そのキャッシュとの差分を抽出して返却して下さい。
 buildMessages(diff):
-  必ず実装して下さい。
-  this.diff() により抽出されたオブジェクトを元に、liberator.plugins.notifier.Message のインスタンス、
-  または、その配列を返却して下さい。
+    必ず実装して下さい。
+    this.diff() により抽出されたオブジェクトを元に、liberator.plugins.notifier.Message のインスタンス、
+    または、その配列を返却して下さい。
   ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -167,12 +170,13 @@ function bootstrap() {
         this.initialize.apply(this, arguments);
     };
     Message.prototype = {
-        initialize: function(title, message, options) {
+        initialize: function(title, message, link, options) {
             try {
                 if (typeof title == 'undefined' || title == null) throw 'title is undefined.';
                 if (typeof message == 'undefined' || message == null) throw 'message is undefined.';
                 this.title = title;
                 this.message = message;
+                this.link = link;
                 this.options = options;
             } catch (e) {
                 logger.log('Message.initialize error: ' + e);
@@ -232,7 +236,7 @@ function bootstrap() {
             var req = new libly.Request(
                 this.options.url,
                 this.options.headers,
-                this.options.extra
+                $U.extend({ asynchronous: true }, this.options.extra)
             );
             req.addEventListener('onSuccess', $U.bind(this, function(res) {
                 logger.log('initialized');
@@ -249,7 +253,7 @@ function bootstrap() {
             var req = new libly.Request(
                 this.options.url,
                 this.options.headers,
-                this.options.extra
+                $U.extend({ asynchronous: false }, this.options.extra)
             );
             req.addEventListener('onSuccess', $U.bind(this, function(res) {
                 var parsed, diff;
@@ -258,7 +262,7 @@ function bootstrap() {
                 if (diff && (typeof diff.length != 'undefined' && diff.length > 0)) {
                     this.cache = parsed;
                     if (typeof this.buildMessages == 'function') {
-                        let messages = this.buildMessages([].concat(diff));
+                        let messages = this.buildMessages(diff);
                         [].concat(messages).forEach($U.bind(this, function(m) {
                             this.notify(m);
                             liberator.sleep(1500);
@@ -267,7 +271,8 @@ function bootstrap() {
                 }
             }));
             req.get();
-        }
+        },
+        diff: function(cache, parsed) cache
     });//}}}
 
     var Notifier = function() {//{{{
@@ -337,11 +342,11 @@ function bootstrap() {
                     liberator.dump('window:' + window.content.window);
                     this.subjects.getPlugins().forEach(function(s) {
                         let now = new Date();
-                        if (!s.__nextTime) s.nexttime = now;
+                        if (!s.__nextTime) s.__nextTime = now;
                         if (s.interval > 0 && !s.isActive && s.__nextTime <= now) {
+                            s.isActive = true;
                             setTimeout(function() {
                                 let start = (new Date()).getTime();
-                                s.isActive = true;
                                 if (typeof s.check == 'function')
                                     try { s.check(); } catch (e) { logger.log('subject.check error: ' + e) }
                                 let stop = (new Date()).getTime();
