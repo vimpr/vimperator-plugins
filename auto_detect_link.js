@@ -1,76 +1,84 @@
-// ==VimperatorPlugin==
-// @name           Auto Detect Link
-// @description-ja (次|前)っぽいページへのリンクを探してジャンプ
-// @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.6
-// @author         anekos (anekos@snca.net)
-// ==/VimperatorPlugin==
-//
-//  Usage:
-//    デフォルトの設定では、"]]" "[[" を上書きします。
-//    ]]    次っぽいページへ
-//    [[    前っぽいページへ
-//
-//  Setting:
-//    liberator.globalVariables.autoDetectLink
-//      nextPatterns:
-//      backPatterns:
-//        (次|前)のパターンの配列。
-//        要素は、
-//          ・リンク文字列に対する(正規表現|文字列)
-//          ・リンクに対する関数のリスト
-//      nextMappings:
-//      backPatterns:
-//        (次|前)移動のマッピング(Array)
-//      useNextHistory:
-//      useBackHistory:
-//        履歴を併用。
-//        履歴がある場合はそっちを優先します。
-//      useSuccPattern:
-//        doc_01.html のときは、 doc_02.html を次と見なす…ようなパターン。
-//        ファイル名に当たる部分の、数字列あるいは一文字のアルファベットが対象です。
-//        (つながっているアルファベットは無視されます。)
-//          doc_02.html => doc_03.html
-//          doc_a.html => doc_b.html
-//      force:
-//        (次|前)っぽいURIを捏造してそこに移動します。
-//      useAutoPagerize:
-//        AutoPagerize のキャッシュを利用します。
-//        (ただし、"次" へのリンクにしか使われません)
-//
-//    example:
-//      :js liberator.globalVariables.autoDetectLink = {nextPatterns: [/next/, /次/]}
-//
-//  Function:
-//    (次|前)へのリンクを検出する。
-//    liberator.plugins.autoDetectLink.detect(next, setting)
-//      next:     次のリンクを探すときは、true。
-//      setting:  設定を一時的に上書きする。省略可。
-//      return:   リンクのURIなどを含んだオブジェクト
-//        uri:     アドレス。
-//        text:    リンクテキストなど
-//        frame:   リンクの存在するフレームの Window オブジェクト
-//        element: リンクの要素
-//
-//    (次|前)へのリンクに移動。
-//    liberator.plugins.autoDetectLink.go(next, setting)
-//      引数は detect と同じ。
-//
-//    example:
-//      履歴を使用しないで、前のリンクを探す。
-//        liberator.plugins.autoDetectLink.detect(false, {useBackHistory: false});
-//
-// Note:
-//    単純なリンクと、フォームのボタンを検出できます。
-//
-// License:
-//    http://creativecommons.org/licenses/by-sa/2.1/jp/
-//    http://creativecommons.org/licenses/by-sa/2.1/jp/deed
-//
-// TODO:
-//    input / form
-//    history
-//    id っぽいのを無視する
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>Auto Detect Link</name>
+  <description>Find (next|previous) link, and jump.</description>
+  <description lang="ja">(次|前)っぽいページへのリンクを探してジャンプ</description>
+  <version>1.8</version>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <license document="http://creativecommons.org/licenses/by-sa/3.0/">
+    Creative Commons Attribution-Share Alike 3.0 Unported
+  </license>
+  //<detail><![CDATA[
+  //]]></detail>
+  <detail lang="ja"><![CDATA[
+    == Usage ==
+      デフォルトの設定では、"]]" "[[" を上書きします。
+      ]]:
+        次っぽいページへ
+      [[:
+        前っぽいページへ
+    == Setting ==
+      liberator.globalVariables.autoDetectLink
+      に以下の値をもつオブジェクトを設定します。
+      rc ファイルなどに書いてください。
+        nextPatterns/backPatterns:
+          (次|前)のパターンの配列。
+          要素は、
+            - リンク文字列に対する(正規表現|文字列)
+            - リンクに対する関数のリスト
+        nextMappings/backPatterns:
+          (次|前)移動のマッピング(Array)
+        useNextHistory/useBackHistory:
+          履歴を併用。
+          履歴がある場合はそっちを優先します。
+        useSuccPattern:
+          doc_01.html のときは、 doc_02.html を次と見なす…ようなパターン。
+          ファイル名に当たる部分の、数字列あるいは一文字のアルファベットが対象です。
+          (つながっているアルファベットは無視されます。)
+            - doc_02.html => doc_03.html
+            - doc_a.html => doc_b.html
+        force:
+          (次|前)っぽいURIを捏造してそこに移動します。
+        useAutoPagerize:
+          AutoPagerize のキャッシュを利用します。
+          (ただし、"次" へのリンクにしか使われません)
+      === example ===
+        >||
+        :js liberator.globalVariables.autoDetectLink = {nextPatterns: [/next/, /次/]}
+        ||<
+
+    == Function ==
+      外部から呼び出せる関数が liberator.plugins.autoDetectLink に入っています。
+      === detect(next, setting) ===
+        (次|前)へのリンクを検出する。
+        ==== 引数 ====
+          next:
+            次のリンクを探すときは、true。
+          setting:
+            設定を一時的に上書きする。省略可。
+        ==== 返値 ====
+          リンクのURIなど以下のプロパティを持つオブジェクト
+          uri:
+            アドレス。
+          text:
+            リンクテキストなど
+          frame:
+            リンクの存在するフレームの Window オブジェクト
+          element:
+            リンクの要素
+      === autoDetectLink.go(next, setting) ===
+        (次|前)へのリンクに移動。
+        引数は detect と同じ。
+
+      === example ===
+        履歴を使用しないで、前のリンクを探す。:
+        >||
+          liberator.plugins.autoDetectLink.detect(false, {useBackHistory: false});
+        ||<
+  ]]></detail>
+</VimperatorPlugin>;
 
 
 (function () {
@@ -108,7 +116,7 @@
     force: false,
     useAutoPagerize: true,
     displayDelay: 500,
-    ignoreId: true
+    ignoreId: false
   };
 
   ////////////////////////////////////////////////////////////////
@@ -197,10 +205,12 @@
   // ID っぽい文字か考えてみる！
   //  数字だけで長いのは ID っぽい！
   //  西暦っぽいのは無視しない方が良いかも。
+  //      根拠はないが、1980-2029 の範囲で。
   //  後方00 が含まれているパターンは、インクリメントしてもいい気がする
   //      830000 => 830001
+  // XXX 根拠があやしぎる！
   function likeID (s)
-    /^\d{6,}$/.test(s) && !/^(19[89]|20[012])\d(0[1-9]|1[012])/.test(s) && !/00\d\d$/.test(s);
+    /^\d{6,}$/.test(s) && !/^(19[89]|20[012])\d/.test(s) && !/00\d\d$/.test(s);
 
 
   // (次|前)の数字文字列リストを取得
