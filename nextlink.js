@@ -5,24 +5,24 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == NEEDS LIBLARY ==
-_libly.js(ver.0.1.9)
+- _libly.js(ver.0.1.9)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Option ==
-let g:nextlink_followlink = "true"
+>||
+    let g:nextlink_followlink = "true"
+||<
 と設定することにより、"[[", "]]" の動作は、カレントのタブに新しくページを読み込むようになります。
 
 == Command ==
-:nextlink
-  autocmd によって呼び出されます。
+:nextlink:
+    autocmd によって呼び出されます。
 
-== TODO ==
-- document cache clear.
   ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -104,7 +104,6 @@ liberator.plugins.nextlink = (function() {
                 $U.bind(this, function(args) { this.handler(args); }), null, true
             );
             var loadEvent = autocommands['DOMLoad'] || 'PageLoad'; // for 1.2
-logger.log('event:' + loadEvent + (this.is2_0later ? 'DOMLoad' : 'PageLoad') );
             liberator.execute(':autocmd! ' + (this.is2_0later ? 'DOMLoad' : 'PageLoad') + ' .* :nextlink onLoad');
             liberator.execute(':autocmd! LocationChange .* :nextlink onLocationChange');
         },
@@ -124,6 +123,8 @@ logger.log('event:' + loadEvent + (this.is2_0later ? 'DOMLoad' : 'PageLoad') );
 
             for (let i = 0, len = this.siteinfo.length; i < len; i++) {
                 if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != '^https?://.') {
+                    window.content.addEventListener('unload', $U.bind(this,
+                                function() { this.cache[url] = null; }), false);
                     this.setCache(url,
                         ['doc', 'xpath', 'siteinfo'],
                         [window.content.document, this.siteinfo[i].nextLink, this.siteinfo[i]]
