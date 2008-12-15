@@ -2,7 +2,7 @@
 // @name           Auto Detect Link
 // @description-ja (次|前)っぽいページへのリンクを探してジャンプ
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.5
+// @version        1.6
 // @author         anekos (anekos@snca.net)
 // ==/VimperatorPlugin==
 //
@@ -70,6 +70,7 @@
 // TODO:
 //    input / form
 //    history
+//    id っぽいのを無視する
 
 
 (function () {
@@ -107,6 +108,7 @@
     force: false,
     useAutoPagerize: true,
     displayDelay: 500,
+    ignoreId: true
   };
 
   ////////////////////////////////////////////////////////////////
@@ -192,8 +194,21 @@
     s.replace(new RegExp('^(.{0,'+(n-1)+'})$'), function (s) padChar(c+s, c, n));
 
 
+  // id っぽい文字か考えてみる！
+  //  数字だけで長いのは ID っぽい！
+  //  年号っぽいのは無視しない方が良いかも。
+  //  後方00 が含まれているパターンは、インクリメントしてもいい気がする
+  //      830000 => 830001
+  function likeID (s) {
+    s = s.toString();
+    return s.match(/^\d{6,}$/) && !s.match(/^(19[8-9]\d|20[0-2]\d)/) && !s.match(/00\d{2}$/);
+  }
+
+
   // (次|前)の数字文字列リストを取得
-  function succNumber (n, next) {
+  function succNumber (n, next, ignoreId) {
+    if (ignoreId && likeID(n))
+      return [];
     var m = (parseInt(n || 0, 10) + (next ? 1 : -1)).toString();
     var result = [m];
     if (m.length < n.length)
@@ -213,7 +228,7 @@
 
 
   // (次|前)のURIリストを取得
-  function succURI (uri, next) {
+  function succURI (uri, next, ignoreId) {
     var urim = uri.match(/^(.+\/)([^\/]+)$/);
     if (!urim)
       return [];
@@ -223,7 +238,7 @@
       while (file && (dm = file.match(/\d+/))) {
         let [rcontext, lcontext, lmatch] = [RegExp.rightContext, RegExp.leftContext, RegExp.lastMatch];
         left += lcontext;
-        succNumber(lmatch, next).forEach(function (succ) {
+        succNumber(lmatch, next, ignoreId).forEach(function (succ) {
           temp.push(dir + left + succ + rcontext);
         });
         left += lmatch;
@@ -421,7 +436,7 @@
       // succ
       let succs = [];
       getAllLocations(window.content).forEach(function (uri) {
-        succs = succs.concat(succURI(uri, next));
+        succs = succs.concat(succURI(uri, next, setting.ignoreId));
       });
       if (setting.useSuccPattern) {
         let link;
