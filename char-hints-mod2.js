@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
     <version>0.0.1</version>
-    <minVersion>2.0pre</minVersion>
+    <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 
@@ -13,6 +13,15 @@ var PLUGIN_INFO =
 LowerCase => input hint command line.
 UpperCase => select char-hint label.
 
+== OPTIONS ==
+set histchars="hjkl" => show char-hint use h, j, k, l.
+
+== TODO ==
+ * support hinttimeout.
+     ]]></detail>
+    <detail lang="ja"><![CDATA[
+
+== Usage ==
 小文字は候補を絞るためのテキスト入力に使います。
 大文字は文字ラベルの選択に使います。
 
@@ -46,7 +55,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
     function num2chars(num) //{{{
     {
         var chars = "";
-        var hintchars = options.hintchars;
+        var hintchars = options.hintchars.toUpperCase();
         var base = hintchars.length;
         do {
             chars = hintchars[((num % base))] + chars;
@@ -57,9 +66,9 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
     } //}}}
     function showCharHints(win) //{{{
     {
-
-        if (!win)
+        if(!win)
             win = window.content;
+
         for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))
         {
             let num = elem.getAttribute("number");
