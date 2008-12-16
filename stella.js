@@ -1,3 +1,37 @@
+/*
+Copyright (c) 2008, anekos.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+    3. The names of the authors may not be used to endorse or promote products
+       derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+
+###################################################################################
+# http://sourceforge.jp/projects/opensource/wiki/licenses%2Fnew_BSD_license
+# に参考になる日本語訳がありますが、有効なのは上記英文となります。
+###################################################################################
+
+*/
+
 var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Stella</name>
@@ -6,11 +40,13 @@ var PLUGIN_INFO =
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
   <version>0.09</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos２</author>
+  <license>new BSD License (Please read the source code comments of this plugin)</license>
+  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <license document="http://creativecommons.org/licenses/by-sa/3.0/">
-    Creative Commons Attribution-Share Alike 3.0 Unported
-  </license>
+  <license><![CDATA[
+  ]]></license>
   <detail><![CDATA[
     == Commands ==
       :stpl[ay]:
@@ -74,33 +110,37 @@ var PLUGIN_INFO =
   ]]></detail>
 </VimperatorPlugin>;
 
-// TODO
-//    ・Icons
-//    ・Other video hosting websites
-//    ・auto fullscreen
-//    ・動的な command の追加削除 (nice rabbit!)
-//    ・ツールチップみたいな物で、マウスオー馬したときに動画情報を得られるようにしておく。
-//    ・外から呼ぶべきでない関数(プライベート)をわかりやすくしたい
-//    ・argCount の指定が適当なのを修正 (動的な userCommand と平行でうまくできそう？)
-//    ・実際のプレイヤーが表示されるまで待機できようにしたい(未表示に時にフルスクリーン化すると…)
-//    ・関連動画まわりがイマイチな仕様
-//
-// MEMO
-//    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
-//    ・関数やプロパティは基本的にアルファベット順にならべる。
-//
-// Refs:
-//    http://yuichis.homeip.net/nicodai.user.html
-//    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/nicontroller.js
-//    http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/youtubeamp.js
-//
-// Thanks:
-//    参考にさせてもらった人々。THANKS!!
-//      janus_wel 氏
-//        http://d.hatena.ne.jp/janus_wel/
-//      ゆういち 氏
-//        http://yuichis.homeip.net/nicodai.user.html
 
+/*
+TODO
+   ・Icons
+   ・Other video hosting websites
+   ・auto fullscreen
+   ・動的な command の追加削除 (nice rabbit!)
+   ・ツールチップみたいな物で、マウスオー馬したときに動画情報を得られるようにしておく。
+   ・外から呼ぶべきでない関数(プライベート)をわかりやすくしたい
+   ・argCount の指定が適当なのを修正 (動的な userCommand と平行でうまくできそう？)
+   ・実際のプレイヤーが表示されるまで待機できようにしたい(未表示に時にフルスクリーン化すると…)
+   ・コメント欄でリンクされている動画も関連動画として扱いたい
+      -> "その３=>sm666" みたいなやつ
+      -> リンクはともかくタイトルの取得がムツカシー
+
+MEMO
+   ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
+   ・関数やプロパティは基本的にアルファベット順にならべる。
+
+Refs:
+   http://yuichis.homeip.net/nicodai.user.html
+   http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/nicontroller.js
+   http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/youtubeamp.js
+
+Thanks:
+   参考にさせてもらった人々。THANKS!!
+     janus_wel 氏
+       http://d.hatena.ne.jp/janus_wel/
+     ゆういち 氏
+       http://yuichis.homeip.net/nicodai.user.html
+*/
 
 (function () {
 
@@ -1241,7 +1281,7 @@ var PLUGIN_INFO =
   *********************************************************************************/
 
   function makeRelationURL (player, command) {
-    if (player.has('makeURL', 'x'))
+    if (!player.has('makeURL', 'x'))
       raise('Mysterious Error! makeURL has been not implmented.');
     if (command.match(/^[#\uff03]/))
       return player.makeURL(command.slice(1), Player.REL_ID);
