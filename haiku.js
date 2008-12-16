@@ -177,7 +177,7 @@
                       '<div><object width="300" height="250" data="' + url + '" type="application/x-shockwave-flash">'+
                       '<param name="wmode" value="transparent"/><param name="allowFullScreen" value="true"/>'+
                       '</object></div>';
-            } else if (/^http:\/\/www\.nicovideo\.jp\/watch\/([-\w]+)$/.test(all)){
+            } else if (/^http:\/\/[^.]+\.nicovideo\.jp\/watch\/([-\w]+)$/.test(all)){
                 str = '<iframe width="312" height="176" src="http://ext.nicovideo.jp/thumb/'+RegExp.$1 + '" scrolling="no">'+
                       '<a href="' + all + '">' +all+'</a></iframe>';
             } else if (all.charAt(0) == "["){

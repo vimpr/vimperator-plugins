@@ -193,7 +193,7 @@ NicoPlayerController.prototype = {
 
         NICO_DOMAIN:    '.nicovideo.jp',
         NICO_URL:       'http://www.nicovideo.jp/',
-        WATCH_URL:      'http://www.nicovideo.jp/watch/',
+        WATCH_URL:      '^http://[^.]+\.nicovideo\.jp/watch/',
         WATCH_PAGE:     1,
 
         FLVPLAYER_NODE_ID: 'flvplayer',

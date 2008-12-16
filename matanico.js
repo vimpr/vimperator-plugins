@@ -121,10 +121,10 @@ NicoScraper.prototype = {
     _constants: {
         VERSION:          '0.70',
         PAGECHECK: {
-            watch:      '^http://(es|www)\\.nicovideo\\.jp/watch/',
+            watch:      '^http://[^.]+\\.nicovideo\\.jp/watch/',
             live:       '^http://live\\.nicovideo\\.jp/watch/',
-            tag:        '^http://(es|www)\\.nicovideo\\.jp/tag/',
-            relatedTag: '^http://(es|www)\\.nicovideo\\.jp/related_tag/',
+            tag:        '^http://[^.]+\\.nicovideo\\.jp/tag/',
+            relatedTag: '^http://[^.]+\\.nicovideo\\.jp/related_tag/',
         },
     },
 

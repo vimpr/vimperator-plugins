@@ -45,8 +45,6 @@ var PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <license><![CDATA[
-  ]]></license>
   <detail><![CDATA[
     == Commands ==
       :stpl[ay]:
@@ -428,7 +426,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () /^http:\/\/(es|www)\.nicovideo\.jp\/watch\//.test(buffer.URL),
+    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/watch\//.test(buffer.URL),
 
     get volume () undefined,
     set volume (value) value,

@@ -26,7 +26,7 @@
 (function () {
 
   function getVideoId () {
-    let m = buffer.URL.match(/^http:\/\/www\.nicovideo\.jp\/watch\/([a-z0-9]+)/);
+    let m = buffer.URL.match(/^http:\/\/(?:tw|es|de|www)\.nicovideo\.jp\/watch\/([a-z0-9]+)/);
     return m && m[1];
   }
 
