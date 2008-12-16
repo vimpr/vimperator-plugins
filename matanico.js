@@ -1,11 +1,11 @@
-let PLUGIN_INFO = 
+let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>update Twitter status to current video/search page information and comment.</description>
 <description lang="ja">今見ている動画 / 検索結果の情報を Twitter に投稿する。</description>
 <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
 <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-<version>0.70</version>
+<version>0.71</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <detail><![CDATA[
@@ -121,10 +121,10 @@ NicoScraper.prototype = {
     _constants: {
         VERSION:          '0.70',
         PAGECHECK: {
-            watch:      '^http://www\\.nicovideo\\.jp/watch/',
+            watch:      '^http://(es|www)\\.nicovideo\\.jp/watch/',
             live:       '^http://live\\.nicovideo\\.jp/watch/',
-            tag:        '^http://www\\.nicovideo\\.jp/tag/',
-            relatedTag: '^http://www\\.nicovideo\\.jp/related_tag/',
+            tag:        '^http://(es|www)\\.nicovideo\\.jp/tag/',
+            relatedTag: '^http://(es|www)\\.nicovideo\\.jp/related_tag/',
         },
     },
 
