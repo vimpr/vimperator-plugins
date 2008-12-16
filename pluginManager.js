@@ -96,7 +96,7 @@ var lang = window.navigator.language;
 var tags = {
     name: function(info) fromUTF8Octets(info.toString()),
     author: function(info){
-        var xml = <>{info.toString()}</>;
+        var xml = <>{fromUTF8Octets(info.toString())}</>;
         if (info.@homepage.toString() != '')
             xml += <><span> </span>{makeLink(info.@homepage.toString())}</>;
         if (info.@mail.toString() != '')
@@ -105,7 +105,7 @@ var tags = {
     },
     description: function(info) makeLink(fromUTF8Octets(info.toString())),
     license: function(info){
-        var xml = <>{info.toString()}</>;
+        var xml = <>{fromUTF8Octets(info.toString())}</>;
         if (info.@document.toString() != '')
             xml += <><span> </span>{makeLink(info.@document.toString())}</>;
         return xml;
