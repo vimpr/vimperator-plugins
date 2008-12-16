@@ -428,7 +428,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () (~buffer.URL.indexOf('http://www.nicovideo.jp/watch/')),
+    get isValid () /^http:\/\/(es|www)\.nicovideo\.jp\/watch\//.test(buffer.URL),
 
     get volume () undefined,
     set volume (value) value,
