@@ -32,7 +32,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-var PLUGIN_INFO =
+let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Stella</name>
   <name lang="ja">すてら</name>
@@ -122,6 +122,9 @@ TODO
    ・コメント欄でリンクされている動画も関連動画として扱いたい
       -> "その３=>sm666" みたいなやつ
       -> リンクはともかくタイトルの取得がムツカシー
+   ・isValid とは別にプレイヤーの準備が出来ているか？などをチェックできる関数があるほうがいいかも
+      -> isValid ってなまえはどうなの？
+      -> isReady とか
 
 MEMO
    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
@@ -213,6 +216,13 @@ Thanks:
     return filename.replace(badChars, '_');
   }
 
+  function fromTemplate (template, args) {
+    let index = 0;
+    function get (name)
+      (args instanceof Array ? args[index++] : args[name]);
+    return template.replace(/--([^-]+)--/g, function (_, n) get(n) || '');
+  }
+
   // 上手い具合に秒数に直すよ
   function fromTimeCode (code) {
     var m;
@@ -227,7 +237,7 @@ Thanks:
     let (p = content.document.getElementById(id))
       (p && (p.wrappedJSObject || p));
 
-  function httpRequest (uri, onComplete) {
+  function httpRequest (uri, data, onComplete) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
       if (xhr.readyState == 4) {
@@ -237,8 +247,8 @@ Thanks:
           raise(xhr.statusText);
       }
     };
-    xhr.open('GET', uri, !!onComplete);
-    xhr.send(null);
+    xhr.open(data ? 'POST' : 'GET', uri, !!onComplete);
+    xhr.send(data || null); // XXX undefined を渡すのはまずいのかな
     return xhr;
   }
 
@@ -261,6 +271,14 @@ Thanks:
     let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
     url.spec = s;
     return url;
+  }
+
+  function parseParameter (str) {
+    let result = {};
+    str.split(/&/).forEach(function (it)
+                             let ([_, n, v] = it.match(/^([^=]*)=(.*)$/))
+                               (result[n] = unescape(v)));
+    return result;
   }
 
   function restoreStyle (target, doDelete) {
@@ -697,6 +715,8 @@ Thanks:
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
 
+    get baseURL () 'http://www.nicovideo.jp/',
+
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
 
@@ -861,7 +881,7 @@ Thanks:
           res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
           download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
       });
-      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, onComplete);
+      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, null, onComplete);
     },
 
     makeURL: function (value, type) {
@@ -887,6 +907,67 @@ Thanks:
         let base = this.currentTime;
         setTimeout(bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
       }
+    },
+
+    // みかんせいじん
+    // test -> http://www.nicovideo.jp/watch/sm2586636
+    sendComment: function (message, command) {
+
+      return;
+
+      let self = this;
+      let postkey, block_no, flvInfo, ticket;
+      function getThumbInfo () {
+        liberator.log('getThumbInfo')
+        let xhr = httpRequest(self.baseURL + 'api/getthumbinfo/' + self.id);
+        let xml = xhr.responseXML;
+        let cn = xml.getElementsByTagName('comment_num')[0];
+        block_no = cn.textContent.replace(/..$/, '');
+        liberator.log('block_no: ' + block_no)
+      }
+      function getFLV () {
+        liberator.log('getFLV')
+        let xhr = httpRequest(self.baseURL + 'api/getflv?v=' + self.id);
+        let res = xhr.responseText;
+        flvInfo = parseParameter(res);
+        liberator.log(flvInfo);
+      }
+      function getPostkey (){
+        liberator.log('getPostkey')
+        let url = self.baseURL + 'api/getpostkey?thread=' + flvInfo.thread_id + '&block_no=' + block_no;
+        let xhr = httpRequest(url);
+        let res = xhr.responseText;
+        postkey = res.replace(/^.*=/, '');
+      }
+      function getComments () {
+        liberator.log('getComments')
+        let tmpl = '<thread res_from="-1" version="20061206" thread="--thread_id--" />';
+        let xhr = httpRequest(flvInfo.ms, fromTemplate(tmpl, flvInfo));
+        window.rxml = xhr.responseXML;
+        //window.exml = new XML(xhr.responseText);
+        let r = rxml.evaluate('//packet/thread', rxml, null, 9, null, 7, null).singleNodeValue;
+        ticket = r.getAttribute('ticket');
+      }
+      function commentXML () {
+        let tmpl = '<chat premium="--is_premium--" postkey="--postkey--" user_id="--user_id--" ticket="--ticket--" mail="--mail--" vpos="--vpos--" thread="--thread_id--">--body--</chat>';
+        let args = {
+          __proto__: flvInfo,
+          ticket: ticket,
+          postkey: postkey,
+          vpos: 10,
+          body: message
+        };
+        let data = fromTemplate(tmpl, args);
+        liberator.log();
+        let xhr = httpRequest(flvInfo.ms, data);
+        liberator.log(xhr.responseText)
+      }
+      liberator.log('sendcommnet')
+      getThumbInfo();
+      getFLV();
+      getPostkey();
+      getComments();
+      commentXML();
     },
 
   };
