@@ -42,6 +42,7 @@ let PLUGIN_INFO =
   <version>0.11</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos２</author>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos３</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
@@ -570,7 +571,7 @@ Thanks:
     Player.apply(this, arguments);
   }
 
-  YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?&]v=([-\w]+)/)) r;
+  YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
 
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,
@@ -634,7 +635,7 @@ Thanks:
 
     get relatedIDs () {
       let result = [];
-      let doc  = content.document;
+      let doc = content.document;
       let r = doc.evaluate("//div[@class='video-mini-title']/a", doc, null, 7, null);
       for (let i = 0, l = r.snapshotLength; i < l; i++) {
         let e = r.snapshotItem(i);
@@ -990,7 +991,7 @@ Thanks:
         self.cachedInfo.flvInfo = parseParameter(res);
       }
 
-      function getPostkey (){
+      function getPostkey () {
         liberator.log('getPostkey')
         let info = self.cachedInfo;
         if (info.postkey !== undefined)
@@ -1464,7 +1465,7 @@ Thanks:
     let install = function () {
       let stella = liberator.plugins.stella = new Stella();
       stella.addUserCommands();
-      liberator.log('Stella: installed.');
+      liberator.log('Stella: installed.')
     };
 
     // すでにインストール済みの場合は、一度ファイナライズする
