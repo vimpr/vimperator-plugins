@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.09</version>
+  <version>0.10</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos２</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
@@ -344,14 +344,14 @@ Thanks:
   Player.ST_PAUSED  = 'paused';
   Player.ST_PLAYING = 'playing';
 
-  Player.REL_ID     = 'id';
-  Player.REL_SEARCH = 'search';
-  Player.REL_TAG    = 'tag';
-  Player.REL_URL    = 'url';
+  Player.URL_ID     = 'id';
+  Player.URL_SEARCH = 'search';
+  Player.URL_TAG    = 'tag';
+  Player.URL_URL    = 'url';
 
   Player.RELATIONS = {
-    REL_TAG: 'relatedTags',
-    REL_ID: 'relatedIDs'
+    URL_TAG: 'relatedTags',
+    URL_ID: 'relatedIDs'
   };
 
   // rwxt で機能の有無を表す
@@ -568,6 +568,8 @@ Thanks:
     Player.apply(this, arguments);
   }
 
+  YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?&]v=([-\w]+)/)) r;
+
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,
 
@@ -575,11 +577,13 @@ Thanks:
       currentTime: 'rw',
       fileURL: 'r',
       fullscreen: 'rwt',
+      makeURL: 'x',
       muted: 'rwt',
       pause: 'x',
       play: 'x',
       playEx: 'x',
       playOrPause: 'x',
+      relatedIDs: 'r',
       repeating: 'rw',
       title: 'r',
       totalTime: 'r',
@@ -626,6 +630,18 @@ Thanks:
       let (p = content.document.getElementById('movie_player'))
         (p && (p.wrappedJSObject || p)),
 
+    get relatedIDs () {
+      let result = [];
+      let doc  = content.document;
+      let r = doc.evaluate("//div[@class='video-mini-title']/a", doc, null, 7, null);
+      liberator.log(r.snapshotLength)
+      for (let i = 0, l = r.snapshotLength; i < l; i++) {
+        let e = r.snapshotItem(i);
+        result.push(new RelatedID(YouTubePlayer.getIDfromURL(e.href), e.textContent));
+      }
+      return result;
+    },
+
     get state () {
       switch (this.player.getPlayerState()) {
         case 0:
@@ -654,6 +670,16 @@ Thanks:
 
     get volume () parseInt(this.player.getVolume()),
     set volume (value) (this.player.setVolume(value), this.volume),
+
+    makeURL: function (value, type) {
+      switch (type) {
+        case Player.URL_ID:
+          return 'http://www.youtube.com/watch?v=' + value + '&fmt=22'; //XXX さりげなく高画質に！
+        case Player.URL_SEARCH:
+          return 'http://www.youtube.com/results?search_query=' + encodeURIComponent(value);
+      }
+      return value;
+    },
 
     play: function () this.player.playVideo(),
 
@@ -901,11 +927,11 @@ Thanks:
 
     makeURL: function (value, type) {
       switch (type) {
-        case Player.REL_ID:
+        case Player.URL_ID:
           return 'http://www.nicovideo.jp/watch/' + value;
-        case Player.REL_TAG:
+        case Player.URL_TAG:
           return 'http://www.nicovideo.jp/tag/' + encodeURIComponent(value);
-        case Player.REL_SEARCH:
+        case Player.URL_SEARCH:
           return 'http://www.nicovideo.jp/search/' + encodeURIComponent(value);
       }
       return value;
@@ -1415,11 +1441,11 @@ Thanks:
     if (!player.has('makeURL', 'x'))
       raise('Mysterious Error! makeURL has been not implmented.');
     if (command.match(/^[#\uff03]/))
-      return player.makeURL(command.slice(1), Player.REL_ID);
+      return player.makeURL(command.slice(1), Player.URL_ID);
     if (command.match(/^[:\uff1a]/))
-      return player.makeURL(command.slice(1), Player.REL_TAG);
+      return player.makeURL(command.slice(1), Player.URL_TAG);
     if (command.indexOf('http://') == -1)
-      return player.makeURL(encodeURIComponent(command), Player.REL_TAG);
+      return player.makeURL(encodeURIComponent(command), Player.URL_TAG);
     return command;
   }
 
