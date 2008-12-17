@@ -9,7 +9,7 @@ var PLUGIN_INFO =
     <minVersion>1.2</minVersion>
     <maxVersion>1.2</maxVersion>
     <detail><![CDATA[
-== Needs Liblary ==
+== Needs Library ==
 - _libly.js(ver.0.1.4)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
