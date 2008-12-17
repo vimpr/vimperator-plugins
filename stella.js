@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.10</version>
+  <version>0.11</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos２</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
@@ -361,6 +361,7 @@ Thanks:
   // t = toggle
   Player.prototype = {
     functions: {
+      comment: '',
       currentTime: '',
       fileExtension: 'r',
       fileURL: '',
@@ -634,7 +635,6 @@ Thanks:
       let result = [];
       let doc  = content.document;
       let r = doc.evaluate("//div[@class='video-mini-title']/a", doc, null, 7, null);
-      liberator.log(r.snapshotLength)
       for (let i = 0, l = r.snapshotLength; i < l; i++) {
         let e = r.snapshotItem(i);
         result.push(new RelatedID(YouTubePlayer.getIDfromURL(e.href), e.textContent));
@@ -1224,6 +1224,8 @@ Thanks:
                   p[func] = arg[0];
                 else if (p.has(func, 'x'))
                   p[func].apply(p, arg);
+                else
+                  raise('Stella: The function is not supported in this page.');
                 self.update();
               },
           {argCount: '*', bang: !!funcB},
