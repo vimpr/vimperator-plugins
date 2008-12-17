@@ -41,8 +41,6 @@ let PLUGIN_INFO =
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
   <version>0.11</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos２</author>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos３</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
@@ -161,158 +159,161 @@ Thanks:
   * Utils                                                                        {{{
   *********************************************************************************/
 
-  function bindr (_this, f)
-    function () f.apply(_this, arguments);
+  const U = {
+    bindr: function (_this, f)
+      function () f.apply(_this, arguments),
 
-  function capitalize (s)
-    s.replace(/^[a-z]/, String.toUpperCase).replace(/-[a-z]/, function (s) s.slice(1).toUpperCase());
+    capitalize: function (s)
+      s.replace(/^[a-z]/, String.toUpperCase).replace(/-[a-z]/, function (s) s.slice(1).toUpperCase()),
 
-  function currentURL ()
-    content.document.location.href;
+    currentURL: function ()
+      content.document.location.href,
 
-  function download (url, filepath, ext, title) {
-    let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
-    let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
-    let file;
+    download: function (url, filepath, ext, title) {
+      let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
+      let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
+      let file;
 
-    if (filepath) {
-      file = io.getFile(io.expandPath(filepath));
-    } else {
-      file = dm.userDownloadsDirectory;
-    }
-    if (file.isDirectory() && title)
-      file.appendRelativePath(fixFilename(title) + ext);
-    if (file.exists())
-      return liberator.echoerr('The file already exists! -> ' + file.path);
-    file = makeFileURI(file);
-
-    let dl = dm.addDownload(0, makeURL(url, null, null), file, title, null, null, null, null, wbp);
-    wbp.progressListener = dl;
-    wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-    wbp.saveURI(makeURL(url), null, null, null, null, file);
-
-    return true;
-  }
-
-  function fixDoubleClick (obj, click, dblClick) {
-    let clicked = 0;
-    let original = {click: obj[click], dblClick: obj[dblClick]};
-    obj[click] = function () {
-      let self = this, args = arguments;
-      let _clicked = ++clicked;
-      setTimeout(function () {
-        if (_clicked == clicked--)
-          original.click.apply(self, args);
-        else
-          clicked = 0;
-      }, DOUBLE_CLICK_INTERVAL);
-    };
-    obj[dblClick] = function () {
-      clicked = 0;
-      original.dblClick.apply(this, arguments);
-    };
-  }
-
-  function fixFilename (filename) {
-    const badChars = /[\\\/:;*?"<>|]/g;
-    return filename.replace(badChars, '_');
-  }
-
-  function fromTemplate (template, args) {
-    let index = 0;
-    function get (name)
-      (args instanceof Array ? args[index++] : args[name]);
-    return template.replace(/--([^-]+)--/g, function (_, n) get(n) || '');
-  }
-
-  // 上手い具合に秒数に直すよ
-  function fromTimeCode (code) {
-    var m;
-    if (m = /^(([-+]?)\d+):(\d+)$/(code))
-      return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
-    if (m = /^([-+]?\d+\.\d+)$/(code))
-      return Math.round(parseFloat(m[1], 10) * 60);
-    return parseInt(code, 10);
-  }
-
-  function getElementByIdEx (id)
-    let (p = content.document.getElementById(id))
-      (p && (p.wrappedJSObject || p));
-
-  function httpRequest (uri, data, onComplete) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200)
-          onComplete && onComplete(xhr);
-        else
-          raise(xhr.statusText);
+      if (filepath) {
+        file = io.getFile(io.expandPath(filepath));
+      } else {
+        file = dm.userDownloadsDirectory;
       }
-    };
-    xhr.open(data ? 'POST' : 'GET', uri, !!onComplete);
-    xhr.send(data || null); // XXX undefined を渡すのはまずいのかな
-    return xhr;
-  }
+      if (file.isDirectory() && title)
+        file.appendRelativePath(U.fixFilename(title) + ext);
+      if (file.exists())
+        return liberator.echoerr('The file already exists! -> ' + file.path);
+      file = makeFileURI(file);
 
-  function id (value)
-    value;
+      let dl = dm.addDownload(0, U.makeURL(url, null, null), file, title, null, null, null, null, wbp);
+      wbp.progressListener = dl;
+      wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+      wbp.saveURI(U.makeURL(url), null, null, null, null, file);
 
-  function isNum (v)
-    (typeof v === 'number' && !isNaN(v));
+      return true;
+    },
 
-  function lz (s, n)
-    String(Math.pow(10, n) + s).substring(1);
+    fixDoubleClick: function (obj, click, dblClick) {
+      let clicked = 0;
+      let original = {click: obj[click], dblClick: obj[dblClick]};
+      obj[click] = function () {
+        let self = this, args = arguments;
+        let _clicked = ++clicked;
+        setTimeout(function () {
+          if (_clicked == clicked--)
+            original.click.apply(self, args);
+          else
+            clicked = 0;
+        }, DOUBLE_CLICK_INTERVAL);
+      };
+      obj[dblClick] = function () {
+        clicked = 0;
+        original.dblClick.apply(this, arguments);
+      };
+    },
 
-  function makeFile (s) {
-    var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-    file.initWithPath(s);
-    return file;
-  }
+    fixFilename: function (filename) {
+      const badChars = /[\\\/:;*?"<>|]/g;
+      return filename.replace(badChars, '_');
+    },
 
-  function makeURL (s) {
-    let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
-    url.spec = s;
-    return url;
-  }
+    fromTemplate: function (template, args) {
+      let index = 0;
+      function get (name)
+        (args instanceof Array ? args[index++] : args[name]);
+      return template.replace(/--([^-]+)--/g, function (_, n) get(n) || '');
+    },
 
-  function parseParameter (str) {
-    let result = {};
-    str.split(/&/).forEach(function (it)
-                             let ([_, n, v] = it.match(/^([^=]*)=(.*)$/))
-                               (result[n] = unescape(v)));
-    return result;
-  }
+    // 上手い具合に秒数に直すよ
+    fromTimeCode: function (code) {
+      var m;
+      if (m = /^(([-+]?)\d+):(\d+)$/(code))
+        return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
+      if (m = /^([-+]?\d+\.\d+)$/(code))
+        return Math.round(parseFloat(m[1], 10) * 60);
+      return parseInt(code, 10);
+    },
 
-  function restoreStyle (target, doDelete) {
-    let style = target.style;
-    if (!style.__stella_backup)
-      return;
-    let backup = style.__stella_backup;
-    for (let name in Iterator(backup))
-      style[name] = backup[name];
-    if (doDelete)
-      delete style.__stella_backup;
-  }
+    getElementByIdEx: function (id)
+      let (p = content.document.getElementById(id))
+        (p && (p.wrappedJSObject || p)),
 
-  function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
+    httpRequest: function (uri, data, onComplete) {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200)
+            onComplete && onComplete(xhr);
+          else
+            raise(xhr.statusText);
+        }
+      };
+      xhr.open(data ? 'POST' : 'GET', uri, !!onComplete);
+      xhr.send(data || null); // XXX undefined を渡すのはまずいのかな
+      return xhr;
+    },
 
-  function storeStyle (target, values, overwrite) {
-    let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
-    let backup = {};
-    for (let [name, value] in Iterator(values)) {
-      backup[name] = cstyle[name];
-      style[name] = value;
-    }
-    if (overwrite || !style.__stella_backup)
-      style.__stella_backup = backup;
-  }
+    id: function (value)
+      value,
 
-  function toTimeCode(v)
-    (isNum(v) ? (parseInt((v / 60)) + ':' + lz(v % 60, 2))
-              : '??:??');
+    isNum: function (v)
+      (typeof v === 'number' && !isNaN(v)),
 
-  let raise = InVimperator ? function (error) {throw new Error(error)}
-                           : function (error) liberator.echoerr(error);
+    lz: function (s, n)
+      String(Math.pow(10, n) + s).substring(1),
+
+    makeFile: function (s) {
+      var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+      file.initWithPath(s);
+      return file;
+    },
+
+    makeURL: function (s) {
+      let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
+      url.spec = s;
+      return url;
+    },
+
+    parseParameter: function (str) {
+      let result = {};
+      str.split(/&/).forEach(function (it)
+                               let ([_, n, v] = it.match(/^([^=]*)=(.*)$/))
+                                 (result[n] = unescape(v)));
+      return result;
+    },
+
+    raise: (InVimperator ? function (error) {throw new Error(error)}
+                         : function (error) liberator.echoerr(error)),
+
+    restoreStyle: function (target, doDelete) {
+      let style = target.style;
+      if (!style.__stella_backup)
+        return;
+      let backup = style.__stella_backup;
+      for (let name in Iterator(backup))
+        style[name] = backup[name];
+      if (doDelete)
+        delete style.__stella_backup;
+    },
+
+    s2b: function (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s,
+
+    storeStyle: function (target, values, overwrite) {
+      let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
+      let backup = {};
+      for (let [name, value] in Iterator(values)) {
+        backup[name] = cstyle[name];
+        style[name] = value;
+      }
+      if (overwrite || !style.__stella_backup)
+        style.__stella_backup = backup;
+    },
+
+    toTimeCode: function (v)
+      (U.isNum(v) ? (parseInt((v / 60)) + ':' + U.lz(v % 60, 2))
+                : '??:??')
+  };
+
 
   // }}}
 
@@ -446,7 +447,7 @@ Thanks:
     get storage ()
       (content.document.__stella_storage || (content.document.__stella_storage = {})),
 
-    get timeCodes () (toTimeCode(this.currentTime) + '/' + toTimeCode(this.totalTime)),
+    get timeCodes () (U.toTimeCode(this.currentTime) + '/' + U.toTimeCode(this.totalTime)),
 
     get title () undefined,
 
@@ -456,7 +457,7 @@ Thanks:
     set volume (value) value,
 
     fetch: function (filepath)
-      download(this.fileURL, filepath, this.fileExtension, this.title),
+      U.download(this.fileURL, filepath, this.fileExtension, this.title),
 
     makeURL: function () undefined,
 
@@ -479,14 +480,14 @@ Thanks:
     },
 
     seek: function (v) {
-      v = fromTimeCode(v);
+      v = U.fromTimeCode(v);
       if (v < 0)
         v = this.totalTime + v;
       return this.currentTime = Math.min(Math.max(v, 0), this.totalTime);
     },
 
     seekRelative: function (v)
-      this.currentTime = Math.min(Math.max(this.currentTime + fromTimeCode(v), 0), this.totalTime),
+      this.currentTime = Math.min(Math.max(this.currentTime + U.fromTimeCode(v), 0), this.totalTime),
 
     toggle: function (name) {
       if (!this.has(name, 'rwt'))
@@ -596,7 +597,7 @@ Thanks:
     icon: 'http://www.youtube.com/favicon.ico',
 
     get currentTime () parseInt(this.player.getCurrentTime()),
-    set currentTime (value) (this.player.seekTo(fromTimeCode(value)), this.currentTime),
+    set currentTime (value) (this.player.seekTo(U.fromTimeCode(value)), this.currentTime),
 
     get fileExtension () '.mp4',
 
@@ -613,7 +614,7 @@ Thanks:
       if (this.fullscreen) {
         if (this.storage.r === undefined)
           this.storage.r = options['guioptions'].indexOf('r') >= 0;
-        storeStyle(p, {
+        U.storeStyle(p, {
           marginLeft: -r.left + 'px',
           marginTop: -r.top + 'px',
           width: content.innerWidth + 'px',
@@ -622,7 +623,7 @@ Thanks:
         p.setSize(content.innerWidth, content.innerHeight);
       } else {
         p.setSize(640, 385);
-        restoreStyle(p);
+        U.restoreStyle(p);
       }
     },
 
@@ -754,7 +755,7 @@ Thanks:
     get baseURL () 'http://www.nicovideo.jp/',
 
     get cachedInfo () {
-      let url = currentURL();
+      let url = U.currentURL();
       if (this.__info_cache.url != url)
         this.__info_cache = {url: url};
       return this.__info_cache;
@@ -763,10 +764,10 @@ Thanks:
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
 
-    get playerContainer () getElementByIdEx('flvplayer_container'),
+    get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
-    set currentTime (value) (this.player.ext_setPlayheadTime(fromTimeCode(value)), this.currentTime),
+    set currentTime (value) (this.player.ext_setPlayheadTime(U.fromTimeCode(value)), this.currentTime),
 
     get fileExtension () '.flv',
 
@@ -815,12 +816,12 @@ Thanks:
           h: Math.max(1, screen.h / viewer.h)
         };
         scale.v = Math.min(scale.w, scale.h);
-        storeStyle(doc.body, {
+        U.storeStyle(doc.body, {
           backgroundImage:  'url()',
           backgroundRepeat: '',
           backgroundColor:  'black'
         });
-        storeStyle(
+        U.storeStyle(
           player,
           (scale.w >= scale.h) ? {
             width:      Math.floor(viewer.w * scale.h) + 'px',
@@ -840,8 +841,8 @@ Thanks:
       }
 
       function turnOff () {
-        restoreStyle(doc.body, true);
-        restoreStyle(player, true);
+        U.restoreStyle(doc.body, true);
+        U.restoreStyle(player, true);
         player.style.marginLeft = '';
         player.style.marginTop  = '';
         setVariables(false);
@@ -853,18 +854,18 @@ Thanks:
     },
 
     get id ()
-      let (m = currentURL().match(/\/watch\/([a-z]{2}\d+)/))
+      let (m = U.currentURL().match(/\/watch\/([a-z]{2}\d+)/))
         (m && m[1]),
 
     get muted () this.player.ext_isMute(),
     set muted (value) (this.player.ext_setMute(value), value),
 
-    get player () getElementByIdEx('flvplayer'),
+    get player () U.getElementByIdEx('flvplayer'),
 
     get relatedIDs () {
-      if (this.__rid_last_url == currentURL())
+      if (this.__rid_last_url == U.currentURL())
         return this.__rid_cache || [];
-      this.__rid_last_url = currentURL();
+      this.__rid_last_url = U.currentURL();
       let videos = [];
       let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
       let xhr = new XMLHttpRequest();
@@ -918,13 +919,13 @@ Thanks:
     set volume (value) (this.player.ext_setVolume(value), this.volume),
 
     fetch: function (filepath) {
-      let onComplete = bindr(this, function (xhr) {
+      let onComplete = U.bindr(this, function (xhr) {
           let res = xhr.responseText;
           let info = {};
           res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
-          download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
+          U.download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
       });
-      httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, null, onComplete);
+      U.httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, null, onComplete);
     },
 
     makeURL: function (value, type) {
@@ -948,12 +949,12 @@ Thanks:
         this.pause();
       } else {
         let base = this.currentTime;
-        setTimeout(bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
+        setTimeout(U.bindr(this, function () (base === this.currentTime ? this.playEx() : this.pause())), 100);
       }
     },
 
     say: function (message) {
-      liberator.log('stsay')
+      liberator.log('stsay');
       this.sendComment(message)
     },
 
@@ -973,30 +974,30 @@ Thanks:
       }
 
       function getThumbInfo () {
-        liberator.log('getThumbInfo')
+        liberator.log('getThumbInfo');
         if (self.cachedInfo.block_no !== undefined)
           return;
-        let xhr = httpRequest(self.baseURL + 'api/getthumbinfo/' + self.id);
+        let xhr = U.httpRequest(self.baseURL + 'api/getthumbinfo/' + self.id);
         let xml = xhr.responseXML;
         let cn = xml.getElementsByTagName('comment_num')[0];
         self.cachedInfo.block_no = cn.textContent.replace(/..$/, '');
       }
 
       function getFLV () {
-        liberator.log('getFLV')
+        liberator.log('getFLV');
         if (self.cachedInfo.flvInfo !== undefined)
           return;
-        let xhr = httpRequest(self.baseURL + 'api/getflv?v=' + self.id);
+        let xhr = U.httpRequest(self.baseURL + 'api/getflv?v=' + self.id);
         let res = xhr.responseText;
-        self.cachedInfo.flvInfo = parseParameter(res);
+        self.cachedInfo.flvInfo = U.parseParameter(res);
       }
 
       function getPostkey () {
-        liberator.log('getPostkey')
+        liberator.log('getPostkey');
         let info = self.cachedInfo;
         if (info.postkey !== undefined)
           return;
-        let url = fromTemplate(
+        let url = U.fromTemplate(
                     '--base--api/getpostkey?thread=--thread_id--&block_no=--block_no--',
                     {
                       base: self.baseURL,
@@ -1004,26 +1005,26 @@ Thanks:
                       block_no: info.block_no
                     }
                   );
-        liberator.log(url)
-        let xhr = httpRequest(url);
+        liberator.log(url);
+        let xhr = U.httpRequest(url);
         let res = xhr.responseText;
         info.postkey = res.replace(/^.*=/, '');
       }
 
       function getComments () {
-        liberator.log('getComments')
+        liberator.log('getComments');
         let info = self.cachedInfo;
         if (info.ticket !== undefined)
           return;
         let tmpl = '<thread res_from="-1" version="20061206" thread="--thread_id--" />';
-        let xhr = httpRequest(info.flvInfo.ms, fromTemplate(tmpl, info.flvInfo));
+        let xhr = U.httpRequest(info.flvInfo.ms, U.fromTemplate(tmpl, info.flvInfo));
         let xml = xhr.responseXML
         let r = xml.evaluate('//packet/thread', xml, null, 9, null, 7, null).singleNodeValue;
         info.ticket = r.getAttribute('ticket')
       }
 
       function sendChat () {
-        liberator.log('sendChat')
+        liberator.log('sendChat');
         let info = self.cachedInfo;
         let tmpl = '<chat premium="--is_premium--" postkey="--postkey--" user_id="--user_id--" ticket="--ticket--" mail="--mail--" vpos="--vpos--" thread="--thread_id--">--body--</chat>';
         let args = {
@@ -1034,20 +1035,19 @@ Thanks:
           vpos: Math.max(100, parseInt(vpos || (self.player.ext_getPlayheadTime() * 100), 10)),
           body: message
         };
-        liberator.log(args)
-        let data = fromTemplate(tmpl, args);
-        let xhr = httpRequest(info.flvInfo.ms, data);
-        liberator.log(xhr.responseText)
+        liberator.log(args);
+        let data = U.fromTemplate(tmpl, args);
+        let xhr = U.httpRequest(info.flvInfo.ms, data);
+        liberator.log(xhr.responseText);
       }
 
-      liberator.log('sendcommnet')
+      liberator.log('sendcommnet');
       getThumbInfo();
       getFLV();
       getPostkey();
       getComments();
       sendChat();
-    },
-
+    }
   };
 
   // }}}
@@ -1088,7 +1088,7 @@ Thanks:
       if (menu instanceof Array)
         return menu.forEach(function (it) append(parent, it));
       if (!menu.label)
-        menu.label = capitalize(menu.name);
+        menu.label = U.capitalize(menu.name);
       let (elem) {
         if (menu.sub) {
           let _menu = document.createElement('menu');
@@ -1132,7 +1132,7 @@ Thanks:
       this[name] = listener;
     getBrowser().addProgressListener(this);
     // これは必要？
-    window.addEventListener('unload', bindr(this.uninstall), false);
+    window.addEventListener('unload', U.bindr(this.uninstall), false);
   }
 
   WebProgressListener.prototype = {
@@ -1142,9 +1142,7 @@ Thanks:
     onLocationChange: function (webProgress, request, location) undefined,
     onStateChange: function (webProgress, request, status, message) undefined,
     onSecurityChange: function (webProgress, request, state) undefined,
-    uninstall: function () {
-      getBrowser().removeProgressListener(this);
-    },
+    uninstall: function () getBrowser().removeProgressListener(this)
   };
 
   // }}}
@@ -1174,8 +1172,8 @@ Thanks:
       this.createStatusPanel();
       this.onLocationChange();
 
-      this.__onResize = window.addEventListener('resize', bindr(this, this.onResize), false);
-      this.progressListener = new WebProgressListener({onLocationChange: bindr(this, this.onLocationChange)});
+      this.__onResize = window.addEventListener('resize', U.bindr(this, this.onResize), false);
+      this.progressListener = new WebProgressListener({onLocationChange: U.bindr(this, this.onLocationChange)});
     },
 
     // もちろん、勝手に呼ばれたりはしない。
@@ -1245,7 +1243,7 @@ Thanks:
       add('fe[tch]', 'fetch');
       add('la[rge]', 'large');
       add('fu[llscreen]', 'fullscreen');
-      if (s2b(liberator.globalVariables.stella_use_nico_comment, false))
+      if (U.s2b(liberator.globalVariables.stella_use_nico_comment, false))
         add('sa[y]', 'say');
 
       commands.addUserCommand(
@@ -1277,7 +1275,7 @@ Thanks:
 
       function setEvents (name, elem) {
         ['click', 'popupshowing'].forEach(function (eventName) {
-          let onEvent = self['on' + capitalize(name) + capitalize(eventName)];
+          let onEvent = self['on' + U.capitalize(name) + U.capitalize(eventName)];
           onEvent && elem.addEventListener(eventName, function (event) {
             if (eventName != 'click' || event.button == 0) {
               onEvent.apply(self, arguments);
@@ -1307,7 +1305,7 @@ Thanks:
       icon.setAttribute('class', 'statusbarpanel-iconic');
       icon.style.marginRight = '4px';
       setEvents('icon', icon);
-      icon.addEventListener('dblclick', bindr(this, this.onIconDblClick), false);
+      icon.addEventListener('dblclick', U.bindr(this, this.onIconDblClick), false);
 
       let labels = this.labels = {};
       let toggles = this.toggles = {};
@@ -1330,7 +1328,7 @@ Thanks:
         parent: panel,
         set: hbox,
         tree: ContextMenuTree,
-        onAppend: function (elem, menu) setEvents(capitalize(menu.name), elem)
+        onAppend: function (elem, menu) setEvents(U.capitalize(menu.name), elem)
       });
 
       let stbar = document.getElementById('status-bar');
@@ -1354,7 +1352,7 @@ Thanks:
         this.toggles[name].hidden = !this.player.has(name, 't');
       }
       if (!this.timerHandle) {
-        this.timerHandle = setInterval(bindr(this, this.update), 500);
+        this.timerHandle = setInterval(U.bindr(this, this.update), 500);
       }
     },
 
@@ -1368,7 +1366,7 @@ Thanks:
       this.labels.main.text = this.player.statusText;
       this.labels.volume.text = this.player.volume;
       for (let name in this.toggles) {
-        this.toggles[name].text = (this.player[name] ? String.toUpperCase : id)(name[0]);
+        this.toggles[name].text = (this.player[name] ? String.toUpperCase : U.id)(name[0]);
       }
     },
 
@@ -1433,7 +1431,7 @@ Thanks:
     onSetVolumeClick: function (event) (this.player.volume = event.target.getAttribute('volume'))
   };
 
-  fixDoubleClick(Stella.prototype, 'onIconClick', 'onIconDblClick');
+  U.fixDoubleClick(Stella.prototype, 'onIconClick', 'onIconDblClick');
 
   // }}}
 
@@ -1465,7 +1463,7 @@ Thanks:
     let install = function () {
       let stella = liberator.plugins.stella = new Stella();
       stella.addUserCommands();
-      liberator.log('Stella: installed.')
+      liberator.log('Stella: installed.');
     };
 
     // すでにインストール済みの場合は、一度ファイナライズする
