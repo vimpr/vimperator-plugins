@@ -292,6 +292,8 @@ Thanks:
       delete style.__stella_backup;
   }
 
+  function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
+
   function storeStyle (target, values, overwrite) {
     let [style, cstyle] = [target.style, content.getComputedStyle(target, '')];
     let backup = {};
@@ -372,6 +374,7 @@ Thanks:
       relatedIDs: '',
       relatedTags: '',
       repeating: '',
+      say: '',
       tags: '',
       title: '',
       totalTime: '',
@@ -707,6 +710,7 @@ Thanks:
       relatedIDs: 'r',
       relatedTags: 'r',
       repeating: 'rwt',
+      say: 'x',
       tags: 'r',
       title: 'r',
       totalTime: 'r',
@@ -715,7 +719,18 @@ Thanks:
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
 
+    initialize: function () {
+      this.__info_cache = {};
+    },
+
     get baseURL () 'http://www.nicovideo.jp/',
+
+    get cachedInfo () {
+      let url = currentURL();
+      if (this.__info_cache.url != url)
+        this.__info_cache = {url: url};
+      return this.__info_cache;
+    },
 
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
@@ -909,65 +924,100 @@ Thanks:
       }
     },
 
+    say: function (message) {
+      liberator.log('stsay')
+      this.sendComment(message)
+    },
+
     // みかんせいじん
     // test -> http://www.nicovideo.jp/watch/sm2586636
-    sendComment: function (message, command) {
-
-      return;
-
+    // 自分のコメントが見れないので、うれしくないかも。
+    sendComment: function (message, command, vpos) {
       let self = this;
-      let postkey, block_no, flvInfo, ticket;
+
+      // コメント連打を防止
+      {
+        let now = new Date();
+        let last = this.__last_comment_time;
+        if (last && (now.getTime() - last.getTime()) < 5000)
+          return raise('Shurrup!!');
+        this.__last_comment_time = now;
+      }
+
       function getThumbInfo () {
         liberator.log('getThumbInfo')
+        if (self.cachedInfo.block_no !== undefined)
+          return;
         let xhr = httpRequest(self.baseURL + 'api/getthumbinfo/' + self.id);
         let xml = xhr.responseXML;
         let cn = xml.getElementsByTagName('comment_num')[0];
-        block_no = cn.textContent.replace(/..$/, '');
-        liberator.log('block_no: ' + block_no)
+        self.cachedInfo.block_no = cn.textContent.replace(/..$/, '');
       }
+
       function getFLV () {
         liberator.log('getFLV')
+        if (self.cachedInfo.flvInfo !== undefined)
+          return;
         let xhr = httpRequest(self.baseURL + 'api/getflv?v=' + self.id);
         let res = xhr.responseText;
-        flvInfo = parseParameter(res);
-        liberator.log(flvInfo);
+        self.cachedInfo.flvInfo = parseParameter(res);
       }
+
       function getPostkey (){
         liberator.log('getPostkey')
-        let url = self.baseURL + 'api/getpostkey?thread=' + flvInfo.thread_id + '&block_no=' + block_no;
+        let info = self.cachedInfo;
+        if (info.postkey !== undefined)
+          return;
+        let url = fromTemplate(
+                    '--base--api/getpostkey?thread=--thread_id--&block_no=--block_no--',
+                    {
+                      base: self.baseURL,
+                      thread_id: info.flvInfo.thread_id,
+                      block_no: info.block_no
+                    }
+                  );
+        liberator.log(url)
         let xhr = httpRequest(url);
         let res = xhr.responseText;
-        postkey = res.replace(/^.*=/, '');
+        info.postkey = res.replace(/^.*=/, '');
       }
+
       function getComments () {
         liberator.log('getComments')
+        let info = self.cachedInfo;
+        if (info.ticket !== undefined)
+          return;
         let tmpl = '<thread res_from="-1" version="20061206" thread="--thread_id--" />';
-        let xhr = httpRequest(flvInfo.ms, fromTemplate(tmpl, flvInfo));
-        window.rxml = xhr.responseXML;
-        //window.exml = new XML(xhr.responseText);
-        let r = rxml.evaluate('//packet/thread', rxml, null, 9, null, 7, null).singleNodeValue;
-        ticket = r.getAttribute('ticket');
+        let xhr = httpRequest(info.flvInfo.ms, fromTemplate(tmpl, info.flvInfo));
+        let xml = xhr.responseXML
+        let r = xml.evaluate('//packet/thread', xml, null, 9, null, 7, null).singleNodeValue;
+        info.ticket = r.getAttribute('ticket')
       }
-      function commentXML () {
+
+      function sendChat () {
+        liberator.log('sendChat')
+        let info = self.cachedInfo;
         let tmpl = '<chat premium="--is_premium--" postkey="--postkey--" user_id="--user_id--" ticket="--ticket--" mail="--mail--" vpos="--vpos--" thread="--thread_id--">--body--</chat>';
         let args = {
-          __proto__: flvInfo,
-          ticket: ticket,
-          postkey: postkey,
-          vpos: 10,
+          __proto__: info.flvInfo,
+          ticket: info.ticket,
+          postkey: info.postkey,
+          // 0 秒コメントはうざいらしいので勝手に自重する
+          vpos: Math.max(100, parseInt(vpos || (self.player.ext_getPlayheadTime() * 100), 10)),
           body: message
         };
+        liberator.log(args)
         let data = fromTemplate(tmpl, args);
-        liberator.log();
-        let xhr = httpRequest(flvInfo.ms, data);
+        let xhr = httpRequest(info.flvInfo.ms, data);
         liberator.log(xhr.responseText)
       }
+
       liberator.log('sendcommnet')
       getThumbInfo();
       getFLV();
       getPostkey();
       getComments();
-      commentXML();
+      sendChat();
     },
 
   };
@@ -1165,6 +1215,8 @@ Thanks:
       add('fe[tch]', 'fetch');
       add('la[rge]', 'large');
       add('fu[llscreen]', 'fullscreen');
+      if (s2b(liberator.globalVariables.stella_use_nico_comment, false))
+        add('sa[y]', 'say');
 
       commands.addUserCommand(
         ['strel[ations]'],
