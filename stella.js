@@ -1,4 +1,4 @@
-/*
+/* {{{
 Copyright (c) 2008, anekos.
 All rights reserved.
 
@@ -30,8 +30,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
 # に参考になる日本語訳がありますが、有効なのは上記英文となります。
 ###################################################################################
 
-*/
+}}} */
 
+// PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Stella</name>
@@ -107,9 +108,9 @@ let PLUGIN_INFO =
       http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
 </VimperatorPlugin>;
+// }}}
 
-
-/*
+/* {{{
 TODO
    ・Icons
    ・Other video hosting websites
@@ -141,7 +142,7 @@ Thanks:
        http://d.hatena.ne.jp/janus_wel/
      ゆういち 氏
        http://yuichis.homeip.net/nicodai.user.html
-*/
+}}} */
 
 (function () {
 
@@ -603,7 +604,7 @@ Thanks:
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
 
     get fullscreen () this.storage.fullscreen,
-    // FIXME - 元に戻らない＆スクロールバーが出たまま
+    // FIXME - うまく元に戻らないことがある？
     set fullscreen () {
       this.storage.fullscreen = !this.storage.fullscreen;
       let p = this.player;
