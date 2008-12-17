@@ -9,28 +9,35 @@ var PLUGIN_INFO =
     <minVersion>1.2</minVersion>
     <maxVersion>1.2</maxVersion>
     <detail><![CDATA[
-== NEEDS LIBLARY ==
-_libly.js(ver.0.1.4)
+== Needs Liblary ==
+- _libly.js(ver.0.1.4)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Usage ==
+>||
 command[!] subcommand [ANY_TEXT]
+||<
 - !                create new tab.
 - ANY_TEXT         your input text
 
 e.g.)
+>||
 :mr  alc[,goo,any1,any2…] ANY_TEXT           -> request by the input text, and display to the buffer.
 :mr! goo[,any1,any2,…]    {window.selection} -> request by the selected text, and display to the new tab.
+||<
 
-== CUSTUMIZE .vimperatorrc ==
-== COMMAND(default [mr]) ==
+== Custumize .vimperatorrc ==
+=== Command(default [mr]) ===
+>||
 let g:multi_requester_command = "ANY1, ANY2, ……"
 or
 liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
+||<
 
-== SITEINFO ==
+=== SITEINFO ===
 e.g.)
-javascript &lt;&lt;EOM
+>||
+javascript <<EOM
 liberator.globalVariables.multi_requester_siteinfo = [
     {
         map:            ',me',                          // optional: keymap for this siteinfo call
@@ -47,12 +54,14 @@ liberator.globalVariables.multi_requester_siteinfo = [
     },
 ];
 EOM
+||<
 
-* other siteinfo by wedata.
+=== other siteinfo by wedata. ===
     @see http://wedata.net/databases/Multi%20Requester/items
 
-== MAPPINGS ==
+=== Mappings ===
 e.g.)
+>||
 javascript <<EOM
 liberator.globalVariables.multi_requester_mappings = [
     [',ml', 'ex'],                  // == :mr  ex
@@ -60,12 +69,15 @@ liberator.globalVariables.multi_requester_mappings = [
     [',ma', 'alc',    , 'args'],    // == :mr  alc args
 ];
 EOM
+||<
 
-== OTHER OPTIONS ==
+=== Other Options ===
+>||
 let g:multi_requester_use_wedata = "false"             // true by default
+||<
 
-== TODO ==
-* wedata local cache.
+=== Todo ===
+- wedata local cache.
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -199,7 +211,7 @@ var DataAccess = {
         });
 
         if (useWedata) {
-            logger.log('use Wedata');
+            logger.log('use wedata');
             this.getWedata(function(site) {
                 if (mergedSiteinfo[site.name]) return;
                 mergedSiteinfo[site.name] = {};
@@ -371,7 +383,6 @@ var MultiRequester = {
                 this.extractLink(res, extractLink);
                 return;
             }
-
             var ignoreTags = ['script'].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
             doc = document.createElementNS(null, 'div');
             res.getHTMLDocument(xpath, null, ignoreTags, function(node, i) { doc.appendChild(node) } );
