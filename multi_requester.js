@@ -30,7 +30,7 @@ liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
 
 == SITEINFO ==
 e.g.)
-javascript &lt;&lt;EOM
+javascript <<EOM
 liberator.globalVariables.multi_requester_siteinfo = [
     {
         map:            ',me',                          // optional: keymap for this siteinfo call
