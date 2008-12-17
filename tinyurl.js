@@ -27,19 +27,14 @@ plugins.tinyurl.getExpand(url):
 
 (function() {
     const TinyAPI = 'http://tinyurl.com/api-create.php?url=';
-    function echopy(str)
-    {
-        liberator.echo(str);
-        util.copyToClipboard(str);
-    }
 
     commands.add(['tinyurl'], 'echo and copy TinyURL',
-        function(args) echopy(tiny.getTiny(args.length==0 ? buffer.URL : args.string)),
+        function(args) util.copyToClipboard(tiny.getTiny(args.length==0 ? buffer.URL : args.string), true),
         {
             argCount: '?',
         });
     commands.add(['expandurl'], 'expand TinyURL',
-        function(args) echopy(tiny.getExpand(args.string)),
+        function(args) util.copyToClipboard(tiny.getExpand(args.string), true),
         {
             argCount: '1',
         });
