@@ -8,39 +8,48 @@ var PLUGIN_INFO =
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
-Usage:
+    == Usage ==
+      :togglelocalkeymode:
+        有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+      :loadkeymaps:
+        任意のキーマップの読み込みを行う
+      :clearkeymaps:
+        loadkeymaps の読み込みを無効にする
 
-:togglelocalkeymode    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
-:loadkeymaps           - 任意のキーマップの読み込みを行う
-:clearkeymaps          - loadkeymaps の読み込みを無効にする
+    == .vimperatorrc ==
+      g:localkeymode_enable:
+        [true=有効/false=無効(デフォルト)]
 
-.vimperatorrc:
-g:localkeymode_enable : [true=有効/false=無効(デフォルト)]
+    == .vimperatorrrc 設定例 ==
+      >||
+      let g:localkeymode_enable = "true"
+      javascript <<EOM
+      //[ [url regexp, [ [removekeys], [key, command/function, {noremap:true, count: true, ...}], ... ]], ... ]
+      liberator.globalVariables.localKeyMappings=
+      [
+        [ Url_RegExp,
+          [ key, command/function, {extra} ],
+          [...]
+        ],
+        [/www\.hoge\.com/, [
+          ['h l'],                  // 一時的に削除するキーマップ(スペース区切で指定)
+          [['1','0'], ':open http://www.google.com'],
+          ['e', '<C-v>?', {noremap:true}],
+          ['q', 'd', {noremap:true}],
+        ],
+      ];
+      EOM
+      ||<
 
-.vimperatorrrc 設定例:
-let g:localkeymode_enable = "true"
-javascript <<EOM
-//[ [url regexp, [ [removekeys], [key, command/function, {noremap:true, count: true, ...}], ... ]], ... ]
-liberator.globalVariables.localKeyMappings=
-[
-  [ Url_RegExp, 
-    [ key, command/function, {extra} ],
-    [...]
-  ],
-  [/www\.hoge\.com/, [
-    ['h l'],                  // 一時的に削除するキーマップ(スペース区切で指定)
-    [['1','0'], ':open http://www.google.com'],
-    ['e', '<C-v>?', {noremap:true}],
-    ['q', 'd', {noremap:true}],
-  ],
-];
-EOM
-
-Url_RegExp       : 設定を有効にしたいURL(正規表現での指定)
-key              : 割り当てたいキー名(Arrayで複数指定可能)
-command/function : キーに割り当てたいコマンド/メソッド。
-                   コマンドは ':hoge' のように先頭に':'を付加してください。
-extra            : noremap, count 等の指定。addUserMap にて使用されます。
+      Url_RegExp:
+        設定を有効にしたいURL(正規表現での指定)
+      key:
+        割り当てたいキー名(Arrayで複数指定可能)
+      command/function:
+        キーに割り当てたいコマンド/メソッド。
+       コマンドは ':hoge' のように先頭に':'を付加してください。
+      extra:
+      noremap, count 等の指定。addUserMap にて使用されます。
   ]]></detail>
 </VimperatorPlugin>;
 
@@ -67,7 +76,7 @@ liberator.plugins.LocalKeyMode = (function() {
 
   var _enableTabs = [];
   var _names;
-  
+
   var feedKeys = liberator.modules ? liberator.modules.events.feedkeys
                                    : liberator.events.feedkeys;
   // utility function
@@ -77,9 +86,9 @@ liberator.plugins.LocalKeyMode = (function() {
       {flags:org.flags, rhs:org.rhs, noremap:org.noremap }
     );
   }
-  
+
   var Class = function() function() {this.initialize.apply(this, arguments);};
-  
+
   var LocalKeyMode = new Class();
   LocalKeyMode.prototype = {
     // 初期化メソッド
@@ -91,7 +100,7 @@ liberator.plugins.LocalKeyMode = (function() {
       this.completeNames;       // 補完用
       this.tabinfo = [];        // タブごとの状態保持用
       this.helpstring = '';
-      
+
       var global = liberator.globalVariables;
       this.panel = this.setupStatusBar();
       this.isEnable = global.localkeymode_enable != undefined ?
@@ -152,7 +161,7 @@ liberator.plugins.LocalKeyMode = (function() {
       var keymaps = [];
       var delkeys = [];
       if (!(uri instanceof RegExp) ) uri = new RegExp(uri.replace(/(?=[^-0-9A-Za-z_@])/g, '\\'));
-      
+
       items.forEach( function( [key, command, extra] ){
         if (!key) return;
         else if (!command) delkeys = delkeys.concat( key.split(' '));
@@ -243,7 +252,7 @@ liberator.plugins.LocalKeyMode = (function() {
           return;
         }
       }
-      
+
       for (let i=0, l=settings.length; i<settings.length; i++) {
         if ( this.keymapnames[i].test(content.location.href) ) {
           this.setupKeyMaps( settings[i] );
@@ -322,6 +331,6 @@ liberator.plugins.LocalKeyMode = (function() {
       });
     },
   };
-  
+
   return new LocalKeyMode();
 })();
