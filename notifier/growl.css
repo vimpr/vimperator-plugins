@@ -65,11 +65,11 @@ div.observer_growl div.observer_growl_notification div.header {
     font-size: 10px;
 }
 
-div.observer_growl div.observer_growl_notification div.header a:link {
+div.observer_growl div.observer_growl_notification a:link {
     color: #EF6D29;
 }
 
-div.observer_growl div.observer_growl_notification div.header a:hover {
+div.observer_growl div.observer_growl_notification a:visited {
     color: #A50000;
 }
 

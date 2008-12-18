@@ -2,14 +2,14 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
-    <description>notice of change framework.</description>
+    <description>change notice framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
-== NEEDS LIBRARY ==
+== Needs Library ==
 - _libly.js(ver.0.1.9)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
@@ -108,7 +108,7 @@ buildMessages(diff):
     必ず実装して下さい。
     this.diff() により抽出されたオブジェクトを元に、liberator.plugins.notifier.Message のインスタンス、
     または、その配列を返却して下さい。
-  ]]></detail>
+    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -259,14 +259,16 @@ function bootstrap() {
                 var parsed, diff;
                 if (typeof this.parse == 'function') parsed = this.parse(res);
                 if (parsed && typeof this.diff == 'function') diff = this.diff(this.cache, parsed);
-                if (diff && (typeof diff.length != 'undefined' && diff.length > 0)) {
+                if (diff &&
+                    (typeof diff.length == 'undefined' ||
+                    (typeof diff.length != 'undefined' && diff.length > 0))) {
                     this.cache = parsed;
                     if (typeof this.buildMessages == 'function') {
                         let messages = this.buildMessages(diff);
-                        [].concat(messages).forEach($U.bind(this, function(m) {
+                        [].concat(messages).forEach(function(m) {
                             this.notify(m);
                             liberator.sleep(1500);
-                        }));
+                        }, this);
                     }
                 }
             }));

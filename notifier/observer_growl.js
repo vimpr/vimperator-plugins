@@ -8,6 +8,37 @@ var PLUGIN_INFO =
     <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+== Settings ==
+>||
+liberator.globalVariables.observer_growl_settings = {
+    'message title': {
+        life: number,           // sec (10 sec by default)
+        sticky: bool,           // true or false (false by default)
+        sticky_keyword: [       // keyword ary
+            'keyword1',
+            'keyword2'
+        ],
+        hide: bool              // true or false (false by default)
+                                //   however it's displayed when there is a keyword in the message.
+    }
+};
+||<
+e.g.)
+>||
+javascript <<EOM
+liberator.globalVariables.observer_growl_settings = {
+    'Hatelabo bottle': { life: 20, keyword: 'はてな' },
+    'Weather forecast by Yahoo!': { sticky: true }
+};
+EOM
+||<
+
+== Todo ==
+- sticky_keyword
+- hide
+- close all
+    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -24,19 +55,21 @@ var Growl = function() {//{{{
 };
 Growl.prototype = {
     defaults: {
-        life: 10000
+        life: 10,
+        sticky: false,
+        suticky_keyword: [],
+        hide: false,
     },
-    initialize: function(dom, container, options) {
-        this.dom = dom;
+    initialize: function(node, container, options) {
+        this.node = node;
         this.container = container;
         this.created = new Date();
         this.options = $U.extend(this.defaults, (options || {}));
-        this.life = this.options.life;
-        dom.childNodes[0].addEventListener("click", $U.bind(this, this.remove), false);
+        node.childNodes[0].addEventListener("click", $U.bind(this, this.remove), false);
     },
     remove: function() {
         // TODO: animation!!!!
-        this.container.removeChild(this.dom);
+        this.container.removeChild(this.node);
     },
 
 };//}}}
@@ -44,6 +77,7 @@ Growl.prototype = {
 notifier.observer.register(notifier.Observer, {
     initialize: function () {
         this.count = 1;
+        this.settings;
 
         io.getRuntimeDirectories('').forEach(function(dir) {
             var path = io.expandPath(dir.path + '/plugin/notifier');
@@ -56,6 +90,8 @@ notifier.observer.register(notifier.Observer, {
                 }
             });
         });
+
+        this.settings = liberator.globalVariables.observer_growl_settings || {};
     },
     update: function(message) {
 
@@ -68,7 +104,7 @@ notifier.observer.register(notifier.Observer, {
 
         var notification = this.createPopup(message, doc, container);
         // TODO: animation!!!
-        var node = doc.importNode(notification, true);
+        //container.appendChild(doc.importNode(notification, true));
         container.appendChild(notification);
 
         if (container.childNodes.length == 1) {
@@ -78,8 +114,8 @@ notifier.observer.register(notifier.Observer, {
 
         this.count++;
     },
-    createPopup: function(message, doc, nodes) {
-        var dom;
+    createPopup: function(message, doc, container) {
+        var node;
         var html =
             <div class="observer_growl_notification" style="display: block;">
                 <div class="close">&#215;</div>
@@ -90,11 +126,9 @@ notifier.observer.register(notifier.Observer, {
                     )}</div>
                 <div class="message">{new XMLList(message.message || '')}</div>
             </div>;
-        dom = $U.xmlToDom(html, doc, nodes);
-        // TODO: get settings
-        var options = {};
-        dom.__data__ = new Growl(dom, nodes, {});
-        return dom;
+        node = $U.xmlToDom(html, doc);
+        node.__data__ = new Growl(node, container, this.settings[message.title]);
+        return node;
     },
     checkStatus: function() {
 
@@ -107,7 +141,8 @@ notifier.observer.register(notifier.Observer, {
             let item = container.childNodes[i];
             let growl = item.__data__;
             if (growl && growl.created &&
-                growl.created.getTime() + growl.life < (new Date()).getTime()) {
+                !growl.options.sticky &&
+                growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime()) {
                 removeNodes.push(item);
             }
         }

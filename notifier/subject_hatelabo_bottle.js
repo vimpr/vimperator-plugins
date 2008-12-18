@@ -2,7 +2,7 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
-    <description>notifies if hatena bottle was changed.</description>
+    <description>hatena bottle change notice.</description>
     <description lang="ja">はてなボトルの変更通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <version>0.1.1</version>
@@ -44,7 +44,7 @@ notifier.subject.register(notifier.SubjectHttp, {
             var permalink = $U.getNodesFromXPath('descendant::a[@class="hatena-star-uri"]', d);
             if (permalink.length > 0)
                 permalink = URL + permalink[0];
-            return new notifier.Message('Hatelab bottle', $U.xmlSerialize(d), permalink)
+            return new notifier.Message('Hatelabo bottle', $U.xmlSerialize(d), permalink)
         }));
     }
 });
