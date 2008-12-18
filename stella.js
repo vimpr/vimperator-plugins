@@ -245,7 +245,7 @@ Thanks:
           if (xhr.status == 200)
             onComplete && onComplete(xhr);
           else
-            raise(xhr.statusText);
+            U.raise(xhr.statusText);
         }
       };
       xhr.open(data ? 'POST' : 'GET', uri, !!onComplete);
@@ -785,11 +785,16 @@ Thanks:
       if (player.ext_getVideoSize() === 'fit')
         player.ext_setVideoSize('normal');
 
-      win.toggleMaximizePlayer();
       if (value) {
+        // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
+        let oldStyle = content.getComputedStyle(player, '');
+        win.toggleMaximizePlayer();
         turnOn();
+        // 保存したもので修正する
+        player.style.__stella_backup.height = oldStyle.height;
         win.onresize = fixFullscreen;
       } else {
+        win.toggleMaximizePlayer();
         turnOff();
         delete win.onresize;
       }
@@ -969,7 +974,7 @@ Thanks:
         let now = new Date();
         let last = this.__last_comment_time;
         if (last && (now.getTime() - last.getTime()) < 5000)
-          return raise('Shurrup!!');
+          return U.raise('Shurrup!!');
         this.__last_comment_time = now;
       }
 
@@ -1215,7 +1220,7 @@ Thanks:
             ? funcS
             : function (arg, bang) {
                 if (!self.isValid)
-                  raise('Stella: Current page is not supported');
+                  U.raise('Stella: Current page is not supported');
                 let p = self.player;
                 let func = bang ? funcB : funcS;
                 if (p.has(func, 'rwt'))
@@ -1225,7 +1230,7 @@ Thanks:
                 else if (p.has(func, 'x'))
                   p[func].apply(p, arg);
                 else
-                  raise('Stella: The function is not supported in this page.');
+                  U.raise('Stella: The function is not supported in this page.');
                 self.update();
               },
           {argCount: '*', bang: !!funcB},
@@ -1259,7 +1264,7 @@ Thanks:
           bang: true,
           completer: function (context, args) {
             if (!self.isValid)
-              raise('Stella: Current page is not supported');
+              U.raise('Stella: Current page is not supported');
             if (!self.player.has('relations', 'r'))
               return;
             context.title = ['Tag/ID', 'Description'];
@@ -1441,7 +1446,7 @@ Thanks:
 
   function makeRelationURL (player, command) {
     if (!player.has('makeURL', 'x'))
-      raise('Mysterious Error! makeURL has been not implmented.');
+      U.raise('Mysterious Error! makeURL has been not implmented.');
     if (command.match(/^[#\uff03]/))
       return player.makeURL(command.slice(1), Player.URL_ID);
     if (command.match(/^[:\uff1a]/))
