@@ -5,9 +5,16 @@ var PLUGIN_INFO =
     <description>yahoo weather forecast notice.</description>
     <description lang="ja">ヤフー天気予報通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <detail><![CDATA[
+== Options ==
+>||
+liberator.globalVariables.subject_weather_yahoo_urls =  [url1, url2,…]
+||<
+- @see http://weather.yahoo.co.jp/weather/
+    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -19,8 +26,7 @@ var libly = notifier.libly;
 var $U = libly.$U;
 var logger = $U.getLogger('subject_weather_yahoo');
 
-// @see http://weather.yahoo.co.jp/weather/
-var URLs = [
+var URLs = liberator.globalVariables.subject_weather_yahoo_urls || [
     'http://weather.yahoo.co.jp/weather/jp/27/6200/27127/5300001.html',
     'http://weather.yahoo.co.jp/weather/jp/13/4410/13113/1500001.html'
 ];
@@ -55,6 +61,7 @@ URLs.forEach(function(url) {
 
             var table = $U.getFirstNodeFromXPath('descendant::table', source);
             table.style.width = '95%';
+            table.style.color = '#222';
             var cloneTable = table.cloneNode(false);
             this.cloneTable(cloneTable, table, start, start + 3, true);
 

@@ -28,9 +28,6 @@ notifier.subject.register(notifier.SubjectHttp, {
         headers: null,
         extra: null
     },
-    preInitialize: function() {
-        logger.log('preInitialize: ');
-    },
     parse: function(res) {
         // if (this.count == 0) return []; // for debug
         var doc = res.getHTMLDocument('id("body")//div[contains(concat(" ", @class, " "), " entry ")]');

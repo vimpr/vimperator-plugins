@@ -36,12 +36,12 @@ body > div.observer_growl.center {
 }
 
 /** Cross Browser Styling **/
-div.center div.observer_growl_notification, div.center div.observer_growl-closer {
+div.center div.observer_growl_notification, div.center div.observer_growl_closer {
     margin-left: auto;
     margin-right: auto;
 }
 
-div.observer_growl div.observer_growl_notification, div.observer_growl div.observer_growl-closer {
+div.observer_growl div.observer_growl_notification, div.observer_growl div.observer_growl_closer {
     background-color: #000;
     color: #fff;
     opacity: .85;

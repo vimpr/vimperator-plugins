@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -28,7 +28,7 @@ e.g.)
 >||
 javascript <<EOM
 liberator.globalVariables.observer_growl_settings = {
-    'Hatelabo bottle': { life: 20, keyword: 'はてな' },
+    'Hatelabo bottle': { life: 20, sticky_keyword: 'はてな' },
     'Weather forecast by Yahoo!': { sticky: true }
 };
 EOM
@@ -37,7 +37,6 @@ EOM
 == Todo ==
 - sticky_keyword
 - hide
-- close all
     ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -54,22 +53,22 @@ var Growl = function() {//{{{
     this.initialize.apply(this, arguments);
 };
 Growl.prototype = {
-    defaults: {
-        life: 10,
-        sticky: false,
-        suticky_keyword: [],
-        hide: false,
-    },
-    initialize: function(node, container, options) {
+    initialize: function(node, options) {
+        this.defaults = {
+            life: 10,
+            sticky: false,
+            suticky_keyword: [],
+            hide: false
+        };
         this.node = node;
-        this.container = container;
         this.created = new Date();
         this.options = $U.extend(this.defaults, (options || {}));
-        node.childNodes[0].addEventListener("click", $U.bind(this, this.remove), false);
+        var div = node.getElementsByTagName('div');
+        div[0].addEventListener("click", $U.bind(this, this.remove), false);
     },
     remove: function() {
         // TODO: animation!!!!
-        this.container.removeChild(this.node);
+        this.node.parentNode.removeChild(this.node);
     },
 
 };//}}}
@@ -101,6 +100,7 @@ notifier.observer.register(notifier.Observer, {
             doc.body.appendChild($U.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
             container = doc.getElementById("observer_growl");
         }
+        var closer = doc.getElementById("observer_growl_closer");
 
         var notification = this.createPopup(message, doc, container);
         // TODO: animation!!!
@@ -110,6 +110,12 @@ notifier.observer.register(notifier.Observer, {
         if (container.childNodes.length == 1) {
             let interval = setInterval($U.bind(this, this.checkStatus), 1000);
             container.__interval__ = interval;
+        } else if (container.childNodes.length >= 2) {
+            if (!closer) {
+                closer = $U.xmlToDom(<div id="observer_growl_closer" class="observer_growl_closer center" style="display: block;">[close all]</div>, doc);
+                container.insertBefore(closer, container.firstChild);
+                closer.addEventListener("click", $U.bind(this, this.removeAll, 'test'), false);
+            }
         }
 
         this.count++;
@@ -127,10 +133,11 @@ notifier.observer.register(notifier.Observer, {
                 <div class="message">{new XMLList(message.message || '')}</div>
             </div>;
         node = $U.xmlToDom(html, doc);
-        node.__data__ = new Growl(node, container, this.settings[message.title]);
+        node.__data__ = new Growl(node, this.settings[message.title]);
         return node;
     },
-    checkStatus: function() {
+    checkStatus: function(force) {
+        force = force == 'EVENT_REMOVE_ALL' ? true : false;
 
         var doc = window.content.document;
         var container = doc.getElementById("observer_growl");
@@ -140,18 +147,31 @@ notifier.observer.register(notifier.Observer, {
         for (let i = 0, len = container.childNodes.length; i < len; i++) {
             let item = container.childNodes[i];
             let growl = item.__data__;
-            if (growl && growl.created &&
-                !growl.options.sticky &&
-                growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime()) {
-                removeNodes.push(item);
+            if (force ||
+                (growl && growl.created && !growl.options.sticky &&
+                 growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime())) {
+                if (item.id != 'observer_growl_closer')
+                    removeNodes.push(item);
+            }
+
+            if (len == 1) {
+                let elem = container.childNodes[0];
+                if (elem.id == 'observer_growl_closer')
+                    elem.parentNode.removeChild(elem);
             }
         }
         removeNodes.forEach(function(element) element.__data__.remove());
 
-        if (container.childNodes.length == 0)
+        if (force || container.childNodes.length == 0)
             clearInterval(container.__interval__);
 
+    },
+    removeAll: function(a) {
+        this.checkStatus('EVENT_REMOVE_ALL');
+        var closer = window.content.document.getElementById("observer_growl_closer");
+        closer.parentNode.removeChild(closer);
     }
+
 });
 
 })();
