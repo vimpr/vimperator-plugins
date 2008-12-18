@@ -5,11 +5,11 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.5</version>
+    <version>0.2.6</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
-== NEEDS LIBRARY ==
+== Needs Library ==
 - _libly.js(ver.0.1.9)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
@@ -105,8 +105,8 @@ NextLink.prototype = {
             $U.bind(this, function(args) { this.handler(args); }), null, true
         );
         var loadEvent = autocommands['DOMLoad'] || 'PageLoad'; // for 1.2
-        liberator.execute(':autocmd! ' + (this.is2_0later ? 'DOMLoad' : 'PageLoad') + ' .* :nextlink onLoad');
-        liberator.execute(':autocmd! LocationChange .* :nextlink onLocationChange');
+        liberator.execute(':autocmd ' + (this.is2_0later ? 'DOMLoad' : 'PageLoad') + ' .* :nextlink onLoad');
+        liberator.execute(':autocmd LocationChange .* :nextlink onLocationChange');
     },
     handler: function(args) {
         event = args.string || args;
