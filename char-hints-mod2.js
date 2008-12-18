@@ -138,10 +138,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
             hints.onEvent = charhints.onEvent;
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
-            highlight.CSS = highlight.CSS.replace(
-                    "Hint::after,,*  content: attr(number);",
-                    "Hint::after,,*  content: attr(hintchar);");
-            highlight.reload();
+            liberator.execute(":hi Hint::after content: attr(hintchar)");
         }; //}}}
         charhints.uninstall = function () //{{{
         {
@@ -149,10 +146,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
             hints.onEvent = charhints.original.onEvent;
             liberator.eval("onInput = plugins.charhints.original.onInput", hintContext);
 
-            highlight.CSS = highlight.CSS.replace(
-                    "Hint::after,,*  content: attr(hintchar);",
-                    "Hint::after,,*  content: attr(number);");
-            highlight.reload();
+            liberator.execute(":hi Hint::after content: attr(number)");
         }; //}}}
     }
     charhints.install();
