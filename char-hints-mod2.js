@@ -89,7 +89,11 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         }, //}}}
         onInput: function (event) //{{{
         {
-            var hintString = commandline.command;
+            let eventkey = events.toString(event);
+            if(/^\d$/.test(eventkey)) {
+                commandline.command += eventkey;
+            }
+            let hintString = commandline.command;
             commandline.command = hintString.replace(/[A-Z]+/g, "");
             charhints.original.onInput(event);
             showCharHints();
@@ -100,14 +104,23 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
             }
             if(hintChars.length>0) {
                 let numstr = String(chars2num(hintChars.join("")));
+                // no setTimeout, don't run nice
                 setTimeout(function () {
                     for(let i=0,l=numstr.length;i<l;++i) {
                         let num = numstr[i];
                         let alt = new Object;
                         alt.liberatorString = num;
-                        hints.onEvent(alt);
+                        charhints.original.onEvent(alt);
                     }
                 }, 10);
+            }
+        }, //}}}
+        onEvent: function (event) //{{{
+        {
+            if(/^\d$/.test(events.toString(event))) {
+                charhints.onInput(event);
+            } else {
+                charhints.original.onEvent(event);
             }
         }, //}}}
     };
@@ -116,11 +129,13 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         charhints.original = {
             show: hints.show,
             onInput: liberator.eval("onInput", hintContext),
+            onEvent: hints.onEvent,
         };
 
         charhints.install = function () //{{{
         {
             hints.show = charhints.show;
+            hints.onEvent = charhints.onEvent;
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
             highlight.CSS = highlight.CSS.replace(
@@ -131,6 +146,7 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
         charhints.uninstall = function () //{{{
         {
             hints.show = charhints.original.show;
+            hints.onEvent = charhints.original.onEvent;
             liberator.eval("onInput = plugins.charhints.original.onInput", hintContext);
 
             highlight.CSS = highlight.CSS.replace(
@@ -142,4 +158,4 @@ set histchars="hjkl" => show char-hint use h, j, k, l.
     charhints.install();
 })();
 
-// vim: set fdm=marker sw=4 ts=4 et:
+// vim: set fdm=marker sw=4 ts=4 et fenc=utf-8:
