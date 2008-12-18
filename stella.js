@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.11</version>
+  <version>0.13</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -785,7 +785,13 @@ Thanks:
         // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
         let oldHeight = content.getComputedStyle(player, '').height;
         win.toggleMaximizePlayer();
+        turnOnMain();
+        // 保存したもので修正する for toggleMaximizePlayer問題
+        player.style.__stella_backup.height = oldHeight;
+        win.onresize = fixFullscreen;
+      }
 
+      function turnOnMain () {
         let viewer = {w: 544, h: 384};
         let screen = {
           w: content.innerWidth,
@@ -816,14 +822,10 @@ Thanks:
             marginTop:  ((screen.h - viewer.h * scale.w) / 2) + 'px'
           }
         );
-        // 保存したもので修正する for toggleMaximizePlayer問題
-        player.style.__stella_backup.height = oldHeight;
 
         player.SetVariable('videowindow._xscale', 100 * scale.v);
         player.SetVariable('videowindow._yscale', 100 * scale.v);
         setVariables(true);
-
-        win.onresize = fixFullscreen;
       }
 
       function turnOff () {
@@ -837,7 +839,7 @@ Thanks:
       }
 
       function fixFullscreen ()
-        ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOn, 500));
+        ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOnMain, 500));
 
       // メイン
       value = !!value;
