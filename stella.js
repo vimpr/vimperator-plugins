@@ -773,35 +773,6 @@ Thanks:
 
     get fullscreen () !!this.storage.fullscreen,
     set fullscreen (value) {
-      value = !!value;
-      if (this.storage.fullscreen === value)
-        return;
-
-      this.storage.fullscreen = value;
-
-      let self = this, player = this.player,
-          win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
-
-      if (player.ext_getVideoSize() === 'fit')
-        player.ext_setVideoSize('normal');
-
-      if (value) {
-        // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
-        let oldStyle = content.getComputedStyle(player, '');
-        win.toggleMaximizePlayer();
-        turnOn();
-        // 保存したもので修正する
-        player.style.__stella_backup.height = oldStyle.height;
-        win.onresize = fixFullscreen;
-      } else {
-        win.toggleMaximizePlayer();
-        turnOff();
-        delete win.onresize;
-      }
-      win.scrollTo(0, 0);
-
-      // 以下関数定義のみ - setVariables turnOn/Off fixFullscreen
-
       function setVariables (fullscreen) {
         NicoPlayer.Variables.forEach(function ([name, normal, full]) {
           let v = fullscreen ? full : normal;
@@ -811,6 +782,10 @@ Thanks:
       }
 
       function turnOn () {
+        // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
+        let oldHeight = content.getComputedStyle(player, '').height;
+        win.toggleMaximizePlayer();
+
         let viewer = {w: 544, h: 384};
         let screen = {
           w: content.innerWidth,
@@ -821,6 +796,7 @@ Thanks:
           h: Math.max(1, screen.h / viewer.h)
         };
         scale.v = Math.min(scale.w, scale.h);
+
         U.storeStyle(doc.body, {
           backgroundImage:  'url()',
           backgroundRepeat: '',
@@ -840,12 +816,19 @@ Thanks:
             marginTop:  ((screen.h - viewer.h * scale.w) / 2) + 'px'
           }
         );
+        // 保存したもので修正する for toggleMaximizePlayer問題
+        player.style.__stella_backup.height = oldHeight;
+
         player.SetVariable('videowindow._xscale', 100 * scale.v);
         player.SetVariable('videowindow._yscale', 100 * scale.v);
         setVariables(true);
+
+        win.onresize = fixFullscreen;
       }
 
       function turnOff () {
+        delete win.onresize;
+        win.toggleMaximizePlayer();
         U.restoreStyle(doc.body, true);
         U.restoreStyle(player, true);
         player.style.marginLeft = '';
@@ -856,6 +839,21 @@ Thanks:
       function fixFullscreen ()
         ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOn, 500));
 
+      // メイン
+      value = !!value;
+      if (this.storage.fullscreen === value)
+        return;
+
+      this.storage.fullscreen = value;
+
+      let self = this, player = this.player,
+          win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
+
+      if (player.ext_getVideoSize() === 'fit')
+        player.ext_setVideoSize('normal');
+
+      (value ? turnOn : turnOff)();
+      win.scrollTo(0, 0);
     },
 
     get id ()
