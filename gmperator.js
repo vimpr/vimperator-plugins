@@ -1,90 +1,111 @@
-/**
- * ==VimperatorPlugin==
- * @name           gmperator
- * @description    Vimperator plugin for Greasemonkey
- * @author         teramako teramako@gmail.com
- * @namespace      http://d.hatena.ne.jp/teramako/
- * @version        0.6c
- * ==/VimperatorPlugin==
- *
- * ---------------------------
- * Usage:
- * ---------------------------
- * {{{
- *
- * :gmli[st] {filter}                -> show user scripts matches {filter}
- * :gmli[st]!                        -> show all user scripts
- * :gmli[st] full                    -> same as :gmli[st]!
- *
- * :gmlo[ad] {name|filename}         -> load the user script to the current page
- *                                      but, don't dispatch load event
- *                                      so maybe you should edit the scripts before load
- * :gmlo[ad]! {name|filename}        -> force load the user script
- *
- * :gmset!                           -> toggle enable/disable Greasemonkey
- * :gmset! {filename}                -> toogle enable/disable the script
- * :gmset {filename} {options}
- *   {options}:
- *       -n[ame] {value}              -> change name to {value}
- *       -i[nclude] {expr[,expr,...]} -> change includes to expr list ("," demiliter)
- *       -e[xclude] {expr[,expr,...]} -> change excludes to expr list ("," demiliter)
- *
- * :gmcommand {command name}          -> run Greasemonkey Command
- *
- * Caution:
- * The change is permanent, not only the session.
- * And cannot get back.
- *
- * e.g.)
- * :gmset! {filename} -n fooScriptName -i http://*,https://* -e http://example.com/*
- *   toggle enable or disable,
- *   name to "fooScriptName",
- *   includes to "http://*" and "https://*",
- *   and excludes to "http://example.com/*"
- *
- * ---------------------------
- * Autocommand
- * ---------------------------
- * Available events:
- * 'GMInjectedScript'  -> when open either foreground or background
- * 'GMActiveScript'    -> when TabSelect or open foreground
- * e.g.)
- * autocmd GMActiveScript scriptName\.user\.js$ :echo "scriptName is executing"
- *    when any URL and scriptName.user.js is executing
- *
- * ---------------------------
- * Dialog
- * ---------------------------
- * :dialog userscriptmanager -> open Greasemonkey UserScript Manager
- *
- * }}}
- * ---------------------------
- * For plugin developer:
- * ---------------------------
- * {{{
- *
- * you can access to the sandbox of Greasemonkey !!!
- *
- * liberator.plugins.gmperator => (
- *   allItem           :  return object of key   : {panalID},
- *                                         value : {GmContainer}
- *                              {panelID}   => @see gBrowser.mTags[].linkedPanel
- *   currentPanel
- *   currentContainer  :  return the current {GmContainer} object
- *   currentSandbox    :  return the current sandbox object
- *   gmScripts         :  return array of {userScripts}
- *                              {userScripts} => (
- *                                  filename   : {String}
- *                                  name       : {String}
- *                                  namespace  : {String}
- *                                  description: {String}
- *                                  enabled    : {Boolean}
- *                                  includes   : {String[]}
- *                                  encludes   : {String[]}
- *                              )
- * )
- * }}}
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>Vimperator plugin for Greasemonkey</description>
+<author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
+<version>0.6c</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0pre</maxVersion>
+<detail><![CDATA[
+
+== Command ==
+
+=== gmlist ===
+:gmli[st] {filter}:
+    show user scripts matches {filter}
+:gmli[st]!:
+    show all user scripts
+:gmli[st] full:
+    same as :gmli[st]!
+
+=== gmload ===
+:gmlo[ad] {name|filename}:
+    load the user script to the current page
+    but, do not dispatch load event
+    so maybe you should edit the scripts before load
+:gmlo[ad]! {name|filename}:
+    force load the user script
+
+=== gmset ===
+:gmset!:
+    toggle enable/disable Greasemonkey
+:gmset! {filename}:
+    toggle enable/disable the script
+:gmset {filename} {options}:
+    change the {filename} script attributes.
+    {options}:
+        -n[name] {value}:  change name to {value}
+        -i[nclude] {expr[,expr,...]}: change includes to expr list ("," demiliter)
+        -e[xclude] {expr[,expr,...]}: change excludes to expr list ("," demiliter)
+    Caution:
+        This change is permanent, not only the session.
+        And cannot get back.
+
+
+==== example ====
+    :gmset! {filename} -n fooScriptName -i http://*,https://* -e http://example.com/*:
+         - toggle enable or disable,
+         - name to "fooScriptName",
+         - includes to "http://*" and "https://*",
+         - and excludes to "http://example.com/*"
+
+
+=== gmcommand ===
+:gmcommand {command name}:
+    run Greasemonkey Command
+
+== AutoCommand ==
+
+Available events
+
+GMInjectedScript:
+    when open either foreground or background
+GMActiveScript:
+    when TabSelect or open foreground
+    example:
+        autocmd GMActiveScript scriptName\.user\.js$ :echo "scriptName is executing"
+        when any URL and scriptName.user.js is executing
+
+
+== Dialog ==
+
+:dialog userscriptmanager:
+    open Greasemonkey UserScript Manager
+
+== for JavaScripter ==
+you can access to the sandbox of Greasemonkey !!!
+
+liberator.plugins.gmperator:
+    allItem:
+        return object of
+            key:
+                {panalID}
+            value:
+                {GmContainer}
+
+        {panelID}:
+            @see gBrowser.mTags[].linkedPanel
+
+    currentPanel:
+        currentContainer  :
+            return the current {GmContainer} object
+        currentSandbox    :
+            return the current sandbox object
+        gmScripts         :
+             return array of {userScripts}
+                              {userScripts} => (:
+                                 - filename   : {String}
+                                 - name       : {String}
+                                 - namespace  : {String}
+                                 - description: {String}
+                                 - enabled    : {Boolean}
+                                 - includes   : {String[]}
+                                 - encludes   : {String[]}
+                              )
+
+]]></detail>
+</VimperatorPlugin>;
+
 (function(){
 
 const Cc = Components.classes;
