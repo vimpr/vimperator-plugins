@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -107,7 +107,7 @@ notifier.observer.register(notifier.Observer, {
         //container.appendChild(doc.importNode(notification, true));
         container.appendChild(notification);
 
-        if (container.childNodes.length == 1) {
+        if (container.childNodes.length == 1 && !container.__interval__) {
             let interval = setInterval($U.bind(this, this.checkStatus), 1000);
             container.__interval__ = interval;
         } else if (container.childNodes.length >= 2) {
@@ -162,8 +162,10 @@ notifier.observer.register(notifier.Observer, {
         }
         removeNodes.forEach(function(element) element.__data__.remove());
 
-        if (force || container.childNodes.length == 0)
+        if (force || container.childNodes.length == 0) {
             clearInterval(container.__interval__);
+            container.__interval__ = 0;
+        }
 
     },
     removeAll: function(a) {
