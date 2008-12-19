@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.10</version>
+    <version>0.1.11</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -54,7 +54,7 @@ readDirectory(path, fileter, func):
     filter は Function を指定することも可能です。
 
 == HTML, XML, DOM, E4X ==
-pathToURL(path):
+pathToURL(a, baseURL, doc):
     相対パスを絶対パスに変換します。
 getHTMLFragment(html):
     <html>※1</html>
@@ -62,11 +62,11 @@ getHTMLFragment(html):
 stripTags(str, tags):
     str から tags で指定されたタグを取り除いて返却します。
     tags は文字列、または配列で指定して下さい。
-createHTMLDocument(str):
+createHTMLDocument(str, xmlns):
     引数 str より、HTMLFragment を作成します。
 getFirstNodeFromXPath(xpath, context):
     xpath を評価しオブジェクトをを返却します。
-getNodesFromXPath(xpath, context, callback, obj):
+getNodesFromXPath(xpath, context, callback, thisObj):
     xpath を評価し snapshot の配列を返却します。
 xmlSerialize(xml):
     xml を文字列化します。
@@ -79,7 +79,7 @@ getElementPosition(elem):
     ]]></detail>
 </VimperatorPlugin>;
 //}}}
-if (!liberator.plugins.libly) {
+//if (!liberator.plugins.libly) {
 
 liberator.plugins.libly = {};
 var libly = liberator.plugins.libly;
@@ -214,12 +214,16 @@ libly.$U = {//{{{
     },
     // }}}
     // HTML, XML, DOM, E4X {{{
-    pathToURL: function(a, doc) {
+    pathToURL: function(a, baseURL, doc) {
         if (!a) return '';
-        var path = (a.href || a.action || a.value || a);
+        var XHTML_NS = "http://www.w3.org/1999/xhtml"
+        var XML_NS   = "http://www.w3.org/XML/1998/namespace"
+        //var path = (a.href || a.getAttribute('src') || a.action || a.value || a);
+        var path = (a.getAttribute('href') || a.getAttribute('src') || a.action || a.value || a);
         if (/^https?:\/\//.test(path)) return path;
-        var link = (doc || window.content.documtent).createElement('a');
-        link.href = path;
+        var link = (doc || window.content.documtent).createElementNS(XHTML_NS, 'a');
+        link.setAttributeNS(XML_NS, 'xml:base', baseURL)
+        link.href = path
         return link.href;
     },
     getHTMLFragment: function(html) {
@@ -230,7 +234,7 @@ libly.$U = {//{{{
         var ignoreTags = '(?:' + [].concat(tags).join('|') + ')';
         return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
-    createHTMLDocument: function(str, doc) {
+    createHTMLDocument: function(str, xmlns, doc) {
         doc = doc || window.content.document;
         var htmlFragment = doc.implementation.createDocument(null, 'html', null);
         var range = doc.createRange();
@@ -244,13 +248,13 @@ libly.$U = {//{{{
         var result = (context.ownerDocument || context).evaluate(xpath, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         return result.singleNodeValue ? result.singleNodeValue : null;
     },
-    getNodesFromXPath: function(xpath, context, callback, obj) {
+    getNodesFromXPath: function(xpath, context, callback, thisObj) {
         var ret = [];
         if (!xpath) return ret;
         context = context || window.content.document;
         var nodesSnapshot = (context.ownerDocument || context).evaluate(xpath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; i++) {
-            if (typeof callback == 'function') callback.call(obj, nodesSnapshot.snapshotItem(i), i);
+            if (typeof callback == 'function') callback.call(thisObj, nodesSnapshot.snapshotItem(i), i);
             ret.push(nodesSnapshot.snapshotItem(i));
         }
         return ret;
@@ -442,18 +446,21 @@ libly.Response.prototype = {
             return this.transport.statusText || '';
         } catch (e) { return ''; }
     },
-    getHTMLDocument: function(xpath, xmlns, ignoreTags, callback) {
+    getHTMLDocument: function(xpath, xmlns, ignoreTags, callback, thisObj) {
         if (!this.doc) {
+            //if (doc.documentElement.nodeName != 'HTML') {
+            //    return new DOMParser().parseFromString(str, 'application/xhtml+xml');
+            //}
             this.htmlFragmentstr = libly.$U.getHTMLFragment(this.responseText);
             this.htmlStripScriptFragmentstr = libly.$U.stripTags(this.htmlFragmentstr, ignoreTags);
             this.doc = libly.$U.createHTMLDocument(this.htmlStripScriptFragmentstr, xmlns);
         }
         if (!xpath) xpath = '//*';
-        return libly.$U.getNodesFromXPath(xpath, this.doc, callback);
+        return libly.$U.getNodesFromXPath(xpath, this.doc, callback, thisObj);
     }
 };
 //}}}
 
-}
+//}
 // vim: set fdm=marker sw=4 ts=4 sts=0 et:
 

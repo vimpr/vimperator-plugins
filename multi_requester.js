@@ -5,12 +5,12 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.5</version>
+    <version>0.4.6</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.4)
+- _libly.js(ver.0.1.11)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Usage ==
@@ -349,7 +349,7 @@ var MultiRequester = {
 
         var el = res.getHTMLDocument(extractLink);
         if (!el) throw 'extract link failed.: extractLink -> ' + extractLink;
-        var url = $U.pathToURL(el[0]);
+        var url = $U.pathToURL(el[0], res.req.url);
         var req = new libly.Request(url, null, $U.extend(res.req.options, {extractLink: true}));
         req.addEventListener('onException', $U.bind(this, this.onException));
         req.addEventListener('onSuccess', $U.bind(this, this.onSuccess));
@@ -372,7 +372,7 @@ var MultiRequester = {
             MultiRequester.doProcess = false;
         }
 
-        var url, escapedUrl, xpath, doc, html, extractLink;
+        var url, escapedUrl, xpath, doc, html, extractLink, ignoreTags;
 
         try {
 
@@ -387,10 +387,22 @@ var MultiRequester = {
                 this.extractLink(res, extractLink);
                 return;
             }
-            var ignoreTags = ['script'].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
+            ignoreTags = ['script'].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
             doc = document.createElementNS(null, 'div');
-            res.getHTMLDocument(xpath, null, ignoreTags, function(node, i) { doc.appendChild(node) } );
+            res.getHTMLDocument(xpath, null, ignoreTags, function(node, i) {
+                if (node.tagName.toLowerCase() != 'html')
+                    doc.appendChild(node);
+            });
             if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
+
+            $U.getNodesFromXPath('descendant-or-self::a | descendant-or-self::img', doc, function(node) {
+                var tagName = node.tagName.toLowerCase();
+                if (tagName == 'a') {
+                    node.href = $U.pathToURL(node, url, res.doc);
+                } else if (tagName == 'img') {
+                    node.src = $U.pathToURL(node, url, res.doc);
+                }
+            });
 
             html = '<a href="' + escapedUrl + '" class="hl-Title" target="_self">' + escapedUrl + '</a>' +
                    $U.xmlSerialize(doc);
