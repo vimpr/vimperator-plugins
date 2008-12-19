@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.6</version>
+    <version>0.2.7</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
@@ -111,7 +111,6 @@ NextLink.prototype = {
     handler: function(args) {
         event = args.string || args;
         this[event](buffer.URL);
-        commandline.echo('');
     },
     onLoad: function(url) {
         if (!this.initialized) return;
