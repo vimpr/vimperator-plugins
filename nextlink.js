@@ -5,12 +5,12 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.7</version>
+    <version>0.2.8</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.9)
+- _libly.js(ver.0.1.11)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Option ==
@@ -224,6 +224,7 @@ Autopager.prototype = {
                 ['prev', 'next', 'curPage', 'insertPoint', 'terminate', 'lastReqUrl', 'loadedURLs', 'mark'],
                 [[], [elem], 1, insertPoint, 0, null, {}, []]
             );
+            cache.loadedURLs[url] = true;
         }
     },
     customizeMap: function(context, url, prev, next) {
@@ -246,7 +247,7 @@ Autopager.prototype = {
         mappings.addUserMap(context.browserModes, [']]'], 'customize by nextlink.js',
             $U.bind(this, function(count) {
                 var reqUrl, lastReqUrl;
-                reqUrl = $U.pathToURL(cache.next[cache.curPage - 1], doc);
+                reqUrl = $U.pathToURL(cache.next[cache.curPage - 1], url, doc);
                 lastReqUrl = cache.lastReqUrl;
 
                 if (cache.isLoading) {
