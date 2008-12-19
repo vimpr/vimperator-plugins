@@ -127,7 +127,7 @@ set charhintshow=uppercase|lowercase:
 
         return chars;
     } //}}}
-    function showCharHints(win) //{{{
+    function showCharHints() //{{{
     {
         function showHints(win)
         {
@@ -136,21 +136,22 @@ set charhintshow=uppercase|lowercase:
                 let num = elem.getAttribute("number");
                 let hintchar = num2chars(parseInt(num, 10));
                 elem.setAttribute("hintchar", showCase(hintchar));
-                pageHints.push(elem);
+                if(isValidHint(hintchar))
+                    validHints.push(elem);
             }
-            Array.forEach(win.frames, showCharHints);
+            Array.forEach(win.frames, showHints);
         }
 
-        pageHints = [];
+        validHints = [];
         showHints(window.content);
     } //}}}
-    function isValidHint(elem) //{{{
+    function isValidHint(hint) //{{{
     {
-        return inputCase(elem.getAttribute("hintchar")).indexOf(hintInput) == 0;
+        return inputCase(hint).indexOf(hintInput) == 0;
     } //}}}
 
     var hintInput = "";
-    var pageHints = [];
+    var validHints = [];
     var charhints = plugins.charhints = {
         show: function (minor, filter, win) //{{{
         {
@@ -174,7 +175,6 @@ set charhintshow=uppercase|lowercase:
                 }
             }
             if(hintInput.length>0) {
-                let validHints = pageHints.filter(isValidHint);
                 let numstr = String(chars2num(hintInput));
                 // no setTimeout, don't run nice
                 setTimeout(function () {
