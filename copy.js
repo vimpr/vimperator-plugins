@@ -1,63 +1,74 @@
-/**
- * ==VimperatorPlugin==
- * @name           copy.js
- * @description    enable to copy strings from a template (like CopyURL+)
- * @description-ja テンプレートから文字列のコピーを可能にします（CopyURL+みたなもの）
- * @minVersion     1.1
- * @author         teramako teramako@gmail.com
- * @version        0.5a
- * ==/VimperatorPlugin==
- *
- * Usage:
- * :copy {copyString}         -> copy the argument replaced some certain string
- * :copy! {expr}              -> evaluate the argument and copy the result
- *
- * e.g.)
- * :copy %TITLE%              -> copied the title of the current page
- * :copy title                -> same as `:copy %TITLE%' by default
- * :copy! liberator.version   -> copy the value of liberator.version
- *
- * If non-argument, used `default'
- *
- * label: template name which is command argument
- * value:  copy string
- *    the certian string is replace to ...
- *        %TITTLE%  -> to the title of the current page
- *        %URL%     -> to the URL of the current page
- *        %SEL%     -> to the string of selection
- *        %HTMLSEL% -> to the html string of selection
- *
- * map: key map (optional)
- *
- * custom: {function} or {Array} (optional)
- *   {function}:
- *    execute the function and copy return value, if specified.
- *
- *   {Array}:
- *    replaced to the {value} by normal way at first.
- *    and replace words matched {Array}[0] in the replaced string to {Array}[1].
- *    {Array}[0] is string or regexp
- *    {Array}[1] is string or function
- *    see http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace
- *
- * The copy_templates is a string variable which can set on
- * vimperatorrc as following.
- *
- * let copy_templates = "[{ label: 'titleAndURL', value: '%TITLE%\n%URL%' }, { label: 'title', value: '%TITLE%' }]"
- *
- * or your can set it using inline JavaScript.
- *
- * javascript <<EOM
- * liberator.globalVariables.copy_templates = [
- *   { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
- *   { label: 'title',          value: '%TITLE%', map: ',y' },
- *   { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
- *   { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
- *   { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
- *   { label: 'ASIN',   value: 'copy ASIN code from Amazon', custom: function(){return content.document.getElementById('ASIN').value;} },
- * ];
- * EOM
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>enable to copy strings from a template (like CopyURL+)</description>
+<description lang="ja">テンプレートから文字列のコピーを可能にします（CopyURL+みたいなもの）</description>
+<minVersion>1.1</minVersion>
+<maxVersion>2.0pre</maxVersion>
+<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
+<license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
+<version>0.5</version>
+<detail><![CDATA[
+== Command ==
+:copy {copyString}:
+    copy the argument replaced some certain string
+:copy! {expr}:
+    evaluate the argument and copy the result
+
+=== Example ===
+:copy %TITLE%:
+    copied the title of the current page
+:copy title:
+    some as `:copy %TITLE%' by default
+:copy! liberator.version:
+    copy the value of `liberator.version'
+
+== Keyword ==
+%TITLE%:
+    to the title of the current page
+%URL%:
+    to the URL of the current page
+%SEL%:
+    to the string of selection
+%HTMLSEL%:
+    to the html string of selection
+
+== How to create template ==
+you can set your own template using inline JavaScript.
+>||
+javascript <<EOM
+liberator.globalVariables.copy_templates = [
+  { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
+  { label: 'title',          value: '%TITLE%', map: ',y' },
+  { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
+  { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
+  { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
+  { label: 'ASIN',   value: 'copy ASIN code from Amazon', custom: function(){return content.document.getElementById('ASIN').value;} },
+];
+EOM
+||<
+label:
+    template name which is command argument
+value:
+    copy string
+    the certain string is replace to ...
+map:
+    key map (optional)
+custom:
+    {function} or {Array} (optional)
+    {function}:
+        execute the function and copy return value, if specified.
+    {Array}:
+        replaced to the {value} by normal way at first.
+        then replace words matched {Array}[0] in the replaced string to {Array}[1].
+        {Array}[0]:
+            String or RegExp
+        {Array}[1]:
+            String or Function
+        see http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace
+]]></detail>
+</VimperatorPlugin>;
+
 liberator.plugins.exCopy = (function(){
 if (!liberator.globalVariables.copy_templates){
     liberator.globalVariables.copy_templates = [
@@ -193,7 +204,7 @@ var exCopyManager = {
             if (typeof template.custom == 'function'){
                 copyString = template.custom.call(this, template.value);
             } else if (template.custom instanceof Array){
-                copyString = replaceVariable(template.value).replace(tempalte.custom[0], template.custom[1]);
+                copyString = replaceVariable(template.value).replace(template.custom[0], template.custom[1]);
             } else {
                 copyString = replaceVariable(template.value);
             }
