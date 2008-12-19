@@ -24,7 +24,6 @@ set charhintshow=uppercase|lowercase:
     charhint show in uppercase|lowercase
 
 == TODO ==
- * support hinttimeout.
      ]]></detail>
     <detail lang="ja"><![CDATA[
 
@@ -42,7 +41,6 @@ set charhintshow=uppercase|lowercase:
     charhint show in uppercase|lowercase
 
 == TODO ==
- * support hinttimeout.
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -162,17 +160,16 @@ set charhintshow=uppercase|lowercase:
             }
             let hintString = commandline.command;
             commandline.command = hintString.replace(inputRegex, "");
-            //commandline.command = hintString.replace(/[A-Z]+/g, "");
             charhints.original.onInput(event);
             showCharHints();
             for(let i=0,l=hintString.length;i<l;++i) {
-                //if(/^[A-Z]$/.test(hintString[i])) {}
                 if(inputRegex.test(hintString[i])) {
                     hintChars.push(hintString[i]);
                 }
             }
             if(hintChars.length>0) {
-                let numstr = String(chars2num(hintChars.join("")));
+                let hintinput = hintChars.join("");
+                let numstr = String(chars2num(hintinput));
                 // no setTimeout, don't run nice
                 setTimeout(function () {
                     for(let i=0,l=numstr.length;i<l;++i) {
@@ -181,6 +178,7 @@ set charhintshow=uppercase|lowercase:
                         alt.liberatorString = num;
                         charhints.original.onEvent(alt);
                     }
+                    statusline.updateInputBuffer(hintinput);
                 }, 10);
             }
         }, //}}}
@@ -190,6 +188,7 @@ set charhintshow=uppercase|lowercase:
                 charhints.onInput(event);
             } else {
                 charhints.original.onEvent(event);
+                statusline.updateInputBuffer(hintinput);
             }
         }, //}}}
     };
