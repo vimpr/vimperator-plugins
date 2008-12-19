@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.2</version>
+    <version>0.1</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
     <detail><![CDATA[
@@ -48,6 +48,7 @@ set charhintshow=uppercase|lowercase:
 (function () {
 
     const DEFAULT_HINTCHARS = "HJKLASDFGYUIOPQWERTNMZXCVB";
+    const hintContext = hints.addMode;
 
     let inputCase = function(str) str.toUpperCase();
     let inputRegex = /[A-Z]/;
@@ -107,7 +108,6 @@ set charhintshow=uppercase|lowercase:
     function chars2num(chars) //{{{
     {
         let num = 0;
-        //let hintchars = options.hintchars.toUpperCase();
         let hintchars = inputCase(options.hintchars);
         let base = hintchars.length;
         for(let i=0,l=chars.length;i<l;++i) {
@@ -118,7 +118,6 @@ set charhintshow=uppercase|lowercase:
     function num2chars(num) //{{{
     {
         let chars = "";
-        //let hintchars = options.hintchars.toUpperCase();
         let hintchars = inputCase(options.hintchars);
         let base = hintchars.length;
         do {
@@ -130,26 +129,33 @@ set charhintshow=uppercase|lowercase:
     } //}}}
     function showCharHints(win) //{{{
     {
-        if(!win)
-            win = window.content;
-
-        for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))
+        function showHints(win)
         {
-            let num = elem.getAttribute("number");
-            let hintchar = num2chars(parseInt(num, 10));
-            //elem.setAttribute("hintchar", hintchar);
-            elem.setAttribute("hintchar", showCase(hintchar));
+            for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))
+            {
+                let num = elem.getAttribute("number");
+                let hintchar = num2chars(parseInt(num, 10));
+                elem.setAttribute("hintchar", showCase(hintchar));
+                pageHints.push(elem);
+            }
+            Array.forEach(win.frames, showCharHints);
         }
-        Array.forEach(win.frames, showCharHints);
+
+        pageHints = [];
+        showHints(window.content);
+    } //}}}
+    function isValidHint(elem) //{{{
+    {
+        return inputCase(elem.getAttribute("hintchar")).indexOf(hintInput) == 0;
     } //}}}
 
-    var hintContext = hints.addMode;
-    var hintChars = [];
+    var hintInput = "";
+    var pageHints = [];
     var charhints = plugins.charhints = {
         show: function (minor, filter, win) //{{{
         {
             charhints.original.show(minor, filter, win);
-            hintChars = [];
+            hintInput = "";
             showCharHints();
         }, //}}}
         onInput: function (event) //{{{
@@ -164,12 +170,12 @@ set charhintshow=uppercase|lowercase:
             showCharHints();
             for(let i=0,l=hintString.length;i<l;++i) {
                 if(inputRegex.test(hintString[i])) {
-                    hintChars.push(hintString[i]);
+                    hintInput += hintString[i];
                 }
             }
-            if(hintChars.length>0) {
-                let hintinput = hintChars.join("");
-                let numstr = String(chars2num(hintinput));
+            if(hintInput.length>0) {
+                let validHints = pageHints.filter(isValidHint);
+                let numstr = String(chars2num(hintInput));
                 // no setTimeout, don't run nice
                 setTimeout(function () {
                     for(let i=0,l=numstr.length;i<l;++i) {
@@ -178,7 +184,11 @@ set charhintshow=uppercase|lowercase:
                         alt.liberatorString = num;
                         charhints.original.onEvent(alt);
                     }
-                    statusline.updateInputBuffer(hintinput);
+                    statusline.updateInputBuffer(hintInput);
+                    if(validHints.length == 1) {
+                        charhints.original.processHints(true);
+                        return true;
+                    }
                 }, 10);
             }
         }, //}}}
@@ -188,7 +198,7 @@ set charhintshow=uppercase|lowercase:
                 charhints.onInput(event);
             } else {
                 charhints.original.onEvent(event);
-                statusline.updateInputBuffer(hintinput);
+                statusline.updateInputBuffer(hintInput);
             }
         }, //}}}
     };
@@ -198,6 +208,7 @@ set charhintshow=uppercase|lowercase:
             show: hints.show,
             onInput: liberator.eval("onInput", hintContext),
             onEvent: hints.onEvent,
+            processHints: liberator.eval("processHints", hintContext),
         };
 
         charhints.install = function () //{{{
