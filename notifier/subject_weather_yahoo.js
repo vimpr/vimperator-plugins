@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>yahoo weather forecast notice.</description>
     <description lang="ja">ヤフー天気予報通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier\subject_weather_yahoo.js</updateURL>
     <detail><![CDATA[
 == Options ==
 >||

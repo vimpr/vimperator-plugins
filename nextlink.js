@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.8</version>
+    <version>0.2.9</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.11)

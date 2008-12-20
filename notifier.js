@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>change notice framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.9)

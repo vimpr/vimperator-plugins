@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.11</version>
+    <version>0.1.12</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
     <detail><![CDATA[
 == Objects ==
 - liberator.plugins.libly.$U
@@ -222,8 +223,8 @@ libly.$U = {//{{{
         var path = (a.getAttribute('href') || a.getAttribute('src') || a.action || a.value || a);
         if (/^https?:\/\//.test(path)) return path;
         var link = (doc || window.content.documtent).createElementNS(XHTML_NS, 'a');
-        link.setAttributeNS(XML_NS, 'xml:base', baseURL)
-        link.href = path
+        link.setAttributeNS(XML_NS, 'xml:base', baseURL);
+        link.href = path;
         return link.href;
     },
     getHTMLFragment: function(html) {

@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>hatena bottle change notice.</description>
     <description lang="ja">はてなボトルの変更通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier\subject_hatelabo_bottle.js</updateURL>
 </VimperatorPlugin>;
 //}}}
 (function() {

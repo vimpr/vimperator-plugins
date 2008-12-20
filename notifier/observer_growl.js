@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier\observer_growl.js</updateURL>
     <detail><![CDATA[
 == Settings ==
 >||
