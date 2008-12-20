@@ -5,9 +5,10 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.6</version>
+    <version>0.4.7</version>
     <minVersion>1.2</minVersion>
     <maxVersion>1.2</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/branches/1.2/multi_requester.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.11)
