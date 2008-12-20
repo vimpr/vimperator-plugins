@@ -8,7 +8,7 @@ var PLUGIN_INFO =
     <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier\subject_weather_yahoo.js</updateURL>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/subject_weather_yahoo.js</updateURL>
     <detail><![CDATA[
 == Options ==
 >||
