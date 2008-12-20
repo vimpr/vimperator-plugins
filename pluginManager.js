@@ -7,6 +7,7 @@ var PLUGIN_INFO =
 <version>0.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
 <detail lang="ja"><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
 == Command ==
@@ -42,6 +43,8 @@ maxVersion:
     プラグインが使用できるVimperatorの最大バージョン
 minVersion:
     プラグインが使用できるVimperatorの最小バージョン
+updateURL:
+    プラグインの最新リソースURL
 detail:
     ここにコマンドやマップ、プラグインの説明
     CDATAセクションにwiki的に記述可能
@@ -113,6 +116,7 @@ var tags = {
     version: id,
     maxVersion: id,
     minVersion: id,
+    updateURL: function(info) makeLink(info.toString()),
     detail: function(info){
         if (info.* && info.*[0] && info.*[0].nodeKind() == 'element')
             return info.*;
@@ -162,11 +166,16 @@ function getPlugins(){
             ['path', path]
         ];
         plugin['name'] = context.NAME;
+        plugin['info'] = {};
+        plugin['orgInfo'] = {};
         if (info){
             for (let tag in tags){
+                plugin.orgInfo[tag] = info[tag];
                 let value = tags[tag](info);
-                if (value && value.toString().length > 0)
+                if (value && value.toString().length > 0){
                     plugin.push([tag, value]);
+                    plugin.info[tag] = value;
+                }
             }
         }
         list.push(plugin);
@@ -179,6 +188,21 @@ function itemFormater(plugin, showDetails){
 
     var data = plugin.filter(function($_) $_[0] != 'detail');
     return template.table(plugin.name, data);
+}
+function checkVersion(plugin){
+    var data = {
+        "Current Version": plugin.info.version || 'unknown',
+        "Latest Version": getLatestVersion(plugin.info.updateURL) || 'unknown',
+        "Update URL": plugin.info.updateURL || '-'
+    };
+    return template.table(plugin.name, data);
+}
+function getLatestVersion(url){
+    if (!url) return '';
+    var val = util.httpGet(url).responseText || '';
+    val.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/);
+    val = RegExp.$1;
+    return val;
 }
 function WikiParser(text){
     this.mode = '';
@@ -273,7 +297,7 @@ WikiParser.prototype = {
                 prevMode = this.mode;
                 continue;
             }
-            if (!line) {
+            if (!line){
                 //this.xmlstack.append(<>{"\n"}</>);
                 continue;
             }
@@ -342,7 +366,7 @@ HTMLStack.prototype = {
         }
         return this.last;
     },
-    appendChild: function(xml) {
+    appendChild: function(xml){
         var buf = this.stack[this.length-1];
         buf[buf.length()-1].* += xml;
         return this.last;
@@ -389,38 +413,47 @@ HTMLStack.prototype = {
 };
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
     function(args){
-        liberator.plugins.pluginManager.list(args[0], args['-verbose']);
+        liberator.plugins.pluginManager.list(args);
     }, {
         argCount: '*',
         options: [
             [['-verbose', '-v'], commands.OPTION_NOARG],
+            [['-check', '-c'], commands.OPTION_NOARG],
         ],
         completer: function(context){
             var all = getPlugins().map(function(plugin){
-                let desc = '-';
-                for (let i=plugin.length; i-->0;){
-                    if (plugin[i][0] == 'description'){
-                        desc = plugin[i][1];
-                        break;
-                    }
-                }
-                return [plugin.name, desc];
+                let ver = plugin.info.version || 'unknown';
+                let desc = plugin.info.description || '-';
+                return [plugin.name, '[' + ver + ']' + desc];
             });
-            context.title = ['PluginName', 'Description'];
+            context.title = ['PluginName', '[Version]Description'];
             context.completions = all.filter(function(row) row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
     }, true);
 var public = {
-    list: function(name, showDetails){
+    list: function(args){
+        var names = args;
+        var check = args['-check'];
+        var showDetails = args['-verbose'];
+
         var xml = <></>;
         var plugins = getPlugins();
-        if (name){
-            let plugin = plugins.filter(function(plugin) plugin.name == name)[0];
-            if (plugin){
-                xml = itemFormater(plugin, showDetails);
-            }
+
+        var action = itemFormater;
+        var params = [showDetails];
+
+        if (check)
+            action = checkVersion;
+
+        if (names.length){
+            names.forEach(function(name){
+                let plugin = plugins.filter(function(plugin) plugin.name == name)[0];
+                if (plugin){
+                    xml += action.apply(this, [plugin].concat(params));
+                }
+            });
         } else {
-            plugins.forEach(function(plugin) xml += itemFormater(plugin, showDetails));
+            plugins.forEach(function(plugin) xml += action.apply(this, [plugin].concat(params)));
         }
         liberator.echo(xml, true);
     }
@@ -428,3 +461,4 @@ var public = {
 return public;
 })();
 // vim: sw=4 ts=4 et fdm=marker:
+
