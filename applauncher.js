@@ -4,7 +4,7 @@ var PLUGIN_INFO =
   <name lang='ja'>アプリケーションランチャー</name>
   <description>Launch defined application</description>
   <description lang='ja'>アプリケーションを起動します</description>
-  <version>0.11</version>
+  <version>0.12</version>
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -20,18 +20,23 @@ var PLUGIN_INFO =
     [ 'Internet Explorer', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%URL%'],
     [ 'Internet Explorer(Search)', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%SEL%'],
   ];
+  liberator.globalVariables.applauncher_charset = 'Shift_JIS';
   EOM
   %URL% は実行時に選択中のリンクURL、もしくは開いているページのURLに置き換えられます。
   %SEL% は選択中の文字列に置き換えられます。
   %TITLE% はページのタイトルに置き換えられます。
   引数を複数指定する場合は配列形式で指定してください。
+  applauncher_charset を指定すると、渡される文字列が指定の文字セットに変換されます。
   ]]></detail>
 </VimperatorPlugin>
 
 liberator.plugins.AppLauncher = (function(){
+  const UConv = Cc['@mozilla.org/intl/scriptableunicodeconverter'].getService(Ci.nsIScriptableUnicodeConverter);
   const AppName = 'AppLauncher';
+
   var global = liberator.globalVariables;
   var settings = global.applauncher_list || [];
+  var defaultCharset = global.applauncher_charset;
   if (!settings || settings.length <= 0) return;
   var completer = settings.map( function([name, app, args]) [name, args ? app + ' ' + args.toString(): app] );
 
@@ -97,6 +102,10 @@ liberator.plugins.AppLauncher = (function(){
       settings.some( function([name, app, args]){
         args = args instanceof Array ? args : args ? [args] : [];
         args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) self.variables[name]()) );
+        if (defaultCharset) {
+          UConv.charset = defaultCharset;
+          args = args.map( function( val ) UConv.ConvertFromUnicode(val) );
+        }
         if (appName == name){
           io.run(app, args);
           return true;
