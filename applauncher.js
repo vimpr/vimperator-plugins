@@ -4,7 +4,7 @@ var PLUGIN_INFO =
   <name lang='ja'>アプリケーションランチャー</name>
   <description>Launch defined application</description>
   <description lang='ja'>アプリケーションを起動します</description>
-  <version>0.10</version>
+  <version>0.11</version>
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -36,7 +36,7 @@ liberator.plugins.AppLauncher = (function(){
 
   var Class = function(){ return function(){ this.initialize.apply(this, arguments); }};
   var AppLauncher = new Class();
-  
+
   AppLauncher.prototype = {
     initialize: function(){
       this.buildMenu();
@@ -44,7 +44,7 @@ liberator.plugins.AppLauncher = (function(){
     },
     registerCommand: function(){
       var self = this;
-      commands.addUserCommand(['applaunch','runapp'], 'Run Defined Application',
+      commands.addUserCommand(['applaunch', 'runapp'], 'Run Defined Application',
         function(arg){
           arg = (typeof arg.string == undefined ? arg : arg.string);
           self.launch(arg);
@@ -67,7 +67,7 @@ liberator.plugins.AppLauncher = (function(){
       menu.setAttribute('id', AppName + 'Context');
       menu.setAttribute('label', AppName);
       menu.setAttribute('accesskey', 'L');
-      
+
       var menupopup = document.createElement('menupopup');
       menupopup.setAttribute('id', AppName + 'ContextMenu');
       menu.appendChild(menupopup);
@@ -81,16 +81,23 @@ liberator.plugins.AppLauncher = (function(){
       }
       document.getElementById('contentAreaContextMenu').appendChild(menu);
     },
+    variables: {
+      __noSuchMethod__: function(name) name,
+      URL: function() gContextMenu && gContextMenu.onLink ? gContextMenu.getLinkURL() : buffer.URL,
+      SEL: function(){
+        var selection = window.content.window.getSelection();
+        var sel = '';
+        for (let i=0, l=selection.rangeCount; i<l; i++) sel+=selection.getRangeAt(i).toString();
+        return sel;
+      },
+      TITLE: function() buffer.title
+    },
     launch: function(appName){
-      var url = gContextMenu && gContextMenu.onLink ? gContextMenu.getLinkURL() : buffer.URL ;
-      var selection = window.content.window.getSelection();
-      var sel = '';
-      for (let i=0, l=selection.rangeCount; i<l; i++) sel+=selection.getRangeAt(i).toString();
-      
+      var self = this;
       appName = appName.replace(/\\/g,'');                // fix commandline input ' ' -> '\ '
       settings.some( function([name, app, args]){
         args = args instanceof Array ? args : args ? [args] : [];
-        args = args.map( function( val ) val.replace(/%URL%/g, url).replace(/%SEL%/g, sel) );
+        args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) self.variables[name]()) );
         if (appName == name) {
           io.run(app, args);
           return true;
