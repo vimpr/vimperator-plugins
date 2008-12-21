@@ -86,7 +86,7 @@ detail:
     - mailtoとhttp、httpsスキームのURLはリンクになります
 
 == ToDo ==
-- 更新通知とアップデート機能
+- 更新通知
 - スタイルの追加(これはすべき？)
 
 ]]></detail>
@@ -116,7 +116,7 @@ var tags = {
     version: id,
     maxVersion: id,
     minVersion: id,
-    updateURL: function(info) makeLink(info.toString()),
+    updateURL: function(info) makeLink(info.toString(), true),
     detail: function(info){
         if (info.* && info.*[0] && info.*[0].nodeKind() == 'element')
             return info.*;
@@ -148,8 +148,9 @@ for (let it in Iterator(tags)){
         return value.call(tags, chooseByLang(info[name]));
     };
 }
-function makeLink(str){
-    return XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="#" highlight="URL">$&</a>'));
+function makeLink(str, withLink){
+    var href = withLink ? '$&' : '#';
+    return XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="' + href + '" highlight="URL">$&</a>'));
 }
 function fromUTF8Octets(octets){
     return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
@@ -192,17 +193,67 @@ function itemFormater(plugin, showDetails){
 function checkVersion(plugin){
     var data = {
         "Current Version": plugin.info.version || 'unknown',
-        "Latest Version": getLatestVersion(plugin.info.updateURL) || 'unknown',
+        "Latest Version": getLatestVersion(plugin.info.updateURL)['version'] || 'unknown',
         "Update URL": plugin.info.updateURL || '-'
     };
     return template.table(plugin.name, data);
 }
 function getLatestVersion(url){
-    if (!url) return '';
-    var val = util.httpGet(url).responseText || '';
-    val.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/);
-    val = RegExp.$1;
-    return val;
+    if (!url) return {};
+    var source = util.httpGet(url).responseText || '';
+    var version = '';
+    source.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/);
+    version = RegExp.$1;
+    return {source: source, version: version};
+}
+function updatePlugin(plugin){
+    var currentVersion = plugin.info.version || '';
+    var latestResource = getLatestVersion(plugin.info.updateURL) || '';
+    var data = {
+        information: '',
+        "Current Version": plugin.info.version || 'unknown',
+        "Local Path": plugin[0][1] || 'unknown',
+        "Latest Version": latestResource.version || 'unknown',
+        "Update URL": plugin.info.updateURL || '-'
+    };
+
+    if (!currentVersion || !latestResource.version){
+        data.information = 'unknown version.';
+    } else if (currentVersion == latestResource.version){
+        data.information = 'already latest.';
+    } else if (currentVersion > latestResource.version){
+        data.information = '<span highlight="WarningMsg">local version is newest.</span>';
+    } else {
+        data.information = overwritePlugin(plugin, latestResource);
+    }
+    return template.table(plugin.name, data);
+}
+function overwritePlugin(plugin, latestResource){
+    if (!plugin[0] || plugin[0][0] != 'path')
+        return '<span highlight="WarningMsg">plugin localpath notfound.</span>';
+
+    var source = latestResource.source;
+    var localpath = plugin[0][1];
+    var file = io.getFile(localpath);
+
+    if (!source)
+        return '<span highlight="WarningMsg">source is null.</span>';
+
+    try {
+        io.writeFile(file, source);
+    } catch (e){
+        liberaotr.log("Could not write to " + file.path + ": " + e.message);
+        return "E190: Cannot open " + filename.quote() + " for writing";
+    }
+
+    try {
+        io.source(localpath);
+    } catch (e){
+        return e.message;
+    }
+
+    return '<span style="font-weight: bold; color: blue;">update complete.</span>';
+
 }
 function WikiParser(text){
     this.mode = '';
@@ -419,6 +470,7 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
         options: [
             [['-verbose', '-v'], commands.OPTION_NOARG],
             [['-check', '-c'], commands.OPTION_NOARG],
+            [['-update', '-u'], commands.OPTION_NOARG],
         ],
         completer: function(context){
             var all = getPlugins().map(function(plugin){
@@ -433,8 +485,9 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
 var public = {
     list: function(args){
         var names = args;
-        var check = args['-check'];
         var showDetails = args['-verbose'];
+        var check = args['-check'];
+        var update = args['-update'];
 
         var xml = <></>;
         var plugins = getPlugins();
@@ -442,8 +495,11 @@ var public = {
         var action = itemFormater;
         var params = [showDetails];
 
-        if (check)
+        if (check){
             action = checkVersion;
+        } else if (update){
+            action = updatePlugin;
+        }
 
         if (names.length){
             names.forEach(function(name){
