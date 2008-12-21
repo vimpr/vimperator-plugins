@@ -2,10 +2,10 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>libly(filename _libly.js)</name>
-    <description>vimperator plugins library?</description>
+    <description>Vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.12</version>
+    <version>0.1.13</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -26,6 +26,14 @@ extend(dst, src):
     オブジェクトを拡張します。
 A(iterable):
     オブジェクトを配列にします。
+around(obj, name, func):
+  obj がもつ name 関数を、func に置き換えます。
+  func は
+    function (next, args) {...}
+  という形で呼ばれます。
+  next はオリジナルの関数を呼び出すための関数、
+  args はオリジナルの引数列です。
+  next には引数を渡す必要はありません。
 bind(obj, func):
     func に obj を bind します。
     func内からは this で obj が参照できるようになります。
@@ -36,7 +44,7 @@ evalJson(str, toRemove):
     str を decode します。
     toRemove が true の場合、文字列の前後を1文字削除します。
     "(key:value)" 形式の場合などに true を指定して下さい。
-deteFormat(dtm, fmt):
+dateFormat(dtm, fmt):
     Date型インスタンスを、指定されたフォーマットで文字列に変換します。
     fmt を省略した場合、"%y/%M/%d %h:%m:%s" となります。
 
@@ -123,6 +131,14 @@ libly.$U = {//{{{
             for each (let item in iterable) ret.push(item);
         }
         return ret;
+    },
+    around: function around (obj, name, func) {
+        let next = obj[name];
+        let current = obj[name] = function () {
+            let self = this, args = arguments;
+            return func.call(self, function () next.apply(self, args), args);
+        };
+        return [next, current];
     },
     bind: function(obj, func) {
         return function() {
