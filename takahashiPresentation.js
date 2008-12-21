@@ -13,7 +13,7 @@ var PLUGIN_INFO =
 presentation:
    start presentation
 == HOWTO ==
-open html file includes <pre id="page">...</pre> and <div id="text">...</pre>.
+open HTML file includes <pre id="page">...</pre> and <div id="text">...</div>.
 start :presentation.
      ]]></detail>
 </VimperatorPlugin>;
@@ -71,16 +71,17 @@ start :presentation.
         loadPage(curpage);
     }
     function parsePages(text) {
-        if(/:backgroundImage:(.+)\n/.test(text)) {
+        if(/:backgroundImage:(.+)(?:\r\n|[\r\n])/.test(text)) {
             doc.body.style.backgroundImage = RegExp.$1;
             doc.body.style.backgroundRepeat = 'repeat';
         }
-        text = text.replace(/:.+\n/g, '');
-        return text.split('----').map(function(txt) txt.replace(/^\n/, '').replace(/\n$/, ''));
+        return text.replace(/(?::.+(?:\r\n|[\r\n]))+/g, '')
+                   .split('----')
+                   .map(function(txt) txt.replace(/^(?:\r\n|[\r\n])|(?:\r\n|[\r\n])$/g, ''));
     }
     function start() {
         options.fullscreen = true;
-        options.guioptions = "";
+        options.guioptions = '';
         win = window.content;
         doc = win.document;
         let text = buffer.evaluateXPath('//div[@id="text"]').snapshotItem(0);
@@ -88,9 +89,8 @@ start :presentation.
         addKeys();
 
         div = doc.createElement('div');
-        head = doc.createElement('div');
+        head = doc.body.appendChild(doc.createElement('div'));
         head.style.textAlign = 'right';
-        doc.body.appendChild(head);
 
         pre = buffer.evaluateXPath('//pre[@id="page"]').snapshotItem(0);
         pre.style.fontSize = fontSize+'px';
