@@ -147,6 +147,7 @@ set charhintshow=uppercase|lowercase:
     } //}}}
     function isValidHint(hint) //{{{
     {
+        if(hintInput.length == 0 ) return false;
         return inputCase(hint).indexOf(hintInput) == 0;
     } //}}}
 
@@ -168,12 +169,12 @@ set charhintshow=uppercase|lowercase:
             let hintString = commandline.command;
             commandline.command = hintString.replace(inputRegex, "");
             charhints.original.onInput(event);
-            showCharHints();
             for(let i=0,l=hintString.length;i<l;++i) {
                 if(inputRegex.test(hintString[i])) {
                     hintInput += hintString[i];
                 }
             }
+            showCharHints();
             if(hintInput.length>0) {
                 let numstr = String(chars2num(hintInput));
                 // no setTimeout, don't run nice
