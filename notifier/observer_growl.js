@@ -5,10 +5,10 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier\observer_growl.js</updateURL>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/observer_growl.js</updateURL>
     <detail><![CDATA[
 == Settings ==
 >||
@@ -78,6 +78,7 @@ notifier.observer.register(notifier.Observer, {
     initialize: function () {
         this.count = 1;
         this.settings;
+        this.intervalIDs = {};
 
         io.getRuntimeDirectories('').forEach(function(dir) {
             var path = io.expandPath(dir.path + '/plugin/notifier');
@@ -100,6 +101,12 @@ notifier.observer.register(notifier.Observer, {
         if (!container) {
             doc.body.appendChild($U.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
             container = doc.getElementById("observer_growl");
+            window.content.addEventListener('unload', $U.bind(this, function() {
+                if (container.__interval__) {
+                    clearInterval(container.__interval__);
+                    this.intervalIDs[container.__interval__] = false;
+                }
+            }), false);
         }
         var closer = doc.getElementById("observer_growl_closer");
 
@@ -110,6 +117,7 @@ notifier.observer.register(notifier.Observer, {
 
         if (container.childNodes.length == 1 && !container.__interval__) {
             let interval = setInterval($U.bind(this, this.checkStatus), 1000);
+            this.intervalIDs[interval]  = true;
             container.__interval__ = interval;
         } else if (container.childNodes.length >= 2) {
             if (!closer) {
@@ -173,8 +181,14 @@ notifier.observer.register(notifier.Observer, {
         this.checkStatus('EVENT_REMOVE_ALL');
         var closer = window.content.document.getElementById("observer_growl_closer");
         closer.parentNode.removeChild(closer);
+    },
+    shutdown: function() {
+        for (let [id, flg] in Iterator(this.intervalIDs)) {
+            if (!flg) return;
+            clearInterval(id);
+            this.intervalIDs[id] = false;
+        };
     }
-
 });
 
 })();

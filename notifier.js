@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>change notice framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier.js</updateURL>
@@ -193,7 +193,8 @@ function bootstrap() {
         __initialize__: function(args) {
             $U.extend(this, args);
             if (typeof this.initialize == 'function') this.initialize();
-        }
+        },
+        shutdown: function() {}
     };//}}}
 
     var Subject = function() {//{{{
@@ -222,7 +223,8 @@ function bootstrap() {
                 }
             });
         },
-        check: function() { throw 'needs override.' }
+        check: function() { throw 'needs override.' },
+        shutdown: function() {}
     };//}}}
 
     var SubjectHttp = Subject;//{{{
@@ -323,6 +325,8 @@ function bootstrap() {
                 this.subjects.getPlugins().forEach(function(s) s.attach(o));
             }));
 
+            liberator.registerObserver("shutdown", $U.bind(this, function() this.stop()));
+
             this.isBusy = false;
         },//}}}
         start: function() {//{{{
@@ -373,6 +377,8 @@ function bootstrap() {
                 if (typeof finallycallback == 'function') finallycallback();
                 return;
             }
+            this.subjects.getPlugins().forEach(function(s) s.shutdown());
+            this.observers.getPlugins().forEach(function(o) o.shutdown());
             this.finallycallback = finallycallback;
             this.timer = false;
         }//}}}
