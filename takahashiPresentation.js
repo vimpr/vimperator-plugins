@@ -101,7 +101,7 @@ start :presentation.
 
     commands.add(['presentation'], 'start presentation', //{{{
         function(args) {
-                stop();
+            start();
         },
         {
             argCount: '0',
