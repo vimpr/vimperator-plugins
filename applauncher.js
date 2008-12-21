@@ -16,7 +16,7 @@ var PLUGIN_INFO =
   == .vimperatorrc example ==
   js <<EOM
   liberator.globalVariables.applauncher_list = [
-    [ 'name', 'application path', ['arguments','%URL%', '%SEL%']],
+    [ 'name', 'application path', ['arguments', '%URL%', '%SEL%']],
     [ 'Internet Explorer', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%URL%'],
     [ 'Internet Explorer(Search)', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%SEL%'],
   ];
@@ -31,11 +31,11 @@ var PLUGIN_INFO =
 liberator.plugins.AppLauncher = (function(){
   const AppName = 'AppLauncher';
   var global = liberator.globalVariables;
-  var settings = global.applauncher_list ? global.applauncher_list : [];
+  var settings = global.applauncher_list || [];
   if (!settings || settings.length <= 0) return;
   var completer = settings.map( function([name, app, args]) [name, args ? app + ' ' + args.toString(): app] );
 
-  var Class = function(){ return function(){ this.initialize.apply(this, arguments); }};
+  var Class = function() function(){ this.initialize.apply(this, arguments); };
   var AppLauncher = new Class();
 
   AppLauncher.prototype = {
@@ -47,13 +47,13 @@ liberator.plugins.AppLauncher = (function(){
       var self = this;
       commands.addUserCommand(['applaunch', 'runapp'], 'Run Defined Application',
         function(arg){
-          arg = (typeof arg.string == undefined ? arg : arg.string);
+          arg = (typeof arg.string == 'undefined' ? arg : arg.string);
           self.launch(arg);
         }, {
           completer: function( context, arg, special){
-            let filter = context.filter;
+            var filter = context.filter;
             context.title = [ 'Name', 'Description'];
-            if (!filter) {
+            if (!filter){
               context.completions = completer;
               return;
             }
@@ -64,23 +64,21 @@ liberator.plugins.AppLauncher = (function(){
     },
     buildMenu: function(){
       var self = this;
-      var menu = document.createElement('menu');
+      var menu = document.getElementById('contentAreaContextMenu')
+                         .appendChild(document.createElement('menu'));
       menu.setAttribute('id', AppName + 'Context');
       menu.setAttribute('label', AppName);
       menu.setAttribute('accesskey', 'L');
 
-      var menupopup = document.createElement('menupopup');
+      var menupopup = menu.appendChild(document.createElement('menupopup'));
       menupopup.setAttribute('id', AppName + 'ContextMenu');
-      menu.appendChild(menupopup);
       for (let i=0, l=settings.length; i<l; i++){
         let [name, app, args] = settings[i];
-        let menuitem = document.createElement('menuitem');
+        let menuitem = menupopup.appendChild(document.createElement('menuitem'));
         menuitem.setAttribute('id', AppName + i);
         menuitem.setAttribute('label', name + '\u3092\u8D77\u52D5');
-        menuitem.addEventListener('command', function() self.launch(name) , false);
-        menupopup.appendChild(menuitem);
+        menuitem.addEventListener('command', function() self.launch(name), false);
       }
-      document.getElementById('contentAreaContextMenu').appendChild(menu);
     },
     variables: {
       __noSuchMethod__: function(name) name,
@@ -95,11 +93,11 @@ liberator.plugins.AppLauncher = (function(){
     },
     launch: function(appName){
       var self = this;
-      appName = appName.replace(/\\/g,'');                // fix commandline input ' ' -> '\ '
+      appName = appName.replace(/\\+/g, '');                // fix commandline input ' ' -> '\ '
       settings.some( function([name, app, args]){
         args = args instanceof Array ? args : args ? [args] : [];
         args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) self.variables[name]()) );
-        if (appName == name) {
+        if (appName == name){
           io.run(app, args);
           return true;
         }
