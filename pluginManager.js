@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugin</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.2</version>
+<version>0.3</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -202,8 +202,8 @@ function getLatestVersion(url){
     if (!url) return {};
     var source = util.httpGet(url).responseText || '';
     var version = '';
-    source.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/);
-    version = RegExp.$1;
+    if (source.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/))
+        version = RegExp.$1;
     return {source: source, version: version};
 }
 function updatePlugin(plugin){
