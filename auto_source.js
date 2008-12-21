@@ -3,7 +3,7 @@ var PLUGIN_INFO =
   <name> Auto Source </name>
   <description>Sourcing automatically when the specified file is modified.</description>
   <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
-  <version>1.3</version>
+  <version>1.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -50,7 +50,7 @@ var PLUGIN_INFO =
     files.some(function (it) (it.path.indexOf(filepath) === 0))
 
   function remove (filepath, func)
-    (files = files.filter(function (it) (it.path.indexOf(filepath) !== 0 && (func(it)+'-'))));
+    (files = files.filter(function (it) (!(it.path.indexOf(filepath) === 0 && func(it)+'-'))));
 
   function expandPath (filepath) {
     filepath = io.expandPath(filepath);
@@ -74,10 +74,11 @@ var PLUGIN_INFO =
           io.source(filepath);
         }
       } catch (e) {
-        killWatcher(filepath);
         liberator.echoerr('Error! ' + filepath);
+        killWatcher(filepath);
       }
     }, interval);
+    liberator.log('filepath: ' + filepath)
     files.push({handle: handle, path: filepath});
   }
 
