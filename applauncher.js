@@ -102,7 +102,7 @@ liberator.plugins.AppLauncher = (function(){
       settings.some( function([name, app, args]){
         args = args instanceof Array ? args : args ? [args] : [];
         args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) self.variables[name]()) );
-        if (defaultCharset) {
+        if (defaultCharset){
           UConv.charset = defaultCharset;
           args = args.map( function( val ) UConv.ConvertFromUnicode(val) );
         }
