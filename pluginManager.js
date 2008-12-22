@@ -195,7 +195,7 @@ function checkVersion(plugin){
     return updatePlugin(plugin, true);
 }
 function updatePlugin(plugin, checkOnly){
-    var [localResource, serverResource] = getResourceInfo(plugin);
+    var [localResource, serverResource, store] = getResourceInfo(plugin);
 
     var data = {
         'Local Version': plugin.info.version || 'unknown',
@@ -254,7 +254,7 @@ function getResourceInfo(plugin){
         localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
         store.set(plugin.name, localResource);
     }
-    return [localResource, serverResource];
+    return [localResource, serverResource, store];
 }
 function overwritePlugin(plugin, serverResource){
     if (!plugin[0] || plugin[0][0] != 'path')
