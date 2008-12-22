@@ -205,7 +205,7 @@ function getLatestVersion(url){
     var version = '';
     var m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
     if (m){
-        m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
+        m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
         m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
         if (m){
             version = m[1];
