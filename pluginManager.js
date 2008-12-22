@@ -240,13 +240,20 @@ function getResourceInfo(plugin){
         let source = xhr.responseText || '';
         let headers = {};
         try {
-            xhr.getAllResponseHeaders().split('\n').forEach(function(h) {
+            xhr.getAllResponseHeaders().split(/\r?\n/).forEach(function(h){
                 var pair = h.split(': ');
                 if (pair && pair.length > 1)
                     headers[pair.shift()] = pair.join('').substring(1, pair.join('').length - 1);
             });
-        } catch(e) {}
-        [,version] = /PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/.exec(source);
+        } catch(e){}
+        let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
+        if (m){
+            m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
+            m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
+            if (m){
+                version = m[1];
+            }
+        }
         serverResource = {version: version, source: source, headers: headers};
     }
 
