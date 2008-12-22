@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description>Vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.13</version>
+    <version>0.1.14</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -47,6 +47,8 @@ evalJson(str, toRemove):
 dateFormat(dtm, fmt):
     Date型インスタンスを、指定されたフォーマットで文字列に変換します。
     fmt を省略した場合、"%y/%M/%d %h:%m:%s" となります。
+runnable(generator):
+    gererator を実行し、再帰的に resume する為の引数を渡します。
 
 ==  Browser ==
 getSelectedString:
@@ -180,6 +182,22 @@ libly.$U = {//{{{
                 d[n] = '0' + v;
         }
         return (fmt || '%y/%M/%d %h:%m:%s').replace(/%([yMdhms%])/g, function (_, n) d[n]);
+    },
+    /**
+     * example)
+     *  $U.runnable(function(resume) {
+     *      // execute asynchronous function.
+     *      // goto next yield;
+     *      var val = yield setTimeout(function() { resume('value!'), 1000) });
+     *      alert(val);  // value!
+     *      yield;
+     *  });
+     */
+    runnable: function(generator) {
+        var it = generator(function(value) {
+                    try { it.send(value); } catch (e) {}
+                 });
+        it.next();
     },
     // }}}
     // Browser {{{
