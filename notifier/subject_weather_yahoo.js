@@ -1,3 +1,9 @@
+/*** BEGIN LICENSE BLOCK {{{
+    Copyright (c) 2008 suVene<suvene@zeromemory.info>
+
+    distributable under the terms of an MIT-style license.
+    http://www.opensource.jp/licenses/mit-license.html
+}}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
@@ -6,6 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">Yahoo!天気予報通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <version>0.1.2</version>
+    <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/subject_weather_yahoo.js</updateURL>

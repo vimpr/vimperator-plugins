@@ -1,3 +1,9 @@
+/*** BEGIN LICENSE BLOCK {{{
+    Copyright (c) 2008 suVene<suvene@zeromemory.info>
+
+    distributable under the terms of an MIT-style license.
+    http://www.opensource.jp/licenses/mit-license.html
+}}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
@@ -5,6 +11,7 @@ var PLUGIN_INFO =
     <description>Vimperator plugins library?</description>
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
+    <license>MIT</license>
     <version>0.1.14</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
