@@ -898,7 +898,7 @@ Thanks:
 
     get large () this.player.ext_getVideoSize() === NicoPlayer.SIZE_LARGE,
     set large (value) {
-        this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL)
+        this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL);
         return this.large;
     },
 
@@ -960,7 +960,7 @@ Thanks:
 
     say: function (message) {
       liberator.log('stsay');
-      this.sendComment(message)
+      this.sendComment(message);
     },
 
     // みかんせいじん
@@ -1021,11 +1021,11 @@ Thanks:
         let info = self.cachedInfo;
         if (info.ticket !== undefined)
           return;
-        let tmpl = '<thread res_from="-1" version="20061206" thread="--thread_id--" />';
+        let tmpl = '<thread res_from="-1" version="20061206" thread="--thread_id--"/>';
         let xhr = U.httpRequest(info.flvInfo.ms, U.fromTemplate(tmpl, info.flvInfo));
-        let xml = xhr.responseXML
+        let xml = xhr.responseXML;
         let r = xml.evaluate('//packet/thread', xml, null, 9, null, 7, null).singleNodeValue;
-        info.ticket = r.getAttribute('ticket')
+        info.ticket = r.getAttribute('ticket');
       }
 
       function sendChat () {
