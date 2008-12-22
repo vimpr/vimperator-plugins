@@ -4,41 +4,53 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
+    <date>2008/12/22 14:57:34</date>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
-
 == Usage ==
 In default setting,
 input quickhint in lowercase
 and
 select charhint label in uppercase.
 
-== OPTIONS ==
-set histchars="hjkl":
-    show char-hint use h, j, k, l.
-set charhintinput=uppercase|lowercase:
-    charhint input in uppercase|lowercase
-set charhintshow=uppercase|lowercase:
-    charhint show in uppercase|lowercase
+== SETTING ==
+let g:hinstchars:
+    set character used by char-hint.
+    ex)
+      let g:hinstchars="hjkl"
+let g:hintsio:
+    - "i" setting char-hint input lowercase.
+    - "I" setting char-hint input uppercase.
+    - "o" setting char-hint show lowercase.
+    - "O" setting char-hint show uppercase.
+    Default setting is "IO".
+    ex)
+      let g:histsio="i"
 
 == TODO ==
      ]]></detail>
     <detail lang="ja"><![CDATA[
-
 == Usage ==
 デフォルトの設定では
 小文字は候補を絞るためのテキスト入力に、
 大文字は文字ラベルの選択に使います。
 
-== OPTIONS ==
-set histchars="hjkl":
-    show char-hint use h, j, k, l.
-set charhintinput=uppercase|lowercase:
-    charhint input in uppercase|lowercase
-set charhintshow=uppercase|lowercase:
-    charhint show in uppercase|lowercase
+== SETTING ==
+let g:hinstchars:
+    set character used by char-hint.
+    ex)
+      let g:hinstchars="hjkl"
+let g:hintsio:
+    - "i" setting char-hint input lowercase.
+    - "I" setting char-hint input uppercase.
+    - "o" setting char-hint show lowercase.
+    - "O" setting char-hint show uppercase.
+    Default setting is "IO".
+    ex)
+      let g:histsio="i"
 
 == TODO ==
      ]]></detail>
@@ -50,65 +62,15 @@ set charhintshow=uppercase|lowercase:
     const DEFAULT_HINTCHARS = "HJKLASDFGYUIOPQWERTNMZXCVB";
     const hintContext = hints.addMode;
 
+    let hintchars = DEFAULT_HINTCHARS;
     let inputCase = function(str) str.toUpperCase();
     let inputRegex = /[A-Z]/;
     let showCase = function(str) str.toUpperCase();
 
-    options.add(["hintchars", "hchar"], //{{{
-        "Hint characters",
-        "string", DEFAULT_HINTCHARS); //}}}
-    options.add(["charhintinput", "chinput"], //{{{
-        "Character Hint Input",
-        "string", "uppercase",
-        {
-            setter: function (value)
-            {
-                switch (value)
-                {
-                    default:
-                    case "uppercase":
-                        inputCase = function(str) str.toUpperCase();
-                        inputRegex = /[A-Z]/;
-                        break;
-                    case "lowercase":
-                        inputCase = function(str) str.toLowerCase();
-                        inputRegex = /[a-z]/;
-                        break;
-                }
-            },
-            completer: function () [
-                ["uppercase", "Input charhint UpperCase"],
-                ["lowercase", "Input charhint LowerCase"],
-            ],
-        }); //}}}
-    options.add(["charhintshow", "chshow"], //{{{
-        "Character Hint Show",
-        "string", "uppercase",
-        {
-            setter: function (value)
-            {
-                switch (value)
-                {
-                    default:
-                    case "uppercase":
-                        showCase = function(str) str.toUpperCase();
-                        break;
-                    case "lowercase":
-                        showCase = function(str) str.toLowerCase();
-                        break;
-                }
-            },
-            completer: function () [
-                ["uppercase", "show charhint UpperCase"],
-                ["lowercase", "show charhint LowerCase"],
-            ],
-        }); //}}}
-        
-
     function chars2num(chars) //{{{
     {
         let num = 0;
-        let hintchars = inputCase(options.hintchars);
+        hintchars = inputCase(hintchars);
         let base = hintchars.length;
         for(let i=0,l=chars.length;i<l;++i) {
             num = base*num + hintchars.indexOf(chars[i]);
@@ -118,7 +80,7 @@ set charhintshow=uppercase|lowercase:
     function num2chars(num) //{{{
     {
         let chars = "";
-        let hintchars = inputCase(options.hintchars);
+        hintchars = inputCase(hintchars);
         let base = hintchars.length;
         do {
             chars = hintchars[((num % base))] + chars;
@@ -149,6 +111,26 @@ set charhintshow=uppercase|lowercase:
     {
         if(hintInput.length == 0 ) return false;
         return inputCase(hint).indexOf(hintInput) == 0;
+    } //}}}
+    function setIOType(type) //{{{
+    {
+        switch (type)
+        {
+            case "I":
+                inputCase = function(str) str.toUpperCase();
+                inputRegex = /[A-Z]/;
+                break;
+            case "i":
+                inputCase = function(str) str.toLowerCase();
+                inputRegex = /[a-z]/;
+                break;
+            case "O":
+                showCase = function(str) str.toUpperCase();
+                break;
+            case "o":
+                showCase = function(str) str.toLowerCase();
+                break;
+        }
     } //}}}
 
     var hintInput = "";
@@ -219,6 +201,15 @@ set charhintshow=uppercase|lowercase:
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
             liberator.execute(":hi Hint::after content: attr(hintchar)");
+            if(liberator.globalVariables.hintsio) {
+                let hintsio = liberator.globalVariables.hintsio;
+                for(let i=0,l=hintsio.length;i<l;++i) {
+                    setIOType(hintsio[i]);
+                }
+            }
+            if(liberator.globalVariables.hintchars) {
+                hintchars = liberator.globalVariables.hintchars;
+            }
         }; //}}}
         charhints.uninstall = function () //{{{
         {
