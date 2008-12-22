@@ -157,7 +157,7 @@ notifier.observer.register(notifier.Observer, {
             let item = container.childNodes[i];
             let growl = item.__data__;
             if (force ||
-                (growl && growl.created && !growl.options.sticky &&
+                (growl && !growl.options.sticky && growl.created &&
                  growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime())) {
                 if (item.id != 'observer_growl_closer')
                     removeNodes.push(item);
@@ -187,7 +187,7 @@ notifier.observer.register(notifier.Observer, {
             if (!flg) return;
             clearInterval(id);
             this.intervalIDs[id] = false;
-        };
+        }
     }
 });
 

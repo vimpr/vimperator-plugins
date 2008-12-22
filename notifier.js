@@ -262,9 +262,7 @@ function bootstrap() {
                 var parsed, diff;
                 if (typeof this.parse == 'function') parsed = this.parse(res);
                 if (parsed && typeof this.diff == 'function') diff = this.diff(this.cache, parsed);
-                if (diff &&
-                    (typeof diff.length == 'undefined' ||
-                    (typeof diff.length != 'undefined' && diff.length > 0))) {
+                if (diff && (typeof diff.length == 'undefined' || diff.length > 0)) {
                     this.cache = parsed;
                     if (typeof this.buildMessages == 'function') {
                         let messages = this.buildMessages(diff);

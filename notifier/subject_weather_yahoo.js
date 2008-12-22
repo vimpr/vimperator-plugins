@@ -2,8 +2,8 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
-    <description>yahoo weather forecast notice.</description>
-    <description lang="ja">ヤフー天気予報通知。</description>
+    <description>Yahoo! Weather forecast notice.</description>
+    <description lang="ja">Yahoo!天気予報通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <detail><![CDATA[
 == Options ==
 >||
-liberator.globalVariables.subject_weather_yahoo_urls =  [url1, url2,…]
+liberator.globalVariables.subject_weather_yahoo_urls = [url1, url2,…]
 ||<
 - @see http://weather.yahoo.co.jp/weather/
     ]]></detail>
@@ -42,7 +42,7 @@ URLs.forEach(function(url) {
         },
         parse: function(res) {
             var parsed = res.getHTMLDocument(
-                            'id("cat-pass") | id("yjw_pinpoint_today") | id("yjw_pinpoint_tomorrow")'
+                            'id("cat-pass yjw_pinpoint_today yjw_pinpoint_tomorrow")'
                          );
             if (!parsed.length) return;
 

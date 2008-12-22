@@ -233,8 +233,8 @@ libly.$U = {//{{{
     // HTML, XML, DOM, E4X {{{
     pathToURL: function(a, baseURL, doc) {
         if (!a) return '';
-        var XHTML_NS = "http://www.w3.org/1999/xhtml"
-        var XML_NS   = "http://www.w3.org/XML/1998/namespace"
+        var XHTML_NS = "http://www.w3.org/1999/xhtml";
+        var XML_NS   = "http://www.w3.org/XML/1998/namespace";
         //var path = (a.href || a.getAttribute('src') || a.action || a.value || a);
         var path = (a.getAttribute('href') || a.getAttribute('src') || a.action || a.value || a);
         if (/^https?:\/\//.test(path)) return path;
@@ -263,7 +263,7 @@ libly.$U = {//{{{
         if (!xpath) return null;
         context = context || window.content.document;
         var result = (context.ownerDocument || context).evaluate(xpath, context, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        return result.singleNodeValue ? result.singleNodeValue : null;
+        return result.singleNodeValue || null;
     },
     getNodesFromXPath: function(xpath, context, callback, thisObj) {
         var ret = [];
