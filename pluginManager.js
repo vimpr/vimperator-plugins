@@ -1,7 +1,7 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
-<description>Manage Vimperator Plugin</description>
+<description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
 <version>0.3</version>
@@ -17,7 +17,7 @@ var PLUGIN_INFO =
     省略すると全てのプラグインの詳細を表示します。
     オプション -v はより細かなデータを表示します
 
-== For plugin Developer ==
+== For plugin Developers ==
 プラグインの先頭に
 >||
     var PLUGIN_INFO = ...
@@ -99,11 +99,12 @@ var lang = window.navigator.language;
 var tags = {
     name: function(info) fromUTF8Octets(info.toString()),
     author: function(info){
-        var xml = <>{fromUTF8Octets(info.toString())}</>;
-        if (info.@homepage.toString() != '')
-            xml += <><span> </span>{makeLink(info.@homepage.toString())}</>;
+        var name = fromUTF8Octets(info.toString());
+        var xml = <>{name}</>;
         if (info.@mail.toString() != '')
-            xml += <><span> </span>({makeLink("mailto:"+info.@mail)})</>;
+            xml += <><span> </span>&lt;<a href={'mailto:'+name+' <'+info.@mail+'>'} highlight="URL">{info.@mail}</a>&gt;</>;
+        if (info.@homepage.toString() != '')
+            xml += <><span> </span>({makeLink(info.@homepage.toString())})</>;
         return xml;
     },
     description: function(info) makeLink(fromUTF8Octets(info.toString())),
@@ -192,9 +193,9 @@ function itemFormater(plugin, showDetails){
 }
 function checkVersion(plugin){
     var data = {
-        "Current Version": plugin.info.version || 'unknown',
-        "Latest Version": getLatestVersion(plugin.info.updateURL)['version'] || 'unknown',
-        "Update URL": plugin.info.updateURL || '-'
+        'Current Version': plugin.info.version || 'unknown',
+        'Latest Version': getLatestVersion(plugin.info.updateURL)['version'] || 'unknown',
+        'Update URL': plugin.info.updateURL || '-'
     };
     return template.table(plugin.name, data);
 }
@@ -202,8 +203,14 @@ function getLatestVersion(url){
     if (!url) return {};
     var source = util.httpGet(url).responseText || '';
     var version = '';
-    if (source.match(/PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/))
-        version = RegExp.$1;
+    var m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
+    if (m){
+        m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
+        m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
+        if (m){
+            version = m[1];
+        }
+    }
     return {source: source, version: version};
 }
 function updatePlugin(plugin){
@@ -211,16 +218,16 @@ function updatePlugin(plugin){
     var latestResource = getLatestVersion(plugin.info.updateURL) || '';
     var data = {
         information: '',
-        "Current Version": plugin.info.version || 'unknown',
-        "Local Path": plugin[0][1] || 'unknown',
-        "Latest Version": latestResource.version || 'unknown',
-        "Update URL": plugin.info.updateURL || '-'
+        'Current Version': plugin.info.version || 'unknown',
+        'Local Path': plugin[0][1] || 'unknown',
+        'Latest Version': latestResource.version || 'unknown',
+        'Update URL': plugin.info.updateURL || '-'
     };
 
     if (!currentVersion || !latestResource.version){
         data.information = 'unknown version.';
     } else if (currentVersion == latestResource.version){
-        data.information = 'already latest.';
+        data.information = 'up to date.';
     } else if (currentVersion > latestResource.version){
         data.information = '<span highlight="WarningMsg">local version is newest.</span>';
     } else {
@@ -230,7 +237,7 @@ function updatePlugin(plugin){
 }
 function overwritePlugin(plugin, latestResource){
     if (!plugin[0] || plugin[0][0] != 'path')
-        return '<span highlight="WarningMsg">plugin localpath notfound.</span>';
+        return '<span highlight="WarningMsg">plugin localpath was not found.</span>';
 
     var source = latestResource.source;
     var localpath = plugin[0][1];
@@ -243,7 +250,7 @@ function overwritePlugin(plugin, latestResource){
         io.writeFile(file, source);
     } catch (e){
         liberaotr.log("Could not write to " + file.path + ": " + e.message);
-        return "E190: Cannot open " + filename.quote() + " for writing";
+        return 'E190: Cannot open ' + filename.quote() + ' for writing';
     }
 
     try {
@@ -257,31 +264,25 @@ function overwritePlugin(plugin, latestResource){
 }
 function WikiParser(text){
     this.mode = '';
-    this.lines = text.split(/\n\r|[\r\n]/);
+    this.lines = text.split(/\r\n|[\r\n]/);
     this.preCount = 0;
     this.pendingMode = '';
     this.xmlstack = new HTMLStack();
 }
 WikiParser.prototype = {
     inlineParse: function(str){
-        function replacer(str){
-            switch(str){
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '&': return '&amp;';
-                default:
-                    return '<a href="#" highlight="URL">'+str+'</a>';
-            }
-        }
+        function replacer(str)
+            ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[str] ||
+            '<a href="#" highlight="URL">'+str+'</a>';
         return XMLList(str.replace(/>|<|&|(?:https?:\/\/|mailto:)\S+/g, replacer));
     },
     wikiReg: { // {{{
-        hn: /^(={2,4})\s*(.*?)\s*(\1)$/,
+        hn: /^(={2,4})\s*(.*?)\s*\1$/,
         dt: /^(.*)\s*:$/,
-        ul: /^\-\s+(.*)$/,
+        ul: /^-\s+(.*)$/,
         ol: /^\+\s+(.*)$/,
         preStart: /^>\|\|$/,
-        preEnd: /^\|\|<$/,
+        preEnd: /^\|\|<$/
     }, // }}}
     blockParse: function(line, prevMode){ // {{{
         if (prevMode == 'pre'){
@@ -303,9 +304,9 @@ WikiParser.prototype = {
             this.pendingMode = prevMode;
             return <pre/>;
         } else if (this.wikiReg.hn.test(line)){
-            var hn = RegExp.$1.length - 1;
+            let hn = RegExp.$1.length - 1;
             this.mode = '';
-            return <h{hn} highlight="Title" style={"font-size:"+(0.75+1/hn)+"em"}>{this.inlineParse(RegExp.$2)}</h{hn}>;
+            return <h{hn} highlight="Title" style={'font-size:'+(0.75+1/hn)+'em'}>{this.inlineParse(RegExp.$2)}</h{hn}>;
         } else if (this.wikiReg.ul.test(line)){
             this.mode = 'ul';
             return <ul><li>{this.inlineParse(RegExp.$1)}</li></ul>;
@@ -325,20 +326,20 @@ WikiParser.prototype = {
         var ite = Iterator(this.lines);
         var num, line, indent;
         var currentIndent = 0, indentList = [0], nest=0;
-        var prevMode = "";
+        var prevMode = '';
         var stack = [];
         var nest;
         var isNest = false;
         var bufXML;
         //try {
         for ([num, line] in ite){
-            [,indent, line] = line.match(/^(\s*)(.*)\s*$/);
+            [, indent, line] = line.match(/^(\s*)(.*?)\s*$/);
             currentIndent = indent.length;
-            var prevIndent = indentList[indentList.length -1];
+            let prevIndent = indentList[indentList.length -1];
             bufXML = this.blockParse(line, prevMode);
             if (prevMode == 'pre'){
                 if (this.mode){
-                    this.xmlstack.appendLastChild(indent.substr(prevIndent) + line + "\n");
+                    this.xmlstack.appendLastChild(indent.substr(prevIndent) + line + '\n');
                 } else {
                     this.xmlstack.reorg(-2);
                     this.mode = this.pendingMode;
@@ -349,7 +350,7 @@ WikiParser.prototype = {
                 continue;
             }
             if (!line){
-                //this.xmlstack.append(<>{"\n"}</>);
+                //this.xmlstack.append(<>{'\n'}</>);
                 continue;
             }
 
@@ -369,7 +370,7 @@ WikiParser.prototype = {
                     this.mode = prevMode;
                 }
             } else if (currentIndent < prevIndent){
-                for (var i in indentList){
+                for (let i in indentList){
                     if (currentIndent == indentList[i] || currentIndent < indentList[i+1]){ nest = i; break; }
                 }
                 indentList.splice(nest);
@@ -381,7 +382,7 @@ WikiParser.prototype = {
             }
             prevMode = this.mode;
         }
-        //} catch (e){ alert(num + ":"+ e); }
+        //} catch (e){ alert(num + ':'+ e); }
         this.xmlstack.reorg();
         return this.xmlstack.last;
     }
@@ -393,10 +394,9 @@ HTMLStack.prototype = {
     get length() this.stack.length,
     get last() this.stack[this.length-1],
     get lastLocalName() this.last[this.last.length()-1].localName(),
-    get inlineElements() ['a','b','i','code','samp','dfn','kbd','br','em','strong','sub','sup','img','span'],
-    isInline: function(xml){
-        return (xml.length() > 1 || xml.nodeKind() == 'text' || this.inlineElements.indexOf(xml.localName()) >= 0) ?  true : false;
-    },
+    get inlineElements() 'a abbr acronym b basefont bdo big br button cite code dfn em font i iframe img inout kbd label map object q s samp script select small span strike strong sub sup textarea tt u var'.split(' '),
+    isInline: function(xml)
+        xml.length() > 1 || xml.nodeKind() == 'text' || this.inlineElements.indexOf(xml.localName()) >= 0,
     push: function(xml) this.stack.push(xml),
     append: function(xml){
         if (this.length == 0){
@@ -406,14 +406,12 @@ HTMLStack.prototype = {
         var buf = this.last[this.last.length()-1];
         if (buf.nodeKind() == 'text'){
             this.last[this.last.length()-1] += this.isInline(xml) ? <><br/>{xml}</> : xml;
+        } else if (this.isInline(xml)){
+            this.stack[this.length-1] += xml;
+        } else if (buf.localName() == xml.localName()){
+            buf.* += xml.*;
         } else {
-            if(this.isInline(xml)){
-                this.stack[this.length-1] += xml;
-            } else if (buf.localName() == xml.localName()){
-                buf.* += xml.*;
-            } else {
-                this.stack[this.length-1] += xml;
-            }
+            this.stack[this.length-1] += xml;
         }
         return this.last;
     },
@@ -425,7 +423,7 @@ HTMLStack.prototype = {
     appendLastChild: function(xml){
         var buf = this.last[this.last.length()-1].*;
         if (buf.length() > 0 && buf[buf.length()-1].nodeKind() == 'element'){
-            var tmp = buf[buf.length()-1].*;
+            let tmp = buf[buf.length()-1].*;
             if (tmp[tmp.length()-1].nodeKind() == 'element'){
                 buf[buf.length()-1].* += xml;
             } else {
@@ -443,7 +441,7 @@ HTMLStack.prototype = {
         var xml;
         if (xmllist.length > 1){
             xml = xmllist.reduceRight(function(p, c){
-                var buf = c[c.length()-1].*;
+                let buf = c[c.length()-1].*;
                 if (buf.length() > 0){
                     if (buf[buf.length()-1].nodeKind() == 'text'){
                         c += p;
@@ -460,7 +458,7 @@ HTMLStack.prototype = {
         }
         this.push(xml);
         return this.last;
-    },
+    }
 };
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
     function(args){
@@ -473,13 +471,13 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             [['-update', '-u'], commands.OPTION_NOARG],
         ],
         completer: function(context){
-            var all = getPlugins().map(function(plugin){
-                let ver = plugin.info.version || 'unknown';
-                let desc = plugin.info.description || '-';
-                return [plugin.name, '[' + ver + ']' + desc];
-            });
             context.title = ['PluginName', '[Version]Description'];
-            context.completions = all.filter(function(row) row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
+            context.completions = getPlugins().map(function(plugin) [
+                plugin.name,
+                '[' + (plugin.info.version || 'unknown') + ']' +
+                (plugin.info.description || '-')
+            ]).filter(function(row)
+                row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
     }, true);
 var public = {
