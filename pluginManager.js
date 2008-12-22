@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.3</version>
+<version>0.4</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -192,54 +192,75 @@ function itemFormater(plugin, showDetails){
     return template.table(plugin.name, data);
 }
 function checkVersion(plugin){
-    var data = {
-        'Current Version': plugin.info.version || 'unknown',
-        'Latest Version': getLatestVersion(plugin.info.updateURL)['version'] || 'unknown',
-        'Update URL': plugin.info.updateURL || '-'
-    };
-    return template.table(plugin.name, data);
+    return updatePlugin(plugin, true);
 }
-function getLatestVersion(url){
-    if (!url) return {};
-    var source = util.httpGet(url).responseText || '';
-    var version = '';
-    var m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
-    if (m){
-        m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
-        m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
-        if (m){
-            version = m[1];
-        }
-    }
-    return {source: source, version: version};
-}
-function updatePlugin(plugin){
-    var currentVersion = plugin.info.version || '';
-    var latestResource = getLatestVersion(plugin.info.updateURL) || '';
+function updatePlugin(plugin, checkOnly){
+    var [localResource, serverResource] = getResourceInfo(plugin);
+
     var data = {
-        information: '',
-        'Current Version': plugin.info.version || 'unknown',
+        'Local Version': plugin.info.version || 'unknown',
+        'Local Last-Modified': localResource['Last-Modified'] || 'unkonwn',
         'Local Path': plugin[0][1] || 'unknown',
-        'Latest Version': latestResource.version || 'unknown',
+        'Server Latest Version': serverResource.version || 'unknown',
+        'Server Last-Modified': serverResource.headers['Last-Modified'] || 'unknown',
         'Update URL': plugin.info.updateURL || '-'
     };
 
-    if (!currentVersion || !latestResource.version){
-        data.information = 'unknown version.';
-    } else if (currentVersion == latestResource.version){
-        data.information = 'up to date.';
-    } else if (currentVersion > latestResource.version){
+    if (checkOnly) return template.table(plugin.name, data);
+
+    if (!plugin.info.version || !serverResource.version){
+        data.Information = '<span style="font-weight: bold;">unknown version.</span>';
+    } else if (plugin.info.version == serverResource.version &&
+               localResource['Last-Modified'] == serverResource.headers['Last-Modified']){
+        data.Information = 'up to date.';
+    } else if (plugin.info.version > serverResource.version ||
+               localResource['Last-Modified'] > serverResource.headers['Last-Modified']){
         data.information = '<span highlight="WarningMsg">local version is newest.</span>';
     } else {
-        data.information = overwritePlugin(plugin, latestResource);
+        data.Information = overwritePlugin(plugin, serverResource);
+        localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
+        store.set(plugin.name, localResource);
+        store.save();
     }
     return template.table(plugin.name, data);
 }
-function overwritePlugin(plugin, latestResource){
+function getResourceInfo(plugin){
+    var store = storage.newMap('plugins-pluginManager', true);
+    var url = plugin.info.updateURL;
+    var localResource = store.get(plugin.name) || {};
+    var serverResource = {
+            version: '',
+            source: '',
+            headers: {}
+        };
+
+    if (url){
+        let xhr = util.httpGet(url);
+        let version = '';
+        let source = xhr.responseText || '';
+        let headers = {};
+        try {
+            xhr.getAllResponseHeaders().split('\n').forEach(function(h) {
+                var pair = h.split(': ');
+                if (pair && pair.length > 1)
+                    headers[pair.shift()] = pair.join('').substring(1, pair.join('').length - 1);
+            });
+        } catch(e) {}
+        [,version] = /PLUGIN_INFO[\s\S]*<VimperatorPlugin>[\s\S]*<version>(.*)<\/version>[\s\S]*<\/VimperatorPlugin>/.exec(source);
+        serverResource = {version: version, source: source, headers: headers};
+    }
+
+    if (!localResource['Last-Modified']){
+        localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
+        store.set(plugin.name, localResource);
+    }
+    return [localResource, serverResource];
+}
+function overwritePlugin(plugin, serverResource){
     if (!plugin[0] || plugin[0][0] != 'path')
         return '<span highlight="WarningMsg">plugin localpath was not found.</span>';
 
-    var source = latestResource.source;
+    var source = serverResource.source;
     var localpath = plugin[0][1];
     var file = io.getFile(localpath);
 
@@ -249,7 +270,7 @@ function overwritePlugin(plugin, latestResource){
     try {
         io.writeFile(file, source);
     } catch (e){
-        liberaotr.log("Could not write to " + file.path + ": " + e.message);
+        liberaotr.log('Could not write to ' + file.path + ': ' + e.message);
         return 'E190: Cannot open ' + filename.quote() + ' for writing';
     }
 
