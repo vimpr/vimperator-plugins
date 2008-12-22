@@ -351,7 +351,6 @@ function bootstrap() {
                 logger.echo('notifier[' + this.id + '] running at ' + start, commandline.force_singleline);
                 this.timer = true;
                 while (this.timer) { //{{{
-                    liberator.dump('window:' + window.content.window);
                     this.subjects.getPlugins().forEach(function(s) {
                         let now = new Date();
                         if (!s.__nextTime) s.__nextTime = now;
