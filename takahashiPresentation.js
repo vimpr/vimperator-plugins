@@ -7,6 +7,8 @@ var PLUGIN_INFO =
     <version>0.1</version>
     <minVersion>2.0a1</minVersion>
     <maxVersion>2.0a1</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/takahashiPresentation.js</updateURL>
+    <date>2008/12/23 09:20:07</date>
     <detail><![CDATA[
 
 == COMMANDS ==
