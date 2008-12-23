@@ -3,7 +3,7 @@ var PLUGIN_INFO =
   <name>localkeymode</name>
   <description>assign temporary keymap</description>
   <description lang="ja">一時的なキーマップの割り当て</description>
-  <version>0.2.1b</version>
+  <version>0.2.1c</version>
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -153,7 +153,7 @@ liberator.plugins.LocalKeyMode = (function() {
         m = (m+'').replace(/[\/\\]+/g, '');
         return [m+'', 'maps for [' + m + ']'];
       } );
-      autocommands.add('LocationChange', '.*', 'js liberator.plugins.LocalKeyMode.loadKeyMap();');
+      autocommands.add('LocationChange', '.*', function () liberator.plugins.LocalKeyMode.loadKeyMap());
     },
     // ローカルキーマップの生成
     addLocalKeyMap: function( uri, items ) {
