@@ -19,13 +19,13 @@ start :presentation.
 </VimperatorPlugin>;
 //}}}
 (function() {
-    plugins.presentation = {};
     let keys = [
         ['<Right>', 'next page', function() nextPage()],
         ['<Left>', 'prev page', function() prevPage()],
         ['^', 'first page', function() loadPage(0)],
         ['$', 'last page', function() loadPage(pages.length-1)],
         ['.', 'last page', function(count) loadPage(count?count-1:0), {flags: Mappings.flags.COUNT}],
+        ['q', 'stop presentation', function() stop()],
     ];
     let win;
     let doc;
@@ -71,15 +71,30 @@ start :presentation.
         loadPage(curpage);
     }
     function parsePages(text) {
-        if(/:backgroundImage:(.+)(?:\r\n|[\r\n])/.test(text)) {
-            doc.body.style.backgroundImage = RegExp.$1;
-            doc.body.style.backgroundRepeat = 'repeat';
-        }
-        return text.replace(/(?::.+(?:\r\n|[\r\n]))+/g, '')
-                   .split('----')
+        return text.split('----')
                    .map(function(txt) txt.replace(/^(?:\r\n|[\r\n])|(?:\r\n|[\r\n])$/g, ''));
     }
+    function save_setting(setting) {
+        setting.fullscreen = options.fullscreen;
+        setting.guioptions = options.guioptions;
+        // TODO: save key mapping
+        //setting.mappings = keys.map(function([key,]) {
+        //    let mapping = mappings.get(modes.NORMAL, key);
+        //    return [mapping.modes, key, mapping.description, mapping.action, mapping.extra];
+        //});
+    }
+    function load_setting(setting) {
+        options.fullscreen = setting.fullscreen;
+        options.guioptions = setting.guioptions;
+        // TODO: load key mapping
+        //setting.mappings.forEach(function([modes, key, desc, action, extra]) {
+        //    mappings.addUserMap(modes, [key], desc, action, extra);
+        //});
+    }
+    let original_setting = {};
     function start() {
+        save_setting(original_setting);
+
         options.fullscreen = true;
         options.guioptions = '';
         win = window.content;
@@ -97,6 +112,9 @@ start :presentation.
         pre.style.margin = '0px';
 
         loadPage(0);
+    }
+    function stop() {
+        load_setting(original_setting);
     }
 
     commands.add(['presentation'], 'start presentation', //{{{
