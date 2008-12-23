@@ -9,6 +9,7 @@ var PLUGIN_INFO =
     <maxVersion>2.0a1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/takahashiPresentation.js</updateURL>
     <date>2008/12/23 09:20:07</date>
+    <exampleURL></exampleURL>
     <detail><![CDATA[
 
 == COMMANDS ==
@@ -17,6 +18,7 @@ presentation:
 == HOWTO ==
 open HTML file includes <pre id="page">...</pre> and <div id="text">...</div>.
 start :presentation.
+Example HTML http://konbu.s13.xrea.com/lib/vimperator/takahashi_example.html
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
