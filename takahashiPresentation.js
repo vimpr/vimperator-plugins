@@ -32,7 +32,7 @@ start :presentation.
     let pages = [];
     let curpage = 0;
     let pre;
-    let div;
+    let header;
     let fontSize = 18.0;
 
     function addKeys() {
@@ -59,7 +59,9 @@ start :presentation.
     function loadPage(page) {
         let text = pages[page];
         pre.innerHTML = text;
-        head.innerHTML = (page+1)+'/'+pages.length;
+        if(header) {
+            header.innerHTML = (page+1)+'/'+pages.length;
+        }
         fitPage();
     }
     function nextPage() {
@@ -103,9 +105,7 @@ start :presentation.
         pages = parsePages(text.innerHTML);
         addKeys();
 
-        div = doc.createElement('div');
-        head = doc.body.appendChild(doc.createElement('div'));
-        head.style.textAlign = 'right';
+        header = buffer.evaluateXPath('//*[@id="header"]').snapshotItem(0);
 
         pre = buffer.evaluateXPath('//pre[@id="page"]').snapshotItem(0);
         pre.style.fontSize = fontSize+'px';
