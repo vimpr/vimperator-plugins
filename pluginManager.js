@@ -1,3 +1,4 @@
+pluginManager.js
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
@@ -196,7 +197,9 @@ function checkVersion(plugin){
 }
 function updatePlugin(plugin, checkOnly){
     var [localResource, serverResource, store] = getResourceInfo(plugin);
-
+    var localDate = Date.parse(localResource['Last-Modified']) || 0;
+    var serverDate = Date.parse(serverResource.headers['Last-Modified']) || 0;
+ 
     var data = {
         'Local Version': plugin.info.version || 'unknown',
         'Local Last-Modified': localResource['Last-Modified'] || 'unkonwn',
@@ -214,10 +217,11 @@ function updatePlugin(plugin, checkOnly){
                localResource['Last-Modified'] == serverResource.headers['Last-Modified']){
         data.Information = 'up to date.';
     } else if (plugin.info.version > serverResource.version ||
-               localResource['Last-Modified'] > serverResource.headers['Last-Modified']){
+               localDate > serverDate){
         data.information = '<span highlight="WarningMsg">local version is newest.</span>';
     } else {
         data.Information = overwritePlugin(plugin, serverResource);
+        localResource = {}; // cleanup pref.
         localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
         store.set(plugin.name, localResource);
         store.save();
@@ -242,8 +246,9 @@ function getResourceInfo(plugin){
         try {
             xhr.getAllResponseHeaders().split(/\r?\n/).forEach(function(h){
                 var pair = h.split(': ');
-                if (pair && pair.length > 1)
-                    headers[pair.shift()] = pair.join('').substring(1, pair.join('').length - 1);
+                if (pair && pair.length > 1) {
+                    headers[pair.shift()] = pair.join('');
+                }
             });
         } catch(e){}
         let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
