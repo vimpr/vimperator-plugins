@@ -7,6 +7,7 @@ var PLUGIN_INFO =
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/localkeymode.js</updateURL>
   <detail><![CDATA[
     == Usage ==
       :togglelocalkeymode:

@@ -8,6 +8,7 @@ var PLUGIN_INFO =
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/applauncher.js</updateURL>
   <detail lang='ja'><![CDATA[
   == Commands ==
     :applaunch [name]

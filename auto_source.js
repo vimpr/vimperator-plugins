@@ -7,6 +7,7 @@ var PLUGIN_INFO =
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_source.js</updateURL>
   <license document="http://creativecommons.org/licenses/by-sa/3.0/">
     Creative Commons Attribution-Share Alike 3.0 Unported
   </license>

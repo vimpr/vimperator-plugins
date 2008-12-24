@@ -7,6 +7,7 @@ var PLUGIN_INFO =
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/refcontrol.js</updateURL>
   <detail><![CDATA[
 :togglerefcontrol    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
 :addref              - リファラー設定追加(再起動すると消えます)

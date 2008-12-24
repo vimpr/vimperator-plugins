@@ -1,4 +1,4 @@
-var PLUGIN_INFO = 
+var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>autoproxychanger</name>
   <description>setting proxy</description>
@@ -7,6 +7,7 @@ var PLUGIN_INFO =
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/autoproxychanger.js</updateURL>
   <detail><![CDATA[
 Usage:
 :proxy [setting_name]      -> set proxy setting to setting_name

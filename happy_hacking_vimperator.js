@@ -6,6 +6,7 @@ var PLUGIN_INFO =
 <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/happy_hacking_vimperator.js</updateURL>
 <detail><![CDATA[
 == Usage ==
 DO NOT THINK. FEEL!
