@@ -1,50 +1,78 @@
-// Vimperator plugin: 'Direct Post to Social Bookmarks'
-// Version: 0.12
-// Last Change: 27-Nov-2008. Jan 2008
-// License: Creative Commons
-// Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
-// Parts:
-//      http://d.hatena.ne.jp/fls/20080309/p1
-//      Pagerization (c) id:ofk
-//      AutoPagerize (c) id:swdyh
-//      direct_delb.js id:mattn
-//      JSDeferred id:cho45
-//
-// Social Bookmark direct add script for Vimperator 0.6.*
-// for Migemo search: require XUL/Migemo Extension
-//
-// Variables:
-//  'g:direct_sbm_use_services_by_tag'
-//      Use social bookmark services to extract tags
-//          'h': Hatena Bookmark
-//          'd': del.icio.us
-//          'l': livedoor clip
-//          'p': Places (Firefox bookmarks)
-//      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
-//  'g:direct_sbm_use_services_by_post'
-//      Use social bookmark services to post
-//          'h': Hatena Bookmark
-//          'd': del.icio.us
-//          'l': livedoor clip
-//          'g': Google Bookmarks
-//          'p': Places (Firefox bookmarks)
-//      Usage: let g:direct_sbm_use_services_by_post = "hdl"
-//  'g:direct_sbm_is_normalize'
-//      Use normalize permalink
-//  'g:direct_sbm_is_use_migemo'
-//      Use Migemo completion
-// Commands:
-//  ':btags'
-//      Extract tags from social bookmarks for completion
-//  ':sbm'
-//      Post a current page to social bookmarks
-//      Arguments
-//          -s,-service: default:"hdl"
-//              Specify target SBM services to post
-//  ':bentry'
-//      Goto Bookmark Entry Page
-//  ':bicon'
-//      Show Bookmark Count as Icon
+// Last Change: 25-Dec-2008. Jan 2008
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>{NAME}</name>
+    <description>Direct Post to Social Bookmarks</description>
+    <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
+    <version>0.12</version>
+    <license>Creative Commons</license>
+    <minVersion>2.0pre</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/direct_bookmark.js</updateURL>
+    <detail><![CDATA[
+Social Bookmark direct add script for Vimperator 0.6.*.
+for Migemo search: require XUL/Migemo Extension
+
+== Parts ==
+- http://d.hatena.ne.jp/fls/20080309/p1
+- Pagerization (c) id:ofk
+- AutoPagerize (c) id:swdyh
+- direct_delb.js id:mattn
+- JSDeferred id:cho45
+
+
+== Variables ==
+=== g:direct_sbm_use_services_by_tag ===
+>||
+      Use social bookmark services to extract tags
+          'h': Hatena Bookmark
+          'd': del.icio.us
+          'l': livedoor clip
+          'p': Places (Firefox bookmarks)
+      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
+||<
+=== g:direct_sbm_use_services_by_post ===
+>||
+      Use social bookmark services to post
+          'h': Hatena Bookmark
+          'd': del.icio.us
+          'l': livedoor clip
+          'g': Google Bookmarks
+          'p': Places (Firefox bookmarks)
+      Usage: let g:direct_sbm_use_services_by_post = "hdl"
+||<
+=== g:direct_sbm_is_normalize ===
+>||
+      Use normalize permalink
+||<
+=== g:direct_sbm_is_use_migemo ===
+>||
+      Use Migemo completion
+||<
+
+== Commands ==
+=== :btags ===
+>||
+      Extract tags from social bookmarks for completion
+||<
+=== :sbm ===
+>||
+      Post a current page to social bookmarks
+      Arguments
+          -s,-service: default:"hdl"
+              Specify target SBM services to post
+||<
+=== :bentry ===
+>||
+      Goto Bookmark Entry Page
+||<
+=== :bicon ===
+>||
+      Show Bookmark Count as Icon
+||<
+   ]]></detail>
+</VimperatorPlugin>;
+
 (function(){
     var evalFunc = window.eval;
     try {
