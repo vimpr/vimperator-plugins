@@ -1,4 +1,12 @@
+/*** BEGIN LICENSE BLOCK {{{
+    Copyright (c) 2008 suVene<suvene@zeromemory.info>
 
+    distributable under the terms of an MIT-style license.
+    http://www.opensource.jp/licenses/mit-license.html
+
+    @based on jGrowl
+        http://stanlemon.net/projects/jgrowl.html
+}}}  END LICENSE BLOCK ***/
 div.observer_growl {
     padding: 10px;
     z-index: 9999;
@@ -80,7 +88,7 @@ div.observer_growl div.observer_growl_notification div.close {
     cursor: pointer;
 }
 
-div.observer_growl div.observer_growl-closer {
+div.observer_growl div.observer_growl_closer {
     height: 15px;
     padding-top: 4px;
     padding-bottom: 4px;
