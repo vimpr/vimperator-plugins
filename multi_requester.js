@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.7</version>
+    <version>0.4.8</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -41,6 +41,12 @@ let g:multi_requester_command = "ANY1, ANY2, ……"
 or
 liberator.globalVariables.multi_requester_command = [ANY1, ANY2, ……];
 ||<
+
+=== Default Sites (default undefined) ===
+>||
+liberator.globalVariables.multi_requester_default_sites = "alc,goo"
+||<
+These sites(subcommands) will be used, if this variable has been defined and you do not specify subcommands.
 
 === SITEINFO ===
 e.g.)
@@ -252,6 +258,7 @@ var DataAccess = {
 var MultiRequester = {
     name: DataAccess.getCommand(),
     description: 'request, and display to the buffer',
+    defaultSites: liberator.globalVariables.multi_requester_default_sites,
     doProcess: false,
     requestNames: '',
     requestCount: 0,
@@ -323,7 +330,6 @@ var MultiRequester = {
         ret.names = '';
         ret.str = '';
         ret.count = 0;
-        ret.siteinfo = [];
 
         if (!args) return ret;
 
@@ -332,16 +338,25 @@ var MultiRequester = {
 
         if (arguments.length < 1) return ret;
 
-        ret.names = arguments.shift();
-        ret.str = (arguments.length < 1 ? sel : arguments.join()).replace(/[\n\r]+/g, '');
+        function parse(args, names) {
+            args = Array.concat(args);
+            ret.siteinfo = [];
+            ret.names = names || args.shift();
+            ret.str = (args.length < 1 ? sel : args.join()).replace(/[\n\r]+/g, '');
 
-        ret.names.split(',').forEach(function(name) {
-            var site = self.getSite(name);
-            if (site) {
-                ret.count++;
-                ret.siteinfo.push(site);
-            }
-        });
+            ret.names.split(',').forEach(function(name) {
+                var site = self.getSite(name);
+                if (site) {
+                    ret.count++;
+                    ret.siteinfo.push(site);
+                }
+            });
+        }
+
+        parse(arguments);
+
+        if (!ret.siteinfo.length && this.defaultSites)
+            parse(arguments, this.defaultSites);
 
         return ret;
     },
