@@ -1,4 +1,3 @@
-pluginManager.js
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
