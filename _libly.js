@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.14</version>
+    <version>0.1.15</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -21,6 +21,7 @@ var PLUGIN_INFO =
 - liberator.plugins.libly.$U
 - liberator.plugins.libly.Request
 - liberator.plugins.libly.Response
+- liberator.plugins.libly.Wedata
 
 == Logger ==
 getLogger(prefix):
@@ -499,6 +500,65 @@ libly.Response.prototype = {
         }
         if (!xpath) xpath = '//*';
         return libly.$U.getNodesFromXPath(xpath, this.doc, callback, thisObj);
+    }
+};
+//}}}
+
+libly.Wedata = function(dbname) { // {{{
+    this.initialize.apply(this, arguments);
+};
+libly.Wedata.prototype = {
+    initialize: function(dbname) {
+        this.HOST_NAME = 'http://wedata.net/';
+        this.dbname = dbname;
+        this.logger = libly.$U.getLogger('libly.Wedata');
+    },
+    getItems: function(expire, itemCallback, finalCallback) {
+
+        var logger = this.logger;
+        var STORE_KEY = 'plugins-libly-wedata-items';
+        var store = storage.newMap(STORE_KEY, true);
+
+        expire = expire || 0;
+
+        if (store && store.get('data') && new Date(store.get('expire')) > new Date()) {
+            logger.log('return cache. ');
+            store.get('data').forEach(function(item) itemCallback(item));
+            finalCallback(true, store.get('data'));
+            return;
+        }
+
+        function errDispatcher(msg, cache) {
+            if (cache) {
+                logger.log('return cache. -> ' + msg);
+                cache.forEach(function(item) itemCallback(item));
+                finalCallback(true, cache);
+            } else {
+                finalCallback(false, msg);
+            }
+        }
+
+        var req = new libly.Request(this.HOST_NAME + 'databases/' + this.dbname + '/items.json');
+        req.addEventListener('onSuccess', libly.$U.bind(this, function(res) {
+            var text = res.responseText;
+            if (!text) {
+                errDispatcher('respons is null.', store.get('data'));
+                return;
+            };
+            var json = libly.$U.evalJson(text);
+            if (!json) {
+                errDispatcher('uailed eval json.', store.get('data'));
+                return;
+            };
+            store.set('expire', new Date(new Date().getTime() + expire).toString());
+            store.set('data', json);
+            store.save();
+            json.forEach(function(item) itemCallback(item));
+            finalCallback(true, json);
+        }));
+        req.addEventListener('onFailure', function() errDispatcher('onFailure'));
+        req.addEventListener('onException', function() errDispatcher('onException') );
+        req.get();
     }
 };
 //}}}
