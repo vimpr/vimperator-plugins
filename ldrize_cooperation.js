@@ -241,7 +241,7 @@
                     liberator.modules.commandline.echo(showString, liberator.modules.commandline.HL_NORMAL, liberator.modules.commandline.FORCE_MULTILINE);
                 },{});
             liberator.modules.commands.addUserCommand(["mb","m","minibuffer"], "Execute Minibuffer",
-                function(arg){self.Minibuffer.execute(arg.string)},
+                function(arg){ self.Minibuffer.execute(arg.string.replace(/\\/g,"")) },
                 {
                     completer: function(context, arg, special){
                         var filter = context.filter;
