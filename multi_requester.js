@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.8</version>
+    <version>0.4.9</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -90,8 +90,6 @@ EOM
 let g:multi_requester_use_wedata = "false"             // true by default
 ||<
 
-=== Todo ===
-- wedata local cache.
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -226,30 +224,22 @@ var DataAccess = {
 
         if (useWedata) {
             logger.log('use wedata');
-            this.getWedata(function(site) {
-                if (mergedSiteinfo[site.name]) return;
-                mergedSiteinfo[site.name] = {};
-                $U.extend(mergedSiteinfo[site.name], site);
-            });
+            var wedata = new libly.Wedata('Multi%20Requester');
+            wedata.getItems(24 * 60 * 60 * 1000,
+                function(item) {
+                    var site = item.data;
+                    if (mergedSiteinfo[site.name]) return;
+                    mergedSiteinfo[site.name] = {};
+                    $U.extend(mergedSiteinfo[site.name], site);
+                },
+                function(isSuccess, data) {
+                    if (!isSuccess) return;
+                    CommandRegister.register(MultiRequester, $U.A(mergedSiteinfo));
+                }
+            );
         }
 
         return $U.A(mergedSiteinfo);
-    },
-    getWedata: function(func) {
-        var req = new libly.Request(
-            'http://wedata.net/databases/Multi%20Requester/items.json'
-        );
-        req.addEventListener('onSuccess', function(res) {
-            var text = res.responseText;
-            if (!text) return;
-            var json = $U.evalJson(text);
-            if (!json) return;
-
-            json.forEach(function(item) func(item.data));
-            CommandRegister.register(MultiRequester, $U.A(mergedSiteinfo));
-
-        });
-        req.get();
     }
 };
 //}}}
