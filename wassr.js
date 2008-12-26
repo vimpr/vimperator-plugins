@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 11-Nov-2008. Jan 2008
+// Last Change: 26-Dec-2008. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -87,9 +87,9 @@
                          title={status.user.screen_name}
                          class="wassr photo"/>
                     <strong>{status.user_login_id}&#x202C;</strong>
-                    : <span class="wassr entry-content">{emojiConv(status.text)}&#x202C;</span>
                 </>.toSource()
-                   .replace(/(?:\r?\n|\r)[ \t]*/g, " "))
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', emojiConv(status.text)))
                         .join("<br/>");
 
         //liberator.log(html);
