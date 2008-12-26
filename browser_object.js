@@ -1,7 +1,7 @@
 // Vimperator plugin: 'Map behave like text-object'
-// Version: 0.4
-// Last Change: 15-Sep-2008. Jan 2008
-// License: Creative Commons
+// Version: 0.5
+// Last Change: 26-Dec-2008. Jan 2008
+// License: New BSD License
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
 // Map behave like text-object for Vimperator
@@ -13,6 +13,8 @@
 // Mappings:
 //  'dd'
 //      Delete current tab (when prefix is '' only)
+//  '{motion}/'
+//      {motion} pattern matched tabs
 //  '{motion}{scope}{target}'
 //      Motions:
 //          'd' : Delete
@@ -31,6 +33,14 @@
 //      Target:
 //          't' : Tabs
 (function(){
+     var XMigemoCore, XMigemoTextUtils;
+     try{
+          XMigemoCore = Components.classes["@piro.sakura.ne.jp/xmigemo/factory;1"]
+                                      .getService(Components.interfaces.pIXMigemoFactory)
+                                      .getService("ja");
+          XMigemoTextUtils = Components.classes["@piro.sakura.ne.jp/xmigemo/text-utility;1"]
+                                           .getService(Components.interfaces.pIXMigemoTextUtils);
+     }catch(ex){}
      const PINNED_ICON = 'data:image/png;base64,'
      +'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgI'
      +'fAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3'
@@ -128,6 +138,8 @@
 
         active: function() gBrowser.mTabContainer.selectedIndex,
         identify: function(i){try{return i.linkedBrowser.contentDocument.location.host}catch(e){}},
+        href: function(i){try{return i.linkedBrowser.contentDocument.location.href}catch(e){}},
+        title: function(i){try{return i.linkedBrowser.contentDocument.title}catch(e){}},
         pinned: function(i){
             if(typeof i == "object"){
                 return i.linkedBrowser.vimperatorBrowserObjectPin
@@ -225,5 +237,23 @@
                 [motion.id + motion.id], map.description, map.action,
             {});
         }
+        liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL],
+            [motion.id + "/"], "Browser Object Mappings",
+            function (){
+                liberator.modules.commandline.input("/",function(s){
+                    var target = browserObject.targets.get("t");
+                    var targetCollection = (function(ary){
+                        var pattern;
+                        if(XMigemoCore != undefined){
+                            pattern = new RegExp(XMigemoTextUtils.sanitize(s) + "|" + XMigemoCore.getRegExp(s),"i");
+                        }else{
+                            pattern = new RegExp(s,"i");
+                        }
+                        return [ary[i] for (i in ary) if(pattern.test(this.title(ary[i]) || pattern.test(this.href(ary[i]))))];
+                    }).call(target.handler,target.handler.collection());
+                    target.handler[motion.handler].call(target.handler,targetCollection);
+                },{completer: liberator.modules.completion.buffer});
+            },
+        {});
     }
 })();
