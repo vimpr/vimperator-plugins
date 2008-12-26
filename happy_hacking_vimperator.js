@@ -27,7 +27,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ###################################################################################
 # http://sourceforge.jp/projects/opensource/wiki/licenses%2Fnew_BSD_license       #
-# $B$K;29M$K$J$kF|K\8lLu$,$"$j$^$9$,!"M-8z$J$N$O>e5-1QJ8$H$J$j$^$9!#(B                #
+# に参考になる日本語訳がありますが、有効なのは上記英文となります。                #
 ###################################################################################
 
 */
@@ -42,7 +42,7 @@ let PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/happy_hacking_vimperator.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">$B=$@5(BBSD$B%i%$%;%s%9(B ($B%=!<%9%3!<%I$N%3%a%s%H$r;2>H$7$F$/$@$5$$(B)</license>
+  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <detail><![CDATA[
     == Usage ==
     DO NOT THINK. FEEL!
