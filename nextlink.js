@@ -11,14 +11,14 @@ var PLUGIN_INFO =
     <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
     <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.2.9</version>
+    <version>0.2.10</version>
     <license>MIT</license>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.11)
+- _libly.js(ver.0.1.15)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Option ==
@@ -77,7 +77,6 @@ var NextLink = function() {//{{{
 NextLink.prototype = {
     initialize: function(pager) {
 
-        this.WEDATA_AUTOPAGERIZE = 'http://wedata.net/databases/AutoPagerize/items.json';
         this.initialized = false;
         this.isCurOriginalMap = true;
         this.siteinfo = [];
@@ -86,17 +85,15 @@ NextLink.prototype = {
         this.browserModes = config.browserModes || [modes.NORMAL, modes.VISUAL];
         this.is2_0later = config.autocommands.some(function ([k, v]) k == 'DOMLoad'); // toriaezu
 
-        var req = new libly.Request(this.WEDATA_AUTOPAGERIZE);
-        req.addEventListener('onSuccess', $U.bind(this,
-            function(res) {
-                var json = $U.evalJson(res.responseText);
-                if (!json) return;
-                this.siteinfo = json.map(function(item) item.data)
+        var wedata = new libly.Wedata('AutoPagerize');
+        wedata.getItems(24 * 60 * 60 * 1000, null,
+            $U.bind(this, function(isSuccess, data) {
+                if (!isSuccess) return;
+                this.siteinfo = data.map(function(item) item.data)
                                 .sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
                 this.initialized = true;
-            }
-        ));
-        req.get();
+            })
+        );
         // for debug
         /*
         this.initialized = true;

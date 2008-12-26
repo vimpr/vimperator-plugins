@@ -523,18 +523,21 @@ libly.Wedata.prototype = {
 
         if (store && store.get('data') && new Date(store.get('expire')) > new Date()) {
             logger.log('return cache. ');
-            store.get('data').forEach(function(item) itemCallback(item));
-            finalCallback(true, store.get('data'));
+            store.get('data').forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
+            if (typeof finalCallback == 'function') 
+                finalCallback(true, store.get('data'));
             return;
         }
 
         function errDispatcher(msg, cache) {
             if (cache) {
                 logger.log('return cache. -> ' + msg);
-                cache.forEach(function(item) itemCallback(item));
-                finalCallback(true, cache);
+                cache.forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
+                if (typeof finalCallback == 'function') 
+                    finalCallback(true, cache);
             } else {
-                finalCallback(false, msg);
+                if (typeof finalCallback == 'function')
+                    finalCallback(false, msg);
             }
         }
 
@@ -553,8 +556,9 @@ libly.Wedata.prototype = {
             store.set('expire', new Date(new Date().getTime() + expire).toString());
             store.set('data', json);
             store.save();
-            json.forEach(function(item) itemCallback(item));
-            finalCallback(true, json);
+            json.forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
+            if (typeof finalCallback == 'function')
+                finalCallback(true, json);
         }));
         req.addEventListener('onFailure', function() errDispatcher('onFailure'));
         req.addEventListener('onException', function() errDispatcher('onException') );

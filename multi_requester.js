@@ -18,7 +18,7 @@ var PLUGIN_INFO =
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/multi_requester.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.11)
+- _libly.js(ver.0.1.15)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Usage ==
