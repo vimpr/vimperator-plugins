@@ -238,7 +238,7 @@
             {});
         }
         liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL],
-            [motion.id + "/"], "Browser Object Mappings",
+            [prefix + motion.id + "/"], "Browser Object Mappings",
             function (){
                 liberator.modules.commandline.input("/",function(s){
                     var target = browserObject.targets.get("t");
