@@ -516,7 +516,7 @@ libly.Wedata.prototype = {
     getItems: function(expire, itemCallback, finalCallback) {
 
         var logger = this.logger;
-        var STORE_KEY = 'plugins-libly-wedata-items';
+        var STORE_KEY = 'plugins-libly-wedata-' + this.dbname + '-items';
         var store = storage.newMap(STORE_KEY, true);
 
         expire = expire || 0;
