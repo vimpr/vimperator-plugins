@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.15</version>
+    <version>0.1.16</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -384,8 +384,9 @@ libly.Request.prototype = {
         try {
             libly.Request.requestCount++;
 
+            this.method = method;
             this.transport = new XMLHttpRequest();
-            this.transport.open(method, this.url, this.options.asynchronous);
+            this.transport.open(method, this.url, this.options.asynchronous, this.options.username, this.options.password);
 
             this.transport.onreadystatechange = libly.$U.bind(this, this._onStateChange);
             this.setRequestHeaders();
@@ -452,7 +453,6 @@ libly.Request.prototype = {
 
         for (let name in headers)
             this.transport.setRequestHeader(name, headers[name]);
-
     },
     get: function() {
         this._request('GET');

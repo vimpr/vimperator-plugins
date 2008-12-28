@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>change notice framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -237,11 +237,13 @@ function bootstrap() {
     var SubjectHttp = Subject;//{{{
     $U.extend(SubjectHttp.prototype, {
         initialize: function() {
+            this.preInitialized = true;
             this.initialized = false;
             this.count = 0;
             this.cache;
 
-            if (typeof this.preInitialize == 'function') this.preInitialize();
+            if (typeof this.preInitialize == 'function') this.preInitialized = this.preInitialize();
+            if (!this.preInitialized) return;
 
             var req = new libly.Request(
                 this.options.url,
@@ -254,7 +256,12 @@ function bootstrap() {
                 if (this.cache)
                     this.initialized = true;
             }));
-            req.get();
+            req.addEventListener('onFailure', function(res) { logger.log(res); });
+            req.addEventListener('onException', function(res) { logger.log(res); });
+            if (this.method == 'POST')
+                req.post();
+            else
+                req.get();
         },
         check: function() {
             if (!this.initialized) return;
@@ -280,7 +287,10 @@ function bootstrap() {
                     }
                 }
             }));
-            req.get();
+            if (this.method == 'POST')
+                req.post();
+            else
+                req.get();
         },
         diff: function(cache, parsed) cache
     });//}}}
