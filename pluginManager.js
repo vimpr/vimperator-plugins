@@ -198,7 +198,7 @@ function updatePlugin(plugin, checkOnly){
     var [localResource, serverResource, store] = getResourceInfo(plugin);
     var localDate = Date.parse(localResource['Last-Modified']) || 0;
     var serverDate = Date.parse(serverResource.headers['Last-Modified']) || 0;
- 
+
     var data = {
         'Local Version': plugin.info.version || 'unknown',
         'Local Last-Modified': localResource['Last-Modified'] || 'unkonwn',
@@ -215,7 +215,7 @@ function updatePlugin(plugin, checkOnly){
     } else if (plugin.info.version == serverResource.version &&
                localResource['Last-Modified'] == serverResource.headers['Last-Modified']){
         data.Information = 'up to date.';
-    } else if (plugin.info.version > serverResource.version ||
+    } else if (compVersion(plugin.info.version, serverResource.version) > 0 ||
                localDate > serverDate){
         data.information = '<span highlight="WarningMsg">local version is newest.</span>';
     } else {
@@ -226,6 +226,18 @@ function updatePlugin(plugin, checkOnly){
         store.save();
     }
     return template.table(plugin.name, data);
+}
+function compVersion(a, b){
+    a = (a || '').split('.');
+    b = (b || '').split('.');
+    if (!a.length && b.length) return -1;
+    if (a.length && !b.length) return 1;
+    for (let [i, bv] in Iterator(b)) {
+        var av = i < a.length ? a[i] : 0;
+        if (av == bv) continue;
+        return av < bv ? -1 : 1;
+    }
+    return 0;
 }
 function getResourceInfo(plugin){
     var store = storage.newMap('plugins-pluginManager', true);
