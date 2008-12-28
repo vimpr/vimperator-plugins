@@ -235,6 +235,10 @@ function compVersion(a, b){
     for (let [i, bv] in Iterator(b)) {
         var av = i < a.length ? a[i] : 0;
         if (av == bv) continue;
+        if (!isNaN(av) && !isNaN(bv)) {
+            av = parseInt(av);
+            bv = parseInt(bv);
+        }
         return av < bv ? -1 : 1;
     }
     return 0;
