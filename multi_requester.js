@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.9</version>
+    <version>0.4.10</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -257,11 +257,10 @@ var MultiRequester = {
 
         if (MultiRequester.doProcess) return;
 
-        var argstr = args.string;
         var bang = args.bang;
         var count = args.count;
 
-        var parsedArgs = this.parseArgs(argstr);
+        var parsedArgs = this.parseArgs(args);
         if (parsedArgs.count == 0) { return; } // do nothing
 
         MultiRequester.doProcess = true;
@@ -278,12 +277,15 @@ var MultiRequester = {
             let urlEncode = info.urlEncode || srcEncode;
 
             let idxRepStr = url.indexOf('%s');
-            if (idxRepStr > -1 && !parsedArgs.str) continue;
+            if (idxRepStr > -1 && !parsedArgs.strs.length) continue;
 
             // via. lookupDictionary.js
             let ttbu = Components.classes['@mozilla.org/intl/texttosuburi;1']
                                  .getService(Components.interfaces.nsITextToSubURI);
-            url = url.replace(/%s/g, ttbu.ConvertAndEscape(urlEncode, parsedArgs.str));
+
+            let cnt = 0;
+            url = url.replace(/%s/g, function(m, i) ttbu.ConvertAndEscape(urlEncode, 
+                        (cnt < parsedArgs.strs.length ? parsedArgs.strs[cnt++] : parsedArgs.strs[cnt - 1])));
             logger.log(url + '[' + srcEncode + '][' + urlEncode + ']::' + info.xpath);
 
             if (bang) {
@@ -312,27 +314,23 @@ var MultiRequester = {
             MultiRequester.doProcess = false;
         }
     },
-    // return {names: '', str: '', count: 0, siteinfo: [{}]}
+    // return {names: '', strs: [''], count: 0, siteinfo: [{}]}
     parseArgs: function(args) {
 
         var self = this;
         var ret = {};
         ret.names = '';
-        ret.str = '';
+        ret.strs = [];
         ret.count = 0;
-
-        if (!args) return ret;
-
-        var arguments = args.split(/ +/);
         var sel = $U.getSelectedString();
 
-        if (arguments.length < 1) return ret;
+        if (args.length < 1 && !sel.length) return ret;
 
         function parse(args, names) {
             args = Array.concat(args);
             ret.siteinfo = [];
-            ret.names = names || args.shift();
-            ret.str = (args.length < 1 ? sel : args.join()).replace(/[\n\r]+/g, '');
+            ret.names = names || args.shift() || '';
+            ret.strs = (args.length < 1 ? [sel.replace(/[\n\r]+/g, '')] : args);
 
             ret.names.split(',').forEach(function(name) {
                 var site = self.getSite(name);
@@ -343,10 +341,10 @@ var MultiRequester = {
             });
         }
 
-        parse(arguments);
+        parse(args);
 
         if (!ret.siteinfo.length && this.defaultSites)
-            parse(arguments, this.defaultSites);
+            parse(args, this.defaultSites);
 
         return ret;
     },
