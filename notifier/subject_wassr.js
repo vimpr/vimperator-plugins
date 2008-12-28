@@ -42,11 +42,10 @@ notifier.subject.register(notifier.SubjectHttp, {
         this.options.url = URL + username + '&page=4';
         this.options.extra.username = username;
         this.options.extra.password = password;
-        logger.log(username + ':' + password);
         return (username && password) ? true : false;
     },
     parse: function(res) {
-        if (this.count == 0) return []; // for debug
+        // if (this.count == 0) return []; // for debug
         return $U.evalJson(res.responseText) || [];
     },
     diff: function(cache, parsed)
