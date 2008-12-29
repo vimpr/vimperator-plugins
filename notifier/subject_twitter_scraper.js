@@ -15,7 +15,7 @@ var PLUGIN_INFO =
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/subject_twitter.js</updateURL>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/subject_twitter_scraper.js</updateURL>
 </VimperatorPlugin>;
 //}}}
 (function() {
