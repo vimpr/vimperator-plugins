@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <minVersion>2.0a2</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
@@ -33,6 +33,13 @@ liberator.globalVariables.userScenarioList = {
         action: {and: [
             {sleep: 5000},
             {follow: '//a[@rel="prev"]'},
+        ]}
+    },
+    { // recent vector site is confusing
+        pattern: 'http://www.vector.co.jp/soft/',
+        action: {or: [
+            {follow: ['//a[not(contains(@href,"http")) and contains(@href,"/soft/dl/")]', liberator.NEW_TAB]},
+            {follow: '//a[not(contains(@href,"http")) and contains(@href,"/download/file/")]'},
         ]}
     },
     ],
@@ -192,7 +199,7 @@ function ScenarioActor () { //{{{
                     case 'object':
                         for(sym in exp) {
                             let args = exp[sym];
-                            if(debug) liberator.log("eval: "+sym+"("+args+")");
+                            if(debugMode) liberator.log("eval: "+sym+"("+args+")");
                             if(args instanceof Array) {
                                 return this[sym].apply(this, args);
                             } else {
