@@ -74,11 +74,11 @@ div.observer_growl div.observer_growl_notification div.header {
 }
 
 div.observer_growl div.observer_growl_notification a:link {
-    color: #EF6D29;
+    color: #EF6D29 !important;
 }
 
 div.observer_growl div.observer_growl_notification a:visited {
-    color: #A50000;
+    color: #BA591E !important;
 }
 
 div.observer_growl div.observer_growl_notification div.close {
