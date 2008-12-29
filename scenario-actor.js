@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <minVersion>2.0a2</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
@@ -15,7 +15,7 @@ browser act scenario semi-automatic.
 enable user scenario is liberator.globalVariables.userScenarioList.
 .vimperatorrc (or _vimperatorrc) can set
 liberator.globalVariables.userScenarioList
-using inline javascrip.
+using inline javascript.
 >||
 // hatena sample
 javascript <<EOM
@@ -47,6 +47,21 @@ liberator.globalVariables.userScenarioList = {
 liberator.globalVariables.userScenarioList = sampleHatenaScenario;
 EOM
 ||<
+Action expressions like
+>||
+action: {and: [
+    {sleep: 5000},
+    {follow: '//a[@rel="prev"]'},
+]}
+||<
+is syntax-sugar of
+>||
+action: [{and: [
+    {sleep: [5000]},
+    {follow: ['//a[@rel="prev"]']},
+]}]
+||<
+and action expressions are quoted by {begin: ...}.
 == TODO ==
 - enable to load local scenario file.
 - enable to regexp pattern.
@@ -225,7 +240,6 @@ let allScenarioList = plugins.scenarioActor.allScenarioList = {};
 io.getRuntimeDirectories('plugin/scenario').forEach(function(dir) {
         actor.loadScenario(dir);
 });
-liberator.echo(loadedScenarioList);
 loadedScenarioList.forEach(function(list) {
     for(event in list) {
         if(!allScenarioList[event]) allScenarioList[event] = [];
