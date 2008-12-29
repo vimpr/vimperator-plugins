@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <minVersion>2.0a2</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
@@ -65,6 +65,7 @@ and action expressions are quoted by {begin: ...}.
 - enable to load local scenario file.
 - enable to regexp pattern.
 - write example.
+- add function.
 - fix bug.
 - a lot.
      ]]></detail>
@@ -85,7 +86,6 @@ function ScenarioActor () { //{{{
     let variables = storage.newMap('scenarioactor', true);
 
     function ScenarioContext(event) { //{{{
-        config.x = event;
         let triggeredEvent = event;
         let doc = event.target.contentDocument || event.target;
         let win = doc.defaultView;
@@ -123,7 +123,6 @@ function ScenarioActor () { //{{{
             },
             value: function (dst, src) {
                 let edst = this.eval({xpath: this.eval(dst)});
-                liberator.log("xpath("+this.eval(dst)+")="+edst);
 
                 if(src==undefined) { // get
                     return edst.value;
@@ -142,6 +141,33 @@ function ScenarioActor () { //{{{
                 let edst = this.eval({xpath: this.eval(dst)});
                 if(edst) buffer.followLink(edst, where?where:liberator.CURRENT_TAB)
                 return edst;
+            },
+            remove: function (dst) {
+                let edst = this.eval({xpath: this.eval(dst)});
+                if(edst) edst.parentNode.removeChild(edst);
+                return edst;
+            },
+            innerText: function (dst, src) {
+                let edst = this.eval({xpath: this.eval(dst)});
+
+                if(src==undefined) { // get
+                    return edst.innerText;
+                } else { // set
+                    let esrc = this.eval(src);
+                    if(edst) edst.innerText = esrc;
+                    return esrc;
+                }
+            },
+            innerHTML: function (dst, src) {
+                let edst = this.eval({xpath: this.eval(dst)});
+
+                if(src==undefined) { // get
+                    return edst.innerHTML;
+                } else { // set
+                    let esrc = this.eval(src);
+                    if(edst) edst.innerHTML = esrc;
+                    return esrc;
+                }
             },
             url: function() {
                 return doc ? doc.location.href : doc;
@@ -166,7 +192,7 @@ function ScenarioActor () { //{{{
                     case 'object':
                         for(sym in exp) {
                             let args = exp[sym];
-                            liberator.log("eval: "+sym+"("+args+")");
+                            if(debug) liberator.log("eval: "+sym+"("+args+")");
                             if(args instanceof Array) {
                                 return this[sym].apply(this, args);
                             } else {
