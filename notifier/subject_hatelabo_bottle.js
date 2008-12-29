@@ -46,9 +46,9 @@ notifier.subject.register(notifier.SubjectHttp, {
             !cache.some(function(c) c.textContent == element.textContent)),
     buildMessages: function(diff) {
         return diff.map($U.bind(this, function(d) {
-            var permalink = $U.getNodesFromXPath('descendant::a[@class="hatena-star-uri"]', d);
-            if (permalink.length > 0)
-                permalink = URL + permalink[0];
+            var permalink = $U.getFirstNodeFromXPath('descendant::a[@class="hatena-star-uri"]', d);
+            if (permalink)
+                permalink = URL + permalink;
             return new notifier.Message('Hatelabo bottle', $U.xmlSerialize(d), permalink)
         }));
     }

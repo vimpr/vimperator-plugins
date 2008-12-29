@@ -39,7 +39,7 @@ notifier.subject.register(notifier.SubjectHttp, {
     },
     preInitialize: function() {
         [username, password] = $U.getUserAndPassword('http://wassr.jp', 'http://wassr.jp');
-        this.options.url = URL + username + '&page=4';
+        this.options.url = URL + username;
         this.options.extra.username = username;
         this.options.extra.password = password;
         return (username && password) ? true : false;

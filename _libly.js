@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.16</version>
+    <version>0.1.17</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -223,15 +223,18 @@ libly.$U = {//{{{
                         if (logins[i].username == username)
                             return [logins[i].username, logins[i].password]
                     }
-                    throw 'username notfound.';
+                    liberator.log(this.dateFormat(new Date()) +': [getUserAndPassword] username notfound');
+                    //throw 'username notfound.';
+                    return [];
                 } else {
                     return [logins[0].username, logins[0].password];
                 }
             } else {
-                throw 'account notfound.';
+                liberator.log(this.dateFormat(new Date()) + ': [getUserAndPassword] account notfound');
+                return [];
             }
         } catch (e) {
-            liberator.log('[getUserAndPassword] error: ' + e, 0);
+            liberator.log(this.dateFormat(new Date()) + ': [getUserAndPassword] error: ' + e, 0);
             return null;
         }
     },
