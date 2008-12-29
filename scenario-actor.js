@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <minVersion>2.0a2</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
@@ -44,7 +44,6 @@ liberator.globalVariables.userScenarioList = {
     },
     ],
 };
-liberator.globalVariables.userScenarioList = sampleHatenaScenario;
 EOM
 ||<
 Action expressions like
@@ -78,7 +77,7 @@ const VariablesName = 'ScenarioActorVariables';
 const VariablesLabelID = 'ScenarioActorVariablesLabelID';
 
 let loadedScenarioList = [];
- 
+
 if(liberator.globalVariables.userScenarioList)
     loadedScenarioList.push(liberator.globalVariables.userScenarioList);
 
@@ -125,7 +124,7 @@ function ScenarioActor () { //{{{
             value: function (dst, src) {
                 let edst = this.eval({xpath: this.eval(dst)});
                 liberator.log("xpath("+this.eval(dst)+")="+edst);
-    
+
                 if(src==undefined) { // get
                     return edst.value;
                 } else { // set
@@ -200,6 +199,7 @@ function ScenarioActor () { //{{{
     }
 
     return {
+        enabled: true,
         loadScenario: function(dir) {
             // TODO: implementation.
         },
@@ -217,10 +217,13 @@ function ScenarioActor () { //{{{
             variables.clear();
         },
         addListener: function (eventType, scenarioList) {
+            let self = this;
             if(!scenarioList || scenarioList.length==0) return scenarioList;
 
             getBrowser().addEventListener(eventType,
                     function (event) {
+                        if (!self.enabled)
+                            return;
                         let context = ScenarioContext(event);
                         let url = context.url();
                         if(!url) return url;
@@ -235,6 +238,10 @@ function ScenarioActor () { //{{{
 }; //}}}
 
 let actor = plugins.scenarioActor = ScenarioActor();
+let (e = liberator.globalVariables.scenario_actor_enabled) {
+    if (e && e.toString().match(/^(false|0)$/i))
+        actor.enabled = false;
+}
 let allScenarioList = plugins.scenarioActor.allScenarioList = {};
 
 io.getRuntimeDirectories('plugin/scenario').forEach(function(dir) {
@@ -250,17 +257,42 @@ for(event in allScenarioList) {
     actor.addListener(event, allScenarioList[event]);
 }
 
-commands.add(['scenarioclear'], 'clear scenario-actor variables',
+commands.addUserCommand(['scenarioclear'], 'clear scenario-actor variables',
         actor.clear,
         {
             argCount: '0',
         });
-commands.add(['scenariovars'], 'show scenario-actor variables',
+commands.addUserCommand(['scenariovars'], 'show scenario-actor variables',
         function(args) {
             actor.showVariables(window.content.document);
         },
         {
             argCount: '0',
+        });
+commands.addUserCommand(['scenario'], 'turn on/off scenario-actor',
+        function(args) {
+            if (args.length) {
+                switch (args[0].toLowerCase()) {
+                    case 'on':
+                        actor.enabled = true;
+                        break;
+                    case 'off':
+                        actor.enabled = false;
+                        break;
+                    default:
+                        liberator.echoerr('Invalid argument: ' + args[0]);
+                        return;
+                }
+            } else {
+                actor.enabled = !actor.enabled;
+            }
+            liberator.echo('scenario-actor was ' + (actor.enabled ? 'enabled' : 'disabled'));
+        },
+        {
+            argCount: '*',
+            completer: function (context, args) {
+                context.completions = [['on', 'enable scenario-actor'], ['off', 'disable scenario-actor']];
+            }
         });
 })();
 // vim: set fdm=marker sw=4 ts=4 et:
