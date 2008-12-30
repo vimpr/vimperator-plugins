@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <minVersion>2.0a2</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
@@ -97,8 +97,7 @@ function ScenarioActor () { //{{{
 
     function ScenarioContext(event) { //{{{
         let triggeredEvent = event;
-        let doc = event.target.contentDocument || event.target;
-        let win = doc.defaultView;
+        let win = (event.target.contentDocument||event.target).defaultView;
         let self = {
             glet: function (name, value) {
                 if((typeof name)!='string') throw [name, value];
@@ -130,9 +129,19 @@ function ScenarioActor () { //{{{
                 }
                 return lastValue;
             },
+            loop: function (cond, exp) {
+                let mainThread = services.get("threadManager").mainThread;
+                let f = function() {
+                    if(!self.eval(cond)) return;
+                    self.eval(exp);
+                    mainThread.processNextEvent(true);
+                    f();
+                };
+                setTimeout(f, 1);
+            },
             xpath: function (xpath) {
-                if((typeof xpath)!='string'||!doc) throw [name, value];
-                return buffer.evaluateXPath(xpath, doc).snapshotItem(0);
+                if((typeof xpath)!='string'||!win.document) throw [name, value];
+                return buffer.evaluateXPath(xpath, win.document).snapshotItem(0);
             },
             value: function (dst, src) {
                 let edst = self.eval({xpath: self.eval(dst)});
@@ -188,8 +197,8 @@ function ScenarioActor () { //{{{
                 }
             },
             url: function() {
-                if(!doc) throw [];
-                return doc.location.href;
+                if(!win.document) throw [];
+                return win.document.location.href;
             },
             prompt: function(message, init) {
                 if(!win) throw [message, init];
@@ -210,8 +219,8 @@ function ScenarioActor () { //{{{
                 return f.apply(this, args);
             },
             showVariables: function (names) {
-                if(!doc) throw [names];
-                actor.showVariables(doc, names);
+                if(!win.document) throw [names];
+                actor.showVariables(win.document, names);
             },
             eval: function(exp) {
                 switch(typeof exp) {
