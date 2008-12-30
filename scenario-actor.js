@@ -11,15 +11,19 @@ var PLUGIN_INFO =
 == Usage ==
 browser act scenario semi-automatic.
 
+== Needs Library ==
+- _libly.js(ver.0.1.17)
+  @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
+
 == SETTING ==
-enable user scenario is liberator.globalVariables.userScenarioList.
-.vimperatorrc (or _vimperatorrc) can set
-liberator.globalVariables.userScenarioList
-using inline javascript.
+Scenario list is loaded by script under RUNTIME_PATH/plugin/scenario,
+and liberator.globalVariables.userScenario.
+liberator.globalVariables.userScenario can be set
+by .vimperatorrc (or _vimperatorrc) using inline javascript.
 >||
 // hatena sample
 javascript <<EOM
-liberator.globalVariables.userScenarioList = {
+liberator.globalVariables.userScenario = {
     DOMContentLoaded: [
     { // good by hatena keyword
         pattern: 'http://d.hatena.ne.jp/keyword/',
@@ -69,10 +73,8 @@ action: [{and: [
 ||<
 and action expressions are quoted by {begin: ...}.
 == TODO ==
-- enable to load local scenario file.
-- enable to regexp pattern.
-- write example.
-- add function.
+- write more example.
+- add more function.
 - fix bug.
 - a lot.
      ]]></detail>
@@ -84,10 +86,11 @@ const debugMode = true;
 const VariablesName = 'ScenarioActorVariables';
 const VariablesLabelID = 'ScenarioActorVariablesLabelID';
 
-let loadedScenarioList = [];
+let SCENARIO_DIR = liberator.globalVariables.scenarioDir || 'plugin/scenario';
 
-if(liberator.globalVariables.userScenarioList)
-    loadedScenarioList.push(liberator.globalVariables.userScenarioList);
+var libly = liberator.plugins.libly;
+var $U = libly.$U;
+var logger = $U.getLogger('scenario-actor');
 
 function ScenarioActor () { //{{{
     let variables = storage.newMap('scenarioactor', true);
@@ -96,96 +99,118 @@ function ScenarioActor () { //{{{
         let triggeredEvent = event;
         let doc = event.target.contentDocument || event.target;
         let win = doc.defaultView;
-        return {
+        let self = {
             glet: function (name, value) {
-                variables.set(this.eval(name), this.eval(value));
+                if((typeof name)!='string') throw [name, value];
+                variables.set(name, self.eval(value));
                 return value;
             },
             gvar: function (name) {
+                if((typeof name)!='string') throw [name, value];
                 return variables.get(name);
             },
             begin: function () {
                 let lastValue;
                 for(let i=0,len=arguments.length;i<len;++i) {
-                    lastValue = this.eval(arguments[i]);
+                    lastValue = self.eval(arguments[i]);
                 }
                 return lastValue;
             },
             and: function () {
                 let lastValue;
                 for(let i=0,len=arguments.length;i<len;++i) {
-                    if(!(lastValue = this.eval(arguments[i]))) break;
+                    if(!(lastValue = self.eval(arguments[i]))) break;
                 }
                 return lastValue;
             },
             or: function () {
                 let lastValue;
                 for(let i=0,len=arguments.length;i<len;++i) {
-                    if(lastValue = this.eval(arguments[i])) break;
+                    if(lastValue = self.eval(arguments[i])) break;
                 }
                 return lastValue;
             },
             xpath: function (xpath) {
+                if((typeof xpath)!='string'||!doc) throw [name, value];
                 return buffer.evaluateXPath(xpath, doc).snapshotItem(0);
             },
             value: function (dst, src) {
-                let edst = this.eval({xpath: this.eval(dst)});
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, src];
 
                 if(src==undefined) { // get
                     return edst.value;
                 } else { // set
-                    let esrc = this.eval(src);
-                    if(edst) edst.value = esrc;
-                    return esrc;
+                    edst.value = self.eval(src);
+                    return edst.value;
                 }
             },
             click: function (dst) {
-                let edst = this.eval({xpath: this.eval(dst)});
-                if(edst) edst.click();
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst];
+                edst.click();
                 return edst;
             },
             follow: function(dst, where) {
-                let edst = this.eval({xpath: this.eval(dst)});
-                if(edst) buffer.followLink(edst, where?where:liberator.CURRENT_TAB)
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, where];
+                buffer.followLink(edst, where?where:liberator.CURRENT_TAB)
                 return edst;
             },
             remove: function (dst) {
-                let edst = this.eval({xpath: this.eval(dst)});
-                if(edst) edst.parentNode.removeChild(edst);
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst];
+                edst.parentNode.removeChild(edst);
                 return edst;
             },
             innerText: function (dst, src) {
-                let edst = this.eval({xpath: this.eval(dst)});
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, src];
 
                 if(src==undefined) { // get
                     return edst.innerText;
                 } else { // set
-                    let esrc = this.eval(src);
-                    if(edst) edst.innerText = esrc;
+                    let esrc = self.eval(src);
+                    edst.innerText = esrc;
                     return esrc;
                 }
             },
             innerHTML: function (dst, src) {
-                let edst = this.eval({xpath: this.eval(dst)});
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, src];
 
                 if(src==undefined) { // get
                     return edst.innerHTML;
                 } else { // set
-                    let esrc = this.eval(src);
-                    if(edst) edst.innerHTML = esrc;
+                    let esrc = self.eval(src);
+                    edst.innerHTML = esrc;
                     return esrc;
                 }
             },
             url: function() {
-                return doc ? doc.location.href : doc;
+                if(!doc) throw [];
+                return doc.location.href;
             },
             prompt: function(message, init) {
-                return win ? win.prompt(message||'', init||'') : win;
+                if(!win) throw [message, init];
+                return win.prompt(message||'', init||'');
             },
             sleep: function(delay) {
                 return liberator.sleep(delay);
             },
+            close: function() {
+                if(!win) throw [];
+                return win.close();
+            },
+            jseval: function() {
+                let f = arguments[0];
+                let args = Array.prototype.slice.call(arguments);
+                args.shift();
+                if(typeof f!='function') throw [f].concat(args);
+                return f.apply(this, args);
+            },
             showVariables: function (names) {
+                if(!doc) throw [names];
                 actor.showVariables(doc, names);
             },
             eval: function(exp) {
@@ -199,16 +224,23 @@ function ScenarioActor () { //{{{
                     case 'object':
                         for(sym in exp) {
                             let args = exp[sym];
-                            if(debugMode) liberator.log("eval: "+sym+"("+args+")");
-                            if(args instanceof Array) {
-                                return this[sym].apply(this, args);
-                            } else {
-                                return this[sym](args);
+                            if(debugMode) logger.log('{'+sym+': '+args+'}');
+                            try {
+                                if(args instanceof Array) {
+                                    return self[sym].apply(this, args);
+                                } else {
+                                    return self[sym](args);
+                                }
+                            } catch(args if args instanceof Array) {
+                                let msg = '{'+sym+': ['+args.join(',')+']}';
+                                liberator.reportError(msg);
+                                return false;
                             }
                         }
                 }
             },
         };
+        return self;
     } //}}}
 
     function createLabel(doc, labelID) {
@@ -230,11 +262,55 @@ function ScenarioActor () { //{{{
         }
         return label;
     }
+    function urlmatcher(url) {
+        return function(scenario) {
+            if(scenario.pattern) {
+                let pattern = scenario.pattern;
+                switch(typeof pattern) {
+                    case 'string':
+                        if(url.indexOf(pattern)==-1) return false;
+                        break;
+                    case 'object':
+                        if(!pattern.test(url)) return false;
+                        break;
+                }
+            }
+            if(scenario.ignore) {
+                let ignore = scenario.ignore;
+                switch(typeof ignore) {
+                    case 'string':
+                        if(url.indexOf(ignore)!=-1) return false;
+                        break;
+                    case 'object':
+                        if(ignore.test(url)) return false;
+                        break;
+                }
+            }
+            return true;
+        }
+    }
 
-    return {
+    let self = {
         enabled: true,
-        loadScenario: function(dir) {
-            // TODO: implementation.
+        readScenarioDirectory: function(name, fun) {
+            io.getRuntimeDirectories(SCENARIO_DIR).forEach(function(dir) {
+                $U.readDirectory(dir.path, name, fun);
+            });
+        },
+        loadLocalScenario: function(name) {
+            if(!name) name = '.';
+
+            if(liberator.globalVariables.userScenario)
+                loadedScenarioList.push(liberator.globalVariables.userScenario);
+            self.readScenarioDirectory(name, function(file) {
+                logger.log('load scenario '+file.path);
+                io.source(file.path);
+            });
+            loadedScenarioList.forEach(function(list) {
+                for(event in list) {
+                    self.addListener(event, list[event]);
+                }
+            });
         },
         showVariables: function(doc, names) {
             if(!doc)
@@ -250,7 +326,6 @@ function ScenarioActor () { //{{{
             variables.clear();
         },
         addListener: function (eventType, scenarioList) {
-            let self = this;
             if(!scenarioList || scenarioList.length==0) return scenarioList;
 
             getBrowser().addEventListener(eventType,
@@ -259,36 +334,29 @@ function ScenarioActor () { //{{{
                             return;
                         let context = ScenarioContext(event);
                         let url = context.url();
-                        if(!url) return url;
+                        if(!url) return false;
+                        let matchfun = urlmatcher(url);
                         scenarioList.forEach(function(scenario) {
-                            if(url.indexOf(scenario.pattern)>=0)
+                            if(matchfun(scenario))
                                 context.eval({begin: scenario.action});
                         });
                     },
                     true);
         },
     };
+    return self;
 }; //}}}
 
 let actor = plugins.scenarioActor = ScenarioActor();
+
+let loadedScenarioList = plugins.scenarioActor.loadedScenarioList = [];
+
 let (e = liberator.globalVariables.scenario_actor_enabled) {
     if (e && e.toString().match(/^(false|0)$/i))
         actor.enabled = false;
 }
-let allScenarioList = plugins.scenarioActor.allScenarioList = {};
 
-io.getRuntimeDirectories('plugin/scenario').forEach(function(dir) {
-        actor.loadScenario(dir);
-});
-loadedScenarioList.forEach(function(list) {
-    for(event in list) {
-        if(!allScenarioList[event]) allScenarioList[event] = [];
-        allScenarioList[event] = allScenarioList[event].concat(list[event]);
-    }
-});
-for(event in allScenarioList) {
-    actor.addListener(event, allScenarioList[event]);
-}
+actor.loadLocalScenario();
 
 commands.addUserCommand(['scenarioclear'], 'clear scenario-actor variables',
         actor.clear,
@@ -301,6 +369,24 @@ commands.addUserCommand(['scenariovars'], 'show scenario-actor variables',
         },
         {
             argCount: '0',
+        });
+commands.addUserCommand(['scenarioload'], 'load local scenario',
+        function(args) {
+            if(args.length) {
+                args.forEach(actor.loadLocalScenario);
+            } else {
+                actor.loadLocalScenario();
+            }
+        },
+        {
+            argCount: '*',
+            completer: function (context, args) {
+                let completions = [];
+                actor.readScenarioDirectory(name, function(file) {
+                    completions.push([file.leafName, '']);
+                });
+                context.completions = completions;
+            }
         });
 commands.addUserCommand(['scenario'], 'turn on/off scenario-actor',
         function(args) {
