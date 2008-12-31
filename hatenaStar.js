@@ -12,7 +12,8 @@ var flasher = null;
 
 var nmap = (liberator.globalVariables.hatena_star_mappings || ',?s').split(/\s+/);
 var hmap = liberator.globalVariables.hatena_star_hint_mapping || 'h';
-var hmax = parseInt(liberator.globalVariables.hatena_star_hint_max || '10', 10);
+var hmax = function () parseInt(liberator.globalVariables.hatena_star_hint_max || '10', 10);
+var hinterval = function () parseInt(liberator.globalVariables.hatena_star_interval || '100', 10);
 
 function getFlasher() {
 	if (!flasher) {
@@ -81,11 +82,18 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 
 liberator.modules.hints.addMode(hmap, 'Add Hatena star',
 	function (elem, _, count) {
-		for (let i = 0, l = Math.min(hmax, Math.max(count, 1)); i < l; i++)
-			addHatenaStar(elem);
+		count = Math.min(hmax(), Math.max(count, 1)) - 1;
+		addHatenaStar(elem);
+		let handle = setInterval(function () {
+			if (count-- > 0)
+				addHatenaStar(elem);
+			else
+				clearInterval(handle);
+		}, hinterval());
 	},
 	function () StarXPath
 );
 
 })();
 
+// vim: set noet :
