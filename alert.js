@@ -13,7 +13,7 @@ let PLUGIN_INFO =
   <name lang="ja">アラート</name>
   <description>Display an alert after the specified time.</description>
   <description lang="ja">指定時間後にアラートダイアログを出したりする。タイマー。</description>
-  <version>1.00</version>
+  <version>1.01</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -37,6 +37,7 @@ let PLUGIN_INFO =
         恐ろしい軍曹が出現
       :-pokimon:
         ピッカー！
+        使用には注意してください！
       :-meow:
         "みゃお"
       :-quit:
