@@ -444,9 +444,9 @@ let PLUGIN_INFO =
         else
           message += ' ' + v;
       });
-      if (message)
+      if (!message)
           message = defaults.message;
-      if (time)
+      if (!time)
         time = defaults.time;
       if (!methods.length)
           methods = defaults.methods;
