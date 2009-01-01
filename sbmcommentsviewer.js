@@ -1,45 +1,53 @@
-/**
- * ==VimperatorPlugin==
- * @name           SBM Comments Viewer
- * @description    List show Social Bookmark Comments
- * @description-ja ソーシャル・ブックマーク・コメントを表示します
- * @version        0.1c
- * ==/VimperatorPlugin==
- *
- * Usage:
- *
- * viewSBMComments [url] [options]
- *  url             : 省略時は現在のURL
- *  options:
- *      -f, -format : 出力時のフォーマット(`,'区切りのリスト)
- *                    (default: id,timestamp,tags,comment)
- *                    let g:def_sbm_format = ... で指定可能
- *      -t, -type   : 出力するSBMタイプ
- *                    (default: hdl)
- *                    let g:def_sbms = ... で指定可能
- *      -c, -count  : ブックマーク件数のみ出力
- *      -b, -browser: バッファ・ウィンドウではなくブラウザに開く
- *                    TODO:まだ出来てない
- *
- * 指定可能フォーマット:
- *  id, timpstamp, tags, comment, tagsAndComment
- *
- * SBMタイプ:
- *  h : hatena bookmark
- *  d : Delicious
- *  l : livedoor clip
- *  z : Buzzurl
- *  XXX:今後増やしていきたい
- *
- *  例:
- *   :viewSBMComments http://d.hatena.ne.jp/teramako/ -t hdl -f id,comment -c
- *
- *  備考:
- *   * 一度取得したものは(30分ほど)キャッシュに貯めてますので何度も見直すことが可能です。
- *   * 粋なコマンド名募集中
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+    <name>SBM Comments Viewer</name>
+    <description>List show Social Bookmark Comments</description>
+    <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
+    <version>0.1c</version>
+    <minVersion>2.0pre</minVersion>
+    <maxVersion>2.0pre</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
+    <detail><![CDATA[
+== Usage ==
+>||
+viewSBMComments [url] [options]
+ url             : 省略時は現在のURL
+ options:
+     -f, -format : 出力時のフォーマット(`,'区切りのリスト)
+                   (default: id,timestamp,tags,comment)
+                   let g:def_sbm_format = ... で指定可能
+     -t, -type   : 出力するSBMタイプ
+                   (default: hdl)
+                   let g:def_sbms = ... で指定可能
+     -c, -count  : ブックマーク件数のみ出力
+     -b, -browser: バッファ・ウィンドウではなくブラウザに開く
+                   TODO:まだ出来てない
+||<
 
+== 指定可能フォーマット ==
+  id, timpstamp, tags, comment, tagsAndComment
+
+== SBMタイプ ==
+- h : hatena bookmark
+- d : Delicious
+- l : livedoor clip
+- z : Buzzurl
+- XXX:今後増やしていきたい
+
+>||
+e.g.)
+  :viewSBMComments http://d.hatena.ne.jp/teramako/ -t hdl -f id,comment -c
+||<
+
+== 備考 ==
+ 一度取得したものは(30分ほど)キャッシュに貯めてますので何度も見直すことが可能です。
+ 粋なコマンド名募集中
+     ]]></detail>
+</VimperatorPlugin>;
 liberator.plugins.sbmCommentsViewer = (function(){
+
+var isFilterNoComments = liberator.globalVariables.sbm_comments_viewer_filter_nocomments || false;
+
 /**
  * SBMEntry Container {{{
  * @param {String} type
@@ -82,7 +90,10 @@ SBMContainer.prototype = { //{{{
                 var thead = <tr/>;
                 format.forEach(function(colum){ thead.* += <th>{manager.format[colum] || '-'}</th>; });
                 var tbody = <></>;
-                self.entries.forEach(function(e){ tbody += e.toHTML(format); });
+                self.entries.forEach(function(e){
+                    if (isFilterNoComments && !e.comment) return;
+                    tbody += e.toHTML(format);
+                });
                 return thead + tbody;
             })();
             return xml;
@@ -327,7 +338,6 @@ var SBM = { //{{{
     } //}}}
 }; //}}}
 
-
 /**
  * jsonDecode {{{
  * @param {String} str JSON String
@@ -495,6 +505,9 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
     }
 ); //}}}
 
+/**
+ * cacheManager {{{
+ */
 var cacheManager = (function(){
     var cache = {};
     //             min  sec   millisec
@@ -539,6 +552,7 @@ var cacheManager = (function(){
     };
     return c_manager;
 })();
+//}}}
 
 return manager;
 })();
