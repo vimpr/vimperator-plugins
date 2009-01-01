@@ -86,7 +86,7 @@ const debugMode = true;
 const VariablesName = 'ScenarioActorVariables';
 const VariablesLabelID = 'ScenarioActorVariablesLabelID';
 
-let SCENARIO_DIR = liberator.globalVariables.scenarioDir || 'plugin/scenario';
+let SCENARIO_DIR = liberator.globalVariables.scenarioDir || 'scenario';
 
 var libly = liberator.plugins.libly;
 var $U = libly.$U;
@@ -139,6 +139,19 @@ function ScenarioActor () { //{{{
                 };
                 setTimeout(f, 1);
             },
+            get: function (dst, prop) {
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, prop];
+
+                return edst[prop];
+            },
+            set: function (dst, src, prop) {
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, src, prop];
+
+                edst[prop] = self.eval(src);
+                return edst[prop];
+            },
             xpath: function (xpath) {
                 if((typeof xpath)!='string'||!win.document) throw [name, value];
                 return buffer.evaluateXPath(xpath, win.document).snapshotItem(0);
@@ -170,6 +183,12 @@ function ScenarioActor () { //{{{
                 let edst = self.eval({xpath: self.eval(dst)});
                 if(!edst) throw [dst];
                 edst.parentNode.removeChild(edst);
+                return edst;
+            },
+            saveLink: function (dst, skipPrompt) {
+                let edst = self.eval({xpath: self.eval(dst)});
+                if(!edst) throw [dst, skipPrompt];
+                buffer.saveLink(edst, skipPrompt);
                 return edst;
             },
             innerText: function (dst, src) {
@@ -307,7 +326,7 @@ function ScenarioActor () { //{{{
             });
         },
         loadLocalScenario: function(name) {
-            if(!name) name = '.';
+            if(!name) name = '\.js$';
 
             if(liberator.globalVariables.userScenario)
                 loadedScenarioList.push(liberator.globalVariables.userScenario);
@@ -346,8 +365,9 @@ function ScenarioActor () { //{{{
                         if(!url) return false;
                         let matchfun = urlmatcher(url);
                         scenarioList.forEach(function(scenario) {
-                            if(matchfun(scenario))
+                            if(matchfun(scenario)) {
                                 context.eval({begin: scenario.action});
+                            }
                         });
                     },
                     true);
