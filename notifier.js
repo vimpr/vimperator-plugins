@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>change notice framework.</description>
     <description lang="ja">変更通知フレームワーク。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -92,10 +92,15 @@ check():
     指定したインターバルごとにフレームワークによって呼び出されます。
     変更を検知した場合、liberator.plugins.notifier.Message のインスタンスを引数に
     this.notify(message) を呼び出してください。
+shutdown():
+    必要の無い場合、実装しなくても OK です。
+    変更通知フレームワークの終了時に呼ばれます。
 
 ==== librator.plugins.notifier.SubjectHttp ====
 Httpを利用した変更検知の基底クラスです。
 リクエスト内容をキャッシュします。
+interval:
+    秒で変更チェックするインターバルを指定します。デフォルトは 60 です。
 options{}:
     url:
         URL を指定します。
@@ -270,7 +275,7 @@ function bootstrap() {
             var req = new libly.Request(
                 this.options.url,
                 this.options.headers,
-                $U.extend({ asynchronous: false }, this.options.extra)
+                $U.extend({ asynchronous: true }, this.options.extra)
             );
             req.addEventListener('onSuccess', $U.bind(this, function(res) {
                 var parsed, diff;
