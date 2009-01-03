@@ -65,7 +65,7 @@ Growl.prototype = {
         this.defaults = {
             life: 10,
             sticky: false,
-            suticky_keyword: [],
+            sticky_keyword: [],
             hide: false
         };
         this.node = node;
@@ -164,8 +164,13 @@ notifier.observer.register(notifier.Observer, {
             let item = container.childNodes[i];
             let growl = item.__data__;
             if (force ||
-                (growl && !growl.options.sticky && growl.created &&
-                 growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime())) {
+                (growl &&
+                    !(growl.options.sticky ||
+                      growl.options.sticky_keyword.some(function(keyword) this.indexOf(keyword) > -1, item.childNodes[2].textContent)) &&
+                    growl.created &&
+                    growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime()
+                )
+            ) {
                 if (item.id != 'observer_growl_closer')
                     removeNodes.push(item);
             }
