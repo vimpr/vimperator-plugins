@@ -11,11 +11,20 @@ var PLUGIN_INFO =
     <description>liberator.echomsg notice.</description>
     <description lang="ja">liberator.echomsg 通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/subject_liberator_echomsg.js</updateURL>
+    <detail><![CDATA[
+== Settings ==
+>||
+liberator.globalVariables.subject_liberator_echomsg_filter = [
+    'Auto commands for',
+    '^autocommand'
+];
+||<
+    ]]></detail>
 </VimperatorPlugin>;
 //}}}
 (function() {
@@ -33,6 +42,7 @@ notifier.subject.register(notifier.Subject, {
         this.original = liberator.echomsg;
         this.__updating__ = false;
         this.messages = [];
+        this.filter = liberator.globalVariables.subject_liberator_echomsg_filter || [];
 
         var self = this;
 
@@ -40,7 +50,6 @@ notifier.subject.register(notifier.Subject, {
             while (self.waiting)
                 liberator.sleep(100);
 
-            logger.log('message: ' + message);
             self.messages.push(message);
             return self.original.apply(null, arguments);
         };
@@ -48,6 +57,7 @@ notifier.subject.register(notifier.Subject, {
     check: function() {
         try {
             this.__updating__ = true;
+            this.messages = this.messages.filter(function(m) !this.filter.some(function(f) (m.indexOf(f) > -1 || m.match(f))), this);
             if (!this.messages.length) return;
 
             var msg = '<ul><li>' + this.messages.join('</li><li>') + '</li></ul>';

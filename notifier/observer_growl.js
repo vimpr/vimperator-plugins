@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -23,7 +23,7 @@ liberator.globalVariables.observer_growl_settings = {
     'message title': {
         life: number,           // sec (10 sec by default)
         sticky: bool,           // true or false (false by default)
-        sticky_keyword: [       // keyword ary
+        sticky_keywords: [      // keyword ary
             'keyword1',
             'keyword2'
         ],
@@ -36,14 +36,13 @@ e.g.)
 >||
 javascript <<EOM
 liberator.globalVariables.observer_growl_settings = {
-    'Hatelabo bottle': { life: 20, sticky_keyword: 'はてな' },
+    'Hatelabo bottle': { life: 20, sticky_keywords: ['はてな'] },
     'Weather forecast by Yahoo!': { sticky: true }
 };
 EOM
 ||<
 
-== Todo ==
-- sticky_keyword
+== ToDo ==
 - hide
     ]]></detail>
 </VimperatorPlugin>;
@@ -61,16 +60,17 @@ var Growl = function() {//{{{
     this.initialize.apply(this, arguments);
 };
 Growl.prototype = {
-    initialize: function(node, options) {
+    initialize: function(node, options, message) {
         this.defaults = {
             life: 10,
             sticky: false,
-            sticky_keyword: [],
+            sticky_keywords: [],
             hide: false
         };
         this.node = node;
         this.created = new Date();
         this.options = $U.extend(this.defaults, (options || {}));
+        this.message = message;
         var div = node.getElementsByTagName('div');
         div[0].addEventListener("click", $U.bind(this, this.remove), false);
     },
@@ -149,7 +149,7 @@ notifier.observer.register(notifier.Observer, {
                 <div class="message">{new XMLList(message.message || '')}</div>
             </div>;
         node = $U.xmlToDom(html, doc);
-        node.__data__ = new Growl(node, this.settings[message.title]);
+        node.__data__ = new Growl(node, this.settings[message.title], message);
         return node;
     },
     checkStatus: function(force) {
@@ -163,23 +163,15 @@ notifier.observer.register(notifier.Observer, {
         for (let i = 0, len = container.childNodes.length; i < len; i++) {
             let item = container.childNodes[i];
             let growl = item.__data__;
-            if (force ||
-                (growl &&
-                    !(growl.options.sticky ||
-                      growl.options.sticky_keyword.some(function(keyword) this.indexOf(keyword) > -1, item.childNodes[2].textContent)) &&
-                    growl.created &&
-                    growl.created.getTime() + (growl.options.life * 1000) < (new Date()).getTime()
-                )
-            ) {
-                if (item.id != 'observer_growl_closer')
-                    removeNodes.push(item);
+
+            if (item.id == 'observer_growl_closer') {
+                if (len == 1)
+                    item.parentNode.removeChild(item);
+                continue;
             }
 
-            if (len == 1) {
-                let elem = container.childNodes[0];
-                if (elem.id == 'observer_growl_closer')
-                    elem.parentNode.removeChild(elem);
-            }
+            if (force || this.canRemove(growl))
+                removeNodes.push(item);
         }
         removeNodes.forEach(function(element) element.__data__.remove());
 
@@ -189,10 +181,26 @@ notifier.observer.register(notifier.Observer, {
         }
 
     },
+    canRemove: function(growl) {
+        var ret = false;
+
+        if (!growl || !growl.created) return ret;
+        if (growl.options.sticky) return ret;
+
+        var text = growl.message.title + ' ' + growl.message.message.replace(/<.*?>/g, '');
+        if (growl.options.sticky_keywords.some(function(k) text.indexOf(k) > -1)) return ret;
+
+        if (growl.created.getTime() + (growl.options.life * 1000) > (new Date()).getTime())
+            return ret;
+
+        ret = true;
+        return ret;
+    },
     removeAll: function(a) {
         this.checkStatus('EVENT_REMOVE_ALL');
         var closer = window.content.document.getElementById("observer_growl_closer");
-        closer.parentNode.removeChild(closer);
+        if (closer)
+            closer.parentNode.removeChild(closer);
     },
     shutdown: function() {
         for (let [id, flg] in Iterator(this.intervalIDs)) {
