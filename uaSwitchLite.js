@@ -2,15 +2,15 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>UserAgentSwitcherLite</name>
   <description>switch user agent</description>
-  <description lang='ja'>user agent Ø‚è‘Ö‚¦</description>
+  <description lang='ja'>user agent åˆ‡ã‚Šæ›¿ãˆ</description>
   <version>0.1.0</version>
   <author homepage='http://d.hatena.ne.jp/pekepekesamurai/'>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail lang='ja'><![CDATA[
  == Commands
-  :ua [uaname]       - User Agent ‚ğØ‚è‘Ö‚¦‚Ü‚·B
-  :ua                - User Agent ‚ğ•\¦‚µ‚Ü‚·B
+  :ua [uaname]       - User Agent ã‚’åˆ‡ã‚Šæ›¿ãˆã¾ã™ã€‚
+  :ua                - User Agent ã‚’è¡¨ç¤ºã—ã¾ã™ã€‚
 
  == .vimperatorrrc
 javascript <<EOM
