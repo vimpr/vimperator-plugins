@@ -11,7 +11,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Alert</name>
   <name lang="ja">アラート</name>
-  <description>Display an alert after the specified time.</description>
+  <description>Displays an alert after the specified time.</description>
   <description lang="ja">指定時間後にアラートダイアログを出したりする。タイマー。</description>
   <version>1.01</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -275,7 +275,7 @@ let PLUGIN_INFO =
   let gv = liberator.globalVariables;
 
   let defaults = {
-    methods: (gv.alert_default_methods || 'alert').split(/[^\w]+/),
+    methods: (gv.alert_default_methods || 'alert').split(/\W+/),
     time: parseFloat(gv.alert_default_time || '3'),
     message: gv.alert_default_message || 'Time out!',
   };
@@ -358,18 +358,17 @@ let PLUGIN_INFO =
       let times = parseInt(arg || '10', 10);
       let colors = ['red', 'blue', 'yellow'];
       let elem = content.document.body;
-      let indicator = elem.ownerDocument.createElement('div');
+      let indicator = elem.appendChild(elem.ownerDocument.createElement('div'));
       let rect = elem.getBoundingClientRect();
       indicator.id = 'nyantoro-element-indicator';
       let style = 'background-color: ' + colors[0] + ';' +
                   'opacity: 0.5; z-index: 999;' +
-                  'position: fixed; ' +
-                  'top: '   +                    0 + 'px;' +
-                  'height:' + content.innerHeight  + 'px;' +
-                  'left: '  +                    0 + 'px;' +
-                  'width: ' + content.innerWidth   + 'px';
+                  'position: fixed;' +
+                  'top: '    +                   0 + 'px;' +
+                  'height: ' + content.innerHeight + 'px;' +
+                  'left: '   +                   0 + 'px;' +
+                  'width: '  +  content.innerWidth + 'px';
       indicator.setAttribute('style', style);
-      elem.appendChild(indicator);
       let (count = 0) {
         let handle = setInterval(
           function () {
