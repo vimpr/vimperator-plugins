@@ -40,7 +40,8 @@
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "http://twitter.com/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send("status=" + encodeURIComponent(stat));
+        xhr.send("status=" + encodeURIComponent(stat) + "&source=Vimperator");
+        liberator.echo("[Twitter] Your post " + '"' + stat + '" (' + stat.length + " charactors) was sent. " );
     }
     function favTwitter(username, password, user){
         var xhr = new XMLHttpRequest();
