@@ -38,22 +38,19 @@ notifier.subject.register(notifier.SubjectHttp, {
     },
     parse: function(res) {
         // if (this.count == 0) return []; // for debug
-        var doc = res.getHTMLDocument('id("timeline_body")/tr[@class=contains(concat(" ", @class, " "), " hentry ")]');
-        return doc;
+        return res.getHTMLDocument('id("timeline_body")/tr[@class=contains(concat(" ", @class, " "), " hentry ")]');
     },
     diff: function(cache, parsed) {
         var self = this;
         return parsed.filter(function(element)
                 !cache.some(function(c) self.getContent(c) == self.getContent(element)));
     },
-    getContent: function(element) 
-         $U.getFirstNodeFromXPath('descendant::span[@class="entry-content"]', element).textContent,
-    buildMessages: function(diff) {
-        return diff.map($U.bind(this, function(d) {
-            var permalink = $U.getFirstNodeFromXPath('descendant::a[@class="entry-date"]', d);
-            return new notifier.Message('Twitter', $U.xmlSerialize(d), permalink)
-        }));
-    }
+    getContent: function(element)
+        $U.getFirstNodeFromXPath('descendant::span[@class="entry-content"]', element).textContent,
+    buildMessages: function(diff)
+        diff.map($U.bind(this, function(d)
+            new notifier.Message('Twitter', $U.xmlSerialize(d),
+                                 $U.getFirstNodeFromXPath('descendant::a[@class="entry-date"]', d))))
 });
 
 })();

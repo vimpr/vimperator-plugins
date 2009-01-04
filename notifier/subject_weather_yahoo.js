@@ -105,9 +105,8 @@ URLs.forEach(function(url) {
             }
             return source;
         },
-        buildMessages: function(diff) {
-            return new notifier.Message('Weather forecast by Yahoo!', $U.xmlSerialize(diff), url);
-        }
+        buildMessages: function(diff)
+            new notifier.Message('Weather forecast by Yahoo!', $U.xmlSerialize(diff), url)
     });
 });
 

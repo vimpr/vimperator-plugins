@@ -30,27 +30,24 @@ notifier.subject.register(notifier.SubjectHttp, {
         extra: {}
     },
     preInitialize: function() {
-        [username, password] = $U.getUserAndPassword('https://www.hatena.ne.jp', 'https://www.hatena.ne.jp');
+        var [username, password] = $U.getUserAndPassword('https://www.hatena.ne.jp', 'https://www.hatena.ne.jp');
         this.options.extra.username = username;
         this.options.extra.password = password;
         return (username && password) ? true : false;
     },
-    parse: function(res) {
-        var doc = res.getHTMLDocument('//table[@class="list"]//tr');
-        return doc;
-    },
+    parse: function(res)
+        res.getHTMLDocument('//table[@class="list"]//tr'),
     diff: function(cache, parsed)
         parsed.filter(function(element)
             !cache.some(function(c) c.textContent == element.textContent)),
-    buildMessages: function(diff) {
-        return diff.map($U.bind(this, function(d) {
+    buildMessages: function(diff)
+        diff.map($U.bind(this, function(d) {
             var anchor = $U.getFirstNodeFromXPath('descendant::a[@class="message-title"]', d);
-            var permalink = URL + (anchor.href ? anchor.href : "");
-            var [title, message, date] = [elm.textContent.replace(/^\s+|\s+$/g,"").replace(/>\s+</g,"><") for ([i,elm] in Iterator(d.cells))];
+            var permalink = URL + (anchor.href ? anchor.href : '');
+            var [title, message, date] = [elm.textContent.replace(/^\s+|\s+$/g,'').replace(/>\s+</g,'><') for ([i,elm] in Iterator(d.cells))];
             var html = title + ' (' + date + ')<br/>' + message;
-            return new notifier.Message('Hatena::Message', html, permalink)
-        }));
-    }
+            return new notifier.Message('Hatena::Message', html, permalink);
+        }))
 });
 
 })();

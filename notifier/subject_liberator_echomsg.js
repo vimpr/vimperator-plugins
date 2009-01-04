@@ -57,10 +57,10 @@ notifier.subject.register(notifier.Subject, {
     check: function() {
         try {
             this.__updating__ = true;
-            this.messages = this.messages.filter(function(m) !this.filter.some(function(f) (m.indexOf(f) > -1 || m.match(f))), this);
+            this.messages = this.messages.filter(function(m) !this.filter.some(function(f) m.indexOf(f) > -1 || m.match(f) ? true : false), this);
             if (!this.messages.length) return;
 
-            var msg = '<ul><li>' + this.messages.join('</li><li>') + '</li></ul>';
+            let msg = '<ul><li>' + this.messages.join('</li><li>') + '</li></ul>';
             this.messages = [];
 
             this.notify(new notifier.Message('liberator.echomsg', msg));

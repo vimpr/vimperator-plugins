@@ -522,8 +522,6 @@ libly.Wedata.prototype = {
         var STORE_KEY = 'plugins-libly-wedata-' + this.dbname + '-items';
         var store = storage.newMap(STORE_KEY, true);
 
-        expire = expire || 0;
-
         if (store && store.get('data') && new Date(store.get('expire')) > new Date()) {
             logger.log('return cache. ');
             store.get('data').forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
@@ -531,6 +529,8 @@ libly.Wedata.prototype = {
                 finalCallback(true, store.get('data'));
             return;
         }
+
+        expire = expire || 0;
 
         function errDispatcher(msg, cache) {
             if (cache) {
@@ -550,12 +550,12 @@ libly.Wedata.prototype = {
             if (!text) {
                 errDispatcher('respons is null.', store.get('data'));
                 return;
-            };
+            }
             var json = libly.$U.evalJson(text);
             if (!json) {
                 errDispatcher('uailed eval json.', store.get('data'));
                 return;
-            };
+            }
             store.set('expire', new Date(new Date().getTime() + expire).toString());
             store.set('data', json);
             store.save();
@@ -564,7 +564,7 @@ libly.Wedata.prototype = {
                 finalCallback(true, json);
         }));
         req.addEventListener('onFailure', function() errDispatcher('onFailure'));
-        req.addEventListener('onException', function() errDispatcher('onException') );
+        req.addEventListener('onException', function() errDispatcher('onException'));
         req.get();
     }
 };

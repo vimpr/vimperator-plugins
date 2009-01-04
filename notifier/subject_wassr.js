@@ -38,7 +38,7 @@ notifier.subject.register(notifier.SubjectHttp, {
         extra: {}
     },
     preInitialize: function() {
-        [username, password] = $U.getUserAndPassword('http://wassr.jp', 'http://wassr.jp');
+        var [username, password] = $U.getUserAndPassword('http://wassr.jp', 'http://wassr.jp');
         this.options.url = URL + username;
         this.options.extra.username = username;
         this.options.extra.password = password;
@@ -51,19 +51,16 @@ notifier.subject.register(notifier.SubjectHttp, {
     diff: function(cache, parsed)
         parsed.filter(function(item)
             !cache.some(function(c) c.html == item.html)),
-    buildMessages: function(diff) {
-        return diff.map($U.bind(this, function(d) {
-            var html = <div>
+    buildMessages: function(diff)
+        diff.map($U.bind(this, function(d)
+            new notifier.Message('Wassr', <div>
                 {d.reply_status_url ? <p><a href={d.reply_status_url}>{'> ' + d.reply_message + ' by ' + d.reply_user_nick}</a></p> : ''}
                 <p>
                 <img src={d.user.profile_image_url} alt={d.user_login_id} width="16" height="16"/>
-                {d.photo_thumbnail_url ? <img src={d.photo_thumbnail_url}/> : ''}
+                {d.photo_thumbnail_url ? <img src={d.photo_thumbnail_url} alt=""/> : ''}
                 {d.html || ''}
                 </p>
-            </div>.toString();
-            return new notifier.Message('Wassr', html, d.link)
-        }));
-    }
+            </div>.toString(), d.link)))
 });
 
 })();

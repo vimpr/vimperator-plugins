@@ -72,7 +72,7 @@ Growl.prototype = {
         this.options = $U.extend(this.defaults, (options || {}));
         this.message = message;
         var div = node.getElementsByTagName('div');
-        div[0].addEventListener("click", $U.bind(this, this.remove), false);
+        div[0].addEventListener('click', $U.bind(this, this.remove), false);
     },
     remove: function() {
         // TODO: animation!!!!
@@ -104,10 +104,10 @@ notifier.observer.register(notifier.Observer, {
     update: function(message) {
 
         var doc = window.content.document;
-        var container = doc.getElementById("observer_growl");
+        var container = doc.getElementById('observer_growl');
         if (!container) {
             doc.body.appendChild($U.xmlToDom(<div id="observer_growl" class="observer_growl top-right"/>, doc));
-            container = doc.getElementById("observer_growl");
+            container = doc.getElementById('observer_growl');
             window.content.addEventListener('unload', $U.bind(this, function() {
                 if (container.__interval__) {
                     clearInterval(container.__interval__);
@@ -115,7 +115,7 @@ notifier.observer.register(notifier.Observer, {
                 }
             }), false);
         }
-        var closer = doc.getElementById("observer_growl_closer");
+        var closer = doc.getElementById('observer_growl_closer');
 
         var notification = this.createPopup(message, doc, container);
         // TODO: animation!!!
@@ -124,13 +124,13 @@ notifier.observer.register(notifier.Observer, {
 
         if (container.childNodes.length == 1 && !container.__interval__) {
             let interval = setInterval($U.bind(this, this.checkStatus), 1000);
-            this.intervalIDs[interval]  = true;
+            this.intervalIDs[interval] = true;
             container.__interval__ = interval;
         } else if (container.childNodes.length >= 2) {
             if (!closer) {
                 closer = $U.xmlToDom(<div id="observer_growl_closer" class="observer_growl_closer center" style="display: block;">[close all]</div>, doc);
                 container.insertBefore(closer, container.firstChild);
-                closer.addEventListener("click", $U.bind(this, this.removeAll, 'test'), false);
+                closer.addEventListener('click', $U.bind(this, this.removeAll, 'test'), false);
             }
         }
 
@@ -153,10 +153,10 @@ notifier.observer.register(notifier.Observer, {
         return node;
     },
     checkStatus: function(force) {
-        force = force == 'EVENT_REMOVE_ALL' ? true : false;
+        force = force == 'EVENT_REMOVE_ALL';
 
         var doc = window.content.document;
-        var container = doc.getElementById("observer_growl");
+        var container = doc.getElementById('observer_growl');
         if (!container) return;
 
         var removeNodes = [];
@@ -182,23 +182,19 @@ notifier.observer.register(notifier.Observer, {
 
     },
     canRemove: function(growl) {
-        var ret = false;
+        if (!growl || !growl.created || growl.options.sticky) return false;
 
-        if (!growl || !growl.created) return ret;
-        if (growl.options.sticky) return ret;
+        var text = growl.message.title + ' ' +
+                   growl.message.message.replace(/(?:<[^>]*>)+/g, '');
+        if (growl.options.sticky_keywords.some(function(k) text.indexOf(k) > -1) ||
+            growl.created.getTime() + growl.options.life * 1000 > new Date().getTime())
+            return false;
 
-        var text = growl.message.title + ' ' + growl.message.message.replace(/<.*?>/g, '');
-        if (growl.options.sticky_keywords.some(function(k) text.indexOf(k) > -1)) return ret;
-
-        if (growl.created.getTime() + (growl.options.life * 1000) > (new Date()).getTime())
-            return ret;
-
-        ret = true;
-        return ret;
+        return true;
     },
     removeAll: function(a) {
         this.checkStatus('EVENT_REMOVE_ALL');
-        var closer = window.content.document.getElementById("observer_growl_closer");
+        var closer = window.content.document.getElementById('observer_growl_closer');
         if (closer)
             closer.parentNode.removeChild(closer);
     },
