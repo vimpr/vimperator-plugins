@@ -73,7 +73,7 @@ global.useragent_list = global.useragent_list ? global.useragent_list : [
   }
 ];
 
-var Class = function(){ return function(){ this.initialize.apply(this, arguments); }};
+var Class = function() function(){ this.initialize.apply(this, arguments); };
 
 var UASwitcherLite = new Class();
 UASwitcherLite.prototype = {
@@ -81,8 +81,8 @@ UASwitcherLite.prototype = {
     // init
     this.completer = [];
     this.switcher = {
-      __noSuchMethod__: function(arg) liberator.echoerr('cannot switch useragent "'+arg+'"'),
-      '':function(){
+      __noSuchMethod__: function(arg) liberator.echoerr('cannot switch user agent "'+arg+'"'),
+      '': function(){
         var ua = options.getPref(USER_AGENT);
         liberator.echo('Current User Agent : ' + (ua ? ua : DEFAULT) );
       }
@@ -90,18 +90,18 @@ UASwitcherLite.prototype = {
     var self = this;
 
     // default values
-    this.completer.push([DEFAULT , '']);
+    this.completer.push([DEFAULT, '']);
     this.switcher[DEFAULT] = function() self.switch();
-    
+
     // expand setting
     global.useragent_list.forEach( function(item){
-      let desc = item.description;
-      let userAgent = item.useragent;
-      let appName = item.appname;
-      let appVersion = item.appversion;
-      let platform = item.platform;
-      let vendor = item.vendor;
-      let vendorSub = item.vendorSub;
+      var desc = item.description;
+      var userAgent = item.useragent;
+      var appName = item.appname;
+      var appVersion = item.appversion;
+      var platform = item.platform;
+      var vendor = item.vendor;
+      var vendorSub = item.vendorSub;
       self.completer.push([desc, userAgent]);
       self.switcher[desc] = function() self.switch(appName, appVersion, platform, userAgent, vendor, vendorSub);
     });
@@ -109,23 +109,22 @@ UASwitcherLite.prototype = {
   },
   switch: function(appName, appVersion, platform, userAgent, vendor, vendorSub){
     if (!userAgent && !options.getPref(USER_AGENT)) return;
-    let setter = userAgent ? options.setPref : options.resetPref;
+    var setter = userAgent ? options.setPref : options.resetPref;
     setter(APP_NAME, decodeURIComponent(appName || ''));
     setter(APP_VERSION, decodeURIComponent(appVersion || ''));
     setter(PLATFORM, decodeURIComponent(platform || ''));
     setter(USER_AGENT, decodeURIComponent(userAgent || ''));
     setter(VENDOR, decodeURIComponent(vendor || ''));
     setter(VENDOR_SUB, decodeURIComponent(vendorSub || ''));
-
   },
   registerCommand: function(){
     var self = this;
     commands.addUserCommand(['ua'], 'Switch User Agent',
-      function(arg) 
-        self.switcher[ arg.string ? arg.string.replace(/\\/g,''): (arg+'').replace(/\\/g,'') ](),
+      function(arg)
+        self.switcher[ (arg.string || arg+'').replace(/\\+/g,'') ](),
       {
         completer: function(context, args, special){
-          let filter = context.filter;
+          var filter = context.filter;
           context.title = ['Description', 'User Agent'];
           if (!filter) {
             context.completions = self.completer;
