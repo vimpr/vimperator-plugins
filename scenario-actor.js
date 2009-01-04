@@ -19,7 +19,7 @@ browser act scenario semi-automatic.
 Scenario list is loaded by script under RUNTIME_PATH/plugin/scenario,
 and liberator.globalVariables.userScenario.
 liberator.globalVariables.userScenario can be set
-by .vimperatorrc (or _vimperatorrc) using inline javascript.
+by .vimperatorrc (or _vimperatorrc) using inline JavaScript.
 >||
 // hatena sample
 javascript <<EOM
@@ -42,8 +42,8 @@ liberator.globalVariables.userScenario = {
     { // recent vector site is confusing
         pattern: 'http://www.vector.co.jp/soft/',
         action: {or: [
-            {follow: ['//a[not(contains(@href,"http")) and contains(@href,"/soft/dl/")]', liberator.NEW_TAB]},
-            {follow: '//a[not(contains(@href,"http")) and contains(@href,"/download/file/")]'},
+            {follow: ['//a[not(starts-with(@href,"http")) and contains(@href,"/soft/dl/")]', liberator.NEW_TAB]},
+            {follow: '//a[not(starts-with(@href,"http")) and contains(@href,"/download/file/")]'},
         ]}
     },
     ],
@@ -73,9 +73,9 @@ action: [{and: [
 ||<
 and action expressions are quoted by {begin: ...}.
 == TODO ==
-- write more example.
-- add more function.
-- fix bug.
+- write more examples.
+- add more functions.
+- fix bugs.
 - a lot.
      ]]></detail>
 </VimperatorPlugin>;
@@ -130,7 +130,7 @@ function ScenarioActor () { //{{{
                 return lastValue;
             },
             loop: function (cond, exp) {
-                let mainThread = services.get("threadManager").mainThread;
+                let mainThread = services.get('threadManager').mainThread;
                 let f = function() {
                     if(!self.eval(cond)) return;
                     self.eval(exp);
@@ -160,12 +160,10 @@ function ScenarioActor () { //{{{
                 let edst = self.eval({xpath: self.eval(dst)});
                 if(!edst) throw [dst, src];
 
-                if(src==undefined) { // get
-                    return edst.value;
-                } else { // set
+                if(src!=undefined) { // set
                     edst.value = self.eval(src);
-                    return edst.value;
                 }
+                return edst.value;
             },
             click: function (dst) {
                 let edst = self.eval({xpath: self.eval(dst)});
@@ -197,11 +195,10 @@ function ScenarioActor () { //{{{
 
                 if(src==undefined) { // get
                     return edst.innerText;
-                } else { // set
-                    let esrc = self.eval(src);
-                    edst.innerText = esrc;
-                    return esrc;
                 }
+                let esrc = self.eval(src);
+                edst.innerText = esrc;
+                return esrc;
             },
             innerHTML: function (dst, src) {
                 let edst = self.eval({xpath: self.eval(dst)});
@@ -209,11 +206,10 @@ function ScenarioActor () { //{{{
 
                 if(src==undefined) { // get
                     return edst.innerHTML;
-                } else { // set
-                    let esrc = self.eval(src);
-                    edst.innerHTML = esrc;
-                    return esrc;
                 }
+                let esrc = self.eval(src);
+                edst.innerHTML = esrc;
+                return esrc;
             },
             url: function() {
                 if(!win.document) throw [];
@@ -250,15 +246,14 @@ function ScenarioActor () { //{{{
                     case 'function':
                         return exp;
                     case 'object':
-                        for(sym in exp) {
+                        for(let sym in exp) {
                             let args = exp[sym];
                             if(debugMode) logger.log('{'+sym+': '+args+'}');
                             try {
                                 if(args instanceof Array) {
                                     return self[sym].apply(this, args);
-                                } else {
-                                    return self[sym](args);
                                 }
+                                return self[sym](args);
                             } catch(args if args instanceof Array) {
                                 let msg = '{'+sym+': ['+args.join(',')+']}';
                                 liberator.reportError(msg);
@@ -335,7 +330,7 @@ function ScenarioActor () { //{{{
                 io.source(file.path);
             });
             loadedScenarioList.forEach(function(list) {
-                for(event in list) {
+                for(let event in list) {
                     self.addListener(event, list[event]);
                 }
             });
@@ -380,10 +375,7 @@ let actor = plugins.scenarioActor = ScenarioActor();
 
 let loadedScenarioList = plugins.scenarioActor.loadedScenarioList = [];
 
-let (e = liberator.globalVariables.scenario_actor_enabled) {
-    if (e && e.toString().match(/^(false|0)$/i))
-        actor.enabled = false;
-}
+actor.enabled = !/^(?:false|0)$/i.test(liberator.globalVariables.scenario_actor_enabled);
 
 actor.loadLocalScenario();
 
