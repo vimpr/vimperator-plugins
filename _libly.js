@@ -525,7 +525,7 @@ libly.Wedata.prototype = {
         if (store && store.get('data') && new Date(store.get('expire')) > new Date()) {
             logger.log('return cache. ');
             store.get('data').forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
-            if (typeof finalCallback == 'function') 
+            if (typeof finalCallback == 'function')
                 finalCallback(true, store.get('data'));
             return;
         }
@@ -536,7 +536,7 @@ libly.Wedata.prototype = {
             if (cache) {
                 logger.log('return cache. -> ' + msg);
                 cache.forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
-                if (typeof finalCallback == 'function') 
+                if (typeof finalCallback == 'function')
                     finalCallback(true, cache);
             } else {
                 if (typeof finalCallback == 'function')
