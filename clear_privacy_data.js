@@ -14,12 +14,12 @@ var PLUGIN_INFO =
 
 == Command ==
 :clearp[rivacy]:
-    デフォルトの設定でプライバシーデータを削除します
+    既定の設定でプライバシーデータを削除します。
 
 :clearp[rivacy] -l[ist] {itemName}:
-    {itemName}のデータを削除します
-    省略するとデフォルトの値が用いられます
-    デフォルトの値は「プライバシー情報の消去」設定で行えます
+    {itemName}のデータを削除します。
+    省略すると既定の値が用いられます。
+    既定の値は「プライバシー情報の消去」設定で行えます。
 
     {itemName}:
         cache: Webキャッシュ
@@ -31,9 +31,9 @@ var PLUGIN_INFO =
 
 :clearp[rivacy] -t[ime] {timeSpan}:
     現在から{timeSpan}分の期間のデータを削除します。
-    省略するとデフォルトの値が用いられます。
-    デフォルトの値は、about:config にある privacy.sanitize.timeSpan になり、
-    0:全て,1:１時間以内,2:2時間以内,3:4時間以内,4:今日 となっています。
+    省略すると既定の値が用いられます。
+    既定の値は、about:config にある privacy.sanitize.timeSpan になり、
+    0:全て,1:1時間以内,2:2時間以内,3:4時間以内,4:今日 となっています。
 
     期間内指定で有効なのは
         + cookies
@@ -59,7 +59,7 @@ var privacyManager = { // {{{
             var cacheService = Cc["@mozilla.org/network/cache-service;1"].getService(Ci.nsICacheService);
             try {
                 getCacheService.evictEntries(Ci.nsICache.STORE_ANYWHERE);
-            } catch (er) {}
+            } catch (er){}
         },
         getPref: function() options.getPref("privacy.cpd.cache")
     },
@@ -67,9 +67,9 @@ var privacyManager = { // {{{
         clear: function(range){
             var cookieMgr = Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager);
             if (range){
-                var cookiesEnum = cookieMgr.enumrator;
+                let cookiesEnum = cookieMgr.enumrator;
                 while (cookiesEnum.hasMoreElements()){
-                    var cookie = cookiesEnum.getNext().QueryInterface(Ci.nsICookie2);
+                    let cookie = cookiesEnum.getNext().QueryInterface(Ci.nsICookie2);
                     if (cookie.creationTime > this.range[0])
                         cookieMgr.remove(cookie.host, cookie.name, cookie.path, false);
                 }
@@ -84,7 +84,7 @@ var privacyManager = { // {{{
             var cacheService = Cc["@mozilla.org/network/cache-service;1"].getService(Ci.nsICacheService);
             try {
                 cacheService.evictEntries(Ci.nsICache.STORE_OFFLINE);
-            } catch(er) {}
+            } catch(er){}
 
             var storageManagerService = Cc["@mozilla.org/dom/storagemanager;1"].getService(Ci.nsIDOMStorageManager);
             storageManagerService.clearOfflineApps();
@@ -100,13 +100,13 @@ var privacyManager = { // {{{
                 globalHistory.removeAllPages();
 
             try {
-                var os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+                let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
                 os.notifyObservers(null, "browser:purge-session-history", "");
-            } catch(e) {}
+            } catch(e){}
             var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
             try {
                 prefs.clearUserPref("general.open_location.last_url");
-            } catch(er) {}
+            } catch(er){}
         },
         getPref: function() options.getPref("privacy.cpd.history")
     },
@@ -115,7 +115,7 @@ var privacyManager = { // {{{
             var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
             var windows = windowManager.getEnumerator("navigator:browser");
             while (windows.hasMoreElements()){
-                var searchBar = windows.getNext().document.getElementById("searchbar");
+                let searchBar = windows.getNext().document.getElementById("searchbar");
                 if (searchBar){
                     searchBar.value = "";
                     searchBar.textbox.editor.transactionManager.clear();
@@ -138,11 +138,11 @@ var privacyManager = { // {{{
         },
         getPref: function() options.getPref("privacy.cpd.sessions")
     }
-} // }}}
+}; // }}}
 
 function getDefaultClearList(){
     var list = [];
-    for (var name in privacyManager){
+    for (let name in privacyManager){
         if (privacyManager[name].getPref())
             list.push(name);
     }
@@ -162,7 +162,7 @@ function getTimeRange(ts, isPref){
                 startDate = endDate - (4*60*60*1000000);
                 break;
             case 4:
-                var d = new Date();
+                let d = new Date();
                 d.setHours(0);
                 d.setMinutes(0);
                 d.setSeconds(0);
@@ -174,38 +174,37 @@ function getTimeRange(ts, isPref){
     } else {
         startDate = endDate - parseTime(ts);
     }
-    return [startDate, endDate]
+    return [startDate, endDate];
 
 }
 // TODO: かなり適当なので要修正
 function parseTime(ts){
-    var int = parseInt(ts,10);
+    var int = parseInt(ts, 10);
     if (isNaN(int)){
-        var matches = ts.match(/(?:(\d+)m)?(?:(\d+)d)?(?:(\d+)h)?/);
-        var [,month, day, hour] = matches;
-        var time = (month ? month * 30 * 24 * 60 * 60 * 1000000 : 0) +
+        let matches = ts.match(/^(?:(\d+)m)?(?:(\d+)d)?(?:(\d+)h)?$/);
+        let [, month, day, hour] = matches;
+        let time = (month ? month * 30 * 24 * 60 * 60 * 1000000 : 0) +
                    (day   ? day   *      24 * 60 * 60 * 1000000 : 0) +
                    (hour  ? hour            * 60 * 60 * 1000000 : 0);
         return time;
-    } else {
-        return int * 60 * 60 * 1000000;
     }
+    return int * 60 * 60 * 1000000;
 }
 var ops = [
-    [['-list', '-l'], commands.OPTION_LIST, null, [[name, "-"] for (name in privacyManager)]],
-    [['-time', '-t'], commands.OPTION_STRING]
-]
+    [["-list", "-l"], commands.OPTION_LIST, null, [[name, "-"] for (name in privacyManager)]],
+    [["-time", "-t"], commands.OPTION_STRING]
+];
 // --------------------------
 // Command
 // --------------------------
-commands.addUserCommand(['clearp[rivacy]'], 'Clear Privacy data',
+commands.addUserCommand(["clearp[rivacy]"], "Clear Privacy data",
     function(args){
-        var clearList = args["-data"] ? args["-data"] : getDefaultClearList();
+        var clearList = args["-data"] || getDefaultClearList();
         var range = args["-time"] ?
                     getTimeRange(args["-time"], false) :
                     getTimeRange(options.getPref("privacy.sanitize.timeSpan"), true);
         clearList.forEach(function(name) this[name].clear(range), plugins.privacySanitizer);
-    },{
+    }, {
         options: ops,
     },
     true);
