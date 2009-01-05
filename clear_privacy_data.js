@@ -7,6 +7,7 @@ var PLUGIN_INFO =
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.1</version>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/clear_privacy_data.js</updateURL>
 <detail lang="ja"><![CDATA[
 == 注意 ==
 このプラグインはFirefox 3.1用です。
@@ -27,7 +28,7 @@ var PLUGIN_INFO =
         history: 表示したページの履歴
         formdata: フォームと検索エントリーの履歴
         sessions: 現在のログイン情報
-        
+
 :clearp[rivacy] -t[ime] {timeSpan}:
     現在から{timeSpan}分の期間のデータを削除します。
     省略するとデフォルトの値が用いられます。
@@ -50,7 +51,7 @@ var PLUGIN_INFO =
 </VimperatorPlugin>;
 liberator.plugins.privacySanitizer = (function(){
 
-if (Application.version.substring(0,3) != "3.1") return null;
+if (Application.version.substring(0, 3) != "3.1") return null;
 
 var privacyManager = { // {{{
     cache: {
@@ -84,7 +85,7 @@ var privacyManager = { // {{{
             try {
                 cacheService.evictEntries(Ci.nsICache.STORE_OFFLINE);
             } catch(er) {}
-            
+
             var storageManagerService = Cc["@mozilla.org/dom/storagemanager;1"].getService(Ci.nsIDOMStorageManager);
             storageManagerService.clearOfflineApps();
         },
@@ -174,14 +175,14 @@ function getTimeRange(ts, isPref){
         startDate = endDate - parseTime(ts);
     }
     return [startDate, endDate]
-    
+
 }
 // TODO: かなり適当なので要修正
 function parseTime(ts){
     var int = parseInt(ts,10);
     if (isNaN(int)){
         var matches = ts.match(/(?:(\d+)m)?(?:(\d+)d)?(?:(\d+)h)?/);
-        var [,month,day,hour] = matches;
+        var [,month, day, hour] = matches;
         var time = (month ? month * 30 * 24 * 60 * 60 * 1000000 : 0) +
                    (day   ? day   *      24 * 60 * 60 * 1000000 : 0) +
                    (hour  ? hour            * 60 * 60 * 1000000 : 0);
@@ -191,8 +192,8 @@ function parseTime(ts){
     }
 }
 var ops = [
-    [['-list','-l'], commands.OPTION_LIST, null, [[name, "-"] for (name in privacyManager)]],
-    [['-time','-t'], commands.OPTION_STRING]
+    [['-list', '-l'], commands.OPTION_LIST, null, [[name, "-"] for (name in privacyManager)]],
+    [['-time', '-t'], commands.OPTION_STRING]
 ]
 // --------------------------
 // Command
@@ -206,7 +207,6 @@ commands.addUserCommand(['clearp[rivacy]'], 'Clear Privacy data',
         clearList.forEach(function(name) this[name].clear(range), plugins.privacySanitizer);
     },{
         options: ops,
-        
     },
     true);
 
