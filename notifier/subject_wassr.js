@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>Wassr change notice.</description>
     <description lang="ja">Wassr変更通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -31,7 +31,6 @@ var URL = 'http://api.wassr.jp/statuses/friends_timeline.json?id=';
 
 notifier.subject.register(notifier.SubjectHttp, {
     interval: 60,
-    method: 'POST',
     options: {
         url: '',
         headers: null,
