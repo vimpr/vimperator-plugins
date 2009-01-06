@@ -11,14 +11,14 @@ var PLUGIN_INFO =
     <description>request, and the result is displayed to the buffer.</description>
     <description lang="ja">リクエストの結果をバッファに出力する。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.4.10</version>
+    <version>0.4.11</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/multi_requester.js</updateURL>
     <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.15)
+- _libly.js(ver.0.1.19)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Usage ==
@@ -404,7 +404,7 @@ var MultiRequester = {
                 if (node.tagName.toLowerCase() != 'html')
                     doc.appendChild(node);
             });
-            if (!doc) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
+            if (!doc || !doc.childNodes.length) throw 'XPath result is undefined or null.: XPath -> ' + xpath;
 
             $U.getNodesFromXPath('descendant-or-self::a | descendant-or-self::img', doc, function(node) {
                 var tagName = node.tagName.toLowerCase();
