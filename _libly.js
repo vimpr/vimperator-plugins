@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.18</version>
+    <version>0.1.19</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -521,12 +521,13 @@ libly.Wedata.prototype = {
         var logger = this.logger;
         var STORE_KEY = 'plugins-libly-wedata-' + this.dbname + '-items';
         var store = storage.newMap(STORE_KEY, true);
+        var cache = store && store.get('data');
 
-        if (store && store.get('data') && new Date(store.get('expire')) > new Date()) {
+        if (store && cache && new Date(store.get('expire')) > new Date()) {
             logger.log('return cache. ');
-            store.get('data').forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
+            cache.forEach(function(item) { if (typeof itemCallback == 'function') itemCallback(item); });
             if (typeof finalCallback == 'function')
-                finalCallback(true, store.get('data'));
+                finalCallback(true, cache);
             return;
         }
 
@@ -539,6 +540,7 @@ libly.Wedata.prototype = {
                 if (typeof finalCallback == 'function')
                     finalCallback(true, cache);
             } else {
+                logger.log(msg + ': cache notfound.');
                 if (typeof finalCallback == 'function')
                     finalCallback(false, msg);
             }
@@ -548,14 +550,15 @@ libly.Wedata.prototype = {
         req.addEventListener('onSuccess', libly.$U.bind(this, function(res) {
             var text = res.responseText;
             if (!text) {
-                errDispatcher('respons is null.', store.get('data'));
+                errDispatcher('respons is null.', cache);
                 return;
             }
             var json = libly.$U.evalJson(text);
             if (!json) {
-                errDispatcher('uailed eval json.', store.get('data'));
+                errDispatcher('failed eval json.', cache);
                 return;
             }
+            logger.log('success get wedata.');
             store.set('expire', new Date(new Date().getTime() + expire).toString());
             store.set('data', json);
             store.save();
@@ -563,8 +566,8 @@ libly.Wedata.prototype = {
             if (typeof finalCallback == 'function')
                 finalCallback(true, json);
         }));
-        req.addEventListener('onFailure', function() errDispatcher('onFailure'));
-        req.addEventListener('onException', function() errDispatcher('onException'));
+        req.addEventListener('onFailure', function() errDispatcher('onFailure', cache));
+        req.addEventListener('onException', function() errDispatcher('onException', cache));
         req.get();
     }
 };
