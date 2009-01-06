@@ -51,7 +51,7 @@ var PLUGIN_INFO =
 </VimperatorPlugin>;
 liberator.plugins.privacySanitizer = (function(){
 
-if (Application.version.substring(0, 3) != "3.1") return null;
+//if (Application.version.substring(0, 3) != "3.1") return null;
 
 var privacyManager = { // {{{
     cache: {
@@ -128,6 +128,31 @@ var privacyManager = { // {{{
                 formHistory.removeAllEntries();
         },
         getPref: function() options.getPref("privacy.cpd.formdata")
+    },
+    downloads: {
+        clear: function(range){
+            var dlMgr = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
+            let dlIDsRemove = [];
+            if (range){
+                dlMgr.removeDownloadsByTimeframe(range[0], range[1]);
+                let dlsEnum = dlMgr.activeDownloads;
+                while (dlsEnum.hasMoreElements()){
+                    let dl = dlsEnum.next();
+                    if (dl.startTime >= range[0])
+                        dlIDsRemove.push(dl.id);
+                }
+            } else {
+                dlMgr.cleanUp();
+                let dlsEnum = dlMgr.activeDownloads;
+                while (dlsEnum.hasMoreElements()){
+                    dlIDsRemove.push(dlsEnum.next().id)
+                }
+            }
+            dlIDsRemove.forEach(function(id) {
+                dlMgr.removeDownload(id);
+            });
+        },
+        getPref: function() options.getPref("privacy.cpd.downloads")
     },
     sessions: {
         clear: function(){
