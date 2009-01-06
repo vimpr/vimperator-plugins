@@ -304,7 +304,7 @@ var SBM = { //{{{
                 });
                 return c;
             } else {
-                liverator.log('Faild: LivedoorClip');
+                liberator.log('Faild: LivedoorClip');
             }
         }
     }, //}}}
@@ -332,7 +332,7 @@ var SBM = { //{{{
                 });
                 return c;
             } else {
-                liverator.log('Faild: Buzzurl');
+                liberator.log('Faild: Buzzurl');
             }
         }
     } //}}}
