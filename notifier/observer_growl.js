@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <description>notification from the subjects is notified to you by the Growl style.</description>
     <description lang="ja">Growl風通知。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.6</version>
+    <version>0.1.7</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -70,6 +70,8 @@ Growl.prototype = {
         this.node = node;
         this.created = new Date();
         this.options = $U.extend(this.defaults, (options || {}));
+        this.sticky_keywords_exp =
+            this.options.sticky_keywords.map(function(k) new RegExp(k, 'i'));
         this.message = message;
         var div = node.getElementsByTagName('div');
         div[0].addEventListener('click', $U.bind(this, this.remove), false);
@@ -186,7 +188,7 @@ notifier.observer.register(notifier.Observer, {
 
         var text = growl.message.title + ' ' +
                    growl.message.message.replace(/(?:<[^>]*>)+/g, '');
-        if (growl.options.sticky_keywords.some(function(k) text.indexOf(k) > -1) ||
+        if (growl.sticky_keywords_exp.some(function(k) text.match(k)) ||
             growl.created.getTime() + growl.options.life * 1000 > new Date().getTime())
             return false;
 
