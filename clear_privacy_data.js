@@ -51,7 +51,8 @@ var PLUGIN_INFO =
 </VimperatorPlugin>;
 liberator.plugins.privacySanitizer = (function(){
 
-//if (Application.version.substring(0, 3) != "3.1") return null;
+var isFx31 = (Application.version.substring(0, 3) == "3.1") 
+var prefPrefix = isFx31 ? "privacy.cpd." : "privacy.item.";
 
 var privacyManager = { // {{{
     cache: {
@@ -61,7 +62,7 @@ var privacyManager = { // {{{
                 getCacheService.evictEntries(Ci.nsICache.STORE_ANYWHERE);
             } catch (er){}
         },
-        getPref: function() options.getPref("privacy.cpd.cache")
+        getPref: function() options.getPref(prefPrefix + "cache")
     },
     cookies: {
         clear: function(range){
@@ -77,7 +78,7 @@ var privacyManager = { // {{{
                 cookieMgr.removeAll();
             }
         },
-        getPref: function() options.getPref("privacy.cpd.cookies")
+        getPref: function() options.getPref(prefPrefix + "cookies")
     },
     offlineApps: {
         clear: function(){
@@ -89,7 +90,7 @@ var privacyManager = { // {{{
             var storageManagerService = Cc["@mozilla.org/dom/storagemanager;1"].getService(Ci.nsIDOMStorageManager);
             storageManagerService.clearOfflineApps();
         },
-        getPref: function() options.getPref("privacy.cpd.offlineApps")
+        getPref: function() options.getPref(prefPrefix + "offlineApps")
     },
     history: {
         clear: function(range){
@@ -108,7 +109,7 @@ var privacyManager = { // {{{
                 prefs.clearUserPref("general.open_location.last_url");
             } catch(er){}
         },
-        getPref: function() options.getPref("privacy.cpd.history")
+        getPref: function() options.getPref(prefPrefix + "history")
     },
     formdata: {
         clear: function(range){
@@ -127,7 +128,7 @@ var privacyManager = { // {{{
             else
                 formHistory.removeAllEntries();
         },
-        getPref: function() options.getPref("privacy.cpd.formdata")
+        getPref: function() options.getPref(prefPrefix + "formdata")
     },
     downloads: {
         clear: function(range){
@@ -152,7 +153,7 @@ var privacyManager = { // {{{
                 dlMgr.removeDownload(id);
             });
         },
-        getPref: function() options.getPref("privacy.cpd.downloads")
+        getPref: function() options.getPref(prefPrefix + "downloads")
     },
     sessions: {
         clear: function(){
@@ -161,7 +162,7 @@ var privacyManager = { // {{{
             var authMgr = Cc["@mozilla.org/network/http-auth-manager;1"].getService(Ci.nsIHttpAuthManager);
             authMgr.clearAll();
         },
-        getPref: function() options.getPref("privacy.cpd.sessions")
+        getPref: function() options.getPref(prefPrefix + "sessions")
     }
 }; // }}}
 
@@ -217,17 +218,21 @@ function parseTime(ts){
 }
 var ops = [
     [["-list", "-l"], commands.OPTION_LIST, null, [[name, "-"] for (name in privacyManager)]],
-    [["-time", "-t"], commands.OPTION_STRING]
 ];
+if (isFx31) ops.push([["-time", "-t"], commands.OPTION_STRING]);
+
 // --------------------------
 // Command
 // --------------------------
 commands.addUserCommand(["clearp[rivacy]"], "Clear Privacy data",
     function(args){
         var clearList = args["-data"] || getDefaultClearList();
-        var range = args["-time"] ?
+        var range = null;
+        if (isFx31){
+            range = args["-time"] ?
                     getTimeRange(args["-time"], false) :
                     getTimeRange(options.getPref("privacy.sanitize.timeSpan"), true);
+        }
         clearList.forEach(function(name) this[name].clear(range), plugins.privacySanitizer);
     }, {
         options: ops,
