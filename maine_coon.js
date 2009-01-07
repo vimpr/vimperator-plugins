@@ -133,7 +133,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       return {
         x: x,
         y: y,
-        widt: width,
+        width: width,
         height: height,
         adjustHeight: adjustHeight,
         adjustWidth: adjustWidth
