@@ -5,7 +5,7 @@
  * @description-ja プロクシ設定
  * @minVersion     0.6pre
  * @author         cho45, halt feits
- * @version        0.6.1
+ * @version        0.6.2
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -116,17 +116,10 @@
         });
     },
     {
-        completer: function (filter) {
+        completer: function (context, args) {
             var completions = [];
-            var exp = new RegExp("^" + filter);
-
-            for each (let { conf_name: name, conf_usage: usage } in proxy_settings) {
-                if (exp.test(name)) {
-                    completions.push([name, usage]);
-                }
-            }
-
-            return [0, completions];
+            context.title = ["Proxy Name", "Proxy Usage"];
+            context.completions = [[c.conf_name, c.conf_usage] for each (c in proxy_settings)];
         }
     });
 
