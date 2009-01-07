@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Makes more large screen</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>1.1</version>
+  <version>2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -46,28 +46,47 @@ let PLUGIN_INFO =
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <detail><![CDATA[
-    == Commands ==
-      :fullscreen:
-        toggle fullscreen <-> normal
+    == Options ==
+      mainecoon:
+        Possible values
+          c:
+            Hide caption-bar
+          a:
+            Hide automatically command-line
+          f:
+            Fullscreeen
     == Global Variables ==
       maine_coon_targets:
-        Other elements ids that you want to kill.
+        Other elements IDs that you want to hide.
         let g:maine_coon_targets = "sidebar-2 sidebar-2-splitter"
-      maine_coon_auto_hide:
-        "true" or "false"
-         Hide automatically commandline, if this variable is true.
+      maine_coon_default:
+        The default value of 'mainecoon' option.
+    == Thanks ==
+      snaka72 (hidechrome part):
+        http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    == Commands ==
-      fullscreen:
-        切り替え fullscreen <-> normal
+    == Options ==
+      mainecoon:
+        以下の文字の組み合わせを指定します。
+          c:
+            キャプションバーを隠す
+          a:
+            自動でコマンドラインを隠す
+          f:
+            フルスクリーン
+        "c" と "f" の併用は意味がありません。
     == Global Variables ==
       maine_coon_targets:
-        他の非表示にしたい要素のIDを空白区切りで指定します。
-        let g:maine_coon_targets = "sidebar-2 sidebar-2-splitter"
-      maine_coon_auto_hide:
-        "true" / "false"
-        true のとき、自動的にコマンドラインを隠す。
+        フルスクリーン時にの非表示にしたい要素のIDを空白区切りで指定します。
+        >||
+          let g:maine_coon_targets = "sidebar-2 sidebar-2-splitter"
+        ||<
+      maine_coon_default:
+        オプションのデフォルト値を設定します。
+    == Thanks ==
+      snaka72 (hidechrome part):
+        http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
   ]]></detail>
 </VimperatorPlugin>;
 
@@ -75,7 +94,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
 
 (function () {
 
-  let autoHideCommandLine = s2b(liberator.globalVariables.maine_coon_auto_hide || '', true);
+  let mainWindow = document.getElementById('main-window');
+  let messageBox = document.getElementById('liberator-message');
 
   function around (obj, name, func) {
     let next = obj[name];
@@ -86,24 +106,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
                   args);
   }
 
-  function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
-
-  let mainWindow = document.getElementById('main-window');
-  let messageBox = document.getElementById('liberator-message');
-
-  if (autoHideCommandLine) {
-    messageBox.collapsed = true;
-
-    around(commandline, 'open', function (next, args) {
-      messageBox.collapsed = false;
-      return next();
-    });
-
-    around(commandline, 'close', function (next, args) {
-      messageBox.collapsed = true;
-      return next();
-    });
-  }
+  function s2b (s, d) !!((!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s);
 
   function hideTargets (hide) {
     tagetIDs.forEach(
@@ -113,23 +116,172 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     );
   }
 
-  function hideChrome (hide)
-    mainWindow.setAttribute('hidechrome', hide);
+  function getWindowInfo () {
+      let box = mainWindow.boxObject;
+      let x = screenX < 0 ? 0 : screenX;
+      let y = screenY < 0 ? 0 : screenY;
+      let width =  box.width;
+      let height = box.height;
+      let adjustHeight = box.screenY - y; // maybe caption height?
+      let adjustWidth  = (box.screenX - x) * 2;
+      return {
+        x: x,
+        y: y,
+        widt: width,
+        height: height,
+        adjustHeight: adjustHeight,
+        adjustWidth: adjustWidth
+      };
+  }
 
+  function delay (f, t)
+    setTimeout(f, t || 0);
+
+  function refreshWindow () {
+    // FIXME
+    let old = window.outerWidth;
+    window.outerWidth = old + 1;
+    window.outerWidth = old;
+  }
+
+  function getHideChrome ()
+    s2b(mainWindow.getAttribute('hidechrome'), false);
+
+  function hideChrome (hide) {
+    hide = !!hide;
+    if (getHideChrome() === hide)
+      return;
+    if (hide)
+      windowInfo = getWindowInfo();
+    mainWindow.setAttribute('hidechrome', hide);
+    delay(function () {
+      window.outerWidth = windowInfo.width;
+      window.outerHeight = windowInfo.height + windowInfo.adjustHeight;
+    });
+    refreshWindow();
+  }
+
+  function setFullscreen (full) {
+    full = !!full;
+    if (full === !!window.fullScreen)
+      return;
+    window.fullScreen = full;
+    delay(function () {
+      hideTargets(full);
+      document.getElementById('status-bar').setAttribute('moz-collapsed', false);
+      document.getElementById('navigator-toolbox').collapsed = full;
+      if (!full)
+        window.maximize();
+    }, 1000); // FIXME
+  }
+
+  function nothing (value)
+    (value === undefined);
+
+  let setAutoHideCommandLine = (function () {
+    let hiddenNodes = [];
+
+    return function (hide) {
+      hide = !!hide;
+
+      if (hide === autoHideCommandLine)
+        return;
+
+      autoHideCommandLine = hide;
+
+      if (hide) {
+        let cs = messageBox.parentNode.childNodes;
+        hiddenNodes = [];
+        for (let i = 0, l = cs.length, c; i < l; i++) {
+          c = cs[i];
+          if (c.id == 'liberator-commandline')
+            continue;
+          let style = window.getComputedStyle(c, '');
+          hiddenNodes.push([c, c.collapsed, style.display]);
+          if (c.id != 'liberator-message')
+            c.style.display = 'none';
+          c.collapsed = true;
+        }
+      } else {
+        hiddenNodes.forEach(function ([c, v, d]) [c.collapsed, c.style.display] = [v, d]);
+      }
+    }
+  })();
+
+
+  let autoHideCommandLine = false;
+  let windowInfo = {};
+
+  {
+    let a = liberator.globalVariables.maine_coon_auto_hide;
+    let d = liberator.globalVariables.maine_coon_default;
+
+    let def = !nothing(d) ? d :
+              nothing(a)  ? 'a' :
+              s2b(a)      ? 'a' :
+              '';
+
+    autocommands.add(
+      'VimperatorEnter',
+      /.*/,
+      function () {
+        delay(function () options.get('mainecoon').set(def), 1000)
+      }
+    );
+  }
+
+  around(commandline, 'open', function (next, args) {
+    messageBox.collapsed = false;
+    return next();
+  });
+
+  around(commandline, 'close', function (next, args) {
+    if (autoHideCommandLine)
+      messageBox.collapsed = true;
+    return next();
+  });
+
+  options.add(
+    ['mainecoon'],
+    'Make big screen like a Maine Coone',
+    'charlist',
+    '',
+    {
+      setter: function (value) {
+        function has (c)
+          (value.indexOf(c) >= 0);
+
+        if (has('f')) {
+          hideChrome(false);
+          delay(function () setFullscreen(true));
+        } else if (has('c')) {
+          setFullscreen(false);
+          delay(function () hideChrome(true));
+        } else {
+          hideChrome(false);
+          delay(function () setFullscreen(false));
+        }
+        setAutoHideCommandLine(has('a'));
+
+        return value;
+      },
+      completer: function (context, args) {
+        context.title = ['Value', 'Description'];
+        context.completions = [
+          ['c', 'Hide caption bar'],
+          ['f', 'Fullscreen'],
+          ['a', 'Hide automatically command-line'],
+        ];
+      },
+      validater: function (value) /^[cfa]*$/.test(value)
+    }
+  );
+
+  // XXX obsolete
   commands.addUserCommand(
     ['fullscreen', 'fs'],
     'Toggle fullscreen mode',
-    function () {
-      let hide = !window.fullScreen;
-      window.fullScreen = hide;
-      setTimeout(function () {
-        hideTargets(hide);
-        document.getElementById('status-bar').setAttribute('moz-collapsed', false);
-        document.getElementById('navigator-toolbox').collapsed = hide;
-        if (!hide)
-          window.maximize();
-      }, 400);
-    },
+    function () setFullscreen(!window.fullScreen),
     {},
     true
   );
