@@ -171,8 +171,9 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       window.outerWidth = windowInfo.width;
       window.outerHeight = windowInfo.height + windowInfo.adjustHeight;
     });
-    if (windowInfo.state == window.STATE_MAXIMIZED)
-      delay(function () window.maximize());
+    // FIXME?
+    // if (windowInfo.state == window.STATE_MAXIMIZED)
+    //   delay(function () window.maximize());
     refreshWindow();
   }
 
