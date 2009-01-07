@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Makes more large screen</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.0</version>
+  <version>2.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -55,6 +55,9 @@ let PLUGIN_INFO =
             Hide automatically command-line
           f:
             Fullscreeen
+        >||
+          :set mainecoon=ac
+        ||<
     == Global Variables ==
       maine_coon_targets:
         Other elements IDs that you want to hide.
@@ -79,6 +82,9 @@ let PLUGIN_INFO =
           f:
             フルスクリーン
         "c" と "f" の併用は意味がありません。
+        >||
+          :set mainecoon=ac
+        ||<
     == Global Variables ==
       maine_coon_targets:
         フルスクリーン時にの非表示にしたい要素のIDを空白区切りで指定します。
@@ -136,7 +142,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
         width: width,
         height: height,
         adjustHeight: adjustHeight,
-        adjustWidth: adjustWidth
+        adjustWidth: adjustWidth,
+        state: window.windowState
       };
   }
 
@@ -164,6 +171,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       window.outerWidth = windowInfo.width;
       window.outerHeight = windowInfo.height + windowInfo.adjustHeight;
     });
+    if (windowInfo.state == window.STATE_MAXIMIZED)
+      delay(function () window.maximize());
     refreshWindow();
   }
 
@@ -230,9 +239,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     autocommands.add(
       'VimperatorEnter',
       /.*/,
-      function () {
-        delay(function () options.get('mainecoon').set(def), 1000)
-      }
+      function () delay(function () options.get('mainecoon').set(def), 1000)
     );
   }
 
