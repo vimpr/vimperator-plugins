@@ -8,7 +8,7 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
-  <description>resizeble textarea</description>
+  <description>Allows you to resize textareas.</description>
   <description lang="ja">テキストエリアをリサイズ可能にする。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <version>0.1.0</version>
@@ -40,7 +40,7 @@ TextResizer.prototype = {
       stopResize: this._bind(this, this.stopResize)
     };
   },
-  resizeble: function(args) {
+  resizable: function(args) {
     this.changeCursor(false);
     this.doc.addEventListener("mousedown", this.handler.initResize, false);
   },
@@ -93,15 +93,15 @@ TextResizer.prototype = {
       for (let i = 0, len = arguments.length; i < len; args.push(arguments[i++]));
       return function(event) {
         return func.apply(obj, [ event ].concat(args));
-      }
+      };
   }
 };
 
 commands.addUserCommand(
-  [ "textareaResize", "tr" ], "resizeble textarea.",
+  [ "textareaResize", "tr" ], "resizable textarea.",
   function() {
     var instance = new TextResizer(window.content.document);
-    instance.resizeble.apply(instance, arguments);
+    instance.resizable.apply(instance, arguments);
   },
   null,
   true
