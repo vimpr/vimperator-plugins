@@ -191,7 +191,7 @@
         initLDRizeCaptureKeys: function(keys){
             var self = this;
             keys.forEach(function(x){
-                    var map = liberator.modules.mappings.getDefault(null,x) || liberator.modules.mappings.get(null,x);
+                    var map = liberator.modules.mappings.get(null,x) || liberator.modules.mappings.getDefault(null,x);
                     var oldAction = map.action;
                     var getter = "getPrev";
                     switch(x){
@@ -201,6 +201,13 @@
                                             self.isIntelligenceBind && self.isScrollOrBind(getter) ?
                                                 oldAction.apply(this,arguments)           // scroll
                                                 : self.sendRawKeyEvent(0,x.charCodeAt(0)) // bind
+                                            : oldAction.apply(this,arguments);
+                                    };
+                                    break;
+                        case 'J': 
+                        case 'K':   map.action = function(){
+                                        self.isEnableLDRizeCooperation()
+                                            ? self.sendRawKeyEvent(0, x.charCodeAt(0) + 32)
                                             : oldAction.apply(this,arguments);
                                     };
                                     break;
