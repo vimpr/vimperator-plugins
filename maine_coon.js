@@ -61,6 +61,9 @@ let PLUGIN_INFO =
         let g:maine_coon_targets = "sidebar-2 sidebar-2-splitter"
       maine_coon_default:
         The default value of 'mainecoon' option.
+        >||
+          let g:maine_coon_default = "ac"
+        ||<
     == Thanks ==
       snaka72 (hidechrome part):
         http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
@@ -84,6 +87,9 @@ let PLUGIN_INFO =
         ||<
       maine_coon_default:
         オプションのデフォルト値を設定します。
+        >||
+          let g:maine_coon_default = "ac"
+        ||<
     == Thanks ==
       snaka72 (hidechrome part):
         http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
