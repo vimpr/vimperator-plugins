@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Makes more large screen</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.0.1</version>
+  <version>2.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -55,9 +55,16 @@ let PLUGIN_INFO =
             Hide automatically command-line
           f:
             Fullscreeen
+          C:
+            Hide caption-bar
+            If window is maximized, then window maximize after window is hid.
+          m:
+            Display the message to command-line.
+            (e.g. "Yanked http://..." "-- CARET --")
         >||
           :set mainecoon=ac
         ||<
+        The default value of this option is "am".
     == Global Variables ==
       maine_coon_targets:
         Other elements IDs that you want to hide.
@@ -81,10 +88,17 @@ let PLUGIN_INFO =
             自動でコマンドラインを隠す
           f:
             フルスクリーン
+          C:
+            キャプションバーを隠す
+            ウィンドウが最大化されているときは、隠したあとに最大化し直します
+          m:
+            コマンドラインへのメッセージを表示します。
+            ("Yanked http://..." "-- CARET --" など)
         "c" と "f" の併用は意味がありません。
         >||
           :set mainecoon=ac
         ||<
+        デフォルト値は "am"
     == Global Variables ==
       maine_coon_targets:
         フルスクリーン時にの非表示にしたい要素のIDを空白区切りで指定します。
@@ -160,7 +174,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
   function getHideChrome ()
     s2b(mainWindow.getAttribute('hidechrome'), false);
 
-  function hideChrome (hide) {
+  function hideChrome (hide, maximize) {
     hide = !!hide;
     if (getHideChrome() === hide)
       return;
@@ -171,9 +185,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       window.outerWidth = windowInfo.width;
       window.outerHeight = windowInfo.height + windowInfo.adjustHeight;
     });
-    // FIXME?
-    // if (windowInfo.state == window.STATE_MAXIMIZED)
-    //   delay(function () window.maximize());
+    if (maximize && windowInfo.state == window.STATE_MAXIMIZED)
+      delay(function () window.maximize());
     refreshWindow();
   }
 
@@ -193,6 +206,43 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
 
   function nothing (value)
     (value === undefined);
+
+  let echo = (function () {
+    let U = libly.$U;
+    let time = 40;
+    let remove;
+
+    return function (message) {
+      if (remove)
+        remove();
+      let doc = window.content.document;
+      let style = highlight.get('StatusLine').value +
+                  U.toStyleText({
+                    position: 'fixed',
+                    zIndex: 1000,
+                    left: 0,
+                    bottom: 0,
+                    opacity: 1
+                  });
+      let elem = U.xmlToDom(<div style={style}>{message}</div>, doc);
+      doc.body.appendChild(elem);
+      let count = time;
+      let handle = setInterval(function () {
+        if (count <= 0) {
+          if (remove)
+            remove();
+        } else {
+          elem.style.opacity = count / time;
+        }
+        count--;
+      }, 100);
+      remove = function () {
+        doc.body.removeChild(elem);
+        clearInterval(handle);
+        remove = null;
+      }
+    };
+  })();
 
   let setAutoHideCommandLine = (function () {
     let hiddenNodes = [];
@@ -225,6 +275,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
   })();
 
 
+  let useEcho = false;
   let autoHideCommandLine = false;
   let windowInfo = {};
 
@@ -233,15 +284,36 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     let d = liberator.globalVariables.maine_coon_default;
 
     let def = !nothing(d) ? d :
-              nothing(a)  ? 'a' :
-              s2b(a)      ? 'a' :
-              '';
+              nothing(a)  ? 'am' :
+              s2b(a)      ? 'am' :
+              'm';
 
     autocommands.add(
       'VimperatorEnter',
       /.*/,
       function () delay(function () options.get('mainecoon').set(def), 1000)
     );
+  }
+
+
+  {
+    let last;
+    messageBox.watch('value', function (name, oldValue, newValue) {
+      try {
+        if (autoHideCommandLine
+        && useEcho
+        && /[^\s]/.test(newValue)
+        && messageBox.collapsed
+        && last != newValue
+        && newValue != "Press ENTER or type command to continue") {
+          echo(newValue);
+        }
+      } catch (e) {
+        liberator.reportError(e);
+      }
+      last = newValue;
+      return newValue;
+    });
   }
 
   around(commandline, 'open', function (next, args) {
@@ -271,11 +343,15 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
         } else if (has('c')) {
           setFullscreen(false);
           delay(function () hideChrome(true));
+        } else if (has('C')) {
+          setFullscreen(false);
+          delay(function () hideChrome(true, true));
         } else {
           hideChrome(false);
           delay(function () setFullscreen(false));
         }
         setAutoHideCommandLine(has('a'));
+        useEcho = has('m');
 
         return value;
       },
@@ -285,6 +361,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
           ['c', 'Hide caption bar'],
           ['f', 'Fullscreen'],
           ['a', 'Hide automatically command-line'],
+          ['C', 'Hide caption bar (maximize)'],
+          ['m', 'Display the message to command-line'],
         ];
       },
       validater: function (value) /^[cfa]*$/.test(value)
