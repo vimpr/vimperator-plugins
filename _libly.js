@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.19</version>
+    <version>0.1.20</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -95,6 +95,13 @@ xmlToDom(node, doc, nodes):
 getElementPosition(elem):
     elem の offset を返却します。
     return {top: 0, left: 0}
+toStyleText(style):
+    スタイルが格納されているオブジェクトを
+    >||
+        position: fixed;
+        left: 10px;
+    ||<
+    のような文字列に変換します。
     ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -127,7 +134,7 @@ libly.$U = {//{{{
     extend: function(dst, src) {
         for (let prop in src)
             dst[prop] = src[prop];
-         return dst;
+        return dst;
     },
     A: function(iterable) {
         var ret = [];
@@ -342,6 +349,16 @@ libly.$U = {//{{{
         offsetTop = offsetTop || null;
         offsetLeft = offsetLeft || null;
         return {top: offsetTop, left: offsetLeft};
+    },
+    toStyleText: function(style) {
+        var result = '';
+        for (let name in style) {
+            result += name.replace(/[A-Z]/g, function (c) ('-' + c.toLowerCase())) +
+                      ': ' +
+                      style[name] +
+                      ';\n';
+        }
+        return result;
     }
     // }}}
 };
