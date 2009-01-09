@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.13</version>
+    <version>0.14</version>
     <license>Creative Commons</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -86,10 +86,10 @@ for Migemo search: require XUL/Migemo Extension
 
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
-    var isNormalize = liberator.globalVariables.direct_sbm_is_normalize ?
-        evalFunc(liberator.globalVariables.direct_sbm_is_normalize) : true;
-    var isUseMigemo = liberator.globalVariables.direct_sbm_is_use_migemo ?
-        evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo) : true;
+    var isNormalize = typeof liberator.globalVariables.direct_sbm_is_normalize == 'undefined' ? 
+                      true : evalFunc(liberator.globalVariables.direct_sbm_is_normalize); 
+    var isUseMigemo = typeof liberator.globalVariables.direct_sbm_is_use_migemo == 'undefined' ? 
+                      true : evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo);
 
     var XMigemoCore;
     try{
