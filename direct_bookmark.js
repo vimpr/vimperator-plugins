@@ -1,4 +1,4 @@
-// Last Change: 01-Jan-2009. Jan 2008
+// Last Change: 09-Jan-2009. Jan 2008
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
@@ -86,10 +86,10 @@ for Migemo search: require XUL/Migemo Extension
 
     var useServicesByPost = liberator.globalVariables.direct_sbm_use_services_by_post || 'hdl';
     var useServicesByTag = liberator.globalVariables.direct_sbm_use_services_by_tag || 'hdl';
-    var isNormalize = typeof liberator.globalVariables.direct_sbm_is_normalize == 'undefined' ?
-                      true : evalFunc(liberator.globalVariables.direct_sbm_is_normalize);
-    var isUseMigemo = typeof liberator.globalVariables.direct_sbm_is_use_migemo == 'undefined' ?
-                      true : evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo);
+    var isNormalize = liberator.globalVariables.direct_sbm_is_normalize ?
+        evalFunc(liberator.globalVariables.direct_sbm_is_normalize) : true;
+    var isUseMigemo = liberator.globalVariables.direct_sbm_is_use_migemo ?
+        evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo) : true;
 
     var XMigemoCore;
     try{
@@ -387,7 +387,6 @@ for Migemo search: require XUL/Migemo Extension
                 tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
                 });
-                liberator.echo("Hatena Bookmark: Tag parsing is finished. Taglist length: " + tags.length);
                 return hatena_tags;
             },
             icon:function(url){
@@ -422,7 +421,6 @@ for Migemo search: require XUL/Migemo Extension
                 var tags = evalFunc("(" + xhr.responseText + ")");
                 for(var tag in tags)
                     returnValue.push(tag);
-                liberator.echo("del.icio.us: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
             },
             icon:function(url){
@@ -479,7 +477,6 @@ for Migemo search: require XUL/Migemo Extension
                 tags.forEach(function(tag){
                     ldc_tags.push(tag.textContent);
                 });
-                liberator.echo("livedoor clip: Tag parsing is finished. Taglist length: " + tags.length);
                 return ldc_tags;
             },
             icon:function(url){
@@ -537,7 +534,6 @@ for Migemo search: require XUL/Migemo Extension
                 var tags = xhr.responseXML.getElementsByTagName('tag');
                 for(var n = 0; n < tags.length; n++)
                     returnValue.push(tags[n].getAttribute('tag'));
-                liberator.echo("foves: Tag parsing is finished. Taglist length: " + returnValue.length);
                 return returnValue;
             },
         },
@@ -563,21 +559,35 @@ for Migemo search: require XUL/Migemo Extension
     };
     liberator.plugins.direct_bookmark = { services: services, tags: [] };
 
-    function getTags(arg){
+    function getTagsAsync(arg){
         var d,first;
         d = first = Deferred();
 
         useServicesByTag.split(/\s*/).forEach(function(service){
             var user, password, currentService = services[service] || null;
             [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
-            d = d.next(function(t) t.concat(currentService.tags(user,password)));
+            d = d.next(function(t) {
+                var tags = currentService.tags(user,password);
+                liberator.echo(currentService.description + ": Tag parsing is finished. Taglist length: " + tags.length);
+                return t.concat(tags);
+            });
         });
         d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort()})
          .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
         return first;
     }
+    function getTags(arg){
+        var user,password;
+        var tags = [];
+        useServicesByTag.split(/\s*/).forEach(function(service){
+            var currentService = services[service] || null;
+            [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
+            tags = tags.concat(currentService.tags(user,password));
+        });
+        liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort();
+    }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
-        function(arg){setTimeout(function(){getTags().call([])},0)}, {});
+        function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {});
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(service, special){
             service = service.string || useServicesByPost.split(/\s*/)[0];
@@ -667,6 +677,7 @@ for Migemo search: require XUL/Migemo Extension
                 var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
                 var completionList = [];
+                // XXX: completer works asynchronous. thus we shouldn't call getTagsAsync().
                 if(liberator.plugins.direct_bookmark.tags.length == 0)
                     getTags().call([]);
                 context.title = ['Tag','Description'];
