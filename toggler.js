@@ -54,10 +54,7 @@ Toggler.prototype = {
 		if (!notUpdate) this.index = index;
 		return this.cmds[this.index];
 	},
-	list: function(){
-		var data = this.cmds.map(function(cmd, i) [i==this.index ? "*" : "", cmd], this);
-		return template.table(this.name, data);
-	}
+	list: function() template.table(this.name, this.cmds.map(function(cmd, i) [i==this.index ? "*" : "", cmd], this))
 };
 var manager = {
 	add: function(name, cmds){
@@ -89,7 +86,7 @@ var manager = {
 	reload: function(){
 		if (liberator.globalVariables.toggler){
 			settings = {};
-			for (var [name, toggler] in Iterator(liberator.globalVariables.toggler))
+			for (let [name, toggler] in Iterator(liberator.globalVariables.toggler))
 				this.add(name, toggler);
 		}
 	},

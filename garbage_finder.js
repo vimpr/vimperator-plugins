@@ -48,7 +48,7 @@ let PLUGIN_INFO =
   <detail><![CDATA[
     == Commands ==
       :garbages:
-        Display (removed|appended) variables.
+        Displays (removed|appended) variables.
   ]]></detail>
   <detail lang="ja"><![CDATA[
     前回(Firefox)起動時の window オブジェクトにおける変数と、現在のそれの差分を取ります。
@@ -83,7 +83,7 @@ let PLUGIN_INFO =
 
   function diff (oldList, newList) {
     function sub (n, o)
-      n.filter(function (it) !has(o, it))
+      n.filter(function (it) !has(o, it));
     return {
       appended: ignore(sub(newList, oldList)),
       removed: ignore(sub(oldList, newList))
@@ -111,17 +111,16 @@ let PLUGIN_INFO =
 
   commands.addUserCommand(
     ['garbages'],
-    'Display garbages',
+    'Displays garbages',
     function (args) {
       function makeLI (list) {
         if (list.length) {
           let result = <></>;
           list.forEach(function (it) (result += <li>{it}</li>));
           return <ol>{result}</ol>;
-        } else {
-          // XXX 駄目くさいけどめんどくさいので…
-          return <ol>Nothing</ol>;
         }
+        // XXX 駄目くさいけどめんどくさいので…
+        return <ol>Nothing</ol>;
       }
 
       if (args.bang) {

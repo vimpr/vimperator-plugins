@@ -19,7 +19,7 @@ select charhint label in uppercase.
 == SETTING ==
 let g:hinstchars:
     set character used by char-hint.
-    ex)
+    e.g.)
       let g:hinstchars="hjkl"
 let g:hintsio:
     - "i" setting char-hint input lowercase.
@@ -27,7 +27,7 @@ let g:hintsio:
     - "o" setting char-hint show lowercase.
     - "O" setting char-hint show uppercase.
     Default setting is "IO".
-    ex)
+    e.g.)
       let g:histsio="i"
 
 == TODO ==
@@ -41,7 +41,7 @@ let g:hintsio:
 == SETTING ==
 let g:hinstchars:
     set character used by char-hint.
-    ex)
+    e.g.)
       let g:hinstchars="hjkl"
 let g:hintsio:
     - "i" setting char-hint input lowercase.
@@ -49,7 +49,7 @@ let g:hintsio:
     - "o" setting char-hint show lowercase.
     - "O" setting char-hint show uppercase.
     Default setting is "IO".
-    ex)
+    e.g.)
       let g:histsio="i"
 
 == TODO ==
@@ -203,9 +203,7 @@ let g:hintsio:
             liberator.execute(":hi Hint::after content: attr(hintchar)");
             if(liberator.globalVariables.hintsio) {
                 let hintsio = liberator.globalVariables.hintsio;
-                for(let i=0,l=hintsio.length;i<l;++i) {
-                    setIOType(hintsio[i]);
-                }
+                for(let i=hintsio.length;i-->0;setIOType(hintsio[i]));
             }
             if(liberator.globalVariables.hintchars) {
                 hintchars = liberator.globalVariables.hintchars;

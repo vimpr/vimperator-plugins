@@ -67,7 +67,7 @@ function $(arg){ //{{{
         return new $o(arg);
     }
 } //}}}
-liberator.modules.$f = (function () { //{{{
+liberator.modules.$f = (function(){ //{{{
     const pests = [
         '__defineGetter__', '__defineSetter__', 'hasOwnProperty', 'isPrototypeOf',
         '__lookupGetter__', '__lookupSetter__', '__parent__', 'propertyIsEnumerable',
@@ -78,23 +78,23 @@ liberator.modules.$f = (function () { //{{{
         value;
 
     function memfn(parent)
-        function (name,args)
+        function(name,args)
             FFF(function(self)
                     let (s = parent(self))
                         let (f = s[name])
                             (f instanceof Function ? s[name].apply(s, args) : f));
 
     function mem(parent)
-        function (name)
+        function(name)
             FFF(function(self)
                     parent(self)[name]);
 
-    function FFF(parent) {
-        parent.__noSuchMethod__ = memfn(parent)
+    function FFF(parent){
+        parent.__noSuchMethod__ = memfn(parent);
         parent.m = {__noSuchMethod__: mem(parent)};
         pests.forEach(function(it) (parent[it] = function() parent.__noSuchMethod__(it, arguments)));
         return parent;
-    };
+    }
 
     return FFF(id);
 })(); //}}}
@@ -202,7 +202,7 @@ createPrototype($s, {
         var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : "" for (i in hash)].join("");
         return $(s);
     },
-    s: function(from, to) $(this.value.replace(from,to)),
+    s: function(from, to) $(this.value.replace(from, to)),
     split: function(reg) $(this.value.split(reg)),
     get toJSON(){
         var json;
@@ -213,13 +213,13 @@ createPrototype($s, {
             return null;
         }
     },
-    evaluate: function(doc,context){
+    evaluate: function(doc, context){
         if (!doc) doc = content.document;
         if (!context) context = doc;
         var result = [];
         var nodes = doc.evaluate(this.value, context, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
         var node;
-        while (node = nodes.iterateNext()) {
+        while (node = nodes.iterateNext()){
             result.push(node);
         }
         return $(result);
@@ -251,7 +251,7 @@ createPrototype($a, {
         return this;
     },
     get first() $(this.value[0]),
-    get last() $(this.value[this.length - 1]),
+    get last() $(this.value[this.length - 1])
 });
 // }}}
 
@@ -310,7 +310,7 @@ createPrototype($o, {
         return $(json.encode(this.value));
     }
 });
-if (DOMINSPECTOR){ createPrototype($o,{ inspect: function(){ inspectObject(this.value); return ""; } }); }
+if (DOMINSPECTOR){ createPrototype($o, { inspect: function(){ inspectObject(this.value); return ""; } }); }
 // }}}
 
 // -----------------------------------------------------------------------------
@@ -403,7 +403,7 @@ createPrototype($xml, {
     }, // 2}}}
 });
 if (DOMINSPECTOR){
-    createPrototype($xml,{
+    createPrototype($xml, {
         inspect: function(){
             if (this.value instanceof Document)
                 inspectDOMDocument(this.value);
@@ -426,12 +426,12 @@ function $xhr(url, method, user, password, xhr){
     this.success = null;
 }
 $xhr.prototype = {
-    open: function(url,user,password){
+    open: function(url, user, password){
         if (this.xhr.readyState != 0) return this;
         if (url) this.url = url;
         if (user) this.user = user;
         if (password) this.password = password;
-        this.xhr.open(this.method,this.url,false,this.user,this.password);
+        this.xhr.open(this.method, this.url, false, this.user, this.password);
         return this;
     },
     setMIME: function(type, charset){
@@ -474,13 +474,13 @@ createPrototype($xhrResult, {
             return $(this.value.responseXML);
         } else if (this.value.getResponseHeader("Content-Type").indexOf("text/html") == 0){
             let str = this.value.responseText.
-                                 replace(/^[\s\S]*?<html(?:\s[^>]*)?>|<\/html\s*>[\S\s]*$/ig,"").
-                                 replace(/[\r\n]+/g," ");
-            let htmlFragment = document.implementation.createDocument(null,"html",null);
+                                 replace(/^[\s\S]*?<html(?:[ \t\r\n][^>]*)?>|<\/html[ \t\n\t]*>[\S\s]*$/ig, "").
+                                 replace(/[\r\n]+/g, " ");
+            let htmlFragment = document.implementation.createDocument(null, "html", null);
             //let range = window.content.document.createRange();
             let range = document.getElementById("liberator-multiline-output").contentDocument.createRange();
             range.setStartAfter(window.content.document.body);
-            htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str),true));
+            htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str), true));
             return $(htmlFragment);
         } else {
             return this.text;
@@ -520,16 +520,16 @@ createPrototype($e4x, {
 });
 // }}}
 
-function createPrototype(class,obj){
+function createPrototype(class, obj){
     var flag;
     for (let i in obj){
         flag = false;
         if (obj.__lookupGetter__(i)){
-            class.prototype.__defineGetter__(i,obj.__lookupGetter__(i));
+            class.prototype.__defineGetter__(i, obj.__lookupGetter__(i));
             flag = true;
         }
         if (obj.__lookupSetter__(i)){
-            class..prototype.__defineSetter__(i,obj.__lookupSetter__(i));
+            class..prototype.__defineSetter__(i, obj.__lookupSetter__(i));
             flag = true;
         }
         if (!flag) class.prototype[i] = obj[i];

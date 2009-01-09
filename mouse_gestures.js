@@ -22,15 +22,15 @@ var PLUGIN_INFO =
     ['RLR', 'Close Tab Or Window', '#cmd_close'],
     ['LD' , 'Stop Loading Page', '#Browser:Stop'],
     ['LR' , 'Undo Close Tab', '#History:UndoCloseTab'],
-    ['UL' , 'Select Previous Tab' ,'gT', true],
-    ['UR' , 'Select Next Tab' ,'gt', true],
+    ['UL' , 'Select Previous Tab', 'gT', true],
+    ['UR' , 'Select Next Tab', 'gt', true],
     ['LU' , 'Scroll To Top', function() goDoCommand('cmd_scrollTop')],
     ['LD' , 'Scroll To Bottom', function() goDoCommand('cmd_scrollBottom')],
     ['UDR', 'Add Bookmark', ':dialog addbookmark'],
-    ['L>R'  , 'Forward', '#Browser:Forward'],
-    ['L<R'  , 'Back', '#Browser:Back'],
-    ['W-' , 'Select Previous Tab' , function() gBrowser.tabContainer.advanceSelectedTab(-1, true) ],
-    ['W+' , 'Select Next Tab' , function() gBrowser.tabContainer.advanceSelectedTab(+1, true) ],
+    ['L>R', 'Forward', '#Browser:Forward'],
+    ['L<R', 'Back', '#Browser:Back'],
+    ['W-' , 'Select Previous Tab', function() gBrowser.tabContainer.advanceSelectedTab(-1, true) ],
+    ['W+' , 'Select Next Tab', function() gBrowser.tabContainer.advanceSelectedTab(+1, true) ],
   ];
   EOM
   == liberator.globalVariables ==
@@ -78,30 +78,30 @@ liberator.plugins.MouseGestures = (function() {
 
   var Class = function() function() {this.initialize.apply(this, arguments);};
   var MouseGestures = new Class();
-  
+
   var doCommandByID = function(id) {
-    if (document.getElementById(id)) 
+    if (document.getElementById(id))
       document.getElementById(id).doCommand();
   };
-  
+
   MouseGestures.prototype = {
-    initialize: function(){
+    initialize: function() {
       this.parseSetting();
-      
+
       var self = this;
       this.registerEvents('add');
       window.addEventListener('unload', function() { self.registerEvents('remove'); }, false);
     },
-    parseSetting: function(){
+    parseSetting: function() {
       var gestures = {};
       var self = this;
       this._showstatus = global.mousegesture_showmsg || true;
-      
+
       this._enableRocker = global.mousegesture_rocker || false;
       this._enableWheel = global.mousegesture_wheel || false;
       if (this._enableRocker) this.captureEvents.push('draggesture');
       if (this._enableWheel) this.captureEvents.push('DOMMouseScroll');
-      global.mousegesture_list.forEach(function( [gesture, desc, action, noremap] ){
+      global.mousegesture_list.forEach(function( [gesture, desc, action, noremap] ) {
         action = action || desc;
         noremap = noremap || false;
         if (typeof action == 'string') {
@@ -115,17 +115,17 @@ liberator.plugins.MouseGestures = (function() {
       this.GESTURES = gestures;
     },
     captureEvents : ['mousedown', 'mousemove', 'mouseup', 'contextmenu'],
-    registerEvents: function(action){
+    registerEvents: function(action) {
       var self = this;
       this.captureEvents.forEach(
-        function(type) { getBrowser().mPanelContainer[action + 'EventListener'](type, self, type == 'contextmenu' || type == 'draggesture'); 
+        function(type) { getBrowser().mPanelContainer[action + 'EventListener'](type, self, type == 'contextmenu' || type == 'draggesture');
       });
     },
     set status(msg) {
-      if (this._showstatus) commandline.echo(msg,null, commandline.FORCE_SINGLELINE);
+      if (this._showstatus) commandline.echo(msg, null, commandline.FORCE_SINGLELINE);
     },
     handleEvent: function(event) {
-      switch(event.type){
+      switch(event.type) {
       case 'mousedown':
         if (event.button == 2) {
           this._isMouseDownR = true;
@@ -137,7 +137,7 @@ liberator.plugins.MouseGestures = (function() {
             this._gesture = 'L>R';
             this.stopGesture(event);
           }
-        } else if (this._enableRocker && event.button == 0){
+        } else if (this._enableRocker && event.button == 0) {
           this._isMouseDownL = true;
           if (this._isMouseDownR) {
             this._isMouseDownL = false;
@@ -158,7 +158,7 @@ liberator.plugins.MouseGestures = (function() {
           this.stopGesture(event);
           if (this._shouldFireContext) {      // for Linux & Mac
             this._shouldFireContext = false;
-            var mEvent = event.originalTarget.ownerDocument.createEvent('MouseEvents');
+            let mEvent = event.originalTarget.ownerDocument.createEvent('MouseEvents');
             mEvent.initMouseEvent('contextmenu', true, true, aEvent.originalTarget.defaultView, 0, event.screenX, event.screenY, event.clientX, event.clientY, false, false, false, false, 2, null);
             event.originalTarget.dispatchEvent(mEvent);
           }
@@ -178,7 +178,7 @@ liberator.plugins.MouseGestures = (function() {
           event.stopPropagation();
           this._suppressContext = true;
           this._gesture = 'W' + (event.detail > 0 ? '+' : '-');
-          this.stopGesture( event , false);
+          this.stopGesture( event, false );
         }
         break;
       case 'draggesture':
@@ -213,7 +213,7 @@ liberator.plugins.MouseGestures = (function() {
       }
       this._x = x; this._y = y;
     },
-    timerGesture: function(isClear){
+    timerGesture: function(isClear) {
       if (this._timer)  clearTimeout(this._timer);
         this._timer = setTimeout( !isClear ? function(self) self.stopGesture({}, true) : function(self) self._timer = self.status = '', 1500, this);
     },
@@ -221,11 +221,11 @@ liberator.plugins.MouseGestures = (function() {
       if (this._gesture) {
         try {
           if (cancel) throw 'Gesture Canceled';
-          
-          var cmd = this.GESTURES[this._gesture] || null;
+
+          let cmd = this.GESTURES[this._gesture] || null;
 /*
           if ( !cmd && this.GESTURES['*'] ) {
-            for (var key in this.GESTURES['*']) {
+            for (let key in this.GESTURES['*']) {
               if (this.GESTURES['*'][key].test(this._gesture)) {
                 cmd = this.GESTURES[key];
                 break;
@@ -234,7 +234,7 @@ liberator.plugins.MouseGestures = (function() {
           }
 */
           if (!cmd) throw 'Unknown Gesture: ' + this._gesture;
-          
+
           cmd[1].call(this);
           this.status = 'Gesture: ' + cmd[0];
         } catch (exp) {

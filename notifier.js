@@ -410,5 +410,5 @@ function bootstrap() {
 };
 
 })();
-// vim: set fdm=marker sw=4 ts=4 sts=0 et:
+// vim: set fdm=marker sw=2 ts=2 sts=0 et:
 

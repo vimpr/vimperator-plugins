@@ -83,7 +83,7 @@ liberator.plugins.LocalKeyMode = (function() {
   // utility function
   function cloneMap(org, key) {
     return new Map(
-      org.modes, key ? key : org.names, org.description, org.action,
+      org.modes, key || org.names, org.description, org.action,
       {flags:org.flags, rhs:org.rhs, noremap:org.noremap }
     );
   }
@@ -163,18 +163,18 @@ liberator.plugins.LocalKeyMode = (function() {
       var delkeys = [];
       if (!(uri instanceof RegExp) ) uri = new RegExp(uri.replace(/(?=[^-0-9A-Za-z_@])/g, '\\'));
 
-      items.forEach( function( [key, command, extra] ){
+      items.forEach( function( [key, command, extra] ) {
         if (!key) return;
         else if (!command) delkeys = delkeys.concat( key.split(' '));
         else {
           key = key instanceof Array ? key : [key];
-          extra = extra ? extra : new Object();
+          extra = extra || new Object();
           if (!extra || !extra.rhs) extra.rhs = (command+'').replace(rhsRegExp, ' ');
-          if (typeof command != 'function'){
+          if (typeof command != 'function') {
             let cmdName = command;
             if (command.charAt(0) == ':')
-            command = extra.noremap ? function () commandline.open("", cmdName, modes.EX)
-                                    : function () liberator.execute(cmdName);
+              command = extra.noremap ? function () commandline.open("", cmdName, modes.EX)
+                                      : function () liberator.execute(cmdName);
             else
               command = function () feedKeys( command, extra.noremap, true);
           }
@@ -312,7 +312,7 @@ liberator.plugins.LocalKeyMode = (function() {
             }
           }
         }, {
-          completer: function(context, arg, special){
+          completer: function(context, arg, special) {
             let filter = context.filter;
             var names = self.completeNames;
             context.title = ['Name','Description'];

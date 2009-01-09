@@ -12,12 +12,12 @@
  *
  */
 (function(){
-    var multilineOutputWidget = document.getElementById("liberator-multiline-output");
+    var multilineOutputWidget = document.getElementById('liberator-multiline-output');
     var outputContainer = multilineOutputWidget.parentNode;
 
     var option = {
         bang: true,
-        completer: function (context) {
+        completer: function (context){
             var complete = options.complete.replace(/[sS]/g, '');
             completion.url(context, complete);
         },
@@ -32,7 +32,7 @@
         iframe.width = '100%';
 
         if (outputContainer.collapsed)
-            doc.body.innerHTML = "";
+            doc.body.innerHTML = '';
 
         doc.body.appendChild(iframe);
         commandline.updateOutputHeight(true);

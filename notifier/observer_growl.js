@@ -188,7 +188,7 @@ notifier.observer.register(notifier.Observer, {
 
         var text = growl.message.title + ' ' +
                    growl.message.message.replace(/(?:<[^>]*>)+/g, '');
-        if (growl.sticky_keywords_exp.some(function(k) text.match(k)) ||
+        if (growl.sticky_keywords_exp.some(function(k) k.test(text)) ||
             growl.created.getTime() + growl.options.life * 1000 > new Date().getTime())
             return false;
 

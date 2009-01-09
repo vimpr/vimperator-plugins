@@ -59,7 +59,7 @@ let PLUGIN_INFO =
             Hide caption-bar
             If window is maximized, then window maximize after window is hid.
           m:
-            Display the message to command-line.
+            Displays the message to command-line.
             (e.g. "Yanked http://..." "-- CARET --")
         >||
           :set mainecoon=ac
@@ -240,7 +240,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
         doc.body.removeChild(elem);
         clearInterval(handle);
         remove = null;
-      }
+      };
     };
   })();
 
@@ -302,10 +302,10 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       try {
         if (autoHideCommandLine
         && useEcho
-        && /[^\s]/.test(newValue)
+        && /\S/.test(newValue)
         && messageBox.collapsed
         && last != newValue
-        && newValue != "Press ENTER or type command to continue") {
+        && newValue != 'Press ENTER or type command to continue') {
           echo(newValue);
         }
       } catch (e) {
@@ -362,7 +362,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
           ['f', 'Fullscreen'],
           ['a', 'Hide automatically command-line'],
           ['C', 'Hide caption bar (maximize)'],
-          ['m', 'Display the message to command-line'],
+          ['m', 'Displays the message to command-line'],
         ];
       },
       validater: function (value) /^[cfa]*$/.test(value)
