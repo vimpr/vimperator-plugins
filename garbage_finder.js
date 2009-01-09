@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">ゴミ探し</name>
   <description>Finds the taints in global(window object)</description>
   <description lang="ja">グローバル(window オブジェクト)の汚染を調べる</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -62,9 +62,14 @@ let PLUGIN_INFO =
 
 (function () {
 
-  const STORAGE_NAME = 'plugin-garbage-finder-vars';
+  const STORAGE_NAME = 'plugin-garbage-finder';
   const IGNORES = (let (gv = liberator.globalVariables.garbage_finder_ignore)
                       gv === undefined ? 'DownloadUtils PluralForm' : gv).split(/\s+/);
+
+  function Somali (n)
+    let(V,[l,s,j,t]=liberator.eval('[loadPref,savePref,json,Object]',storage.newObject))
+      ({load:function(d)let(v=l(n,true,t))(V=v?v.value:d),
+        save:function(v)s({store:true,name:n,serial:j.encode({value:v===undefined?V:v})})});
 
   function vars () {
     let result = [];
@@ -92,16 +97,11 @@ let PLUGIN_INFO =
     ary.filter(function (it) !has(IGNORES, it));
 
 
-  let store = storage.newArray(STORAGE_NAME, true);
-  // 速度を稼ぐためのかんたん黒魔術
-  let raw = liberator.eval('array', store.get);
-  let prevVars = raw.map(id);
+  let store = new Somali(STORAGE_NAME);
+  let prevVars = store.load(vars());
 
-  function save () {
-    raw.splice(0);
-    raw.push.apply(raw, vars());
-    store.save();
-  }
+  function save ()
+    store.save(vars());
 
   autocommands.add(
     'VimperatorEnter',
@@ -112,7 +112,7 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['garbages'],
     'Display garbages',
-    function (context, args) {
+    function (args) {
       function makeLI (list) {
         if (list.length) {
           let result = <></>;
