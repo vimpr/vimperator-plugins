@@ -163,10 +163,10 @@ liberator.plugins.exOpen = (function(){
     },
     registerCommand: function(){
       var self = this;
-      commands.addUserCommand(['exopen'], 'Open byextension url', 
+      commands.addUserCommand(['exopen'], 'Open byextension url',
         function(args) self.open(args.string, args.bang), {
           completer: function(context, args) {
-            context.title = ['Template', 'Value'];
+            context.title = ['Template', 'Description - Value'];
             if (!context.filter) {
               context.completions = self.completer;
               return;
@@ -186,12 +186,13 @@ liberator.plugins.exOpen = (function(){
       if (!arg) return;
       var template = this.find(arg) || {value: arg};
       if (typeof template.custom == 'function') {
-        url = replacer(template.custom.call(this, template.value), template.escape);
+        url = template.custom.call(this, template.value);
       } else if (template.custom instanceof Array){
         url = replacer(template.value).replace(template.custom[0], template.custom[1], template.escape);
       } else {
         url = replacer(template.value, template.escape);
       }
+      if (!url) return;
       if (template.newtab) openTabOrSwitch(url);
       else liberator.open(url);
     }
