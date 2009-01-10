@@ -39,12 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">ゴミ探し</name>
   <description>Finds the taints in global(window object)</description>
   <description lang="ja">グローバル(window オブジェクト)の汚染を調べる</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/garbage_finder.js</updateURL>
   <detail><![CDATA[
     == Commands ==
       :garbages:
