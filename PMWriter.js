@@ -1,6 +1,6 @@
 
 /*
- * $B$5$o$k$J$-$1$s!*(B
+ * さわるなきけん！
  * DO NOT USE!
  * */
 
@@ -16,7 +16,7 @@ let outputDir = liberator.globalVariables.pmwriter_output_dir;
   let otags = liberator.eval('tags', liberator.plugins.pluginManager.list);
   let template = liberator.eval('template', liberator.plugins.pluginManager.list);
 
-  // makeLink $B$rL5M}LpM}=$@5(B
+  // makeLink を無理矢理修正
   let makeLink = liberator.eval('makeLink', liberator.plugins.pluginManager.list);
   liberator.plugins.pmwriter.makeLink = function (str) makeLink(str, true);
   liberator.log(makeLink)
@@ -55,7 +55,7 @@ let outputDir = liberator.globalVariables.pmwriter_output_dir;
     if (context.NAME == myname)
       return;
 
-    context.watch('PLUGIN_INFO', function (n,N,O) { PLUGIN_INFO = O; throw 'STOP'; return O; });
+    context.watch('PLUGIN_INFO', function (n,N,O) { PLUGIN_INFO = O; throw 'STOP';});
 
     try { services.get("subscriptLoader").loadSubScript(uri.spec, context); } catch (e) {}
 
