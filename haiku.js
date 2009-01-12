@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Haiku"
-// Last Change: 22-Aug-2008. Jan 2008
+// Last Change: 12-Jan-2009. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 //
@@ -22,8 +22,41 @@
 //      un-fav someone's last status.. mean remove hatena star.
 //  :haiku! #keyword
 //      show the keyword timeline.
+var PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>{NAME}</name>
+  <description>Hatena Haiku Client</description>
+  <author mail="mattn.jp@gmail.com" homepage="http://mattn.kaoriya.net">mattn</author>
+  <license>Creative Commons</license>
+  <minVersion>2.0a1</minVersion>
+  <maxVersion>2.0</maxVersion>
+  <detail><![CDATA[
+The script allows you to update Haiku status from Vimperator.
+
+== Commands ==
+:haiku some thing text:
+    post "some thing text" to keyword 'id:username' on hatena haiku.
+:haiku #keyword some thing text:
+    post "some thing text" to keyword 'id:keyword' on hatena haiku.
+:haiku!/:
+    show public timeline.
+:haiku! someone:
+    show someone's statuses.
+:haiku! album:
+    show aubum timeline.
+:haiku!+ someone:
+    fav someone's last status.. mean put hatena star.
+:haiku!- someone:
+    un-fav someone's last status.. mean remove hatena star.
+:haiku! #keyword:
+    show the keyword timeline.
+  ]]></detail>
+</VimperatorPlugin>;
 
 (function(){
+    liberator.plugins.haiku = {
+        get cache() statuses
+    };
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var CLIENT_NAME = encodeURIComponent(config.name + "::plugin::haiku.js");
     var evalFunc = window.eval;
@@ -128,9 +161,9 @@
                     replies.* += <>
                                  <dt>
                                     <img src={rep.user.profile_image_url} alt={rep.user.screen_name} class="haiku photo"/>
-                                    <strong>{rep.user_name}</strong>
+                                    <strong>{rep.user.name}</strong>
                                  </dt>
-                                 <dd class="haiku entry-content">{rep.text.substr(keyword.length+1)}</dd>
+                                 <dd class="haiku entry-content">{rep.text.substr(keyword.length)}</dd>
                                  </>;
                 });
             }
@@ -194,7 +227,8 @@
         return new XMLList(str);
     }
     commands.addUserCommand(["haiku"], "Change Haiku status",
-        function(arg, special){
+        function(args){
+            var special = args.bang;
             var password;
             var username;
             try {
@@ -221,7 +255,7 @@
                 liberator.echoerr(ex);
             }
 
-            arg = arg.string.replace(/%URL%/g, buffer.URL)
+            var arg = args.string.replace(/%URL%/g, buffer.URL)
                      .replace(/%TITLE%/g, buffer.title);
 
             if (special && arg.match(/^\+\s*(.*)/))
@@ -237,30 +271,32 @@
         }, {
             bang: true,
             hereDoc: true,
-            completer: function(filter, special){
-                if (!filter || !statuses) return [0,[]];
-                var matches= filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
-                if (!matches) return [0,[]];
+            completer: function(context, args){
+                if (!statuses) return;
+                var matches= context.filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
+                if (!matches) return;
                 var list = [];
                 var [prefix, target] = [matches[1],matches[2]];
                 switch (prefix.charAt(0)){
                     case "+":
                     case "-":
-                        if (!special) return;
+                        if (!args.bang) return;
                     case "@":
-                        if (special)
-                            list = statuses.map(function(entry) [entry.user.id, entry.text]);
+                        context.title = ["ID","Entry"];
+                        if (args.bang)
+                            list = statuses.map(function(entry) ["@" + entry.user.id, entry.text]);
                         else
-                            list = statuses.map(function(entry) [entry.user.id + "#" + entry.id, entry.text]);
+                            list = statuses.map(function(entry) ["@" + entry.user.id + "#" + entry.id, entry.text]);
                         break;
                     case "#":
-                        list = statuses.map(function(entry) [entry.keyword, entry.text]);
+                        context.title = ["Keyword","Entry"];
+                        list = statuses.map(function(entry) ["#" + entry.keyword, entry.text]);
                         break;
                 }
                 if (target){
                     list = list.filter(function($_) $_[0].indexOf(target) >= 0);
                 }
-                return [prefix.length, list];
+                context.completions = list;
             }
         }
     );
