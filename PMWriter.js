@@ -9,6 +9,9 @@ let pluginDirPath = liberator.globalVariables.pmwriter_plugin_dir;
 let outputDir = liberator.globalVariables.pmwriter_output_dir;
 
 (function(){
+  if (!(pluginDirPath && outputDir))
+    return;
+
   let U = liberator.plugins.libly.$U;
 
   let myname = __context__.NAME;
