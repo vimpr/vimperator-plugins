@@ -11,7 +11,7 @@ var PLUGIN_INFO =
   <detail><![CDATA[
 notifier.js 用の通知プラグイン
 OSのプラットフォーム依存の通知なのでプラットフォームによってはうまく動作しない可能性があります。
-MacOSのGrowlが設定されている場合があやしいです。
+Mac OSのGrowlが設定されている場合があやしいです。
 
 == 設定値 ==
 about:config や :set! コマンドでアラートのポップアップ時間等を変更できます。
@@ -19,13 +19,13 @@ about:config や :set! コマンドでアラートのポップアップ時間等
 alerts.slideIncrement:
   ポップアップ時の上昇/下降量(px) (default: 1)
 alerts.slideIncrementTime:
-  ポップアップ時の上昇/下降インターバル(mili sec) (default: 10)
+  ポップアップ時の上昇/下降インターバル(millisec.) (default: 10)
 alerts.totalOpenTime:
-  アラートの表示時間(mili sec) (default: 4000)
-  
+  アラートの表示時間(millisec.) (default: 4000)
+
 == 動作確認済プラットフォーム ==
-- Debian/GNU Linux (Gnome)
-- WindowsXP
+- Debian/GNU Linux (GNOME)
+- Windows XP
 
 == 既知の問題点 ==
 - アラートが連続すると重なってしまう
@@ -38,22 +38,22 @@ alerts.totalOpenTime:
   ]]></detail>
 </VimperatorPlugin>;
 //}}}
-(function() {
+(function(){
 
 var notifier = liberator.plugins.notifier;
-if (!notifier) {
+if (!notifier){
     return;
 }
 
 var libly = notifier.libly;
 var $U = libly.$U;
-var logger = $U.getLogger('observer_alert');
+var logger = $U.getLogger("observer_alert");
 
 const alertService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService);
 const ICON_URL = "chrome://vimperator/skin/icon.png";
 var observer = {
     observe: function(aSubject, aTopic, aData){
-        if(aTopic == "alertclickcallback" && aData){
+        if (aTopic == "alertclickcallback" && aData){
             liberator.open(aData, liberator.NEW_TAB);
         }
     }
@@ -66,7 +66,7 @@ function getAlertWindows(){
 function alertNotify(count, message){
     alertService.showAlertNotification(
         ICON_URL,
-        count + ': ' + message.title,
+        count + ": " + message.title,
         "",
         message.link ? true : false,
         message.link,
@@ -82,35 +82,35 @@ function alertNotify(count, message){
                     .QueryInterface(Ci.nsIInterfaceRequestor)
                     .getInterface(Ci.nsIDOMWindow);
             if (win.arguments[1] == count + ": " + message.title){
-                var box = win.document.getElementById('alertTextBox');
-                var t = box.firstChild;
-                if (box.lastChild.hasAttribute('clickable')){
+                let box = win.document.getElementById("alertTextBox");
+                let t = box.firstChild;
+                if (box.lastChild.hasAttribute("clickable")){
                     t.style.cursor = "pointer";
                     t.style.color = "#1455D6";
                     t.style.textDecoration = "underline";
                 }
-                t.setAttribute('onclick',"onAlertClick();");
+                t.setAttribute("onclick", "onAlertClick();");
                 box.removeChild(box.lastChild);
                 box.appendChild($U.xmlToDom(new XMLList(
-                    '<div xmlns="http://www.w3.org/1999/xhtml" class="alertText plain">'+message.message+'</div>'),
+                    '<div xmlns="http://www.w3.org/1999/xhtml" class="alertText plain">' + message.message + "</div>"),
                     document
                 ));
                 win.onAlertLoad();
                 fixed = true;
             }
         }
-        if (!fixed) setTimeout(arguments.callee,10);
+        if (!fixed) setTimeout(arguments.callee, 10);
     })();
 }
 
 notifier.observer.register(notifier.Observer, {
-    initialize: function () {
+    initialize: function (){
         this.count = 1;
     },
-    update: function(message) {
+    update: function(message){
         alertNotify(this.count, message);
         this.count++;
-    },
+    }
 });
 
 })();
