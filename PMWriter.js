@@ -52,7 +52,6 @@
     let ioService = services.get("io");
     let files = io.readDirectory(pluginDirPath);
     let i = 0;
-    let xml = <></>;
     let xml_index = <></>;
 
     files.forEach(function (file) {
@@ -96,7 +95,16 @@
         }
       }
 
-      xml = template.table(plugin.name, plugin);
+      let xml = <html>
+        <head>
+          <title>{detailFilename}</title>
+          <link rel="stylesheet" href="voqn.css" type="text/css" />
+        </head>
+        <body>
+          {template.table(plugin.name, plugin)}
+        </body>
+      </html>;
+      liberator.log(xml)
       io.writeFile(io.getFile(outputDir + detailFilename), xml.toString());
 
       let link = 'http://vimperator.kurinton.net/' + detailFilename;
@@ -115,46 +123,10 @@
     xml_index = <html>
       <head>
         <title>{title}</title>
-        <style><![CDATA[
-          /* (c) VoQn */
-          * {
-           margin: 0 !important;
-           padding: 0 !important;
-          }
-          h1 {
-           background: black !important;
-           color: white !important;
-           font-family: monospace !important;
-           padding: 0.5em 0 0.1em 0.75em !important;
-          }
-          table {
-           margin: 1em !important;
-           padding: 0.5em !important;
-           border: 1px solid lightgray !important;
-          }
-          th {
-           border-bottom: 1px solid magenta !important;
-           color: magenta !important;
-           text-align: left !important;
-           font-weight: bold !important;
-           font-size: 1.5em !important;
-          }
-          td {
-           padding: 0 3em 0.5em 0 !important;
-          }
-          td.name {
-           font-weight: bold !important;
-           font-size: 1.2em !important;
-          }
-          .hatena-star-comment-container {
-            display: none;
-            padding: 0;
-            margin: 0;
-          }
-        ]]></style>
+        <link rel="stylesheet" href="voqn.css" type="text/css" />
         <script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js"></script>
         <script type="text/javascript">
-        Hatena.Star.Token = '48e8f4c633307a76a4dd923111e22a25e80b6e8a';
+          Hatena.Star.Token = '48e8f4c633307a76a4dd923111e22a25e80b6e8a';
         </script>
         <script type="text/javascript"><![CDATA[
           Hatena.Star.SiteConfig = {
