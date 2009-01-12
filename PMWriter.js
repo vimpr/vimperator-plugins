@@ -110,16 +110,47 @@
       //xml_index += template.table(plugin.name, data);
     });
 
-    let js = "" +
-"";
-    let style = "table {border: solid 1px black; empty-cells: show;}";
     let title = "Vimperator Plugins in CodeRepos";
 
     xml_index = <html>
       <head>
         <title>{title}</title>
         <style><![CDATA[
-          {style}
+          /* (c) VoQn */
+          * {
+           margin: 0 !important;
+           padding: 0 !important;
+          }
+          h1 {
+           background: black !important;
+           color: white !important;
+           font-family: monospace !important;
+           padding: 0.5em 0 0.1em 0.75em !important;
+          }
+          table {
+           margin: 1em !important;
+           padding: 0.5em !important;
+           border: 1px solid lightgray !important;
+          }
+          th {
+           border-bottom: 1px solid magenta !important;
+           color: magenta !important;
+           text-align: left !important;
+           font-weight: bold !important;
+           font-size: 1.5em !important;
+          }
+          td {
+           padding: 0 3em 0.5em 0 !important;
+          }
+          td.name {
+           font-weight: bold !important;
+           font-size: 1.2em !important;
+          }
+          .hatena-star-comment-container {
+            display: none;
+            padding: 0;
+            margin: 0;
+          }
         ]]></style>
         <script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js"></script>
         <script type="text/javascript">
@@ -140,10 +171,10 @@
       <body>
         <h1>{title}</h1>
         <table>
-          <tr>
-            <td>Name</td>
-            <td>Description</td>
-            <td>Author</td>
+          <tr class="header">
+            <th class="name">Name</th>
+            <th class="description">Description</th>
+            <th class="author">Author</th>
           </tr>
           {xml_index}
         </table>
