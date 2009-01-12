@@ -11,7 +11,7 @@ var PLUGIN_INFO =
   <description>Allows you to resize textareas.</description>
   <description lang="ja">テキストエリアをリサイズ可能にする。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0α2</maxVersion>
@@ -120,17 +120,17 @@ TextResizer.prototype = {
     switch (event.keyCode) {
     case KeyEvent.DOM_VK_UP: case KeyEvent.DOM_VK_K:
       if (nodeName == "textarea")
-        this.target.style.height = this.target.clientHeight - 10 + "px";
+        this.target.style.height = this.target.offsetHeight - 10 + "px";
       break;
     case KeyEvent.DOM_VK_DOWN: case KeyEvent.DOM_VK_J:
       if (nodeName == "textarea")
-        this.target.style.height = this.target.clientHeight + 15 + "px";
+        this.target.style.height = this.target.offsetHeight + 10 + "px";
       break;
     case KeyEvent.DOM_VK_LEFT: case KeyEvent.DOM_VK_H:
-      this.target.style.width = this.target.clientWidth - 10 + "px";
+       this.target.style.width = this.target.offsetWidth - 10 + "px";
       break;
     case KeyEvent.DOM_VK_RIGHT: case KeyEvent.DOM_VK_L:
-      this.target.style.width = this.target.clientWidth + 15 + "px";
+      this.target.style.width = this.target.offsetWidth + 10 + "px";
       break;
     case KeyEvent.DOM_VK_RETURN: case KeyEvent.DOM_VK_ENTER: case KeyEvent.DOM_VK_ESCAPE:
       this.target.style.background = this.target.startBgColor;
@@ -166,7 +166,8 @@ commands.addUserCommand(
   true
 );
 
-mappings.add(
+mappings.remove("<A-r>");
+mappings.addUserMap(
   [ modes.INSERT, modes.TEXTAREA ],
   [ "<M-r>", "<A-r>" ],
   "Allows you to resize current textarea.",
