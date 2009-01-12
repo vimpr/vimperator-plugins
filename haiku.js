@@ -7,19 +7,19 @@
 //
 // Commands:
 //  :haiku some thing text
-//      post "some thing text" to keyword 'id:username' on hatena haiku.
+//      post "some thing text" to keyword 'id:username' on Hatena Haiku.
 //  :haiku #keyword some thing text
-//      post "some thing text" to keyword 'id:keyword' on hatena haiku.
+//      post "some thing text" to keyword 'id:keyword' on Hatena Haiku.
 //  :haiku!/
 //      show public timeline.
 //  :haiku! someone
 //      show someone's statuses.
 //  :haiku! album
-//      show aubum timeline.
+//      show album timeline.
 //  :haiku!+ someone
-//      fav someone's last status.. mean put hatena star.
+//      fav someone's last status.. mean put Hatena Star.
 //  :haiku!- someone
-//      un-fav someone's last status.. mean remove hatena star.
+//      un-fav someone's last status.. mean remove Hatena Star.
 //  :haiku! #keyword
 //      show the keyword timeline.
 var PLUGIN_INFO =
@@ -35,19 +35,19 @@ The script allows you to update Haiku status from Vimperator.
 
 == Commands ==
 :haiku some thing text:
-    post "some thing text" to keyword 'id:username' on hatena haiku.
+    post "some thing text" to keyword 'id:username' on Hatena Haiku.
 :haiku #keyword some thing text:
-    post "some thing text" to keyword 'id:keyword' on hatena haiku.
+    post "some thing text" to keyword 'id:keyword' on Hatena Haiku.
 :haiku!/:
     show public timeline.
 :haiku! someone:
     show someone's statuses.
 :haiku! album:
-    show aubum timeline.
+    show album timeline.
 :haiku!+ someone:
-    fav someone's last status.. mean put hatena star.
+    fav someone's last status.. mean put Hatena Star.
 :haiku!- someone:
-    un-fav someone's last status.. mean remove hatena star.
+    un-fav someone's last status.. mean remove Hatena Star.
 :haiku! #keyword:
     show the keyword timeline.
   ]]></detail>
@@ -273,7 +273,7 @@ The script allows you to update Haiku status from Vimperator.
             hereDoc: true,
             completer: function(context, args){
                 if (!statuses) return;
-                var matches= context.filter.match(/^([@#]|[-+]\s*)([^\s]*)$/);
+                var matches= context.filter.match(/^([@#]|[-+]\s*)(\S*)$/);
                 if (!matches) return;
                 var list = [];
                 var [prefix, target] = [matches[1],matches[2]];
