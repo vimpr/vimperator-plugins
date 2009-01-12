@@ -510,7 +510,8 @@ HTMLStack.prototype = {
 };
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
     function(args){
-        liberator.plugins.pluginManager.list(args);
+        var xml = liberator.plugins.pluginManager.list(args, args["-verbose"]);
+        liberator.echo(xml, true);
     }, {
         argCount: '*',
         options: [
@@ -529,9 +530,8 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
         }
     }, true);
 var public = {
-    list: function(args){
+    list: function(args, verbose){
         var names = args;
-        var showDetails = args['-verbose'];
         var check = args['-check'];
         var update = args['-update'];
 
@@ -539,7 +539,7 @@ var public = {
         var plugins = getPlugins();
 
         var action = itemFormater;
-        var params = [showDetails];
+        var params = [verbose];
 
         if (check){
             action = checkVersion;
@@ -557,7 +557,7 @@ var public = {
         } else {
             plugins.forEach(function(plugin) xml += action.apply(this, [plugin].concat(params)));
         }
-        liberator.echo(xml, true);
+        return xml;
     }
 };
 return public;
