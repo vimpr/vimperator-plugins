@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.13</version>
+  <version>0.14</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -126,6 +126,7 @@ TODO
    ・isValid とは別にプレイヤーの準備が出来ているか？などをチェックできる関数があるほうがいいかも
       -> isValid ってなまえはどうなの？
       -> isReady とか
+   ・パネルなどの要素にクラス名をつける
 
 MEMO
    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
@@ -234,6 +235,9 @@ Thanks:
         return Math.round(parseFloat(m[1], 10) * 60);
       return parseInt(code, 10);
     },
+
+    getElementById: function (id)
+      content.document.getElementById(id),
 
     getElementByIdEx: function (id)
       let (p = content.document.getElementById(id))
@@ -575,6 +579,19 @@ Thanks:
 
   YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
 
+  YouTubePlayer.OUTER_NODES = [
+    'old-masthead',
+    'watch-vid-title',
+    'watch-other-vids',
+    'old-footer',
+    'copyright',
+    'watch-main-area',
+    'watch-comments-stats',
+    'watch-video-response',
+    'chrome-promo',
+    'watch-video-quality-setting',
+  ];
+
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,
 
@@ -608,8 +625,26 @@ Thanks:
 
     get fullscreen () this.storage.fullscreen,
     // FIXME - うまく元に戻らないことがある？
-    set fullscreen () {
-      this.storage.fullscreen = !this.storage.fullscreen;
+    set fullscreen (value) {
+      function changeOuterNodes (hide) {
+        return;
+        const st = {display: 'none'};
+        let f = hide ? function (node) U.storeStyle(node, st)
+                     : function (node) U.restoreStyle(node);
+        YouTubePlayer.OUTER_NODES.forEach(
+          function (id) {
+            let (node = U.getElementById(id)) {
+              liberator.log(node)
+              node && f(node);
+            }
+          }
+        );
+      }
+
+      this.storage.fullscreen = value;
+
+      // changeOuterNodes(value);
+
       let p = this.player;
       let r = p.getBoundingClientRect();
       if (this.fullscreen) {
@@ -632,8 +667,7 @@ Thanks:
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
     get player ()
-      let (p = content.document.getElementById('movie_player'))
-        (p && (p.wrappedJSObject || p)),
+      U.getElementByIdEx('movie_player'),
 
     get relatedIDs () {
       let result = [];
@@ -765,8 +799,6 @@ Thanks:
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
 
-    get playerContainer () U.getElementByIdEx('flvplayer_container'),
-
     get currentTime () parseInt(this.player.ext_getPlayheadTime()),
     set currentTime (value) (this.player.ext_setPlayheadTime(U.fromTimeCode(value)), this.currentTime),
 
@@ -867,6 +899,8 @@ Thanks:
     set muted (value) (this.player.ext_setMute(value), value),
 
     get player () U.getElementByIdEx('flvplayer'),
+
+    get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get relatedIDs () {
       if (this.__rid_last_url == U.currentURL())
@@ -1424,7 +1458,26 @@ Thanks:
     onRepeatClick: function () this.player.toggle('repeating'),
 
     onRelationsRootPopupshowing: function () {
-      /* build */
+      let self = this;
+
+      function clickEvent (cmd)
+        function () liberator.open(makeRelationURL(self.player, cmd));
+
+      if (!this.player)
+        return;
+
+      let relmenu = document.getElementById('anekos-stela-relations-menupopup');
+      let rels = this.player.relations;
+
+      rels.forEach(function (rel) {
+        let elem = document.createElement('menuitem');
+        let prefix = rel instanceof RelatedID  ? 'ID: ' :
+                     rel instanceof RelatedTag ? 'Tag: ' :
+                     '';
+        elem.setAttribute('label', prefix + rel.description);
+        elem.addEventListener('click', clickEvent(rel.command), false);
+        relmenu.appendChild(elem);
+      }, this);
     },
 
     onResize: function () {
