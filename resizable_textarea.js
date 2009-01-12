@@ -166,8 +166,7 @@ commands.addUserCommand(
   true
 );
 
-mappings.remove("<A-r>");
-mappings.addUserMap(
+mappings.add(
   [ modes.INSERT, modes.TEXTAREA ],
   [ "<M-r>", "<A-r>" ],
   "Allows you to resize current textarea.",
