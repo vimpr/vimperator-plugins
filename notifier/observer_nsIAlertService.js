@@ -8,6 +8,7 @@ var PLUGIN_INFO =
   <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier/observer_nsIAlertService.js</updateURL>
   <detail><![CDATA[
 notifier.js 用の通知プラグイン
 OSのプラットフォーム依存の通知なのでプラットフォームによってはうまく動作しない可能性があります。
