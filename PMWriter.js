@@ -7,8 +7,11 @@
 
 
 (function(){
+  const U = liberator.plugins.libly.$U;
+
   let pluginDirPath = liberator.globalVariables.pmwriter_plugin_dir;
   let outputDir = liberator.globalVariables.pmwriter_output_dir;
+
 
   if (!(pluginDirPath && outputDir))
     return;
@@ -26,22 +29,44 @@
     teramako:         'http://d.hatena.ne.jp/teramako/',
   };
 
+  if (!liberator.plugins.pmwriter)
+    liberator.plugins.pmwriter = {};
+
+  // make を改造
+  {
+    let makeLink = liberator.eval('makeLink', liberator.plugins.pluginManager.list);
+    if (!liberator.plugins.pmwriter.makeLink) {
+      liberator.plugins.pmwriter.makeLink = function (str) makeLink(str, true);
+      liberator.eval('makeLink = liberator.plugins.pmwriter.makeLink ', liberator.plugins.pluginManager.list);
+    }
+    let WikiParser = liberator.eval('WikiParser', liberator.plugins.pluginManager.list);
+    WikiParser.prototype.inlineParse = function (str) {
+      function replacer(_, s)
+        ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[s] ||
+        '<a href="' + s + '" highlight="URL">' + s + '</a>';
+      try {
+        return XMLList(str.replace(/(>|<|&|(?:https?:\/\/|mailto:)\S+)/g, replacer));
+      } catch (e) {
+        return XMLList(str);
+      }
+    };
+  }
 
   function action () {
 
-    liberator.plugins.pmwriter = {};
-    let U = liberator.plugins.libly.$U;
+    const IOService = services.get('io');
+    const DOCUMENT_TITLE = 'Vimperator Plugins in CodeRepos';
+    const CodeRepos = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/';
+
+    function Context (file) {
+      this.NAME = file.leafName.replace(/\..*/, '')
+                      .replace(/-([a-z])/g, function (m, n1) n1.toUpperCase());
+    };
 
     let myname = __context__.NAME;
 
     let otags = liberator.eval('tags', liberator.plugins.pluginManager.list);
     let template = liberator.eval('template', liberator.plugins.pluginManager.list);
-
-    // makeLink を無理矢理修正
-    let makeLink = liberator.eval('makeLink', liberator.plugins.pluginManager.list);
-    liberator.plugins.pmwriter.makeLink = function (str) makeLink(str, true);
-    liberator.log(makeLink)
-    liberator.eval('makeLink = liberator.plugins.pmwriter.makeLink ', liberator.plugins.pluginManager.list);
 
     let linkTo;
     let tags = {
@@ -49,90 +74,104 @@
       name: function () <a href={linkTo}>{otags.name.apply(otags, arguments)}</a>
     };
 
-    let ioService = services.get("io");
     let files = io.readDirectory(pluginDirPath);
-    let i = 0;
-    let xml_index = <></>;
+    let indexHtml = <></>;
 
     files.forEach(function (file) {
       if (!/\.js$/.test(file.path))
         return;
-      let src = io.readFile(file.path);
-      if (!/PLUGIN_INFO/.test(src))
+
+      if (!/PLUGIN_INFO/.test(io.readFile(file.path)))
         return;
-      //if (i++ > 0) return;
 
-      let uri = ioService.newFileURI(file);
-
-      function Context (file) {
-        this.NAME = file.leafName.replace(/\..*/, "").replace(/-([a-z])/g, function (m, n1) n1.toUpperCase());
-      };
       let context = new Context(file);
-      let PLUGIN_INFO;
-      let detailFilename = context.NAME + '.html';
+      let pluginName = file.leafName.replace(/\..*$/, '');
+      let pluginFilename = file.leafName;
 
       if (context.NAME == myname)
         return;
 
-      context.watch('PLUGIN_INFO', function (n,N,O) { PLUGIN_INFO = O; throw 'STOP';});
+      let pluginInfo;
+      let htmlFilename = pluginName + '.html';
 
-      try { services.get("subscriptLoader").loadSubScript(uri.spec, context); } catch (e) {}
+      context.watch('PLUGIN_INFO', function (n, O, N) { pluginInfo = N; throw 'STOP';});
 
-      let info = PLUGIN_INFO;
+      try {
+        services.get("subscriptLoader").loadSubScript(IOService.newFileURI(file).spec, context);
+      } catch (e) {
+        /* DO NOTHING */
+      }
+
       tags.name = function () <a href={linkTo}>{otags.name.apply(otags, arguments)}</a>;
 
-      let plugin = [ ];
-      plugin['name'] = context.NAME;
-      plugin['info'] = {};
-      plugin['orgInfo'] = {};
+      let plugin = [];
+      let (info = pluginInfo) {
+        plugin['name'] = pluginName;
+        plugin['info'] = {};
+        plugin['orgInfo'] = {};
 
-      for (let tag in tags){
-        plugin.orgInfo[tag] = info[tag];
-        let value = tags[tag](info);
-        if (value && value.toString().length > 0){
-          plugin.push([tag, value]);
-          plugin.info[tag] = value;
+        for (let tag in tags){
+          plugin.orgInfo[tag] = info[tag];
+          let value = tags[tag](info);
+          if (value && value.toString().length > 0){
+            plugin.push([tag, value]);
+            plugin.info[tag] = value;
+          }
         }
       }
 
-      let xml = <html>
-        <head>
-          <title>{detailFilename}</title>
-          <link rel="stylesheet" href="voqn.css" type="text/css" />
-        </head>
-        <body>
-          {template.table(plugin.name, plugin)}
-        </body>
-      </html>;
-      liberator.log(xml)
-      io.writeFile(io.getFile(outputDir + detailFilename), xml.toString());
+      // プラグイン毎のドキュメント
+      io.writeFile(
+        io.getFile(outputDir + htmlFilename),
+        <html>
+          <head>
+            <title>{pluginName}</title>
+            <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+          </head>
+          <body>
+            {template.table(plugin.name, plugin)}
+          </body>
+        </html>.toString()
+      );
 
-      let link = 'http://vimperator.kurinton.net/' + detailFilename;
-      let alink = AUTHORS[info.author];
-      let data = plugin.filter(function($_) /name|description|author/.test($_[0]));
-      xml_index += <tr class="plugin">
-        <td class="name"><a href={link} class="link">{plugin.name}</a></td>
-        <td class="description">{plugin.info.description}</td>
-        <td class="author"><a href={alink}>{info.author}</a></td>
-      </tr>
-      //xml_index += template.table(plugin.name, data);
+      // index.html
+      {
+        indexHtml += <tr class="plugin">
+          <td class="name">
+            <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
+            <a href={htmlFilename} class="link">{plugin.name}</a>
+          </td>
+          <td class="description">
+            {plugin.info.description}
+          </td>
+          <td class="author">
+            <a href={AUTHORS[pluginInfo.author]}>{pluginInfo.author.toString()}</a>
+          </td>
+        </tr>
+      }
     });
 
-    let title = "Vimperator Plugins in CodeRepos";
-
-    xml_index = <html>
+    indexHtml = <html>
       <head>
-        <title>{title}</title>
+        <title>{DOCUMENT_TITLE}</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
         <link rel="stylesheet" href="voqn.css" type="text/css" />
-        <script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js"></script>
+        <script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js" />
         <script type="text/javascript">
           Hatena.Star.Token = '48e8f4c633307a76a4dd923111e22a25e80b6e8a';
         </script>
+        <style><![CDATA[
+          .hatena-star-comment-container {
+            display: none;
+            padding: 0;
+            margin: 0;
+          }
+        ]]></style>
         <script type="text/javascript"><![CDATA[
           Hatena.Star.SiteConfig = {
             entryNodes: {
               'tr': {
-                uri: "a.link",
+                uri: 'a.coderepos',
                 title: 'td.name',
                 container: 'td.name'
               }
@@ -148,12 +187,12 @@
             <th class="description">Description</th>
             <th class="author">Author</th>
           </tr>
-          {xml_index}
+          {indexHtml}
         </table>
       </body>
     </html>;
 
-    io.writeFile(io.getFile(outputDir + 'index.html'), xml_index.toString());
+    io.writeFile(io.getFile(outputDir + 'index.html'), indexHtml.toString());
   }
 
   commands.addUserCommand(
