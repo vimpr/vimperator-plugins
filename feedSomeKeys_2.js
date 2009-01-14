@@ -1,56 +1,72 @@
-/**
- * ==VimperatorPlugin==
- * @name           feedSomeKeys 2
- * @description    feed some defined key events into the Web content
- * @description-ja 定義したkeyイベントをWebページ側へ送ってあげます
- * @author         teramako teramako@gmail.com
- * @version        2.0a
- * ==/VimperatorPlugin==
- *
- * 英語での説明を放棄する
- *
- * XXX: feedSomeKeys.js の改良版仕様を変更したのでフォーク
- *
- * keyイベント(正確にはkepressイベント)をWebコンテンツ側へ送る事を可能にするプラグイン
- * Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場合に活躍するでしょう。
- * それ以外の場面ではむしろ邪魔になる諸刃の剣
- *
- * :f[eed]map lhs [...]             -> lhsのキーマップをそのままWebコンテンツへ
- * :f[eed]map lhs,[num]rhs [...]    -> lhsのキーマップをrhsへ変換してWebコンテンツへ
- *                                     [num]はフレームの番号(省略時はトップウィンドウへイベントが送られる)
- * :f[eed]map -d[epth] {num} ...    -> {num}はフレームの番号で :fmap lhs1,{num}rhs1 lhs2,{num}rhs2 ... と同等
- *                                     Gmailの例を参照
- * :f[eed]map -v[key] ....          -> 仮想キーコードでイベントを送るように
- *
- * :fmapc
- * :feedmapclear            -> 全てを無に帰して元に戻す
- *
- * :f[eed]map! lhs ...      -> "!" をつけると、一旦すべてのfeedKeysを元に戻しての再定義
- *
- * autocmdと組み合わせる場合は
- * :autocmd LocationChange .* :fmapc
- * を最初に登録してください。でないと対象外のページに移ったときに設定が前のものを引きずることになります。
- *
- * また、下記設定例はvimperator 2.0pre用で1.2の場合は\を一つに削ってください。
- *
- * == LDR の場合 ==
- * :autocmd LocationChange .* :fmapc
- * :autocmd LocationChange reader\\.livedoor\\.com/reader :fmap j k s a p o v c <Space> <S-Space> z b < >
- *
- * とかやると幸せになれるかも。
- *
- * == Gmail の場合 ==
- * :autocmd LocationChange .* :fmapc
- * :autocmd LocationChange mail\\.google\\.com/mail :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
- *
- * とかやると幸せになれるかもしれません。
- *
- * == Google Reader の場合 ==
- * :autocmd LocationChange .* :fmapc
- * :autocmd LocationChange www\\.google\\.co\\.jp/reader :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
- *
- * Greasemonkey LDRizeの場合などにも使用可
- */
+var PLUGIN_INFO=
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>feed some defined key events into the Web content</description>
+<description lang="ja">定義したkeyイベントをWebページへ送ってあげる</description>
+<version>2.1</version>
+<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
+<minVersion>2.0a1</minVersion>
+<maxVersion>2.0</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_2.js</updateURL>
+<detail lang="ja"><![CDATA[
+== 概要 ==
+keyイベント(正確にはkepressイベント)をWebコンテンツ側へ送る事を可能にするプラグイン
+Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場合に活躍するでしょう。
+それ以外の場面ではむしろ邪魔になる諸刃の剣
+
+== Commands ==
+:f[eed]map lhs [...]:
+    lhsのキーマップをそのままWebコンテンツへ
+
+:f[eed]map lhs,[num]rhs [...]:
+    lhsのキーマップをrhsへ変換してWebコンテンツへ
+    [num]はフレームの番号(省略時はトップウィンドウへイベントが送られる)
+
+:f[eed]map -d[epth] {num} ...:
+    {num}はフレームの番号で :fmap lhs1,{num}rhs1 lhs2,{num}rhs2 ... と同等
+    Gmailの例を参照
+
+:f[eed]map -v[key] ....
+    仮想キーコードでイベントを送るように
+
+:fmapc:
+:feedmapclear:
+    全てを無に帰して元に戻す
+
+:f[eed]map! lhs ...:
+    "!" をつけると、一旦すべてのfeedKeysを元に戻しての再定義
+
+== autocmdと組み合わせる場合 ==
+>||
+:autocmd LocationChange .* :fmapc
+||<
+を最初に登録してください。でないと対象外のページに移ったときに設定が前のものを引きずることになります。
+
+== 用例 ==
+最初に登録すべき
+>||
+:autocmd LocationChange .* :fmapc
+||<
+は省略
+
+=== LDR の場合 ===
+>||
+:autocmd LocationChange reader\\.livedoor\\.com/reader :fmap j k s a p o v c <Space> <S-Space> z b < >
+||<
+
+=== Gmail の場合 ===
+>||
+:autocmd LocationChange mail\\.google\\.com/mail :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+||<
+
+=== Google Reader の場合 ===
+>||
+:autocmd LocationChange www\\.google\\.co\\.jp/reader :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
+||<
+
+Greasemonkey LDRizeの場合などにも使用可
+]]></detail>
+</VimperatorPlugin>;
 
 liberator.plugins.feedKey = (function(){
 var origMaps = [];
