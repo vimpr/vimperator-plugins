@@ -96,7 +96,7 @@ liberator.plugins.pluginManager = (function(){
 
 function id(value) value;
 var lang = window.navigator.language;
-var tags = {
+var tags = { // {{{
     name: function(info) fromUTF8Octets(info.toString()),
     author: function(info){
         var name = fromUTF8Octets(info.toString());
@@ -127,7 +127,8 @@ var tags = {
         var xml = parser.parse();
         return xml;
     }
-};
+}; // }}}
+
 function chooseByLang(elems){
     if (!elems)
         return null;
@@ -158,158 +159,188 @@ function fromUTF8Octets(octets){
         return '%' + c.charCodeAt(0).toString(16);
     }));
 }
-function getPlugins(){
-    var list = [];
+// --------------------------------------------------------
+// Plugin
+// -----------------------------------------------------{{{
+var plugins = [];
+function getPlugins(reload){
+    if (plugins.length > 0 && !reload){
+        return plugins;
+    }
+    plugins = [];
     var contexts = liberator.plugins.contexts;
     for (let path in contexts){
         let context = contexts[path];
-        let info = context.PLUGIN_INFO || null;
-        let plugin = [
-            ['path', path]
+        plugins.push(new Plugin(path, context));
+    }
+    return plugins;
+}
+function Plugin() { this.initialize.apply(this, arguments); }
+Plugin.prototype = { // {{{
+    initialize: function(path, context){
+        this.path = path;
+        this.name = context.NAME;
+        this.info = context.PLUGIN_INFO || {};
+    },
+    getItems: function(){
+        if (this.items) return this.items;
+        this.items = {};
+        for (let tag in tags){
+            if (tag == "detail") continue;
+            let xml = this.info[tag];
+            let value = tags[tag](this.info);
+            if (value && value.toString().length > 0)
+                this.items[tag] = value;
+        }
+        return this.items;
+    },
+    getDetail: function(){
+        if (this.detail)
+            return this.detail;
+        else if (!this.info || !this.info.detail)
+            return null;
+
+        return this.detail = tags['detail'](this.info);
+    },
+    itemFormatter: function(showDetail){
+        let data = [
+            ["path", this.path]
         ];
-        plugin['name'] = context.NAME;
-        plugin['info'] = {};
-        plugin['orgInfo'] = {};
-        if (info){
-            for (let tag in tags){
-                plugin.orgInfo[tag] = info[tag];
-                let value = tags[tag](info);
-                if (value && value.toString().length > 0){
-                    plugin.push([tag, value]);
-                    plugin.info[tag] = value;
-                }
-            }
+        let items = this.getItems();
+        for (let name in items){
+            data.push([name, items[name]]);
         }
-        list.push(plugin);
-    }
-    return list;
-}
-function itemFormater(plugin, showDetails){
-    if (showDetails)
-        return template.table(plugin.name, plugin);
+        if (showDetail && this.getDetail())
+            data.push(["detail", this.getDetail()]);
 
-    var data = plugin.filter(function($_) $_[0] != 'detail');
-    return template.table(plugin.name, data);
-}
-function checkVersion(plugin){
-    return updatePlugin(plugin, true);
-}
-function updatePlugin(plugin, checkOnly){
-    var [localResource, serverResource, store] = getResourceInfo(plugin);
-    var localDate = Date.parse(localResource['Last-Modified']) || 0;
-    var serverDate = Date.parse(serverResource.headers['Last-Modified']) || 0;
+        return template.table(this.name, data);
+    },
+    checkVersion: function(){
+        return this.updatePlugin(true);
+    },
+    updatePlugin: function(checkOnly){ //{{{
+        var [localResource, serverResource, store] = this.getResourceInfo();
+        var localDate = Date.parse(localResource['Last-Modified']) || 0;
+        var serverDate = Date.parse(serverResource.headers['Last-Modified']) || 0;
 
-    var data = {
-        'Local Version': plugin.info.version || 'unknown',
-        'Local Last-Modified': localResource['Last-Modified'] || 'unkonwn',
-        'Local Path': plugin[0][1] || 'unknown',
-        'Server Latest Version': serverResource.version || 'unknown',
-        'Server Last-Modified': serverResource.headers['Last-Modified'] || 'unknown',
-        'Update URL': plugin.info.updateURL || '-'
-    };
-
-    if (checkOnly) return template.table(plugin.name, data);
-
-    if (!plugin.info.version || !serverResource.version){
-        data.Information = '<span style="font-weight: bold;">unknown version.</span>';
-    } else if (plugin.info.version == serverResource.version &&
-               localResource['Last-Modified'] == serverResource.headers['Last-Modified']){
-        data.Information = 'up to date.';
-    } else if (compVersion(plugin.info.version, serverResource.version) > 0 ||
-               localDate > serverDate){
-        data.information = '<span highlight="WarningMsg">local version is newest.</span>';
-    } else {
-        data.Information = overwritePlugin(plugin, serverResource);
-        localResource = {}; // cleanup pref.
-        localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
-        store.set(plugin.name, localResource);
-        store.save();
-    }
-    return template.table(plugin.name, data);
-}
-function compVersion(a, b){
-    a = (a || '').split('.');
-    b = (b || '').split('.');
-    if (!a.length && b.length) return -1;
-    if (a.length && !b.length) return 1;
-    for (let [i, bv] in Iterator(b)) {
-        var av = i < a.length ? a[i] : 0;
-        if (av == bv) continue;
-        if (!isNaN(av) && !isNaN(bv)) {
-            av = parseInt(av);
-            bv = parseInt(bv);
-        }
-        return av < bv ? -1 : 1;
-    }
-    return 0;
-}
-function getResourceInfo(plugin){
-    var store = storage.newMap('plugins-pluginManager', true);
-    var url = plugin.info.updateURL;
-    var localResource = store.get(plugin.name) || {};
-    var serverResource = {
-            version: '',
-            source: '',
-            headers: {}
+        var data = {
+            'Local Version': this.info.version || 'unknown',
+            'Local Last-Modified': localResource['Last-Modified'] || 'unkonwn',
+            'Local Path': this.path || 'unknown',
+            'Server Latest Version': serverResource.version || 'unknown',
+            'Server Last-Modified': serverResource.headers['Last-Modified'] || 'unknown',
+            'Update URL': this.info.updateURL || '-'
         };
 
-    if (url){
-        let xhr = util.httpGet(url);
-        let version = '';
-        let source = xhr.responseText || '';
-        let headers = {};
-        try {
-            xhr.getAllResponseHeaders().split(/\r?\n/).forEach(function(h){
-                var pair = h.split(': ');
-                if (pair && pair.length > 1) {
-                    headers[pair.shift()] = pair.join('');
-                }
-            });
-        } catch(e){}
-        let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
-        if (m){
-            m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
-            m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
-            if (m){
-                version = m[1];
-            }
+        if (checkOnly) return template.table(this.name, data);
+
+        if (!this.info.version || !serverResource.version){
+            data.Information = '<span style="font-weight: bold;">unknown version.</span>';
+        } else if (this.info.version == serverResource.version &&
+                   localResource['Last-Modified'] == serverResource.headers['Last-Modified']){
+            data.Information = 'up to date.';
+        } else if (this.compVersion(this.info.version, serverResource.version) > 0 ||
+                   localDate > serverDate){
+            data.information = '<span highlight="WarningMsg">local version is newest.</span>';
+        } else {
+            data.Information = overwritePlugin(serverResource);
+            localResource = {}; // cleanup pref.
+            localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
+            store.set(this.name, localResource);
+            store.save();
         }
-        serverResource = {version: version, source: source, headers: headers};
+        return template.table(this.name, data);
+    }, // }}}
+    getResourceInfo: function(){
+        var store = storage.newMap('plugins-pluginManager', true);
+        var url = this.info.updateURL;
+        var localResource = store.get(this.name) || {};
+        var serverResource = {
+                version: '',
+                source: '',
+                headers: {}
+            };
+
+        if (url && /^(http|ftp):\/\//.test(url)){
+            let xhr = util.httpGet(url);
+            let version = '';
+            let source = xhr.responseText || '';
+            let headers = {};
+            try {
+                xhr.getAllResponseHeaders().split(/\r?\n/).forEach(function(h){
+                    var pair = h.split(': ');
+                    if (pair && pair.length > 1) {
+                        headers[pair.shift()] = pair.join('');
+                    }
+                });
+            } catch(e){}
+            let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
+            if (m){
+                m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
+                m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
+                if (m){
+                    version = m[1];
+                }
+            }
+            serverResource = {version: version, source: source, headers: headers};
+        }
+
+        if (!localResource['Last-Modified']){
+            localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
+            store.set(this.name, localResource);
+        }
+        return [localResource, serverResource, store];
+    },
+    overwritePlugin: function(serverResource){
+        /*
+        if (!plugin[0] || plugin[0][0] != 'path')
+            return '<span highlight="WarningMsg">plugin localpath was not found.</span>';
+
+        var localpath = plugin[0][1];
+        */
+        var source = serverResource.source;
+        var file = io.getFile(this.path);
+
+        if (!source)
+            return '<span highlight="WarningMsg">source is null.</span>';
+
+        try {
+            io.writeFile(file, source);
+        } catch (e){
+            liberaotr.log('Could not write to ' + file.path + ': ' + e.message);
+            return 'E190: Cannot open ' + filename.quote() + ' for writing';
+        }
+
+        try {
+            io.source(this.path);
+        } catch (e){
+            return e.message;
+        }
+
+        return '<span style="font-weight: bold; color: blue;">update complete.</span>';
+    },
+    compVersion: function(a,  b){
+        a = (a || '').split('.');
+        b = (b || '').split('.');
+        if (!a.length && b.length) return -1;
+        if (a.length && !b.length) return 1;
+        for (let [i, bv] in Iterator(b)) {
+            var av = i < a.length ? a[i] : 0;
+            if (av == bv) continue;
+            if (!isNaN(av) && !isNaN(bv)) {
+                av = parseInt(av);
+                bv = parseInt(bv);
+            }
+            return av < bv ? -1 : 1;
+        }
+        return 0;
     }
+}; // }}}
+// }}}
 
-    if (!localResource['Last-Modified']){
-        localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
-        store.set(plugin.name, localResource);
-    }
-    return [localResource, serverResource, store];
-}
-function overwritePlugin(plugin, serverResource){
-    if (!plugin[0] || plugin[0][0] != 'path')
-        return '<span highlight="WarningMsg">plugin localpath was not found.</span>';
-
-    var source = serverResource.source;
-    var localpath = plugin[0][1];
-    var file = io.getFile(localpath);
-
-    if (!source)
-        return '<span highlight="WarningMsg">source is null.</span>';
-
-    try {
-        io.writeFile(file, source);
-    } catch (e){
-        liberaotr.log('Could not write to ' + file.path + ': ' + e.message);
-        return 'E190: Cannot open ' + filename.quote() + ' for writing';
-    }
-
-    try {
-        io.source(localpath);
-    } catch (e){
-        return e.message;
-    }
-
-    return '<span style="font-weight: bold; color: blue;">update complete.</span>';
-
-}
+// --------------------------------------------------------
+// WikiParser
+// -----------------------------------------------------{{{
 function WikiParser(text){
     this.mode = '';
     this.lines = text.split(/\r\n|[\r\n]/);
@@ -317,7 +348,7 @@ function WikiParser(text){
     this.pendingMode = '';
     this.xmlstack = new HTMLStack();
 }
-WikiParser.prototype = {
+WikiParser.prototype = { // {{{
     inlineParse: function(str){
         function replacer(str)
             ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[str] ||
@@ -370,7 +401,7 @@ WikiParser.prototype = {
         this.mode = '';
         return <>{this.inlineParse(line)}</>;
     }, // }}}
-    parse: function(){
+    parse: function(){ // {{{
         var ite = Iterator(this.lines);
         var num, line, indent;
         var currentIndent = 0, indentList = [0], nest=0;
@@ -433,12 +464,17 @@ WikiParser.prototype = {
         //} catch (e){ alert(num + ':'+ e); }
         this.xmlstack.reorg();
         return this.xmlstack.last;
-    }
-};
+    } // }}}
+}; // }}}
+// End WikiParser }}}
+
+// --------------------------------------------------------
+// HTML Stack
+// -----------------------------------------------------{{{
 function HTMLStack(){
     this.stack = [];
 }
-HTMLStack.prototype = {
+HTMLStack.prototype = { // {{{
     get length() this.stack.length,
     get last() this.stack[this.length-1],
     get lastLocalName() this.last[this.last.length()-1].localName(),
@@ -507,10 +543,22 @@ HTMLStack.prototype = {
         this.push(xml);
         return this.last;
     }
-};
+}; // }}}
+// }}}
+
+// --------------------------------------------------------
+// Vimperator Command
+// -----------------------------------------------------{{{
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
     function(args){
-        var xml = liberator.plugins.pluginManager.list(args, args["-verbose"]);
+        var xml; 
+        if (args["-check"])
+            xml = liberator.plugins.pluginManager.checkVersion(args);
+        else if (args["-update"])
+            xml = liberator.plugins.pluginManager.update(args);
+        else
+            xml = liberator.plugins.pluginManager.list(args, args["-verbose"]);
+
         liberator.echo(xml, true);
     }, {
         argCount: '*',
@@ -528,39 +576,43 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             ]).filter(function(row)
                 row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
-    }, true);
+    }, true); // }}}
+
+// --------------------------------------------------------
+// Public Member (liberator.plugins.pluginManger)
+// -----------------------------------------------------{{{
 var public = {
-    list: function(args, verbose){
-        var names = args;
-        var check = args['-check'];
-        var update = args['-update'];
+    getPlugins: function(names, forceReload){
+        let plugins = getPlugins(forceReload);
+        if (!names || names.length == 0)
+            return plugins;
 
-        var xml = <></>;
-        var plugins = getPlugins();
-
-        var action = itemFormater;
-        var params = [verbose];
-
-        if (check){
-            action = checkVersion;
-        } else if (update){
-            action = updatePlugin;
-        }
-
-        if (names.length){
-            names.forEach(function(name){
-                let plugin = plugins.filter(function(plugin) plugin.name == name)[0];
-                if (plugin){
-                    xml += action.apply(this, [plugin].concat(params));
-                }
-            });
-        } else {
-            plugins.forEach(function(plugin) xml += action.apply(this, [plugin].concat(params)));
-        }
+        return plugins.filter(function(plugin) names.indexOf(plugin.name) >= 0);
+    },
+    checkVersion: function(names){
+        let xml = <></>;
+        this.getPlugins(names).forEach(function(plugin){
+            xml += plugin.checkVersion();
+        });
+        return xml;
+    },
+    update: function(names){
+        let xml = <></>;
+        this.getPlugins(names).forEach(function(plugin){
+            xml += plugin.updatePlugin();
+        });
+        return xml;
+    },
+    list: function(names, verbose){
+        let xml = <></>
+        this.getPlugins(names).forEach(function(plugin){
+            xml += plugin.itemFormatter(verbose);
+        });
         return xml;
     }
 };
 return public;
+// }}}
 })();
 // vim: sw=4 ts=4 et fdm=marker:
 
