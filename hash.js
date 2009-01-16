@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>hash of file</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1</version>
+    <version>0.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hash.js</updateURL>
@@ -19,6 +19,7 @@ hash:
 //}}}
 
 (function() {
+    const Crypt = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
     const PR_UINT_MAX = 0xffffffff;
     const Cc = Components.classes;
     const Ci = Components.interfaces;
@@ -57,15 +58,15 @@ hash:
             let [algo, path] = args;
             let stream = getStream(path);
 
-            let crypt = Cc["@mozilla.org/security/hash;1"]
-                .createInstance(Ci.nsICryptoHash);
-            crypt.initWithString(algo);
+            Crypt.initWithString(algo);
 
             // read the entire stream
-            crypt.updateFromStream(stream, PR_UINT_MAX);
+            Crypt.updateFromStream(stream, PR_UINT_MAX);
+
+            stream.close();
 
             // get base-64 string
-            let hash = crypt.finish(false);
+            let hash = Crypt.finish(false);
 
             // convert the binary hash data to a hex string.
             let str = [toHexString(hash.charCodeAt(i)) for(i in hash)].join("");
