@@ -45,6 +45,7 @@ if (!liberator.plugins.libly) {
 var libly = liberator.plugins.libly;
 var $U = libly.$U;
 var logger = $U.getLogger('nextlink');
+var $H = Cc["@mozilla.org/browser/global-history;2"].getService(Ci.nsIGlobalHistory2);
 
 var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == 'undefined' ?
                    false : $U.eval(liberator.globalVariables.nextlink_followlink);
@@ -355,6 +356,8 @@ Autopager.prototype = {
         p.innerHTML = 'page: <a href="' + reqUrl + '">' + cache.curPage + '</a>';
         p.className = 'vimperator-nextlink-page';
         cache.mark.push(p);
+
+        $H.addURI(makeURI(reqUrl), false, true, makeURI(url));
 
         return page.map(function(elem) {
             var pe = doc.importNode(elem, true);
