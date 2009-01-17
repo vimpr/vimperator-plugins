@@ -19,11 +19,9 @@ hash:
 //}}}
 
 (function() {
-    const Crypt = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
     const PR_UINT_MAX = 0xffffffff;
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
-    const Algos = [
+    let Crypt = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+    let Algos = [
         ["md2", "MD2 Algorithm"],
         ["md5", "MD5 Algorithm"],
         ["sha1", "SHA1 Algorithm"],
