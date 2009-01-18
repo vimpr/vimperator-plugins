@@ -12,14 +12,14 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
-- _libly.js(ver.0.1.15)
+- _libly.js(ver.0.1.20)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
 
 == Option ==
@@ -33,7 +33,6 @@ var PLUGIN_INFO =
   autocmd によって呼び出されます。
 
 == TODO ==
-- 同一URLのページを複数開いている場合のバグフィックス
 - Autopager利用時のMICROFORMATの対応
 
   ]]></detail>
@@ -52,6 +51,7 @@ var $U = libly.$U;
 var logger = $U.getLogger("nextlink");
 var $H = Cc["@mozilla.org/browser/global-history;2"].getService(Ci.nsIGlobalHistory2);
 const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+const UUID = "{3b72c049-a347-4777-96f6-b128fc76ed6a}";
 
 var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "undefined" ?
            false : $U.eval(liberator.globalVariables.nextlink_followlink);
@@ -86,7 +86,6 @@ NextLink.prototype = {
 
     this.initialized = false;
     this.siteinfo = [];
-    this.cache = {}; // {url: {xpath: xpath, next: element, prev: url}} or null
     this.pager = pager;
     this.browserModes = config.browserModes || [ modes.NORMAL, modes.VISUAL ];
     this.is2_0later = config.autocommands.some(function ([ k, v ]) k == "DOMLoad"); // toriaezu
@@ -112,34 +111,23 @@ NextLink.prototype = {
     ];
     */
 
-    getBrowser().addEventListener("DOMContentLoaded",
-      $U.bind(this, function(event) {
-        let win = (event.target.contentDocument || event.target).defaultView;
-        this.onLoad(win);
-      }), false);
     this.customizeMap(this);
   },
-  onLoad: function(win) {
-    if (!this.initialized) return;
-    let doc = win.document;
-    let url = doc.location.href;
-
-    for (let i = 0, len = this.siteinfo.length; i < len; i++) {
-      if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
-        win.addEventListener("unload",
-          $U.bind(this, function() {
-            this.cache[url] = null;
-          }), false);
-        this.setCache(url,
-          [ "xpath", "siteinfo" ],
-          [this.siteinfo[i].nextLink, this.siteinfo[i]]
-        );
+  nextLink: function(count) {
+    var win = window.content;
+    var doc = win.document;
+    var url = doc.location.href;
+    if (!doc[UUID]) {
+      var value = doc[UUID] = {};
+      for (var i = 0, len = this.siteinfo.length; i < len; i++) {
+        if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
+          value.siteinfo = this.siteinfo[i];
+          break;
+        }
       }
     }
-    return this.cache[url];
-  },
-  nextLink: function(count) {
-    this.pager.nextLink(this, count);
+
+    this.pager.nextLink(this, win, doc, count);
   },
   setCache: function(key, subKeys, values) {
     if (!this.cache[key]) this.cache[key] = {};
@@ -162,19 +150,16 @@ NextLink.prototype = {
 
 var Autopager = function() {};//{{{
 Autopager.prototype = {
-  nextLink: function(context, count) {
+  nextLink: function(context, win, doc, count) {
     var self = this;
-    var win = window.content;
-    var doc = win.document;
     var url = doc.location.href;
-    var cache = context.cache[url] || context.onLoad(win);
-    var next;
+    var value = doc[UUID];
 
     // TODO: support MICROFORMAT
     // rel="next", rel="prev"
 
     // no siteinfo, defalut [[, ]] action
-    if (!cache) {
+    if (!value.siteinfo) {
       if (count < 0) {
         buffer.followDocumentRelationship("previous");
       } else {
@@ -199,42 +184,45 @@ Autopager.prototype = {
       return true;
     }
 
-    if (cache.isLoading) {
+    if (value.isLoading) {
       logger.echo("loading now...");
       return;
     }
 
-    next = cache.next;
+    next = value.next;
     if (!next)
-      [ next ] = $U.getNodesFromXPath(cache.xpath, doc);
-    if (!next) {
+      [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, doc);
+    if (!next || value.terminate) {
       logger.echo("end of pages.");
       return;
     }
 
     let reqUrl = $U.pathToURL(next, url, doc);
-    cache.isLoading = true;
+    value.isLoading = true;
     var req = new libly.Request(
                 reqUrl, null,
                 { asynchronous: true, encoding: doc.characterSet,
-                  context: context, url: url }
+                  context: context, url: url,
+                  win: win, doc: doc }
               );
 
-    req.addEventListener("onSuccess", function(res) self.onSuccess(win, doc, res));
-    req.addEventListener("onFailure", function(res) self.onFailure(win, doc, res));
-    req.addEventListener("onException", function(res) self.onFailure(win, doc, res));
+    req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
+    req.addEventListener("onFailure", $U.bind(this, this.onFailure));
+    req.addEventListener("onException", $U.bind(this, this.onFailure));
     req.get();
   },
-  onSuccess: function(win, doc, res) {
+  onSuccess: function(res) {
     var context = res.req.options.context;
     var url = res.req.options.url;
-    var cache = context.cache[url];
-    var page = res.getHTMLDocument(cache.siteinfo.pageElement);
+    var win = res.req.options.win;
+    var doc = res.req.options.doc;
+    var value = doc[UUID];
+    var page = res.getHTMLDocument(value.siteinfo.pageElement);
     var resDoc = res.doc;
-    var [ next ] = $U.getNodesFromXPath(cache.xpath, resDoc);
+    var [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, resDoc);
 
-    cache.next = next;
-    cache.isLoading = false;
+    value.next = next;
+    value.isLoading = false;
 
     if (!page || page.length < 1)
       page = res.getHTMLDocument('//*[contains(@class, "autopagerize_page_element")]');
@@ -244,14 +232,13 @@ Autopager.prototype = {
     var addPage = this.getPageNum() + 1;
     this.addPage(context, doc, resDoc, page, res.req.url, addPage);
     this.focusPagenavi(win, doc, addPage);
-    context.setCache(doc, "isLoading", false);
   },
   addPage: function(context, doc, resDoc, page, reqUrl, addPage) {
     var url = doc.location.href;
-    var cache = context.cache[url];
-    if(!cache.insertPoint)
-      cache.insertPoint = this.getInsertPoint(doc, cache.siteinfo);
-    var insertPoint = cache.insertPoint;
+    var value = doc[UUID];
+    if(!value.insertPoint)
+      value.insertPoint = this.getInsertPoint(doc, value.siteinfo);
+    var insertPoint = value.insertPoint;
 
     var p = doc.createElementNS(HTML_NAMESPACE, "p");
     var tagName;
@@ -294,14 +281,16 @@ Autopager.prototype = {
       return pe;
     });
   },
-  onFailure: function(win, doc, res) {
+  onFailure: function(res) {
     logger.log("onFailure");
     var context = res.req.options.context;
     var url = res.req.options.url;
-    var cache = context.cache[url];
-    cache.isLoading = false;
+    var win = res.req.options.win;
+    var doc = res.req.options.doc;
+    var value = doc[UUID];
+    value.isLoading = false;
     logger.echoerr("nextlink: loading failed. " + "[" + res.status + "]" + res.statusText + " > " + res.req.url);
-    res.req.options.context.setCache(res.req.options.url, "terminate", cache.curPage);
+    value.terminate = true;
   },
   focusPagenavi: function(win, doc, page) {
     var xpath = '//*[@id="vimperator-nextlink-' + page + '"]';
@@ -346,28 +335,14 @@ Autopager.prototype = {
         lastPageElement.parentNode.appendChild(doc.createTextNode(" "));
     return insertPoint;
   },
-  setValue: function(doc, id, value) {
-    var realID = "vimperator-nextlink-value-" + id;
-    var [ input ] = doc.getElementById(realID);
-    if (!input)
-      input = doc.createElementNS(HTML_NAMESPACE, "input");
-    input.value = value;
-  },
-  getValue: function(doc, id) {
-    var realID = "vimperator-nextlink-value-" + id;
-    var [ input ] = doc.getElementById(realID);
-    if (!input) return false;
-    return input.value;
-  }
 };
 //}}}
 
 var FollowLink = function() {};//{{{
 FollowLink.prototype = {
-  nextLink: function(context, count) {
-    var win = window.content;
-    var doc = win.document;
+  nextLink: function(context, win, doc, count) {
     var url = doc.location.href;
+    var value = doc[UUID];
 
     function followXPath(xpath) {
       var [ elem ] = $U.getNodesFromXPath(xpath, doc);
@@ -395,8 +370,7 @@ FollowLink.prototype = {
         .join(" | ");
       if (followXPath(xpath)) return;
 
-      let cache = context.cache[url] || context.onLoad(win);
-      if (cache && followXPath(cache.xpath)) return;
+      if (value.siteinfo && followXPath(value.siteinfo.nextLink)) return;
       buffer.followDocumentRelationship("next");
     }
   }
