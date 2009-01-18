@@ -11,7 +11,7 @@ var PLUGIN_INFO =
   <description>request, and the result is displayed to the buffer.</description>
   <description lang="ja">リクエストの結果をバッファに出力する。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.4.11</version>
+  <version>0.4.12</version>
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -58,13 +58,13 @@ liberator.globalVariables.multi_requester_siteinfo = [
     bang:           true,               // optional:
     args:           "any"               // optional:
     name:           "ex",               // required: subcommand name
-    description:    "example",            // required: commandline short help
+    description:    "example",          // required: commandline short help
     url:            "http://example.com/?%s",     // required: %s <-- replace string
     xpath:          "//*",              // optional: default all
-    srcEncode:      "SHIFT_JIS",          // optional: default UTF-8
-    urlEncode:      "SHIFT_JIS",          // optional: default srcEncode
+    srcEncode:      "SHIFT_JIS",        // optional: default UTF-8
+    urlEncode:      "SHIFT_JIS",        // optional: default srcEncode
     ignoreTags:     "img",              // optional: default script, syntax "tag1,tag2,……"
-    extractLink:    "//xpath"             // optional: extract permalink
+    extractLink:    "//xpath"           // optional: extract permalink
   },
 ];
 EOM
@@ -89,6 +89,16 @@ EOM
 >||
 let g:multi_requester_use_wedata = "false"       // true by default
 ||<
+wedata を利用しない場合は false を設定してください。
+>||
+let g:multi_requester_default_sites = 'alc';
+||<
+subcommand を省略した場合に利用されるサイトを設定します。
+>||
+let g:multi_requester_order = 'count'; // date by default
+||<
+補完の順番を設定します。(大きい順に並びます)
+"count" または "date" を設定してください。
 
    ]]></detail>
 </VimperatorPlugin>;
@@ -121,6 +131,7 @@ var libly = liberator.plugins.libly;
 var $U = libly.$U;
 var logger = $U.getLogger("multi_requester");
 var mergedSiteinfo = {};
+var store = storage.newMap('plugins-multi_requester', true);
 //}}}
 
 // Vimperator plugin command register {{{
@@ -135,10 +146,15 @@ var CommandRegister = {
       {
         completer: cmdClass.cmdCompleter || function(context, arg) {
           context.title = [ "Name", "Descprition" ];
+          var sorted = siteinfo.sort(function(a, b)
+                         typeof liberator.globalVariables.multi_requester_order == "undefined" ||
+                         liberator.globalVariables.multi_requester_order == "date" ? store.get(b.name).lastPostTime - store.get(a.name).lastPostTime :
+                         liberator.globalVariables.multi_requester_order == "count" ? store.get(b.name).count - store.get(a.name).count :
+                         store.get(b.name).lastPostTime - store.get(a.name).lastPostTime);
           var filters = context.filter.split(",");
           var prefilters = filters.slice(0, filters.length - 1);
           var prefilter = !prefilters.length ? "" : prefilters.join(",") + ",";
-          var subfilters = siteinfo.filter(function(s) prefilters.every(function(p) s.name != p));
+          var subfilters = sorted.filter(function(s) prefilters.every(function(p) s.name != p));
           var allSuggestions = subfilters.map(function(s) [prefilter + s.name, s.description]);
           context.completions = context.filter
             ? allSuggestions.filter(function(s) s[0].indexOf(context.filter) == 0)
@@ -206,6 +222,10 @@ var DataAccess = {
       liberator.globalVariables.multi_requester_siteinfo.forEach(function(site) {
         if (!mergedSiteinfo[site.name]) mergedSiteinfo[site.name] = {};
         $U.extend(mergedSiteinfo[site.name], site);
+        if (!store.get(site.name)) {
+            store.set(site.name, { count: 0, lastPostTime: (new Date()).getTime() });
+            store.save();
+        }
         if (site.map) {
           CommandRegister.addUserMaps(MultiRequester.name[0],
             [[ site.map, site.name, site.bang, site.args ]]);
@@ -216,6 +236,10 @@ var DataAccess = {
     SITEINFO.forEach(function(site) {
       if (!mergedSiteinfo[site.name]) mergedSiteinfo[site.name] = {};
       $U.extend(mergedSiteinfo[site.name], site);
+      if (!store.get(site.name)) {
+        store.set(site.name, { count: 0, lastPostTime: (new Date()).getTime() });
+        store.save();
+      }
       if (site.map) {
         CommandRegister.addUserMaps(MultiRequester.name[0],
           [[ site.map, site.name, site.bang, site.args ]]);
@@ -231,6 +255,10 @@ var DataAccess = {
           if (mergedSiteinfo[site.name]) return;
           mergedSiteinfo[site.name] = {};
           $U.extend(mergedSiteinfo[site.name], site);
+          if (!store.get(site.name)) {
+            store.set(site.name, { count: 0, lastPostTime: (new Date()).getTime() });
+            store.save();
+          }
         },
         function(isSuccess, data) {
           if (!isSuccess) return;
@@ -273,7 +301,12 @@ var MultiRequester = {
       let info = siteinfo[i];
       let name = info.name;
 
-      logger.log(name);
+      let history = store.get(name);
+      history.count++;
+      history.lastPostTime = (new Date()).getTime();
+      store.set(name, history);
+      store.save();
+
       let url = info.url;
       // see: http://fifnel.com/2008/11/14/1980/
       let srcEncode = info.srcEncode || "UTF-8";
@@ -398,7 +431,7 @@ var MultiRequester = {
       extractLink = res.req.options.siteinfo.extractLink;
 
       if (extractLink && !res.req.options.extractLink) {
-        this.extractLink(res, extractLink);
+        this.extractLink(res, extractLink).getCommand();
         return;
       }
       ignoreTags = [ "script" ].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
@@ -462,5 +495,5 @@ if (liberator.globalVariables.multi_requester_mappings) {
 return MultiRequester;
 
 })();
-// vim: set fdm=marker sw=4 ts=4 sts=0 et:
+// vim: set fdm=marker sw=2 ts=2 sts=0 et:
 
