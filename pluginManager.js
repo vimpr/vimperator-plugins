@@ -180,7 +180,8 @@ Plugin.prototype = { // {{{
     initialize: function(path, context){
         this.path = path;
         this.name = context.NAME;
-        this.info = context.PLUGIN_INFO || {};
+        this.info = context.PLUGIN_INFO || <></>;
+        this.getItems();
     },
     getItems: function(){
         if (this.items) return this.items;
@@ -571,8 +572,8 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             context.title = ['PluginName', '[Version]Description'];
             context.completions = getPlugins().map(function(plugin) [
                 plugin.name,
-                '[' + (plugin.info.version || 'unknown') + ']' +
-                (plugin.info.description && tags.description(plugin.info) || '-')
+                '[' + (plugin.items.version || 'unknown') + ']' +
+                (plugin.items.description || '-')
             ]).filter(function(row)
                 row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
