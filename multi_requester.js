@@ -431,7 +431,7 @@ var MultiRequester = {
       extractLink = res.req.options.siteinfo.extractLink;
 
       if (extractLink && !res.req.options.extractLink) {
-        this.extractLink(res, extractLink).getCommand();
+        this.extractLink(res, extractLink);
         return;
       }
       ignoreTags = [ "script" ].concat(libly.$U.A(res.req.options.siteinfo.ignoreTags));
