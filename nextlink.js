@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.1</version>
+  <version>0.3.2</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -147,7 +147,6 @@ NextLink.prototype = {
 var Autopager = function() {};//{{{
 Autopager.prototype = {
   nextLink: function(context, win, doc, count) {
-    var self = this;
     var url = doc.location.href;
     var value = doc[UUID];
 
@@ -164,6 +163,7 @@ Autopager.prototype = {
       return;
     }
 
+
     if (context.is2_0later) {
       let css = $U.xmlToDom(pageNaviCss, doc);
       let node = doc.importNode(css, true);
@@ -171,7 +171,8 @@ Autopager.prototype = {
       //doc.body.appendChild(css);
     }
 
-    let page = this.getCurrentPage(win, doc) + count;
+    let curPage = this.getCurrentPage(win, doc);
+    let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
     if (page <= 1) {
       win.scrollTo(0, 0);
       return true;
@@ -304,13 +305,21 @@ Autopager.prototype = {
     return page;
   },
   getCurrentPage: function(win, doc) {
-    var page = 1;
+    var page = 1.0;
     var xpath = '//*[@class="vimperator-nextlink-page"]';
     var makers = $U.getNodesFromXPath(xpath, doc);
     var curPos = win.scrollY;
+
+    // bottom of page
+    if(curPos == win.scrollMaxY) return 1 + makers.length;
+
+    // return n.5 if between n and n+1
     for (let i = 0; i < makers.length; ++i) {
       let p = $U.getElementPosition(makers[i]);
-      if (curPos < p.top) break;
+      if (curPos == p.top)
+        return page+1;
+      else if (curPos < p.top)
+        return page+0.5;
       ++page;
     }
     return page;
