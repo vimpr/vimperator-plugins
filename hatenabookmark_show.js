@@ -3,7 +3,7 @@
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
-// show hatena bookmark comments script for Vimperator 0.6
+// show hatena bookmark comments script for Vimperator 2.0pre
 
 (function(){
     function showComments(url){
@@ -26,17 +26,21 @@
             showString += tagString + (bookmark.tags.length > 0 && bookmark.comment ? "<br/> ":"") + bookmark.comment + "</dd>";
         });
         showString += "</dl></div>";
-        liberator.commandline.echo(showString, liberator.commandline.HL_NORMAL, liberator.commandline.FORCE_MULTILINE);
+        liberator.modules.commandline.echo(showString, liberator.modules.commandline.HL_NORMAL, liberator.modules.commandline.FORCE_MULTILINE);
     }
-    liberator.commands.addUserCommand(["hbinfo"], "show hatena bookmark comments",
+    liberator.modules.commands.addUserCommand(["hbinfo"], "show hatena bookmark comments",
         function(arg,special){
             var clipboard = readFromClipboard();
-            if(special)
-                arg = window.content.document.getSelection() || clipboard;
-            showComments(arg?encodeURIComponent(arg):liberator.buffer.URL);
-        },{ completer: liberator.completion.url }
+            var url = arg.string;
+            if(special) 
+                url = window.content.document.getSelection() || clipboard;
+            showComments(url ? encodeURIComponent(url): liberator.modules.buffer.URL);
+        },{ 
+          completer: liberator.modules.completion.url,
+          bang: true
+        }
     );
-    liberator.mappings.addUserMap([liberator.modes.VISUAL], [",h"], "show hatena bookmark comments",
+    liberator.modules.mappings.addUserMap([liberator.modules.modes.VISUAL], [",h"], "show hatena bookmark comments",
         function(count){
             showComments(window.content.document.getSelection());
         },{ noremap: true }
