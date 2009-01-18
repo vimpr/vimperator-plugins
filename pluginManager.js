@@ -572,7 +572,7 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             context.completions = getPlugins().map(function(plugin) [
                 plugin.name,
                 '[' + (plugin.info.version || 'unknown') + ']' +
-                (plugin.info.description || '-')
+                (plugin.info.description && tags.description(plugin.info) || '-')
             ]).filter(function(row)
                 row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
