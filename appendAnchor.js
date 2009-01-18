@@ -2,7 +2,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
-  <description lang="ja">$B%j%s%/Cf$N(B URL $B$C$]$$%F%-%9%H$K%"%s%+!<$r$D$1$k!#(B</description>
+  <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
   <version>0.04</version>
   <author>SAKAI, Kazuaki</author>
   <minVersion>2.0pre</minVersion>
@@ -20,12 +20,12 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
     == Commands ==
       :anc:
-        $B%"%s%+!<$rIU2C$9$k!#(B
+        アンカーを付加する。
     == GlobalVariables ==
       g:auto_append_anchor:
-        Vimperator $B$,%R%s%H$rI=<($9$k$H$-$K<+F0E*$K(B ":anc" $B$9$k!#(B
+        Vimperator がヒントを表示するときに自動的に ":anc" する。
       g:auto_append_anchor_once:
-        $B:G=i$N0l2s$@$1!#(B
+        最初の一回だけ。
   ]]></detail>
 </VimperatorPlugin>;
 
