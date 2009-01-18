@@ -77,11 +77,10 @@ escape:
 ]]></detail>
 </VimperatorPlugin>;
 
-liberator.plugins.exOpen = (function(){
+liberator.plugins.exOpen = (function() {
   var global = liberator.globalVariables.exopen_templates;
   if (!global) {
-    global = [
-    {
+    global = [{
       label: 'vimpnightly',
       value: 'http://download.vimperator.org/vimperator/nightly/',
       description: 'open vimperator nightly xpi page',
@@ -109,7 +108,7 @@ liberator.plugins.exOpen = (function(){
 
   function openTabOrSwitch(url) {
     var tabs = gBrowser.mTabs;
-    for (var i=0, l=tabs.length; i<l ;i++)
+    for (let i=0, l=tabs.length; i<l; i++)
       if (tabs[i].linkedBrowser.contentDocument.location.href == url) return (gBrowser.tabContainer.selectedIndex = i);
     return liberator.open(url, liberator.NEW_TAB);
   }
@@ -117,9 +116,9 @@ liberator.plugins.exOpen = (function(){
   function replacer(str, isEscape) {
     if (!str) return '';
     var win = new XPCNativeWrapper(window.content.window);
-    var sel = '',htmlsel = '';
-    var selection =  win.getSelection();
-    function __replacer(val){
+    var sel = '', htmlsel = '';
+    var selection = win.getSelection();
+    function __replacer(val) {
       switch (val) {
         case '%TITLE%':
           return buffer.title;
@@ -128,18 +127,18 @@ liberator.plugins.exOpen = (function(){
         case '%SEL%':
           if (sel) return sel;
           else if (selection.rangeCount < 1) return '';
-          for (var i=0, c=selection.rangeCount; i<c; i++){
-            sel += selection.getRangeAt(i).toString();
-          }
+          for (let i=0, c=selection.rangeCount; i<c; (function(r) {
+            sel += r.toString();
+          })(selection.getRangeAt(i++)));
           return sel;
         case '%HTMLSEL%':
           if (htmlsel) return sel;
-          else if (selection.rangeCount < 1) return '';
+          if (selection.rangeCount < 1) return '';
 
-          var serializer = new XMLSerializer();
-          for (var i=0, c=selection.rangeCount; i<c; i++){
-            htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
-          }
+          let serializer = new XMLSerializer();
+          for (let i=0, c=selection.rangeCount; i<c; (function(r) {
+            htmlsel += serializer.serializeToString(r.cloneContents());
+          })(selection.getRangeAt(i++)));
           return htmlsel;
       }
       return '';
@@ -152,18 +151,18 @@ liberator.plugins.exOpen = (function(){
 
   var ExOpen = function() this.initialize.apply(this, arguments);
   ExOpen.prototype = {
-    initialize: function(){
+    initialize: function() {
       this.createCompleter();
       this.registerCommand();
     },
-    createCompleter: function(){
+    createCompleter: function() {
         this.completer = global.map(
           function(t) [t.label, util.escapeString((t.description ? t.description + ' - ' : '') + t.value)]
         );
     },
-    registerCommand: function(){
+    registerCommand: function() {
       var self = this;
-      commands.addUserCommand(['exopen'], 'Open byextension url',
+      commands.addUserCommand(['exopen'], 'Open byextension URL',
         function(args) self.open(args.string, args.bang), {
           completer: function(context, args) {
             context.title = ['Template', 'Description - Value'];
@@ -171,7 +170,7 @@ liberator.plugins.exOpen = (function(){
               context.completions = self.completer;
               return;
             }
-            let filter = context.filter.toLowerCase();
+            var filter = context.filter.toLowerCase();
             context.completions = self.completer.filter( function( t ) t[0].toLowerCase().indexOf(filter) == 0 );
           }
       });
@@ -187,7 +186,7 @@ liberator.plugins.exOpen = (function(){
       var template = this.find(arg) || {value: arg};
       if (typeof template.custom == 'function') {
         url = template.custom.call(this, template.value);
-      } else if (template.custom instanceof Array){
+      } else if (template.custom instanceof Array) {
         url = replacer(template.value).replace(template.custom[0], template.custom[1], template.escape);
       } else {
         url = replacer(template.value, template.escape);
