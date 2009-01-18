@@ -1,13 +1,33 @@
-/**
- * == VimperatorPlugin==
- * @name          appendAnchor
- * @description   append anchors to texts look like url.
- * @author        SAKAI, Kazuaki
- * @version       0.03
- * @minVersion    2.0pre
- * @maxVersion    2.0pre
- * == /VimperatorPlugin==
- */
+let PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>appendAnchor</name>
+  <description>append anchors to texts look like url.</description>
+  <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
+  <version>0.04</version>
+  <author>SAKAI, Kazuaki</author>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <detail><![CDATA[
+    == Commands ==
+      :anc:
+        Append anchors.
+    == GlobalVariables ==
+      g:auto_append_anchor:
+        Execute ":anc" automatically when Vimperator shows the hints.
+      g:auto_append_anchor_once:
+        Just first once.
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    == Commands ==
+      :anc:
+        アンカーを付加する。
+    == GlobalVariables ==
+      g:auto_append_anchor:
+        Vimperator がヒントを表示するときに自動的に ":anc" する。
+      g:auto_append_anchor_once:
+        最初の一回だけ。
+  ]]></detail>
+</VimperatorPlugin>;
 
 (function(){
 
@@ -21,8 +41,12 @@
   // process global variable
   if (stringToBoolean(liberator.globalVariables.auto_append_anchor, 'false')) {
     let originalHintsShow = liberator.modules.hints.show;
+    let once = stringToBoolean(liberator.globalVariables.auto_append_anchor_once, 'false')
     hints.show = function () {
-      liberator.execute('anc');
+      if (!content.document.anchor_appended) {
+        content.document.anchor_appended = true;
+        liberator.execute('anc');
+      }
       originalHintsShow.apply(this, arguments);
     };
   }
