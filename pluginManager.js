@@ -243,7 +243,7 @@ Plugin.prototype = { // {{{
                    localDate > serverDate){
             data.information = '<span highlight="WarningMsg">local version is newest.</span>';
         } else {
-            data.Information = overwritePlugin(serverResource);
+            data.Information = this.overwritePlugin(serverResource);
             localResource = {}; // cleanup pref.
             localResource['Last-Modified'] = serverResource.headers['Last-Modified'];
             store.set(this.name, localResource);
