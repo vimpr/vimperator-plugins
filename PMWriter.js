@@ -16,19 +16,6 @@
   if (!(pluginDirPath && outputDir))
     return;
 
-  let AUTHORS = {
-    Trapezoid:        'http://unsigned.g.hatena.ne.jp/Trapezoid/',
-    anekos:           'http://d.hatena.ne.jp/nokturnalmortum/',
-    "halt feits":     'http://project-p.jp/halt/',
-    hogelog:          'http://d.hatena.ne.jp/hogelog/',
-    janus_wel:        'http://d.hatena.ne.jp/janus_wel/',
-    mattn:            'http://mattn.kaoriya.net',
-    pekepeke:         'http://d.hatena.ne.jp/pekepekesamurai/',
-    pekepekesamurai:  'http://d.hatena.ne.jp/pekepekesamurai/',
-    suVene:           'http://d.zeromemory.info/',
-    teramako:         'http://d.hatena.ne.jp/teramako/',
-  };
-
   if (!liberator.plugins.pmwriter)
     liberator.plugins.pmwriter = {};
 
@@ -136,6 +123,16 @@
 
       // index.html
       {
+        let authors;
+        for each (let a in pluginInfo.author) {
+          let hp = a.@homepage.toString();
+          let xml = hp ? <a href={hp}>{a.toString()}</a>
+                       : <span>{a.toString()}</span>
+          if (authors)
+            authors += <span>, </span> + xml;
+          else
+            authors = xml;
+        }
         indexHtml += <tr class="plugin">
           <td class="name">
             <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
@@ -145,7 +142,7 @@
             {plugin.info.description}
           </td>
           <td class="author">
-            <a href={AUTHORS[pluginInfo.author]}>{pluginInfo.author.toString()}</a>
+            {authors}
           </td>
         </tr>
       }
@@ -180,7 +177,7 @@
         ]]></script>
       </head>
       <body>
-        <h1>{title}</h1>
+        <h1>{DOCUMENT_TITLE}</h1>
         <table>
           <tr class="header">
             <th class="name">Name</th>
@@ -189,6 +186,7 @@
           </tr>
           {indexHtml}
         </table>
+        <div class="last-updated">Last updated {new Date().toLocaleFormat('%Y/%m/%d %H:%M:%S')}</div>
       </body>
     </html>;
 
