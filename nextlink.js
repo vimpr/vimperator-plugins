@@ -28,12 +28,8 @@ var PLUGIN_INFO =
 ||<
 と設定することにより、"[[", "]]" の動作は、カレントのタブに新しくページを読み込むようになります。
 
-== Command ==
-:nextlink:
-  autocmd によって呼び出されます。
-
 == TODO ==
-- Autopager利用時のMICROFORMATの対応
+- Autopager 利用時の MICROFORMAT の対応.
 
   ]]></detail>
 </VimperatorPlugin>;
@@ -51,10 +47,10 @@ var $U = libly.$U;
 var logger = $U.getLogger("nextlink");
 var $H = Cc["@mozilla.org/browser/global-history;2"].getService(Ci.nsIGlobalHistory2);
 const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
-const UUID = "{3b72c049-a347-4777-96f6-b128fc76ed6a}";
+const UUID = "{3b72c049-a347-4777-96f6-b128fc76ed6a}"; // siteinfo cache key
 
 var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "undefined" ?
-           false : $U.eval(liberator.globalVariables.nextlink_followlink);
+                   false : $U.eval(liberator.globalVariables.nextlink_followlink);
 var pageNaviCss =
     <style type="text/css"><![CDATA[
       .vimperator-nextlink-page {
@@ -334,7 +330,7 @@ Autopager.prototype = {
       insertPoint = lastPageElement.nextSibling ||
         lastPageElement.parentNode.appendChild(doc.createTextNode(" "));
     return insertPoint;
-  },
+  }
 };
 //}}}
 
