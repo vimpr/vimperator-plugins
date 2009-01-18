@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.2</version>
+  <version>0.3.3</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -27,6 +27,13 @@ var PLUGIN_INFO =
   let g:nextlink_followlink = "true"
 ||<
 と設定することにより、"[[", "]]" の動作は、カレントのタブに新しくページを読み込むようになります。
+
+>||
+  let g:nextlink_prevmap = "[n"
+  let g:nextlink_nextmap = "]n"
+||<
+のように設定することにより、"[[", "]]" 以外のキーに割り当てることができます。
+
 
 == TODO ==
 - Autopager 利用時の MICROFORMAT の対応.
@@ -48,6 +55,11 @@ var logger = $U.getLogger("nextlink");
 var $H = Cc["@mozilla.org/browser/global-history;2"].getService(Ci.nsIGlobalHistory2);
 const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
 const UUID = "{3b72c049-a347-4777-96f6-b128fc76ed6a}"; // siteinfo cache key
+
+const DEFAULT_PREVMAP = "[[";
+const DEFAULT_NEXTMAP = "]]";
+var prevMap = liberator.globalVariables.nextlink_prevmap || DEFAULT_PREVMAP;
+var nextMap = liberator.globalVariables.nextlink_nextmap || DEFAULT_NEXTMAP;
 
 var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "undefined" ?
                    false : $U.eval(liberator.globalVariables.nextlink_followlink);
@@ -134,11 +146,11 @@ NextLink.prototype = {
     return this.cache[key];
   },
   customizeMap: function(context) {
-    mappings.addUserMap(context.browserModes, [ "[[" ], "customize by nextlink.js",
+    mappings.addUserMap(context.browserModes, [ prevMap ], "customize by nextlink.js",
       function(count) context.nextLink(count > 0 ? -1 * count : -1),
       { flags: Mappings.flags.COUNT });
 
-    mappings.addUserMap(context.browserModes, [ "]]" ], "customize by nextlink.js",
+    mappings.addUserMap(context.browserModes, [ nextMap ], "customize by nextlink.js",
       function(count) context.nextLink(count > 0 ? count : 1),
       { flags: Mappings.flags.COUNT });
   },
@@ -162,7 +174,6 @@ Autopager.prototype = {
       }
       return;
     }
-
 
     if (context.is2_0later) {
       let css = $U.xmlToDom(pageNaviCss, doc);
