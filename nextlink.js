@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.3</version>
+  <version>0.3.4</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -122,8 +122,7 @@ NextLink.prototype = {
     this.customizeMap(this);
   },
   nextLink: function(count) {
-    var win = window.content;
-    var doc = win.document;
+    var doc = window.content.document;
     var url = doc.location.href;
     if (!doc[UUID]) {
       var value = doc[UUID] = {};
@@ -135,7 +134,7 @@ NextLink.prototype = {
       }
     }
 
-    this.pager.nextLink(this, win, doc, count);
+    this.pager.nextLink(this, doc, count);
   },
   setCache: function(key, subKeys, values) {
     if (!this.cache[key]) this.cache[key] = {};
@@ -158,7 +157,7 @@ NextLink.prototype = {
 
 var Autopager = function() {};//{{{
 Autopager.prototype = {
-  nextLink: function(context, win, doc, count) {
+  nextLink: function(context, doc, count) {
     var url = doc.location.href;
     var value = doc[UUID];
 
@@ -182,13 +181,15 @@ Autopager.prototype = {
       //doc.body.appendChild(css);
     }
 
-    let curPage = this.getCurrentPage(win, doc);
+    let curPage = this.getCurrentPage(doc);
     let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
+    logger.log(curPage);
+    logger.log(page);
     if (page <= 1) {
-      win.scrollTo(0, 0);
+      doc.defaultView.scrollTo(0, 0);
       return true;
     }
-    if (this.focusPagenavi(win, doc, page)) {
+    if (this.focusPagenavi(doc, page)) {
       return true;
     }
 
@@ -211,7 +212,7 @@ Autopager.prototype = {
                 reqUrl, null,
                 { asynchronous: true, encoding: doc.characterSet,
                   context: context, url: url,
-                  win: win, doc: doc }
+                  doc: doc }
               );
 
     req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
@@ -222,7 +223,6 @@ Autopager.prototype = {
   onSuccess: function(res) {
     var context = res.req.options.context;
     var url = res.req.options.url;
-    var win = res.req.options.win;
     var doc = res.req.options.doc;
     var value = doc[UUID];
     var page = res.getHTMLDocument(value.siteinfo.pageElement);
@@ -237,9 +237,9 @@ Autopager.prototype = {
 
     if (!page || page.length < 1) return;
 
-    var addPage = this.getPageNum() + 1;
+    var addPage = this.getPageNum(doc) + 1;
     this.addPage(context, doc, resDoc, page, res.req.url, addPage);
-    this.focusPagenavi(win, doc, addPage);
+    this.focusPagenavi(doc, addPage);
   },
   addPage: function(context, doc, resDoc, page, reqUrl, addPage) {
     var url = doc.location.href;
@@ -293,16 +293,16 @@ Autopager.prototype = {
     logger.log("onFailure");
     var context = res.req.options.context;
     var url = res.req.options.url;
-    var win = res.req.options.win;
     var doc = res.req.options.doc;
     var value = doc[UUID];
     value.isLoading = false;
     logger.echoerr("nextlink: loading failed. " + "[" + res.status + "]" + res.statusText + " > " + res.req.url);
     value.terminate = true;
   },
-  focusPagenavi: function(win, doc, page) {
+  focusPagenavi: function(doc, page) {
     var xpath = '//*[@id="vimperator-nextlink-' + page + '"]';
     var [ elem ] = $U.getNodesFromXPath(xpath, doc);
+    var win = doc.defaultView;
     if(elem) {
       let p = $U.getElementPosition(elem);
       win.scrollTo(0, p.top);
@@ -315,10 +315,11 @@ Autopager.prototype = {
     var page = 1 + $U.getNodesFromXPath(xpath, doc).length;
     return page;
   },
-  getCurrentPage: function(win, doc) {
+  getCurrentPage: function(doc) {
     var page = 1.0;
     var xpath = '//*[@class="vimperator-nextlink-page"]';
     var makers = $U.getNodesFromXPath(xpath, doc);
+    var win = doc.defaultView;
     var curPos = win.scrollY;
 
     // bottom of page
@@ -356,7 +357,7 @@ Autopager.prototype = {
 
 var FollowLink = function() {};//{{{
 FollowLink.prototype = {
-  nextLink: function(context, win, doc, count) {
+  nextLink: function(context, doc, count) {
     var url = doc.location.href;
     var value = doc[UUID];
 
