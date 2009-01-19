@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.5</version>
+  <version>0.3.6</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -121,28 +121,23 @@ NextLink.prototype = {
 
     this.customizeMap(this);
   },
-  nextLink: function(count) {
-    var doc = window.content.document;
+  initDoc: function(context, doc) {
     var url = doc.location.href;
-    if (!doc[UUID]) {
-      var value = doc[UUID] = {};
-      for (var i = 0, len = this.siteinfo.length; i < len; i++) {
-        if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
-          value.siteinfo = this.siteinfo[i];
-          break;
-        }
+    var value = doc[UUID] = {};
+    for (var i = 0, len = this.siteinfo.length; i < len; i++) {
+      if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
+        value.siteinfo = this.siteinfo[i];
+        break;
       }
     }
-
-    this.pager.nextLink(this, doc, count);
+    this.pager.initDoc(context, doc);
   },
-  setCache: function(key, subKeys, values) {
-    if (!this.cache[key]) this.cache[key] = {};
-    values = [].concat(values);
-    [].concat(subKeys).forEach($U.bind(this, function(subKey, i) {
-      this.cache[key][subKey] = values[i];
-    }));
-    return this.cache[key];
+  nextLink: function(count) {
+    var doc = window.content.document;
+    if (!doc[UUID])
+      this.initDoc(this, doc);
+
+    this.pager.nextLink(doc, count);
   },
   customizeMap: function(context) {
     mappings.addUserMap(context.browserModes, [ prevMap ], "customize by nextlink.js",
@@ -157,8 +152,17 @@ NextLink.prototype = {
 
 var Autopager = function() {};//{{{
 Autopager.prototype = {
-  nextLink: function(context, doc, count) {
-    var url = doc.location.href;
+  initDoc: function(context, doc) {
+    doc[UUID].loadURLs = [];
+
+    if (context.is2_0later) {
+      let css = $U.xmlToDom(pageNaviCss, doc);
+      let node = doc.importNode(css, true);
+      doc.body.insertBefore(node, doc.body.firstChild);
+      //doc.body.appendChild(css);
+    }
+  },
+  nextLink: function(doc, count) {
     var value = doc[UUID];
 
     // TODO: support MICROFORMAT
@@ -167,51 +171,45 @@ Autopager.prototype = {
     // no siteinfo, defalut [[, ]] action
     if (!value.siteinfo) {
       if (count < 0) {
-        buffer.followDocumentRelationship("previous");
+        return buffer.followDocumentRelationship("previous");
       } else {
-        buffer.followDocumentRelationship("next");
+        return buffer.followDocumentRelationship("next");
       }
-      return;
     }
 
-    if (context.is2_0later) {
-      let css = $U.xmlToDom(pageNaviCss, doc);
-      let node = doc.importNode(css, true);
-      doc.body.insertBefore(node, doc.body.firstChild);
-      //doc.body.appendChild(css);
-    }
-
-    let curPage = this.getCurrentPage(doc);
-    let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
+    var curPage = this.getCurrentPage(doc);
+    var page = (count < 0 ? Math.round : Math.floor)(curPage + count);
     if (page <= 1) {
+      value.isLoading = false;
       doc.defaultView.scrollTo(0, 0);
       return true;
     }
     if (this.focusPagenavi(doc, page)) {
+      value.isLoading = false;
       return true;
     }
 
     if (value.isLoading) {
       logger.echo("loading now...");
-      return;
+      return false;
     }
 
-    next = value.next;
-    if (!next)
-      [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, doc);
-    if (!next || value.terminate) {
-      logger.echo("end of pages.");
-      return;
-    }
-
-    let reqUrl = $U.pathToURL(next, url, doc);
     value.isLoading = true;
-    var req = new libly.Request(
-                reqUrl, null,
-                { asynchronous: true, encoding: doc.characterSet,
-                  context: context, url: url,
-                  doc: doc }
-              );
+
+    if (value.terminate) {
+      value.isLoading = false;
+      logger.echo("terminated.");
+      return false;
+    }
+
+    var req = this.createNextRequest(doc);
+    if (!req) {
+      value.isLoading = false;
+      var win = doc.defaultView;
+      win.scrollTo(0, win.scrollMaxY);
+      logger.echo("end of pages.");
+      return true;
+    }
 
     req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
     req.addEventListener("onFailure", $U.bind(this, this.onFailure));
@@ -219,83 +217,50 @@ Autopager.prototype = {
     req.get();
   },
   onSuccess: function(res) {
-    var context = res.req.options.context;
-    var url = res.req.options.url;
     var doc = res.req.options.doc;
+    var url = doc.location.href;
     var value = doc[UUID];
-    var page = res.getHTMLDocument(value.siteinfo.pageElement);
+    var pages = this.getPageElement(res, value.siteinfo);
     var resDoc = res.doc;
+    var reqUrl = res.req.url;
     var [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, resDoc);
 
+    value.loadURLs.push(reqUrl);
     value.next = next;
     value.isLoading = false;
 
-    if (!page || page.length < 1)
-      page = res.getHTMLDocument('//*[contains(@class, "autopagerize_page_element")]');
+    // set reqUrl link-state visited
+    $H.addURI(makeURI(reqUrl), false, true, makeURI(url));
 
-    if (!page || page.length < 1) return;
+    if (!pages || pages.length==0) return;
 
-    var addPage = this.getPageNum(doc) + 1;
-    this.addPage(context, doc, resDoc, page, res.req.url, addPage);
-    this.focusPagenavi(doc, addPage);
+    var addPageNum = this.getPageNum(doc) + 1;
+    this.addPage(doc, resDoc, pages, reqUrl, addPageNum);
+    this.focusPagenavi(doc, addPageNum);
   },
-  addPage: function(context, doc, resDoc, page, reqUrl, addPage) {
+  addPage: function(doc, resDoc, pages, reqUrl, addPageNum) {
     var url = doc.location.href;
     var value = doc[UUID];
-    if(!value.insertPoint)
+    if (!value.insertPoint)
       value.insertPoint = this.getInsertPoint(doc, value.siteinfo);
     var insertPoint = value.insertPoint;
 
-    var p = doc.createElementNS(HTML_NAMESPACE, "p");
-    var tagName;
+    this.insertRule(doc, addPageNum, reqUrl, pages[0], insertPoint);
 
-    if (page[0] && page[0].tagName)
-      tagName = page[0].tagName.toLowerCase();
-
-    if (tagName == "tr") {
-      let insertParent = insertPoint.parentNode;
-      let colNodes = getElementsByXPath("child::tr[1]/child::*[self::td or self::th]", insertParent);
-
-      let colums = 0;
-      for (let i = 0, l = colNodes.length; i < l; i++) {
-        let col = colNodes[i].getAttribute("colspan");
-        colums += parseInt(col, 10) || 1;
-      }
-      let td = doc.createElement("td");
-      td.appendChild(p);
-      let tr = doc.createElement("tr");
-      td.setAttribute("colspan", colums);
-      tr.appendChild(td);
-      insertParent.insertBefore(tr, insertPoint);
-    } else if (tagName == "li") {
-      let li = doc.createElementNS(HTML_NAMESPACE, "li");
-      insertPoint.parentNode.insertBefore(li, insertPoint);
-      li.appendChild(p);
-    } else {
-      insertPoint.parentNode.insertBefore(p, insertPoint);
-    }
-
-    p.id = "vimperator-nextlink-" + addPage;
-    p.innerHTML = 'page: <a href="' + reqUrl + '">' + addPage + "</a>";
-    p.className = "vimperator-nextlink-page";
-
-    $H.addURI(makeURI(reqUrl), false, true, makeURI(url));
-
-    return page.map(function(elem) {
+    pages.forEach(function(elem) {
       var pe = resDoc.importNode(elem, true);
       insertPoint.parentNode.insertBefore(pe, insertPoint);
-      return pe;
     });
+    return true;
   },
   onFailure: function(res) {
     logger.log("onFailure");
-    var context = res.req.options.context;
-    var url = res.req.options.url;
     var doc = res.req.options.doc;
+    var url = doc.location.href;
     var value = doc[UUID];
     value.isLoading = false;
-    logger.echoerr("nextlink: loading failed. " + "[" + res.status + "]" + res.statusText + " > " + res.req.url);
     value.terminate = true;
+    logger.echoerr("nextlink: loading failed. " + "[" + res.status + "]" + res.statusText + " > " + res.req.url);
   },
   focusPagenavi: function(doc, page) {
     var xpath = '//*[@id="vimperator-nextlink-' + page + '"]';
@@ -307,6 +272,25 @@ Autopager.prototype = {
       return true;
     }
     return false;
+  },
+  createNextRequest: function(doc) {
+    var value = doc[UUID];
+    var url = doc.location.href;
+    var next = value.next;
+    if (!next)
+      [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, doc);
+    if (!next)
+      return false;
+
+    var reqUrl = $U.pathToURL(next, url, doc);
+    if(value.loadURLs.some(function(url) url==reqUrl)) return false;
+
+    var req = new libly.Request(
+                reqUrl, null,
+                { asynchronous: true, encoding: doc.characterSet,
+                  doc: doc }
+              );
+    return req;
   },
   getPageNum: function(doc) {
     var xpath = '//*[@class="vimperator-nextlink-page"]';
@@ -352,20 +336,62 @@ Autopager.prototype = {
       insertPoint = lastPageElement.nextSibling ||
         lastPageElement.parentNode.appendChild(doc.createTextNode(" "));
     return insertPoint;
-  }
+  },
+  getPageElement: function(res, siteinfo) {
+    var page = res.getHTMLDocument(siteinfo.pageElement);
+    if (!page || page.length==0) 
+      page = res.getHTMLDocument('//*[contains(@class, "autopagerize_page_element")]');
+    return page;
+  },
+  insertRule: function(doc, addPageNum, reqUrl, page, insertPoint) {
+    var p = doc.createElementNS(HTML_NAMESPACE, "p");
+    p.id = "vimperator-nextlink-" + addPageNum;
+    p.innerHTML = 'page: <a href="' + reqUrl + '">' + addPageNum + "</a>";
+    p.className = "vimperator-nextlink-page";
+
+    var tagName;
+    if (page && page.tagName)
+      tagName = page.tagName.toLowerCase();
+
+    if (tagName == "tr") {
+      let insertParent = insertPoint.parentNode;
+      let colNodes = getElementsByXPath("child::tr[1]/child::*[self::td or self::th]", insertParent);
+
+      let colums = 0;
+      for (let i = 0, l = colNodes.length; i < l; i++) {
+        let col = colNodes[i].getAttribute("colspan");
+        colums += parseInt(col, 10) || 1;
+      }
+      let td = doc.createElement("td");
+      td.appendChild(p);
+      let tr = doc.createElement("tr");
+      td.setAttribute("colspan", colums);
+      tr.appendChild(td);
+      insertParent.insertBefore(tr, insertPoint);
+    } else if (tagName == "li") {
+      let li = doc.createElementNS(HTML_NAMESPACE, "li");
+      insertPoint.parentNode.insertBefore(li, insertPoint);
+      li.appendChild(p);
+    } else {
+      insertPoint.parentNode.insertBefore(p, insertPoint);
+    }
+  },
 };
 //}}}
 
 var FollowLink = function() {};//{{{
 FollowLink.prototype = {
-  nextLink: function(context, doc, count) {
+  initDoc: function(context, doc) {
+  },
+  nextLink: function(doc, count) {
     var url = doc.location.href;
     var value = doc[UUID];
 
     function followXPath(xpath) {
       var [ elem ] = $U.getNodesFromXPath(xpath, doc);
       if (elem) {
-        if (elem.tagName == "LINK") {
+        var tagName = elem.tagName.toLowerCase();
+        if (tagName == "link") {
           liberator.open(elem.href);
         } else {
           buffer.followLink(elem, liberator.CURRENT_TAB);
