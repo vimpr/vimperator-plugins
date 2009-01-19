@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Wassr"
-// Last Change: 26-Dec-2008. Jan 2008
+// Last Change: 19-Jan-2009. Jan 2008
 // License: Creative Commons
 // Maintainer: mattn <mattn.jp@gmail.com> - http://mattn.kaoriya.net/
 // Based On: twitter.js by Trapezoid
@@ -82,17 +82,16 @@
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
                 <>
-                    <img src={"http://wassr.jp/user/" + status.user_login_id + "/profile_img.png.32"}
+                    <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
                          title={status.user.screen_name}
                          class="wassr photo"/>
                     <strong>{status.user_login_id}&#x202C;</strong>
                 </>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', emojiConv(status.text)))
+                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.html))
                         .join("<br/>");
 
-        //liberator.log(html);
         liberator.echo(html, true);
     }
     function favWassr(username, password, user){
@@ -135,7 +134,7 @@
                     <strong>{status.user_login_id}&#x202C;</strong>
                 </>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
-                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.text))
+                    sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.html))
                         .join("<br/>");
 
         //liberator.log(html);
