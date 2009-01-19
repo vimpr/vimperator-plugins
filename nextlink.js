@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.4</version>
+  <version>0.3.5</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -183,8 +183,6 @@ Autopager.prototype = {
 
     let curPage = this.getCurrentPage(doc);
     let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
-    logger.log(curPage);
-    logger.log(page);
     if (page <= 1) {
       doc.defaultView.scrollTo(0, 0);
       return true;
@@ -316,25 +314,28 @@ Autopager.prototype = {
     return page;
   },
   getCurrentPage: function(doc) {
-    var page = 1.0;
     var xpath = '//*[@class="vimperator-nextlink-page"]';
     var makers = $U.getNodesFromXPath(xpath, doc);
     var win = doc.defaultView;
     var curPos = win.scrollY;
 
+    // top of page
+    if(curPos == 0) return 1.0;
+
     // bottom of page
-    if(curPos == win.scrollMaxY) return 1 + makers.length;
+    if(curPos == win.scrollMaxY) return 1.5 + makers.length;
 
     // return n.5 if between n and n+1
+    var page = 1.0;
     for (let i = 0; i < makers.length; ++i) {
       let p = $U.getElementPosition(makers[i]);
       if (curPos == p.top)
         return page+1;
-      else if (curPos < p.top)
+      if (curPos < p.top)
         return page+0.5;
       ++page;
     }
-    return page;
+    return page+0.5;
   },
   getInsertPoint: function(doc, siteinfo) {
     var insertPoint, lastPageElement;
