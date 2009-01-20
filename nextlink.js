@@ -178,6 +178,7 @@ Autopager.prototype = {
     }
 
     var curPage = this.getCurrentPage(doc);
+    logger.log(curPage);
     var page = (count < 0 ? Math.round : Math.floor)(curPage + count);
     if (page <= 1) {
       value.isLoading = false;
@@ -304,10 +305,10 @@ Autopager.prototype = {
     var curPos = win.scrollY;
 
     // top of page
-    if(curPos == 0) return 1.0;
+    if(curPos <= 0) return 1.0;
 
     // bottom of page
-    if(curPos == win.scrollMaxY) return 1.5 + makers.length;
+    if(curPos >= win.scrollMaxY) return 1.5 + makers.length;
 
     // return n.5 if between n and n+1
     var page = 1.0;
