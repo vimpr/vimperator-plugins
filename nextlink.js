@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.7</version>
+  <version>0.3.8</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -47,8 +47,20 @@ n:
   何もしない
 が設定可能です
 
-== TODO ==
+RUNTIME_PATH/info/nextlink-local-siteinfo に
+>||
+[
+  {
+    url:          'http://(.*).google.+/(search).+',
+    nextLink:     'id("navbar")//td[last()]/a',
+    pageElement:  '//div[@id="res"]/div',
+    exampleUrl:   'http://www.google.com/search?q=nsIObserver',
+  },
+]
+||<
+のような JSON を置くことでローカルで SITEINFO を設定できます
 
+== TODO ==
   ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -100,6 +112,11 @@ const nositeinfoActions = {
 var actpattern = liberator.globalVariables.nextlink_nositeinfo_act || "e";
 var nositeinfoAct = nositeinfoActions[actpattern];
 
+
+var localSiteinfo = storage.newMap("nextlink-local-siteinfo", false);
+if (localSiteinfo)
+  localSiteinfo = [ info for ([ i, info ] in localSiteinfo) ];
+
 var pageNaviCss =
     <style type="text/css"><![CDATA[
       .vimperator-nextlink-page {
@@ -139,22 +156,14 @@ NextLink.prototype = {
     wedata.getItems(24 * 60 * 60 * 1000, null,
       $U.bind(this, function(isSuccess, data) {
         if (!isSuccess) return;
-        this.siteinfo = data.map(function(item) item.data)
-            .sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
-        this.initialized = true;
+        this.siteinfo = data.map(function(item) item.data);
       })
     );
-    // for debug
-    /*
+    if (localSiteinfo)
+      this.siteinfo = this.siteinfo.concat(localSiteinfo);
+    this.siteinfo = this.siteinfo.sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
+
     this.initialized = true;
-    this.siteinfo = [
-      {
-        url: "^https?://(?:192\\.168(?:\\.\\d+){2}|localhost)(?::\\d+)?/",
-        nextLink: "id("next")",
-        pageElement: "//*"
-      }
-    ];
-    */
 
     this.customizeMap(this);
   },
@@ -173,13 +182,15 @@ NextLink.prototype = {
     function valid(prop)
       $U.getNodesFromXPath(MICROFORMAT[prop], doc).length > 0;
 
-    if (!valid("nextLink")) return null;
-    if (!valid("insertBefore")) return null;
-    if (!valid("pageElement")) return null;
+    if (!valid("nextLink") || !valid("pageElement")) return null;
 
     return MICROFORMAT;
   },
   nextLink: function(count) {
+    if (!this.initialized) {
+      liberator.echo("before initialized.");
+      return false;
+    }
     var doc = window.content.document;
     if (!doc[UUID])
       this.initDoc(this, doc);
@@ -348,19 +359,21 @@ Autopager.prototype = {
     // top of page
     if(curPos <= 0) return 1.0;
 
-    // bottom of page
-    if(curPos >= win.scrollMaxY) return 1.0 + markers.length;
-
     // return n.5 if between n and n+1
     var page = 1.0;
+    var pos;
     for (var i = 0, len = markers.length; i < len; i++) {
-      let p = $U.getElementPosition(markers[i]);
-      if (curPos == p.top)
-        return page+1;
-      if (curPos < p.top)
-        return page+0.5;
+      pos = $U.getElementPosition(markers[i]).top;
+      if (curPos == pos) return page + 1;
+      if (curPos < pos) return page + 0.5;
       ++page;
     }
+
+    // bottom of page
+    if (curPos >= win.scrollMaxY && curPos > pos) {
+      return page;
+    }
+
     return page+0.5;
   },
   getInsertPoint: function(doc, siteinfo) {
