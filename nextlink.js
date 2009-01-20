@@ -12,7 +12,7 @@ var PLUGIN_INFO =
   <description lang="ja">AutoPagerize 用の XPath より "[[", "]]" をマッピングします。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-  <version>0.3.6</version>
+  <version>0.3.7</version>
   <license>MIT</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -34,9 +34,20 @@ var PLUGIN_INFO =
 ||<
 のように設定することにより、"[[", "]]" 以外のキーに割り当てることができます。
 
+SITEINFOが無い場合の処理を
+>||
+  let g:nextlink_nositeinfo_act = "f"
+||<
+のように設定できます。現在は
+f:
+  Vimperatorの"[[", "]]"の動作
+e:
+  マッチするSITEINFOが無いことを知らせる(デフォルト設定)
+n:
+  何もしない
+が設定可能です
 
 == TODO ==
-- Autopager 利用時の MICROFORMAT の対応.
 
   ]]></detail>
 </VimperatorPlugin>;
@@ -63,6 +74,32 @@ var nextMap = liberator.globalVariables.nextlink_nextmap || DEFAULT_NEXTMAP;
 
 var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "undefined" ?
                    false : $U.eval(liberator.globalVariables.nextlink_followlink);
+
+const MICROFORMAT = {
+    url:          '.*',
+    nextLink:     '//a[@rel="next"] | //link[@rel="next"]',
+    insertBefore: '//*[contains(@class, "autopagerize_insert_before")]',
+    pageElement:  '//*[contains(@class, "autopagerize_page_element")]',
+}
+
+const nositeinfoActions = {
+  // vimperator [[, ]] action
+  f: function(doc, count) {
+       if (count < 0) {
+         return buffer.followDocumentRelationship("previous");
+       } else {
+         return buffer.followDocumentRelationship("next");
+       }
+     },
+  e: function(doc, count) {
+       var url = doc.location.href;
+       return liberator.echo("No SITEINFO match " + url);
+     },
+  n: function() true,
+};
+var actpattern = liberator.globalVariables.nextlink_nositeinfo_act || "e";
+var nositeinfoAct = nositeinfoActions[actpattern];
+
 var pageNaviCss =
     <style type="text/css"><![CDATA[
       .vimperator-nextlink-page {
@@ -122,15 +159,25 @@ NextLink.prototype = {
     this.customizeMap(this);
   },
   initDoc: function(context, doc) {
-    var url = doc.location.href;
     var value = doc[UUID] = {};
+    value.siteinfo = this.getSiteinfo(doc);
+    this.pager.initDoc(context, doc);
+  },
+  getSiteinfo: function(doc) {
+    var url = doc.location.href;
     for (var i = 0, len = this.siteinfo.length; i < len; i++) {
       if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
-        value.siteinfo = this.siteinfo[i];
-        break;
+        return this.siteinfo[i];
       }
     }
-    this.pager.initDoc(context, doc);
+    function valid(prop)
+      $U.getNodesFromXPath(MICROFORMAT[prop], doc).length > 0;
+
+    if (!valid("nextLink")) return null;
+    if (!valid("insertBefore")) return null;
+    if (!valid("pageElement")) return null;
+
+    return MICROFORMAT;
   },
   nextLink: function(count) {
     var doc = window.content.document;
@@ -168,17 +215,11 @@ Autopager.prototype = {
     // TODO: support MICROFORMAT
     // rel="next", rel="prev"
 
-    // no siteinfo, defalut [[, ]] action
-    if (!value.siteinfo) {
-      if (count < 0) {
-        return buffer.followDocumentRelationship("previous");
-      } else {
-        return buffer.followDocumentRelationship("next");
-      }
+    if (!value.siteinfo && nositeinfoAct) {
+      return nositeinfoAct(doc, count);
     }
 
     var curPage = this.getCurrentPage(doc);
-    logger.log(curPage);
     var page = (count < 0 ? Math.round : Math.floor)(curPage + count);
     if (page <= 1) {
       value.isLoading = false;
@@ -221,7 +262,7 @@ Autopager.prototype = {
     var doc = res.req.options.doc;
     var url = doc.location.href;
     var value = doc[UUID];
-    var pages = this.getPageElement(res, value.siteinfo);
+    var pages = res.getHTMLDocument(value.siteinfo.pageElement)
     var resDoc = res.doc;
     var reqUrl = res.req.url;
     var [ next ] = $U.getNodesFromXPath(value.siteinfo.nextLink, resDoc);
@@ -300,7 +341,7 @@ Autopager.prototype = {
   },
   getCurrentPage: function(doc) {
     var xpath = '//*[@class="vimperator-nextlink-page"]';
-    var makers = $U.getNodesFromXPath(xpath, doc);
+    var markers = $U.getNodesFromXPath(xpath, doc);
     var win = doc.defaultView;
     var curPos = win.scrollY;
 
@@ -308,12 +349,12 @@ Autopager.prototype = {
     if(curPos <= 0) return 1.0;
 
     // bottom of page
-    if(curPos >= win.scrollMaxY) return 1.5 + makers.length;
+    if(curPos >= win.scrollMaxY) return 1.0 + markers.length;
 
     // return n.5 if between n and n+1
     var page = 1.0;
-    for (let i = 0; i < makers.length; ++i) {
-      let p = $U.getElementPosition(makers[i]);
+    for (var i = 0, len = markers.length; i < len; i++) {
+      let p = $U.getElementPosition(markers[i]);
       if (curPos == p.top)
         return page+1;
       if (curPos < p.top)
@@ -338,12 +379,6 @@ Autopager.prototype = {
         lastPageElement.parentNode.appendChild(doc.createTextNode(" "));
     return insertPoint;
   },
-  getPageElement: function(res, siteinfo) {
-    var page = res.getHTMLDocument(siteinfo.pageElement);
-    if (!page || page.length==0) 
-      page = res.getHTMLDocument('//*[contains(@class, "autopagerize_page_element")]');
-    return page;
-  },
   insertRule: function(doc, addPageNum, reqUrl, page, insertPoint) {
     var p = doc.createElementNS(HTML_NAMESPACE, "p");
     p.id = "vimperator-nextlink-" + addPageNum;
@@ -359,7 +394,7 @@ Autopager.prototype = {
       let colNodes = getElementsByXPath("child::tr[1]/child::*[self::td or self::th]", insertParent);
 
       let colums = 0;
-      for (let i = 0, l = colNodes.length; i < l; i++) {
+      for (let i = 0, len = colNodes.length; i < len; i++) {
         let col = colNodes[i].getAttribute("colspan");
         colums += parseInt(col, 10) || 1;
       }
