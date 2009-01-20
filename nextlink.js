@@ -47,14 +47,14 @@ n:
   何もしない
 が設定可能です
 
-RUNTIME_PATH/info/nextlink-local-siteinfo に
+<RUNTIME_PATH>/info/<YOUR_PROFILE>/nextlink-local-siteinfo に
 >||
 [
   {
-    url:          'http://(.*).google.+/(search).+',
-    nextLink:     'id("navbar")//td[last()]/a',
-    pageElement:  '//div[@id="res"]/div',
-    exampleUrl:   'http://www.google.com/search?q=nsIObserver',
+    "url":          "http://(.*).google.+/(search).+",
+    "nextLink":     "id('navbar')//td[last()]/a",
+    "pageElement":  "//div[@id='res']/div",
+    "exampleUrl":   "http://www.google.com/search?q=nsIObserver",
   },
 ]
 ||<
