@@ -299,7 +299,7 @@
             _isEnable = value;
         },
         isEnableLDRize: function() this.LDRize.getSiteinfo() != undefined,
-        isEnableLDRizeCooperation: function() /^https?$/.test(content.location.protocol) && this.isEnable && this.isEnableLDRize(),
+        isEnableLDRizeCooperation: function() /^https?:$/.test(content.location.protocol) && this.isEnable && this.isEnableLDRize(),
 
         //Pin
         getPinnedItems: function(){
