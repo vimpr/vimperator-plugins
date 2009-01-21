@@ -1,5 +1,5 @@
 // Vimperator plugin: "Update Twitter"
-// Last Change: 11-Nov-2008. Jan 2008
+// Last Change: 21-Jan-2009. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -11,7 +11,7 @@
 //  :twitter! someone
 //      show someone's statuses.
 //  :twitter!? someword
-//      show search result of 'someword' from "http://twitter.1x1.jp".
+//      show search result of 'someword' from "http://search.twitter.com/".
 //  :twitter!@
 //      show replies.
 //  :twitter!+ someone
@@ -35,6 +35,22 @@
         var i = 1, re = /%s/, result = "" + format;
         while (re.test(result) && i < arguments.length) result = result.replace(re, arguments[i++]);
         return result;
+    }
+    function getElementsByXPath(xpath, node){
+        node = node || document;
+        var nodesSnapshot = (node.ownerDocument || node).evaluate(xpath, node, null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var data = [];
+        for(var i = 0, l = nodesSnapshot.snapshotLength; i < l;
+                data.push(nodesSnapshot.snapshotItem(i++)));
+        return (data.length > 0) ? data : null;
+    }
+    function getFirstElementByXPath(xpath, node){
+        node = node || document;
+        var doc = node.ownerDocument;
+        var result = (node.ownerDocument || node).evaluate(xpath, node, null,
+                XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return result.singleNodeValue ? result.singleNodeValue : null;
     }
     function sayTwitter(username, password, stat){
         var xhr = new XMLHttpRequest();
@@ -121,21 +137,28 @@
     }
     function showTwitterSearchResult(word){
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://twitter.1x1.jp/rss/search/?keyword=" + encodeURIComponent(word) + "&text=1", false);
+        xhr.open("GET", "http://search.twitter.com/search.json?q=" + encodeURIComponent(word), false);
         xhr.send(null);
-        var items = xhr.responseXML.getElementsByTagName('item');
+        var results = (evalFunc("("+xhr.responseText+")") || {'results':[]}).results;
+
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
+            img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
         ]]></style>.toSource()
-            .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
-        for (var n = 0; n < items.length; n++)
-            html += <>
-                <strong>{items[n].getElementsByTagName('title')[0].textContent}&#x202C;</strong>
-                : <span class="twitter entry-content">{items[n].getElementsByTagName('description')[0].textContent}&#x202C;</span>
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
+            results.map(function(result)
+                <>
+                    <img src={result.profile_image_url}
+                         alt={result.from_user}
+                         title={result.from_user}
+                         class="twitter photo"/>
+                    <strong>{result.from_user}&#x202C;</strong>
+                    : <span class="twitter entry-content">{result.text}</span>
+                </>.toSource()
+                   .replace(/(?:\r?\n|\r)[ \t]*/g, " "))
+                        .join("<br/>");
 
-                <br />
-            </>.toSource()
-                .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
+        //liberator.log(html);
         liberator.echo(html, true);
     }
     liberator.modules.commands.addUserCommand(["twitter"], "Change Twitter status",
