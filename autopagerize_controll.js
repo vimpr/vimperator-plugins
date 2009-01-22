@@ -2,7 +2,7 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
-  <description>controll autopagerize</description>
+  <description>controls autopagerize</description>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
   <version>0.0.1</version>
   <maxVersion>2.0pre</maxVersion>
@@ -37,6 +37,7 @@ var pager = {
     modes: [modes.NORMAL, modes.VISUAL],
     next: function(doc, count) {
         var curPage = pager.getCurrentPage(doc);
+        liberator.reportError(curPage);
         pager.paging(doc, Math.floor(curPage+count));
     },
     prev: function(doc, count) {
@@ -49,15 +50,15 @@ var pager = {
         var win = doc.defaultView;
         if (page <= 1) {
             win.scrollTo(0, 0);
-        } else if (!pager.focusPagenavi(doc, page)) {
+        } else if (!pager.focusPageNav(doc, page)) {
             win.scrollTo(0, win.scrollMaxY);
         }
     },
-    focusPagenavi: function(doc, page) {
+    focusPageNav: function(doc, page) {
         var xpath = '//*[@class="autopagerize_page_info" and child::a[contains(text(), "'+page+'")]]';
         var [ elem ] = $U.getNodesFromXPath(xpath, doc);
         var win = doc.defaultView;
-        if(elem) {
+        if (elem) {
             let p = $U.getElementPosition(elem);
             win.scrollTo(0, p.top);
             return true;
@@ -71,14 +72,14 @@ var pager = {
         var curPos = win.scrollY;
 
         // top of page
-        if(curPos <= 0) return 1.0;
+        if (curPos <= 0) return 1.0;
 
         // bottom of page
-        if(curPos >= win.scrollMaxY) return 1.0 + markers.length;
+        if (curPos >= win.scrollMaxY) return 1.0 + markers.length;
 
         // return n.5 if between n and n+1
         var page = 1.0;
-        for (var i = 0, len = markers.length; i < len; i++) {
+        for (let i = 0, len = markers.length; i < len; i++) {
             let p = $U.getElementPosition(markers[i]);
             if (curPos == p.top) return page+1;
             if (curPos < p.top) return page+0.5;
@@ -94,13 +95,13 @@ commands.addUserCommand(["prevpage"], "Autopagerize prev page",
     function(args)
         pager.prev(window.content.document, args.length>0 ? args[0] : 1));
 
-if(nextMap) {
+if (nextMap) {
     mappings.addUserMap(pager.modes, [nextMap], "Autopagerize next page",
             function(count)
                 pager.next(window.content.document, count>0 ? count : 1),
             {flags: Mappings.flags.COUNT});
 }
-if(prevMap) {
+if (prevMap) {
     mappings.addUserMap(pager.modes, [prevMap], "Autopagerize prev page",
             function(count)
                 pager.prev(window.content.document, count>0 ? count : 1),
