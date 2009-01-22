@@ -41,7 +41,7 @@ let PLUGIN_INFO =
   // process global variable
   if (stringToBoolean(liberator.globalVariables.auto_append_anchor, 'false')) {
     let originalHintsShow = liberator.modules.hints.show;
-    let once = stringToBoolean(liberator.globalVariables.auto_append_anchor_once, 'false')
+    let once = stringToBoolean(liberator.globalVariables.auto_append_anchor_once, 'false');
     hints.show = function () {
       if (!content.document.anchor_appended) {
         content.document.anchor_appended = true;

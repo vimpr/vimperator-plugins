@@ -12,12 +12,11 @@ This software distribute under term of new BSD style license.
 */
 (function() {
 
-if (gIeTab && gIeTab.onTabSelected) {
-  liberator.log("replace IeTab.onTabSelected() function");
-  var func = gIeTab.onTabSelected.toSource();
-  var newFunc = func.replace(/window\.setTimeout\(gIeTab\.focusIeTab, 0\);/, '');
-  gIeTab.removeEventListener("appcontent", "select", gIeTab.onTabSelected);
-  gIeTab.addEventListener("appcontent", "select", new Function(newFunc));
-}
+if (!gIeTab || !gIeTab.onTabSelected) return;
+liberator.log("replace IeTab.onTabSelected() function");
+var func = gIeTab.onTabSelected.toSource();
+var newFunc = func.replace(/window\.setTimeout\(gIeTab\.focusIeTab, 0\);/, '');
+gIeTab.removeEventListener("appcontent", "select", gIeTab.onTabSelected);
+gIeTab.addEventListener("appcontent", "select", new Function(newFunc));
 
 })();

@@ -127,18 +127,16 @@ liberator.plugins.exOpen = (function() {
         case '%SEL%':
           if (sel) return sel;
           else if (selection.rangeCount < 1) return '';
-          for (let i=0, c=selection.rangeCount; i<c; (function(r) {
-            sel += r.toString();
-          })(selection.getRangeAt(i++)));
+          for (let i=0, c=selection.rangeCount; i<c;
+            sel += selection.getRangeAt(i++).toString());
           return sel;
         case '%HTMLSEL%':
           if (htmlsel) return sel;
           if (selection.rangeCount < 1) return '';
 
           let serializer = new XMLSerializer();
-          for (let i=0, c=selection.rangeCount; i<c; (function(r) {
-            htmlsel += serializer.serializeToString(r.cloneContents());
-          })(selection.getRangeAt(i++)));
+          for (let i=0, c=selection.rangeCount; i<c;
+            htmlsel += serializer.serializeToString(selection.getRangeAt(i++).cloneContents()));
           return htmlsel;
       }
       return '';

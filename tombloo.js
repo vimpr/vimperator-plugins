@@ -1,4 +1,4 @@
-let PLUGIN_INFO = 
+let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Tombloo integrate plugin</description>
@@ -77,7 +77,7 @@ commands.addUserCommand(
     'Post by Tombloo',
     function (args, special) {
         //let f = Tombloo.Service.extractors[args.string];
-        let arg = args.string.replace(/\\\u0020/g, '\u0020');
+        let arg = args.string.replace(/\\(?=\u0020)/g, '');
         liberator.log(args.string, 0);
         liberator.log(arg, 0);
 
@@ -96,8 +96,8 @@ commands.addUserCommand(
             context.completions = candidates.filter(
                 function($_) this.test($_[0]),
                 new RegExp(context.filter, 'i')
-            )
-        },
+            );
+        }
     }
 );
 
