@@ -25,7 +25,7 @@ Cookie の管理をするプラグイン
 :cookiem[anager] -p[erm] list {hostname}:
   {hostname}のCookieのパーミッションを表示
 
-:cookiem[anager] -p[erm] add {hostname} {capability}: 
+:cookiem[anager] -p[erm] add {hostname} {capability}:
   {hostname}のCookieのパーミッションを設定
 
 :cookiem[anager] -p[erm] list {hostname}:
@@ -54,7 +54,7 @@ function getIterator(enum, interface){
     }
 }
 function cookieIterator() getIterator(CM.enumerator, Ci.nsICookie2);
-function cookiePermissionIterator() {
+function cookiePermissionIterator(){
     for (let perm in getIterator(PM.enumerator, Ci.nsIPermission)){
         if (perm.type = PERM_TYPE)
             yield perm;
@@ -88,7 +88,7 @@ function getHost(){
     var host;
     try {
         host = content.document.location.host;
-    } catch(e){}
+    } catch (e){}
     return host;
 }
 
@@ -99,7 +99,7 @@ buffer.addPageInfoSection("c", "Cookies", function(verbose){
     var hostname;
     try {
         hostname = content.window.location.host;
-    } catch(e) { return []; }
+    } catch (e){ return []; }
     return [[c.rawHost + c.path, c.name + " = " + c.value] for (c in cManager.stored.getByHostAndPath(hostname))];
 });
 
@@ -109,7 +109,7 @@ buffer.addPageInfoSection("c", "Cookies", function(verbose){
 commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
     function(args){
         if (args["-perm"]){
-            switch(args[0]){
+            switch (args[0]){
                 case "list":
                     let list = cManager.permission.list(args[1]);
                     liberator.echo(template.table("Cookie Permission", list));
@@ -129,9 +129,9 @@ commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
             }
             return;
         }
-        let host = args[1] || getHost();
+        var host = args[1] || getHost();
         if (!host) return;
-        switch(args[0]){
+        switch (args[0]){
             case "list":
                 let xml = <></>;
                 let tree = cManager.stored.getTree(host);
@@ -146,18 +146,18 @@ commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
             default:
                 liberator.echoerr("Invalid sub-command.");
         }
-    },{
+    }, {
         options: [
-            [["-perm","-p"], commands.OPTION_NOARG]
+            [["-perm", "-p"], commands.OPTION_NOARG]
         ],
         completer: function(context, args){
-            if(args["-perm"]){
+            if (args["-perm"]){
                 plugins.cookieManager.permission.completer(context, args);
             } else {
                 plugins.cookieManager.stored.completer(context, args);
             }
         },
-    },true);
+    }, true);
 // Command End }}}
 var cManager = {
     stored: { // {{{
@@ -175,7 +175,7 @@ var cManager = {
             return true;
         },
         getTree: function(hostAndPath){
-            let tree = {};
+            var tree = {};
             function getTree(name){
                 if (name in tree) return tree[name];
                 tree[name] = [];
@@ -194,7 +194,7 @@ var cManager = {
             if (args.length == 1){
                 context.title = ["SubCommand", "Description"];
                 context.completions = context.filter ?
-                    this.subcommands.filter(function(c) c[0].indexOf(context.filter) >= 0) : 
+                    this.subcommands.filter(function(c) c[0].indexOf(context.filter) >= 0) :
                     this.subcommands;
             } else if (args.length == 2){
                 let list = util.Array.uniq([c.rawHost + c.path for (c in this.getByHostAndPath())]).map(function(host) [host, "-"]);
@@ -214,8 +214,8 @@ var cManager = {
             return null;
         },
         add: function(hostname, capability, force){
-            let uri = util.newURI("http://" + hostname);
-            let perm = this.getByHost(hostname);
+            var uri = util.newURI("http://" + hostname);
+            var perm = this.getByHost(hostname);
             switch (typeof capability){
                 case "string":
                     capability = stringToCapability(capability);
@@ -227,7 +227,7 @@ var cManager = {
             }
             if (perm && force){
                 this.remove(hostname);
-            } 
+            }
             PM.add(uri, PERM_TYPE, capability);
         },
         remove: function(hostname){
@@ -240,14 +240,14 @@ var cManager = {
         list: function(filterReg){
             if (filterReg && !(filterReg instanceof RegExp)){
                 filterReg = new RegExp(filterReg.toString());
-            } else if (!filterReg) {
-                filterReg = new RegExp(".*");
+            } else if (!filterReg){
+                filterReg = new RegExp("");
             }
             return [[p.host, capabilityToString(p.capability)] for (p in cookiePermissionIterator())].filter(function($_) filterReg.test($_[0]));
         },
         subcommands: [
             ["list",   "list cookie permission"],
-            ["add" ,   "add cookie permission"],
+            ["add",    "add cookie permission"],
             ["remove", "remove cookie premission"]
         ],
         capabilityList: [
@@ -259,11 +259,11 @@ var cManager = {
             if (args.length == 1){
                 context.title = ["SubCommand", "Description"];
                 context.completions = context.filter ?
-                    this.subcommands.filter(function(c) c[0].indexOf(context.filter) >= 0) : 
+                    this.subcommands.filter(function(c) c[0].indexOf(context.filter) >= 0) :
                     this.subcommands;
             } else {
-                var suggestion = [];
-                switch(args[0]){
+                let suggestion = [];
+                switch (args[0]){
                     case "add":
                         if (args.length == 3){
                             context.title = ["Capability"];
@@ -271,9 +271,9 @@ var cManager = {
                                 this.capabilityList.filter(function($_) c[0].toLowerCase().indexOf(context.filter.toLowerCase()) == 0) :
                                 this.capabilityList;
                         } else if (args.length == 2){
-                            var host = getHost();
+                            let host = getHost();
                             if (host){
-                                var hosts = [];
+                                let hosts = [];
                                 host.split(".").reduceRight(function(p, c){
                                     let domain = c + "." + p;
                                     hosts.push([domain, "-"]);
@@ -290,14 +290,14 @@ var cManager = {
                     case "remove":
                         if (args.length > 2) return;
                         context.title = ["Host", "Capability"];
-                        var list = this.list();
+                        let list = this.list();
                         context.completions = context.filter ?
                             list.filter(function($_) $_[0].indexOf(context.filter) >= 0) : list;
                 }
             }
         },
     }, // }}}
-}
+};
 return cManager;
 })();
 
