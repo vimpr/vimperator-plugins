@@ -51,9 +51,9 @@ n:
 >||
 [
   {
-    "url":          "http://(.*).google.+/(search).+",
-    "nextLink":     "id('navbar')//td[last()]/a",
-    "pageElement":  "//div[@id='res']/div",
+    "url":          "^http://[^.]+\\.google\\.(?:[^.]+\\.)?[^./]+/search\\b",
+    "nextLink":     'id("navbar")//td[last()]/a',
+    "pageElement":  'id("res")/div',
     "exampleUrl":   "http://www.google.com/search?q=nsIObserver",
   },
 ]
@@ -88,10 +88,10 @@ var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "unde
                    false : $U.eval(liberator.globalVariables.nextlink_followlink);
 
 const MICROFORMAT = {
-    url:          '.*',
-    nextLink:     '//a[@rel="next"] | //link[@rel="next"]',
-    insertBefore: '//*[contains(@class, "autopagerize_insert_before")]',
-    pageElement:  '//*[contains(@class, "autopagerize_page_element")]',
+    url:          "^https?://.",
+    nextLink:     '//a[translate(nomalize-space(@rel), "ENTX", "entx")="next"] | //link[translate(normalize-space(@rel), "ENTX", "entx")="next"]',
+    insertBefore: '//*[contains(concat(" ", @class, " "), " autopagerize_insert_before ")]',
+    pageElement:  '//*[contains(concat(" ", @class, " "), " autopagerize_page_element ")]',
 }
 
 const nositeinfoActions = {
@@ -99,9 +99,8 @@ const nositeinfoActions = {
   f: function(doc, count) {
        if (count < 0) {
          return buffer.followDocumentRelationship("previous");
-       } else {
-         return buffer.followDocumentRelationship("next");
        }
+       return buffer.followDocumentRelationship("next");
      },
   e: function(doc, count) {
        var url = doc.location.href;
@@ -174,7 +173,7 @@ NextLink.prototype = {
   },
   getSiteinfo: function(doc) {
     var url = doc.location.href;
-    for (var i = 0, len = this.siteinfo.length; i < len; i++) {
+    for (let i = 0, len = this.siteinfo.length; i < len; i++) {
       if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
         return this.siteinfo[i];
       }
@@ -259,7 +258,7 @@ Autopager.prototype = {
     var req = this.createNextRequest(doc);
     if (!req) {
       value.isLoading = false;
-      var win = doc.defaultView;
+      let win = doc.defaultView;
       win.scrollTo(0, win.scrollMaxY);
       logger.echo("end of pages.");
       return true;
@@ -286,7 +285,7 @@ Autopager.prototype = {
     // set reqUrl link-state visited
     $H.addURI(makeURI(reqUrl), false, true, makeURI(url));
 
-    if (!pages || pages.length==0) return;
+    if (!pages || pages.length == 0) return;
 
     var addPageNum = this.getPageNum(doc) + 1;
     this.addPage(doc, resDoc, pages, reqUrl, addPageNum);
@@ -320,7 +319,7 @@ Autopager.prototype = {
     var xpath = '//*[@id="vimperator-nextlink-' + page + '"]';
     var [ elem ] = $U.getNodesFromXPath(xpath, doc);
     var win = doc.defaultView;
-    if(elem) {
+    if (elem) {
       let p = $U.getElementPosition(elem);
       win.scrollTo(0, p.top);
       return true;
@@ -337,7 +336,7 @@ Autopager.prototype = {
       return false;
 
     var reqUrl = $U.pathToURL(next, url, doc);
-    if(value.loadURLs.some(function(url) url==reqUrl)) return false;
+    if (value.loadURLs.some(function(url) url == reqUrl)) return false;
 
     var req = new libly.Request(
                 reqUrl, null,
@@ -358,12 +357,12 @@ Autopager.prototype = {
     var curPos = win.scrollY;
 
     // top of page
-    if(curPos <= 0) return 1.0;
+    if (curPos <= 0) return 1.0;
 
     // bottom of page
     if (curPos >= win.scrollMaxY) {
       if (markers.length > 0) {
-        var lastMarker = $U.getElementPosition(markers[markers.length-1]).top;
+        let lastMarker = $U.getElementPosition(markers[markers.length-1]).top;
         if (curPos <= lastMarker) return markers.length + 1;
       }
       return markers.length + 1.5;
@@ -371,8 +370,8 @@ Autopager.prototype = {
 
     // return n.5 if between n and n+1
     var page = 1.0;
-    for (var i = 0, len = markers.length; i < len; i++) {
-      var pos = $U.getElementPosition(markers[i]).top;
+    for (let i = 0, len = markers.length; i < len; i++) {
+      let pos = $U.getElementPosition(markers[i]).top;
       if (curPos == pos) return page + 1;
       if (curPos < pos) return page + 0.5;
       ++page;
@@ -411,20 +410,16 @@ Autopager.prototype = {
       let colNodes = getElementsByXPath("child::tr[1]/child::*[self::td or self::th]", insertParent);
 
       let colums = 0;
-      for (let i = 0, len = colNodes.length; i < len; i++) {
-        let col = colNodes[i].getAttribute("colspan");
+      for (let i = 0, l = colNodes.length, f = function(col) {
         colums += parseInt(col, 10) || 1;
-      }
-      let td = doc.createElement("td");
-      td.appendChild(p);
-      let tr = doc.createElement("tr");
+      }; i < l; f(colNodes[i++].getAttribute("colspan")));
+      let td = insertParent.insertBefore(doc.createElement("tr"), insertPoint)
+                           .appendChild(doc.createElement("td"));
       td.setAttribute("colspan", colums);
-      tr.appendChild(td);
-      insertParent.insertBefore(tr, insertPoint);
+      td.appendChild(p);
     } else if (tagName == "li") {
-      let li = doc.createElementNS(HTML_NAMESPACE, "li");
-      insertPoint.parentNode.insertBefore(li, insertPoint);
-      li.appendChild(p);
+      insertPoint.parentNode.insertBefore(doc.createElementNS(HTML_NAMESPACE, "li"), insertPoint)
+                 .appendChild(p);
     } else {
       insertPoint.parentNode.insertBefore(p, insertPoint);
     }
@@ -443,7 +438,7 @@ FollowLink.prototype = {
     function followXPath(xpath) {
       var [ elem ] = $U.getNodesFromXPath(xpath, doc);
       if (elem) {
-        var tagName = elem.tagName.toLowerCase();
+        let tagName = elem.tagName.toLowerCase();
         if (tagName == "link") {
           liberator.open(elem.href);
         } else {
@@ -457,14 +452,14 @@ FollowLink.prototype = {
     if (count < 0) {
       let xpath = [ "link", "a" ].map(function(e)
         "//" + e + '[translate(normalize-space(@rel), "PREV", "prev")="prev"]')
-        .join(" | ");
+                                 .join(" | ");
 
       if (followXPath(xpath)) return;
       buffer.followDocumentRelationship("previous");
     } else {
       let xpath = [ "link", "a" ].map(function(e)
         "//" + e + '[translate(normalize-space(@rel), "NEXT", "next")="next"]')
-        .join(" | ");
+                                 .join(" | ");
       if (followXPath(xpath)) return;
 
       if (value.siteinfo && followXPath(value.siteinfo.nextLink)) return;
