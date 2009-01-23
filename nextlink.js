@@ -89,7 +89,7 @@ var isFollowLink = typeof liberator.globalVariables.nextlink_followlink == "unde
 
 const MICROFORMAT = {
     url:          "^https?://.",
-    nextLink:     '//a[translate(nomalize-space(@rel), "ENTX", "entx")="next"] | //link[translate(normalize-space(@rel), "ENTX", "entx")="next"]',
+    nextLink:     '//a[translate(normalize-space(@rel), "NEXT", "next")="next"] | //link[translate(normalize-space(@rel), "NEXT", "next")="next"]',
     insertBefore: '//*[contains(concat(" ", @class, " "), " autopagerize_insert_before ")]',
     pageElement:  '//*[contains(concat(" ", @class, " "), " autopagerize_page_element ")]',
 }
