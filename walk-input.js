@@ -1,5 +1,5 @@
 // Vimperator plugin: 'Walk Input'
-// Last Change: 2008-11-19
+// Last Change: 2009-01-25
 // License: BSD
 // Version: 1.1
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
@@ -35,6 +35,8 @@ var walkinput = function (forward) {
         let r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = r.snapshotLength; i < l; ++i) {
             let e = r.snapshotItem(i);
+            if (/^none$/i.test(getComputedStyle(e, '').display))
+              continue;
             let ef = {element: e, frame: frame};
             list.push(ef);
             if (e == focused) {
@@ -59,7 +61,6 @@ var walkinput = function (forward) {
     if (!current || current.frame != elem.frame)
       elem.frame.focus();
     elem.element.focus();
-
 };
 
 mappings.addUserMap([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'],
