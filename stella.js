@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.15</version>
+  <version>0.16</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1520,10 +1520,10 @@ Thanks:
   *********************************************************************************/
 
   if (InVimperator) {
-    let estella = liberator.plugins.stella;
+    let estella = liberator.globalVariables.stella;
 
     let install = function () {
-      let stella = liberator.plugins.stella = new Stella();
+      let stella = liberator.globalVariables.stella = new Stella();
       stella.addUserCommands();
       liberator.log('Stella: installed.');
     };
@@ -1531,6 +1531,7 @@ Thanks:
     // すでにインストール済みの場合は、一度ファイナライズする
     // (デバッグ時に前のパネルが残ってしまうため)
     if (estella) {
+      liberator.log(estella)
       estella.finalize();
       install();
     } else {
