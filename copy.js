@@ -91,7 +91,6 @@ wedata から読込まない label のリストを定義します。
 
 liberator.plugins.exCopy = (function(){
 var excludeLabelsMap = {};
-liberator.globalVariables.copy_templates = null;
 if (!liberator.globalVariables.copy_templates){
     liberator.globalVariables.copy_templates = [
         { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
