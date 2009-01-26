@@ -288,7 +288,8 @@ var exCopyManager = {
                 copyString = e.toString();
             }
         } else {
-            if (!arg) arg = liberator.globalVariables.copy_templates[0];
+            if (!arg) arg = liberator.globalVariables.copy_templates[0].label;
+
             var template = getCopyTemplate(arg) || {value: arg};
             if (typeof template.custom == 'function'){
                 copyString = template.custom.call(this, template.value);
@@ -298,7 +299,9 @@ var exCopyManager = {
                 copyString = replaceVariable(template.value);
             }
         }
-        util.copyToClipboard(copyString || '');
+
+        if (copyString)
+            util.copyToClipboard(copyString);
         if (isError){
             liberator.echoerr('CopiedErrorString: `' + copyString + "'");
         } else {
