@@ -91,6 +91,7 @@ wedata から読込まない label のリストを定義します。
 
 liberator.plugins.exCopy = (function(){
 var excludeLabelsMap = {};
+var copy_templates = [];
 if (!liberator.globalVariables.copy_templates){
     liberator.globalVariables.copy_templates = [
         { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
@@ -101,7 +102,11 @@ if (!liberator.globalVariables.copy_templates){
     ];
 }
 
-liberator.globalVariables.copy_templates.forEach(function(template){
+copy_templates = liberator.globalVariables.copy_templates.map(function(t){
+    return { label: t.label, value: t.value, custom: t.custom, map: t.map }
+});
+
+copy_templates.forEach(function(template){
     if (typeof template.map == 'string')
         addUserMap(template.label, [template.map]);
     else if (template.map instanceof Array)
@@ -120,7 +125,7 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
                 return;
             }
             context.title = ['Template','Value'];
-            var templates = liberator.globalVariables.copy_templates.map(function(template)
+            var templates = copy_templates.map(function(template)
                 [template.label, liberator.modules.util.escapeString(template.value, '"')]
             );
             if (!context.filter){ context.completions = templates; return; }
@@ -129,7 +134,8 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
             context.completions = templates.filter(function(template) template[0].toLowerCase().indexOf(filter) == 0);
         },
         bang: true
-    }
+    },
+    true
 );
 
 function addUserMap(label, map){
@@ -141,7 +147,7 @@ function addUserMap(label, map){
 }
 function getCopyTemplate(label){
     var ret = null;
-    liberator.globalVariables.copy_templates.some(function(template)
+    copy_templates.some(function(template)
         template.label == label ? (ret = template) && true : false);
     return ret;
 }
@@ -254,7 +260,7 @@ function wedataRegister(item){
 var exCopyManager = {
     add: function(label, value, custom, map){
         var template = {label: label, value: value, custom: custom, map: map};
-        liberator.globalVariables.copy_templates.unshift(template);
+        copy_templates.unshift(template);
         if (map) addUserMap(label, map);
 
         return template;
@@ -288,7 +294,7 @@ var exCopyManager = {
                 copyString = e.toString();
             }
         } else {
-            if (!arg) arg = liberator.globalVariables.copy_templates[0].label;
+            if (!arg) arg = copy_templates[0].label;
 
             var template = getCopyTemplate(arg) || {value: arg};
             if (typeof template.custom == 'function'){
@@ -318,7 +324,7 @@ if (liberator.globalVariables.copy_use_wedata){
         }
 
         var libly = liberator.plugins.libly;
-        liberator.globalVariables.copy_templates.forEach(function(item) excludeLabelsMap[item.label] = item.value);
+        copy_templates.forEach(function(item) excludeLabelsMap[item.label] = item.value);
         if (liberator.globalVariables.copy_wedata_exclude_labels)
             liberator.globalVariables.copy_wedata_exclude_labels.forEach(function(item) excludeLabelsMap[item] = 1);
         var wedata = new libly.Wedata("vimp%20copy");
