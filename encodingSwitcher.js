@@ -82,25 +82,29 @@ function completion(array, filter){
 }
 var sbCharDefault = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('default'));
 const DEFAULT_CHARSET = sbCharDefault.GetStringFromName('intl.charset.default');
-liberator.options.add(['fileencoding','fenc'],'set the charactor encoding for the current page','string', DEFAULT_CHARSET,
+options.add(['fileencoding','fenc'],'set the charactor encoding for the current page','string', DEFAULT_CHARSET,
     {
+        scope: options.OPTION_SCOPE_LOCAL,
         setter: function(value){
-            if (!value) return;
-            value = getEncoding(value);
-            SetForcedCharset(value);
-            //SetDefaultCharacterSet(value);
+            if (value) {
+                value = getEncoding(value);
+                liberator.log('set: ' + value)
+                SetForcedCharset(value);
+            }
+            return value;
         },
         getter: function()
             getBrowser().docShell.QueryInterface(Ci.nsIDocCharset).charset,
         validator: function(value)
-            isValid( encodings, value),
-        completer: function(filter)
-            [0,completion( encodings, filter)]
+            isValid(encodings, value),
+        completer: function(context) {
+            context.completions = completion(encodings, context.filter);
+        }
     }
 );
 var sbCharDetector = sbService.createBundle(gPrefService.getDefaultBranch('intl.charset.').getCharPref('detector'));
 const DEFAULT_DETECTOR = createDetector(sbCharDetector.GetStringFromName('intl.charset.detector'))[0];
-liberator.options.add(['autodetector','audet'],'set auto detect character encoding','string',DEFAULT_DETECTOR,
+options.add(['autodetector','audet'],'set auto detect character encoding','string',DEFAULT_DETECTOR,
     {
         setter: function(value){
             var pref = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefBranch);
@@ -124,8 +128,9 @@ liberator.options.add(['autodetector','audet'],'set auto detect character encodi
         },
         validator: function(value)
             isValid( detectors, value),
-        completer: function(filter)
-            [0,completion( detectors, filter)]
+        completer: function(context) {
+            context.completions = completion(detectors, context.filter);
+        }
     }
 );
 function listCharset(arg, current, list){
@@ -146,20 +151,22 @@ function listCharset(arg, current, list){
     str.push('</table>');
     liberator.echo( str.join(''), true);
 }
-liberator.commands.addUserCommand(['listencoding','lsenc'],'list all encodings',
+commands.addUserCommand(['listencoding','lsenc'],'list all encodings',
     function(arg){
-        listCharset(arg, liberator.options.fileencoding, encodings);
+        listCharset(arg, options.fileencoding, encodings);
     },{
-        completer: function(filter)
-            [0,completion(encodings, filter)]
+        completer: function(context) {
+            context.completions = completion(encodings, context.filter);
+        }
     }
 );
-liberator.commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
+commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
     function(arg){
-        listCharset(arg, liberator.options.autodetector, detectors);
+        listCharset(arg, options.autodetector, detectors);
     },{
-        completer: function(filter)
-            [0,completion(detectors, filter)]
+        completer: function(context) {
+            context.completions = completion(detectors, context.filter);
+        }
     }
 );
 
