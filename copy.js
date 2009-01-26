@@ -3,12 +3,12 @@ var PLUGIN_INFO =
 <name>{NAME}</name>
 <description>enable to copy strings from a template (like CopyURL+)</description>
 <description lang="ja">テンプレートから文字列のコピーを可能にします（CopyURL+みたいなもの）</description>
-<minVersion>1.1</minVersion>
+<minVersion>2.0</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.5</version>
+<version>0.6</version>
 <detail><![CDATA[
 == Command ==
 :copy {copyString}:
@@ -67,6 +67,25 @@ custom:
         {Array}[1]:
             String or Function
         see http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace
+
+== Options ==
+>||
+liberator.globalVariables.copy_use_wedata = false; // false by default
+||<
+true に設定すると wedata からテンプレートを読込みます。
+>||
+liberator.globalVariables.copy_wedata_include_custom = true; // false by default
+||<
+custom が設定された wedata を読込みます。
+SandBox でなく、window.eval を利用してオブジェクトする為、
+セキュリティ上の理由で初期設定は false になっています。
+true に設定する場合は、動作を理解したうえ自己責任でご利用ください。
+>||
+liberator.globalVariables.copy_wedata_exclude_labels = [
+    'pathtraqnormalize',
+];
+||<
+wedata から読込まない label のリストを定義します。
 ]]></detail>
 </VimperatorPlugin>;
 
@@ -179,7 +198,7 @@ var exCopyManager = {
         var isError = false;
         if (special && arg){
             try {
-                copyString = liberator.eval( arg);
+                copyString = liberator.eval(arg);
                 switch (typeof copyString){
                     case 'object':
                         copyString = copyString === null ? 'null' : copyString.toSource();
@@ -218,7 +237,45 @@ var exCopyManager = {
         }
     }
 };
+
+if (liberator.globalVariables.copy_use_wedata){
+    var excludeLabelsMap = {};
+    function loadWedata(){
+        if (!liberator.plugins.libly){
+            liberator.echomsg("need a _libly.js when use wedata.");
+            return;
+        }
+
+        var libly = liberator.plugins.libly;
+        var logger = libly.$U.getLogger("copy");
+
+        liberator.globalVariables.copy_templates.forEach(function(item) excludeLabelsMap[item.label] = item.value);
+        if (liberator.globalVariables.copy_wedata_exclude_labels)
+            liberator.globalVariables.copy_wedata_exclude_labels.forEach(function(item) excludeLabelsMap[item] = 1);
+        var wedata = new libly.Wedata("vimp%20copy");
+        wedata.getItems(24 * 60 * 60 * 1000,
+            function(item){
+                item = item.data;
+                if (excludeLabelsMap[item.label]) return;
+                var custom;
+                try{
+                    if (liberator.globalVariables.copy_wedata_include_custom)
+                        custom = window.eval("(" + item.custom + ")");
+                } catch (e){
+                    logger.echoerr(e);
+                    logger.log(item.custom);
+                    return;
+                }
+                exCopyManager.add(item.label, item.value, custom, item.map);
+            }
+        );
+
+    }
+    loadWedata();
+}
+
 return exCopyManager;
 })();
 
 // vim: set fdm=marker sw=4 ts=4 et:
+
