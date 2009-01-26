@@ -90,6 +90,8 @@ wedata から読込まない label のリストを定義します。
 </VimperatorPlugin>;
 
 liberator.plugins.exCopy = (function(){
+var excludeLabelsMap = {};
+liberator.globalVariables.copy_templates = null;
 if (!liberator.globalVariables.copy_templates){
     liberator.globalVariables.copy_templates = [
         { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
@@ -147,7 +149,7 @@ function getCopyTemplate(label){
 function replaceVariable(str){
     if (!str) return '';
     var win = new XPCNativeWrapper(window.content.window);
-    var sel = '',htmlsel = '';
+    var sel = '', htmlsel = '';
     var selection =  win.getSelection();
     function replacer(value){ //{{{
         switch(value){
@@ -182,6 +184,74 @@ function replaceVariable(str){
     return str.replace(/%(TITLE|URL|SEL|HTMLSEL)%/g, replacer);
 }
 
+function wedataRegister(item){
+    var libly = liberator.plugins.libly;
+    var logger = libly.$U.getLogger("copy");
+    item = item.data;
+    if (excludeLabelsMap[item.label]) return;
+
+    if (item.custom && item.custom.toLowerCase().indexOf('function') != -1) {
+        if (!liberator.globalVariables.copy_wedata_include_custom ||
+             item.label == 'test') {
+            logger.log('skip: ' + item.label);
+            return;
+        }
+
+        let custom = (function(item){
+
+            return function(value){
+                var STORE_KEY = 'plugins-copy-ok-func';
+                var store = storage.newMap(STORE_KEY, true);
+                var check = store.get(item.label);
+                var ans;
+
+                if (!check){
+                    ans = window.confirm(
+                        'warnning!!!: execute "' + item.label + '" ok ?\n' +
+                        '(this function is working with unsafe sandbox.)\n\n' +
+                        '----- execute code -----\n\n' +
+                        'value: ' + item.value + '\n' +
+                        'function: ' +
+                        item.custom
+                    );
+                } else {
+                    if (item.value == check.value &&
+                        item.custom == check.custom &&
+                        item.map == check.map){
+                        ans = true;
+                    } else {
+                        ans = window.confirm(
+                            'warnning!!!: "' + item.label + '" was changed when you registered the function.\n' +
+                            '(this function is working with unsafe sandbox.)\n\n' +
+                            '----- execute code -----\n\n' +
+                            'value: ' + item.value + '\n' +
+                            'function: ' +
+                            item.custom
+                        );
+                    }
+                }
+
+                if (!ans) return;
+                store.set(item.label, item);
+                store.save();
+
+                var func;
+                try{
+                    func = window.eval('(' + item.custom + ')');
+                } catch (e){
+                    logger.echoerr(e);
+                    logger.log(item.custom);
+                    return;
+                }
+                return func(value);
+            };
+        })(item);
+
+        exCopyManager.add(item.label, item.value, custom, item.map);
+    } else {
+        exCopyManager.add(item.label, item.value, null, item.map);
+    }
+}
 var exCopyManager = {
     add: function(label, value, custom, map){
         var template = {label: label, value: value, custom: custom, map: map};
@@ -229,17 +299,16 @@ var exCopyManager = {
                 copyString = replaceVariable(template.value);
             }
         }
-        util.copyToClipboard(copyString);
+        util.copyToClipboard(copyString || '');
         if (isError){
             liberator.echoerr('CopiedErrorString: `' + copyString + "'");
         } else {
-            liberator.echo('CopiedString: `' + util.escapeHTML(copyString) + "'");
+            liberator.echo('CopiedString: `' + util.escapeHTML(copyString || '') + "'");
         }
     }
 };
 
 if (liberator.globalVariables.copy_use_wedata){
-    var excludeLabelsMap = {};
     function loadWedata(){
         if (!liberator.plugins.libly){
             liberator.echomsg("need a _libly.js when use wedata.");
@@ -247,29 +316,11 @@ if (liberator.globalVariables.copy_use_wedata){
         }
 
         var libly = liberator.plugins.libly;
-        var logger = libly.$U.getLogger("copy");
-
         liberator.globalVariables.copy_templates.forEach(function(item) excludeLabelsMap[item.label] = item.value);
         if (liberator.globalVariables.copy_wedata_exclude_labels)
             liberator.globalVariables.copy_wedata_exclude_labels.forEach(function(item) excludeLabelsMap[item] = 1);
         var wedata = new libly.Wedata("vimp%20copy");
-        wedata.getItems(24 * 60 * 60 * 1000,
-            function(item){
-                item = item.data;
-                if (excludeLabelsMap[item.label]) return;
-                var custom;
-                try{
-                    if (liberator.globalVariables.copy_wedata_include_custom)
-                        custom = window.eval("(" + item.custom + ")");
-                } catch (e){
-                    logger.echoerr(e);
-                    logger.log(item.custom);
-                    return;
-                }
-                exCopyManager.add(item.label, item.value, custom, item.map);
-            }
-        );
-
+        wedata.getItems(24 * 60 * 60 * 1000, wedataRegister);
     }
     loadWedata();
 }
