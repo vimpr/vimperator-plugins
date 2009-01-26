@@ -206,7 +206,7 @@ function wedataRegister(item){
 
                 if (!check){
                     ans = window.confirm(
-                        'warnning!!!: execute "' + item.label + '" ok ?\n' +
+                        'warning!!!: execute "' + item.label + '" ok ?\n' +
                         '(this function is working with unsafe sandbox.)\n\n' +
                         '----- execute code -----\n\n' +
                         'value: ' + item.value + '\n' +
@@ -220,7 +220,7 @@ function wedataRegister(item){
                         ans = true;
                     } else {
                         ans = window.confirm(
-                            'warnning!!!: "' + item.label + '" was changed when you registered the function.\n' +
+                            'warning!!!: "' + item.label + '" was changed when you registered the function.\n' +
                             '(this function is working with unsafe sandbox.)\n\n' +
                             '----- execute code -----\n\n' +
                             'value: ' + item.value + '\n' +
