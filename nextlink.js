@@ -1,8 +1,8 @@
 /*** BEGIN LICENSE BLOCK {{{
   Copyright (c) 2008 suVene<suvene@zeromemory.info>
 
-  distributable under the terms of an MIT-style license.
-  http://www.opensource.jp/licenses/mit-license.html
+  Released under the GPL license
+  http://www.gnu.org/copyleft/gpl.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
 var PLUGIN_INFO =
@@ -13,7 +13,7 @@ var PLUGIN_INFO =
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
   <version>0.3.9</version>
-  <license>MIT</license>
+  <license>GPL</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
