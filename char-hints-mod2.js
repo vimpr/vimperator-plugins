@@ -4,10 +4,10 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
-    <date>2008/12/22 14:57:34</date>
+    <date>2009/1/27 18:56</date>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -17,18 +17,16 @@ and
 select charhint label in uppercase.
 
 == SETTING ==
-let g:hinstchars:
+let g:hintchars:
     set character used by char-hint.
     e.g.)
-      let g:hinstchars="hjkl"
-let g:hintsio:
+      let g:hintchars="hjkl"
+let g:hintsinput:
     - "i" setting char-hint input lowercase.
     - "I" setting char-hint input uppercase.
-    - "o" setting char-hint show lowercase.
-    - "O" setting char-hint show uppercase.
-    Default setting is "IO".
+    Default setting is "I".
     e.g.)
-      let g:histsio="i"
+      let g:hintinput="i"
 
 == TODO ==
      ]]></detail>
@@ -39,18 +37,16 @@ let g:hintsio:
 大文字は文字ラベルの選択に使います。
 
 == SETTING ==
-let g:hinstchars:
+let g:hintchars:
     set character used by char-hint.
     e.g.)
-      let g:hinstchars="hjkl"
-let g:hintsio:
+      let g:hintchars="hjkl"
+let g:hintinput:
     - "i" setting char-hint input lowercase.
     - "I" setting char-hint input uppercase.
-    - "o" setting char-hint show lowercase.
-    - "O" setting char-hint show uppercase.
-    Default setting is "IO".
+    Default setting is "I".
     e.g.)
-      let g:histsio="i"
+      let g:hintinput="i"
 
 == TODO ==
      ]]></detail>
@@ -65,7 +61,6 @@ let g:hintsio:
     let hintchars = DEFAULT_HINTCHARS;
     let inputCase = function(str) str.toUpperCase();
     let inputRegex = /[A-Z]/;
-    let showCase = function(str) str.toUpperCase();
 
     function chars2num(chars) //{{{
     {
@@ -89,33 +84,67 @@ let g:hintsio:
 
         return chars;
     } //}}}
-    function showCharHints() //{{{
+    function getStartNum(base, count) //{{{
     {
-        function showHints(win)
-        {
-            for(let elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))
-            {
-                let num = elem.getAttribute("number");
-                let hintchar = num2chars(parseInt(num, 10));
-                elem.setAttribute("hintchar", showCase(hintchar));
-                if(isValidHint(hintchar))
-                    validHints.push(elem);
-            }
-            Array.forEach(win.frames, showHints);
+        let figure = 1;
+        while((count/=base) >= 1.0) {
+            ++figure;
         }
-
-        validHints = [];
-        showHints(window.content);
+        return Math.pow(base, figure-1) - 1;
     } //}}}
-    function isValidHint(hint) //{{{
+    function getCharHints(win) //{{{
     {
-        if(hintInput.length == 0 ) return false;
-        return inputCase(hint).indexOf(hintInput) == 0;
+        let hints = [];
+        (function (win) {
+            let elems = [elem for(elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))];
+            hints = hints.concat(elems);
+            Array.forEach(win.frames, arguments.callee);
+        })(win);
+        return hints;
     } //}}}
-    function setIOType(type) //{{{
+    function showCharHints(hints) //{{{
+    {
+        let start = getStartNum(hintchars.length, hints.length);
+        for(let i=0,len=hints.length;i<len;++i) {
+            let hint = hints[i];
+            let num = hint.getAttribute("number");
+            let hintchar = num2chars(parseInt(num, 10)+start);
+            hint.setAttribute("hintchar", hintchar.toUpperCase());
+        }
+    } //}}}
+    function isValidHint(hintInput, hint) //{{{
+    {
+        if(hintInput.length == 0) return false;
+        let hintchar = hint.getAttribute("hintchar");
+        return inputCase(hintchar).indexOf(hintInput) == 0;
+    } //}}}
+    function processHintInput(hintInput, hints) //{{{
+    {
+        let start = getStartNum(hintchars.length, hints.length);
+        let num = chars2num(hintInput)-start;
+        if(num < 0) return;
+        let numstr = String(num);
+        // no setTimeout, don't run nice ?
+        setTimeout(function () {
+            for(let i=0,l=numstr.length;i<l;++i) {
+                let num = numstr[i];
+                let alt = new Object;
+                alt.liberatorString = num;
+                charhints.original.onEvent(alt);
+            }
+            statusline.updateInputBuffer(hintInput);
+            let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
+            if(validHints.length == 1) {
+                charhints.original.processHints(true);
+                return true;
+            }
+        }, 10);
+    } //}}}
+    function setInputCase(type) //{{{
     {
         switch (type)
         {
+            default:
             case "I":
                 inputCase = function(str) str.toUpperCase();
                 inputRegex = /[A-Z]/;
@@ -124,23 +153,17 @@ let g:hintsio:
                 inputCase = function(str) str.toLowerCase();
                 inputRegex = /[a-z]/;
                 break;
-            case "O":
-                showCase = function(str) str.toUpperCase();
-                break;
-            case "o":
-                showCase = function(str) str.toLowerCase();
-                break;
         }
     } //}}}
 
     var hintInput = "";
-    var validHints = [];
     var charhints = plugins.charhints = {
         show: function (minor, filter, win) //{{{
         {
             charhints.original.show(minor, filter, win);
             hintInput = "";
-            showCharHints();
+            let hints = getCharHints(window.content);
+            showCharHints(hints);
         }, //}}}
         onInput: function (event) //{{{
         {
@@ -156,24 +179,9 @@ let g:hintsio:
                     hintInput += hintString[i];
                 }
             }
-            showCharHints();
-            if(hintInput.length>0) {
-                let numstr = String(chars2num(hintInput));
-                // no setTimeout, don't run nice
-                setTimeout(function () {
-                    for(let i=0,l=numstr.length;i<l;++i) {
-                        let num = numstr[i];
-                        let alt = new Object;
-                        alt.liberatorString = num;
-                        charhints.original.onEvent(alt);
-                    }
-                    statusline.updateInputBuffer(hintInput);
-                    if(validHints.length == 1) {
-                        charhints.original.processHints(true);
-                        return true;
-                    }
-                }, 10);
-            }
+            let hints = getCharHints(window.content);
+            showCharHints(hints);
+            if(hintInput.length>0) processHintInput(hintInput, hints);
         }, //}}}
         onEvent: function (event) //{{{
         {
@@ -200,10 +208,10 @@ let g:hintsio:
             hints.onEvent = charhints.onEvent;
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
-            liberator.execute(":hi Hint::after content: attr(hintchar)");
-            if(liberator.globalVariables.hintsio) {
-                let hintsio = liberator.globalVariables.hintsio;
-                for(let i=hintsio.length;i-->0;setIOType(hintsio[i]));
+            liberator.execute(":hi Hint::after content: attr(hintchar)", true, true);
+            if(liberator.globalVariables.hintsinput) {
+                let hintsinput = liberator.globalVariables.hintsinput;
+                setInputCase(liberator.globalVariables.hintsinput);
             }
             if(liberator.globalVariables.hintchars) {
                 hintchars = liberator.globalVariables.hintchars;
