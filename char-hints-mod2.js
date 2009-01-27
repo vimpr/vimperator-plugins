@@ -4,10 +4,10 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
-    <date>2009/1/27 18:56</date>
+    <date>2009/1/27 23:52</date>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -89,19 +89,20 @@ let g:hintsio:
 
         return chars;
     } //}}}
-    function getStartNum(base, count) //{{{
+    // get Most Significant Digit
+    function getMSD(base, count) //{{{
     {
-        let figure = 1;
-        while((count/=base) >= 1.0) {
-            ++figure;
+        let next;
+        while((next = Math.floor(count/base)) > 0) {
+            count = next;
         }
-        return Math.pow(base, figure-1) - 1;
+        return count;
     } //}}}
     function getCharHints(win) //{{{
     {
         let hints = [];
         (function (win) {
-            let elems = [elem for(elem in buffer.evaluateXPath("//*[@liberator:highlight and @number]", win.document))];
+            let elems = [elem for(elem in buffer.evaluateXPath('//*[@liberator:highlight="Hint" and @number]', win.document))];
             hints = hints.concat(elems);
             Array.forEach(win.frames, arguments.callee);
         })(win);
@@ -109,11 +110,11 @@ let g:hintsio:
     } //}}}
     function showCharHints(hints) //{{{
     {
-        let start = getStartNum(hintchars.length, hints.length);
+        let msd = getMSD(hintchars.length, hints.length);
         for(let i=0,len=hints.length;i<len;++i) {
             let hint = hints[i];
             let num = hint.getAttribute("number");
-            let hintchar = num2chars(parseInt(num, 10)+start);
+            let hintchar = num2chars(parseInt(num, 10)+msd);
             hint.setAttribute("hintchar", showCase(hintchar));
         }
     } //}}}
@@ -145,8 +146,8 @@ let g:hintsio:
     } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
-        let start = getStartNum(hintchars.length, hints.length);
-        let num = chars2num(hintInput)-start;
+        let msd = getMSD(hintchars.length, hints.length);
+        let num = chars2num(hintInput)-msd;
         if(num < 0) return;
         let numstr = String(num);
         // no setTimeout, don't run nice ?
