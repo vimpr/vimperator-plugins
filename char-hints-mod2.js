@@ -21,12 +21,14 @@ let g:hintchars:
     set character used by char-hint.
     e.g.)
       let g:hintchars="hjkl"
-let g:hintsinput:
+let g:hintsio:
     - "i" setting char-hint input lowercase.
     - "I" setting char-hint input uppercase.
-    Default setting is "I".
+    - "o" setting char-hint show lowercase.
+    - "O" setting char-hint show uppercase.
+    Default setting is "IO".
     e.g.)
-      let g:hintinput="i"
+      let g:histsio="i"
 
 == TODO ==
      ]]></detail>
@@ -41,12 +43,14 @@ let g:hintchars:
     set character used by char-hint.
     e.g.)
       let g:hintchars="hjkl"
-let g:hintinput:
+let g:hintsio:
     - "i" setting char-hint input lowercase.
     - "I" setting char-hint input uppercase.
-    Default setting is "I".
+    - "o" setting char-hint show lowercase.
+    - "O" setting char-hint show uppercase.
+    Default setting is "IO".
     e.g.)
-      let g:hintinput="i"
+      let g:histsio="i"
 
 == TODO ==
      ]]></detail>
@@ -61,6 +65,7 @@ let g:hintinput:
     let hintchars = DEFAULT_HINTCHARS;
     let inputCase = function(str) str.toUpperCase();
     let inputRegex = /[A-Z]/;
+    let showCase = function(str) str.toUpperCase();
 
     function chars2num(chars) //{{{
     {
@@ -109,7 +114,7 @@ let g:hintinput:
             let hint = hints[i];
             let num = hint.getAttribute("number");
             let hintchar = num2chars(parseInt(num, 10)+start);
-            hint.setAttribute("hintchar", hintchar.toUpperCase());
+            hint.setAttribute("hintchar", showCase(hintchar));
         }
     } //}}}
     function isValidHint(hintInput, hint) //{{{
@@ -117,6 +122,26 @@ let g:hintinput:
         if(hintInput.length == 0) return false;
         let hintchar = hint.getAttribute("hintchar");
         return inputCase(hintchar).indexOf(hintInput) == 0;
+    } //}}}
+    function setIOType(type) //{{{
+    {
+        switch (type)
+        {
+            case "I":
+                inputCase = function(str) str.toUpperCase();
+                inputRegex = /[A-Z]/;
+                break;
+            case "i":
+                inputCase = function(str) str.toLowerCase();
+                inputRegex = /[a-z]/;
+                break;
+            case "O":
+                showCase = function(str) str.toUpperCase();
+                break;
+            case "o":
+                showCase = function(str) str.toLowerCase();
+                break;
+        }
     } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
@@ -209,9 +234,9 @@ let g:hintinput:
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
 
             liberator.execute(":hi Hint::after content: attr(hintchar)", true, true);
-            if(liberator.globalVariables.hintsinput) {
-                let hintsinput = liberator.globalVariables.hintsinput;
-                setInputCase(liberator.globalVariables.hintsinput);
+            if(liberator.globalVariables.hintsio) {
+                let hintsio = liberator.globalVariables.hintsio;
+                for(let i=hintsio.length;i-->0;setIOType(hintsio[i]));
             }
             if(liberator.globalVariables.hintchars) {
                 hintchars = liberator.globalVariables.hintchars;
