@@ -1,8 +1,14 @@
-/**
- * For Vimperator 2.0pre
- * @author mattn <mattn.jp@gmail.com>
- */
-
+var PLUGIN_INFO =
+<VimperatorPlugin>
+	<name>{NAME}</name>
+	<description>Add Hatena Star.</description>
+	<description lang="ja">はてなスターをつける。</description>
+	<author mail="mattn.jp@gmail.com">mattn</author>
+	<version>0.1.0</version>
+	<minVersion>2.0pre</minVersion>
+	<maxVersion>2.0pre</maxVersion>
+	<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatenaStar.js</updateURL>
+</VimperatorPlugin>;
 (function() {
 
 const Cc = Components.classes;
