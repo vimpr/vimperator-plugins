@@ -4,10 +4,10 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
-    <date>2009/1/27 23:52</date>
+    <date>2009/1/28 15:34</date>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -98,6 +98,10 @@ let g:hintsio:
         }
         return count;
     } //}}}
+    function getStartNumber(base, count) //{{{
+    {
+        return count<base ? 0 : getMSD(base, count);
+    } //}}}
     function getCharHints(win) //{{{
     {
         let hints = [];
@@ -110,11 +114,11 @@ let g:hintsio:
     } //}}}
     function showCharHints(hints) //{{{
     {
-        let msd = getMSD(hintchars.length, hints.length);
+        let start = getStartNumber(hintchars.length, hints.length);
         for(let i=0,len=hints.length;i<len;++i) {
             let hint = hints[i];
             let num = hint.getAttribute("number");
-            let hintchar = num2chars(parseInt(num, 10)+msd);
+            let hintchar = num2chars(parseInt(num, 10)+start);
             hint.setAttribute("hintchar", showCase(hintchar));
         }
     } //}}}
@@ -146,8 +150,8 @@ let g:hintsio:
     } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
-        let msd = getMSD(hintchars.length, hints.length);
-        let num = chars2num(hintInput)-msd;
+        let start = getStartNumber(hintchars.length, hints.length);
+        let num = chars2num(hintInput)-start;
         if(num < 0) return;
         let numstr = String(num);
         // no setTimeout, don't run nice ?
