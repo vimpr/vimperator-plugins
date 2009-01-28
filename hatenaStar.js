@@ -43,6 +43,9 @@ function blink(aNode) {
 
 function addHatenaStar (elem) {
 	var e = document.createEvent('MouseEvents');
+	// "Hatena.Star.AddButton.selectedText" is initialized on mouseover.
+	e.initMouseEvent('mouseover', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, elem);
+	elem.dispatchEvent(e);
 	e.initMouseEvent('click', true, true, window, 1, 10, 50, 10, 50, 0, 0, 0, 0, 1, elem);
 	elem.dispatchEvent(e);
 }
