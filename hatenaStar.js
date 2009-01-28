@@ -2,7 +2,7 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 	<name>{NAME}</name>
 	<description>Add Hatena Star.</description>
-	<description lang="ja">‚Í‚Ä‚ÈƒXƒ^[‚ğ‚Â‚¯‚éB</description>
+	<description lang="ja">ã¯ã¦ãªã‚¹ã‚¿ãƒ¼ã‚’ã¤ã‘ã‚‹ã€‚</description>
 	<author mail="mattn.jp@gmail.com">mattn</author>
 	<version>0.1.0</version>
 	<minVersion>2.0pre</minVersion>
