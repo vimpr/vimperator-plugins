@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
@@ -117,7 +117,14 @@ let g:hintlabeling:
         } else if(count >= Math.pow(base, 2)) {
             return base;
         }
-        return Math.floor(count / base);
+        var start = Math.floor(count / base);
+        var adjust = count + start;
+        var next_start;
+        while(start != (next_start = Math.floor(adjust / base))) {
+            adjust += start;
+            start = next_start;
+        }
+        return start;
     } //}}}
     function getCharHints(win) //{{{
     {
