@@ -1,19 +1,89 @@
-// ==VimperatorPlugin==
-// @name           Kawase
-// @description-ja 外国為替換算
-// @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.0
-// @author         anekos (anekos@snca.net)
-// ==/VimperatorPlugin==
-//
-// Usage-ja:
-//  引数書式
-//    :kawase[!] <金額> [<ソース> [<ターゲット>]]
-//  ソースをターゲットに換算します。
-//  "!" 指定でクリップボードにコピーされます。
-//
-// Exsample:
-//    :kawase 30000 JPY THB
+/* {{{
+Copyright (c) 2008, anekos.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+    3. The names of the authors may not be used to endorse or promote products
+       derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+
+###################################################################################
+# http://sourceforge.jp/projects/opensource/wiki/licenses%2Fnew_BSD_license       #
+# に参考になる日本語訳がありますが、有効なのは上記英文となります。                #
+###################################################################################
+
+}}} */
+
+// PLUGIN_INFO {{{
+let PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>Exchange Converter</name>
+  <name lang="ja">外国為替換算</name>
+  <description>for exchangeconvertion</description>
+  <description lang="ja">為替換算をします</description>
+  <version>1.1</version>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <license>new BSD License (Please read the source code comments of this plugin)</license>
+  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0pre</maxVersion>
+  <detail><![CDATA[
+    == Usage ==
+      :kawase[!] <VALUE> [<SOURCE> [<TARGET>]]:
+      :kawase[!] <VALUE> <SOURCE1> <SOURCE2> ... <TARGET>:
+        Convert <SOURCE> to <TARGET>.
+        When used with "!", copy result to clipboard.
+    === Example ===
+       :kawase 30000 JPY THB
+    == Global Variables ==
+      - g:umihara_default_source
+      - g:umihara_default_target
+      === Example ===
+      >||
+        let g:umihara_default_source="USD"
+        let g:umihara_default_target="JPY"
+      ||<
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    == Usage ==
+      :kawase[!] <金額> [<ソース> [<ターゲット>]]:
+      :kawase[!] <金額> <ソース1> <ソース2> ... <ターゲット>:
+        ソースをターゲットに換算します。
+        "!" 指定でクリップボードにコピーされます。
+      === Example ===
+        >||
+          :kawase 30000 JPY THB
+        ||<
+    == Global Variables ==
+      引数省略時のデフォルト値を設定します
+      - g:umihara_default_source
+      - g:umihara_default_target
+      === Example ===
+        >||
+          let g:umihara_default_source="USD"
+          let g:umihara_default_target="JPY"
+        ||<
+  ]]></detail>
+</VimperatorPlugin>;
+// }}}
 
 (function () {
 
@@ -64,8 +134,18 @@
     ['RUB', '\u30ed\u30b7\u30a2\u30f3 \u30eb\u30fc\u30d6\u30eb'],
   ];
 
+  function echo (msg) {
+    liberator.echo(<pre>{msg}</pre>);
+  }
+
+  let resultBuffer = '';
+
   function kawase (value, clipboard, from, to) {
     [from, to] = [from || defaultSource, to || defaultTarget].map(function (it) it.toUpperCase());
+    if (from == '-')
+      from = defaultSource;
+    if (to == '-')
+      to = defaultTarget;
     let url = 'http://quote.yahoo.co.jp/m5?a=' + value + '&s=' + from + '&t=' + to;
     var req = new XMLHttpRequest();
     req.open('GET', url);
@@ -78,11 +158,12 @@
                      '\n ' + to + ': ' + m[3] +
                      '\n rate: ' + m[2] +
                      '\n time: ' + m[1];
-          liberator.echo(text);
-          if (clipboard)
-            liberator.modules.util.copyToClipboard(text);
+          echo(text);
+          if (clipboard) {
+            resultBuffer += text + '\n';
+            util.copyToClipboard(resultBuffer);
+          }
         } else {
-          //liberator.open(url);
           liberator.echoerr('parse error');
         }
       }
@@ -94,24 +175,35 @@
     argCount: '+',
     bang: true,
     completer: function (context, args) {
-      let last = context.contextList.slice(-1)[0];
-      context.title = ['Country Code', 'Country Name'];
-      context.advance(last.offset - last.caret);
-      context.completions = ContryCodes;
+      if (args.length == 1) {
+        // TODO - history
+      } else {
+        let  def = args.length < 3 ? defaultSource
+                                   : defaultTarget;
+        context.title = ['Country Code', 'Country Name'];
+        context.completions = [['-', def]].concat(ContryCodes);
+      }
     }
   };
 
-  //commands.removeUserCommand('kawase');
   commands.addUserCommand(
     ['kawase'],
     'Umihara Kawase Meow',
     function (args) {
-      let [value, from, to] = args;
-      value = eval(value);
-      kawase(value, args.bang, from, to);
+      let as = args;
+      resultBuffer = '';
+      liberator.echo('<<Results>>\n')
+      for (let i = 1, l = args.length - 1; i < l; i++) {
+        let [value, from, to] = [as[0], as[i], l == i ? '-' : as[l]];
+        value = eval(value);
+        kawase(value, args.bang, from, to);
+      }
     },
     extra,
     true
   );
 
 })();
+
+
+// vim:sw=2 ts=2 et si fdm=marker:
