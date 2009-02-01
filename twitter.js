@@ -196,7 +196,8 @@
             else
                 sayTwitter(username, password, arg);
         },{
-            bang: true
+            bang: true,
+            literal: 0
         }
     );
 })();
