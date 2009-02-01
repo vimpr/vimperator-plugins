@@ -107,23 +107,8 @@
         }
       }
 
-      // プラグイン毎のドキュメント
-      io.writeFile(
-        io.getFile(outputDir + htmlFilename),
-        <html>
-          <head>
-            <title>{pluginName}</title>
-            <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-          </head>
-          <body>
-            {template.table(plugin.name, plugin)}
-          </body>
-        </html>.toString()
-      );
-
-      // index.html
+      let authors;
       {
-        let authors;
         for each (let a in pluginInfo.author) {
           let hp = a.@homepage.toString();
           let xml = hp ? <a href={hp}>{a.toString()}</a>
@@ -133,6 +118,48 @@
           else
             authors = xml;
         }
+      }
+
+      // プラグイン毎のドキュメント
+      {
+        io.writeFile(
+          io.getFile(outputDir + htmlFilename),
+          <html>
+            <head>
+              <title>{plugin.info.name.toString()}</title>
+              <link rel="stylesheet" href="plugin.css" type="text/css" />
+              <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+            </head>
+            <body>
+              <div class="information" id="information">
+                <h1>{plugin.info.name.toString()}</h1>
+                <div>
+                  <dl>
+                    <dt>Description</dt>
+                    <dd>{plugin.info.description || '---'}</dd>
+                    <dt>Latest version</dt>
+                    <dd>{plugin.info.version || '???'}</dd>
+                    <dt>Vimperator version</dt>
+                    <dd>{(plugin.info.minVersion || '?') + ' - ' + (plugin.info.maxVersion || '?')}</dd>
+                    <dt>URL</dt>
+                    <dd><a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a></dd>
+                    <dt>File URL</dt>
+                    <dd>{plugin.info.updateURL || '--'}</dd>
+                    <dt>Author</dt>
+                    <dd>{authors}</dd>
+                    <dt>License</dt>
+                    <dd>{plugin.info.license || '--'}</dd>
+                  </dl>
+                </div>
+              </div>
+              <div class="detail" id="detail">{plugin.info.detail}</div>
+            </body>
+          </html>.toString()
+        );
+      }
+
+      // index.html
+      {
         indexHtml += <tr class="plugin">
           <td class="name">
             <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
