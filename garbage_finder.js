@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Garbage Finder</name>
   <name lang="ja">ゴミ探し</name>
-  <description>Finds the taints in global(window object)</description>
+  <description>Find the taints in global(window object)</description>
   <description lang="ja">グローバル(window オブジェクト)の汚染を調べる</description>
   <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -112,7 +112,7 @@ let PLUGIN_INFO =
 
   commands.addUserCommand(
     ['garbages'],
-    'Displays garbages',
+    'Display garbages',
     function (args) {
       function makeLI (list) {
         if (list.length) {
