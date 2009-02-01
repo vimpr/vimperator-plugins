@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>force focuscontent</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/forcefocuscontent.js</updateURL>
@@ -14,6 +14,9 @@ var PLUGIN_INFO =
 getBrowser().addEventListener("load", onPageLoad, true);
 function onPageLoad(event)
 {
+    let doc = event.originalTarget;
+    if (doc != getBrowser().contentDocument)
+        return;
     setTimeout(function () {
         let focused = document.commandDispatcher.focusedElement;
         if (focused)
