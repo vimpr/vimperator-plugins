@@ -38,8 +38,8 @@ let PLUGIN_INFO =
   <name>{NAME}</name>
   <name lang="ja">{NAME}</name>
   <description>Echo and Copy(to clipboard)</description>
-  <description lang="ja">echo しつつクリップボードにコピーできる様にする</description>
-  <version>1.0.1</version>
+  <description lang="ja">:echo! で echo しつつクリップボードにコピーできる様にする</description>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
