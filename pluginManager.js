@@ -320,21 +320,9 @@ Plugin.prototype = { // {{{
 
         return '<span style="font-weight: bold; color: blue;">update complete.</span>';
     },
-    compVersion: function(a,  b){
-        a = (a || '').split('.');
-        b = (b || '').split('.');
-        if (!a.length && b.length) return -1;
-        if (a.length && !b.length) return 1;
-        for (let [i, bv] in Iterator(b)) {
-            var av = i < a.length ? a[i] : 0;
-            if (av == bv) continue;
-            if (!isNaN(av) && !isNaN(bv)) {
-                av = parseInt(av);
-                bv = parseInt(bv);
-            }
-            return av < bv ? -1 : 1;
-        }
-        return 0;
+    compVersion: function(a, b){
+        const comparator = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+        return comparator.compare(a, b);
     }
 }; // }}}
 // }}}
