@@ -39,10 +39,11 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.8</version>
+  <version>2.8.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
+  <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/migemized_find.js</updateURL>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
