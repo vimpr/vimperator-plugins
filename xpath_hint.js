@@ -8,9 +8,9 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
-    <description>UUID generator</description>
+    <description>add "get element's XPath" hint mode</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpath_hint.js</updateURL>
