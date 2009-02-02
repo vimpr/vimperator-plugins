@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">外国為替換算</name>
   <description>for exchangeconvertion</description>
   <description lang="ja">為替換算をします</description>
-  <version>1.1</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -193,8 +193,17 @@ let PLUGIN_INFO =
       let as = args;
       resultBuffer = '';
       liberator.echo('<<Results>>\n')
-      for (let i = 1, l = args.length - 1; i < l; i++) {
+      if (as.length == 0)
+        as.push('1');
+      while (as.length < 3)
+        as.push('-');
+      for (let i = 1, l = as.length - 1; i < l; i++) {
         let [value, from, to] = [as[0], as[i], l == i ? '-' : as[l]];
+        liberator.log({
+          value: value,
+          from: from,
+          to: to
+        })
         value = eval(value);
         kawase(value, args.bang, from, to);
       }
