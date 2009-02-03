@@ -540,12 +540,16 @@ HTMLStack.prototype = { // {{{
 // -----------------------------------------------------{{{
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
     function(args){
-        var xml; 
+        var xml;
         if (args["-check"])
             xml = liberator.plugins.pluginManager.checkVersion(args);
         else if (args["-update"])
             xml = liberator.plugins.pluginManager.update(args);
-        else
+        else if (args["-source"]) {
+            if (args.length < 1)
+                return liberator.echoerr('Argument(plugin name) required');
+            return liberator.plugins.pluginManager.source(args);
+        } else
             xml = liberator.plugins.pluginManager.list(args, args["-verbose"]);
 
         liberator.echo(xml, true);
@@ -555,6 +559,7 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             [['-verbose', '-v'], commands.OPTION_NOARG],
             [['-check', '-c'], commands.OPTION_NOARG],
             [['-update', '-u'], commands.OPTION_NOARG],
+            [['-source', '-s'], commands.OPTION_NOARG],
         ],
         completer: function(context){
             context.title = ['PluginName', '[Version]Description'];
@@ -591,6 +596,13 @@ var public = {
             xml += plugin.updatePlugin();
         });
         return xml;
+    },
+    source: function(names){
+        // XXX 一度に開くようにするべき？ (ref: editor.js L849)
+        this.getPlugins(names).forEach(function(plugin){
+            editor.editFileExternally(plugin.path);
+        });
+        return;
     },
     list: function(names, verbose){
         let xml = <></>
