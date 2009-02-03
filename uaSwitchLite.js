@@ -3,35 +3,38 @@ var PLUGIN_INFO =
   <name>UserAgentSwitcherLite</name>
   <description>switch user agent</description>
   <description lang='ja'>user agent 切り替え</description>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <author homepage='http://d.hatena.ne.jp/pekepekesamurai/'>pekepeke</author>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/uaSwitchLite</updateURL>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail lang='ja'><![CDATA[
- == Commands
-  :ua [uaname]       - User Agent を切り替えます。
-  :ua                - User Agent を表示します。
+    == Commands ==
+      :ua [uaname]       - User Agent を切り替えます。
+      :ua                - User Agent を表示します。
 
- == .vimperatorrrc
-javascript <<EOM
-liberator.globalVariables.useragent_list = [
-{
-  description: 'Internet Explorer 7 (Windows Vista)',
-  useragent: 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
-  appname: 'Microsoft Internet Explorer',
-  appversion: '4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
-  platform: 'Win32',
-}, {
-  description: 'Netscape 4.8 (Windows Vista)',
-  useragent: 'Mozilla/4.8 [en] (Windows NT 6.0; U)',
-  appname: 'Netscape',
-  appversion: '4.8 [en] (Windows NT 6.0; U)',
-  platform: 'Win32',
-}, {
-  description: 'Google',
-  useragent: 'Googlebot/2.1 (+http://www.google.com/bot.html)',
-}];
-EOM
+    == .vimperatorrrc ==
+      >||
+        javascript <<EOM
+        liberator.globalVariables.useragent_list = [
+        {
+          description: 'Internet Explorer 7 (Windows Vista)',
+          useragent: 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
+          appname: 'Microsoft Internet Explorer',
+          appversion: '4.0 (compatible; MSIE 7.0; Windows NT 6.0)',
+          platform: 'Win32',
+        }, {
+          description: 'Netscape 4.8 (Windows Vista)',
+          useragent: 'Mozilla/4.8 [en] (Windows NT 6.0; U)',
+          appname: 'Netscape',
+          appversion: '4.8 [en] (Windows NT 6.0; U)',
+          platform: 'Win32',
+        }, {
+          description: 'Google',
+          useragent: 'Googlebot/2.1 (+http://www.google.com/bot.html)',
+        }];
+        EOM
+      ||<
   ]]></detail>
 </VimperatorPlugin>;
 
