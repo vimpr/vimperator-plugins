@@ -10,8 +10,10 @@ var PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <detail lang='ja'><![CDATA[
     == Commands ==
-      :ua [uaname]       - User Agent を切り替えます。
-      :ua                - User Agent を表示します。
+      :ua [uaname]:
+        User Agent を切り替えます。
+      :ua:
+        User Agent を表示します。
 
     == .vimperatorrrc ==
       >||
