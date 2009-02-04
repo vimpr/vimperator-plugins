@@ -46,6 +46,8 @@ let PLUGIN_INFO =
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <detail><![CDATA[
+    == Requires ==
+      _libly.js
     == Options ==
       mainecoon:
         Possible values
@@ -79,6 +81,8 @@ let PLUGIN_INFO =
         http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
   ]]></detail>
   <detail lang="ja"><![CDATA[
+    == Requires ==
+      _libly.js
     == Options ==
       mainecoon:
         以下の文字の組み合わせを指定します。
@@ -120,6 +124,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
 
 (function () {
 
+  let U = libly.$U;
   let mainWindow = document.getElementById('main-window');
   let messageBox = document.getElementById('liberator-message');
 
@@ -208,7 +213,6 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     (value === undefined);
 
   let echo = (function () {
-    let U = libly.$U;
     let time = 40;
     let remove;
 
