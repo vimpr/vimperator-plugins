@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.19.2</version>
+  <version>0.19.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -877,11 +877,14 @@ Thanks:
 
       function turnOn () {
         // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
-        let oldHeight = content.getComputedStyle(player, '').height;
+        let oldStyle = content.getComputedStyle(player, '');
+        let oldHeight = oldStyle.height;
+        let oldWidth = oldStyle.width;
         win.toggleMaximizePlayer();
         turnOnMain();
         // 保存したもので修正する for toggleMaximizePlayer問題
         player.style.__stella_backup.height = oldHeight;
+        player.style.__stella_backup.width = oldWidth;
         win.onresize = fixFullscreen;
       }
 
@@ -1527,7 +1530,11 @@ Thanks:
 
     onIconDblClick: function () this.player.toggle('fullscreen'),
 
-    onLargeClick: function () this.player.toggle('large'),
+    onLargeClick: function () {
+      if (this.player.fullscreen)
+        this.player.fullscreen = false;
+      this.player.toggle('large');
+    },
 
     onLocationChange: function () {
       if (this.__valid !== this.isValid) {
