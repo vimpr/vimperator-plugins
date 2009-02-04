@@ -113,20 +113,19 @@ let PLUGIN_INFO =
 /* {{{
 TODO
    ・Icons
-   ・Other video hosting websites
    ・auto fullscreen
    ・動的な command の追加削除 (nice rabbit!)
    ・ツールチップみたいな物で、マウスオー馬したときに動画情報を得られるようにしておく。
    ・外から呼ぶべきでない関数(プライベート)をわかりやすくしたい
    ・argCount の指定が適当なのを修正 (動的な userCommand と平行でうまくできそう？)
    ・実際のプレイヤーが表示されるまで待機できようにしたい(未表示に時にフルスクリーン化すると…)
-   ・コメント欄でリンクされている動画も関連動画として扱いたい
-      -> "その３=>sm666" みたいなやつ
-      -> リンクはともかくタイトルの取得がムツカシー
    ・isValid とは別にプレイヤーの準備が出来ているか？などをチェックできる関数があるほうがいいかも
       -> isValid ってなまえはどうなの？
       -> isReady とか
    ・パネルなどの要素にクラス名をつける
+
+FIXME
+    ・this.last.fullscreen = value;
 
 MEMO
    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
@@ -352,6 +351,10 @@ Thanks:
 
     this.initialize.apply(this, arguments);
 
+    this.last = {
+      fullscreen: false
+    };
+
     function setf (name, value)
       ((self.functions[name] === undefined) && (self.functions[name] = value || ''));
 
@@ -442,10 +445,15 @@ Thanks:
 
     get fileURL () undefined,
 
+    get large () this.fullscreen,
+    set large (value) (this.fullscreen = value),
+
     get maxVolume () 100,
 
     get muted () undefined,
     set muted (value) value,
+
+    get ready () undefined,
 
     get relatedIDs () undefined,
 
@@ -462,9 +470,6 @@ Thanks:
 
     get repeating () undefined,
     set repeating (value) value,
-
-    get large () this.fullscreen,
-    set large (value) (this.fullscreen = value),
 
     get state () undefined,
 
@@ -655,13 +660,13 @@ Thanks:
         YouTubePlayer.OUTER_NODES.forEach(
           function (id) {
             let (node = U.getElementById(id)) {
-              liberator.log(node)
               node && f(node);
             }
           }
         );
       }
 
+      this.last.fullscreen = value;
       this.storage.fullscreen = value;
 
       // changeOuterNodes(value);
@@ -689,6 +694,8 @@ Thanks:
 
     get player ()
       U.getElementByIdEx('movie_player'),
+
+    get ready () !!this.player,
 
     get relatedIDs () {
       let result = [];
@@ -820,7 +827,14 @@ Thanks:
     get comment () this.player.ext_isCommentVisible(),
     set comment (value) (this.player.ext_setCommentVisible(value), value),
 
-    get currentTime () parseInt(this.player.ext_getPlayheadTime()),
+    get currentTime () {
+      try {
+      return parseInt(this.player.ext_getPlayheadTime())
+      } catch (e) {
+        liberator.log(e)
+        liberator.log(e.stack)
+      }
+    },
     set currentTime (value) (this.player.ext_setPlayheadTime(U.fromTimeCode(value)), this.currentTime),
 
     get fileExtension () '.flv',
@@ -895,6 +909,8 @@ Thanks:
       function fixFullscreen ()
         ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOnMain, 500));
 
+      this.last.fullscreen = value;
+
       // メイン
       value = !!value;
       if (this.storage.fullscreen === value)
@@ -922,6 +938,8 @@ Thanks:
     get player () U.getElementByIdEx('flvplayer'),
 
     get playerContainer () U.getElementByIdEx('flvplayer_container'),
+
+    get ready () !!(this.player && this.player.ext_getVideoSize),
 
     get relatedIDs () {
       if (this.__rid_last_url == U.currentURL())
@@ -956,7 +974,6 @@ Thanks:
         let links = U.xpathGets(xpath + '/a')
                      .filter(function (it) /watch\//.test(it.href))
                      .map(function(v) v.textContent);
-        liberator.log(comment)
         links.forEach(function (link) {
           let r = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="video">').exec(comment);
           if (r)
@@ -1423,9 +1440,12 @@ Thanks:
 
     disable: function () {
       this.hidden = true;
-      if (this.timerHandle) {
-        clearInterval(this.timerHandle);
-        this.timerHandle = null;
+      if (this.__updateTimer) {
+        clearInterval(this.__updateTimer);
+        delete this.__updateTimer;
+      }
+      if (this.__autoFullscreenTimer) {
+        clearInterval(this.__autoFullscreenTimer);
       }
     },
 
@@ -1435,8 +1455,8 @@ Thanks:
       for (let name in this.toggles) {
         this.toggles[name].hidden = !this.player.has(name, 't');
       }
-      if (!this.timerHandle) {
-        this.timerHandle = setInterval(U.bindr(this, this.update), 500);
+      if (!this.__updateTimer) {
+        this.__updateTimer = setInterval(U.bindr(this, this.update), 500);
       }
     },
 
@@ -1447,6 +1467,8 @@ Thanks:
     },
 
     update: function () {
+      if (!(this.isValid && this.player.ready))
+        return;
       this.labels.main.text = this.player.statusText;
       this.labels.volume.text = this.player.volume;
       for (let name in this.toggles) {
@@ -1479,6 +1501,19 @@ Thanks:
       if (this.__valid !== this.isValid) {
         (this.__valid = this.isValid) ? this.enable() : this.disable();
       }
+      if (this.isValid) {
+        clearInterval(this.__onReadyTimer);
+        this.__onReadyTimer = setInterval(
+          U.bindr(this, function () {
+            if (this.player && this.player.ready) {
+              clearInterval(this.__onReadyTimer);
+              delete this.__onReadyTimer;
+              this.onReady();
+            }
+          }),
+          200
+        );
+      }
     },
 
     onMainClick: function (event) {
@@ -1498,6 +1533,21 @@ Thanks:
     onPauseClick: function () this.player.pause(),
 
     onPlayClick: function () this.player.play(),
+
+    onReady: function () {
+      if (this.player.last.fullscreen && !this.__autoFullscreenTimer) {
+        this.__autoFullscreenTimer = setInterval(
+          U.bindr(this, function () {
+            if (!this.player.ready)
+              return;
+            clearInterval(this.__autoFullscreenTimer)
+            setTimeout(U.bindr(this, function () (this.player.fullscreen = true), 1000));
+            delete this.__autoFullscreenTimer;
+          }),
+          200
+        );
+      }
+    },
 
     onRepeatClick: function () this.player.toggle('repeating'),
 
