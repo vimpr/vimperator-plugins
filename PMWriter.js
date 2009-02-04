@@ -63,6 +63,7 @@
 
     let files = io.readDirectory(pluginDirPath);
     let indexHtml = <></>;
+    let allHtml = <></>;
 
     files.forEach(function (file) {
       if (!/\.js$/.test(file.path))
@@ -122,15 +123,7 @@
 
       // プラグイン毎のドキュメント
       {
-        io.writeFile(
-          io.getFile(outputDir + htmlFilename),
-          <html>
-            <head>
-              <title>{plugin.info.name.toString()}</title>
-              <link rel="stylesheet" href="plugin.css" type="text/css" />
-              <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-            </head>
-            <body>
+        let body = <div>
               <div class="information" id="information">
                 <h1>{plugin.info.name.toString()}</h1>
                 <div>
@@ -153,9 +146,22 @@
                 </div>
               </div>
               <div class="detail" id="detail">{plugin.info.detail}</div>
+              </div>;
+
+        io.writeFile(
+          io.getFile(outputDir + htmlFilename),
+          <html>
+            <head>
+              <title>{plugin.info.name.toString()}</title>
+              <link rel="stylesheet" href="plugin.css" type="text/css" />
+              <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+            </head>
+            <body>
+              {body}
             </body>
           </html>.toString()
         );
+        allHtml += body;
       }
 
       // index.html
@@ -217,7 +223,19 @@
       </body>
     </html>;
 
+    allHtml = <html>
+            <head>
+              <title>All Plugins</title>
+              <link rel="stylesheet" href="plugin.css" type="text/css" />
+              <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+            </head>
+            <body>
+              {allHtml}
+            </body>
+          </html>.toString();
+
     io.writeFile(io.getFile(outputDir + 'index.html'), indexHtml.toString());
+    io.writeFile(io.getFile(outputDir + 'all.html'), allHtml.toString());
   }
 
   commands.addUserCommand(
