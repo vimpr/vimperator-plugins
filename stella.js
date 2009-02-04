@@ -924,9 +924,9 @@ Thanks:
     get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get relatedIDs () {
-      // if (this.__rid_last_url == U.currentURL())
-      //   return this.__rid_cache || [];
-      // this.__rid_last_url = U.currentURL();
+      if (this.__rid_last_url == U.currentURL())
+        return this.__rid_cache || [];
+      this.__rid_last_url = U.currentURL();
 
       let videos = [];
 
@@ -947,7 +947,9 @@ Thanks:
         }
       }
 
-      // コメント欄からそれっぽいのを取得
+      // コメント欄からそれっぽいのを取得する
+      // コメント欄のリンクの前のテキストをタイトルと見なす
+      // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
       {
         let xpath = '//*[@id="des_2"]/table/tbody/tr/td/div[2]';
         let comment = U.xpathGet(xpath).innerHTML;
@@ -958,7 +960,7 @@ Thanks:
         links.forEach(function (link) {
           let r = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="video">').exec(comment);
           if (r)
-            videos.push(new RelatedID(link, r[1]));
+            videos.push(new RelatedID(link, r[1].slice(-20)));
         });
       }
 
