@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>hash of file</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2</version>
+    <version>0.2.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hash.js</updateURL>
@@ -24,10 +24,10 @@ hash:
     let Algos = [
         ["md2", "MD2 Algorithm"],
         ["md5", "MD5 Algorithm"],
-        ["sha1", "SHA-1 Algorithm"],
-        ["sha256", "SHA-256 Algorithm"],
-        ["sha384", "SHA-385 Algorithm"],
-        ["sha512", "SHA-512 Algorithm"],
+        ["sha1", "SHA1 Algorithm"],
+        ["sha256", "SHA256 Algorithm"],
+        ["sha384", "SHA385 Algorithm"],
+        ["sha512", "SHA512 Algorithm"],
     ];
 
     function getStream(path)
@@ -47,9 +47,9 @@ hash:
 
 
     commands.addUserCommand(["hash"], "hash of file",
-        function(args) {
+        function(args){
             if (args.length!=2) {
-
+    
                 liberator.echo("usage \":hash md2|md5|sha1|sha256|sha384|sha512 file-path\"");
                 return false;
             }
@@ -67,20 +67,20 @@ hash:
             let hash = Crypt.finish(false);
 
             // convert the binary hash data to a hex string.
-            let str = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+            let str = [toHexString(hash.charCodeAt(i)) for(i in hash)].join("");
             util.copyToClipboard(str, true);
         },
         {
             bang: true,
-            completer: function (context) {
-                let args = context.value.split(/\s+/);
-                if (args.length<=2) {
-                    context.title = "hash algorithm";
+            completer: function (context, args){
+                if (args.completeArg == 0) {
+                    context.title = ["hash", "algorithm"];
                     context.completions = Algos;
-                } else if (args.length==3) {
+                } else if (args.completeArg == 1) {
                     completion.url(context, "f");
                 }
             },
+            literal: 1,
         });
 
 })();
