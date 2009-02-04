@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.16</version>
+  <version>0.17.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
+  <updateURL>{'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/' + __context__.PATH.match(/[^\\\/]+\.js$/)}</updateURL>
   <detail><![CDATA[
     == Commands ==
       :stpl[ay]:
@@ -193,6 +193,27 @@ Thanks:
       wbp.saveURI(U.makeURL(url), null, null, null, null, file);
 
       return true;
+    },
+
+    xpathGet: function (xpath, doc, root) {
+      if (!doc)
+        doc = content.document;
+      if (!root)
+        root = doc;
+      return doc.evaluate(xpath, doc, null, 9, null, 7, null).singleNodeValue;
+    },
+
+    xpathGets: function (xpath, doc, root) {
+      if (!doc)
+        doc = content.document;
+      if (!root)
+        root = doc;
+      let result = [];
+      let r = doc.evaluate(xpath, root, null, 7, null);
+      for (let i = 0, l = r.snapshotLength; i < l; i++) {
+        result.push(r.snapshotItem(i));
+      }
+      return result;
     },
 
     fixDoubleClick: function (obj, click, dblClick) {
@@ -903,23 +924,44 @@ Thanks:
     get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get relatedIDs () {
-      if (this.__rid_last_url == U.currentURL())
-        return this.__rid_cache || [];
-      this.__rid_last_url = U.currentURL();
+      // if (this.__rid_last_url == U.currentURL())
+      //   return this.__rid_cache || [];
+      // this.__rid_last_url = U.currentURL();
+
       let videos = [];
-      let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
-      let xhr = new XMLHttpRequest();
-      xhr.open('GET', uri, false);
-      xhr.send(null);
-      let xml = xhr.responseXML;
-      let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-      while (v = vs.iterateNext()) {
-        let [cs, video] = [v.childNodes, {}];
-        for each (let c in cs)
-          if (c.nodeName != '#text')
-            video[c.nodeName] = c.textContent;
-        videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
+
+      // API で取得
+      {
+        let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', uri, false);
+        xhr.send(null);
+        let xml = xhr.responseXML;
+        let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+        while (v = vs.iterateNext()) {
+          let [cs, video] = [v.childNodes, {}];
+          for each (let c in cs)
+            if (c.nodeName != '#text')
+              video[c.nodeName] = c.textContent;
+          videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
+        }
       }
+
+      // コメント欄からそれっぽいのを取得
+      {
+        let xpath = '//*[@id="des_2"]/table/tbody/tr/td/div[2]';
+        let comment = U.xpathGet(xpath).innerHTML;
+        let links = U.xpathGets(xpath + '/a')
+                     .filter(function (it) /watch\//.test(it.href))
+                     .map(function(v) v.textContent);
+        liberator.log(comment)
+        links.forEach(function (link) {
+          let r = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="video">').exec(comment);
+          if (r)
+            videos.push(new RelatedID(link, r[1]));
+        });
+      }
+
       return this.__rid_cache = videos;
     },
 
