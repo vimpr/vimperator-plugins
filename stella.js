@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.19.1</version>
+  <version>0.19.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -114,6 +114,19 @@ let PLUGIN_INFO =
         再生・ポーズ
       アイコンをダブルクリック:
         フルスクリーン切り替え
+      パネルの cflmr をクリック:
+        以下の機能をオンオフします。
+        (大文字の時がオン)
+          C:
+            コメント
+          F:
+            フルスクリーン (Stella によるもの)
+          L:
+            大画面
+          M:
+            ミュート(消音)
+          R:
+            リピート
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
@@ -1513,6 +1526,8 @@ Thanks:
     onIconClick: function () this.player.playOrPause(),
 
     onIconDblClick: function () this.player.toggle('fullscreen'),
+
+    onLargeClick: function () this.player.toggle('large'),
 
     onLocationChange: function () {
       if (this.__valid !== this.isValid) {
