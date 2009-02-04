@@ -298,7 +298,7 @@ var exCopyManager = {
 
             var template = getCopyTemplate(arg) || {value: arg};
             if (typeof template.custom == 'function'){
-                copyString = template.custom.call(this, template.value);
+                copyString = template.custom.call(this, template.value, replaceVariable(template.value));
             } else if (template.custom instanceof Array){
                 copyString = replaceVariable(template.value).replace(template.custom[0], template.custom[1]);
             } else {
