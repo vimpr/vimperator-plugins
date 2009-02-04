@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.19.0</version>
+  <version>0.19.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -104,6 +104,16 @@ let PLUGIN_INFO =
         画面を大きくする/戻す。
       :stfu[llscreen]:
         フルスクリーン表示のOn/Offを切り替える。
+    == Controls ==
+      マウスのホイール:
+        パネル上でホイールの上下することにより音量を上下できます
+      時間をクリック:
+        再生時間をの表示をクリックすることでシークできます。
+        左の方をクリックすれば最初の方に、右の方をクリックすれば最後の方に跳びます。
+      アイコンをクリック:
+        再生・ポーズ
+      アイコンをダブルクリック:
+        フルスクリーン切り替え
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
