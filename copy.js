@@ -204,7 +204,7 @@ function wedataRegister(item){
 
         let custom = (function(item){
 
-            return function(value){
+            return function(value, value2){
                 var STORE_KEY = 'plugins-copy-ok-func';
                 var store = storage.newMap(STORE_KEY, true);
                 var check = store.get(item.label);
@@ -248,7 +248,7 @@ function wedataRegister(item){
                     logger.log(item.custom);
                     return;
                 }
-                return func(value);
+                return func(value, value2);
             };
         })(item);
 
