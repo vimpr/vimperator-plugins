@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.17.1</version>
+  <version>0.19.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>{'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/' + __context__.PATH.match(/[^\\\/]+\.js$/)}</updateURL>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
       :stpl[ay]:
@@ -123,6 +123,7 @@ TODO
       -> isValid ってなまえはどうなの？
       -> isReady とか
    ・パネルなどの要素にクラス名をつける
+   ・上書き保存
 
 FIXME
     ・this.last.fullscreen = value;
@@ -1440,6 +1441,8 @@ Thanks:
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
 
       let relmenu = document.getElementById('anekos-stela-relations-menupopup');
+
+      panel.addEventListener('DOMMouseScroll', U.bindr(this, this.onMouseScroll), true);
     },
 
     disable: function () {
@@ -1529,7 +1532,14 @@ Thanks:
       let rect = event.target.getBoundingClientRect();
       let x = event.screenX;
       let per = (x - rect.left) / (rect.right - rect.left);
-      this.player.currentTime = this.player.totalTime * per;
+      this.player.currentTime = parseInt(this.player.totalTime * per);
+    },
+
+    onMouseScroll: function (event) {
+      if (this.isValid && this.player.ready && event.detail) {
+        this.player.volume += (event.detail > 0) ? -5 : 5;
+        this.update();
+      }
     },
 
     onMutedClick: function (event) this.player.toggle('muted'),
