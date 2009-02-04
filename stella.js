@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.17.0</version>
+  <version>0.17.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -476,7 +476,7 @@ Thanks:
     get statusText () this.timeCodes,
 
     get storage ()
-      (content.document.__stella_storage || (content.document.__stella_storage = {})),
+      (content.document.__stella_player_storage || (content.document.__stella_player_storage = {})),
 
     get timeCodes () (U.toTimeCode(this.currentTime) + '/' + U.toTimeCode(this.totalTime)),
 
@@ -841,6 +841,8 @@ Thanks:
 
     get fullscreen () !!this.storage.fullscreen,
     set fullscreen (value) {
+      let self = this;
+
       function setVariables (fullscreen) {
         NicoPlayer.Variables.forEach(function ([name, normal, full]) {
           let v = fullscreen ? full : normal;
@@ -918,8 +920,7 @@ Thanks:
 
       this.storage.fullscreen = value;
 
-      let self = this, player = this.player,
-          win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
+      let player = this.player, win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
 
       if (player.ext_getVideoSize() === 'fit')
         player.ext_setVideoSize('normal');
@@ -1299,6 +1300,9 @@ Thanks:
     get statusBarVisible () !this.statusBar.getAttribute('moz-collapsed', false),
     set statusBarVisible (value) (this.statusBar.setAttribute('moz-collapsed', !value), value),
 
+    get storage ()
+      (content.document.__stella_storage || (content.document.__stella_storage = {})),
+
     get where () {
       for (let [name, player] in Iterator(this.players))
         if (player.isValid)
@@ -1535,7 +1539,8 @@ Thanks:
     onPlayClick: function () this.player.play(),
 
     onReady: function () {
-      if (this.player.last.fullscreen && !this.__autoFullscreenTimer) {
+      if (this.player.last.fullscreen && !this.storage.alreadyAutoFullscreen
+      && !this.__autoFullscreenTimer) {
         this.__autoFullscreenTimer = setInterval(
           U.bindr(this, function () {
             if (!this.player.ready)
@@ -1547,6 +1552,7 @@ Thanks:
           200
         );
       }
+      this.storage.alreadyAutoFullscreen = true;
     },
 
     onRepeatClick: function () this.player.toggle('repeating'),
