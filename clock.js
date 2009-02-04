@@ -5,7 +5,7 @@ let PLUGIN_INFO =
 <description lang="ja">とけい</description>
 <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
 <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-<version>0.15</version>
+<version>0.15.1</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/clock.js</updateURL>
@@ -27,25 +27,29 @@ refer:
     http://d.hatena.ne.jp/janus_wel/20081128/1227849365
 
 == EX-COMMANDS ==
-:clockhide
+:clockhide:
     hide clock
-:clockappear
+:clockappear:
     appear clock
-:clockstop
+:clockstop:
     stop clock
-:clockstart
+:clockstart:
     start clock
-:clockjustify
+:clockjustify:
     justify clock position
 
 == EXAMPLE ==
 in .vimperatorrc
 
-    let clock_format='(%t %d)'
+>||
+let clock_format='(%t %d)'
+||<
 
 this exapmple show clock like below
 
-    (20:34 12/12)
+>||
+(20:34 12/12)
+||<
 
 ]]></detail>
 <detail lang="ja"><![CDATA[
@@ -66,25 +70,29 @@ clock_format: 時計の書式。設定なしの場合 '[%t]' として扱われ�
     http://d.hatena.ne.jp/janus_wel/20081128/1227849365
 
 == EX-COMMANDS ==
-:clockhide
+:clockhide:
     時計を隠します。
-:clockappear
+:clockappear:
     時計を出します。
-:clockstop
+:clockstop:
     時計を止めます。
-:clockstart
+:clockstart:
     時計を動かします。
-:clockjustify
+:clockjustify:
     時計の位置を調節します。
 
 == EXAMPLE ==
 .vimperatorrc に、
 
-    let clock_format='(%t %d)'
+>||
+let clock_format='(%t %d)'
+||<
 
 と書くと以下のように表示されます。
 
-    (20:34 12/12)
+>||
+(20:34 12/12)
+||<
 
 ]]></detail>
 </VimperatorPlugin>;

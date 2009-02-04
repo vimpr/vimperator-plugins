@@ -3,45 +3,52 @@ var PLUGIN_INFO =
   <name>autoproxychanger</name>
   <description>setting proxy</description>
   <description lang="ja">proxyの設定・自動切り替え</description>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/autoproxychanger.js</updateURL>
   <detail><![CDATA[
-Usage:
-:proxy [setting_name]      -> set proxy setting to setting_name
-:proxy!                    -> set proxy setting to default setting
-:toggleautoproxy           -> proxy autochanger on/off toggle
+    == Usage ==
+      :proxy [setting_name]:
+        set proxy setting to setting_name
+      :proxy!:
+        set proxy setting to default setting
+      :toggleautoproxy:
+        proxy autochanger on/off toggle
 
-The proxy_settings is a string variable which can set on
-vimperatorrc as following.
+      The proxy_settings is a string variable which can set on
+      vimperatorrc as following.
 
-let autochanger_proxy_settings = "[{ name:'disable', usage: 'direct connection', proxy:{type:0} }]"
-let autochanger_proxy_enabled = "true"
+      >||
+      let autochanger_proxy_settings = "[{ name:'disable', usage: 'direct connection', proxy:{type:0} }]"
+      let autochanger_proxy_enabled = "true"
+      ||<
 
-or your can set it using inline JavaScript.
+      or your can set it using inline JavaScript.
 
-liberator.globalVariables.autochanger_proxy_enabled = true;
-liberator.globalVariables.autochanger_proxy_settings = [{
-    name  : 'disable',
-    usage : 'direct connection',
-    proxy :{
-      type      :0,
-    },
-  },{
-    name  : 'http',
-    usage : 'localhost proxy',
-    proxy :{
-      type      : 1,
-      http      : 'localhost',
-      http_port : 8080,
-    },
-    url   : /http:\/\/www.nicovideo.jp/,
-    run   : 'java.exe',
-    args  : ['C:\Personal\Apps\Internet\NicoCacheNl\NicoCache_nl.jar'],
-  }];
-EOM
+      >||
+      liberator.globalVariables.autochanger_proxy_enabled = true;
+      liberator.globalVariables.autochanger_proxy_settings = [{
+          name  : 'disable',
+          usage : 'direct connection',
+          proxy :{
+            type      :0,
+          },
+        },{
+          name  : 'http',
+          usage : 'localhost proxy',
+          proxy :{
+            type      : 1,
+            http      : 'localhost',
+            http_port : 8080,
+          },
+          url   : /http:\/\/www.nicovideo.jp/,
+          run   : 'java.exe',
+          args  : ['C:\Personal\Apps\Internet\NicoCacheNl\NicoCache_nl.jar'],
+        }];
+      EOM
+      ||<
   ]]></detail>
 </VimperatorPlugin>;
 

@@ -11,23 +11,25 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/applauncher.js</updateURL>
   <detail lang='ja'><![CDATA[
   == Commands ==
-    :applaunch [name]
-    :runapp [name]
+    :applaunch [name]:
+    :runapp [name]:
       [name] で指定されたアプリケーションを起動します。
   == .vimperatorrc example ==
-  js <<EOM
-  liberator.globalVariables.applauncher_list = [
-    [ 'name', 'application path', ['arguments', '%URL%', '%SEL%']],
-    [ 'Internet Explorer', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%URL%'],
-    [ 'Internet Explorer(Search)', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%SEL%'],
-  ];
-  liberator.globalVariables.applauncher_charset = 'Shift_JIS';
-  EOM
-  %URL% は実行時に選択中のリンクURL、もしくは開いているページのURLに置き換えられます。
-  %SEL% は選択中の文字列に置き換えられます。
-  %TITLE% はページのタイトルに置き換えられます。
-  引数を複数指定する場合は配列形式で指定してください。
-  applauncher_charset を指定すると、渡される文字列が指定の文字セットに変換されます。
+    >||
+    js <<EOM
+    liberator.globalVariables.applauncher_list = [
+      [ 'name', 'application path', ['arguments', '%URL%', '%SEL%']],
+      [ 'Internet Explorer', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%URL%'],
+      [ 'Internet Explorer(Search)', 'C:\\Program Files\\Internet Explorer\\iexplore.exe', '%SEL%'],
+    ];
+    liberator.globalVariables.applauncher_charset = 'Shift_JIS';
+    EOM
+    ||<
+    %URL% は実行時に選択中のリンクURL、もしくは開いているページのURLに置き換えられます。
+    %SEL% は選択中の文字列に置き換えられます。
+    %TITLE% はページのタイトルに置き換えられます。
+    引数を複数指定する場合は配列形式で指定してください。
+    applauncher_charset を指定すると、渡される文字列が指定の文字セットに変換されます。
   ]]></detail>
 </VimperatorPlugin>
 

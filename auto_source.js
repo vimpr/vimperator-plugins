@@ -14,20 +14,20 @@ var PLUGIN_INFO =
   <detail><![CDATA[
     == Commands ==
     Start watching:
-      :aso taro.js
-      :autoso[urce] taro.js
+      - :aso taro.js
+      - :autoso[urce] taro.js
     Stop watching:
-      :aso! taro.js
-      :autoso[urce]! taro.js
+      - :aso! taro.js
+      - :autoso[urce]! taro.js
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Commands ==
-   監視を開始:
-     :aso taro.js
-     :autoso[urce] taro.js
-   監視を中止:
-     :aso! taro.js
-     :autoso[urce]! taro.js
+    監視を開始:
+      - :aso taro.js
+      - :autoso[urce] taro.js
+    監視を中止:
+      - :aso! taro.js
+      - :autoso[urce]! taro.js
   ]]></detail>
 </VimperatorPlugin>;
 
