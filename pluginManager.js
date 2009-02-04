@@ -411,7 +411,7 @@ WikiParser.prototype = { // {{{
                 } else {
                     this.xmlstack.reorg(-2);
                     this.mode = this.pendingMode;
-                    indentList.pop();
+                    //indentList.pop();
                     if (indentList.length == 0) indentList = [0];
                 }
                 prevMode = this.mode;
@@ -425,7 +425,7 @@ WikiParser.prototype = { // {{{
             if (currentIndent > prevIndent){
                 if (this.mode){
                     if (prevMode == 'dl'){
-                        this.xmlstack.appendChild(<dd/>);
+                        this.xmlstack.appendChild(<dl><dd/></dl>);
                     }
                     this.xmlstack.push(bufXML);
                     indentList.push(currentIndent);
@@ -489,8 +489,19 @@ HTMLStack.prototype = { // {{{
         return this.last;
     },
     appendChild: function(xml){
+        if (this.length == 0){
+            this.push(xml);
+            return xml;
+        }
         var buf = this.stack[this.length-1];
-        buf[buf.length()-1].* += xml;
+        if (buf[buf.length()-1].localName() == xml.localName()){
+            if (this.isInline(xml.*[0]))
+                buf[buf.length()-1].* += <br/> + xml.*;
+            else
+                buf[buf.length()-1].* += xml.*;
+        } else
+            this.stack[this.length-1] += xml;
+
         return this.last;
     },
     appendLastChild: function(xml){
