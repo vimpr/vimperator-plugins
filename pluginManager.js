@@ -505,7 +505,8 @@ var WikiParser = (function () {
     return function (st) {
       let m = st.head.match(re);
       if (m) {
-        return st.next.set(stripAndLink(m[1])).wrap('h' + n);
+        let hn = 'h' + n;
+        return st.next.set(<{hn} style={'font-size:'+(0.75+1/n)+'em'}>{stripAndLink(m[1])}</{hn}>)
       } else {
         return Error('not head1', st);
       }
@@ -544,7 +545,7 @@ var WikiParser = (function () {
   function dt (st) {
     let m = st.head.match(/^(\s*)(.+):\s*$/);
     if (m) {
-      return st.next.set([m[1], <dt>{m[2]}</dt>]);
+      return st.next.set([m[1], <dt style="font-weight:bold;">{m[2]}</dt>]);
     } else {
       return Error('not dt', st);
     }
