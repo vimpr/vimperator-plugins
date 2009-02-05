@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.4</version>
+<version>0.5</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -123,8 +123,7 @@ var tags = { // {{{
             return info.*;
 
         var text = fromUTF8Octets(info.*.toString());
-        var parser = new WikiParser(text);
-        var xml = parser.parse();
+        var xml = WikiParser(text);
         return xml;
     }
 }; // }}}
@@ -330,131 +329,315 @@ Plugin.prototype = { // {{{
 // --------------------------------------------------------
 // WikiParser
 // -----------------------------------------------------{{{
-function WikiParser(text){
-    this.mode = '';
-    this.lines = text.split(/\r\n|[\r\n]/);
-    this.preCount = 0;
-    this.pendingMode = '';
-    this.xmlstack = new HTMLStack();
-}
-WikiParser.prototype = { // {{{
-    inlineParse: function(str){
-        function replacer(str)
-            ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[str] ||
-            '<a href="#" highlight="URL">'+str+'</a>';
-        return XMLList(str.replace(/>|<|&|(?:https?:\/\/|mailto:)\S+/g, replacer));
-    },
-    wikiReg: { // {{{
-        hn: /^(={2,4})\s*(.*?)\s*\1$/,
-        dt: /^(.*)\s*:$/,
-        ul: /^-\s+(.*)$/,
-        ol: /^\+\s+(.*)$/,
-        preStart: /^>\|\|$/,
-        preEnd: /^\|\|<$/
-    }, // }}}
-    blockParse: function(line, prevMode){ // {{{
-        if (prevMode == 'pre'){
-            if (this.wikiReg.preEnd.test(line)){
-                if (this.preCount > 0){
-                    this.preCount--;
-                    return <>{line}</>;
-                } else {
-                    this.mode = '';
-                    return <></>;
-                }
-                return <>{line}</>;
-            } else if (this.wikiReg.preStart.test(line)){
-                this.preCount++;
-            }
-            return <>{line}</>;
-        } else if (this.wikiReg.preStart.test(line)){
-            this.mode = 'pre';
-            this.pendingMode = prevMode;
-            return <pre/>;
-        } else if (this.wikiReg.hn.test(line)){
-            let hn = RegExp.$1.length - 1;
-            this.mode = '';
-            return <h{hn} highlight="Title" style={'font-size:'+(0.75+1/hn)+'em'}>{this.inlineParse(RegExp.$2)}</h{hn}>;
-        } else if (this.wikiReg.ul.test(line)){
-            this.mode = 'ul';
-            return <ul><li>{this.inlineParse(RegExp.$1)}</li></ul>;
-        } else if (this.wikiReg.ol.test(line)){
-            this.mode = 'ol';
-            return <ol><li>{this.inlineParse(RegExp.$1)}</li></ol>;
-        } else if (this.wikiReg.dt.test(line)){
-            this.mode = 'dl';
-            return <dl><dt style="font-weight:bold;">{this.inlineParse(RegExp.$1)}</dt></dl>;
-        } else if (prevMode == 'dl'){
-            return <>{this.inlineParse(line)}</>;
-        }
-        this.mode = '';
-        return <>{this.inlineParse(line)}</>;
-    }, // }}}
-    parse: function(){ // {{{
-        var ite = Iterator(this.lines);
-        var num, line, indent;
-        var currentIndent = 0, indentList = [0], nest=0;
-        var prevMode = '';
-        var stack = [];
-        var nest;
-        var isNest = false;
-        var bufXML;
-        //try {
-        for ([num, line] in ite){
-            [, indent, line] = line.match(/^(\s*)(.*?)\s*$/);
-            currentIndent = indent.length;
-            let prevIndent = indentList[indentList.length -1];
-            bufXML = this.blockParse(line, prevMode);
-            if (prevMode == 'pre'){
-                if (this.mode){
-                    this.xmlstack.appendLastChild(indent.substr(prevIndent) + line + '\n');
-                } else {
-                    this.xmlstack.reorg(-2);
-                    this.mode = this.pendingMode;
-                    //indentList.pop();
-                    if (indentList.length == 0) indentList = [0];
-                }
-                prevMode = this.mode;
-                continue;
-            }
-            if (!line){
-                //this.xmlstack.append(<>{'\n'}</>);
-                continue;
-            }
+var WikiParser = (function () {
 
-            if (currentIndent > prevIndent){
-                if (this.mode){
-                    if (prevMode == 'dl'){
-                        this.xmlstack.appendChild(<dl><dd/></dl>);
-                    }
-                    this.xmlstack.push(bufXML);
-                    indentList.push(currentIndent);
-                } else {
-                    if (prevMode && this.xmlstack.length > 0){
-                        this.xmlstack.appendLastChild(bufXML);
-                    } else {
-                        this.xmlstack.append(bufXML);
-                    }
-                    this.mode = prevMode;
-                }
-            } else if (currentIndent < prevIndent){
-                for (let i in indentList){
-                    if (currentIndent == indentList[i] || currentIndent < indentList[i+1]){ nest = i; break; }
-                }
-                indentList.splice(nest);
-                indentList.push(currentIndent);
-                this.xmlstack.reorg(nest);
-                this.xmlstack.append(bufXML);
-            } else {
-                this.xmlstack.append(bufXML);
-            }
-            prevMode = this.mode;
+  function cloneArray (ary)
+    Array.concat(ary);
+
+  function State (lines, result) {
+    if (!(this instanceof arguments.callee))
+        return new arguments.callee(lines, result);
+
+    this.lines = lines;
+    this.result = result || <></>;
+  }
+  State.prototype = {
+    get end () !this.lines.length,
+    get head () this.lines[0],
+    set head (value) this.lines[0] = value,
+    get clone () State(cloneArray(this.lines), this.result),
+    get next () State(this.lines.slice(1), this.result),
+    wrap: function (name) {
+      let result = this.clone;
+      result.result = <{name}>{this.result}</{name}>;
+      return result;
+    },
+    set: function (v) {
+      let result = this.clone;
+      result.result = v instanceof State ? v.result : v;
+      return result;
+    },
+  };
+
+  function Error (name, state) {
+    if (!(this instanceof arguments.callee))
+        return new arguments.callee(name, state);
+
+    this.__ok = false;
+    this.name = name;
+    this.state = state; //TODO clone
+  }
+
+  function ok (v)
+    v instanceof State;
+
+  function xmlJoin (xs, init) {
+    let result = init || <></>;
+    for (let i = 0, l = xs.length; i < l; i++)
+      result += xs[i];
+    return result;
+  }
+
+  function strip (s)
+    s.replace(/^\s+|\s+$/g, '');
+
+  // FIXME
+  function link (s) {
+    let m;
+    let result = <></>;
+    while (s && (m = s.match(/(?:https?:\/\/|mailto:)\S+/))) {
+      result += <>{RegExp.leftContext || ''}<a href={m[0]}>{m[0]}</a></>;
+      s = RegExp.rightContext;
+    }
+    if (s)
+      result += <>{s}</>;
+    return result;
+  }
+
+  function stripAndLink (s)
+    link(strip(s));
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+
+  // [Parser] -> OKError Parser
+  function or () {
+    let as = [];
+    for (let i = 0, l = arguments.length; i < l; i++)
+      as.push(arguments[i]);
+    return function (st) {
+      let a;
+      for each (let a in as) {
+        let r = a(st);
+        if (ok(r))
+          return r;
+      }
+      return Error('or-end', st);
+    };
+  }
+
+  function map (p) {
+    return function (st) {
+      let result = [];
+      let cnt = 0;
+      while (!st.end) {
+        st = p(st);
+        if (ok(st))
+          result.push(st.result);
+        else
+          break;
+        if (cnt++ > 100) {
+          liberator.log('100 break: map')
+          break;
         }
-        //} catch (e){ alert(num + ':'+ e); }
-        this.xmlstack.reorg();
-        return this.xmlstack.last;
-    } // }}}
-}; // }}}
+      }
+      return st.set(result);
+    }
+  }
+
+  function whileMap (p) {
+    return function (st) {
+      let result = [];
+      let next;
+      let cnt = 0;
+      while (!st.end) {
+        next = p(st);
+        if (ok(next))
+          result.push(next.result);
+        else
+          break;
+        st = next;
+        if (cnt++ > 100) {
+          liberator.log('100 break: whileMap')
+          break;
+        }
+      }
+      if (result.length)
+        return st.set(result);
+      else
+        return Error('whileMap', st);
+    }
+  }
+
+  function lv_map (lv, more, p) {
+    let re = RegExp('^' + lv.replace(/[^\s]/g, ' ') + (more ? '\\s+' : '') + '(.*)$');
+    return function (st) {
+      let result = [];
+      let cnt = 0;
+      while (!st.end) {
+        if (!re.test(st.head))
+          break;
+        st = p(st);
+        if (!ok(st))
+          return st;
+        result.push(st.result);
+        if (cnt++ > 100) {
+          liberator.log('100 break')
+          break;
+        }
+      }
+      return st.set(result);
+    };
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+
+  function wiki (st) {
+    let r = wikiLines(st);
+    if (ok(r)) {
+      let xs = r.result;
+      return r.set(xmlJoin(xs)).wrap('div');
+    } else {
+      return Error('wiki', st);
+    }
+  }
+
+  // St -> St XML
+  function plain (st) {
+    let text = st.head;
+    return st.next.set(<>{stripAndLink(text)}<br /></>);
+  }
+
+  // St -> St XML
+  function hn (n) {
+    let re = RegExp('^\\s*=={' + n + '}\\s+(.*)\\s*=={' + n + '}\\s*$');
+    return function (st) {
+      let m = st.head.match(re);
+      if (m) {
+        return st.next.set(stripAndLink(m[1])).wrap('h' + n);
+      } else {
+        return Error('not head1', st);
+      }
+    };
+  }
+
+  let h1 = hn(1);
+  let h2 = hn(2);
+  let h3 = hn(3);
+  let h4 = hn(4);
+
+  // St -> St XML
+  function dl (st) {
+    let r = whileMap(dtdd)(st);
+    if (ok(r)) {
+      let body = xmlJoin(r.result);
+      return r.set(body).wrap('dl');
+    } else {
+      return Error('dl', st);
+    }
+  }
+
+  // St -> St XML
+  function dtdd (st) {
+    let r = dt(st);
+    if (ok(r)) {
+      let [lv, _dt] = r.result;
+      let _dd = lv_dd(lv, wikiLine)(r);
+      return _dd.set(_dt + <dd>{xmlJoin(_dd.result)}</dd>);
+    } else {
+      return r;
+    }
+  }
+
+  // St -> St (lv, XML)
+  function dt (st) {
+    let m = st.head.match(/^(\s*)(.+):\s*$/);
+    if (m) {
+      return st.next.set([m[1], <dt>{m[2]}</dt>]);
+    } else {
+      return Error('not dt', st);
+    }
+  }
+
+  // lv -> (St -> St [XML])
+  function lv_dd (lv) {
+    return lv_map(lv, true, wikiLine);
+  }
+
+  // St -> St XML
+  function ul (st) {
+    let lis = whileMap(li)(st);
+    if (ok(lis)) {
+      return lis.set(xmlJoin(lis.result)).wrap('ul');
+    } else {
+      return Error('ul', st);
+    }
+  }
+
+  // St -> St XML
+  function li (st) {
+    let m = st.head.match(/^(\s*- )(.*)$/);
+    if (m) {
+      st.head = st.head.replace(/- /, '  ');
+      let r = lv_map(m[1], false, wikiLine)(st);
+      return r.set(xmlJoin(r.result)).wrap('li');
+    } else {
+      return Error('li', st);
+    }
+  }
+
+  // St -> St XML
+  function ol (st) {
+    let lis = whileMap(oli)(st);
+    if (ok(lis)) {
+      return lis.set(xmlJoin(lis.result)).wrap('ol');
+    } else {
+      return Error('ol', st);
+    }
+  }
+
+  // St -> St XML
+  function oli (st) {
+    let m = st.head.match(/^(\s*\+ )(.*)$/);
+    if (m) {
+      st.head = st.head.replace(/\+ /, '  ');
+      let r = lv_map(m[1], false, wikiLine)(st);
+      return r.set(xmlJoin(r.result)).wrap('li');
+    } else {
+      return Error('li', st);
+    }
+  }
+
+  // St -> St XML
+  function pre (st) {
+    let m = st.head.match(/^(\s*)>\|\|\s*$/);
+    if (m) {
+      let result = '';
+      let cnt = 0;
+      while (!st.end) {
+        st = st.next;
+        if (/^(\s*)\|\|<\s*$/.test(st.head)){
+          st = st.next;
+          break;
+        }
+        result += st.head.replace(m[1], '') + '\n';
+        if (cnt++ > 100) {
+          liberator.log('br')
+          break;
+        }
+      }
+      return st.set(<pre>{result}</pre>);
+    } else {
+      return Error('pre', st);
+    }
+  }
+
+  // St -> St XML
+  let wikiLine = or(h1, h2, h3, h4, dl, ul, ol, pre, plain);
+
+  // St -> St [XML]
+  let wikiLines = map(wikiLine);
+
+  return liberator.plugins.PMWikiParser = function (src) {
+    let r = wiki(State(src.split(/\n/)));
+    if (ok(r))
+      return r.result;
+    else
+      liberator.echoerr(r.name);
+  };
+
+})();
 // End WikiParser }}}
 
 // --------------------------------------------------------
