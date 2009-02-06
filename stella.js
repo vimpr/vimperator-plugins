@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.19.3</version>
+  <version>0.19.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -972,12 +972,12 @@ Thanks:
     get relatedIDs () {
       if (this.__rid_last_url == U.currentURL())
         return this.__rid_cache || [];
-      this.__rid_last_url = U.currentURL();
 
       let videos = [];
+      let failed = false;
 
       // API で取得
-      {
+      try {
         let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
         let xhr = new XMLHttpRequest();
         xhr.open('GET', uri, false);
@@ -991,6 +991,9 @@ Thanks:
               video[c.nodeName] = c.textContent;
           videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
         }
+      } catch (e) {
+        liberator.log(e)
+        failed = true;
       }
 
       // コメント欄からそれっぽいのを取得する
@@ -1009,7 +1012,12 @@ Thanks:
         });
       }
 
-      return this.__rid_cache = videos;
+      if (!failed) {
+        this.__rid_last_url = U.currentURL();
+        this.__rid_cache = videos;
+      }
+
+      return videos;
     },
 
     get relatedTags() {
