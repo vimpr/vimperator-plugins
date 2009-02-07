@@ -2,10 +2,12 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Manage Cookies (list, remove, add/remove permission)</description>
-<author mail="teramako@gmail.com">teramako</author>
-<version>1.0</version>
+<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
+<version>1.1</version>
+<license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/cookieManager.js</updateURL>
 <detail lang="ja"><![CDATA[
 Cookie の管理をするプラグイン
 
@@ -268,7 +270,7 @@ var cManager = {
                         if (args.length == 3){
                             context.title = ["Capability"];
                             context.completions = context.filter ?
-                                this.capabilityList.filter(function($_) c[0].toLowerCase().indexOf(context.filter.toLowerCase()) == 0) :
+                                this.capabilityList.filter(function($_) $_[0].toLowerCase().indexOf(context.filter.toLowerCase()) == 0) :
                                 this.capabilityList;
                         } else if (args.length == 2){
                             let host = getHost();
