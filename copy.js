@@ -3,12 +3,12 @@ var PLUGIN_INFO =
 <name>{NAME}</name>
 <description>enable to copy strings from a template (like CopyURL+)</description>
 <description lang="ja">テンプレートから文字列のコピーを可能にします（CopyURL+みたいなもの）</description>
-<minVersion>2.0</minVersion>
+<minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.6</version>
+<version>0.7</version>
 <detail><![CDATA[
 == Command ==
 :copy {copyString}:
@@ -33,6 +33,20 @@ var PLUGIN_INFO =
     to the string of selection
 %HTMLSEL%:
     to the html string of selection
+%HOSTNAME%:
+    to the hostname of the current location
+%PATHNAME%:
+    to the pathname of the current location
+%HOST%:
+    to the host of the current location
+%PORT%:
+    to the port of the current location
+%PROTOCOL%:
+    to the protocol of the current location
+%SEARCH%:
+    to the search(?..) of the current location
+%HASH%:
+    to the hash(anchor #..) of the current location
 
 == How to create template ==
 you can set your own template using inline JavaScript.
@@ -113,6 +127,37 @@ copy_templates.forEach(function(template){
         addUserMap(template.label, template.map);
 });
 
+const REPLACE_TABLE = {
+    get TITLE () buffer.title,
+    get URL () buffer.URL,
+    get SEL () {
+        if (sel)
+            return sel;
+        else if (selection.rangeCount < 1)
+            return '';
+
+        for (var i=0, c=selection.rangeCount; i<c; i++){
+            sel += selection.getRangeAt(i).toString();
+        }
+        return sel;
+    },
+    get HTMLSEL () {
+        if (htmlsel)
+            return sel;
+        else if (selection.rangeCount < 1)
+            return '';
+
+        var serializer = new XMLSerializer();
+        for (var i=0, c=selection.rangeCount; i<c; i++){
+            htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
+        }
+        return htmlsel;
+    }
+};
+'hostname pathname host port protocol search hash'.split(' ').forEach(function (name){
+    REPLACE_TABLE[name.toUpperCase()] = function () content.location && content.location[name];
+});
+
 // used when argument is none
 //const defaultValue = templates[0].label;
 commands.addUserCommand(['copy'],'Copy to clipboard',
@@ -156,37 +201,19 @@ function replaceVariable(str){
     var win = new XPCNativeWrapper(window.content.window);
     var sel = '', htmlsel = '';
     var selection =  win.getSelection();
-    function replacer(value){ //{{{
-        switch(value){
-            case '%TITLE%':
-                return buffer.title;
-            case '%URL%':
-                return buffer.URL;
-            case '%SEL%':
-                if (sel)
-                    return sel;
-                else if (selection.rangeCount < 1)
-                    return '';
-
-                for (var i=0, c=selection.rangeCount; i<c; i++){
-                    sel += selection.getRangeAt(i).toString();
-                }
-                return sel;
-            case '%HTMLSEL%':
-                if (htmlsel)
-                    return sel;
-                else if (selection.rangeCount < 1)
-                    return '';
-
-                var serializer = new XMLSerializer();
-                for (var i=0, c=selection.rangeCount; i<c; i++){
-                    htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
-                }
-                return htmlsel;
-        }
-        return '';
+    function replacer(orig, name){ //{{{
+        if (name == '')
+            return '%';
+        if (!REPLACE_TABLE.hasOwnProperty(name))
+            return orig;
+        let value = REPLACE_TABLE[name];
+        if (typeof value == 'function')
+            return value();
+        else
+            return value.toString();
+        return orig;
     } //}}}
-    return str.replace(/%(TITLE|URL|SEL|HTMLSEL)%/g, replacer);
+    return str.replace(/%([A-Z]*)%/g, replacer);
 }
 
 function wedataRegister(item){
