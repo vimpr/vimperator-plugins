@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.19.4</version>
+  <version>0.20.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -656,7 +656,7 @@ Thanks:
       playEx: 'x',
       playOrPause: 'x',
       relatedIDs: 'r',
-      repeating: 'rw',
+      repeating: '',
       title: 'r',
       totalTime: 'r',
       volume: 'rw'
@@ -1510,7 +1510,11 @@ Thanks:
     update: function () {
       if (!(this.isValid && this.player.ready))
         return;
-      this.labels.main.text = this.player.statusText;
+      this.labels.main.text =
+        let (v = this.player.statusText)
+          (this.__currentTimeTo == undefined) ? v
+                                              : v.replace(/^\d*\:\d*/,
+                                                          U.toTimeCode(this.__currentTimeTo));
       this.labels.volume.text = this.player.volume;
       for (let name in this.toggles) {
         this.toggles[name].text = (this.player[name] ? String.toUpperCase : U.id)(name[0]);
@@ -1575,12 +1579,35 @@ Thanks:
       this.player.currentTime = parseInt(this.player.totalTime * per);
     },
 
-    onMouseScroll: function (event) {
-      if (this.isValid && this.player.ready && event.detail) {
-        this.player.volume += (event.detail > 0) ? -5 : 5;
-        this.update();
+    onMouseScroll: (function () {
+      let timerHandle;
+      return function (event) {
+        if (!(this.isValid && this.player.ready && event.detail))
+          return;
+        if (event.target == this.labels.main) {
+          if (this.__currentTimeTo == undefined)
+            this.__currentTimeTo = this.player.currentTime;
+          this.__currentTimeTo += (event.detail > 0) ? -5 : 5;
+          this.__currentTimeTo = Math.min(Math.max(this.__currentTimeTo, 0), this.player.totalTime);
+          clearTimeout(timerHandle);
+          timerHandle = setTimeout(
+            U.bindr(this, function () {
+              this.player.currentTime = this.__currentTimeTo;
+              liberator.log({
+                pl: this.player.currentTime,
+                to: this.__currentTimeTo
+              })
+              delete this.__currentTimeTo;
+            }),
+            1000
+          );
+          this.update();
+        } else {
+          this.player.volume += (event.detail > 0) ? -5 : 5;
+          this.update();
+        }
       }
-    },
+    })(),
 
     onMutedClick: function (event) this.player.toggle('muted'),
 
@@ -1605,7 +1632,7 @@ Thanks:
       this.storage.alreadyAutoFullscreen = true;
     },
 
-    onRepeatClick: function () this.player.toggle('repeating'),
+    onRepeatingClick: function () this.player.toggle('repeating'),
 
     onRelationsRootPopupshowing: function () {
       let self = this;
