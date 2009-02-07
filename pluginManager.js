@@ -123,7 +123,7 @@ var tags = { // {{{
             return info.*;
 
         var text = fromUTF8Octets(info.*.toString());
-        var xml = WikiParser(text);
+        var xml = WikiParser.parse(text);
         return xml;
     }
 }; // }}}
@@ -330,23 +330,40 @@ Plugin.prototype = { // {{{
 // WikiParser
 // -----------------------------------------------------{{{
 var WikiParser = (function () {
-
   function cloneArray (ary)
     Array.concat(ary);
 
-  function State (lines, result) {
+  function State (lines, result, indents) {
     if (!(this instanceof arguments.callee))
-        return new arguments.callee(lines, result);
+        return new arguments.callee(lines, result, indents);
 
     this.lines = lines;
     this.result = result || <></>;
+    this.indents = indents || [];
   }
   State.prototype = {
-    get end () !this.lines.length,
+    get end () !(this.lines.length && let (i = this.indents[this.indents.length - 1])
+                                             /^\s*$/.test(this.head) || !i || i.test(this.head)),
+    get realEnd () !this.lines.length,
     get head () this.lines[0],
     set head (value) this.lines[0] = value,
-    get clone () State(cloneArray(this.lines), this.result),
-    get next () State(this.lines.slice(1), this.result),
+    get clone () State(cloneArray(this.lines), this.result, cloneArray(this.indents)),
+    get next () {
+      let result = this.clone;
+      result.lines = this.lines.slice(1);
+      return result;
+    },
+    indent: function (indent, more) {
+      let result = this.clone;
+      let re = RegExp('^' + indent.replace(/[^\s]/g, ' ') + (more ? '\\s+' : '') + '(.*)$');
+      result.indents.push(re);
+      return result;
+    },
+    indentBack: function () {
+      let result = this.clone;
+      result.indents.pop();
+      return result;
+    },
     wrap: function (name) {
       let result = this.clone;
       result.result = <{name}>{this.result}</{name}>;
@@ -397,245 +414,254 @@ var WikiParser = (function () {
   function stripAndLink (s)
     link(strip(s));
 
+  function isEmptyLine (s)
+    /^\s*$/.test(s);
+
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  // [Parser] -> OKError Parser
-  function or () {
-    let as = [];
-    for (let i = 0, l = arguments.length; i < l; i++)
-      as.push(arguments[i]);
-    return function (st) {
-      let a;
-      for each (let a in as) {
-        let r = a(st);
-        if (ok(r))
-          return r;
-      }
-      return Error('or-end', st);
-    };
-  }
+  let C = {
+    // [Parser] -> OKError Parser
+    or: function or () {
+      let as = [];
+      for (let i = 0, l = arguments.length; i < l; i++)
+        as.push(arguments[i]);
+      return function (st) {
+        let a;
+        for each (let a in as) {
+          let r = a(st);
+          if (ok(r))
+            return r;
+        }
+        return Error('or-end', st);
+      };
+    },
 
-  function map (p) {
-    return function (st) {
-      let result = [];
-      let cnt = 0;
-      while (!st.end) {
-        st = p(st);
+    many: function many (p) {
+      return function (st) {
+        let result = [];
+        let cnt = 0;
+        while (!st.end) {
+          let r = p(st);
+          if (ok(r))
+            result.push(r.result);
+          else
+            break;
+          st = r;
+          if (cnt++ > 100) { liberator.log('force break: many-while'); break; }
+        }
         if (ok(st))
-          result.push(st.result);
+          return st.set(result);
         else
-          break;
-        if (cnt++ > 100) {
-          liberator.log('100 break: map')
-          break;
-        }
+          return Error('many', st);
       }
-      return st.set(result);
-    }
-  }
+    },
 
-  function whileMap (p) {
-    return function (st) {
-      let result = [];
-      let next;
-      let cnt = 0;
-      while (!st.end) {
-        next = p(st);
-        if (ok(next))
-          result.push(next.result);
+    many1: function many1 (p) {
+      return function (st) {
+        let result = [];
+        let cnt = 0;
+        while (!st.end) {
+          let r = p(st);
+          if (ok(r))
+            result.push(r.result);
+          else
+            break;
+          st = r;
+          if (cnt++ > 100) { liberator.log('force break: many1-while'); break; }
+        }
+        if (result.length) {
+          return st.set(result);
+        } else
+          return Error('many1', st);
+      };
+    },
+
+    indent: function indent (p) {
+      return function (st) {
+        if (st.end)
+          return Error('EOL', 'st');
         else
-          break;
-        st = next;
-        if (cnt++ > 100) {
-          liberator.log('100 break: whileMap')
-          break;
-        }
-      }
-      if (result.length)
-        return st.set(result);
-      else
-        return Error('whileMap', st);
+          return p(st);
+      };
     }
-  }
-
-  function lv_map (lv, more, p) {
-    let re = RegExp('^' + lv.replace(/[^\s]/g, ' ') + (more ? '\\s+' : '') + '(.*)$');
-    return function (st) {
-      let result = [];
-      let cnt = 0;
-      while (!st.end) {
-        if (!re.test(st.head))
-          break;
-        st = p(st);
-        if (!ok(st))
-          return st;
-        result.push(st.result);
-        if (cnt++ > 100) {
-          liberator.log('100 break')
-          break;
-        }
-      }
-      return st.set(result);
-    };
-  }
-
+  };
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  function wiki (st) {
-    let r = wikiLines(st);
-    if (ok(r)) {
-      let xs = r.result;
-      return r.set(xmlJoin(xs)).wrap('div');
-    } else {
-      return Error('wiki', st);
+  let P = (function () {
+    function hn (n) {
+      let re = RegExp('^\\s*=={' + n + '}\\s+(.*)\\s*=={' + n + '}\\s*$');
+      return function (st) {
+        let m = st.head.match(re);
+        if (m) {
+          let hn = 'h' + n;
+          return st.next.set(<{hn} style={'font-size:'+(0.75+1/n)+'em'}>{stripAndLink(m[1])}</{hn}>)
+        } else {
+          return Error('not head1', st);
+        }
+      };
     }
-  }
 
-  // St -> St XML
-  function plain (st) {
-    let text = st.head;
-    return st.next.set(<>{stripAndLink(text)}<br /></>);
-  }
+    function list (name) {
+      return function (st) {
+        let lis = C.many1(self[name + 'i'])(st);
+        if (ok(lis)) {
+          return lis.set(xmlJoin(lis.result)).wrap(name);
+        } else {
+          return Error(name, st);
+        }
+      };
+    }
 
-  // St -> St XML
-  function hn (n) {
-    let re = RegExp('^\\s*=={' + n + '}\\s+(.*)\\s*=={' + n + '}\\s*$');
-    return function (st) {
-      let m = st.head.match(re);
-      if (m) {
-        let hn = 'h' + n;
-        return st.next.set(<{hn} style={'font-size:'+(0.75+1/n)+'em'}>{stripAndLink(m[1])}</{hn}>)
-      } else {
-        return Error('not head1', st);
-      }
+    function listItem (c) {
+      let re = RegExp('^(\\s*\\' + c + ' )(.*)$');
+      return function li (st) {
+        let m = st.head.match(re);
+        if (m) {
+          let h = m[2];
+          let next = C.many(self.wikiLine)(st.next.indent(m[1]));
+          return next.indentBack().set(xmlJoin([<>{h}</>].concat(next.result))).wrap('li');
+        } else {
+          return Error(c, st);
+        }
+      };
+    }
+
+    let self = {
+      // St -> St
+      debug: function debug (st) {
+        //liberator.log({ head: st.head, indent: st.indents[st.indents.length - 1] });
+        return Error('debug', st);
+      },
+
+      emptyLine: function emptyLine (st) {
+        if (/^\s*$/.test(st.head)) {
+          return st.next.set(<></>);
+        } else {
+          return Error('spaces', st);
+        }
+      },
+
+      // St -> St XML
+      plain: function plain (st) {
+        let text = st.head;
+        return st.next.set(<>{stripAndLink(text)}<br /></>);
+      },
+
+      // St -> St XML
+      h1: hn(1),
+      h2: hn(2),
+      h3: hn(3),
+      h4: hn(4),
+
+      // St -> St XML
+      // TODO ignore indent
+      pre: function pre (st) {
+        let m = st.head.match(/^(\s*)>\|\|\s*$/);
+        if (m) {
+          let result = '';
+          let cnt = 0;
+          while (!st.realEnd) {
+            st = st.next;
+            if (/^(\s*)\|\|<\s*$/.test(st.head)){
+              st = st.next;
+              break;
+            }
+            result += st.head.replace(m[1], '') + '\n';
+            if (cnt++ > 100) { liberator.log('force break: pre-while'); break; }
+          }
+          return st.set(<pre>{result}</pre>);
+        } else {
+          return Error('pre', st);
+        }
+      },
+
+      // St -> St XML
+      ul: list('ul'),
+
+      // St -> St XML
+      uli: listItem('-'),
+
+      // St -> St XML
+      ol: list('ol'),
+
+      // St -> St XML
+      oli: listItem('+'),
+
+      // St -> St XML
+      dl: function dl (st) {
+        let r = C.many1(self.dtdd)(st);
+        if (ok(r)) {
+          let body = xmlJoin(r.result);
+          return r.set(body).wrap('dl');
+        } else {
+          return Error('dl', st);
+        }
+      },
+
+      // St -> St XML
+      dtdd: function dtdd (st) {
+        let r = self.dt(st);
+        if (ok(r)) {
+          let [indent, dt] = r.result;
+          let dd = C.many(self.wikiLine)(r.indent(indent, true));
+          return dd.indentBack().set(dt + <dd>{xmlJoin(dd.result)}</dd>);
+        } else {
+          return r;
+        }
+      },
+
+      // St -> St (lv, XML)
+      dt: function dt (st) {
+        let m = st.head.match(/^(\s*)(.+):\s*$/);
+        if (m) {
+          return st.next.set([m[1], <dt style="font-weight:bold;">{m[2]}</dt>]);
+        } else {
+          return Error('not dt', st);
+        }
+      },
     };
-  }
 
-  let h1 = hn(1);
-  let h2 = hn(2);
-  let h3 = hn(3);
-  let h4 = hn(4);
+    // St -> St XML
+    with (self) {
+      self.wikiLine = C.or(debug, emptyLine, h1, h2, h3, h4, dl, ol, ul, pre, plain);
 
-  // St -> St XML
-  function dl (st) {
-    let r = whileMap(dtdd)(st);
-    if (ok(r)) {
-      let body = xmlJoin(r.result);
-      return r.set(body).wrap('dl');
-    } else {
-      return Error('dl', st);
-    }
-  }
+      // St -> St [XML]
+      self.wikiLines = C.many(wikiLine);
 
-  // St -> St XML
-  function dtdd (st) {
-    let r = dt(st);
-    if (ok(r)) {
-      let [lv, _dt] = r.result;
-      let _dd = lv_dd(lv, wikiLine)(r);
-      return _dd.set(_dt + <dd>{xmlJoin(_dd.result)}</dd>);
-    } else {
-      return r;
-    }
-  }
-
-  // St -> St (lv, XML)
-  function dt (st) {
-    let m = st.head.match(/^(\s*)(.+):\s*$/);
-    if (m) {
-      return st.next.set([m[1], <dt style="font-weight:bold;">{m[2]}</dt>]);
-    } else {
-      return Error('not dt', st);
-    }
-  }
-
-  // lv -> (St -> St [XML])
-  function lv_dd (lv) {
-    return lv_map(lv, true, wikiLine);
-  }
-
-  // St -> St XML
-  function ul (st) {
-    let lis = whileMap(li)(st);
-    if (ok(lis)) {
-      return lis.set(xmlJoin(lis.result)).wrap('ul');
-    } else {
-      return Error('ul', st);
-    }
-  }
-
-  // St -> St XML
-  function li (st) {
-    let m = st.head.match(/^(\s*- )(.*)$/);
-    if (m) {
-      st.head = st.head.replace(/- /, '  ');
-      let r = lv_map(m[1], false, wikiLine)(st);
-      return r.set(xmlJoin(r.result)).wrap('li');
-    } else {
-      return Error('li', st);
-    }
-  }
-
-  // St -> St XML
-  function ol (st) {
-    let lis = whileMap(oli)(st);
-    if (ok(lis)) {
-      return lis.set(xmlJoin(lis.result)).wrap('ol');
-    } else {
-      return Error('ol', st);
-    }
-  }
-
-  // St -> St XML
-  function oli (st) {
-    let m = st.head.match(/^(\s*\+ )(.*)$/);
-    if (m) {
-      st.head = st.head.replace(/\+ /, '  ');
-      let r = lv_map(m[1], false, wikiLine)(st);
-      return r.set(xmlJoin(r.result)).wrap('li');
-    } else {
-      return Error('li', st);
-    }
-  }
-
-  // St -> St XML
-  function pre (st) {
-    let m = st.head.match(/^(\s*)>\|\|\s*$/);
-    if (m) {
-      let result = '';
-      let cnt = 0;
-      while (!st.end) {
-        st = st.next;
-        if (/^(\s*)\|\|<\s*$/.test(st.head)){
-          st = st.next;
-          break;
-        }
-        result += st.head.replace(m[1], '') + '\n';
-        if (cnt++ > 100) {
-          liberator.log('br')
-          break;
+      self.wiki = function (st) {
+        let r = wikiLines(st);
+        if (ok(r)) {
+          let xs = r.result;
+          return r.set(xmlJoin(xs)).wrap('div');
+        } else {
+          return Error('wiki', st);
         }
       }
-      return st.set(<pre>{result}</pre>);
-    } else {
-      return Error('pre', st);
     }
-  }
 
-  // St -> St XML
-  let wikiLine = or(h1, h2, h3, h4, dl, ul, ol, pre, plain);
+    for (let [name, p] in Iterator(self)) {
+      self[name] = C.indent(p);
+    }
 
-  // St -> St [XML]
-  let wikiLines = map(wikiLine);
+    return self;
+  })();
 
-  return liberator.plugins.PMWikiParser = function (src) {
-    let r = wiki(State(src.split(/\n/)));
-    if (ok(r))
-      return r.result;
-    else
-      liberator.echoerr(r.name);
+
+  return liberator.plugins.PMWikiParser = {
+    parsers: P,
+    combs: C,
+    classes: {
+      State: State,
+    },
+    parse: function (src) {
+      let r = P.wiki(State(src.split(/\n/)));
+      if (ok(r))
+        return r.result;
+      else
+        liberator.echoerr(r.name);
+    }
   };
 
 })();
