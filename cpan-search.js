@@ -3,19 +3,18 @@ var PLUGIN_INFO =
 <name>{NAME}</name>
 <description>CPAN search</description>
 <description lang="ja">CPAN モジュールを検索し、補完します。</description>
-<minVersion>2.0</minVersion>
+<minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/cpan-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://tako3.net/http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.1</version>
 <detail><![CDATA[
-:cpan[!] Moo::Me[tab]
-
-CPAN モジュールリストは http://cpan.ma.la/list から vimp 起動時に初回ロードされます。(thx: mala!)
-検索は1単語なら indexOf 探索ですが、: を含む言葉(Foo::Bar など)なら RegExp 検索になるので、重いかもしれません。
-WebService::Hatena をマッチさせたいなら Web::Ha[tab] などで補完できると思います。
-:cpan! で bang をつけると別のタブで開きます。
+:cpan[!] Moo::Me[tab]:
+  CPAN モジュールリストは http://cpan.ma.la/list から vimp 起動時に初回ロードされます。(thx: mala!)
+  検索は1単語なら indexOf 探索ですが、: を含む言葉(Foo::Bar など)なら RegExp 検索になるので、重いかもしれません。
+  WebService::Hatena をマッチさせたいなら Web::Ha[tab] などで補完できると思います。
+  :cpan! で bang をつけると別のタブで開きます。
 ]]></detail>
 </VimperatorPlugin>;
 
