@@ -10,8 +10,8 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Twitter change notice(need login).</description>
     <description lang="ja">Twitter変更通知(ログイン済みであること)。</description>
-    <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-    <version>0.1.0</version>
+    <author mail="suvene@zeromemory.info" homepage="http://d.zeromemory.info/">suVene</author>
+    <version>0.1.1</version>
     <license>MIT</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
@@ -38,7 +38,7 @@ notifier.subject.register(notifier.SubjectHttp, {
     },
     parse: function(res) {
         // if (this.count == 0) return []; // for debug
-        return res.getHTMLDocument('id("timeline_body")/tr[@class=contains(concat(" ", @class, " "), " hentry ")]');
+        return res.getHTMLDocument('id("timeline")/li[@class=contains(concat(" ", @class, " "), " hentry ")]');
     },
     diff: function(cache, parsed) {
         var self = this;
