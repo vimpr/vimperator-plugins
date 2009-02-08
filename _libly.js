@@ -288,12 +288,21 @@ libly.$U = {//{{{
         return str.replace(new RegExp('<' + ignoreTags + '(?:[ \\t\\n\\r][^>]*|/)?>([\\S\\s]*?)<\/' + ignoreTags + '[ \\t\\r\\n]*>', 'ig'), '');
     },
     createHTMLDocument: function(str, xmlns, doc) {
+        let root = document.createElementNS("http://www.w3.org/1999/xhtml", "html");
+        let uhService = Cc["@mozilla.org/feed-unescapehtml;1"].getService(Ci.nsIScriptableUnescapeHTML);
+        let text = str.replace(/^[\s\S]*?<body([ \t\n\r][^>]*)?>[\s]*|<\/body[ \t\r\n]*>[\S\s]*$/ig, '');
+        let fragment = uhService.parseFragment(text, false, null, root);
+        let htmlFragment = document.implementation.createDocument(null, 'html', null);
+        htmlFragment.documentElement.appendChild(htmlFragment.importNode(fragment,true));
+        return htmlFragment;
+        /* うまく動いていない場合はこちらに戻してください
         doc = doc || window.content.document;
         var htmlFragment = doc.implementation.createDocument(null, 'html', null);
         var range = doc.createRange();
         range.setStartAfter(doc.body);
         htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str), true));
         return htmlFragment;
+        */
     },
     getFirstNodeFromXPath: function(xpath, context) {
         if (!xpath) return null;
