@@ -13,7 +13,7 @@
  *  New BSD License
  *
  * USAGE
- *  extended-hints mode ':m' to yank image URL and
+ *  extended-hints mode ';m' to yank image URL and
  *  ';i' to save image are available.
  *  there are default setting.
  *  you can change there by below settings.
