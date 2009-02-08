@@ -26,17 +26,17 @@
       liberator.plugins.pmwriter.makeLink = function (str) makeLink(str, true);
       liberator.eval('makeLink = liberator.plugins.pmwriter.makeLink ', liberator.plugins.pluginManager.list);
     }
-    let WikiParser = liberator.eval('WikiParser', liberator.plugins.pluginManager.list);
-    WikiParser.prototype.inlineParse = function (str) {
-      function replacer(_, s)
-        ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[s] ||
-        '<a href="' + s + '" highlight="URL">' + s + '</a>';
-      try {
-        return XMLList(str.replace(/(>|<|&|(?:https?:\/\/|mailto:)\S+)/g, replacer));
-      } catch (e) {
-        return XMLList(str);
-      }
-    };
+    //let WikiParser = liberator.eval('WikiParser', liberator.plugins.pluginManager.list);
+    //WikiParser.prototype.inlineParse = function (str) {
+    //  function replacer(_, s)
+    //    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[s] ||
+    //    '<a href="' + s + '" highlight="URL">' + s + '</a>';
+    //  try {
+    //    return XMLList(str.replace(/(>|<|&|(?:https?:\/\/|mailto:)\S+)/g, replacer));
+    //  } catch (e) {
+    //    return XMLList(str);
+    //  }
+    //};
   }
 
   function action () {
@@ -44,6 +44,7 @@
     const IOService = services.get('io');
     const DOCUMENT_TITLE = 'Vimperator Plugins in CodeRepos';
     const CodeRepos = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/';
+    const CodeReposFile = 'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/';
 
     function Context (file) {
       this.NAME = file.leafName.replace(/\..*/, '')
@@ -72,112 +73,121 @@
       if (!/PLUGIN_INFO/.test(io.readFile(file.path)))
         return;
 
-      let context = new Context(file);
-      let pluginName = file.leafName.replace(/\..*$/, '');
-      let pluginFilename = file.leafName;
-
-      if (context.NAME == myname)
-        return;
-
-      let pluginInfo;
-      let htmlFilename = pluginName + '.html';
-
-      context.watch('PLUGIN_INFO', function (n, O, N) { pluginInfo = N; throw 'STOP';});
-
       try {
-        services.get("subscriptLoader").loadSubScript(IOService.newFileURI(file).spec, context);
-      } catch (e) {
-        /* DO NOTHING */
-      }
+        let context = new Context(file);
+        let pluginName = file.leafName.replace(/\..*$/, '');
+        let pluginFilename = file.leafName;
 
-      tags.name = function () <a href={linkTo}>{otags.name.apply(otags, arguments)}</a>;
+        if (context.NAME == myname)
+          return;
 
-      let plugin = [];
-      let (info = pluginInfo) {
-        plugin['name'] = pluginName;
-        plugin['info'] = {};
-        plugin['orgInfo'] = {};
+        let pluginInfo;
+        let htmlFilename = pluginName + '.html';
 
-        for (let tag in tags){
-          plugin.orgInfo[tag] = info[tag];
-          let value = tags[tag](info);
-          if (value && value.toString().length > 0){
-            plugin.push([tag, value]);
-            plugin.info[tag] = value;
+        context.watch('PLUGIN_INFO', function (n, O, N) { pluginInfo = N; throw 'STOP';});
+
+        try {
+          services.get("subscriptLoader").loadSubScript(IOService.newFileURI(file).spec, context);
+        } catch (e) {
+          /* DO NOTHING */
+        }
+
+        tags.name = function () <a href={linkTo}>{otags.name.apply(otags, arguments)}</a>;
+
+        let plugin = [];
+        let (info = pluginInfo) {
+          plugin['name'] = pluginName;
+          plugin['info'] = {};
+          plugin['orgInfo'] = {};
+
+          for (let tag in tags){
+            plugin.orgInfo[tag] = info[tag];
+            let value = tags[tag](info);
+            if (value && value.toString().length > 0){
+              plugin.push([tag, value]);
+              plugin.info[tag] = value;
+            }
           }
         }
-      }
 
-      let authors;
-      {
-        for each (let a in pluginInfo.author) {
-          let hp = a.@homepage.toString();
-          let xml = hp ? <a href={hp}>{a.toString()}</a>
-                       : <span>{a.toString()}</span>
-          if (authors)
-            authors += <span>, </span> + xml;
-          else
-            authors = xml;
+        let authors;
+        {
+          for each (let a in pluginInfo.author) {
+            let hp = a.@homepage.toString();
+            let xml = hp ? <a href={hp}>{a.toString()}</a>
+                         : <span>{a.toString()}</span>
+            if (authors)
+              authors += <span>, </span> + xml;
+            else
+              authors = xml;
+          }
         }
-      }
 
-      // プラグイン毎のドキュメント
-      {
-        let body = <div>
-              <div class="information" id="information">
-                <h1>{plugin.info.name.toString()}</h1>
-                <div>
-                  <dl>
-                    <dt>Description</dt>
-                    <dd>{plugin.info.description || '---'}</dd>
-                    <dt>Latest version</dt>
-                    <dd>{plugin.info.version || '???'}</dd>
-                    <dt>Vimperator version</dt>
-                    <dd>{(plugin.info.minVersion || '?') + ' - ' + (plugin.info.maxVersion || '?')}</dd>
-                    <dt>URL</dt>
-                    <dd><a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a></dd>
-                    <dt>File URL</dt>
-                    <dd>{plugin.info.updateURL || '--'}</dd>
-                    <dt>Author</dt>
-                    <dd>{authors}</dd>
-                    <dt>License</dt>
-                    <dd>{plugin.info.license || '--'}</dd>
-                  </dl>
+        // プラグイン毎のドキュメント
+        {
+          let src = pluginInfo.detail.toString();
+          //let detailBody = liberator.plugins.PMWikiParser(src.split(/\n/));
+          let detailBody = plugin.info.detail
+          let body = <div>
+                <div class="information" id="information">
+                  <h1>{plugin.info.name.toString()}</h1>
+                  <div>
+                    <dl>
+                      <dt>Description</dt>
+                      <dd>{plugin.info.description || '---'}</dd>
+                      <dt>Latest version</dt>
+                      <dd>{plugin.info.version || '???'}</dd>
+                      <dt>Vimperator version</dt>
+                      <dd>{(plugin.info.minVersion || '?') + ' - ' + (plugin.info.maxVersion || '?')}</dd>
+                      <dt>URL</dt>
+                      <dd><a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a></dd>
+                      <dt>File URL</dt>
+                      <dd><a id="file-link" href={CodeReposFile + pluginFilename} class="coderepos" target="_blank">{CodeReposFile + pluginFilename}</a></dd>
+                      <dt>Author</dt>
+                      <dd>{authors}</dd>
+                      <dt>License</dt>
+                      <dd>{plugin.info.license || '--'}</dd>
+                    </dl>
+                  </div>
                 </div>
-              </div>
-              <div class="detail" id="detail">{plugin.info.detail}</div>
-              </div>;
+                <div class="detail" id="detail">{detailBody}</div>
+                </div>;
 
-        io.writeFile(
-          io.getFile(outputDir + htmlFilename),
-          <html>
-            <head>
-              <title>{plugin.info.name.toString()}</title>
-              <link rel="stylesheet" href="plugin.css" type="text/css" />
-              <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-            </head>
-            <body>
-              {body}
-            </body>
-          </html>.toString()
-        );
-        allHtml += body;
-      }
+          io.writeFile(
+            io.getFile(outputDir + htmlFilename),
+            <html>
+              <head>
+                <title>{plugin.info.name.toString()}</title>
+                <link rel="stylesheet" href="plugin.css" type="text/css" />
+                <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+              </head>
+              <body>
+                {body}
+              </body>
+            </html>.toString()
+          );
+          allHtml += body;
+        }
 
-      // index.html
-      {
-        indexHtml += <tr class="plugin">
-          <td class="name">
-            <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
-            <a href={htmlFilename} class="link">{plugin.name}</a>
-          </td>
-          <td class="description">
-            {plugin.info.description}
-          </td>
-          <td class="author">
-            {authors}
-          </td>
-        </tr>
+        // index.html
+        {
+          indexHtml += <tr class="plugin">
+            <td class="name">
+              <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
+              <a href={htmlFilename} class="link">{plugin.name}</a>
+            </td>
+            <td class="description">
+              {plugin.info.description}
+            </td>
+            <td class="author">
+              {authors}
+            </td>
+          </tr>
+        }
+      } catch (e) {
+        liberator.log({filename: file.path})
+        liberator.log(e.stack)
+        liberator.log(e)
       }
     });
 
