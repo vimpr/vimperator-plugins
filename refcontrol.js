@@ -9,10 +9,14 @@ var PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/refcontrol.js</updateURL>
   <detail><![CDATA[
-:togglerefcontrol    - 有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
-:addref              - リファラー設定追加(再起動すると消えます)
+== コマンド ==
+:togglerefcontrol:
+  有効/無効のトグルです。(ステータスバーのアイコンクリックでも切り替え可能)
+:addref:
+  リファラー設定追加(再起動すると消えます)
 
- .vimperatorrrc 設定例:
+== .vimperatorrrc 設定例 ==
+>||
 let g:refcontrol_enabled = "true"
 javascript <<EOM
 liberator.globalVariables.refcontrol={
@@ -22,15 +26,19 @@ liberator.globalVariables.refcontrol={
  'del.icio.us': '@NORMAL',
 };
 EOM
+||<
 
 domain:
  '@DEFAULT' はデフォルト設定を指します。
-
 param:
- @NORMAL : 通常の動作です。
- @FORGE  : ドメインのルートをリファラにセットします。
- ''      : リファラーを送信しません
- url     : 指定したURLでリファラーを送信します。
+  @NORMAL:
+    通常の動作です。
+  @FORGE:
+    ドメインのルートをリファラにセットします。
+  '':
+    リファラーを送信しません
+  url:
+    指定したURLでリファラーを送信します。
   ]]></detail>
 </VimperatorPlugin>;
 
