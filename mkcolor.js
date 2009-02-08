@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">mkcolor</name>
   <description>Write current highlights to the specified file.</description>
   <description lang="ja">現在のHighlightを指定のファイルに書き出す。</description>
-  <version>1.00</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -48,7 +48,8 @@ let PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
     == Commands ==
-      +mkcolor <FILENAME>
+      - mkcolor <FILENAME>
+        <FILENAME> に現在の Highlight 設定を書き出します。
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
