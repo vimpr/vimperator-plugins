@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.5</version>
+<version>0.5.1</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -330,9 +330,6 @@ Plugin.prototype = { // {{{
 // WikiParser
 // -----------------------------------------------------{{{
 var WikiParser = (function () {
-  function cloneArray (ary)
-    Array.concat(ary);
-
   function State (lines, result, indents) {
     if (!(this instanceof arguments.callee))
         return new arguments.callee(lines, result, indents);
@@ -388,6 +385,9 @@ var WikiParser = (function () {
   function ok (v)
     v instanceof State;
 
+  function cloneArray (ary)
+    Array.concat(ary);
+
   function xmlJoin (xs, init) {
     let result = init || <></>;
     for (let i = 0, l = xs.length; i < l; i++)
@@ -397,6 +397,26 @@ var WikiParser = (function () {
 
   function strip (s)
     s.replace(/^\s+|\s+$/g, '');
+
+  function trimAll (lines) {
+    let min = null;
+    lines.forEach(function (line) {
+      let s = line.match(/^\s*/).toString();
+      if (min) {
+        if (min.indexOf(s) == 0)
+          min = s;
+      } else {
+        min = s;
+      }
+    });
+    if (min) {
+      let spre = RegExp('^' + min);
+      liberator.log(min.length)
+      return lines.map(function (line) line.replace(spre, ''));
+    } else {
+      return lines;
+    }
+  }
 
   // FIXME
   function link (s) {
@@ -421,7 +441,7 @@ var WikiParser = (function () {
   ////////////////////////////////////////////////////////////////////////////////
 
   let C = {
-    // [Parser] -> OKError Parser
+    // [Parser a] -> Parser b
     or: function or () {
       let as = [];
       for (let i = 0, l = arguments.length; i < l; i++)
@@ -437,6 +457,7 @@ var WikiParser = (function () {
       };
     },
 
+    // Parser a -> Parser a
     many: function many (p) {
       return function (st) {
         let result = [];
@@ -457,6 +478,7 @@ var WikiParser = (function () {
       }
     },
 
+    // Parser a -> Parser a
     many1: function many1 (p) {
       return function (st) {
         let result = [];
@@ -477,6 +499,7 @@ var WikiParser = (function () {
       };
     },
 
+    // Parser a -> Parser a
     indent: function indent (p) {
       return function (st) {
         if (st.end)
@@ -490,6 +513,7 @@ var WikiParser = (function () {
   ////////////////////////////////////////////////////////////////////////////////
 
   let P = (function () {
+    // Int -> Parser XML
     function hn (n) {
       let re = RegExp('^\\s*=={' + n + '}\\s+(.*)\\s*=={' + n + '}\\s*$');
       return function (st) {
@@ -503,6 +527,7 @@ var WikiParser = (function () {
       };
     }
 
+    // String -> Parser XML
     function list (name) {
       return function (st) {
         let lis = C.many1(self[name + 'i'])(st);
@@ -514,6 +539,7 @@ var WikiParser = (function () {
       };
     }
 
+    // String -> Parser XML
     function listItem (c) {
       let re = RegExp('^(\\s*\\' + c + ' )(.*)$');
       return function li (st) {
@@ -521,7 +547,7 @@ var WikiParser = (function () {
         if (m) {
           let h = m[2];
           let next = C.many(self.wikiLine)(st.next.indent(m[1]));
-          return next.indentBack().set(xmlJoin([<>{h}</>].concat(next.result))).wrap('li');
+          return next.indentBack().set(xmlJoin([<>{h}<br /></>].concat(next.result))).wrap('li');
         } else {
           return Error(c, st);
         }
@@ -556,11 +582,10 @@ var WikiParser = (function () {
       h4: hn(4),
 
       // St -> St XML
-      // TODO ignore indent
       pre: function pre (st) {
         let m = st.head.match(/^(\s*)>\|\|\s*$/);
         if (m) {
-          let result = '';
+          let result = [];
           let cnt = 0;
           while (!st.realEnd) {
             st = st.next;
@@ -568,10 +593,10 @@ var WikiParser = (function () {
               st = st.next;
               break;
             }
-            result += st.head.replace(m[1], '') + '\n';
+            result.push(st.head);
             if (cnt++ > 100) { liberator.log('force break: pre-while'); break; }
           }
-          return st.set(<pre>{result}</pre>);
+          return st.set(<pre>{trimAll(result).join('\n')}</pre>);
         } else {
           return Error('pre', st);
         }
