@@ -31,7 +31,7 @@ if (!liberator.globalVariables.cpanListCache) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-                liberator.globalVariables.cpanListCache = 
+                liberator.globalVariables.cpanListCache =
                     xhr.responseText.split(/\r?\n/).map(function(i) [i, '', i.toUpperCase()]);
             } else {
                 liberator.echoerr('CPAN Search: XHR Error: ' + xhr.statusText);
@@ -45,7 +45,7 @@ if (!liberator.globalVariables.cpanListCache) {
 
 commands.addUserCommand(
     ['cpan'],
-    'CPAN Search', 
+    'CPAN Search',
     function(args) {
         var name = (args.string || '').replace(/\s/g, '').replace(/^\^/,'');
         var url = 'http://search.cpan.org/perldoc?' + name;
@@ -57,9 +57,9 @@ commands.addUserCommand(
             if (word.indexOf(':') >= 0) {
                 var regex = word.split(/:+/).map(function(i) i + '[^:]*').join('::');
                 regex = new RegExp('^' + regex.replace(/\[\^:\]\*$/, ''));
-                context.filters = [function (item) regex.test(item.item[2])];
+                context.filters = [function(item) regex.test(item.item[2])];
             } else {
-                context.filters = [function (item) item.item[2].indexOf(word) != -1];
+                context.filters = [function(item) item.item[2].indexOf(word) != -1];
             }
             context.completions = liberator.globalVariables.cpanListCache || [];
         },
