@@ -43,7 +43,7 @@ let PLUGIN_INFO =
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/bitly.js</updateURL>
-  <minVersion>1.2</minVersion>
+  <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
     == Commands ==
