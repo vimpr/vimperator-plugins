@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.5</version>
+    <version>0.2.6</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
@@ -35,8 +35,6 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== BUG? ==
- * adjust labeling algorithm has bug (?)
      ]]></detail>
     <detail lang="ja"><![CDATA[
 == Usage ==
@@ -64,8 +62,6 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== BUG? ==
- * adjust labeling algorithm has bug (?)
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
