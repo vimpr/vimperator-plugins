@@ -29,7 +29,7 @@
         liberator.modules.commandline.echo(showString,liberator.modules.commandline.HL_NORMAL,liberator.modules.commandline.FORCE_MULTILINE);
     }
     liberator.modules.commands.addUserCommand(["hbinfo"],"show Hatena Bookmark comments",
-        function(arg,special){
+        function(arg){
             var clipboard = readFromClipboard();
             var url = arg.string;
             if(special)
@@ -38,7 +38,8 @@
         },{
           completer: liberator.modules.completion.url,
           bang: true
-        }
+        },
+        true
     );
     liberator.modules.mappings.addUserMap([liberator.modules.modes.VISUAL],[",h"],"show Hatena Bookmark comments",
         function(count){
