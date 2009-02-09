@@ -2,8 +2,8 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Hatena Bookmark UserSearch</description>
-<description lang="ja">ÇÕÇƒÇ»ÉuÉbÉNÉ}Å[ÉNÉÜÅ[ÉUåüçı</description>
-<minVersion>2.0</minVersion>
+<description lang="ja">„ÅØ„Å¶„Å™„Éñ„ÉÉ„ÇØ„Éû„Éº„ÇØ„É¶„Éº„Ç∂Ê§úÁ¥¢</description>
+<minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena-bookmark-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
@@ -14,25 +14,25 @@ var PLUGIN_INFO =
 :bs[earch][!] word
 :tabbs[earch][!] word
 ||<
-ÉçÉOÉCÉìÇµÇƒÇ¢ÇÈÉÜÅ[ÉUÇÃÉuÉbÉNÉ}Å[ÉNÇÅAURL, ÉRÉÅÉìÉg, É^ÉCÉgÉã Ç©ÇÁåüçıÇµÇ‹Ç∑ÅB
-ÇÕÇƒÇ»ÉuÉbÉNÉ}Å[ÉNÉÜÅ[ÉUÉyÅ[ÉWÇÃâEè„ÇÃåüçıÇÃÉçÅ[ÉJÉãî≈ÇÃÇÊÇ§Ç»ÉCÉÅÅ[ÉWÇ≈Ç∑ÅB
+„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Çã„É¶„Éº„Ç∂„ÅÆ„Éñ„ÉÉ„ÇØ„Éû„Éº„ÇØ„Çí„ÄÅURL, „Ç≥„É°„É≥„Éà, „Çø„Ç§„Éà„É´ „Åã„ÇâÊ§úÁ¥¢„Åó„Åæ„Åô„ÄÇ
+„ÅØ„Å¶„Å™„Éñ„ÉÉ„ÇØ„Éû„Éº„ÇØ„É¶„Éº„Ç∂„Éö„Éº„Ç∏„ÅÆÂè≥‰∏ä„ÅÆÊ§úÁ¥¢„ÅÆ„É≠„Éº„Ç´„É´Áâà„ÅÆ„Çà„ÅÜ„Å™„Ç§„É°„Éº„Ç∏„Åß„Åô„ÄÇ
 
-XUL/Migemo Ç™ì¸Ç¡ÇƒÇ¢ÇÈèÍçáÇÕ Migemo ÇégÇ¢ê≥ãKï\åªåüçıÇµÇ‹Ç∑ÅB
-Migemo ÇóòópÇµÇΩåüçıåÍÇÃçiÇËçûÇ›ÇÕÉXÉyÅ[ÉXãÊêÿÇËÇÃ 2íPåÍÇ‹Ç≈Ç∆Ç»ÇËÇ‹Ç∑ÅB
+XUL/Migemo „ÅåÂÖ•„Å£„Å¶„ÅÑ„ÇãÂ†¥Âêà„ÅØ Migemo „Çí‰Ωø„ÅÑÊ≠£Ë¶èË°®ÁèæÊ§úÁ¥¢„Åó„Åæ„Åô„ÄÇ
+Migemo „ÇíÂà©Áî®„Åó„ÅüÊ§úÁ¥¢Ë™û„ÅÆÁµû„ÇäËæº„Åø„ÅØ„Çπ„Éö„Éº„ÇπÂå∫Âàá„Çä„ÅÆ 2ÂçòË™û„Åæ„Åß„Å®„Å™„Çä„Åæ„Åô„ÄÇ
 
-Migemo ÇóòópÇ∑ÇÈÇ∆åüçıÇ™èdÇ≠Ç»ÇÈÇÃÇ≈ÅAíxÇ¢É}ÉVÉìÇ‚ÉCÉìÉNÉäÉÅÉìÉ^Éãåüçıä¬ã´â∫Ç≈ÇÕÅAà»â∫ÇÃê›íËÇÇ∑ÇÈÇ±Ç∆Ç≈ migemo åüçıÇÇµÇ»Ç≠Ç»ÇËÇ‹Ç∑ÅB
+Migemo „ÇíÂà©Áî®„Åô„Çã„Å®Ê§úÁ¥¢„ÅåÈáç„Åè„Å™„Çã„ÅÆ„Åß„ÄÅÈÅÖ„ÅÑ„Éû„Ç∑„É≥„ÇÑ„Ç§„É≥„ÇØ„É™„É°„É≥„Çø„É´Ê§úÁ¥¢Áí∞Â¢É‰∏ã„Åß„ÅØ„ÄÅ‰ª•‰∏ã„ÅÆË®≠ÂÆö„Çí„Åô„Çã„Åì„Å®„Åß migemo Ê§úÁ¥¢„Çí„Åó„Å™„Åè„Å™„Çä„Åæ„Åô„ÄÇ
 >||
 liberator.globalVariables.hatena_bookmark_no_migemo = true;
 ||<
 
- :bs word Ç≈ÇÕÅAëIëÇµÇƒÇ¢ÇÈ URL ÇäJÇ´Ç‹Ç∑ÅB:bs! word Ç≈ÇÕÅAëIëÇµÇƒÇ¢ÇÈ URL ÇÃÇÕÇƒÇ»ÉuÉbÉNÉ}Å[ÉNÉGÉìÉgÉäÅ[ÉyÅ[ÉWÇäJÇ´Ç‹Ç∑ÅB:bs Ç∆íPåÍÇì¸óÕÇµÇ»Ç¢Ç∆ÅAhttp://b.hatena.ne.jp/my ÇäJÇ´Ç‹Ç∑ÅB:bs! Ç≈ÇÕ http://b.hatena.ne.jp/ ÉgÉbÉvÉyÅ[ÉWÇäJÇ´Ç‹Ç∑ÅB
+ :bs word „Åß„ÅØ„ÄÅÈÅ∏Êäû„Åó„Å¶„ÅÑ„Çã URL „ÇíÈñã„Åç„Åæ„Åô„ÄÇ:bs! word „Åß„ÅØ„ÄÅÈÅ∏Êäû„Åó„Å¶„ÅÑ„Çã URL „ÅÆ„ÅØ„Å¶„Å™„Éñ„ÉÉ„ÇØ„Éû„Éº„ÇØ„Ç®„É≥„Éà„É™„Éº„Éö„Éº„Ç∏„ÇíÈñã„Åç„Åæ„Åô„ÄÇ:bs „Å®ÂçòË™û„ÇíÂÖ•Âäõ„Åó„Å™„ÅÑ„Å®„ÄÅhttp://b.hatena.ne.jp/my „ÇíÈñã„Åç„Åæ„Åô„ÄÇ:bs! „Åß„ÅØ http://b.hatena.ne.jp/ „Éà„ÉÉ„Éó„Éö„Éº„Ç∏„ÇíÈñã„Åç„Åæ„Åô„ÄÇ
 
-èââÒåüçıéûÇ…ÉfÅ[É^Çç\ízÇµÇ‹Ç∑Ç™ÅAã≠êßìIÇ…ÉfÅ[É^ÇÉçÅ[ÉhÇµíºÇµÇΩÇ¢éûÇ»Ç«ÇÕ
+ÂàùÂõûÊ§úÁ¥¢ÊôÇ„Å´„Éá„Éº„Çø„ÇíÊßãÁØâ„Åó„Åæ„Åô„Åå„ÄÅÂº∑Âà∂ÁöÑ„Å´„Éá„Éº„Çø„Çí„É≠„Éº„Éâ„ÅóÁõ¥„Åó„Åü„ÅÑÊôÇ„Å™„Å©„ÅØ
 
 >||
  :bs -reload x
 ||<
-Ç∆ÇµÇƒÇ≠ÇæÇ≥Ç¢ÅBç≈å„Ç… x ÇÇ¬ÇØÇƒÇÈÇÃÇÕ :bs -reload Ç™ invalid options Ç≈ÉGÉâÅ[Ç…Ç»Ç¡ÇƒÇµÇ‹Ç§ÇΩÇﬂÇ≈Ç∑(âΩÇ≈ÇæÇÎÇ§Åc);
+„Å®„Åó„Å¶„Åè„Å†„Åï„ÅÑ„ÄÇÊúÄÂæå„Å´ x „Çí„Å§„Åë„Å¶„Çã„ÅÆ„ÅØ :bs -reload „Åå invalid options „Åß„Ç®„É©„Éº„Å´„Å™„Å£„Å¶„Åó„Åæ„ÅÜ„Åü„ÇÅ„Åß„Åô(‰Ωï„Åß„Å†„Çç„ÅÜ‚Ä¶);
 
 ]]></detail>
 </VimperatorPlugin>;
@@ -120,7 +120,7 @@ HatenaBookmark.Command = {
             HatenaBookmark.UserData.reload();
             liberator.echo('HatenaBookmark data reloaded.');
             return;
-        } 
+        }
         var url = HatenaBookmark.Command.genURL(args.string);
         liberator.open(url);
     },
@@ -153,7 +153,7 @@ HatenaBookmark.Command.options = {
            title: ['TITLE', 'Info'],
            keys: { text: "url", description: "url", icon: "icon", extra: "extra"},
            process: [
-             HatenaBookmark.Command.templateTitleIcon, 
+             HatenaBookmark.Command.templateTitleIcon,
              HatenaBookmark.Command.templateDescription,
            ],
        }
@@ -197,7 +197,7 @@ HatenaBookmark.UserData = {
     },
     init: function() {
         if (!this._inited) {
-            if (this._bookmarks) 
+            if (this._bookmarks)
                delete this._bookmarks;
             this._inited = true;
             this.preloadLimit = 500;
