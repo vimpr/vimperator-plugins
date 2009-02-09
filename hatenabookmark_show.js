@@ -1,5 +1,5 @@
 // Vimperator plugin: "Show Hatena Bookmark Comments"
-// Last Change: 21-Mar-2008. Jan 2008
+// Last Change: Mon Feb  9 21:36:06     2009
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -29,14 +29,15 @@
         liberator.modules.commandline.echo(showString,liberator.modules.commandline.HL_NORMAL,liberator.modules.commandline.FORCE_MULTILINE);
     }
     liberator.modules.commands.addUserCommand(["hbinfo"],"show Hatena Bookmark comments",
-        function(arg){
+        function(args){
             var clipboard = readFromClipboard();
-            var url = arg.string;
-            if(special)
+            var url = args.literalArg;
+            if(args.bang)
                 url = window.content.document.getSelection() || clipboard;
             showComments(url ? encodeURIComponent(url): liberator.modules.buffer.URL);
         },{
-          completer: liberator.modules.completion.url,
+          literal: 0,
+          completer: function (context, args) liberator.modules.completion.url(context),
           bang: true
         },
         true
