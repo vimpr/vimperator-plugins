@@ -24,10 +24,10 @@ hash:
     let Algos = [
         ["md2", "MD2 Algorithm"],
         ["md5", "MD5 Algorithm"],
-        ["sha1", "SHA1 Algorithm"],
-        ["sha256", "SHA256 Algorithm"],
-        ["sha384", "SHA385 Algorithm"],
-        ["sha512", "SHA512 Algorithm"],
+        ["sha1", "SHA1 Algorithm"],     // SHA-1
+        ["sha256", "SHA256 Algorithm"], // SHA-256
+        ["sha384", "SHA384 Algorithm"], // SHA-384
+        ["sha512", "SHA512 Algorithm"], // SHA-512
     ];
 
     function getStream(path)
@@ -49,7 +49,7 @@ hash:
     commands.addUserCommand(["hash"], "hash of file",
         function(args){
             if (args.length!=2) {
-    
+
                 liberator.echo("usage \":hash md2|md5|sha1|sha256|sha384|sha512 file-path\"");
                 return false;
             }
