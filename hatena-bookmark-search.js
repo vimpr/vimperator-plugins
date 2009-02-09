@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena-bookmark-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.1</version>
+<version>0.1.1</version>
 <detail><![CDATA[
 >||
 :bs[earch][!] word
@@ -30,9 +30,10 @@ liberator.globalVariables.hatena_bookmark_no_migemo = true;
 初回検索時にデータを構築しますが、強制的にデータをロードし直したい時などは
 
 >||
- :bs -reload x
+ :bs -reload
 ||<
-としてください。最後に x をつけてるのは :bs -reload が invalid options でエラーになってしまうためです(何でだろう…);
+としてください。
+(invalid options エラーが出る場合は、適当な文字を後ろに付加するか、最新(Nightly)の Vimperator を使ってください)
 
 ]]></detail>
 </VimperatorPlugin>;
@@ -121,7 +122,7 @@ HatenaBookmark.Command = {
             liberator.echo('HatenaBookmark data reloaded.');
             return;
         }
-        var url = HatenaBookmark.Command.genURL(args.string);
+        var url = HatenaBookmark.Command.genURL(args);
         liberator.open(url);
     },
     executeTab: function(args) {
@@ -162,10 +163,11 @@ HatenaBookmark.Command.options = {
        context.filters = [HatenaBookmark.Command.filter];
        context.completions = HatenaBookmark.UserData.bookmarks;
    },
+   literal: 0,
    argCount: '*',
    bang: true,
    options: [
-      [['-reload'], commands.OPTION_NOARG] // XXX
+      [['-reload'], commands.OPTION_NOARG]
    ],
 }
 
