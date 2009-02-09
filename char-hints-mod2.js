@@ -35,7 +35,8 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== TODO ==
+== BUG ==
+ * adjust labeling algorithm has bug
      ]]></detail>
     <detail lang="ja"><![CDATA[
 == Usage ==
@@ -63,7 +64,8 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== TODO ==
+== BUG ==
+ * adjust labeling algorithm has bug
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
