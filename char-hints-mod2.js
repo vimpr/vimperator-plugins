@@ -35,8 +35,8 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== BUG ==
- * adjust labeling algorithm has bug
+== BUG? ==
+ * adjust labeling algorithm has bug (?)
      ]]></detail>
     <detail lang="ja"><![CDATA[
 == Usage ==
@@ -64,8 +64,8 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
-== BUG ==
- * adjust labeling algorithm has bug
+== BUG? ==
+ * adjust labeling algorithm has bug (?)
      ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -132,7 +132,6 @@ let g:hintlabeling:
     function showCharHints(hints) //{{{
     {
         let start = getStartCount(hintchars.length, hints.length);
-        liberator.reportError(start);
         for(let i=0,len=hints.length;i<len;++i) {
             let hint = hints[i];
             let num = hint.getAttribute("number");
@@ -172,21 +171,18 @@ let g:hintlabeling:
         let num = chars2num(hintInput)-start;
         if(num < 0) return;
         let numstr = String(num);
-        // no setTimeout, don't run nice ?
-        setTimeout(function () {
-            for(let i=0,l=numstr.length;i<l;++i) {
-                let num = numstr[i];
-                let alt = new Object;
-                alt.liberatorString = num;
-                charhints.original.onEvent(alt);
-            }
-            statusline.updateInputBuffer(hintInput);
-            let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
-            if(validHints.length == 1) {
-                charhints.original.processHints(true);
-                return true;
-            }
-        }, 10);
+        for(let i=0,l=numstr.length;i<l;++i) {
+            let num = numstr[i];
+            let alt = new Object;
+            alt.liberatorString = num;
+            charhints.original.onEvent(alt);
+        }
+        statusline.updateInputBuffer(hintInput);
+        let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
+        if(validHints.length == 1) {
+            charhints.original.processHints(true);
+            return true;
+        }
     } //}}}
 
     var hintInput = "";
