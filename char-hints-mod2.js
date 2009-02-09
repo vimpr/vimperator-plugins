@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.4</version>
+    <version>0.2.5</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
     <maxVersion>2.0a1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
@@ -31,9 +31,9 @@ let g:hintsio:
 let g:hintlabeling:
     - "s" setting simple n-base decimal hint labeling (n = hintchars.length)
     - "a" setting adjust no overlap labeling
-    Default setting is "a".
+    Default setting is "s".
     e.g.)
-      let g:hintlabeling="s"
+      let g:hintlabeling="a"
 
 == TODO ==
      ]]></detail>
@@ -59,9 +59,9 @@ let g:hintsio:
 let g:hintlabeling:
     - "s" setting simple n-base decimal hint labeling (n = hintchars.length)
     - "a" setting adjust no overlap labeling
-    Default setting is "a".
+    Default setting is "s".
     e.g.)
-      let g:hintlabeling="s"
+      let g:hintlabeling="a"
 
 == TODO ==
      ]]></detail>
@@ -77,7 +77,7 @@ let g:hintlabeling:
     let inputCase = function(str) str.toUpperCase();
     let inputRegex = /[A-Z]/;
     let showCase = function(str) str.toUpperCase();
-    let getStartCount = getAdjustStartCount;
+    let getStartCount = function() 0;
 
     function chars2num(chars) //{{{
     {
@@ -100,15 +100,6 @@ let g:hintlabeling:
         } while(num>0);
 
         return chars;
-    } //}}}
-    // get Most Significant Digit
-    function getMSD(base, count) //{{{
-    {
-        let next;
-        while((next = Math.floor(count/base)) > 0) {
-            count = next;
-        }
-        return count;
     } //}}}
     function getAdjustStartCount(base, count) //{{{
     {
@@ -139,6 +130,7 @@ let g:hintlabeling:
     function showCharHints(hints) //{{{
     {
         let start = getStartCount(hintchars.length, hints.length);
+        liberator.reportError(start);
         for(let i=0,len=hints.length;i<len;++i) {
             let hint = hints[i];
             let num = hint.getAttribute("number");
@@ -250,18 +242,18 @@ let g:hintlabeling:
             liberator.execute(":hi Hint::after content: attr(hintchar)", true, true);
             if(liberator.globalVariables.hintsio) {
                 let hintsio = liberator.globalVariables.hintsio;
-                for(let i=hintsio.length;i-->0;setIOType(hintsio[i]));
+                Array.forEach(hintsio, setIOType);
             }
             if(liberator.globalVariables.hintchars) {
                 hintchars = liberator.globalVariables.hintchars;
             }
             if(liberator.globalVariables.hintlabeling) {
                 switch(liberator.globalVariables.hintlabeling) {
+                    default:
                     case "s":
                         getStartCount = function() 0;
                         break;
                     case "a":
-                    default:
                         getStartCount = getAdjustStartCount;
                         break;
                 }
