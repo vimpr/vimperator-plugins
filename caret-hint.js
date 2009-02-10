@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Caret Hint</name>
   <description>Move the caret position by hint</description>
   <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -48,21 +48,30 @@ let PLUGIN_INFO =
   <detail><![CDATA[
     == Global Variables ==
       let g:caret_hint_key:
-        Hint mode key
+        Hint mode key.
+        Move the caret position to the selected element.
+      let g:caret_hint_select_key:
+        Hint mode key.
+        Move the caret position to the selected element, and select.
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Global Variables ==
       let g:caret_hint_key:
-        Hint モードのキー
+        Hint モードのキー。
+        選択した要素の位置にキャレットを移動する。
+      let g:caret_hint_select_key:
+        Hint モードのキー。
+        選択した要素の位置にキャレットを移動し、要素を選択する。
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
 
 (function () {
 
-  let mode = liberator.globalVariables.caret_hint_key || 'c';
+  let headMode = liberator.globalVariables.caret_hint_key || 'c';
+  let selectMode = liberator.globalVariables.caret_hint_select_key || 'C';
 
-  function moveCaret (elem) {
+  function moveCaret (elem, type) {
     let doc = elem.ownerDocument;
 
     let win = new XPCNativeWrapper(window.content.window);
@@ -71,17 +80,35 @@ let PLUGIN_INFO =
 
     let r = doc.createRange();
     r.selectNodeContents(elem);
-    r.setEnd(r.startContainer, r.startOffset);
+
+    switch (type) {
+      case 'select':
+        mappings.getDefault(modes.NORMAL, 'i').action();
+        mappings.getDefault(modes.CARET, 'v').action();
+        break;
+      case 'head':
+        r.setEnd(r.startContainer, r.startOffset);
+        mappings.getDefault(modes.NORMAL, 'i').action();
+        break;
+    }
 
     sel.addRange(r);
   }
 
   hints.addMode(
-    'c',
+    headMode,
     'Move the caret position',
     function (elem, _, count) {
-      moveCaret(elem);
-      mappings.getDefault(modes.NORMAL, 'i').action();
+      moveCaret(elem, 'head');
+    },
+    function () '//*'
+  );
+
+  hints.addMode(
+    selectMode,
+    'Move the caret position and select',
+    function (elem, _, count) {
+      moveCaret(elem, 'select');
     },
     function () '//*'
   );
