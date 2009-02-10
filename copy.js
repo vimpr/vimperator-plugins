@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.7</version>
+<version>0.7.1</version>
 <detail><![CDATA[
 == Command ==
 :copy {copyString}:
@@ -131,9 +131,10 @@ const REPLACE_TABLE = {
     get TITLE () buffer.title,
     get URL () buffer.URL,
     get SEL () {
-        if (sel)
-            return sel;
-        else if (selection.rangeCount < 1)
+        var sel = '';
+        var win = new XPCNativeWrapper(window.content.window);
+        var selection =  win.getSelection();
+        if (selection.rangeCount < 1)
             return '';
 
         for (var i=0, c=selection.rangeCount; i<c; i++){
@@ -142,9 +143,10 @@ const REPLACE_TABLE = {
         return sel;
     },
     get HTMLSEL () {
-        if (htmlsel)
-            return sel;
-        else if (selection.rangeCount < 1)
+        var htmlsel = '';
+        var win = new XPCNativeWrapper(window.content.window);
+        var selection =  win.getSelection();
+        if (selection.rangeCount < 1)
             return '';
 
         var serializer = new XMLSerializer();
@@ -198,9 +200,6 @@ function getCopyTemplate(label){
 }
 function replaceVariable(str){
     if (!str) return '';
-    var win = new XPCNativeWrapper(window.content.window);
-    var sel = '', htmlsel = '';
-    var selection =  win.getSelection();
     function replacer(orig, name){ //{{{
         if (name == '')
             return '%';
