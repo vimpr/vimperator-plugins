@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.6</version>
+    <version>0.2.7</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
-    <maxVersion>2.0a1</maxVersion>
+    <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -35,6 +35,9 @@ let g:hintlabeling:
     e.g.)
       let g:hintlabeling="a"
 
+== TODO ==
+- fix bug that hinttimeout don't run
+
      ]]></detail>
     <detail lang="ja"><![CDATA[
 == Usage ==
@@ -61,6 +64,9 @@ let g:hintlabeling:
     Default setting is "s".
     e.g.)
       let g:hintlabeling="a"
+
+== TODO ==
+- fix bug that hinttimeout don't run
 
      ]]></detail>
 </VimperatorPlugin>;
@@ -166,14 +172,19 @@ let g:hintlabeling:
         let start = getStartCount(hintchars.length, hints.length);
         let num = chars2num(hintInput)-start;
         if(num < 0) return;
+
         let numstr = String(num);
         for(let i=0,l=numstr.length;i<l;++i) {
             let num = numstr[i];
+            // events.toString(e) return e.liberatorString
+            // if e.liberatorString.
+            // so alt handled as press number event by vimperator.
             let alt = new Object;
             alt.liberatorString = num;
             charhints.original.onEvent(alt);
         }
         statusline.updateInputBuffer(hintInput);
+
         let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
         if(validHints.length == 1) {
             charhints.original.processHints(true);
@@ -198,7 +209,9 @@ let g:hintlabeling:
             }
             let hintString = commandline.command;
             commandline.command = hintString.replace(inputRegex, "");
+
             charhints.original.onInput(event);
+
             for(let i=0,l=hintString.length;i<l;++i) {
                 if(inputRegex.test(hintString[i])) {
                     hintInput += hintString[i];
@@ -217,6 +230,16 @@ let g:hintlabeling:
                 statusline.updateInputBuffer(hintInput);
             }
         }, //}}}
+        processHints: function (followFirst) //{{{
+        {
+            // don't followFirst if processHints call from
+            // charhints.original.onEvent(alt) in processHintInput
+            let caller = arguments.callee.caller;
+            if(caller == charhints.original.onEvent && caller.caller == processHintInput)
+                return charhints.original.processHints(false);
+
+            return charhints.original.processHints(followFirst);
+        }, //}}}
     };
 
     if(!charhints.original) {
@@ -232,6 +255,7 @@ let g:hintlabeling:
             hints.show = charhints.show;
             hints.onEvent = charhints.onEvent;
             liberator.eval("onInput = plugins.charhints.onInput", hintContext);
+            liberator.eval("processHints = plugins.charhints.processHints", hintContext);
 
             liberator.execute(":hi Hint::after content: attr(hintchar)", true, true);
             if(liberator.globalVariables.hintsio) {
@@ -258,8 +282,9 @@ let g:hintlabeling:
             hints.show = charhints.original.show;
             hints.onEvent = charhints.original.onEvent;
             liberator.eval("onInput = plugins.charhints.original.onInput", hintContext);
+            liberator.eval("processHints = plugins.charhints.original.processHints", hintContext);
 
-            liberator.execute(":hi Hint::after content: attr(number)");
+            liberator.execute(":hi Hint::after content: attr(number)", true, true);
         }; //}}}
     }
     charhints.install();
