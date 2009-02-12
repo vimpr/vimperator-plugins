@@ -159,7 +159,7 @@ const vkeyTable = [
     [ KeyEvent.DOM_VK_SUBTRACT, ['-'] ],
     [ KeyEvent.DOM_VK_COMMA, [','] ],
     [ KeyEvent.DOM_VK_PERIOD, ['.'] ],
-    [ KeyEvent.DOM_VK_SLASH, ['/'] ],
+    [ KeyEvent.DOM_VK_SLASH, ['/', '?'] ],
     [ KeyEvent.DOM_VK_BACK_QUOTE, ['`'] ],
     [ KeyEvent.DOM_VK_OPEN_BRACKET, ['{'] ],
     [ KeyEvent.DOM_VK_BACK_SLASH, ['\\'] ],
@@ -304,7 +304,7 @@ function feedKeyIntoContent(keys, useVkey){
                 i += matches[0].length + 1;
             }
         } else  {
-            shift = (keys[i] >= "A" && keys[i] <= "Z");
+            shift = (keys[i] >= "A" && keys[i] <= "Z") || keys[i] == "?";
         }
 
         //liberator.log({ctrl:ctrl, alt:alt, shift:shift, meta:meta, keyCode:keyCode, charCode:charCode, useVkey: useVkey});
