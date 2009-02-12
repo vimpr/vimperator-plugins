@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.5.1</version>
+<version>0.6.0</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -377,9 +377,8 @@ var WikiParser = (function () {
     if (!(this instanceof arguments.callee))
         return new arguments.callee(name, state);
 
-    this.__ok = false;
     this.name = name;
-    this.state = state; //TODO clone
+    this.state = state;
   }
 
   function ok (v)
@@ -816,6 +815,66 @@ commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
             ]).filter(function(row)
                 row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
         }
+    }, true);
+
+commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
+    function(args){
+        if (args.length < 1)
+            liberator.echoerr('Not enough arguments. Sub-command required.');
+
+        var xml;
+        var sub = args[0];
+        var subArgs = args.slice(1);
+
+        function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
+
+        if (sub == 'source') {
+            if (subArgs.length < 1)
+                return liberator.echoerr('Argument(plugin name) required');
+            return liberator.plugins.pluginManager.source(subArgs);
+        } else if (sub == 'install') {
+            if (s2b(liberator.globalVariables.plugin_manager_installer, false))
+                return liberator.plugins.pluginManager.install(subArgs);
+            else
+                return liberator.echoerr('This function(sub-command) is invalid now.');
+        } else {
+            if (sub == 'check') {
+                xml = liberator.plugins.pluginManager.checkVersion(subArgs);
+            } else if (sub == 'update') {
+                xml = liberator.plugins.pluginManager.update(subArgs);
+            } else if (sub == 'help' ) {
+                xml = liberator.plugins.pluginManager.list(subArgs, true);
+            } else if (sub == 'list') {
+                xml = liberator.plugins.pluginManager.list(subArgs, false);
+            }
+            return liberator.echo(xml, true);
+        }
+
+        liberator.echoerr('Unknown sub-command: ' + sub)
+    }, {
+        argCount: '*',
+        completer: function(context, args){
+            if (args.length <= 1) { // for sub-command
+                context.title = ['Sub-command', 'Description'];
+                context.completions = [
+                    ['check', 'Check the versions of plugins'],
+                    ['help', 'Show plugin help'],
+                    ['install', 'Install the plugin of (current page or specified URL).'],
+                    ['list', 'List plugin information'],
+                    ['update', 'Update plugins'],
+                ];
+            } else { // for sub-arguments
+                if (/^(update|check|help|list)$/.test(args[0])) {
+                    context.title = ['PluginName', '[Version]Description'];
+                    context.completions = getPlugins().map(function(plugin) [
+                        plugin.name,
+                        '[' + (plugin.items.version || 'unknown') + ']' +
+                        (plugin.items.description || '-')
+                    ]).filter(function(row)
+                        row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
+                }
+            }
+        }
     }, true); // }}}
 
 // --------------------------------------------------------
@@ -856,6 +915,77 @@ var public = {
             xml += plugin.itemFormatter(verbose);
         });
         return xml;
+    },
+    install: function(urls){
+        function makeURL(s){
+            let url = Cc["@mozilla.org/network/standard-url;1"].createInstance(Ci.nsIURL);
+            url.spec = s;
+            return url;
+        }
+
+        function fixURL(url){
+            const cr = RegExp('^http://coderepos\.org/share/browser/lang/javascript/vimperator-plugins/trunk/[^/]+\.js$');
+            const pi = RegExp('^http://vimperator\.kurinton\.net/plugins/');
+            const npi = /\/(all|index)\.html/;
+            const js = /\.js$/;
+            function xe(xpath){
+                let ss = buffer.evaluateXPath(xpath);
+                return (ss.snapshotLength > 0) && ss.snapshotItem(0).href;
+            }
+            if (cr.test(url)) {
+                return url.replace(/coderepos/, 'svn.coderepos').replace(/browser\//, '');
+            } else if (pi.test(url) && !npi.test(url)) {
+                return xe('//a[@id="file-link"]');
+            } else if (js.test(url)) {
+                return url;
+            } else {
+                throw 'Current URL is not pluginFile';
+            }
+        }
+
+        function download(url){
+            let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
+
+            let progressListener = {
+                onStateChange: function (_webProgress, _request, _stateFlags, _status) {
+                    if (_stateFlags & Ci.nsIWebProgressListener.STATE_STOP) {
+                        if (file.exists()) {
+                            io.source(file.path);
+                            liberator.echo('Executed: ' + file.path)
+                        } else {
+                            return liberator.echoerr('Download error!');
+                        }
+                    }
+                },
+                onProgressChange: function () undefined,
+                onLocationChange: function () undefined,
+                onStatusChange: function () undefined,
+                onSecurityChange: function () undefined,
+            }
+
+            let filename = url.match(/[^\/]+$/).toString();
+            let file = io.getRuntimeDirectories('plugin')[0];
+            file.append(filename);
+
+            if (file.exists())
+                return liberator.echoerr('Already exists: ' + file.path);
+
+            let fileuri = makeFileURI(file);
+
+            wbp.progressListener = progressListener;
+            wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+            wbp.saveURI(makeURL(url), null, null, null, null, fileuri);
+        }
+
+        var url = urls.length ? urls[0] : buffer.URL;
+        var sourceURL = fixURL(url);
+        if (sourceURL == url) {
+            liberator.log(url);
+            download(url);
+        } else {
+            liberator.open(sourceURL);
+            liberator.echoerr('Please check the source code of plugin, and retry ":pluginmanager install"');
+        }
     }
 };
 return public;
