@@ -26,8 +26,15 @@ j,k key scrolling to be smoothly.
 
 == Global variables ==
 You can configure following variable as you like.
-:smooziee_scroll_amount: Scrolling amount. Default value is 400px.
-:smooziee_interval: Scrolling interval. Default value is 20ms. 
+:smooziee_scroll_amount: Scrolling amount(unit:px). Default value is 400px. 
+:smooziee_interval: Scrolling interval(unit:ms). Default value is 20ms. 
+
+=== Excample === 
+Set scroll amount is 300px and interval is 10ms. 
+>|| 
+let g:smooziee_scroll_amount="300" 
+let g:smooziee_scroll_interval="10" 
+||< 
 
 == ToDo ==
 
@@ -39,8 +46,15 @@ You can configure following variable as you like.
 
 == グローバル変数 ==
 以下の変数を.vimperatorrcなどで設定することで動作を調整することができます。
-:smooziee_scroll_amount:1回にスクロールする幅です。デフォルトは400pxです。
-:smooziee_interval:スクロールのインターバル（単位：ミリ秒）デフォルトは30msです。
+以下の変数を.vimperatorrcなどで設定することで動作を調整することができます。 
+:smooziee_scroll_amount:1回にスクロールする幅です（単位：ピクセル）。デフォルトは"400"です。 
+:smooziee_interval:スクロール時のアニメーションのインターバルです（単位：ミリ秒）。"1"以上の値を設定します。デフォルトは"20"です。 
+=== 設定例 === 
+スクロール量を300pxに、インターバルを10msに設定します。 
+>|| 
+let g:smooziee_scroll_amount="300" 
+let g:smooziee_scroll_interval="10" 
+||< 
 
 == ToDo ==
 - 読み込みの順番によっては他のプラグインと競合する可能性があるのをなんとかしたい。
@@ -51,20 +65,26 @@ You can configure following variable as you like.
 
 (function(){
   // configurations
-  var scrollAmount  = window.eval(liberator.globalVariables.smooziee_scroll_amount || 400);
-  var interval      = window.eval(liberator.globalVariables.smooziee_interval || 20);
+  var scrollAmount  = 400;
+  var interval      = 20;
 
   // 
   // Private
   //
   var next = null;
   var destY = null;
-  var win = function() window.content.window.wrappedJSObject;
+  var win = null;
+
+  function setup() {
+    win = window.content.window.wrappedJSObject;
+    scrollAmount = window.eval(liberator.globalVariables.smooziee_scroll_amount) || scrollAmount; 
+    interval = window.eval(liberator.globalVariables.smooziee_scroll_interval) || interval; 
+  }
 
   // direction : positive (down) / negative (up)
   function smoothScroll(amount, direction) {
     var moment = Math.floor(amount / 2);
-    win().scrollBy(0, moment * direction);
+    win.scrollBy(0, moment * direction);
 
     if (moment < 1) {
       setTimeout(makeScrollTo(0, destY), interval);
@@ -74,13 +94,9 @@ You can configure following variable as you like.
     next = setTimeout(function() smoothScroll(moment, direction), interval);
   }
 
-  function resetDestination() {
-    clearTimeout(next);
-  }
-
   function makeScrollTo(x, y) {
     return function() {
-      win().scrollTo(x, y);
+      win.scrollTo(x, y);
     };
   }
 
@@ -92,8 +108,9 @@ You can configure following variable as you like.
     ["j"], 
     "Smooth scroll down", 
     function(){ 
-      destY = win().scrollY + scrollAmount;
-      resetDestination();
+      setup();
+      destY = win.scrollY + scrollAmount;
+      clearTimeout(next);
       smoothScroll(scrollAmount,  1);
     }
   ); 
@@ -103,8 +120,9 @@ You can configure following variable as you like.
     ["k"], 
     "Smooth scroll up", 
     function(){ 
-      destY = win().scrollY - scrollAmount;
-      resetDestination();
+      setup();
+      destY = win.scrollY - scrollAmount;
+      clearTimeout(next);
       smoothScroll(scrollAmount, -1);
     }
   ); 
