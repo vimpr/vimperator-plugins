@@ -197,7 +197,7 @@ Plugin.prototype = { // {{{
     getDetail: function(){
         if (this.detail)
             return this.detail;
-        else if (!this.info || !this.info.detail)
+        if (!this.info || !this.info.detail)
             return null;
 
         return this.detail = tags['detail'](this.info);
@@ -273,7 +273,7 @@ Plugin.prototype = { // {{{
                         headers[pair.shift()] = pair.join('');
                     }
                 });
-            } catch(e){}
+            } catch (e){}
             let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
             if (m){
                 m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
@@ -352,7 +352,7 @@ var WikiParser = (function () {
     },
     indent: function (indent, more) {
       let result = this.clone;
-      let re = RegExp('^' + indent.replace(/[^\s]/g, ' ') + (more ? '\\s+' : '') + '(.*)$');
+      let re = RegExp('^' + indent.replace(/\S/g, ' ') + (more ? '\\s+' : '') + '(.*)$');
       result.indents.push(re);
       return result;
     },
@@ -412,9 +412,8 @@ var WikiParser = (function () {
       let spre = RegExp('^' + min);
       liberator.log(min.length)
       return lines.map(function (line) line.replace(spre, ''));
-    } else {
-      return lines;
     }
+    return lines;
   }
 
   // FIXME
@@ -446,7 +445,6 @@ var WikiParser = (function () {
       for (let i = 0, l = arguments.length; i < l; i++)
         as.push(arguments[i]);
       return function (st) {
-        let a;
         for each (let a in as) {
           let r = a(st);
           if (ok(r))
@@ -472,8 +470,7 @@ var WikiParser = (function () {
         }
         if (ok(st))
           return st.set(result);
-        else
-          return Error('many', st);
+        return Error('many', st);
       }
     },
 
@@ -493,8 +490,8 @@ var WikiParser = (function () {
         }
         if (result.length) {
           return st.set(result);
-        } else
-          return Error('many1', st);
+        }
+        return Error('many1', st);
       };
     },
 
@@ -503,8 +500,7 @@ var WikiParser = (function () {
       return function (st) {
         if (st.end)
           return Error('EOL', 'st');
-        else
-          return p(st);
+        return p(st);
       };
     }
   };
@@ -520,9 +516,8 @@ var WikiParser = (function () {
         if (m) {
           let hn = 'h' + n;
           return st.next.set(<{hn} style={'font-size:'+(0.75+1/n)+'em'}>{stripAndLink(m[1])}</{hn}>)
-        } else {
-          return Error('not head1', st);
         }
+        return Error('not head1', st);
       };
     }
 
@@ -532,9 +527,8 @@ var WikiParser = (function () {
         let lis = C.many1(self[name + 'i'])(st);
         if (ok(lis)) {
           return lis.set(xmlJoin(lis.result)).wrap(name);
-        } else {
-          return Error(name, st);
         }
+        return Error(name, st);
       };
     }
 
@@ -546,10 +540,9 @@ var WikiParser = (function () {
         if (m) {
           let h = m[2];
           let next = C.many(self.wikiLine)(st.next.indent(m[1]));
-          return next.indentBack().set(xmlJoin([<>{h}<br /></>].concat(next.result))).wrap('li');
-        } else {
-          return Error(c, st);
+          return next.indentBack().set(xmlJoin([<>{h}<br/></>].concat(next.result))).wrap('li');
         }
+        return Error(c, st);
       };
     }
 
@@ -563,15 +556,14 @@ var WikiParser = (function () {
       emptyLine: function emptyLine (st) {
         if (/^\s*$/.test(st.head)) {
           return st.next.set(<></>);
-        } else {
-          return Error('spaces', st);
         }
+        return Error('spaces', st);
       },
 
       // St -> St XML
       plain: function plain (st) {
         let text = st.head;
-        return st.next.set(<>{stripAndLink(text)}<br /></>);
+        return st.next.set(<>{stripAndLink(text)}<br/></>);
       },
 
       // St -> St XML
@@ -596,9 +588,8 @@ var WikiParser = (function () {
             if (cnt++ > 100) { liberator.log('force break: pre-while'); break; }
           }
           return st.set(<pre>{trimAll(result).join('\n')}</pre>);
-        } else {
-          return Error('pre', st);
         }
+        return Error('pre', st);
       },
 
       // St -> St XML
@@ -619,9 +610,8 @@ var WikiParser = (function () {
         if (ok(r)) {
           let body = xmlJoin(r.result);
           return r.set(body).wrap('dl');
-        } else {
-          return Error('dl', st);
         }
+        return Error('dl', st);
       },
 
       // St -> St XML
@@ -631,9 +621,8 @@ var WikiParser = (function () {
           let [indent, dt] = r.result;
           let dd = C.many(self.wikiLine)(r.indent(indent, true));
           return dd.indentBack().set(dt + <dd>{xmlJoin(dd.result)}</dd>);
-        } else {
-          return r;
         }
+        return r;
       },
 
       // St -> St (lv, XML)
@@ -641,9 +630,8 @@ var WikiParser = (function () {
         let m = st.head.match(/^(\s*)(.+):\s*$/);
         if (m) {
           return st.next.set([m[1], <dt style="font-weight:bold;">{m[2]}</dt>]);
-        } else {
-          return Error('not dt', st);
         }
+        return Error('not dt', st);
       },
     };
 
@@ -659,9 +647,8 @@ var WikiParser = (function () {
         if (ok(r)) {
           let xs = r.result;
           return r.set(xmlJoin(xs)).wrap('div');
-        } else {
-          return Error('wiki', st);
         }
+        return Error('wiki', st);
       }
     }
 
@@ -680,7 +667,7 @@ var WikiParser = (function () {
       State: State,
     },
     parse: function (src) {
-      let r = P.wiki(State(src.split(/\n/)));
+      let r = P.wiki(State(src.split(/\r\n|[\r\n]/)));
       if (ok(r))
         return r.result;
       else
@@ -835,8 +822,7 @@ commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
         } else if (sub == 'install') {
             if (s2b(liberator.globalVariables.plugin_manager_installer, false))
                 return liberator.plugins.pluginManager.install(subArgs);
-            else
-                return liberator.echoerr('This function(sub-command) is invalid now.');
+            return liberator.echoerr('This function(sub-command) is invalid now.');
         } else {
             if (sub == 'check') {
                 xml = liberator.plugins.pluginManager.checkVersion(subArgs);
@@ -924,23 +910,24 @@ var public = {
         }
 
         function fixURL(url){
-            const cr = RegExp('^http://coderepos\.org/share/browser/lang/javascript/vimperator-plugins/trunk/[^/]+\.js$');
-            const pi = RegExp('^http://vimperator\.kurinton\.net/plugins/');
+            const cr = RegExp('^http://coderepos\\.org/share/browser/lang/javascript/vimperator-plugins/trunk/[^/]+\\.js$');
+            const pi = RegExp('^http://vimperator\\.kurinton\\.net/plugins/');
             const npi = /\/(all|index)\.html/;
-            const js = /\.js$/;
+            const js = /\.js$/i;
             function xe(xpath){
                 let ss = buffer.evaluateXPath(xpath);
                 return (ss.snapshotLength > 0) && ss.snapshotItem(0).href;
             }
             if (cr.test(url)) {
-                return url.replace(/coderepos/, 'svn.coderepos').replace(/browser\//, '');
-            } else if (pi.test(url) && !npi.test(url)) {
-                return xe('//a[@id="file-link"]');
-            } else if (js.test(url)) {
-                return url;
-            } else {
-                throw 'Current URL is not pluginFile';
+                return url.replace(/(?=coderepos\.org\/)/, 'svn.').replace(/browser\//, '');
             }
+            if (pi.test(url) && !npi.test(url)) {
+                return xe('//a[@id="file-link"]');
+            }
+            if (js.test(url)) {
+                return url;
+            }
+            throw 'Current URL is not a pluginFile';
         }
 
         function download(url){
@@ -961,7 +948,7 @@ var public = {
                 onLocationChange: function () undefined,
                 onStatusChange: function () undefined,
                 onSecurityChange: function () undefined,
-            }
+            };
 
             let filename = url.match(/[^\/]+$/).toString();
             let file = io.getRuntimeDirectories('plugin')[0];
