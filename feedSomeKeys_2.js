@@ -309,7 +309,7 @@ function feedKeyIntoContent(keys, useVkey){
 
         //liberator.log({ctrl:ctrl, alt:alt, shift:shift, meta:meta, keyCode:keyCode, charCode:charCode, useVkey: useVkey});
         var evt = content.document.createEvent('KeyEvents');
-        evt.initKeyEvent('keypress', true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
+        evt.initKeyEvent(useVkey ? 'keydown' : 'keypress', true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
         destElem.document.dispatchEvent(evt);
     }
     modes.passAllKeys = false;
