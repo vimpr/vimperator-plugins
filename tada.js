@@ -83,9 +83,54 @@ var PLUGIN_INFO =
 // }}}
 
 liberator.plugins.tada = (function(){
+// COMMAND {{{
+  commands.addUserCommand(
+    ["tada"],
+    "Show / Add ToDo items to Ta-Da list. (:tada [LISTNAME] [SUBJECT])",
+    function(args) {
 
+      var listId;
+      switch (args.length) 
+      {
+      case 0:
+       showTodoItems(getDefaultListId());
+       break;
+      case 1:
+       if (listId = getListId(args[0]))
+         showTodoItems(listId);
+       else 
+         addTodoItem(getDefaultListId(), args[0]);
+       break;
+      default:
+       if (listId = getListId(args[0]))
+         addTodoItem([listId, args[0]], args[1]);
+       else
+         addTodoItem(getDefaultListId(), args.join(''));
+      }
+    }, {
+      completer: function(context) {
+        context.title = ["List", "Description"];
+        context.completions = getLists().map(function(item) [item[1], "(not implemented)"]);
+      },
+      argCount: "*",
+      literal: true
+    },
+    true  // for DEVELOP
+  );
+// }}}
+// PUBLIC {{{
+  var PUBLICS = { 
+    // for DEBUG {{{
+    // getListId: getListId,
+    // getDefaultListId: getDefaultListId,
+    // getLists: getLists,
+    // showTodoItems: showTodoItems,
+    // addTodoItem: addTodoItem,
+    // g: g
+    // }}}
+  };
+// }}}
 // PRIVATE {{{
-
   function g(str) {
     return liberator.globalVariables[str];
   }
@@ -141,7 +186,6 @@ liberator.plugins.tada = (function(){
       var xpath = "//div[@id='Container']/div[2]/div/div/ul/li/a"
       libly.$U.getNodesFromXPath(xpath, data.doc).forEach(function(item){
         lists.push([parseListId(item.href), item.innerHTML]);
-        //liberator.log(item.innerHTML);
       });
     });
     req.get();
@@ -158,19 +202,13 @@ liberator.plugins.tada = (function(){
       liberator.log("success");
       data.getHTMLDocument();
 
-      var html = [];
-      html.push("<ul>");
+      var list = <ul></ul>;
       libly.$U.getNodesFromXPath("//ul[@id='incomplete_items']/li/form", data.doc).forEach(function(item){
-        html.push([
-          "<li>",
-          item.textContent.replace(/^\s*|\n|\r|\s*$/g, ''),
-          "</li>"
-        ].join(''));
+        list.li += <li>{item.textContent.replace(/^\s*|\n|\r|\s*$/g, '')}</li>;
       });
-      html.push("</ul>");
 
-      liberator.echo(html.join(''), commandline.FORCE_MULTILINE);
-      liberator.log(html.join(''));
+      liberator.echo(list.toXMLString(), commandline.FORCE_MULTILINE);
+      liberator.log(list.toXMLString());
     });
     req.get();
   }
@@ -199,58 +237,8 @@ liberator.plugins.tada = (function(){
     req.post();
   }
 
+  return PUBLICS;
 // }}}
-// COMMAND {{{
-
-  commands.addUserCommand(
-    ["tada"],
-    "Show / Add ToDo items to Ta-Da list. (:tada [LISTNAME] [SUBJECT])",
-    function(args) {
-
-      var listId;
-      switch (args.length) 
-      {
-      case 0:
-       showTodoItems(getDefaultListId());
-       break;
-      case 1:
-       if (listId = getListId(args[0]))
-         showTodoItems(listId);
-       else 
-         addTodoItem(getDefaultListId(), args[0]);
-       break;
-      default:
-       if (listId = getListId(args[0]))
-         addTodoItem([listId, args[0]], args[1]);
-       else
-         addTodoItem(getDefaultListId(), args.join(''));
-      }
-    }, {
-      completer: function(context) {
-        context.title = ["List", "Description"];
-        context.completions = getLists().map(function(item) [item[1], "(not implemented)"]);
-      },
-      argCount: "*",
-      literal: true
-    },
-    true  // for DEVELOP
-  );
-
-// }}}
-// PUBLIC {{{
-
-  return { 
-    // for DEBUG {{{
-    // getListId: getListId,
-    // getDefaultListId: getDefaultListId,
-    // getLists: getLists,
-    // showTodoItems: showTodoItems,
-    // addTodoItem: addTodoItem,
-    // g: g
-    // }}}
-  };
-// }}}
-
 })();
 
 // vim: sw=2 ts=2 et si fdm=marker:
