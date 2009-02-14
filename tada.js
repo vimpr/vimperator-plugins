@@ -21,64 +21,64 @@ var PLUGIN_INFO =
   <license>MIT style license</license>
   <version>0.7</version>
   <detail><![CDATA[
-== Subject ==
-Show ToDo items in commandline buffer. 
-Also add item to your Ta-da list.
+    == Subject ==
+    Show ToDo items in commandline buffer. 
+    Also add item to your Ta-da list.
 
-== Global variables ==
-Following variable is *requied*.
-tada_userId:
-  Please specify your user ID.
+    == Global variables ==
+    Following variable is *requied*.
+    tada_userId:
+    Please specify your user ID.
 
-Following variable is optional.
-tada_defaultListName:
-  Default list name.
-  Use this list name if command parameter is not supplied.
-  However this variable not specified, use first one of lists as default.
+    Following variable is optional.
+    tada_defaultListName:
+      Default list name.
+      Use this list name if command parameter is not supplied.
+      However this variable not specified, use first one of lists as default.
 
-== Command ==
-Usage:
-  tada [list name] [subject]
-  - Show default list if no parameter supplied.
-  - Show specified list if 'list name' is supplied.
-  - Add todo item to default list if 'list name' is not supplied and 'subject' is supplied.
-  - Add todo item to specified list if 'list name' and 'subject' are supplied.
+    == Command ==
+    Usage:
+      tada [list name] [subject]
+      - Show default list if no parameter supplied.
+      - Show specified list if 'list name' is supplied.
+      - Add todo item to default list if 'list name' is not supplied and 'subject' is supplied.
+      - Add todo item to specified list if 'list name' and 'subject' are supplied.
 
-== ToDo ==
-  - 'Done' functionlity.
-  - Item deletion.
-  - Performance tunning.
+    == ToDo ==
+      - 'Done' functionlity.
+      - Item deletion.
+      - Performance tunning.
 
-]]></detail>
-<detail lang="ja"><![CDATA[
-== 概要 ==
-コマンドラインバッファからTa-Da list のToDo一覧を参照したり、ToDo項目を追加したりします。
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    == 概要 ==
+    コマンドラインバッファからTa-Da list のToDo一覧を参照したり、ToDo項目を追加したりします。
 
-== グローバル変数 ==
-以下の変数は必須です。
-tada_userId:
-  あなたのユーザIDを設定してください。
+    == グローバル変数 ==
+    以下の変数は必須です。
+    tada_userId:
+      あなたのユーザIDを設定してください。
 
-以下の変数は任意で設定可能です。
-tada_defaultListName:
-  デフォルトのリスト名
-  コマンドのパラメタでリスト名を省略した場合に使用するリストの名前を定義してください。
-  この変数が設定されていない場合、デフォルトのリストとして先頭のリストが使用されます。
+    以下の変数は任意で設定可能です。
+    tada_defaultListName:
+      デフォルトのリスト名
+      コマンドのパラメタでリスト名を省略した場合に使用するリストの名前を定義してください。
+      この変数が設定されていない場合、デフォルトのリストとして先頭のリストが使用されます。
 
-== コマンド ==
-Usage:
-  tada [list name] [subject]
-  - パラメタが省略された場合、デフォルトのリストの内容が表示されます。
-  - 'list name' が指定された場合、該当リストの内容が表示されます。
-  - 'list name' が指定されず 'subject' のみ指定されている場合、デフォルトのリストに'subject'の内容を追加します。
-  - 'list name' も 'subject' も指定されている場合、該当リストに'subject'の内容を追加します。
+    == コマンド ==
+    Usage:
+      tada [list name] [subject]
+      - パラメタが省略された場合、デフォルトのリストの内容が表示されます。
+      - 'list name' が指定された場合、該当リストの内容が表示されます。
+      - 'list name' が指定されず 'subject' のみ指定されている場合、デフォルトのリストに'subject'の内容を追加します。
+      - 'list name' も 'subject' も指定されている場合、該当リストに'subject'の内容を追加します。
 
-== ToDo ==
-  - 'Done'機能の実装
-  - 項目の削除機能
-  - 表示のパフォーマンス改善
+    == ToDo ==
+      - 'Done'機能の実装
+      - 項目の削除機能
+      - 表示のパフォーマンス改善
 
-]]></detail>
+  ]]></detail>
 </VimperatorPlugin>; 
 // }}}
 
@@ -204,7 +204,7 @@ liberator.plugins.tada = (function(){
 
   commands.addUserCommand(
     ["tada"],
-    "Show / Add ToDo items to Ta-Da list.",
+    "Show / Add ToDo items to Ta-Da list. (:tada [LISTNAME] [SUBJECT])",
     function(args) {
 
       var listId;
@@ -227,8 +227,8 @@ liberator.plugins.tada = (function(){
       }
     }, {
       completer: function(context) {
-        context.title = ["List", "Subject"];
-        context.completions = getLists().map(function(item) [item[1], item[0]]);
+        context.title = ["List", "Description"];
+        context.completions = getLists().map(function(item) [item[1], "(not implemented)"]);
       },
       argCount: "*",
       literal: true
