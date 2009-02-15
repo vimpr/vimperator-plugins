@@ -63,6 +63,7 @@ let PLUGIN_INFO =
     function (args) {
       let tab = gBrowser.mCurrentTab;
       let storage = tab[this.uuid] || (tab[this.uuid] = {});
+      let reload;
       let func = reload = function () tabs.reload(tab);
       let time = parseInt(parseFloat(args[0] || 1) * 1000);
 
@@ -78,12 +79,12 @@ let PLUGIN_INFO =
               return;
             storage.lastModifiedTime = mt;
             reload();
-          }
+          };
         }
       }
 
       if (storage.timer) {
-        liberator.log('removed')
+        liberator.log('removed');
         clearInterval(storage.timer);
       }
 
