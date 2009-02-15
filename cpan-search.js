@@ -22,23 +22,23 @@ var PLUGIN_INFO =
 var p = function(arg) {
     Application.console.log(arg);
     // liberator.log(arg);
-}
+};
 
-// preload cpan list
+// preload CPAN list
 var cpanListURL = liberator.globalVariables.cpanSearchListURL || 'http://cpan.ma.la/list';
 if (!liberator.globalVariables.cpanListCache) {
-    var xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
                 liberator.globalVariables.cpanListCache =
-                    xhr.responseText.split(/\r?\n/).map(function(i) [i, '', i.toUpperCase()]);
+                    xhr.responseText.split(/\r\n|[\r\n]/).map(function(i) [i, '', i.toUpperCase()]);
             } else {
-                liberator.echoerr('CPAN Search: XHR Error: ' + xhr.statusText);
+                liberator.echoerr('CPAN search: XHR Error: ' + xhr.statusText);
                 // throw new Error(xhr.statusText);
             }
         }
-    }
+    };
     xhr.open('GET', cpanListURL, true);
     xhr.send(null);
 }
@@ -47,7 +47,7 @@ commands.addUserCommand(
     ['cpan'],
     'CPAN Search',
     function(args) {
-        var name = (args.string || '').replace(/\s/g, '').replace(/^\^/,'');
+        var name = (args.string || '').replace(/^\^|\s+/g, '');
         var url = 'http://search.cpan.org/perldoc?' + name;
         liberator.open(url, args.bang ? liberator.NEW_TAB : null);
     }, {
@@ -55,7 +55,7 @@ commands.addUserCommand(
             context.title = ['MODULE NAME', ''];
             var word = context.filter.toUpperCase();
             if (word.indexOf(':') >= 0) {
-                var regex = word.split(/:+/).map(function(i) i + '[^:]*').join('::');
+                let regex = word.split(/:+/).map(function(i) i + '[^:]*').join('::');
                 regex = new RegExp('^' + regex.replace(/\[\^:\]\*$/, ''));
                 context.filters = [function(item) regex.test(item.item[2])];
             } else {
@@ -64,7 +64,7 @@ commands.addUserCommand(
             context.completions = liberator.globalVariables.cpanListCache || [];
         },
         argCount: '1',
-        bang: true,
+        bang: true
     },
     true
 );
