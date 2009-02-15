@@ -12,8 +12,8 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>subscldr</name>
-<description>Add subscription to LivedoorReader in place.</description>
-<description lang="ja">ページ遷移なしでLivedoorReader/Fastladderにフィードを登録します</description>
+<description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
+<description lang="ja">ページ遷移なしでlivedoor ReaderやFastladderにフィードを登録します。</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
@@ -22,7 +22,7 @@ var PLUGIN_INFO =
 <version>0.2</version>
 <detail><![CDATA[
 == Subject ==
-Add subscription to LivedoorReader/Fastladder in place.
+Adds subscriptions to livedoor Reader/Fastladder in place.
 
 == Commands ==
 >||
@@ -34,7 +34,7 @@ Add subscription to LivedoorReader/Fastladder in place.
 
 <detail lang="ja"><![CDATA[
 == 概要 ==
-ページ遷移すること無しにLivedoorReader/Fastladderへのフィードの登録を行います。
+ページ遷移すること無しにlivedoor ReaderやFastladderへのフィードの登録を行います。
 
 == コマンド ==
 >||
@@ -46,7 +46,7 @@ Add subscription to LivedoorReader/Fastladder in place.
 </VimperatorPlugin>;
 // }}}
 
-liberator.plugins.subscldr = (function(){
+liberator.plugins.subscldr = (function() {
   // PUBLIC {{{
   var PUBLICS = {
     // for DEBUG {{{
@@ -60,18 +60,18 @@ liberator.plugins.subscldr = (function(){
   // COMMAND {{{
   addCommand(
     ["subscrldr"],
-    "Livedoor Reader",
-    'http://reader.livedoor.com/subscribe/'
+    "livedoor Reader",
+    "http://reader.livedoor.com/subscribe/"
   );
 
   addCommand(
     ["subscrfl"],
     "Fastladder",
-    'http://fastladder.com/subscribe/'
+    "http://fastladder.com/subscribe/"
   );
   // }}}
   // PRIVATE {{{
-  const DEBUG_URL = 'http://d.hatena.ne.jp/snaka72/';
+  const DEBUG_URL = "http://d.hatena.ne.jp/snaka72/";
 
   function addCommand (command, servicename, endpoint) {
 
@@ -84,9 +84,9 @@ liberator.plugins.subscldr = (function(){
 
         if (alreadySubscribed && !force) {
           liberator.echo("This site has already been subscribed. Are you sure to want to add subscription?");
-          commandline.input("Add? (y or n):",
+          commandline.input("Add? [y/N]:",
             function(ans) {
-              if (ans.match(/y|yes/i))
+              if (ans.toLowerCase().indexOf("y") == 0) // /^y(?:es)?$/.test(ans.toLowerCase())
                 handleFeedRequest(opts, null, true);
               else
                 liberator.echo("Canceled.");
@@ -99,7 +99,7 @@ liberator.plugins.subscldr = (function(){
         switch (availableLinks.length) {
         case 0:
           if (alreadySubscribed)
-            liberator.echo("This site feed has already been subscribed.");
+            liberator.echo("The feed of this site has already been subscribed.");
           else
             // Maybe never reach here.
             liberator.echoerr("SITE FEED NOT AVAILABLE!!!");
@@ -115,7 +115,7 @@ liberator.plugins.subscldr = (function(){
             function(sel) {
               liberator.log("SELECTED FEED:" + sel);
               liberator.echo("Redirected ...");
-              var redirectUrl = endpoint + '?url=' + encodeURIComponent(sel);
+              var redirectUrl = endpoint + "?url=" + encodeURIComponent(sel);
               handleFeedRequest(opts, redirectUrl);
             }
           );
@@ -123,14 +123,14 @@ liberator.plugins.subscldr = (function(){
     }
 
     function getSubscription(target) {
-      liberator.echo('Please wait ...');
+      liberator.echo("Please wait ...");
       var subscribeInfo;
 
       // for DEBUG
       var uri = target || endpoint + buffer.URL;
 
       var req = new libly.Request(uri, null, {asynchronous: false});
-      req.addEventListener('onSuccess', function(res) {
+      req.addEventListener("onSuccess", function(res) {
         liberator.log(res.responseText);
         res.getHTMLDocument();
         subscribeInfo = getSubscribeInfo(res.doc);
@@ -161,11 +161,11 @@ liberator.plugins.subscldr = (function(){
           postBody: postBody
         }
       );
-      req.addEventListener('onSuccess', function(data) {
+      req.addEventListener("onSuccess", function(data) {
         liberator.log("Posted: " + data.responseText);
         liberator.echo("Posted: " + data.statusText);
       });
-      req.addEventListener('onFailure', function(data) {
+      req.addEventListener("onFailure", function(data) {
         liberator.log("POST FAILURE: " + data.responseText);
         liberator.echoerr("POST FAILURE: " + data.statusText);
       });
@@ -175,13 +175,13 @@ liberator.plugins.subscldr = (function(){
 
     commands.addUserCommand(
       command,
-      "Register feeds subscription to " + servicename + ".",
+      "Register feed subscriptions to " + servicename + ".",
       function(args) {
-        handleFeedRequest({rate: args['-rate']});
+        handleFeedRequest({rate: args["-rate"]});
       },
       {
         options: [
-          [['-rate', '-r'], commands.OPTION_INT]
+          [["-rate", "-r"], commands.OPTION_INT]
         ]
       },
       true  // Use in DEVELOP
@@ -197,30 +197,30 @@ liberator.plugins.subscldr = (function(){
        feedlinks: []
     };
 
-    $LXs("//ul[@id='feed_candidates']/li", htmldoc).forEach( function(item) {
+    $LXs('id("feed_candidates")/li', htmldoc).forEach( function(item) {
       var feedlink = $LX('./a[@class="feedlink"]', item);
       var yet = $LX('./input[@name="feedlink"]', item);
-      liberator.log('input:' + feedlink.href);
+      liberator.log("input:" + feedlink.href);
       subscribeInfo.feedlinks.push([feedlink.href, (yet != null)]);
     });
 
-    var target_url = $LX('//*[@id="target_url"]', htmldoc);
+    var target_url = $LX('id("target_url")', htmldoc);
     if (!target_url) throw "Cannot find subscribe info about this page!";
     subscribeInfo.target_url = target_url.value;
-    liberator.log('target_url:' + subscribeInfo.target_url);
+    liberator.log("target_url:" + subscribeInfo.target_url);
 
     subscribeInfo.apiKey = $LX('//*[@name="ApiKey"]', htmldoc).value;
-    if (!subscribeInfo.apiKey) throw "Can't get API Key for subscription!";
+    if (!subscribeInfo.apiKey) throw "Can't get API key for subscription!";
     return subscribeInfo;
   }
 
   function selectFeed(links, next) {
     liberator.log(links.toSource());
-    liberator.echo("Following feeds were found this site. Which are you subscribe?");
+    liberator.echo("Following feeds were found on this site. Which are you subscribe?");
     commandline.input("Input feed no. ", function(selected) {
       liberator.echo("You select " + selected + ".");
       commandline.close();
-      if (next && typeof next == 'function')
+      if (next && typeof next == "function")
         next(selected);
       else
         liberator.echoerr("Your selected no is invalid.");
