@@ -1,9 +1,9 @@
 //
 // subscldr.js
-// 
+//
 // LICENSE: {{{
 //   Copyright (c) 2009 snaka<snaka.gml@gmail.com>
-// 
+//
 //     Distributable under the terms of an MIT-style license.
 //     http://www.opensource.jp/licenses/mit-license.html
 // }}}
@@ -13,31 +13,33 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>subscldr</name>
 <description>Add subscription to LivedoorReader in place.</description>
-<description lang="ja">ページ遷移なしでLivedoorReaderにフィードを登録します</description>
+<description lang="ja">ページ遷移なしでLivedoorReader/Fastladderにフィードを登録します</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
 <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
 <license>MIT style license</license>
-<version>0.1</version>
+<version>0.2</version>
 <detail><![CDATA[
 == Subject ==
-Add subscription to LivedoorReader in place.
+Add subscription to LivedoorReader/Fastladder in place.
 
 == Commands ==
 >||
 :subscldr
+:subscfl
 ||<
 
 ]]></detail>
 
 <detail lang="ja"><![CDATA[
 == 概要 ==
-ページ遷移すること無しにLivedoorReaderへのフィードの登録を行います。
+ページ遷移すること無しにLivedoorReader/Fastladderへのフィードの登録を行います。
 
 == コマンド ==
 >||
 :subscldr
+:subscfl
 ||<
 
 ]]></detail>
@@ -56,85 +58,135 @@ liberator.plugins.subscldr = (function(){
 
   // }}}
   // COMMAND {{{
-  commands.addUserCommand(
+  addCommand(
     ["subscrldr"],
-    "Register feeds subscription to Livedoor Reader.",
-    function(args) {
-      handleFeedRequest();
-    },  
-    null,
-    true  // Use in DEVELOP
+    "Livedoor Reader",
+    'http://reader.livedoor.com/subscribe/'
   );
 
+  addCommand(
+    ["subscrfl"],
+    "Fastladder",
+    'http://fastladder.com/subscribe/'
+  );
   // }}}
   // PRIVATE {{{
-  const endpoint = 'http://reader.livedoor.com/subscribe/';
   const DEBUG_URL = 'http://d.hatena.ne.jp/snaka72/';
 
-  function handleFeedRequest(redirectUrl, force) {
-      liberator.echo("force: " + force);
+  function addCommand (command, servicename, endpoint) {
 
-      var subscribeInfo = getSubscription(redirectUrl);
-      var availableLinks = subscribeInfo.feedlinks.filter(function(info) info[1]);
-      var alreadySubscribed = availableLinks.length != subscribeInfo.feedlinks.length;
+    function handleFeedRequest(opts, redirectUrl, force) {
+        liberator.echo("force: " + force);
 
-      if (alreadySubscribed && !force) {
-        liberator.echo("This site has already been subscribed. Are you sure to want to add subscription?");
-        commandline.input("Add? (y or n):",
-          function(ans) {
-            if (ans.match(/y|yes/i))
-              handleFeedRequest(null, true);
-            else
-              liberator.echo("Canceled.");
-            commandline.close();
-          } 
-        );
-        return;
-      }
+        var subscribeInfo = getSubscription(redirectUrl);
+        var availableLinks = subscribeInfo.feedlinks.filter(function(info) info[1]);
+        var alreadySubscribed = availableLinks.length != subscribeInfo.feedlinks.length;
 
-      switch (availableLinks.length) {
-      case 0:
-        if (alreadySubscribed)
-          liberator.echo("This site feed has already been subscribed.");
-        else
-          // Maybe never reach here.
-          liberator.echoerr("SITE FEED NOT AVAILABLE!!!");
-        break;
-      case 1:
-        liberator.log("FEED ONLY ONE!!");
-        subscribeInfo.feedlinks = [availableLinks[0][0], true];
-        postSubscription(subscribeInfo);
-        break;
-      default:
-        liberator.log("SOME FEED AVAILABLE");
-        selectFeed( availableLinks.map(function(i) [i[0], ""]),
-          function(sel) {
-            liberator.log("SELECTED FEED:" + sel);
-            liberator.echo("Redirected ...");
-            var redirectUrl = endpoint + '?url=' + encodeURIComponent(sel);
-            handleFeedRequest(redirectUrl); 
-          }
-        );
-      }
-  }
+        if (alreadySubscribed && !force) {
+          liberator.echo("This site has already been subscribed. Are you sure to want to add subscription?");
+          commandline.input("Add? (y or n):",
+            function(ans) {
+              if (ans.match(/y|yes/i))
+                handleFeedRequest(opts, null, true);
+              else
+                liberator.echo("Canceled.");
+              commandline.close();
+            }
+          );
+          return;
+        }
 
-  function getSubscription(target) {
-    liberator.echo('Please wait ...');
-    var subscribeInfo;
-    
-    // for DEBUG
-    var uri = target || endpoint + buffer.URL;
+        switch (availableLinks.length) {
+        case 0:
+          if (alreadySubscribed)
+            liberator.echo("This site feed has already been subscribed.");
+          else
+            // Maybe never reach here.
+            liberator.echoerr("SITE FEED NOT AVAILABLE!!!");
+          break;
+        case 1:
+          liberator.log("FEED ONLY ONE!!");
+          subscribeInfo.feedlinks = [availableLinks[0][0], true];
+          postSubscription(subscribeInfo, opts);
+          break;
+        default:
+          liberator.log("SOME FEED AVAILABLE");
+          selectFeed( availableLinks.map(function(i) [i[0], ""]),
+            function(sel) {
+              liberator.log("SELECTED FEED:" + sel);
+              liberator.echo("Redirected ...");
+              var redirectUrl = endpoint + '?url=' + encodeURIComponent(sel);
+              handleFeedRequest(opts, redirectUrl);
+            }
+          );
+        }
+    }
 
-    var req = new libly.Request(uri, null, {asynchronous: false});
-    req.addEventListener('onSuccess', function(res) {
-      liberator.log(res.responseText);
-      res.getHTMLDocument();
-      subscribeInfo = getSubscribeInfo(res.doc);
-      liberator.log(subscribeInfo.toSource());
-    });
-    req.get();
+    function getSubscription(target) {
+      liberator.echo('Please wait ...');
+      var subscribeInfo;
 
-    return subscribeInfo;
+      // for DEBUG
+      var uri = target || endpoint + buffer.URL;
+
+      var req = new libly.Request(uri, null, {asynchronous: false});
+      req.addEventListener('onSuccess', function(res) {
+        liberator.log(res.responseText);
+        res.getHTMLDocument();
+        subscribeInfo = getSubscribeInfo(res.doc);
+        liberator.log(subscribeInfo.toSource());
+      });
+      req.get();
+
+      return subscribeInfo;
+    }
+
+    function postSubscription(info, opts) {
+      liberator.log("subscribe:" + info.toSource());
+
+      var postBody= "url=" + encodeURIComponent(info.target_url) +
+                    "&folder_id=0" +
+                    "&rate=" + (opts.rate || "0") +
+                    "&register=1" +
+                    "&feedlink=" + encodeURIComponent(info.feedlinks[0]) +
+                    "&public=1" +
+                    "&ApiKey=" + info.apiKey;
+
+      liberator.log("POST DATA:" + postBody);
+      var req = new libly.Request(
+        endpoint,
+        null,
+        {
+          asyncronus: false,
+          postBody: postBody
+        }
+      );
+      req.addEventListener('onSuccess', function(data) {
+        liberator.log("Posted: " + data.responseText);
+        liberator.echo("Posted: " + data.statusText);
+      });
+      req.addEventListener('onFailure', function(data) {
+        liberator.log("POST FAILURE: " + data.responseText);
+        liberator.echoerr("POST FAILURE: " + data.statusText);
+      });
+
+      req.post();
+    }
+
+    commands.addUserCommand(
+      command,
+      "Register feeds subscription to " + servicename + ".",
+      function(args) {
+        handleFeedRequest({rate: args['-rate']});
+      },
+      {
+        options: [
+          [['-rate', '-r'], commands.OPTION_INT]
+        ]
+      },
+      true  // Use in DEVELOP
+    );
+
   }
 
   function getSubscribeInfo(htmldoc) {
@@ -162,38 +214,6 @@ liberator.plugins.subscldr = (function(){
     return subscribeInfo;
   }
 
-  function postSubscription(info) {
-    liberator.log("subscribe:" + info.toSource());
-
-    var postBody= "url=" + encodeURIComponent(info.target_url) +
-                  "&folder_id=0" +
-                  "&rate=0" +
-                  "&register=1" +
-                  "&feedlink=" + encodeURIComponent(info.feedlinks[0]) +
-                  "&public=1" +
-                  "&ApiKey=" + info.apiKey;
-
-    liberator.log("POST DATA:" + postBody);
-    var req = new libly.Request(
-      endpoint,
-      null,
-      {
-        asyncronus: false,
-        postBody: postBody
-      }
-    );
-    req.addEventListener('onSuccess', function(data) {
-      liberator.log("Posted: " + data.responseText);
-      liberator.echo("Posted: " + data.statusText);
-    });
-    req.addEventListener('onFailure', function(data) {
-      liberator.log("POST FAILURE: " + data.responseText);
-      liberator.echoerr("POST FAILURE: " + data.statusText);
-    });
-
-    req.post();
-  }
-
   function selectFeed(links, next) {
     liberator.log(links.toSource());
     liberator.echo("Following feeds were found this site. Which are you subscribe?");
@@ -214,10 +234,10 @@ liberator.plugins.subscldr = (function(){
     events.feedkeys("<TAB>");
   }
 
-  // For convinience 
+  // For convinience
   function $LXs(a,b) libly.$U.getNodesFromXPath(a,b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a,b);
- 
+
   // }}}
   return PUBLICS;
 })();
