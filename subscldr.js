@@ -59,13 +59,13 @@ liberator.plugins.subscldr = (function() {
   // }}}
   // COMMAND {{{
   addCommand(
-    ["subscrldr"],
+    ["subscldr", "subscrldr"],
     "livedoor Reader",
     "http://reader.livedoor.com/subscribe/"
   );
 
   addCommand(
-    ["subscrfl"],
+    ["subscfl", "subscrfl"],
     "Fastladder",
     "http://fastladder.com/subscribe/"
   );
