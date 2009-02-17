@@ -2,9 +2,10 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>add "Yank element's text/html/attrs" or "Paste to element" hint mode</description>
+    <description lang="ja">要素の text/html/attrs をコピーするヒントモードを追加する</description>
     <minVersion>2.0</minVersion>
     <maxVersion>2.0</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-copy.js</updateURL>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-yank-paste.js</updateURL>
     <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
     <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
     <version>0.1</version>
@@ -13,7 +14,7 @@ var PLUGIN_INFO =
 ソースコードや段落, 画像のURL, input/textarea の値などをさくっとコピーしたり、どこかの部分の html 自体をコピりたいなー、という時に活用できます。
 また p/P で、input/textarea の要素に、現在のクリップボードの値を貼り付け(pが追加、Pが置換)することができます。エディタで書いた文章をそのまんま追加したい時などに利用できます。
 
-== SETTINGS 
+== SETTINGS ==
 マップするキーや hint の xpath などは変更できます。
 
 liberator.globalVariables.hints_copy_maps = ['c', 'C', 'p', 'P'];
@@ -21,10 +22,10 @@ liberator.globalVariables.hints_copy_maps = ['c', 'C', 'p', 'P'];
 例: paste のほうは設定しない
 liberator.globalVariables.hints_copy_maps = ['c', 'C', null, null];
 
-set hintyanktags='//xpath|//xpath2'; 
-set hintpastetags='//xpath|//xpath2'; 
+set hintyanktags='//xpath|//xpath2';
+set hintpastetags='//xpath|//xpath2';
 
-== MAPPING ==
+== MAPPINGS ==
 ;c :
     Yank hint element's text or attributes.
 ;C :
@@ -62,7 +63,7 @@ let maps = liberator.globalVariables.hints_copy_maps || DEFAULT_MAPS;
 var stripText = function(text) {
     text = text.replace(/(^\s+\r?\n)|(\s+$)/m, '');
     let matched = text.match(/(\r?\n)/mg);
-    if (!matched || matched.length == 1) 
+    if (!matched || matched.length == 1)
         text = text.replace(/^\s+/, '');
     return text;
 }
@@ -73,7 +74,7 @@ if (maps[0]) // c
         if (!text)
             for (let i = 0;  i < TEXT_ATTRS.length; i++)
                 if (text = elem[TEXT_ATTRS[i]]) break;
-    
+
         util.copyToClipboard(stripText(text), true);
     }, function() options['hintyanktags']);
 
@@ -102,10 +103,10 @@ var replaceOrAppend = function(replace) {
 }
 
 if (maps[2]) // p
-    hints.addMode(maps[2], 'paste text (append)', replaceOrAppend(false), function() options['hintpastetags']);
+    hints.addMode(maps[2], 'Paste text (append)', replaceOrAppend(false), function() options['hintpastetags']);
 
 if (maps[3]) // P
-    hints.addMode(maps[3], 'paste text (replace)', replaceOrAppend(true), function() options['hintpastetags']);
+    hints.addMode(maps[3], 'Paste text (replace)', replaceOrAppend(true), function() options['hintpastetags']);
 
 })();
 
