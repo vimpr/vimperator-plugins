@@ -1,22 +1,22 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
-<description>Tiny Menu for Vimperator </description>
-<minVersion>2.0</minVersion>
+<description>Tiny Menu for Vimperator</description>
+<minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tinymenu.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.1</version>
 <detail><![CDATA[
-append statusbar's menuicon like Tiny Menu [ https://addons.mozilla.org/en-US/firefox/addon/1455 ].
+append statusbar's menuicon like Tiny Menu [ https://addons.mozilla.org/firefox/addon/1455 ].
 
 thx icon id:tnx.
 ]]></detail>
 </VimperatorPlugin>;
 
-(function(){
-    if (!liberator.plugins.tinymenu) 
+(function() {
+    if (!liberator.plugins.tinymenu)
         liberator.plugins.tinymenu = {};
 
     let tinymenu = liberator.plugins.tinymenu;
@@ -24,7 +24,7 @@ thx icon id:tnx.
 
     let p = function(msg) {
         Application.console.log(msg);
-    }
+    };
 
     const ICON = 'data:image/png;base64,'+
                  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK'+
@@ -59,7 +59,7 @@ thx icon id:tnx.
     let popup = tinymenu.popup;
 
     menu.addEventListener('click', function(event) {
-        if (popup.state == 'closed') 
+        if (popup.state == 'closed')
             popup.openPopup(menu, 'before_end', 0, 0, false, true);
     }, false);
 
