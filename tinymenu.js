@@ -7,11 +7,15 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tinymenu.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.1</version>
+<version>0.2</version>
 <detail><![CDATA[
 append statusbar's menuicon like Tiny Menu [ https://addons.mozilla.org/firefox/addon/1455 ].
 
 thx icon id:tnx.
+
+== Commands ==
+  :opentinymenu:
+    Open the tiny menu.
 ]]></detail>
 </VimperatorPlugin>;
 
@@ -62,6 +66,15 @@ thx icon id:tnx.
         if (popup.state == 'closed')
             popup.openPopup(menu, 'before_end', 0, 0, false, true);
     }, false);
+
+    commands.addUserCommand(
+        ['opentinymenu'],
+        'Open the tiny menu ',
+        function () {
+            popup.openPopup(menu, 'before_end', 0, 0, false, true);
+        },
+        true
+    );
 
     //document.getElementById('status-bar').insertBefore(menu, document.getElementById('security-button').nextSibling);
     document.getElementById('status-bar').appendChild(popup);
