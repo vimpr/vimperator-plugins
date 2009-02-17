@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Caret Hint</name>
   <description>Move caret position by hint</description>
   <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
       let g:caret_hint_tail_key = 'C':
         Hint mode key.
         Move caret position to the tail of selected element.
-      let g:caret_hint_select_key = 's':
+      let g:caret_hint_select_key = '' (default: disabled):
         Hint mode key.
         Move caret position to the head of selected element, and select.
       let g:caret_hint_select_tail_key = 'S':
@@ -77,7 +77,7 @@ let PLUGIN_INFO =
       let g:caret_hint_tail_key = 'C':
         Hint モードのキー
         選択した要素の後尾にキャレットを移動する
-      let g:caret_hint_select_key = 's':
+      let g:caret_hint_select_key = '' (デフォルト: 無効):
         Hint モードのキー
         選択した要素の先頭にキャレットを移動し、要素を選択する
       let g:caret_hint_select_tail_key = 'S':
@@ -107,7 +107,7 @@ let PLUGIN_INFO =
   // XXX 空白も有効
   let headMode = gval('caret_hint_key', 'c');
   let tailMode = gval('caret_hint_tail_key', 'C');
-  let selectHeadMode = gval('caret_hint_select_key', 's');
+  let selectHeadMode = gval('caret_hint_select_key', '');
   let selectTailMode = gval('caret_hint_select_tail_key', 'S');
   let swapKey = gval('caret_hint_swap_key', 's');
   let hintXPath = liberator.globalVariables.caret_hint_xpath || '//*';
