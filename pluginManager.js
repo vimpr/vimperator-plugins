@@ -768,6 +768,36 @@ HTMLStack.prototype = { // {{{
 // }}}
 
 // --------------------------------------------------------
+// CODEREPOS_PLUGINS
+// -----------------------------------------------------{{{
+var CODEREPOS = (function(){
+    const codeURL  = 'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/';
+    const indexURL = 'http://vimperator.kurinton.net/plugins/info.xml';
+    var public = {
+        plugins: [],
+        init: function(){
+            this.plugins = [];
+            util.httpGet(indexURL, function(xhr){
+                let xml = new XMLList(xhr.responseText);
+                let plugins = xml.plugin;
+                for (let i=0, length = plugins.length(); i < length; i++){
+                    public.plugins.push(new CodeReposPlugin(plugins[i]));
+                }
+            });
+        }
+    };
+    function CodeReposPlugin(xml){
+        this.name = tags.name(xml);
+        this.URL = tags.updateURL(xml);
+        this.description = tags.description(xml);
+        this.version = tags.version(xml);
+    }
+    public.init();
+    return public;
+})();
+// }}}
+
+// --------------------------------------------------------
 // Vimperator Command
 // -----------------------------------------------------{{{
 commands.addUserCommand(['plugin[help]'], 'list Vimperator plugins',
@@ -858,6 +888,15 @@ commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
                         (plugin.items.description || '-')
                     ]).filter(function(row)
                         row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
+                } else if (args[0] == "install"){
+                    context.title = ["PluginName", "Name: Description"];
+                    context.completions = CODEREPOS.plugins.filter(function($_)
+                        $_.URL.toLowerCase().indexOf(context.filter.toLowerCase()) >= 0
+                    ).filter(function($_){
+                        return !getPlugins().some(function(installed){
+                            return installed.items.updateURL ? installed.items.updateURL == $_.URL : false;
+                        });
+                    }).map(function(plugin) [plugin.URL, plugin.name + ": " + plugin.description]);
                 }
             }
         }
