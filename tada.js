@@ -108,15 +108,30 @@ liberator.plugins.tada = (function(){
          addTodoItem(getDefaultListId(), args.join(''));
       }
     }, {
-      completer: function(context) {
-        context.title = ["List", "Description"];
-        context.completions = getLists().map(function(item) [item[1], "(not implemented)"]);
-      },
+      completer: tadaListCompleter,
       argCount: "*",
       literal: true
     },
     true  // for DEVELOP
   );
+
+  commands.addUserCommand(
+    ["tadamail"],
+    "Mail Ta-Da list. (:tadamail [LISTNAME])",
+    function(args) {
+      //
+      switch(args.length) {
+      case 0:
+        break;
+      default:
+        sendEmail([getListId(args[0]), args[0]]);
+      }
+    }, {
+      completer: tadaListCompleter,
+      argCount: "*"
+    },
+    true
+  ); 
 // }}}
 // PUBLIC {{{
   var PUBLICS = { 
@@ -131,8 +146,10 @@ liberator.plugins.tada = (function(){
   };
 // }}}
 // PRIVATE {{{
-  function g(str) {
-    return liberator.globalVariables[str];
+
+  function tadaListCompleter(context) {
+    context.title = ["List", "Items left"];
+    context.completions = getLists().map(function(item) [item[1], item[2]]);
   }
 
   function getURI() {
@@ -176,6 +193,8 @@ liberator.plugins.tada = (function(){
     return [lists[0][0], lists[0][1]];
   }
 
+  // Get Your 'MyLists'
+  // @return [[id, name, left], .... ]
   function getLists() {
     var lists = [];
     var req = new libly.Request(getURI(), null, {asynchronous: false});
@@ -183,9 +202,9 @@ liberator.plugins.tada = (function(){
     req.addEventListener('onSuccess', function(data) {
       liberator.log("success");
       data.getHTMLDocument();
-      var xpath = "//div[@id='Container']/div[2]/div/div/ul/li/a"
-      libly.$U.getNodesFromXPath(xpath, data.doc).forEach(function(item){
-        lists.push([parseListId(item.href), item.innerHTML]);
+      $LXs("//div[@id='Container']/div[2]/div/div/ul/li/a", data.doc).forEach(function(item){
+        var left = $LX("../span/strong[text()]", item);
+        lists.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
       });
     });
     req.get();
@@ -203,7 +222,7 @@ liberator.plugins.tada = (function(){
       data.getHTMLDocument();
 
       var list = <ul></ul>;
-      libly.$U.getNodesFromXPath("//ul[@id='incomplete_items']/li/form", data.doc).forEach(function(item){
+      $LXs("//ul[@id='incomplete_items']/li/form", data.doc).forEach(function(item){
         list.li += <li>{item.textContent.replace(/^\s*|\n|\r|\s*$/g, '')}</li>;
       });
 
@@ -220,7 +239,6 @@ liberator.plugins.tada = (function(){
       endpoint,
       null,
       {
-        asyncronus: true,
         postBody: "item[content]=" + encodeURIComponent(content)
       }
     );
@@ -236,6 +254,26 @@ liberator.plugins.tada = (function(){
 
     req.post();
   }
+
+  function sendEmail([listId, listName]) {
+    var endpoint = getURI() + listId + "/email";
+    liberator.log("endpoint:" + endpoint);
+
+    var req = new libly.Request(endpoint, null, {postBody: "dummy=hoge"});
+    req.addEventListener('onSuccess', function(data) {
+      liberator.echo("Send Ta-Da list '" + listName + "' to your email address.");
+    });
+    req.addEventListener('onFailure', function(data) {
+      liberator.echoerr("EMAIL SENDING ERROR.");
+      liberator.log(data.responseText);
+    });
+    req.post();
+  }
+
+  // Utilities 
+  function g(str)    liberator.globalVariables[str]; 
+  function $LXs(a,b) libly.$U.getNodesFromXPath(a, b);
+  function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a, b);
 
   return PUBLICS;
 // }}}
