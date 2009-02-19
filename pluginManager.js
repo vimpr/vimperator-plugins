@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.6.0</version>
+<version>0.6.1</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -241,7 +241,7 @@ Plugin.prototype = { // {{{
             data.Information = 'up to date.';
         } else if (this.compVersion(this.info.version, serverResource.version) > 0 ||
                    localDate > serverDate){
-            data.information = '<span highlight="WarningMsg">local version is newest.</span>';
+            data.Information = '<span highlight="WarningMsg">local version is newest.</span>';
         } else {
             data.Information = this.overwritePlugin(serverResource);
             localResource = {}; // cleanup pref.
@@ -771,7 +771,6 @@ HTMLStack.prototype = { // {{{
 // CODEREPOS_PLUGINS
 // -----------------------------------------------------{{{
 var CODEREPOS = (function(){
-    const codeURL  = 'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/';
     const indexURL = 'http://vimperator.kurinton.net/plugins/info.xml';
     var public = {
         plugins: [],
@@ -870,6 +869,7 @@ commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
     }, {
         argCount: '*',
         completer: function(context, args){
+            context.ignoreCase = true;
             if (args.length <= 1) { // for sub-command
                 context.title = ['Sub-command', 'Description'];
                 context.completions = [
@@ -889,10 +889,9 @@ commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
                     ]).filter(function(row)
                         row[0].toLowerCase().indexOf(context.filter.toLowerCase()) >= 0);
                 } else if (args[0] == "install"){
+                    context.anchored = false;
                     context.title = ["PluginName", "Name: Description"];
-                    context.completions = CODEREPOS.plugins.filter(function($_)
-                        $_.URL.toLowerCase().indexOf(context.filter.toLowerCase()) >= 0
-                    ).filter(function($_){
+                    context.completions = CODEREPOS.plugins.filter(function($_){
                         return !getPlugins().some(function(installed){
                             return installed.items.updateURL ? installed.items.updateURL == $_.URL : false;
                         });
