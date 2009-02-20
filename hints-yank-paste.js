@@ -44,7 +44,7 @@ var p = function(msg) {
 };
 
 const DEFAULT_MAPS = ['c', 'C', 'p', 'P'];
-const DEFAULT_YANK_HINTTAGS = 'h1 h2 h3 h4 h5 h6 pre p ul ol blockquote img code input textarea'.
+const DEFAULT_YANK_HINTTAGS = 'h1 h2 h3 h4 h5 h6 pre p ul ol ul/li ol/li blockquote img code input textarea'.
     split(/\s+/).map(function(t) '//' + t).join(' | ');
 const TEXT_ATTRS = 'src value href title alt'.split(/\s+/);
 
