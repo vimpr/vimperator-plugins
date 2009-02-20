@@ -3,10 +3,10 @@ var PLUGIN_INFO=
 <name>{NAME}</name>
 <description>feed some defined key events into the Web content</description>
 <description lang="ja">定義したkeyイベントをWebページへ送ってあげる</description>
-<version>2.1</version>
+<version>2.2</version>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<minVersion>2.0a1</minVersion>
-<maxVersion>2.0</maxVersion>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0b3pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_2.js</updateURL>
 <detail lang="ja"><![CDATA[
 == 概要 ==
@@ -26,8 +26,14 @@ Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場
     {num}はフレームの番号で :fmap lhs1,{num}rhs1 lhs2,{num}rhs2 ... と同等
     Gmailの例を参照
 
-:f[eed]map -v[key] ....
+:f[eed]map -v[key] ....:
     仮想キーコードでイベントを送るように
+
+:f[eed]map -e[vent] {EventName} ...:
+    イベント名を指定します
+    - keypress (default)
+    - keydown
+    - keyup
 
 :fmapc:
 :feedmapclear:
@@ -51,17 +57,22 @@ Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場
 
 === LDR の場合 ===
 >||
-:autocmd LocationChange reader\\.livedoor\\.com/reader :fmap j k s a p o v c <Space> <S-Space> z b < >
+:autocmd LocationChange 'reader\.livedoor\.com/reader' :fmap j k s a p o v c <Space> <S-Space> z b < >
 ||<
 
 === Gmail の場合 ===
 >||
-:autocmd LocationChange mail\\.google\\.com/mail :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+:autocmd LocationChange 'mail\.google\.com/mail' :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
 ||<
 
 === Google Reader の場合 ===
 >||
-:autocmd LocationChange www\\.google\\.co\\.jp/reader :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
+:autocmd LocationChange 'www\.google\.co\.jp/reader' :fmap! -vkey j k n p m s t v A r S N P X O gh ga gs gt gu u / ?
+||<
+
+=== Google Calendar の場合 ===
+>||
+:autocmd LocationChange 'www\.google\.com/calendar/' :fmap! -vkey -event keydown t a d w m x c e <Del> / + q s ?
 ||<
 
 Greasemonkey LDRizeの場合などにも使用可
@@ -185,7 +196,7 @@ function init(keys, useVkey){
         replaceUserMap(origKey, feedKey, useVkey);
     });
 }
-function replaceUserMap(origKey, feedKey, useVkey){
+function replaceUserMap(origKey, feedKey, useVkey, eventName){
     if (mappings.hasMap(modes.NORMAL, origKey)){
         var origMap = mappings.get(modes.NORMAL,origKey);
         if (origMap.description.indexOf(origKey+' -> ') != 0) {
@@ -203,7 +214,7 @@ function replaceUserMap(origKey, feedKey, useVkey){
         function(count){
             count = count > 1 ? count : 1;
             for (var i=0; i<count; i++){
-                feedKeyIntoContent(feedKey, useVkey);
+                feedKeyIntoContent(feedKey, useVkey, eventName);
             }
         }, { flags:Mappings.flags.COUNT, rhs:feedKey, noremap:true });
     addUserMap(map);
@@ -257,7 +268,7 @@ function getDestinationElement(frameNum){
     }
     return root;
 }
-function feedKeyIntoContent(keys, useVkey){
+function feedKeyIntoContent(keys, useVkey, eventName){
     var frameNum = 0;
     [keys, frameNum] = parseKeys(keys);
     var destElem = getDestinationElement(frameNum);
@@ -309,7 +320,7 @@ function feedKeyIntoContent(keys, useVkey){
 
         //liberator.log({ctrl:ctrl, alt:alt, shift:shift, meta:meta, keyCode:keyCode, charCode:charCode, useVkey: useVkey});
         var evt = content.document.createEvent('KeyEvents');
-        evt.initKeyEvent(useVkey ? 'keydown' : 'keypress', true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
+        evt.initKeyEvent(eventName, true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
         destElem.document.dispatchEvent(evt);
     }
     modes.passAllKeys = false;
@@ -327,18 +338,20 @@ commands.addUserCommand(['feedmap','fmap'],'Feed Map a key sequence',
         if (args.bang) destroy();
         var depth = args["-depth"] ? args["-depth"] : "";
         var useVkey = "-vkey" in args;
+        var eventName = args["-event"] ? args["-event"] : "keypress";
 
         args.forEach(function(keypair){
             var [lhs, rhs] = keypair.split(",");
             if (!rhs) rhs = lhs;
-            replaceUserMap(lhs, depth + rhs, useVkey);
+            replaceUserMap(lhs, depth + rhs, useVkey, eventName);
         });
     },{
         bang: true,
         argCount: "*",
         options: [
             [["-depth","-d"], commands.OPTION_INT],
-            [["-vkey","-v"], commands.OPTION_NOARG]
+            [["-vkey","-v"], commands.OPTION_NOARG],
+            [["-event", "-e"], commands.OPTION_STRING, null, [["keypress","-"],["keydown","-"],["keyup","-"]]]
         ]
     }
 );
