@@ -64,6 +64,9 @@ liberator.globalVariables.history_search_backward_map = ['<C-r>'];
             }
 
             let command = commandline.command || '';
+            let completionsList = [[key, i] for ([i, key] in storage['history-command'])].
+                                      filter(function([key, i]) key).reverse();
+
             commandline.input('bck-i-search: ', function(str) {
                 try {
                     liberator.echo(liberator.execute(str));
@@ -73,8 +76,7 @@ liberator.globalVariables.history_search_backward_map = ['<C-r>'];
             }, {
                 completer: function(context) {
                     context.title = ['CommandLine History', 'INDEX'];
-                    context.completions = [[key, i] for ([i, key] in storage['history-command'])].
-                                              filter(function([key, i]) key).reverse();
+                    context.completions = completionsList;
                 },
                 onChange: function() {
                     showCompletions();
