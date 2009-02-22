@@ -120,7 +120,7 @@ liberator.plugins.jsh = (function() {
       result = String(value);
     }
 
-    liberator.echo(result);
+    liberator.echo(result, commandline.FORCE_MULTILINE);
   }
 
   // }}}
