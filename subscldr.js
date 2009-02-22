@@ -11,38 +11,38 @@
 // PLUGIN INFO: {{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-<name>subscldr</name>
-<description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
-<description lang="ja">ページ遷移なしでlivedoor ReaderやFastladderにフィードを登録します。</description>
-<minVersion>2.0pre</minVersion>
-<maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
-<author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
-<license>MIT style license</license>
-<version>0.2</version>
-<detail><![CDATA[
-== Subject ==
-Adds subscriptions to livedoor Reader/Fastladder in place.
+  <name>subscldr</name>
+  <description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
+  <description lang="ja">ページ遷移なしでlivedoor ReaderやFastladderにフィードを登録します。</description>
+  <minVersion>2.0pre</minVersion>
+  <maxVersion>2.0</maxVersion>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
+  <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
+  <license>MIT style license</license>
+  <version>0.2</version>
+  <detail><![CDATA[
+    == Subject ==
+    Adds subscriptions to livedoor Reader/Fastladder in place.
 
-== Commands ==
->||
-:subscldr
-:subscfl
-||<
+    == Commands ==
+    >||
+    :subscldr
+    :subscfl
+    ||<
 
-]]></detail>
+  ]]></detail>
 
-<detail lang="ja"><![CDATA[
-== 概要 ==
-ページ遷移すること無しにlivedoor ReaderやFastladderへのフィードの登録を行います。
+  <detail lang="ja"><![CDATA[
+    == 概要 ==
+    ページ遷移すること無しにlivedoor ReaderやFastladderへのフィードの登録を行います。
 
-== コマンド ==
->||
-:subscldr
-:subscfl
-||<
+    == コマンド ==
+    >||
+    :subscldr
+    :subscfl
+    ||<
 
-]]></detail>
+  ]]></detail>
 </VimperatorPlugin>;
 // }}}
 
@@ -71,13 +71,9 @@ liberator.plugins.subscldr = (function() {
   );
   // }}}
   // PRIVATE {{{
-  const DEBUG_URL = "http://d.hatena.ne.jp/snaka72/";
-
   function addCommand (command, servicename, endpoint) {
 
     function handleFeedRequest(opts, redirectUrl, force) {
-        liberator.echo("force: " + force);
-
         var subscribeInfo = getSubscription(redirectUrl);
         var availableLinks = subscribeInfo.feedlinks.filter(function(info) info[1]);
         var alreadySubscribed = availableLinks.length != subscribeInfo.feedlinks.length;
@@ -162,8 +158,8 @@ liberator.plugins.subscldr = (function() {
         }
       );
       req.addEventListener("onSuccess", function(data) {
-        liberator.log("Posted: " + data.responseText);
-        liberator.echo("Posted: " + data.statusText);
+        liberator.log("Post status: " + data.responseText);
+        liberator.echo("Subscribe feed succeed.");
       });
       req.addEventListener("onFailure", function(data) {
         liberator.log("POST FAILURE: " + data.responseText);
@@ -234,7 +230,7 @@ liberator.plugins.subscldr = (function() {
     events.feedkeys("<TAB>");
   }
 
-  // For convinience
+  // For convenience
   function $LXs(a,b) libly.$U.getNodesFromXPath(a,b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a,b);
 
