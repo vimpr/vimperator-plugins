@@ -3,7 +3,7 @@
 //
 // LICENSE: {{{
 //   Copyright (c) 2009 snaka<snaka.gml@gmail.com>
-//  
+//
 //     Distributable under the terms of an MIT-style license.
 //     http://www.opensource.jp/licenses/mit-license.html
 // }}}
@@ -11,7 +11,7 @@
 var PLUGIN_INFO = <VimperatorPlugin>
   <name>jsh</name>
   <description>Simple javascript shell</description>
-  <description lang="ja">$B4J0W(BJavascript$B%7%'%k(B</description>
+  <description lang="ja">簡易Javascriptシェル</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/jsh.js</updateURL>
@@ -20,35 +20,35 @@ var PLUGIN_INFO = <VimperatorPlugin>
   <version>0.1</version>
   <detail><![CDATA[
     == Subject ==
-  
+
     == Commands ==
       To start shell.
       >||
       :jsh
       ||<
-  
+
     == Global variables ==
-  
+
     == Options ==
-  
+
     == ToDo ==
-  
+
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    == $B35MW(B ==
+    == 概要 ==
 
-    == $B%3%^%s%I(B ==
-      $B%7%'%k$N3+;O(B
+    == コマンド ==
+      シェルの開始
       >||
       :jsh
       ||<
-  
+
     == Global variables ==
-  
+
     == Options ==
-  
+
     == ToDo ==
-  
+
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -70,7 +70,7 @@ liberator.plugins.jsh = (function() {
     null,
     true  // for DEBUG
   );
-  // }}} 
+  // }}}
   // PRIVATE {{{
   let  shellContext = {
       quit : cmdQuit,
@@ -119,7 +119,7 @@ liberator.plugins.jsh = (function() {
     } else {
       result = String(value);
     }
-               
+
     liberator.echo(result);
   }
 
@@ -135,12 +135,12 @@ liberator.plugins.jsh = (function() {
       var result = liberator.eval(str, shellContext);
       pp(result);
     } catch(e) {
-      if (e == STATUS.QUIT) 
+      if (e == STATUS.QUIT)
         return;
       liberator.echoerr(e);
     }
     (function waitForOutput() {
-      setTimeout( function() modes.main == modes.NORMAL 
+      setTimeout( function() modes.main == modes.NORMAL
                     ? waitForInput()
                     : waitForOutput(),
                   500 );
