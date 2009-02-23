@@ -72,14 +72,14 @@ liberator.plugins.jsh = (function() {
   );
   // }}}
   // PRIVATE {{{
-  let  shellContext = {
+  let  shellContext = libly.$U.extend({
       quit : cmdQuit,
       exit : cmdQuit,  // alias as 'quit()'
       cls  : cmdCls,
       echo : liberator.echo,
       $LXs : plugins.libly.$U.getNodesFromXPath,
       $LX  : plugins.libly.$U.getFirstNodeFromXPath
-  };
+  }, liberator);
 
   const STATUS = {
     NORMAL: '__JAVASCRIPT_SHELL_NORMAL__',
