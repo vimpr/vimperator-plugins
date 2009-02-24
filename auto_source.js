@@ -25,6 +25,8 @@ var PLUGIN_INFO =
     監視を開始:
       - :aso taro.js
       - :autoso[urce] taro.js
+      - :autoso[urce] -c[ommand] 'colorscheme mycolors' taro.js
+      - :autoso[urce] -c[ommand] 'js alert("reload!")' taro.js
     監視を中止:
       - :aso! taro.js
       - :autoso[urce]! taro.js
@@ -62,7 +64,7 @@ var PLUGIN_INFO =
     return cur.path;
   }
 
-  function startWatching (filepath) {
+  function startWatching (filepath, command) {
     if (exists(filepath))
       throw 'The file has already been watched: ' + filepath;
     let last = firstTime ? null : getFileModifiedTime(filepath);
@@ -73,13 +75,17 @@ var PLUGIN_INFO =
           liberator.log('sourcing: ' + filepath);
           last = current;
           io.source(filepath);
+          if (command) {
+              liberator.log('command execute: ' + command);
+              liberator.execute(command);
+          }
         }
       } catch (e) {
         liberator.echoerr('Error! ' + filepath);
         killWatcher(filepath);
       }
     }, interval);
-    liberator.log('filepath: ' + filepath)
+    liberator.log('filepath: ' + filepath + (command ? ('; command: ' + command) : ''));
     files.push({handle: handle, path: filepath});
   }
 
@@ -94,11 +100,14 @@ var PLUGIN_INFO =
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg, bang) {
-      (bang ? killWatcher : startWatching)(expandPath(arg[0]));
+      (bang ? killWatcher : startWatching)(expandPath(arg[0]), arg['-command']);
     },
     {
       bang: true,
       argCount: '1',
+      options: [
+          [['-command', '-c'], commands.OPTION_STRING]
+      ],
       completer: function (context, args) {
         if (args.bang) {
           context.title = ['Path'];
