@@ -51,6 +51,46 @@
                       .replace(/-([a-z])/g, function (m, n1) n1.toUpperCase());
     };
 
+    function fromUTF8Octets(octets){
+        return decodeURIComponent(octets.replace(/[%\x80-\xFF]/g, function(c){
+            return '%' + c.charCodeAt(0).toString(16);
+        }));
+    }
+
+    function concatXML (xmls) {
+      let result = <></>;
+      xmls.forEach(function (xml) result += xml);
+      return result;
+    }
+
+    function langList (info, name) {
+      let result = <></>;
+      let i = info.length();
+      while (i-- > 0) {
+        if (info[i].@lang.toString()) {
+          result += <{name} lang={info[i].@lang.toString()}>{fromUTF8Octets(info[i].toString())}</{name}>;
+        } else {
+          result += <{name}>{fromUTF8Octets(info[i].toString())}</{name}>;
+        }
+      }
+      return result;
+    }
+
+    function chooseByLang(info, lang) {
+      let result;
+      let i = info.length();
+      while (i-- > 0) {
+        let it = info[i];
+        if (!it.@lang)
+          result = it;
+        if (it.@lang.toString() == lang) {
+          result = it;
+          break;
+        }
+      }
+      return result;
+    }
+
     let myname = __context__.NAME;
 
     let otags = liberator.eval('tags', liberator.plugins.pluginManager.list);
@@ -65,6 +105,7 @@
     let files = io.readDirectory(pluginDirPath);
     let indexHtml = <></>;
     let allHtml = <></>;
+    let pminfos = [];
 
     files.forEach(function (file) {
       if (!/\.js$/.test(file.path))
@@ -121,6 +162,18 @@
             else
               authors = xml;
           }
+        }
+
+        // infoXML
+        {
+          pminfos.push(
+            <plugin>
+              {langList(pluginInfo.name, 'name')}
+              {langList(pluginInfo.description, 'description')}
+              {langList(pluginInfo.version, 'version')}
+              <updateURL>{CodeReposFile + pluginFilename}</updateURL>
+            </plugin>
+          );
         }
 
         // プラグイン毎のドキュメント
@@ -246,6 +299,9 @@
 
     io.writeFile(io.getFile(outputDir + 'index.html'), indexHtml.toString());
     io.writeFile(io.getFile(outputDir + 'all.html'), allHtml.toString());
+
+    let infoXML = <plugins>{concatXML(pminfos)}</plugins>;
+    io.writeFile(io.getFile(outputDir + 'info.xml'), infoXML.toString());
   }
 
   commands.addUserCommand(
