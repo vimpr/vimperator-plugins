@@ -36,9 +36,9 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Maine Coon</name>
   <name lang="ja">メインクーン</name>
-  <description>Makes more large screen</description>
+  <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -67,6 +67,8 @@ let PLUGIN_INFO =
           :set mainecoon=ac
         ||<
         The default value of this option is "am".
+        === note ===
+          Probably, The C and c options are supported on some OSs only.
     == Global Variables ==
       maine_coon_targets:
         Other elements IDs that you want to hide.
@@ -79,6 +81,8 @@ let PLUGIN_INFO =
     == Thanks ==
       snaka72 (hidechrome part):
         http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
+    == Maine Coon ==
+      http://en.wikipedia.org/wiki/Maine_Coon
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Requires ==
@@ -103,6 +107,8 @@ let PLUGIN_INFO =
           :set mainecoon=ac
         ||<
         デフォルト値は "am"
+        === 備考 ===
+          C c オプションはいくつかの OS でのみ有効です。多分。
     == Global Variables ==
       maine_coon_targets:
         フルスクリーン時にの非表示にしたい要素のIDを空白区切りで指定します。
@@ -117,6 +123,8 @@ let PLUGIN_INFO =
     == Thanks ==
       snaka72 (hidechrome part):
         http://vimperator.g.hatena.ne.jp/snaka72/20090106/1231262955
+    == メインクーン ==
+      http://ja.wikipedia.org/wiki/%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%AF%E3%83%BC%E3%83%B3
   ]]></detail>
 </VimperatorPlugin>;
 
