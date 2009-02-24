@@ -26,7 +26,7 @@ var PLUGIN_INFO =
       - :aso taro.js
       - :autoso[urce] taro.js
       - :autoso[urce] -c[ommand] 'colorscheme mycolors' taro.js
-      - :autoso[urce] -c[ommand] 'js alert("reload!")' taro.js
+      - :autoso[urce] -c[ommand] -force 'js alert("reload!")' taro.js
     監視を中止:
       - :aso! taro.js
       - :autoso[urce]! taro.js
@@ -64,9 +64,14 @@ var PLUGIN_INFO =
     return cur.path;
   }
 
-  function startWatching (filepath, command) {
-    if (exists(filepath))
-      throw 'The file has already been watched: ' + filepath;
+  function startWatching (filepath, command, force) {
+    if (exists(filepath)) {
+      if (force) {
+        killWatcher(filepath);
+      } else {
+        throw 'The file has already been watched: ' + filepath;
+      }
+    }
     let last = firstTime ? null : getFileModifiedTime(filepath);
     let handle = setInterval(function () {
       try {
@@ -100,13 +105,14 @@ var PLUGIN_INFO =
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg, bang) {
-      (bang ? killWatcher : startWatching)(expandPath(arg[0]), arg['-command']);
+      (bang ? killWatcher : startWatching)(expandPath(arg[0]), arg['-command'], arg['-force']);
     },
     {
       bang: true,
       argCount: '1',
       options: [
-          [['-command', '-c'], commands.OPTION_STRING]
+          [['-command', '-c'], commands.OPTION_STRING],
+          [['-force', '-f'], commands.OPTION_NOARG]
       ],
       completer: function (context, args) {
         if (args.bang) {
