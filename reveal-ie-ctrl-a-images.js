@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Reveal Image</name>
   <description>Reveal IE Ctrl-A images.</description>
   <description lang="ja">IE の Ctrl-A 画像を暴く</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -49,18 +49,18 @@ let PLUGIN_INFO =
     == Description ==
       Reveal IE Ctrl-A images.
     == Global Variables ==
-      g:ie_grid_mode_normal = 'r':
+      g:reveal_ie_image_mode_normal = 'r':
         Hints mode for normal version.
-      g:ie_grid_mode_reverse = 'R':
+      g:reveal_ie_image_mode_reverse = 'R':
         Hints mode for reverse version.
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Description ==
       IE の Ctrl-A 画像を暴く
     == Global Variables ==
-      g:ie_grid_mode_normal = 'r':
+      g:reveal_ie_image_mode_normal = 'r':
         通常版のヒントモード
-      g:ie_grid_mode_reverse = 'R':
+      g:reveal_ie_image_mode_reverse = 'R':
         反対版のヒントモード
   ]]></detail>
 </VimperatorPlugin>;
@@ -70,6 +70,13 @@ let PLUGIN_INFO =
   let ieimg = 'data:image/gif;base64,'+
               'R0lGODlhAgACAIABAF6BvP///yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAEALAAAAAACAAIA'+
               'AAIDRAIFADs=';
+
+  let modeN = gv('reveal_ie_image_mode_normal', 'r');
+  let modeR = gv('reveal_ie_image_mode_reverse', 'R');
+
+  function gv (name, def)
+    let (v = liberator.globalVariables[name])
+      (v === undefined ? def : v);
 
   function getPosition (elem) {
     return {
@@ -94,7 +101,7 @@ let PLUGIN_INFO =
 
   function reveal (elem, sec, zura) {
     if (sec <= 0)
-      sec = 2;
+      sec = 5;
     let body = elem.ownerDocument.body;
     let indicator = elem.ownerDocument.createElement('div');
     let pos = getAbsPosition(elem);
@@ -122,12 +129,14 @@ let PLUGIN_INFO =
   }
 
   [
-    ['r', false],
-    ['R', true]
+    [modeN, false],
+    [modeR, true]
   ].forEach(function ([mode, zura]) {
+    if (!mode)
+      return;
     hints.addMode(
       mode,
-      'description',
+      'Reveal IE Ctrl-A images.' + (zura ? ' (reverse)' : ''),
       function (elem, loc, count) {
         reveal(elem, count, zura);
       },
