@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.6.1</version>
+<version>0.6.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -878,9 +878,10 @@ commands.addUserCommand(['pluginmanager', 'pm'], 'Manage Vimperator plugins',
                     ['install', 'Install the plugin of (current page or specified URL).'],
                     ['list', 'List plugin information'],
                     ['update', 'Update plugins'],
+                    ['source', 'Show the source code'],
                 ];
             } else { // for sub-arguments
-                if (/^(update|check|help|list)$/.test(args[0])) {
+                if (/^(update|check|help|list|source)$/.test(args[0])) {
                     context.title = ['PluginName', '[Version]Description'];
                     context.completions = getPlugins().map(function(plugin) [
                         plugin.name,
