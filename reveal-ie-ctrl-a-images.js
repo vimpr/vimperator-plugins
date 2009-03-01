@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Reveal Image</name>
   <description>Reveal IE Ctrl-A images.</description>
   <description lang="ja">IE の Ctrl-A 画像を暴く</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -78,25 +78,12 @@ let PLUGIN_INFO =
     let (v = liberator.globalVariables[name])
       (v === undefined ? def : v);
 
-  function getPosition (elem) {
-    return {
-      x: elem.offsetLeft || 0,
-      y: elem.offsetTop || 0
-    };
-  }
-
   function getAbsPosition (elem) {
-    let p = getPosition(elem);
-    liberator.log(p)
-    if (elem.offsetParent) {
-      let q = getAbsPosition(elem.offsetParent);
-      return {
-        x: p.x + q.x,
-        y: p.y + q.y,
-      };
-    } else {
-      return p;
-    }
+    let rect = elem.getBoundingClientRect();
+    return {
+      x: Math.max((rect.left + content.scrollX), content.scrollX),
+      y: Math.max((rect.top  + content.scrollY), content.scrollY),
+    };
   }
 
   function reveal (elem, sec, zura) {
