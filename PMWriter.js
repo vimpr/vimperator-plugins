@@ -2,6 +2,7 @@
 /*
  * さわるなきけん！
  * DO NOT USE!
+ * このコードを読むと失明する場合があります。
  * */
 
 
@@ -39,6 +40,23 @@
     //};
   }
 
+  let langselector =
+    <div>
+      <style><![CDATA[
+        .lang-hide { display: none }
+      ]]></style>
+      <script language="javascript"><![CDATA[
+        var element = document.createElement('style');
+        document.getElementsByTagName('head')[0].appendChild(element);
+        var lang = 'default';
+        if (/^ja/.test(window.navigator.language))
+          lang = 'ja';
+        element.sheet.insertRule('.lang-' + lang + ' { display: block !important }', 0);
+        document.write(sheet);
+      ]]></script>
+    </div>;
+
+      //'<style><![CDATA[ .lang-ja { display: none } ]]></style>');
   function action () {
 
     const IOService = services.get('io');
@@ -88,6 +106,26 @@
           break;
         }
       }
+      return result;
+    }
+
+    function allLang (tag, info, utf, f) {
+      if (!f)
+        f = function (v) v;
+
+      let ff = utf ? function (v) fromUTF8Octets(f(v).toString())
+                   : f
+
+      if (!tag)
+        tag = 'div';
+
+      let result = <></>;
+
+      for (let i = 0, l = info.length(); i < l; i++) {
+        let it = info[i];
+        result += <{tag} class={'lang-hide '+(i==0?"lang-default ":'')+(i==l-1?'lang-ja ':'')+"lang-"+(it.@lang.toString()||'default')}>{ff(it)}</{tag}>;
+      }
+
       return result;
     }
 
@@ -178,16 +216,28 @@
 
         // プラグイン毎のドキュメント
         {
-          let src = pluginInfo.detail.toString();
-          //let detailBody = liberator.plugins.PMWikiParser(src.split(/\n/));
-          let detailBody = plugin.info.detail
+          //let src = pluginInfo.detail.toString();
+          let detailBody = allLang('div',
+                                   pluginInfo.detail,
+                                   false,
+                                   function (v) liberator.plugins.PMWikiParser.parse(fromUTF8Octets(v.toString())));
+          //let detailBody = plugin.info.detail
+          let title = allLang('span',
+                               pluginInfo.name,
+                               true,
+                               function (it) (it.toString() || '---'))
+          let description = allLang('span',
+                                   pluginInfo.description,
+                                   true,
+                                   function (it) (it.toString()) || '---')
           let body = <div>
+                <div>{langselector}</div>
                 <div class="information" id="information">
-                  <h1>{plugin.info.name.toString()}</h1>
+                  <h1>{title}</h1>
                   <div>
                     <dl>
                       <dt>Description</dt>
-                      <dd>{plugin.info.description || '---'}</dd>
+                      <dd>{description}</dd>
                       <dt>Latest version</dt>
                       <dd>{plugin.info.version || '???'}</dd>
                       <dt>Vimperator version</dt>
@@ -199,7 +249,10 @@
                       <dt>Author</dt>
                       <dd>{authors}</dd>
                       <dt>License</dt>
-                      <dd>{plugin.info.license || '--'}</dd>
+                      <dd>{allLang('span',
+                                   pluginInfo.license,
+                                   true,
+                                   function (v) (v || '--'))}</dd>
                     </dl>
                   </div>
                 </div>
@@ -210,7 +263,7 @@
             io.getFile(outputDir + htmlFilename),
             <html>
               <head>
-                <title>{plugin.info.name.toString()}</title>
+                <title>{pluginFilename}</title>
                 <link rel="stylesheet" href="plugin.css" type="text/css" />
                 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
               </head>
@@ -220,17 +273,15 @@
             </html>.toString()
           );
           allHtml += body;
-        }
 
-        // index.html
-        {
+          // index.html
           indexHtml += <tr class="plugin">
             <td class="name">
               <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{"\u2606"}</a>
               <a href={htmlFilename} class="link">{plugin.name}</a>
             </td>
             <td class="description">
-              {plugin.info.description}
+              {description}
             </td>
             <td class="author">
               {authors}
@@ -253,6 +304,7 @@
         <script type="text/javascript">
           Hatena.Star.Token = '48e8f4c633307a76a4dd923111e22a25e80b6e8a';
         </script>
+        {langselector}
         <style><![CDATA[
           .hatena-star-comment-container {
             display: none;
