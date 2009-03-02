@@ -187,6 +187,21 @@ commands.addUserCommand(
     true
 );
 
+completion.addUrlCompleter("H", "Hatena Bookmarks", function(context){
+	context.format = {
+        anchored: true,
+        title: ['Hatena Bookmarks'],
+        keys: { text: "url", description: "url", icon: "icon", extra: "extra"},
+        process: [
+            HatenaBookmark.Command.templateTitleIcon,
+        	HatenaBookmark.Command.templateDescription,
+    	],
+    }
+    context.ignoreCase = true;
+    if (context.migemo) delete context.migemo;
+    context.filters = [HatenaBookmark.Command.filter];
+	context.completions = HatenaBookmark.UserData.bookmarks;
+});
 
 HatenaBookmark.UserData = {
     get bookmarks() {
