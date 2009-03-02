@@ -3,7 +3,7 @@
 //
 // LICENSE: {{{
 //   Copyright (c) 2009 snaka<snaka.gml@gmail.com>
-// 
+//
 //   Distributable under the terms of an MIT-style license.
 //   http://www.opensource.jp/licenses/mit-license.html
 // }}}
@@ -19,10 +19,10 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.7</version>
+  <version>0.7.1</version>
   <detail><![CDATA[
     == Subject ==
-    Show ToDo items in commandline buffer. 
+    Show ToDo items in commandline buffer.
     Also add item to your Ta-da list.
 
     == Global variables ==
@@ -79,7 +79,7 @@ var PLUGIN_INFO =
       - 表示のパフォーマンス改善
 
   ]]></detail>
-</VimperatorPlugin>; 
+</VimperatorPlugin>;
 // }}}
 
 liberator.plugins.tada = (function(){
@@ -90,7 +90,7 @@ liberator.plugins.tada = (function(){
     function(args) {
 
       var listId;
-      switch (args.length) 
+      switch (args.length)
       {
       case 0:
        showTodoItems(getDefaultListId());
@@ -98,14 +98,14 @@ liberator.plugins.tada = (function(){
       case 1:
        if (listId = getListId(args[0]))
          showTodoItems(listId);
-       else 
+       else
          addTodoItem(getDefaultListId(), args[0]);
        break;
       default:
        if (listId = getListId(args[0]))
          addTodoItem([listId, args[0]], args[1]);
        else
-         addTodoItem(getDefaultListId(), args.join(''));
+         addTodoItem(getDefaultListId(), args.join(' '));
       }
     }, {
       completer: tadaListCompleter,
@@ -134,7 +134,7 @@ liberator.plugins.tada = (function(){
   ); 
 // }}}
 // PUBLIC {{{
-  var PUBLICS = { 
+  var PUBLICS = {
     // for DEBUG {{{
     // getListId: getListId,
     // getDefaultListId: getDefaultListId,
@@ -161,7 +161,7 @@ liberator.plugins.tada = (function(){
 
   function parseListId(source) {
     let m;
-    if (m = source.match(/\/lists\/([0-9]+)/)) 
+    if (m = source.match(/\/lists\/([0-9]+)/))
       return m[1];
 
     return source;
@@ -185,7 +185,7 @@ liberator.plugins.tada = (function(){
     var defaultId;
     var defaultName;
 
-    if (defaultName = g('tadaDefaultListName')) 
+    if (defaultName = g('tadaDefaultListName'))
       if (defaultId = getListId(defaultName))
         return [defaultId, defaultName];
 
@@ -232,7 +232,7 @@ liberator.plugins.tada = (function(){
     req.get();
   }
 
-  function  addTodoItem([listId, listName], content) {
+  function addTodoItem([listId, listName], content) {
     var endpoint = getURI() + listId + "/items"
     liberator.log("endpoint:" + endpoint);
     var req = new libly.Request(

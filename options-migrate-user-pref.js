@@ -3,7 +3,7 @@ var PLUGIN_INFO =
 <name>{NAME}</name>
 <description>options migrate user_pref</description>
 <description lang="ja">:set foobarbaz で簡単に user_pref をセットできるプラグイン</description>
-<minVersion>2.0</minVersion>
+<minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/options-migrate-user-pref.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
@@ -24,7 +24,7 @@ boolean/number を簡単にセットできるようになるため、よく user
 例
 >||
 js <<EOF
-liberator.globalVariables.options_migrate_user_pref = 
+liberator.globalVariables.options_migrate_user_pref =
 [
     {
         pref: 'javascript.enabled',
@@ -78,9 +78,9 @@ EOF
             options.add(conf.command, conf.description, type,
                 (typeof conf.defaultValue == 'undefined' ? options.getPref(pref) : conf.defaultValue),
                 {
-                    setter: function(value) options.setPref(pref, value), 
+                    setter: function(value) options.setPref(pref, value),
                     getter: function() options.getPref(pref),
-                } 
+                }
             );
         });
     }

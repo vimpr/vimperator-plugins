@@ -175,7 +175,7 @@ liberator.plugins.exOpen = (function() {
     },
     find: function(label) {
       var ret = null;
-      global.some(function(template) template.label == label ? (ret = template) && true : false);
+      global.some(function(template) (template.label == label) && (ret = template));
       return ret;
     },
     open: function(arg) {

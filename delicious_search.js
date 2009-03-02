@@ -13,7 +13,7 @@ let PLUGIN_INFO =
 :delicious[search] -tags tag, ...:
   search bookmark contains all tags
 
-:ds[earch] -query term: 
+:ds[earch] -query term:
 :delicious[search] -query term:
   search bookmark contains term in the titile or the URL or the note
 
