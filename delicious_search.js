@@ -24,13 +24,14 @@ set complete+=D
 
 or write in RC file
 
-autocmd VimperatorEnter . :set complete+=D
+autocmd VimperatorEnter ".*" :set complete+=D
 
 </detail>
 </VimperatorPlugin>;
 
 liberator.plugins.delicious = (function(){
 
+const ydls = Cc["@yahoo.com/nsYDelLocalStore;1"].getService(Ci.nsIYDelLocalStore);
 const ss = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService);
 
 // dabase connection object
@@ -120,14 +121,18 @@ function bookmarkSearch(tags, query){
           'OR b.url like', '?' + num,
           'OR b.description like', '?' + num,
           ')',
-          'GROUP BY b.rowid HAVING COUNT (b.rowid) = ?' + (num+1)
+          'GROUP BY b.rowid HAVING COUNT (b.rowid) = ?' + (num + 1),
+          'ORDER BY b.added_date DESC'
         ].join(" "));
         sql = sqlList.join(" ");
         st = dbc.createStatement(sql);
         st.bindUTF8StringParameter(tags.length, '%'+query+'%');
         st.bindInt32Parameter(tags.length+1, tags.length);
       } else {
-        sqlList.push('GROUP BY b.rowid HAVING COUNT (b.rowid) = ?' + (tags.length + 1));
+        sqlList.push([
+          'GROUP BY b.rowid HAVING COUNT (b.rowid) = ?' + (tags.length + 1),
+          'ORDER BY b.added_date DESC'
+        ].join(" "));
         sql = sqlList.join(" ");
         st = dbc.createStatement(sql);
         st.bindInt32Parameter(tags.length, tags.length);
@@ -137,15 +142,30 @@ function bookmarkSearch(tags, query){
       }
     }
     while (st.executeStep()){
-      let name = st.getString(0);
       let url = st.getString(1);
-      let note = st.getString(2);
-      list.push([url, name, note]);
+      list.push({
+        url: url,
+        name: st.getString(0),
+        note: st.getString(2),
+        icon: bookmarks.getFavicon(url),
+        tags: ydls.getTags(url, {})
+      });
     }
   } finally {
     st.reset();
   }
   return list;
+}
+function templateDescription(item){
+  return (item.tags && item.tags.length > 0 ? "[" + item.tags.join(",") + "]" : "") + item.note;
+}
+function templateTitleAndIcon(item){
+  let simpleURL = item.text.replace(/^https?:\/\//, '');
+  return <>
+    <span highlight="CompIcon">{item.icon ? <img src={item.icon}/> : <></>}</span><span class="td-strut"/>{item.name}<a href={item.text} highlight="simpleURL">
+      <span class="extra-info">{simpleURL}</span>
+    </a>
+  </>;
 }
 
 commands.addUserCommand(["delicious[search]","ds[earch]"], "Delicious Bookmark Search",
@@ -155,8 +175,11 @@ commands.addUserCommand(["delicious[search]","ds[earch]"], "Delicious Bookmark S
       return;
     }
     let list = bookmarkSearch(args["-tags"], args["-query"]);
-    let xml = template.tabular(["Title","Note"], [], list.map(function($_){
-      return [<a highlight="URL" href={$_[0]}>{$_[1]}</a>, $_[2]];
+    let xml = template.tabular(["Title","Tags and Note"], [], list.map(function(item){
+      return [
+        <><img src={item.icon}/><a highlight="URL" href={item.url}>{item.name}</a></>,
+        "[" + item.tags.join(",") + "] " + item.note
+      ];
     }));
     liberator.echo(xml, true);
   },{
@@ -165,11 +188,15 @@ commands.addUserCommand(["delicious[search]","ds[earch]"], "Delicious Bookmark S
       [["-query","-q"], commands.OPTION_STRING]
     ],
     completer: function(context, args){
-      let list = bookmarkSearch(args["-tags"], args["-query"]);
-      if (list.length > 0){
-        context.title = ["URL","TITLE"];
-        context.completions = list.map(function($_) [$_[0], $_[1]]);
-      }
+      context.format = {
+        anchored: true,
+        title: ["Title and URL", "Tags and Note"],
+        keys: { text: "url", name: "name", icon: "icon", tags: "tags", note: "note"},
+        process: [templateTitleAndIcon, templateDescription],
+      };
+      context.filterFunc = null;
+      context.regenerate = true;
+      context.generate = function() bookmarkSearch(args["-tags"], args["-query"]);
     },
   },true);
 
@@ -189,7 +216,8 @@ let self = {
       'SELECT name,url,description FROM bookmarks',
       'WHERE name like ?1 OR',
       'url like ?1 OR',
-      'description like ?1'
+      'description like ?1',
+      'ORDER BY added_date DESC'
     ].join(" "));
   },
   get tags(){
@@ -207,11 +235,15 @@ let self = {
    * @param {CompletionContext} context
    */
   urlCompleter: function(context){
-    context.anchored = false;
-    context.title = ["Delicous Bookmarks"];
-    let list = bookmarkSearch([], context.filter);
+    context.format = {
+      anchored: true,
+      title: ["Delicious Bookmarks"],
+      keys: { text: "url", name: "name", icon: "icon", tags: "tags", note: "note"},
+      process: [templateTitleAndIcon, templateDescription],
+    };
     context.filterFunc = null;
-    context.completions = list.map(function($_) [$_[0], $_[1]]);
+    context.regenerate = true;
+    context.generate = function() bookmarkSearch([], context.filter);
   },
   close: function(){
     dbc.close();
