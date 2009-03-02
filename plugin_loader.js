@@ -80,13 +80,18 @@ let PLUGIN_INFO =
   liberator.log('plugin_loader: loading');
 
   roots.forEach(function (root) {
-    let files = io.readDirectory(io.getFile(root), true);
-    files.forEach(function (file) {
-      if (filter.test(file.path)) {
-        liberator.log("Sourcing: " + file.path);
-        io.source(file.path, false);
-      }
-    });
+    let dir = io.getFile(root);
+    if (dir.exists() && dir.isDirectory() && dir.isReadable()) {
+      let files = io.readDirectory(dir, true);
+      files.forEach(function (file) {
+        if (filter.test(file.path)) {
+          liberator.log("Sourcing: " + file.path);
+          io.source(file.path, false);
+        }
+      });
+    } else {
+      liberator.log("Directory not found: " + dir.path);
+    }
   });
 
   liberator.log('plugin_loader: loaded');
