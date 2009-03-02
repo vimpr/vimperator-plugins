@@ -35,10 +35,10 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>Command-MainMenu</name>
+  <name>Command Menu</name>
   <description>Execute main-menu and tool-bar by ex-command.</description>
   <description lang="ja">メインメニューとツールバーをコマンドで実行できる</description>
-  <version>1.5.1</version>
+  <version>1.5.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
