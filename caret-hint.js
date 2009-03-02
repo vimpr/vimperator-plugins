@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Caret Hint</name>
   <description>Move caret position by hint</description>
   <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -110,7 +110,29 @@ let PLUGIN_INFO =
   let selectHeadMode = gval('caret_hint_select_key', '');
   let selectTailMode = gval('caret_hint_select_tail_key', 'S');
   let swapKey = gval('caret_hint_swap_key', 's');
+  let extendLeader = gval('extend_leader', 'c');
   let hintXPath = liberator.globalVariables.caret_hint_xpath || '//*';
+
+  let extendMode = false;
+
+  [headMode, tailMode, selectHeadMode, selectTailMode].forEach(
+    function(mode) {
+      let map = extendLeader + ';' + mode;
+      mappings.remove(modes.NORMAL, map); // for debug
+      mappings.remove(modes.VISUAL, map); // for debug
+      mappings.addUserMap(
+        [modes.NORMAL, modes.VISUAL],
+        [map],
+        'desc',
+        function () {
+          extendMode = true;
+          hints.show(mode);
+        },
+        {
+        }
+      );
+    }
+  );
 
   [
     [[true,  false], headMode],
@@ -123,7 +145,10 @@ let PLUGIN_INFO =
     hints.addMode(
       m,
       'Move caret position to ' + (h ? 'head' : 'tail') + (s ? ' and Select' : ''),
-      function (elem, loc, count) moveCaret(elem, h, s),
+      function (elem, loc, count) {
+        moveCaret(elem, h, s);
+        extendMode = false;
+      },
       function () hintXPath
     );
   });
@@ -167,11 +192,9 @@ let PLUGIN_INFO =
     r.selectNodeContents(elem);
 
     if (select) {
-      liberator.log('select')
       mappings.getDefault(modes.NORMAL, 'i').action();
       mappings.getDefault(modes.CARET, 'v').action();
     } else {
-      liberator.log('not select')
       if (head) {
         r.setEnd(r.startContainer, r.startOffset);
       } else {
@@ -180,10 +203,20 @@ let PLUGIN_INFO =
       mappings.getDefault(modes.NORMAL, 'i').action();
     }
 
+    if (extendMode) {
+      let a = sel.getRangeAt(0);
+      if (r.compareBoundaryPoints(Range.END_TO_START, a) < 0) {
+        r.setEnd(a.endContainer, a.endOffset);
+      } else {
+        r.setStart(a.startContainer, a.startOffset);
+      }
+    }
+
     sel.addRange(r);
 
     if (select && head)
       swapCaret();
+
   }
 })();
 
