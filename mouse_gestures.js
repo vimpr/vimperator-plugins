@@ -4,13 +4,14 @@ var PLUGIN_INFO =
   <name lang='ja'>マウスジェスチャー</name>
   <description>mouse gestures</description>
   <description lang='ja'>マウスジェスチャー</description>
-  <version>0.10</version>
+  <version>0.10.1</version>
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/mouse_gestures.js</updateURL>
   <detail lang='ja'><![CDATA[
   == .vimperatorrc example ==
+  >||
   js <<EOM
   liberator.globalVariables.mousegesture_showmsg = true;  // default is true
   liberator.globalVariables.mousegesture_rocker = true;  // default is false
@@ -33,6 +34,7 @@ var PLUGIN_INFO =
     ['W+' , 'Select Next Tab', function() gBrowser.tabContainer.advanceSelectedTab(+1, true) ],
   ];
   EOM
+  ||<
   == liberator.globalVariables ==
   - mousegesture_showmsg
     ジェスチャー情報を表示するかどうか(デフォルト=true:表示する)
@@ -43,27 +45,27 @@ var PLUGIN_INFO =
   - mousegesture_list
     ジェスチャー設定。2次元配列で指定してください。
     [ <UDLR>, <Description>, <Command>, <noremap flag> ]
-    -- UDLR
+    - UDLR
       ジェスチャーを指定します。
       UDLRの文字列を指定してください。
       それぞれ、マウスジェスチャーの↑、↓、←, →に対応しています。
       一応、ロッカージェスチャー・ホイールジェスチャー等にも暫定で対応しています(別途、オプションを有効にする必要がある)。
       ロッカージェスチャはL>R(左→右クリック), L<R(右→左クリック)で指定可能。
       ホイールジェスチャは W-(↓回転), W+(上回転)で指定可能
-    -- Description
+    - Description
       コマンドの説明文。
-    -- Command
+    - Command
       ジェスチャーが実施された際に実行するコマンドを指定します。
       以下の3通りの指定が可能です。
-        --- '#id'
+        - '#id'
           document.getElementById(id).doCommand() を実行します。
-        --- function() { ... }
+        - function() { ... }
           記述された関数を実行します。
-        --- ':[command]'
+        - ':[command]'
           Vimperatorのユーザコマンド [command]を実行します。
-        --- '[key]'
+        - '[key]'
           キーを送ります。
-    -- noremap flag
+    - noremap flag
       キーを送る、かつ、そのキーコードを noremap で処理を行いたい場合、true を指定してください。
   ]]></detail>
 </VimperatorPlugin>
