@@ -2,7 +2,7 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Replace default search to migemo.</description>
-<description lang="ja">…∏Ω‡§Œ∏°∫˜§Ú XUL/Migemo §À√÷§≠¥π§®§ﬁ§π</description>
+<description lang="ja">Ê®ôÊ∫ñ„ÅÆÊ§úÁ¥¢„Çí XUL/Migemo „Å´ÁΩÆ„ÅçÊèõ„Åà„Åæ„Åô</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/migemo-find.js</updateURL>
@@ -10,21 +10,21 @@ var PLUGIN_INFO =
 <license>MIT</license>
 <version>0.0.1</version>
 <detail lang="ja"><![CDATA[
-…∏Ω‡§Œ / § §…§Œ∏°∫˜§Ú XUL/Migemo ∏°∫˜§À√÷§≠¥π§®§ﬁ§π°£
-∆±≈˘§Œµ°«Ω§Úª˝§ƒ•◊•È•∞•§•Û§»§∑§∆ migemize_find §¨§¢§Í§ﬁ§π§¨°¢
-migemo-find.js §œ pIXMigemoFind §¨ƒÛ∂°§∑§∆§§§Î XUL/Migemo §Œ•§•Û•ø°º•’•ß•§•π§Úƒæ¿‹Õ¯Õ—§∑§∆§§§ﬁ§π°£
+Ê®ôÊ∫ñ„ÅÆ / „Å™„Å©„ÅÆÊ§úÁ¥¢„Çí XUL/Migemo Ê§úÁ¥¢„Å´ÁΩÆ„ÅçÊèõ„Åà„Åæ„Åô„ÄÇ
+ÂêåÁ≠â„ÅÆÊ©üËÉΩ„ÇíÊåÅ„Å§„Éó„É©„Ç∞„Ç§„É≥„Å®„Åó„Å¶ migemize_find „Åå„ÅÇ„Çä„Åæ„Åô„Åå„ÄÅ
+migemo-find.js „ÅØ pIXMigemoFind „ÅåÊèê‰æõ„Åó„Å¶„ÅÑ„Çã XUL/Migemo „ÅÆ„Ç§„É≥„Çø„Éº„Éï„Çß„Ç§„Çπ„ÇíÁõ¥Êé•Âà©Áî®„Åó„Å¶„ÅÑ„Åæ„Åô„ÄÇ
 
 == ToDo ==
 
-- migemo ¿µµ¨…Ω∏Ω§«•ﬁ•√•¡§∑§ø•—•ø°º•Û§π§Ÿ§∆§À§≠§¡§Û§»•œ•§•È•§•»
--- ∏Ωæı§œ∫«ΩÈ§À•ﬁ•√•¡§∑§ø ∏ª˙ŒÛ§Œ§ﬂ•œ•§•È•§•»§µ§Ï§Î
+- migemo Ê≠£Ë¶èË°®Áèæ„Åß„Éû„ÉÉ„ÉÅ„Åó„Åü„Éë„Çø„Éº„É≥„Åô„Åπ„Å¶„Å´„Åç„Å°„Çì„Å®„Éè„Ç§„É©„Ç§„Éà
+-- ÁèæÁä∂„ÅØÊúÄÂàù„Å´„Éû„ÉÉ„ÉÅ„Åó„ÅüÊñáÂ≠óÂàó„ÅÆ„Åø„Éè„Ç§„É©„Ç§„Éà„Åï„Çå„Çã
 
 ]]></detail>
 </VimperatorPlugin>;
 
 liberator.plugins.migemoFind = (function() {
     let p = function(m) Application.console.log(m);
-    
+
     let evalWithContext = function(func, context) {
         let str;
         let fstr = func.toString();
@@ -35,7 +35,7 @@ liberator.plugins.migemoFind = (function() {
         }
         return liberator.eval(str, context);
     }
-    
+
     var XMigemoFind;
     try {
         XMigemoFind = Cc['@piro.sakura.ne.jp/xmigemo/find;1']
@@ -46,7 +46,7 @@ liberator.plugins.migemoFind = (function() {
         liberator.echoerr("XUL/Migemo not found. You should be install XUL/Migemo.");
         return;
     }
-    
+
     search.migemo = XMigemoFind.wrappedJSObject;
     search.migemo.target = window.gBrowser;
 
@@ -58,7 +58,7 @@ liberator.plugins.migemoFind = (function() {
     let setFound = function(f) {
         liberator.eval('found = ' + f.toString(), search._find);
     }
-    
+
     if (!search.migemoFindEvnetListener) {
         search.migemoFindEvnetListener = search.migemo.document.addEventListener('XMigemoFindProgress', function(ev) {
             if (!ev.foundTerm) {
@@ -69,14 +69,14 @@ liberator.plugins.migemoFind = (function() {
             }
         }, false);
     }
-    
+
     evalWithContext(function () {
        search.find = function (str) {
            search.migemo.find(false, str, options["linksearch"]);
            searchString = searchPattern = search.migemo.lastFoundWord;
        }
     }, search._find);
-    
+
     evalWithContext(function () {
        search.findAgain = function (reverse) {
            let migemo = search.migemo;
