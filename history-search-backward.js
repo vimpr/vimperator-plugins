@@ -69,9 +69,9 @@ liberator.globalVariables.history_search_backward_map = ['<C-r>'];
 
             commandline.input('bck-i-search: ', function(str) {
                 try {
-                    liberator.echo(liberator.execute(str));
+                    liberator.execute(str);
                 } catch(e) {};
-                this.close();
+                modes.pop();
                 return;
             }, {
                 completer: function(context) {
