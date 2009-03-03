@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.1.1</version>
+  <version>2.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -63,12 +63,14 @@ let PLUGIN_INFO =
           m:
             Displays the message to command-line.
             (e.g. "Yanked http://..." "-- CARET --")
+          l:
+            Large mode (Hide status line)
         >||
           :set mainecoon=ac
         ||<
         The default value of this option is "am".
         === note ===
-          Probably, The C and c options are supported on some OSs only.
+          The C and c options probably are supported on some OSs only.
     == Global Variables ==
       maine_coon_targets:
         Other elements IDs that you want to hide.
@@ -102,6 +104,8 @@ let PLUGIN_INFO =
           m:
             コマンドラインへのメッセージを表示します。
             ("Yanked http://..." "-- CARET --" など)
+          l:
+            ラージモード (Hide status line)
         "c" と "f" の併用は意味がありません。
         >||
           :set mainecoon=ac
@@ -210,7 +214,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     window.fullScreen = full;
     delay(function () {
       hideTargets(full);
-      document.getElementById('status-bar').setAttribute('moz-collapsed', false);
+      if (!options.get('mainecoon').has('l'))
+        document.getElementById('status-bar').setAttribute('moz-collapsed', false);
       document.getElementById('navigator-toolbox').collapsed = full;
       if (!full)
         window.maximize();
@@ -349,6 +354,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
         function has (c)
           (value.indexOf(c) >= 0);
 
+        document.getElementById('status-bar').setAttribute('moz-collapsed', has('l'));
+
         if (has('f')) {
           hideChrome(false);
           delay(function () setFullscreen(true));
@@ -362,6 +369,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
           hideChrome(false);
           delay(function () setFullscreen(false));
         }
+
         setAutoHideCommandLine(has('a'));
         useEcho = has('m');
 
@@ -375,6 +383,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
           ['a', 'Hide automatically command-line'],
           ['C', 'Hide caption bar (maximize)'],
           ['m', 'Displays the message to command-line'],
+          ['l', 'Large mode. Hide status-line'],
         ];
       },
       validater: function (value) /^[cfa]*$/.test(value)
