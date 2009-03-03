@@ -7,7 +7,7 @@ let PLUGIN_INFO =
 <version>0.1</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<detail>
+<detail><![CDATA[
 == Command ==
 :ds[earch] -tags tag, ...:
 :delicious[search] -tags tag, ...:
@@ -20,13 +20,17 @@ let PLUGIN_INFO =
 == Completion ==
 :open or :tabopen command completion
 
+>||
 set complete+=D
+||<
 
 or write in RC file
 
+>||
 autocmd VimperatorEnter ".*" :set complete+=D
+||<
 
-</detail>
+]]></detail>
 </VimperatorPlugin>;
 
 liberator.plugins.delicious = (function(){
