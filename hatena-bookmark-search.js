@@ -145,24 +145,27 @@ HatenaBookmark.Command = {
             }
         }
     },
+    createCompleter: function(titles) {
+    return function(context) {
+            context.format = {
+                anchored: true,
+                title: titles,
+                keys: { text: "url", description: "url", icon: "icon", extra: "extra"},
+                process: [
+                  HatenaBookmark.Command.templateTitleIcon,
+                  HatenaBookmark.Command.templateDescription,
+                ],
+            }
+            context.ignoreCase = true;
+            if (context.migemo) delete context.migemo;
+            context.filters = [HatenaBookmark.Command.filter];
+            context.completions = HatenaBookmark.UserData.bookmarks;
+        }
+    }
 }
 
 HatenaBookmark.Command.options = {
-   completer: function(context) {
-       context.format = {
-           anchored: true,
-           title: ['TITLE', 'Info'],
-           keys: { text: "url", description: "url", icon: "icon", extra: "extra"},
-           process: [
-             HatenaBookmark.Command.templateTitleIcon,
-             HatenaBookmark.Command.templateDescription,
-           ],
-       }
-       context.ignoreCase = true;
-       if (context.migemo) delete context.migemo;
-       context.filters = [HatenaBookmark.Command.filter];
-       context.completions = HatenaBookmark.UserData.bookmarks;
-   },
+   completer: HatenaBookmark.Command.createCompleter(['TITLE', 'Info']),
    literal: 0,
    argCount: '*',
    bang: true,
@@ -187,21 +190,7 @@ commands.addUserCommand(
     true
 );
 
-completion.addUrlCompleter("H", "Hatena Bookmarks", function(context){
-	context.format = {
-        anchored: true,
-        title: ['Hatena Bookmarks'],
-        keys: { text: "url", description: "url", icon: "icon", extra: "extra"},
-        process: [
-            HatenaBookmark.Command.templateTitleIcon,
-        	HatenaBookmark.Command.templateDescription,
-    	],
-    }
-    context.ignoreCase = true;
-    if (context.migemo) delete context.migemo;
-    context.filters = [HatenaBookmark.Command.filter];
-	context.completions = HatenaBookmark.UserData.bookmarks;
-});
+completion.addUrlCompleter("H", "Hatena Bookmarks", HatenaBookmark.Command.createCompleter(["Hatena Bookmarks"]));
 
 HatenaBookmark.UserData = {
     get bookmarks() {
