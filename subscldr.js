@@ -107,7 +107,7 @@ liberator.plugins.subscldr = (function() {
           break;
         default:
           liberator.log("SOME FEED AVAILABLE");
-          selectFeed( availableLinks.map(function(i) [i[0], ""]),
+          selectFeed( availableLinks.map(function(i) [i[0], i[2]]),
             function(sel) {
               liberator.log("SELECTED FEED:" + sel);
               liberator.echo("Redirected ...");
@@ -195,9 +195,11 @@ liberator.plugins.subscldr = (function() {
 
     $LXs('id("feed_candidates")/li', htmldoc).forEach( function(item) {
       var feedlink = $LX('./a[@class="feedlink"]', item);
+      var title = $LX('./a[@class="subscribe_list"]', item);
+      var users = $LX('./span[@class="subscriber_count"]/a', item);
       var yet = $LX('./input[@name="feedlink"]', item);
       liberator.log("input:" + feedlink.href);
-      subscribeInfo.feedlinks.push([feedlink.href, (yet != null)]);
+      subscribeInfo.feedlinks.push([feedlink.href, (yet != null), (title ? title.textContent : '' ) + ' / ' + (users ? users.textContent :  '0 user')]);
     });
 
     var target_url = $LX('id("target_url")', htmldoc);
@@ -222,7 +224,7 @@ liberator.plugins.subscldr = (function() {
         liberator.echoerr("Your selected no is invalid.");
     },{
       completer: function(context) {
-        context.title = ["Available feeds"];
+        context.title = ["Available feeds", "Title / users"];
         context.completions = links;
       }
     });
