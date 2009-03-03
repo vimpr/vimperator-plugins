@@ -130,7 +130,7 @@ let PLUGIN_INFO =
           let g:maine_coon_default = "ac"
         ||<
     == Example ==
-      === ラージモード(l) 用のマッピング
+      === ラージモード(l) 用のマッピング ===
         >||
           :noremap <silent> s :set mainecoon!=l<CR>
         ||<
