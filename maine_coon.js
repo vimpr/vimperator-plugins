@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -214,8 +214,8 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     window.fullScreen = full;
     delay(function () {
       hideTargets(full);
-      if (!options.get('mainecoon').has('l'))
-        document.getElementById('status-bar').setAttribute('moz-collapsed', false);
+      document.getElementById('status-bar').setAttribute('moz-collapsed',
+                                                         options.get('mainecoon').has('l'));
       document.getElementById('navigator-toolbox').collapsed = full;
       if (!full)
         window.maximize();
