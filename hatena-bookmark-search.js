@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena-bookmark-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.1.1</version>
+<version>0.1.2</version>
 <detail><![CDATA[
 >||
 :bs[earch][!] word
@@ -34,6 +34,17 @@ liberator.globalVariables.hatena_bookmark_no_migemo = true;
 ||<
 としてください。
 (invalid options エラーが出る場合は、適当な文字を後ろに付加するか、最新(Nightly)の Vimperator を使ってください)
+
+また、:open, :tabopen の補完で、completeオプションに "H"
+を追加することではてなブックマークの検索が可能です。
+>||
+ :set complete+=H
+||<
+.vimperatorrcに書く場合は
+>||
+ autocmd VimperatorEnter .* :set complete+=H
+||<
+としてください。
 
 ]]></detail>
 </VimperatorPlugin>;
