@@ -45,6 +45,15 @@ minVersion:
     プラグインが使用できるVimperatorの最小バージョン
 updateURL:
     プラグインの最新リソースURL
+require:
+    プラグインが必要とする拡張機能や他のプラグイン
+    拡張機能の場合、
+    + type属性を"extension"
+    + id属性をその拡張機能のid (xxxx@example.com または UUID)
+    + 拡張機能名
+    プラグインの場合
+    + type属性を"plugin"
+    + プラグインファイル名
 detail:
     ここにコマンドやマップ、プラグインの説明
     CDATAセクションにwiki的に記述可能
@@ -112,6 +121,37 @@ var tags = { // {{{
         var xml = <>{fromUTF8Octets(info.toString())}</>;
         if (info.@document.toString() != '')
             xml += <><span> </span>{makeLink(info.@document.toString())}</>;
+        return xml;
+    },
+    require: function(infos){
+        let xml = <></>;
+        for (let i=0; i<infos.length(); i++){
+            let info = infos[i];
+            let name = info.toString();
+            xml += <div>{name}</div>;
+            if (info.@type){
+                let type = info.@type.toString();
+                if (type == "extension"){
+                    let id = info.@id.toString();
+                    xml[i].* += <span highlight="Preview">{id}</span>;
+                    if (Application.extensions.has(id)){
+                        if (!Application.extensions.get(id).enabled){
+                            xml[i].* += <span highlight="ErrorMsg">disabled</span>;
+                        }
+                    } else {
+                        xml[i].* += <span highlight="ErrorMsg">not installed</span>;
+                    }
+                } else if (type == "plugin"){
+                    xml[i].* += <span highlight="Preview">(plugin)</span>;
+                    if(!io.getRuntimeDirectories("plugin").some(function(file){
+                        file.append(nanme);
+                        return liberator.pluginFiles[file.path];
+                    })){
+                        xml[i].* += <span highlight="ErrorMsg">not installed</span>;
+                    }
+                }
+            }
+        }
         return xml;
     },
     version: id,
