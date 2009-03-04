@@ -1,20 +1,24 @@
-/**
- * ==VimperatorPlugin==
- * @name          inspector
- * @description   DOM Inspector commands
- * @depend        "DOM Inspector" inspector@mozilla.org
- * @author        teramako teramako@gmail.com
- * @minVersion    2.0pre
- * @version       1.1
- * ==/VimperatorPlugin==
- *
- * Usage:
- * 
- * :inspect #{id}             -> inspect the element of the {id} in browser content
- * :inspect! #{id}            -> inspect the element of the {id} in firefox
- * :inspect[!] -f[rame] #{id} -> inspect the document in the frame element of the {id}
- * :inspect {str}             -> inspect the return value of evaluated the {str}
- */
+let PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>DOM Inspector command</description>
+<require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
+<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
+<version>0.2</version>
+<minVersion>2.0pre</minVersion>
+<maxVersion>2.0</maxVersion>
+<detail><![CDATA[
+== Usage ==
+:inspect #{id}:
+  inspect the element of the {id} in browser content
+:inspect! #{id}:
+  inspect the element of the {id} in firefox
+:inspect[!] -f[rame] #{id}:
+  inspect the document in the frame element of the {id}
+:inspect {str}:
+  inspect the return value of evaluated the {str}
+]]></detail>
+</VimperatorPlugin>;
 
 (function(){
 
