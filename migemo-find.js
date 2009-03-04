@@ -72,6 +72,7 @@ liberator.plugins.migemoFind = (function() {
 
     evalWithContext(function () {
        search.find = function (str) {
+           search.migemo.target = window.gBrowser;
            search.migemo.find(false, str, options["linksearch"]);
            searchString = searchPattern = search.migemo.lastFoundWord;
        }
