@@ -36,8 +36,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Multi-execute</name>
-  <description>Execute some ex-commands.</description>
-  <description lang="ja">複数のexコマンドを実行します。</description>
+  <description>Add the command which execute some ex-commands.</description>
+  <description lang="ja">複数のexコマンドを実行するコマンドを追加</description>
   <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
