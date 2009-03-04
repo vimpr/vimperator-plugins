@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.20.0</version>
+  <version>0.20.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1328,7 +1328,7 @@ Thanks:
 
     get isValid () (this.where),
 
-    get player () this.players[this.where],
+    get player () (this.where && this.players[this.where]),
 
     get statusBar () document.getElementById('status-bar'),
 
