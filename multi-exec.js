@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Multi-execute</name>
   <description>Execute some ex-commands.</description>
   <description lang="ja">複数のexコマンドを実行します。</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -49,7 +49,7 @@ let PLUGIN_INFO =
     == Description ==
       Execute the some ex-commands which has been separated by the specified separator.
     == Commands ==
-      :mx [<SEPARATOR>]<EX-COMMAND-WITH-ARGS>...:
+      :mx [<SEPARATOR>] <EX-COMMAND-WITH-ARGS>...:
       The default value of <SEPARATOR> is "|"
         e.g.
         >||
@@ -62,7 +62,7 @@ let PLUGIN_INFO =
      指定のセパレータによって分割された複数のexコマンドを実行します。 
      auto_source.js などで便利かもしれません。
     == Commands ==
-      :mx [<SEPARATOR>]<EX-COMMAND-WITH-ARGS>...:
+      :mx [<SEPARATOR>] <EX-COMMAND-WITH-ARGS>...:
         <SEPARATOR> のデフォルトは "|" です。
         例
         >||
