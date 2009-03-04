@@ -11,7 +11,7 @@
 // PLUGIN INFO: {{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>Ta-Da</name>
+  <name>{NAME}</name>
   <description>Show ToDo items in commandline buffer. Also add item to your Ta-da list.</description>
   <description lang="ja">コマンドラインバッファからTa-Da list のToDo一覧を参照したり、からToDo項目を追加したりします。</description>
   <minVersion>2.0pre</minVersion>
@@ -19,7 +19,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.7.1</version>
+  <version>0.8</version>
   <detail><![CDATA[
     == Subject ==
     Show ToDo items in commandline buffer.
@@ -43,6 +43,12 @@ var PLUGIN_INFO =
       - Show specified list if 'list name' is supplied.
       - Add todo item to default list if 'list name' is not supplied and 'subject' is supplied.
       - Add todo item to specified list if 'list name' and 'subject' are supplied.
+
+      tadamail
+      - Send list to registered mail address.
+
+      tadaclearcache
+      - Clear cache data.
 
     == ToDo ==
       - 'Done' functionlity.
@@ -72,6 +78,12 @@ var PLUGIN_INFO =
       - 'list name' が指定された場合、該当リストの内容が表示されます。
       - 'list name' が指定されず 'subject' のみ指定されている場合、デフォルトのリストに'subject'の内容を追加します。
       - 'list name' も 'subject' も指定されている場合、該当リストに'subject'の内容を追加します。
+
+      tadamail
+      - Ta-da lists に登録されているアドレスにリストを送ります。
+
+      clearcache
+      - キャッシュされたデータを破棄します
 
     == ToDo ==
       - 'Done'機能の実装
@@ -131,7 +143,14 @@ liberator.plugins.tada = (function(){
       argCount: "*"
     },
     true
-  ); 
+  );
+
+  commands.addUserCommand(
+    ["tadaclearcache"],
+    "Clear Ta-da lists cache",
+    function() cachedLists = []
+  );
+
 // }}}
 // PUBLIC {{{
   var PUBLICS = {
@@ -141,7 +160,6 @@ liberator.plugins.tada = (function(){
     // getLists: getLists,
     // showTodoItems: showTodoItems,
     // addTodoItem: addTodoItem,
-    // g: g
     // }}}
   };
 // }}}
@@ -193,10 +211,14 @@ liberator.plugins.tada = (function(){
     return [lists[0][0], lists[0][1]];
   }
 
+  var cachedLists = [];
+
   // Get Your 'MyLists'
   // @return [[id, name, left], .... ]
   function getLists() {
-    var lists = [];
+    if (cachedLists.length > 0)
+      return cachedLists;
+
     var req = new libly.Request(getURI(), null, {asynchronous: false});
 
     req.addEventListener('onSuccess', function(data) {
@@ -204,14 +226,15 @@ liberator.plugins.tada = (function(){
       data.getHTMLDocument();
       $LXs("//div[@id='Container']/div[2]/div/div/ul/li/a", data.doc).forEach(function(item){
         var left = $LX("../span/strong[text()]", item);
-        lists.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
+        cachedLists.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
       });
     });
     req.get();
 
-    if (lists.length == 0)
+    if (cachedLists.length == 0)
       throw "Cannot get your list. Please chehek " + getURI() + " is accessible.";
-    return lists;
+
+    return cachedLists;
   }
 
   function showTodoItems(listId) {
@@ -270,8 +293,8 @@ liberator.plugins.tada = (function(){
     req.post();
   }
 
-  // Utilities 
-  function g(str)    liberator.globalVariables[str]; 
+  // Utilities
+  function g(str)    liberator.globalVariables[str];
   function $LXs(a,b) libly.$U.getNodesFromXPath(a, b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a, b);
 
