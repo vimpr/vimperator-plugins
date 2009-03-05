@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena-bookmark-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>1.0.0</version>
+<version>1.0.2</version>
 <detail><![CDATA[
 >||
 :bs[earch][!] word
@@ -55,6 +55,8 @@ let g:hatena_bookmark_suffix_array='true';
 
 == ChangeLog ==
 
+- 1.0.2
+-- ヌル文字を消す
 - 1.0.1
 -- ドキュメントの追加
 - 1.0.0
@@ -84,7 +86,7 @@ HatenaBookmark.Data = new Struct('data');
  * comment
  * url 
  */
-HatenaBookmark.Data.prototype.__defineGetter__('title', function() this.data.split("\n")[0]);
+HatenaBookmark.Data.prototype.__defineGetter__('title', function() this.data.split("\n")[0].replace("\0", ''));
 HatenaBookmark.Data.prototype.__defineGetter__('comment', function() this.data.split("\n")[1]);
 HatenaBookmark.Data.prototype.__defineGetter__('url', function() this.data.split("\n")[2]);
 HatenaBookmark.Data.prototype.__defineGetter__('icon', function() bookmarks.getFavicon(this.url));
