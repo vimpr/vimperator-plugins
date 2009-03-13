@@ -11,11 +11,12 @@
 // PLUGIN INFO: {{{
 var PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>subscldr</name>
+  <name>{NAME}</name>
   <description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
   <description lang="ja">ページ遷移なしでlivedoor ReaderやFastladderにフィードを登録します。</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0</maxVersion>
+  <require type="plugin">_libly.js</require>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
@@ -49,6 +50,8 @@ var PLUGIN_INFO =
 liberator.plugins.subscldr = (function() {
   // PUBLIC {{{
   var PUBLICS = {
+    // TODO:Provide API function.
+
     // for DEBUG {{{
     //getSubscription: getSubscription,
     //postSubscription: postSubscription,
@@ -122,7 +125,6 @@ liberator.plugins.subscldr = (function() {
       liberator.echo("Please wait ...");
       var subscribeInfo;
 
-      // for DEBUG
       var uri = target || endpoint + buffer.URL;
 
       var req = new libly.Request(uri, null, {asynchronous: false});
@@ -215,7 +217,7 @@ liberator.plugins.subscldr = (function() {
   function selectFeed(links, next) {
     liberator.log(links.toSource());
     liberator.echo("Following feeds were found on this site. Which are you subscribe?");
-    commandline.input("Input feed no. ", function(selected) {
+    commandline.input("Select or input feed URL ", function(selected) {
       liberator.echo("You select " + selected + ".");
       commandline.close();
       if (next && typeof next == "function")
