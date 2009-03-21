@@ -1640,7 +1640,7 @@ Thanks:
             clearInterval(this.__autoFullscreenTimer)
             setTimeout(
               U.bindr(this, function () (this.player.fullscreen = true)),
-              this.stella.setting.niconico.autoFullscreenDelay
+              this.setting.niconico.autoFullscreenDelay
             );
             delete this.__autoFullscreenTimer;
           }),
