@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.20.1</version>
+  <version>0.20.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -174,7 +174,7 @@ Thanks:
   * Const                                                                        {{{
   *********************************************************************************/
 
-  const ID_PREFIX = 'anekos-stela-';
+  const ID_PREFIX = 'anekos-stella-';
   const InVimperator = !!(liberator && modules && modules.liberator);
   const DOUBLE_CLICK_INTERVAL = 300;
 
@@ -367,13 +367,27 @@ Thanks:
   // }}}
 
   /*********************************************************************************
+  * Setting                                                                      {{{
+  *********************************************************************************/
+
+  function Setting () {
+    this.niconico = {
+      autoFullscreenDelay: 4000
+    };
+  }
+
+  // }}}
+
+  /*********************************************************************************
   * Player                                                                       {{{
   *********************************************************************************/
 
-  function Player () {
+  function Player (stella) {
     let self = this;
 
     this.initialize.apply(this, arguments);
+
+    this.stella = stella;
 
     this.last = {
       fullscreen: false
@@ -1288,8 +1302,9 @@ Thanks:
   * Stella                                                                       {{{
   *********************************************************************************/
 
-  function Stella () {
+  function Stella (setting) {
     this.initialize.apply(this, arguments);
+    this.setting = setting;
   }
 
   Stella.MAIN_PANEL_ID  = ID_PREFIX + 'main-panel',
@@ -1302,8 +1317,8 @@ Thanks:
       let self = this;
 
       this.players = {
-        niconico: new NicoPlayer(),
-        youtube: new YouTubePlayer()
+        niconico: new NicoPlayer(this.stella),
+        youtube: new YouTubePlayer(this.stella)
       };
 
       this.createStatusPanel();
@@ -1474,7 +1489,7 @@ Thanks:
       let stbar = document.getElementById('status-bar');
       stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
 
-      let relmenu = document.getElementById('anekos-stela-relations-menupopup');
+      let relmenu = document.getElementById('anekos-stella-relations-menupopup');
 
       panel.addEventListener('DOMMouseScroll', U.bindr(this, this.onMouseScroll), true);
     },
@@ -1623,7 +1638,10 @@ Thanks:
             if (!this.player.ready)
               return;
             clearInterval(this.__autoFullscreenTimer)
-            setTimeout(U.bindr(this, function () (this.player.fullscreen = true), 1000));
+            setTimeout(
+              U.bindr(this, function () (this.player.fullscreen = true)),
+              this.stella.setting.niconico.autoFullscreenDelay
+            );
             delete this.__autoFullscreenTimer;
           }),
           200
@@ -1643,7 +1661,7 @@ Thanks:
       if (!this.player)
         return;
 
-      let relmenu = document.getElementById('anekos-stela-relations-menupopup');
+      let relmenu = document.getElementById('anekos-stella-relations-menupopup');
       let rels = this.player.relations;
 
       while (relmenu.firstChild)
@@ -1700,7 +1718,7 @@ Thanks:
     let estella = liberator.globalVariables.stella;
 
     let install = function () {
-      let stella = liberator.globalVariables.stella = new Stella();
+      let stella = liberator.globalVariables.stella = new Stella(new Setting());
       stella.addUserCommands();
       liberator.log('Stella: installed.');
     };
