@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.20.2</version>
+  <version>0.20.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -136,7 +136,6 @@ let PLUGIN_INFO =
 /* {{{
 TODO
    ・Icons
-   ・auto fullscreen
    ・動的な command の追加削除 (nice rabbit!)
    ・ツールチップみたいな物で、マウスオー馬したときに動画情報を得られるようにしておく。
    ・外から呼ぶべきでない関数(プライベート)をわかりやすくしたい
@@ -147,6 +146,7 @@ TODO
       -> isReady とか
    ・パネルなどの要素にクラス名をつける
    ・上書き保存
+   ・Fx の pref と liberator.globalVariables の両方で設定をできるようにする (Setting)
 
 FIXME
     ・this.last.fullscreen = value;
