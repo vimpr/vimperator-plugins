@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Read Cat Later</name>
   <description>Read it later</description>
   <description lang="ja">後で読む</description>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -47,12 +47,12 @@ let PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
-      :readcatlater [タグ]:
+      :readcatlater [TAG]:
       :rcl:
         Add current URL to read-it-later list.
 
-      :readcatnow タイトル:
-      :rcn タイトル:
+      :readcatnow URL:
+      :rcn URL:
         Open the URL and delete from bookmarks.
         When used with "!", delete the URL from bookmarks.
 
@@ -65,8 +65,8 @@ let PLUGIN_INFO =
       :rcl:
         現在のURLを後で読むリストに追加する。
 
-      :readcatnow タイトル:
-      :rcn タイトル:
+      :readcatnow [-n=開く数] URL:
+      :rcn URL:
         そのURLを開いて、ブックマークから削除する。
         "!" 付きの場合は、ブックマークから削除する。
 
@@ -289,12 +289,25 @@ let PLUGIN_INFO =
     ['readcatnow', 'rcn'],
     'read cat now',
     function (arg, bang, num, extra) {
-      let uri = arg.string;
-      openURI(uri);
-      if (!bang && removeItems(uri))
-        liberator.echo('"' + uri + '" was removed.');
+      let opennum = arg['-number'];
+      if (opennum) {
+        liberator.log(typeof opennum)
+        let us = RCL_Bookmarks(arg.literalArg).reverse().splice(0, opennum).map(function (it) it.URI);
+        liberator.open(us, liberator.NEW_BACKGROUND_TAB);
+        if (!bang) {
+          us.forEach(removeItems);
+          liberator.echo('[' + us + '] was removed.');
+        }
+      } else {
+        let uri = arg.string;
+        openURI(uri);
+        if (!bang && removeItems(uri))
+          liberator.echo('"' + uri + '" was removed.');
+      }
     },
     {
+      literal: 0,
+      options: [ [['-number', '-n'], commands.OPTION_INT] ],
       completer: completer
     },
     true
