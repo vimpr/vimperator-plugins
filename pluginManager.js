@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.6.2</version>
+<version>0.6.3</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
@@ -144,7 +144,7 @@ var tags = { // {{{
                 } else if (type == "plugin"){
                     xml[i].* += <span highlight="Preview">(plugin)</span>;
                     if(!io.getRuntimeDirectories("plugin").some(function(file){
-                        file.append(nanme);
+                        file.append(name);
                         return liberator.pluginFiles[file.path];
                     })){
                         xml[i].* += <span highlight="ErrorMsg">not installed</span>;
