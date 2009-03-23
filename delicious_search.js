@@ -250,8 +250,13 @@ let self = {
     context.generate = function() bookmarkSearch([], context.filter);
   },
   close: function(){
-    dbc.close();
-  }
+    for each(let st in statements){
+      if (st.state > 0)
+        statements[key].finalize();
+    }
+    if (dbc.connectionReady)
+      dbc.close();
+  },
 };
 self.init();
 liberator.registerObserver("shutdown", self.close);
