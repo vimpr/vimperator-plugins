@@ -4,7 +4,7 @@ let PLUGIN_INFO =
 <description>search DeliciousBookmark and that completer</description>
 <require type="extension" id="{2fa4ed95-0317-4c6a-a74c-5f3e3912c1f9}">Delicious Bookmarks</require>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<version>0.1</version>
+<version>0.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <detail><![CDATA[
@@ -35,7 +35,12 @@ autocmd VimperatorEnter ".*" :set complete+=D
 
 liberator.plugins.delicious = (function(){
 
-const ydls = Cc["@yahoo.com/nsYDelLocalStore;1"].getService(Ci.nsIYDelLocalStore);
+let uuid = PLUGIN_INFO.require[0].@id.toString();
+if (Application.extensions.has(uuid) && Application.extensions.get(uuid).enabled){
+  const ydls = Cc["@yahoo.com/nsYDelLocalStore;1"].getService(Ci.nsIYDelLocalStore);
+} else {
+  return null;
+}
 const ss = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService);
 
 // dabase connection object
@@ -104,10 +109,12 @@ function bookmarkSearch(tags, query){
   let sql;
   let list = [];
   let st;
+  let finalize = true;
   try {
     if (!tags || tags.length == 0){
       st = statements.simpleQuery;
       st.bindUTF8StringParameter(0, '%' + query + '%');
+      finalize = false;
     }  else {
       let sqlList = [
         'SELECT b.name,b.url,b.description',
@@ -157,6 +164,7 @@ function bookmarkSearch(tags, query){
     }
   } finally {
     st.reset();
+    if (finalize) st.finalize();
   }
   return list;
 }
