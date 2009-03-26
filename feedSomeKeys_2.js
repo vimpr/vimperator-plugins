@@ -321,7 +321,10 @@ function feedKeyIntoContent(keys, useVkey, eventName){
         //liberator.log({ctrl:ctrl, alt:alt, shift:shift, meta:meta, keyCode:keyCode, charCode:charCode, useVkey: useVkey});
         var evt = content.document.createEvent('KeyEvents');
         evt.initKeyEvent(eventName, true, true, content, ctrl, alt, shift, meta, keyCode, charCode);
-        destElem.document.dispatchEvent(evt);
+        if (destElem.document.body)
+            destElem.document.body.dispatchEvent(evt);
+        else
+            destElem.document.dispatchEvent(evt);
     }
     modes.passAllKeys = false;
 }
