@@ -1,9 +1,9 @@
 //
 // _smooziee.js
-// 
+//
 // LICENSE: {{{
 //   Copyright (c) 2009 snaka<snaka.gml@gmail.com>
-// 
+//
 //     distributable under the terms of an MIT-style license.
 //     http://www.opensource.jp/licenses/mit-license.html
 // }}}
@@ -15,26 +15,26 @@ var PLUGIN_INFO =
   <description>At j,k key scrolling to be smooth.</description>
   <description lang="ja">j,kキーでのスクロールをスムースに</description>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.0</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_smooziee.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.9</version>
+  <version>0.9.1</version>
   <detail><![CDATA[
     == Subject ==
     j,k key scrolling to be smoothly.
 
     == Global variables ==
     You can configure following variable as you like.
-    :smooziee_scroll_amount: Scrolling amount(unit:px). Default value is 400px. 
-    :smooziee_interval: Scrolling interval(unit:ms). Default value is 20ms. 
+    :smooziee_scroll_amount: Scrolling amount(unit:px). Default value is 400px.
+    :smooziee_interval: Scrolling interval(unit:ms). Default value is 20ms.
 
-    === Excample === 
-    Set scroll amount is 300px and interval is 10ms. 
-    >|| 
-    let g:smooziee_scroll_amount="300" 
-    let g:smooziee_scroll_interval="10" 
-    ||< 
+    === Excample ===
+    Set scroll amount is 300px and interval is 10ms.
+    >||
+    let g:smooziee_scroll_amount="300"
+    let g:smooziee_scroll_interval="10"
+    ||<
 
     == API ==
     >||
@@ -55,18 +55,18 @@ var PLUGIN_INFO =
     普段のj,kキーのスクロールをLDRizeライクにスムースにします。
 
     == グローバル変数 ==
-    以下の変数を.vimperatorrcなどで設定することで動作を調整することができます。 
+    以下の変数を.vimperatorrcなどで設定することで動作を調整することができます。
     :smooziee_scroll_amount:
-      1回にスクロールする幅です（単位：ピクセル）。デフォルトは"400"です。 
+      1回にスクロールする幅です（単位：ピクセル）。デフォルトは"400"です。
     :smooziee_interval:
       スクロール時のアニメーションのインターバルです（単位：ミリ秒）。
-      "1"以上の値を設定します。デフォルトは"20"です。 
-    === 設定例 === 
-    スクロール量を300pxに、インターバルを10msに設定します。 
-    >|| 
-    let g:smooziee_scroll_amount="300" 
-    let g:smooziee_scroll_interval="10" 
-    ||< 
+      "1"以上の値を設定します。デフォルトは"20"です。
+    === 設定例 ===
+    スクロール量を300pxに、インターバルを10msに設定します。
+    >||
+    let g:smooziee_scroll_amount="300"
+    let g:smooziee_scroll_interval="10"
+    ||<
 
     == API ==
     他のキーにマップする場合やスクリプトから呼び出せるようAPIを用意してます。
@@ -92,27 +92,27 @@ let self = liberator.plugins.smooziee = (function(){
 
   // Mappings  {{{
   mappings.addUserMap(
-    [modes.NORMAL], 
-    ["j"], 
-    "Smooth scroll down", 
-    function(){ 
+    [modes.NORMAL],
+    ["j"],
+    "Smooth scroll down",
+    function(){
       self.smoothScrollBy(getScrollAmount());
     }
-  ); 
+  );
   mappings.addUserMap(
-    [modes.NORMAL], 
-    ["k"], 
-    "Smooth scroll up", 
-    function(){ 
+    [modes.NORMAL],
+    ["k"],
+    "Smooth scroll up",
+    function(){
       self.smoothScrollBy(getScrollAmount() * -1);
     }
-  ); 
+  );
   // }}}
   // PUBLIC {{{
   var PUBLICS = {
     smoothScrollBy: function(moment) {
-      win = window.content.window.wrappedJSObject;
-      interval = window.eval(liberator.globalVariables.smooziee_scroll_interval) || 20; 
+      win = findScrollableWindow();
+      interval = window.eval(liberator.globalVariables.smooziee_scroll_interval) || 20;
       destY = win.scrollY + moment;
       clearTimeout(next);
       smoothScroll(moment);
@@ -126,10 +126,12 @@ let self = liberator.plugins.smooziee = (function(){
   var win;
   var interval;
 
+  var findScrollableWindow = liberator.eval('findScrollableWindow', buffer.scrollLines);
+
   function getScrollAmount() window.eval(liberator.globalVariables.smooziee_scroll_amount) || 400;
 
   function smoothScroll(moment) {
-    if (moment > 0) 
+    if (moment > 0)
       moment = Math.floor(moment / 2);
     else
       moment = Math.ceil(moment / 2);
