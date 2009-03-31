@@ -40,8 +40,8 @@ let PLUGIN_INFO =
     <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
     <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
     <version>0.20</version>
-    <minversion>2.0pre</minversion>
-    <maxversion>2.0pre</maxversion>
+    <minversion>2.0</minversion>
+    <maxversion>2.1pre</maxversion>
     <detail><![CDATA[
 == USAGE ==
 Extended-hints mode ';m' to yank image URL and ';M' to save image are
@@ -53,7 +53,7 @@ images of current page, but it effects heavy load to the server, you must
 use carefully. We are NOT RESPONSIBLE for result of this command.
 
 Additionally, following modes are available if you installed Image Zoom
-add-on ( https://addons.mozilla.org/de/firefox/addon/139 ). These feature
+add-on ( https://addons.mozilla.org/firefox/addon/139 ). These feature
 were provided by Frank Blendinger. Thanks !!
 
 - ';i' to zoom in image
@@ -103,7 +103,7 @@ start it to save image, and prompt is not displayed at save operation.
 これは現在のページの画像をすべて保存するものですが、サーバに大きな負荷がかかるため注意して使ってください。
 このコマンドの使用による結果は一切の責任を負いかねます。
 
-さらに、 Image Zoom ( https://addons.mozilla.org/de/firefox/addon/139 ) アドオンをインストールしている場合以下のモードが使えるようになります。
+さらに、 Image Zoom ( https://addons.mozilla.org/firefox/addon/139 ) アドオンをインストールしている場合以下のモードが使えるようになります。
 この機能は Frank Blendinger さんによって提供されました。ありがとう !!
 
 - 画像を拡大する ';i'
