@@ -18,6 +18,36 @@
 //     <textarea name="comment"></textarea>
 // </html>
 
+// PLUGIN_INFO {{{
+let PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>Walk Input</name>
+  <description>The focus walks "input" and "textarea" elements.</description>
+  <version>1.1</version>
+  <author mail="tekezo@pqrs.org">Takayama Fumihiko</author>
+  <license>BSD</license>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js</updateURL>
+  <minVersion>2.0</minVersion>
+  <maxVersion>2.1pre</maxVersion>
+  <detail><![CDATA[
+    The focus walks <input> & <textarea> elements.
+    If you type M-i first, the focus moves to "<input name='search' />".
+    Then if you type M-i once more, the focus moves to "<input name='name' />".
+
+    >||
+      <html>
+          <input name="search" />
+          <a href="xxx">xxx</a>
+          <a href="yyy">yyy</a>
+          <a href="zzz">zzz</a>
+          <input name="name" />
+          <textarea name="comment"></textarea>
+      </html>
+    ||<
+  ]]></detail>
+</VimperatorPlugin>;
+// }}}
+
 (function () {
 
 var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
