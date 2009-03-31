@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -71,8 +71,7 @@ let PLUGIN_INFO =
         try {
           if (frame.scrollMaxX <= 0 && frame.scrollMaxY <= 0)
               continue;
-          let doc = frame.document;
-          let size = doc.width * doc.height;
+          let size = frame.innerWidth * frame.innerHeight;
           if (maxSize < size) {
             maxSize = size;
             maxFrame = frame;
