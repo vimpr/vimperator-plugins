@@ -15,11 +15,11 @@ var PLUGIN_INFO =
   <description>At j,k key scrolling to be smooth.</description>
   <description lang="ja">j,kキーでのスクロールをスムースに</description>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <maxVersion>2.1pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_smooziee.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.9.1</version>
+  <version>0.9.2</version>
   <detail><![CDATA[
     == Subject ==
     j,k key scrolling to be smoothly.
@@ -136,10 +136,10 @@ let self = liberator.plugins.smooziee = (function(){
     else
       moment = Math.ceil(moment / 2);
 
-    win.scrollBy(0, moment);
+    win.scrollBy(win.scrollX, moment);
 
     if (Math.abs(moment) < 1) {
-      setTimeout(makeScrollTo(0, destY), interval);
+      setTimeout(makeScrollTo(win.scrollX, destY), interval);
       destY = null;
       return;
     }
