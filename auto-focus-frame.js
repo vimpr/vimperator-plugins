@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -66,7 +66,7 @@ let PLUGIN_INFO =
           return;
       if (content.frames.length <= 1)
         return;
-      let [maxSize, maxFrame] = [-1, content.frames[0]];
+      let [maxSize, maxFrame] = [-1, null];
       for (let frame in util.Array.iterator(content.frames)) {
         try {
           if (!(frame.frameElement instanceof HTMLFrameElement))
@@ -83,7 +83,8 @@ let PLUGIN_INFO =
           continue;
         }
       }
-      maxFrame.focus();
+      if (maxFrame)
+        maxFrame.focus();
     }
   );
 
