@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>Show video informations on the status line.</description>
   <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.20.3</version>
+  <version>0.20.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.0</minVersion>
+  <maxVersion>2.1pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -1014,7 +1014,7 @@ Thanks:
       // コメント欄のリンクの前のテキストをタイトルと見なす
       // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
       {
-        let xpath = '//*[@id="des_2"]/table/tbody/tr/td/div[2]';
+        let xpath = '//*[@id="des_2"]/p[2]';
         let comment = U.xpathGet(xpath).innerHTML;
         let links = U.xpathGets(xpath + '/a')
                      .filter(function (it) /watch\//.test(it.href))
