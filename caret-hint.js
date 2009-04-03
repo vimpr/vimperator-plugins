@@ -36,9 +36,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Caret Hint</name>
-  <description>Move caret position by hint</description>
+  <description>Move the caret position by hint</description>
   <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.2.1</version>
+  <version>1.0.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -46,145 +46,46 @@ let PLUGIN_INFO =
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
-    Move caret position by hint.
     == Global Variables ==
-      let g:caret_hint_key = 'c':
-        Hint mode key.
-        Move caret position to the head of selected element.
-      let g:caret_hint_tail_key = 'C':
-        Hint mode key.
-        Move caret position to the tail of selected element.
-      let g:caret_hint_select_key = '' (default: disabled):
-        Hint mode key.
-        Move caret position to the head of selected element, and select.
-      let g:caret_hint_select_tail_key = 'S':
-        Hint mode key.
-        Move caret position to the tail of selected element, and select.
-      let g:caret_hint_swap_key = 's':
-        The key mapping for Visual-mode.
-        Swap caret position head to tail.
-      If apply empty string ('') to these variables, these mapping or mode are not enabled.
-    == Global Variables 2 ==
-      let g:caret_hint_xpath = '//*':
-        The XPath for hint-mode selection.
+      let g:caret_hint_key:
+        Hint mode key
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    Hint を使ってキャレット位置を移動
-    == Global Variables 1 ==
-      let g:caret_hint_key = 'c':
+    == Global Variables ==
+      let g:caret_hint_key:
         Hint モードのキー
-        選択した要素の先頭にキャレットを移動する
-      let g:caret_hint_tail_key = 'C':
-        Hint モードのキー
-        選択した要素の後尾にキャレットを移動する
-      let g:caret_hint_select_key = '' (デフォルト: 無効):
-        Hint モードのキー
-        選択した要素の先頭にキャレットを移動し、要素を選択する
-      let g:caret_hint_select_tail_key = 'S':
-        Hint モードのキー
-        選択した要素の後尾にキャレットを移動し、要素を選択する
-      let g:caret_hint_swap_key = 's':
-        VISUAL モード用のキーマッピング
-        キャレットの位置を交換する(先頭 <=> 後尾)
-      これらの値に空文字列を与えれば、マッピングやモードは有効にされません。
-    == Global Variables 2 ==
-      let g:caret_hint_xpath = '//*':
-        ヒント対象要素を選択するための XPath
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
 
-/*       _\|/_
-         (o o)
- +----oOO-{_}-OOo------------+
- |TODO count@action の使い道 |
- |     要素 A-B 間を選択     |
- +---------------------------*/
-
-
 (function () {
 
-  // XXX 空白も有効
-  let headMode = gval('caret_hint_key', 'c');
-  let tailMode = gval('caret_hint_tail_key', 'C');
-  let selectHeadMode = gval('caret_hint_select_key', '');
-  let selectTailMode = gval('caret_hint_select_tail_key', 'S');
-  let swapKey = gval('caret_hint_swap_key', 's');
-  let hintXPath = liberator.globalVariables.caret_hint_xpath || '//*';
+  let mode = liberator.globalVariables.caret_hint_key || 'c';
 
-  [
-    [[true,  false], headMode],
-    [[false, false], tailMode],
-    [[true,  true ], selectHeadMode],
-    [[false, true ], selectTailMode],
-  ].forEach(function ([[h, s], m, d]) {
-    if (!m)
-      return;
-    hints.addMode(
-      m,
-      'Move caret position to ' + (h ? 'head' : 'tail') + (s ? ' and Select' : ''),
-      function (elem, loc, count) moveCaret(elem, h, s),
-      function () hintXPath
-    );
-  });
-
-  if (swapKey) {
-    mappings.addUserMap(
-      [modes.VISUAL],
-      [swapKey],
-      'Swap caret position head to tail',
-      swapCaret,
-      {}
-    );
-  }
-
-
-  function gval (name, def) {
-    let v = liberator.globalVariables[name];
-    return (v === undefined) ? def : v;
-  }
-
-  function swapCaret () {
-    let win = new XPCNativeWrapper(window.content.window);
-    let s = win.getSelection();
-
-    if (s.rangeCount <= 0)
-      return false;
-
-    // 位置交換時に元の情報が失われるので保存しておく
-    let [a, f] = [[s.anchorNode, s.anchorOffset], [s.focusNode, s.focusOffset]];
-    s.collapse.apply(s, f);
-    s.extend.apply(s, a);
-  }
-
-  function moveCaret (elem, head, select) {
+  function moveCaret (elem) {
     let doc = elem.ownerDocument;
+
     let win = new XPCNativeWrapper(window.content.window);
     let sel =  win.getSelection();
-    let r = doc.createRange();
-
     sel.removeAllRanges();
-    r.selectNodeContents(elem);
 
-    if (select) {
-      liberator.log('select')
-      mappings.getDefault(modes.NORMAL, 'i').action();
-      mappings.getDefault(modes.CARET, 'v').action();
-    } else {
-      liberator.log('not select')
-      if (head) {
-        r.setEnd(r.startContainer, r.startOffset);
-      } else {
-        r.setStart(r.endContainer, r.endOffset);
-      }
-      mappings.getDefault(modes.NORMAL, 'i').action();
-    }
+    let r = doc.createRange();
+    r.selectNodeContents(elem);
+    r.setEnd(r.startContainer, r.startOffset);
 
     sel.addRange(r);
-
-    if (select && head)
-      swapCaret();
   }
+
+  hints.addMode(
+    'c',
+    'Move the caret position',
+    function (elem, _, count) {
+      moveCaret(elem);
+      mappings.getDefault(modes.NORMAL, 'i').action();
+    },
+    function () '//*'
+  );
+
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
