@@ -27,7 +27,7 @@ let g:hintsio:
     - "O" setting char-hint show uppercase.
     Default setting is "IO".
     e.g.)
-      let g:histsio="i"
+      let g:hintsio="i"
 let g:hintlabeling:
     - "s" setting simple n-base decimal hint labeling (n = hintchars.length)
     - "a" setting adjust no overlap labeling
@@ -57,7 +57,7 @@ let g:hintsio:
     - "O" setting char-hint show uppercase.
     Default setting is "IO".
     e.g.)
-      let g:histsio="i"
+      let g:hintsio="i"
 let g:hintlabeling:
     - "s" setting simple n-base decimal hint labeling (n = hintchars.length)
     - "a" setting adjust no overlap labeling
