@@ -30,6 +30,14 @@ or write in RC file
 autocmd VimperatorEnter ".*" :set complete+=D
 ||<
 
+== guioptions ==
+show Delicious Toolbar or not
+>||
+set go+=D
+or
+set go-=D
+||<
+
 ]]></detail>
 </VimperatorPlugin>;
 
@@ -268,6 +276,7 @@ let self = {
 };
 self.init();
 liberator.registerObserver("shutdown", self.close);
+config.guioptions['D'] = ['Delicious Toolbar',['ybToolbar']];
 completion.addUrlCompleter("D", "Delicious Bookmarks", self.urlCompleter);
 return self;
 })();
