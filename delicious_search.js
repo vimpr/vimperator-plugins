@@ -4,7 +4,7 @@ let PLUGIN_INFO =
 <description>search DeliciousBookmark and that completer</description>
 <require type="extension" id="{2fa4ed95-0317-4c6a-a74c-5f3e3912c1f9}">Delicious Bookmarks</require>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<version>0.2</version>
+<version>0.3</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
 <detail><![CDATA[
@@ -268,7 +268,7 @@ let self = {
   close: function(){
     for each(let st in statements){
       if (st.state > 0)
-        statements[key].finalize();
+        st.finalize();
     }
     if (dbc.connectionReady)
       dbc.close();
