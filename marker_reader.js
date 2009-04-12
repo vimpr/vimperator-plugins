@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -28,8 +28,16 @@ let g:marker_reader_onload = 0
 ||<
 prevent PageLoad insert markers action.
 
-== BUG ==
-    - all marker are inserted at top(0,0) on some page.
+>||
+javascript <<EOM
+liberator.globalVariables.marker_reader_ignore = [
+  /^https?:\/\/mail\.google\.com\//,
+  /^https?:\/\/www\.google\.com\/reader\//,
+];
+EOM
+||<
+prevent PageLoad insert markers action on these pages;
+
 ]]></detail>
 </VimperatorPlugin>;
 //}}}
@@ -41,6 +49,10 @@ var libly = liberator.plugins.libly;
 var $U = libly.$U;
 var logger = $U.getLogger("marker");
 
+let ignorePages = liberator.globalVariables.marker_reader_ignore ||
+[/^https?:\/\/mail\.google\.com\//,
+/^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//];
+
 var reader = {
     pageNaviCss:
     <style type="text/css"><![CDATA[
@@ -48,12 +60,11 @@ var reader = {
             background-color: #faa;
             opacity: 0.30;
             margin: 0px;
-            /*padding: 10px;*/
             height: 1.5em;
             width: 100%;
-            font-weight: bold;
             text-align: left;
             position: absolute;
+            z-index = 1000;
             -moz-border-radius: 5px;
         }
         ]]></style>,
@@ -81,8 +92,7 @@ var reader = {
             p.className = "vimperator-marker_reader-marker";
 
             p.style.left = 0;
-            p.style.top = Math.ceil((pageNum-1)*scroll);
-            p.style.zIndex = 1000;
+            p.style.top = Math.ceil((pageNum-1)*scroll)+"px";
             doc.body.insertBefore(p, insertPoint);
             //doc.body.appendChild(p);
             markers.push(p);
@@ -188,6 +198,8 @@ if (liberator.globalVariables.marker_reader_onload !== 0) {
     gBrowser.addEventListener("load", function (event) {
         let win = (event.target.contentDocument||event.target).defaultView;
         if (win.frameElement) return;
+        let uri = win.location.href;
+        if (ignorePages.some(function(r) r.test(uri))) return;
         let doc = win.document;
         if (!(doc instanceof HTMLDocument)) return;
         if (doc.contentType != "text/html") return;
