@@ -10,27 +10,44 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
 <detail><![CDATA[
-== TODO ==
-enable setting:
+    
+== OPTION ==
+>||
+let g:marker_reader_scroll_ratio = "0.7"
+||<
+mnext, mprev scroll 0.7 * <screen height>.
+
+>||
+let g:marker_reader_onload = 0
+||<
+prevent PageLoad insert markers action.
+
+== BUG ==
+    - all marker are inserted at top(0,0) on some page.
 ]]></detail>
 </VimperatorPlugin>;
 //}}}
-(function() {
+plugins.marker_reader = (function() {
 
-    const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
 
-    let libly = liberator.plugins.libly;
-    let $U = libly.$U;
+var libly = liberator.plugins.libly;
+var $U = libly.$U;
 
-    let pageNaviCss =
-        <style type="text/css"><![CDATA[
-          .vimperator-marker_reader-marker {
+if (liberator.globalVariables.marker_reader_onload !== 0) {
+    liberator.execute(":autocmd PageLoad .* :minsert", null, true);
+}
+
+var reader = {
+    pageNaviCss:
+    <style type="text/css"><![CDATA[
+        .vimperator-marker_reader-marker {
             background-color: #faa;
             opacity: 0.30;
             margin: 0px;
@@ -41,10 +58,9 @@ enable setting:
             text-align: left;
             position: absolute;
             -moz-border-radius: 5px;
-          }
-          ]]></style>;
-
-    function insertMarkers(doc)
+        }
+        ]]></style>,
+    insertMarkers: function(doc)
     {
         let win = doc.defaultView;
         doc.naviMarker = true;
@@ -53,10 +69,12 @@ enable setting:
         let node = doc.importNode(css, true);
         doc.body.insertBefore(node, doc.body.firstChild);
 
-        let scroll_ratio = parseFloat(liberator.globalVariables.marker_reader_scroll_ratio) || 0.7;
+        let scroll_ratio = parseFloat(liberator.globalVariables.marker_reader_scroll_ratio) || 0.9;
         let scroll = win.innerHeight * scroll_ratio;
         let count = Math.ceil(win.scrollMaxY / scroll);
 
+        let insertPoint = doc.body.firstChild;
+        let markers = [];
         for (let pageNum=1;pageNum<=count+1;++pageNum)
         {
             let p = doc.createElementNS(HTML_NAMESPACE, "p");
@@ -68,22 +86,24 @@ enable setting:
             p.style.left = 0;
             p.style.top = (pageNum-1)*scroll;
             p.style.zIndex = 1000;
-            doc.body.appendChild(p);
+            doc.body.insertBefore(p, insertPoint);
+            //doc.body.appendChild(p);
         }
-    }
-    function removeMarkers(doc)
+        return doc.markers = markers;
+    },
+    removeMarkers: function(doc)
     {
-        let xpath = '//*[@class="vimperator-marker_reader-marker"]';
-        let markers = $U.getNodesFromXPath(xpath, doc);
+        let markers = doc.markers;
+        if (!markers) return false;
         for (let i=0,len=markers.length;i<len;++i)
         {
             doc.body.removeChild(markers[i]);
         }
-    }
-    function currentPage(doc)
+        return true;
+    },
+    currentPage: function(doc)
     {
-        let xpath = '//*[@class="vimperator-marker_reader-marker"]';
-        let markers = $U.getNodesFromXPath(xpath, doc);
+        let markers = doc.markers;
         let win = doc.defaultView;
 
         var curPos = win.scrollY;
@@ -110,52 +130,60 @@ enable setting:
             ++page;
         }
         return page - 0.5;
-    }
-    function focusNavi(doc, count)
+    },
+    focusNavi: function(doc, count)
     {
-        if (!doc.naviMarker) {
-            insertMarkers(doc);
+        function navi(win, page)
+        {
+            let xpath = '//*[@id="vimperator-marker_reader-' + page + '"]';
+            let [elem] = $U.getNodesFromXPath(xpath, doc);
+            if (elem) {
+                let p = $U.getElementPosition(elem);
+                win.scrollTo(0, p.top);
+                return true;
+            }
+            return false;
         }
-
         let win = doc.defaultView;
         let curPage = currentPage(doc);
         let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
         if (page <= 1) {
             win.scrollTo(0, 0);
             return true;
-        }
-        let id_xpath = '//*[@id="vimperator-marker_reader-' + page + '"]';
-        let [elem] = $U.getNodesFromXPath(id_xpath, doc);
-        if (elem) {
-            let p = $U.getElementPosition(elem);
-            win.scrollTo(0, p.top);
+        } else if (navi(win, page)) {
             return true;
         }
 
-        // reload markers
         removeMarkers(doc);
         insertMarkers(doc);
-        [elem] = $U.getNodesFromXPath(id_xpath, doc);
-        if (elem) {
-            let p = $U.getElementPosition(elem);
-            win.scrollTo(0, p.top);
-            return true;
-        }
+        if (navi(win, page)) return true;
 
         win.scrollTo(0, win.scrollMaxY);
         return true;
-    }
-    commands.addUserCommand(["markernext", "mnext"], "marker PageDown",
-        function ()
-        {
-            focusNavi(content.document, 1);
-        });
-    commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
-        function ()
-        {
-            focusNavi(content.document, -1);
-        });
+    },
+};
 
+commands.addUserCommand(["markersinsert", "minsert"], "insert markers",
+    function ()
+    {
+        reader.insertMarkers(content.document);
+    });
+commands.addUserCommand(["markersremove", "mremove"], "remove markers",
+    function ()
+    {
+        reader.removeMarkers(content.document);
+    });
+commands.addUserCommand(["markernext", "mnext"], "marker PageDown",
+    function ()
+    {
+        reader.focusNavi(content.document, 1);
+    });
+commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
+    function ()
+    {
+        reader.focusNavi(content.document, -1);
+    });
 
+return reader;
 })();
 // vim: fdm=marker sw=4 ts=4 et:
