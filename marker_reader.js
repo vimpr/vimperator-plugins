@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -39,10 +39,7 @@ const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
 
 var libly = liberator.plugins.libly;
 var $U = libly.$U;
-
-if (liberator.globalVariables.marker_reader_onload !== 0) {
-    liberator.execute(":autocmd PageLoad .* :minsert", null, true);
-}
+var logger = $U.getLogger("marker");
 
 var reader = {
     pageNaviCss:
@@ -65,7 +62,7 @@ var reader = {
         let win = doc.defaultView;
         doc.naviMarker = true;
 
-        let css = $U.xmlToDom(pageNaviCss, doc);
+        let css = $U.xmlToDom(reader.pageNaviCss, doc);
         let node = doc.importNode(css, true);
         doc.body.insertBefore(node, doc.body.firstChild);
 
@@ -84,10 +81,11 @@ var reader = {
             p.className = "vimperator-marker_reader-marker";
 
             p.style.left = 0;
-            p.style.top = (pageNum-1)*scroll;
+            p.style.top = Math.ceil((pageNum-1)*scroll);
             p.style.zIndex = 1000;
             doc.body.insertBefore(p, insertPoint);
             //doc.body.appendChild(p);
+            markers.push(p);
         }
         return doc.markers = markers;
     },
@@ -106,7 +104,7 @@ var reader = {
         let markers = doc.markers;
         let win = doc.defaultView;
 
-        var curPos = win.scrollY;
+        let curPos = win.scrollY;
 
         // top of page
         if (curPos <= 0) return 1.0;
@@ -114,17 +112,18 @@ var reader = {
         // bottom of page
         if (curPos >= win.scrollMaxY) {
             if (markers.length > 0) {
-                let lastMarker = Math.round(parseFloat(markers[markers.length-1].style.top));
+                let lastMarker = markers[markers.length-1].offsetTop;
                 if (curPos <= lastMarker) return markers.length;
             }
             return markers.length + 0.5;
         }
 
         // return n.5 if between n and n+1
-        var page = 1.0;
+        let page = 1.0;
         for (let i=0,len=markers.length;i<len;++i)
         {
-            let pos = Math.round(parseFloat(markers[i].style.top));
+            let pos = parseInt(markers[i].offsetTop);
+            logger.log(pos);
             if (curPos == pos) return page;
             if (curPos < pos) return page - 0.5;
             ++page;
@@ -138,15 +137,16 @@ var reader = {
             let xpath = '//*[@id="vimperator-marker_reader-' + page + '"]';
             let [elem] = $U.getNodesFromXPath(xpath, doc);
             if (elem) {
-                let p = $U.getElementPosition(elem);
-                win.scrollTo(0, p.top);
+                win.scrollTo(0, elem.offsetTop);
                 return true;
             }
             return false;
         }
         let win = doc.defaultView;
-        let curPage = currentPage(doc);
+        let curPage = reader.currentPage(doc);
         let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
+        logger.log(curPage);
+        logger.log(page);
         if (page <= 1) {
             win.scrollTo(0, 0);
             return true;
@@ -154,8 +154,8 @@ var reader = {
             return true;
         }
 
-        removeMarkers(doc);
-        insertMarkers(doc);
+        reader.removeMarkers(doc);
+        reader.insertMarkers(doc);
         if (navi(win, page)) return true;
 
         win.scrollTo(0, win.scrollMaxY);
@@ -183,6 +183,15 @@ commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
     {
         reader.focusNavi(content.document, -1);
     });
+
+if (liberator.globalVariables.marker_reader_onload !== 0) {
+    gBrowser.addEventListener("load", function (event) {
+        let win = (event.target.contentDocument||event.target).defaultView;
+        let doc = win.document;
+        reader.removeMarkers(doc);
+        reader.insertMarkers(doc);
+    }, true);
+}
 
 return reader;
 })();
