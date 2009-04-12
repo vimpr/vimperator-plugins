@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -31,8 +31,8 @@ prevent PageLoad insert markers action.
 >||
 javascript <<EOM
 liberator.globalVariables.marker_reader_ignore = [
-  /^https?:\/\/mail\.google\.com\//,
-  /^https?:\/\/www\.google\.com\/reader\//,
+    /^https?:\/\/mail\.google\.com\//,
+    /^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//,
 ];
 EOM
 ||<
@@ -107,12 +107,15 @@ var reader = {
         {
             doc.body.removeChild(markers[i]);
         }
+        doc.markers = null;
         return true;
     },
     currentPage: function(doc)
     {
-        let markers = doc.markers;
         let win = doc.defaultView;
+
+        let markers = doc.markers;
+        if(!markers) markers = reader.insertMarkers(doc);
 
         let curPos = win.scrollY;
 
@@ -195,8 +198,8 @@ commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
     });
 
 if (liberator.globalVariables.marker_reader_onload !== 0) {
-    gBrowser.addEventListener("load", function (event) {
-        let win = (event.target.contentDocument||event.target).defaultView;
+    function autoInsert(win)
+    {
         if (win.frameElement) return;
         let uri = win.location.href;
         if (ignorePages.some(function(r) r.test(uri))) return;
@@ -206,7 +209,19 @@ if (liberator.globalVariables.marker_reader_onload !== 0) {
 
         reader.removeMarkers(doc);
         reader.insertMarkers(doc);
-    }, true);
+    }
+    function onResize(event)
+    {
+        let win = event.target;
+        autoInsert(win);
+    }
+    function onLoad(event)
+    {
+        let win = (event.target.contentDocument||event.target).defaultView;
+        autoInsert(win);
+    }
+    window.addEventListener("resize", onResize, true);
+    gBrowser.addEventListener("load", onLoad, true);
 }
 
 return reader;
