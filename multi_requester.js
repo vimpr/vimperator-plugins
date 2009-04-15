@@ -11,10 +11,10 @@ var PLUGIN_INFO =
   <description>request, and the result is displayed to the buffer.</description>
   <description lang="ja">リクエストの結果をバッファに出力する。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.4.13</version>
+  <version>0.4.14</version>
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.1a1pre</maxVersion>
+  <maxVersion>2.1pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/multi_requester.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
@@ -137,6 +137,8 @@ var CommandRegister = {
       $U.bind(cmdClass, cmdClass.cmdAction),
       {
         completer: cmdClass.cmdCompleter || function(context, arg) {
+          if (arg.length > 1)
+            return;
           context.title = [ "Name", "Descprition" ];
           var sorted = siteinfo.sort(function(a, b)
                          typeof liberator.globalVariables.multi_requester_order == "undefined" ||
