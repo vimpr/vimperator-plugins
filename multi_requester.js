@@ -11,7 +11,7 @@ var PLUGIN_INFO =
   <description>request, and the result is displayed to the buffer.</description>
   <description lang="ja">リクエストの結果をバッファに出力する。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.4.14</version>
+  <version>0.4.15</version>
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.1pre</maxVersion>
@@ -306,8 +306,8 @@ var MultiRequester = {
       let srcEncode = info.srcEncode || "UTF-8";
       let urlEncode = info.urlEncode || srcEncode;
 
-      let idxRepStr = url.indexOf("%s");
-      if (idxRepStr > -1 && !parsedArgs.strs.length) continue;
+      let repStrCount = let (m = url.match(/%s/g)) (m && m.length);
+      if (repStrCount && !parsedArgs.strs.length) continue;
 
       // via. lookupDictionary.js
       let ttbu = Components.classes["@mozilla.org/intl/texttosuburi;1"]
@@ -315,7 +315,9 @@ var MultiRequester = {
 
       let cnt = 0;
       url = url.replace(/%s/g, function(m, i) ttbu.ConvertAndEscape(urlEncode,
-            (cnt < parsedArgs.strs.length ? parsedArgs.strs[cnt++] : parsedArgs.strs[cnt - 1])));
+            (cnt >= parsedArgs.strs.length ? parsedArgs.strs[cnt - 1] :
+             cnt >= (repStrCount - 1) ? parsedArgs.strs.splice(cnt).join(' ') :
+             parsedArgs.strs[cnt++])));
       logger.log(url + "[" + srcEncode + "][" + urlEncode + "]::" + info.xpath);
 
       if (bang) {
