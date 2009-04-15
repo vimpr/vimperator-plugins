@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.6</version>
+    <version>0.0.7</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -53,6 +53,8 @@ let ignorePages = liberator.globalVariables.marker_reader_ignore ||
 [/^https?:\/\/mail\.google\.com\//,
 /^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//];
 
+function near(p1, p2, e) p1-e <= p2 && p2 <= p1+e;
+
 var reader = {
     pageNaviCss:
     <style type="text/css"><![CDATA[
@@ -64,13 +66,14 @@ var reader = {
             width: 100%;
             text-align: left;
             position: absolute;
-            z-index = 1000;
+            z-index = 6000;
             -moz-border-radius: 5px;
         }
         ]]></style>,
     insertMarkers: function(doc)
     {
         let win = doc.defaultView;
+        if (win.scrollMaxY == 0) return false;
         doc.naviMarker = true;
 
         let css = $U.xmlToDom(reader.pageNaviCss, doc);
@@ -88,10 +91,14 @@ var reader = {
             let p = doc.createElementNS(HTML_NAMESPACE, "p");
             let id = "vimperator-marker_reader-" + pageNum;
             p.id = id;
-            p.innerHTML = '<a href="#' + id + '">' + pageNum + "</a>";
+            if (liberator.globalVariables.marker_reader_pagelink) {
+                p.innerHTML = '<a href="#' + id + '">' + pageNum + "</a>";
+            } else {
+                //p.innerHTML = "";
+            }
             p.className = "vimperator-marker_reader-marker";
 
-            p.style.left = 0;
+            p.style.left = "0px";
             p.style.top = Math.ceil((pageNum-1)*scroll)+"px";
             doc.body.insertBefore(p, insertPoint);
             //doc.body.appendChild(p);
@@ -113,6 +120,7 @@ var reader = {
     currentPage: function(doc)
     {
         let win = doc.defaultView;
+        if (win.scrollMaxY == 0) return 1.0;
 
         let markers = doc.markers;
         if(!markers) markers = reader.insertMarkers(doc);
@@ -136,8 +144,7 @@ var reader = {
         for (let i=0,len=markers.length;i<len;++i)
         {
             let pos = parseInt(markers[i].offsetTop);
-            logger.log(pos);
-            if (curPos == pos) return page;
+            if (near(curPos, pos, 1)) return page;
             if (curPos < pos) return page - 0.5;
             ++page;
         }
@@ -158,8 +165,6 @@ var reader = {
         let win = doc.defaultView;
         let curPage = reader.currentPage(doc);
         let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
-        logger.log(curPage);
-        logger.log(page);
         if (page <= 1) {
             win.scrollTo(0, 0);
             return true;
@@ -176,6 +181,23 @@ var reader = {
     },
 };
 
+if (liberator.globalVariables.marker_reader_mapping) {
+    let [down, up] = liberator.globalVariables.marker_reader_mapping.split(/,/);
+    mappings.addUserMap([config.browserModes],
+        [down], "marker PageDown",
+        function (count)
+        {
+            reader.focusNavi(content.document, count>1 ? count : 1);
+        },
+        {flags: Mappings.flags.COUNT});
+    mappings.addUserMap([config.browserModes],
+        [up], "marker PageUp",
+        function (count)
+        {
+            reader.focusNavi(content.document, -(count>1 ? count : 1));
+        },
+        {flags: Mappings.flags.COUNT});
+}
 commands.addUserCommand(["markersinsert", "minsert"], "insert markers",
     function ()
     {
