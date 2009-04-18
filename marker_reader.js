@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -54,6 +54,15 @@ let ignorePages = liberator.globalVariables.marker_reader_ignore ||
 /^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//];
 
 function near(p1, p2, e) p1-e <= p2 && p2 <= p1+e;
+function focusDocument(win) {
+    let frames = win.frames;
+    if (!frames) return win.document;
+    for (let i=0,len=win.frames.length;i<len;++i) {
+        let doc = win.frames[i].document;
+        if (doc.hasFocus()) return doc;
+    }
+    return win.document;
+}
 
 var reader = {
     pageNaviCss:
@@ -73,8 +82,9 @@ var reader = {
     insertMarkers: function(doc)
     {
         let win = doc.defaultView;
+
         if (win.scrollMaxY == 0) return false;
-        doc.naviMarker = true;
+        if (!win.scrollbars.visible) return false;
 
         let css = $U.xmlToDom(reader.pageNaviCss, doc);
         let node = doc.importNode(css, true);
@@ -121,6 +131,7 @@ var reader = {
     {
         let win = doc.defaultView;
         if (win.scrollMaxY == 0) return 1.0;
+        if (!win.scrollbars.visible) return 1.0;
 
         let markers = doc.markers;
         if(!markers) markers = reader.insertMarkers(doc);
@@ -187,42 +198,42 @@ if (liberator.globalVariables.marker_reader_mapping) {
         [down], "marker PageDown",
         function (count)
         {
-            reader.focusNavi(content.document, count>1 ? count : 1);
+            reader.focusNavi(focusDocument(content), count>1 ? count : 1);
         },
         {flags: Mappings.flags.COUNT});
     mappings.addUserMap([config.browserModes],
         [up], "marker PageUp",
         function (count)
         {
-            reader.focusNavi(content.document, -(count>1 ? count : 1));
+            reader.focusNavi(focusDocument(content), -(count>1 ? count : 1));
         },
         {flags: Mappings.flags.COUNT});
 }
 commands.addUserCommand(["markersinsert", "minsert"], "insert markers",
     function ()
     {
-        reader.insertMarkers(content.document);
+        reader.insertMarkers(focusDocument(content));
     });
 commands.addUserCommand(["markersremove", "mremove"], "remove markers",
     function ()
     {
-        reader.removeMarkers(content.document);
+        reader.removeMarkers(focusDocument(content));
     });
 commands.addUserCommand(["markernext", "mnext"], "marker PageDown",
     function ()
     {
-        reader.focusNavi(content.document, 1);
+        reader.focusNavi(focusDocument(content, 1));
     });
 commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
     function ()
     {
-        reader.focusNavi(content.document, -1);
+        reader.focusNavi(focusDocument(content, -1));
     });
 
 if (liberator.globalVariables.marker_reader_onload !== 0) {
     function autoInsert(win)
     {
-        if (win.frameElement) return;
+        //if (win.frameElement) return;
         let uri = win.location.href;
         if (ignorePages.some(function(r) r.test(uri))) return;
         let doc = win.document;
@@ -231,6 +242,9 @@ if (liberator.globalVariables.marker_reader_onload !== 0) {
 
         reader.removeMarkers(doc);
         reader.insertMarkers(doc);
+
+        let frames = win.frames;
+        for (let i=0,len=frames.length;i<len;++i) autoInsert(frames[i]);
     }
     function onResize(event)
     {
