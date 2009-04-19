@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.8</version>
+    <version>0.0.10</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -84,6 +84,7 @@ var reader = {
         let win = doc.defaultView;
 
         if (win.scrollMaxY == 0) return false;
+        if (win.innerHeight == 0) return false;
         if (!win.scrollbars.visible) return false;
 
         let css = $U.xmlToDom(reader.pageNaviCss, doc);
@@ -94,7 +95,6 @@ var reader = {
         let scroll = win.innerHeight * scroll_ratio;
         let count = Math.ceil(win.scrollMaxY / scroll);
 
-        let insertPoint = doc.body.firstChild;
         let markers = [];
         for (let pageNum=1;pageNum<=count+1;++pageNum)
         {
@@ -110,8 +110,7 @@ var reader = {
 
             p.style.left = "0px";
             p.style.top = Math.ceil((pageNum-1)*scroll)+"px";
-            doc.body.insertBefore(p, insertPoint);
-            //doc.body.appendChild(p);
+            doc.body.appendChild(p);
             markers.push(p);
         }
         return doc.markers = markers;
@@ -135,6 +134,7 @@ var reader = {
 
         let markers = doc.markers;
         if(!markers) markers = reader.insertMarkers(doc);
+        if(!markers && markers.length==0) return 1.0;
 
         let curPos = win.scrollY;
 
@@ -165,8 +165,7 @@ var reader = {
     {
         function navi(win, page)
         {
-            let xpath = '//*[@id="vimperator-marker_reader-' + page + '"]';
-            let [elem] = $U.getNodesFromXPath(xpath, doc);
+            let elem = doc.getElementById("vimperator-marker_reader-" + page);
             if (elem) {
                 win.scrollTo(0, elem.offsetTop);
                 return true;
