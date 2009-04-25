@@ -165,7 +165,9 @@ liberator.plugins.tada = (function(){
 // }}}
 // PRIVATE {{{
 
-  function tadaListCompleter(context) {
+  function tadaListCompleter(context, args) {
+    if (args.length > 1)
+      return;
     context.title = ["List", "Items left"];
     context.completions = getLists().map(function(item) [item[1], item[2]]);
   }
