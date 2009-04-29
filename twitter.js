@@ -64,7 +64,6 @@
         xhr.open("GET", "https://twitter.com/statuses/user_timeline/" + user + ".json?count=1", false, username, password);
         xhr.send(null);
         xhr.open("POST", "https://twitter.com/favourings/create/" + window.eval(xhr.responseText)[0].id + ".json", false, username, password);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
     }
     function unfavTwitter(username, password, user){
@@ -72,7 +71,6 @@
         xhr.open("GET", "https://twitter.com/statuses/user_timeline/" + user + ".json?count=1", false, username, password);
         xhr.send(null);
         xhr.open("DELETE", "https://twitter.com/favourings/destroy/" + window.eval(xhr.responseText)[0].id + ".json", false, username, password);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send(null);
     }
     function showTwitterMentions(username, password){
@@ -102,12 +100,12 @@
         liberator.echo(html, true);
     }
     function showFollowersStatus(username, password, target){
+        // for debug
+        //target = "otsune"
         var xhr = new XMLHttpRequest();
         var endPoint = target ? "https://twitter.com/statuses/user_timeline/" + target + ".json"
             : "https://twitter.com/statuses/friends_timeline.json";
         xhr.open("GET", endPoint, false, username, password);
-        // for debug
-        //xhr.open("GET", "https://twitter.com/statuses/user_timeline/otsune.json", false, username, password);
         xhr.send(null);
         var statuses = evalFunc(xhr.responseText) || [];
 
