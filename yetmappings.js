@@ -50,7 +50,7 @@ let PLUGIN_INFO =
        :yetmap[pings] [<KEYS>]
        :ymap [<KEYS>]
     == Links ==
-      http://d.hatena.ne.jp/nokturnalmortum/20081109#1226223461
+      http://d.hatena.ne.jp/nokturnalmortum/20081109/1226223461
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
