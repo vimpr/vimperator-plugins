@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -130,11 +130,23 @@ let PLUGIN_INFO =
       } else {
         let gs = diff(prevVars, vars());
         let as = makeLI(gs.appended), rs = makeLI(gs.removed);
-        liberator.echo(<div><h1>Appended</h1><div>{as}</div><h1>Removed</h1><div>{rs}</div></div>);
+        let output = <div><h1>Appended</h1><div>{as}</div><h1>Removed</h1><div>{rs}</div></div>;
+        if (args['-clipboard']) {
+          let cbOut = '';
+          function pushLine (v, i)
+            cbOut += '  ' + i + '.' + v + '\n';
+          cbOut += 'Appended';
+          gs.appended.forEach(pushLine);
+          cbOut += 'Removed';
+          gs.removed.forEach(pushLine);
+          util.copyToClipboard(cbOut);
+        }
+        liberator.echo(output);
       }
     },
     {
-      bang: true
+      bang: true,
+      options: [ [['-clipboard', '-c'], commands.OPTION_NOARG] ]
     },
     true
   );
