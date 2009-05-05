@@ -37,8 +37,9 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Auto Reload</name>
   <name lang="ja">自動リロード</name>
-  <description>ローカルのファイルを監視して、現在のページをリロードする</description>
-  <version>0.0.1</version>
+  <description>Watch local file, and automatically reload current page when the file is modified.</description>
+  <description lang="ja">ローカルのファイルを監視して、現在のページをリロードする</description>
+  <version>1.0.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
