@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -167,7 +167,7 @@ var reader = {
         {
             let elem = doc.getElementById("vimperator-marker_reader-" + page);
             if (elem) {
-                win.scrollTo(0, elem.offsetTop);
+                win.scrollTo(win.scrollX, elem.offsetTop);
                 return true;
             }
             return false;
@@ -176,7 +176,7 @@ var reader = {
         let curPage = reader.currentPage(doc);
         let page = (count < 0 ? Math.round : Math.floor)(curPage + count);
         if (page <= 1) {
-            win.scrollTo(0, 0);
+            win.scrollTo(win.scrollX, 0);
             return true;
         } else if (navi(win, page)) {
             return true;
@@ -186,7 +186,7 @@ var reader = {
         reader.insertMarkers(doc);
         if (navi(win, page)) return true;
 
-        win.scrollTo(0, win.scrollMaxY);
+        win.scrollTo(win.scrollX, win.scrollMaxY);
         return true;
     },
 };
