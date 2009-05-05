@@ -16,7 +16,7 @@ var PLUGIN_INFO =
     <maxVersion>2.1pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
 <detail><![CDATA[
-    
+
 == OPTION ==
 >||
 let g:marker_reader_scroll_ratio = "0.7"
@@ -221,12 +221,12 @@ commands.addUserCommand(["markersremove", "mremove"], "remove markers",
 commands.addUserCommand(["markernext", "mnext"], "marker PageDown",
     function ()
     {
-        reader.focusNavi(focusDocument(content, 1));
+        reader.focusNavi(focusDocument(content), 1);
     });
 commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
     function ()
     {
-        reader.focusNavi(focusDocument(content, -1));
+        reader.focusNavi(focusDocument(content), -1);
     });
 
 if (liberator.globalVariables.marker_reader_onload !== 0) {
