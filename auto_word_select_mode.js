@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_word_select_mode.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <detail><![CDATA[
     == Subject ==
     Add auto word select mode.
@@ -216,6 +216,17 @@ mappings.add( [modes.AUTO_WORD_SELECT],
 );
 
 mappings.add( [modes.AUTO_WORD_SELECT],
+  ["L"],
+  "Extend to right word.",
+  function() {
+    var before = range();
+    content.getSelection().collapseToEnd();
+    controller().wordMove(true, true);
+    content.getSelection().getRangeAt(0).setStart(before.startNode, before.startOffset);
+  }
+);
+
+mappings.add( [modes.AUTO_WORD_SELECT],
   ["h"],
   "Move to left word and select.",
   function() {
@@ -232,6 +243,17 @@ mappings.add( [modes.AUTO_WORD_SELECT],
       content.getSelection().collapseToStart();
       controller().wordMove(false, false);
     }
+  }
+);
+
+mappings.add( [modes.AUTO_WORD_SELECT],
+  ["H"],
+  "Extend to left word.",
+  function() {
+    var before = range();
+    content.getSelection().collapseToStart();
+    controller().wordMove(false, true);
+    content.getSelection().getRangeAt(0).setEnd(before.endNode, before.endOffset);
   }
 );
 
