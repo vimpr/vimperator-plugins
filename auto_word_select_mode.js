@@ -173,7 +173,7 @@ mappings.addUserMap(
 
 mappings.addUserMap(
   [modes.AUTO_WORD_SELECT],
-  [KEY],
+  [KEY, "<Esc>"],
   "Exit AUTO_WORD_SELECT mode.",
   function() {
     modes.pop();
