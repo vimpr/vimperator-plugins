@@ -51,7 +51,7 @@ var PLUGIN_INFO =
     This mode alway selects current word.
 
     == Global variables ==
-    g:auto_word_select_mode_key:
+    g:auto_word_select_key:
       The key that entering to AUTO_WORD_SELECT mode.
       Default is 'I'.
 
@@ -96,7 +96,7 @@ var PLUGIN_INFO =
     コンテンツ内の単語を頻繁に選択＆検索する場合などに便利です。
 
     == グローバル変数 ==
-    g:auto_word_select_mode_key:
+    g:auto_word_select_key:
       AUTO_WORD_SELECTモードに移行するためのキーです。
       デフォルトは'I'です。
 
