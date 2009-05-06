@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_word_select_mode.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <detail><![CDATA[
     == Subject ==
     Add auto word select mode.
@@ -51,7 +51,7 @@ var PLUGIN_INFO =
     This mode alway selects current word.
 
     == Global variables ==
-    :g:auto_word_select_mode_key|
+    g:auto_word_select_mode_key:
       The key that entering to AUTO_WORD_SELECT mode.
       Default is 'I'.
 
@@ -96,7 +96,7 @@ var PLUGIN_INFO =
     コンテンツ内の単語を頻繁に選択＆検索する場合などに便利です。
 
     == グローバル変数 ==
-    :g:auto_word_select_mode_key|
+    g:auto_word_select_mode_key:
       AUTO_WORD_SELECTモードに移行するためのキーです。
       デフォルトは'I'です。
 
@@ -151,7 +151,7 @@ var PLUGIN_INFO =
 const NEW_MODE = "AUTO_WORD_SELECT";
 const KEY = liberator.globalVariables.auto_word_select_key || 'I';
 
-if (!modes[NEW_MODE])
+if (!modes.AUTO_WORD_SELECT)
   modes.addMode(NEW_MODE, false, function() NEW_MODE);
 
 mappings.addUserMap(
@@ -159,7 +159,7 @@ mappings.addUserMap(
   [KEY],
   "Change to AUTO_WORD_SELECT mode.",
   function() {
-    modes.push(modes[NEW_MODE]);
+    modes.push(modes.AUTO_WORD_SELECT);
 
     if (content.getSelection().rangeCount == 0) {
       let firstNode = content.document.body.firstChild;
@@ -219,10 +219,10 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   ["L"],
   "Extend to right word.",
   function() {
-    var before = range();
+    var before = currentRange();
     content.getSelection().collapseToEnd();
     controller().wordMove(true, true);
-    content.getSelection().getRangeAt(0).setStart(before.startNode, before.startOffset);
+    currentRange().setStart(before.startContainer, before.startOffset);
   }
 );
 
@@ -230,7 +230,7 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   ["h"],
   "Move to left word and select.",
   function() {
-    var before = range();
+    var before = currentRange();
     content.getSelection().collapseToStart();
     controller().wordMove(false, false);
     if (selectable()) selectWord();
@@ -238,7 +238,7 @@ mappings.add( [modes.AUTO_WORD_SELECT],
     // FIXME:
     // Because the caret doesn't move in a certain situation,
     // the following ugly codes are added.
-    var after = range();
+    var after = currentRange();
     if (compareRange(before, after)) {
       content.getSelection().collapseToStart();
       controller().wordMove(false, false);
@@ -250,10 +250,10 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   ["H"],
   "Extend to left word.",
   function() {
-    var before = range();
+    var before = currentRange();
     content.getSelection().collapseToStart();
     controller().wordMove(false, true);
-    content.getSelection().getRangeAt(0).setEnd(before.endNode, before.endOffset);
+    currentRange().setEnd(before.endContainer, before.endOffset);
   }
 );
 
@@ -271,7 +271,7 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   ["k"],
   "Move to above word and select.",
   function() {
-    var before = range();
+    var before = currentRange();
     content.getSelection().collapseToStart();
     controller().lineMove(false, false);
     if (selectable()) selectWord();
@@ -279,12 +279,11 @@ mappings.add( [modes.AUTO_WORD_SELECT],
     // FIXME:
     // Because the caret doesn't move in a certain situation,
     // the following ugly codes are added.
-    var after = range();
+    var after = currentRange();
     if (compareRange(before, after)) {
       content.getSelection().collapseToStart();
       controller().lineMove(false, false);
     }
-
   }
 );
 
@@ -297,29 +296,24 @@ function controller()
   buffer.selectionController;
 
 function compareRange(a, b) {
-  return (a.startNode.isSameNode(b.startNode) &&
-          a.endNode.isSameNode(b.endNode) &&
+  return (a.startContainer.isSameNode(b.startContainer) &&
+          a.endContainer.isSameNode(b.endNode) &&
           a.startOffset == b.startOffset &&
           a.endOffset   == b.endOffset )
             ? true
             : false;
 }
 
-function range() {
-  var current = window.content.window.getSelection().getRangeAt(0);
-  return {
-    textString:  current.toString(),
-    startNode:   current.startContainer,
-    startOffset: current.startOffset,
-    endNode:     current.endContainer,
-    endOffset:   current.endOffset
-  }
-}
+function currentRange()
+  content.getSelection().getRangeAt(0);
 
 function selectable() {
   var sel = content.getSelection();
-  if (sel.anchorNode.nodeType != 3) return false;
-  if (sel.anchorOffset == sel.anchorNode.textContent.length) return false;
+  if (sel.anchorNode.nodeType != 3)
+    return false;
+  if (sel.anchorOffset == sel.anchorNode.textContent.length)
+    return false;
+
   return true;
 }
 
