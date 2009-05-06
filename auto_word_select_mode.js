@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_word_select_mode.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <detail><![CDATA[
     == Subject ==
     Add auto word select mode.
@@ -191,6 +191,18 @@ mappings.add(
     // exit from the COMMAND_LINE mode.
     modes.push(modes.AUTO_WORD_SELECT, null, true);
     mappings.get(modes.NORMAL, ":").action();
+  }
+);
+
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
+  ["v"],
+  "Change visual mode.",
+  function() {
+    // FIXME:
+    // cannot return to modes.AUTO_WORD_SELECT when <Esc><Esc>
+    mappings.get(modes.NORMAL, "i").action();
+    mappings.get(modes.CARET, "v").action();
   }
 );
 
