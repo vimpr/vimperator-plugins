@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.24
-// Last Change: 26-Dec-2008. Jan 2008
+// Last Change: 08-May-2009. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -61,8 +61,7 @@
 //  'noldrchints'
 //      Disable "Narrows Hinttags based on Siteinfo"
 //      usage: :set noldrchints
-
-(function(){
+if (liberator.plugins.LDRizeCooperation == undefined) (function(){
     //pattern: wildcard
     //include: [regexp,option] or regexp
     //handler: [programPath,[args]] or programPath or function(url,title)
