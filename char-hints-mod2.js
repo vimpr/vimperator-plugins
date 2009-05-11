@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.7</version>
+    <version>0.3.0</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
-    <maxVersion>2.0pre</maxVersion>
+    <maxVersion>2.1pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -36,7 +36,6 @@ let g:hintlabeling:
       let g:hintlabeling="a"
 
 == TODO ==
-- fix bug that hinttimeout don't run
 
      ]]></detail>
     <detail lang="ja"><![CDATA[
@@ -82,6 +81,8 @@ let g:hintlabeling:
     let inputRegex = /[A-Z]/;
     let showCase = function(str) str.toUpperCase();
     let getStartCount = function() 0;
+
+    let timer = null;
 
     function chars2num(chars) //{{{
     {
@@ -190,6 +191,23 @@ let g:hintlabeling:
             charhints.original.processHints(true);
             return true;
         }
+
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        let timeout = options["hinttimeout"];
+        if (timeout > 0) {
+            // -100 to prevent the conflict with original timeout.
+            timer = setTimeout(function () {
+                if (hints.activeTimeout) {
+                    clearTimeout(hints.activeTimeout);
+                    hints.activeTimeout = null;
+                }
+                charhints.original.processHints(true);
+            }, timeout - 100);
+        }
+
     } //}}}
 
     var hintInput = "";
