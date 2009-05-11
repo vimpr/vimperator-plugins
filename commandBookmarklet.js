@@ -11,7 +11,7 @@ let PLUGIN_INFO =
 <description>convert bookmarklets to commands</description>
 <description lang="ja">ブックマークレットをコマンドにする</description>
 <author mail="halt.feits@gmail.com">halt feits</author>
-<version>0.6.5</version>
+<version>0.6.6</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.1pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/commandBookmarklet.js</updateURL>
@@ -84,11 +84,17 @@ items.forEach(function (item) {
   );
 });
 
-function stringToBoolean(str, defaultValue) {
-  return !str                            ? defaultValue
-         : str.toLowerCase() === 'false' ? false
-         : /^\d+$/.test(str)             ? parseInt(str)
-         :                                 true;
+function toBoolean (value, def) {
+  switch (typeof value) {
+    case 'undefined':
+      return def;
+    case 'number':
+      return !!value;
+    case 'string':
+      return !/^(\d+|false)$/i.test(value) || parseInt(value);
+    default:
+      return !!value;
+  }
 }
 
 function evalInSandbox (str) {
@@ -98,7 +104,7 @@ function evalInSandbox (str) {
 }
 
 function evalScript (url) {
-  if (stringToBoolean(liberator.globalVariables.command_bookmarklet_use_sandbox, false)) {
+  if (toBoolean(liberator.globalVariables.command_bookmarklet_use_sandbox, false)) {
     evalInSandbox(decodeURIComponent(url.replace(/^\s*javascript:/i, '')));
   } else {
     liberator.open(url);
