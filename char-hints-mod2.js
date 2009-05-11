@@ -65,7 +65,6 @@ let g:hintlabeling:
       let g:hintlabeling="a"
 
 == TODO ==
-- fix bug that hinttimeout don't run
 
      ]]></detail>
 </VimperatorPlugin>;
@@ -168,8 +167,16 @@ let g:hintlabeling:
                 break;
         }
     } //}}}
+    function clearOriginalTimeout() //{{{
+    {
+        liberator.eval('if(activeTimeout) clearTimeout(activeTimeout);activeTimeout = null;', hintContext);
+    } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
         let start = getStartCount(hintchars.length, hints.length);
         let num = chars2num(hintInput)-start;
         if(num < 0) return;
@@ -184,6 +191,7 @@ let g:hintlabeling:
             alt.liberatorString = num;
             charhints.original.onEvent(alt);
         }
+        clearOriginalTimeout();
         statusline.updateInputBuffer(hintInput);
 
         let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
@@ -192,20 +200,11 @@ let g:hintlabeling:
             return true;
         }
 
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
         let timeout = options["hinttimeout"];
         if (timeout > 0) {
-            // -100 to prevent the conflict with original timeout.
             timer = setTimeout(function () {
-                if (hints.activeTimeout) {
-                    clearTimeout(hints.activeTimeout);
-                    hints.activeTimeout = null;
-                }
                 charhints.original.processHints(true);
-            }, timeout - 100);
+            }, timeout);
         }
 
     } //}}}
@@ -245,6 +244,7 @@ let g:hintlabeling:
                 charhints.onInput(event);
             } else {
                 charhints.original.onEvent(event);
+                clearOriginalTimeout();
                 statusline.updateInputBuffer(hintInput);
             }
         }, //}}}
