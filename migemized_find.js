@@ -594,6 +594,16 @@ let PLUGIN_INFO =
   };
 
 
+  // XXX for 2.1pre
+  // そのうち消す？
+  // http://vimperator.g.hatena.ne.jp/hogelog/20090511/1242060081
+  if (typeof search == "undefined") {
+    migemized.onSubmit = migemized.searchSubmitted;
+    migemized.onCancel = migemized.searchCanceled;
+    migemized.onKeyPress = migemized.searchKeyPressed;
+    search = finder;
+  }
+
   // オリジナルの状態に戻せるように保存しておく
   let (original = {}) {
     for (let name in migemized)
