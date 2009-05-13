@@ -10,13 +10,13 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.11</version>
+    <version>0.0.12</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
 <detail><![CDATA[
-
+    
 == OPTION ==
 >||
 let g:marker_reader_scroll_ratio = "0.7"
@@ -37,6 +37,11 @@ liberator.globalVariables.marker_reader_ignore = [
 EOM
 ||<
 prevent PageLoad insert markers action on these pages;
+
+>||
+let g:marker_reader_mapping = "J,K"
+||<
+adds mapping J = mnext, K = mprev.
 
 ]]></detail>
 </VimperatorPlugin>;
@@ -79,8 +84,12 @@ var reader = {
             -moz-border-radius: 5px;
         }
         ]]></style>,
+    // insertMarkers have to act synchronized function
     insertMarkers: function(doc)
     {
+        if (doc.markers) return false;
+        doc.markers = [];
+
         let win = doc.defaultView;
 
         if (win.scrollMaxY == 0) return false;
@@ -95,7 +104,6 @@ var reader = {
         let scroll = win.innerHeight * scroll_ratio;
         let count = Math.ceil(win.scrollMaxY / scroll);
 
-        let markers = [];
         for (let pageNum=1;pageNum<=count+1;++pageNum)
         {
             let p = doc.createElementNS(HTML_NAMESPACE, "p");
@@ -111,19 +119,20 @@ var reader = {
             p.style.left = "0px";
             p.style.top = Math.ceil((pageNum-1)*scroll)+"px";
             doc.body.appendChild(p);
-            markers.push(p);
+            doc.markers.push(p);
         }
-        return doc.markers = markers;
+        return doc.markers;
     },
+    // removeMarkers have to act synchronized function
     removeMarkers: function(doc)
     {
-        let markers = doc.markers;
-        if (!markers) return false;
-        for (let i=0,len=markers.length;i<len;++i)
-        {
-            doc.body.removeChild(markers[i]);
-        }
+        if (!doc.markers) return false;
         doc.markers = null;
+
+        for (let i=0,len=doc.markers.length;i<len;++i)
+        {
+            doc.body.removeChild(doc.markers[i]);
+        }
         return true;
     },
     currentPage: function(doc)
