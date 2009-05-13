@@ -52,6 +52,10 @@ liberator.plugins.migemoFind = (function() {
         return;
     }
 
+    // for 2.1pre
+    if (typeof search == "undefined") {
+	search = finder;
+    }
     search.migemo = XMigemoFind.wrappedJSObject;
     search.migemo.target = window.gBrowser;
 
