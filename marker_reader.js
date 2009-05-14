@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.12</version>
+    <version>0.0.13</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -126,12 +126,13 @@ var reader = {
     // removeMarkers have to act synchronized function
     removeMarkers: function(doc)
     {
-        if (!doc.markers) return false;
+        let markers = doc.markers;
+        if (!markers) return false;
         doc.markers = null;
 
-        for (let i=0,len=doc.markers.length;i<len;++i)
+        for (let i=0,len=markers.length;i<len;++i)
         {
-            doc.body.removeChild(doc.markers[i]);
+            doc.body.removeChild(markers[i]);
         }
         return true;
     },
