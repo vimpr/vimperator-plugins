@@ -40,13 +40,13 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.2</version>
+  <version>1.2.0</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
 
     == Commands ==
-    :pino
+    :[count]pino
 
     == Global variables ==
     g:pinoOpenItemsCount:
@@ -87,10 +87,11 @@ var PLUGIN_INFO =
     ことができます。
 
     == コマンド ==
-    :pino
+    :[count]pino
     そのまま<Enter>で先頭のn件（デフォルト5件、グローバル変数で調整可能）
     をバックグラウンドのタブで開きます。
     <TAB>で補完候補の一覧にピンを立てた記事の一覧から選択することもできます。
+    count を指定すると、その件数だけ開きます。
 
     == グローバル変数 ==
     g:pinoOpenItemsCount:
@@ -137,11 +138,11 @@ liberator.plugins.pino.api = (function() {
   commands.addUserCommand(
     ["pinneditemopen", "pino"],
     "Open livedoor Reader pinned item",
-    function(args, bang) {
+    function(args) {
       let pins = new Pins();
       if (args.string == "") {
         let pin;
-        let max = openItemsCount();
+        let max = (args.count >= 1) ? args.count : openItemsCount();
         for(let i = 0; i < max; i++) {
           if (!(pin = pins.head())) break;
           liberator.open(pin.link, openBehavior());
@@ -154,6 +155,7 @@ liberator.plugins.pino.api = (function() {
     },
     {
       literal: 0,
+      count: true,
       completer: function(context) {
         var pins = new Pins();
         context.title = ["title", "url"];
