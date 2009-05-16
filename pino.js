@@ -40,7 +40,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -153,6 +153,7 @@ liberator.plugins.pino.api = (function() {
       }
     },
     {
+      literal: 0,
       completer: function(context) {
         var pins = new Pins();
         context.title = ["title", "url"];
