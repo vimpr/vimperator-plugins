@@ -40,7 +40,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -131,6 +131,7 @@ var PLUGIN_INFO =
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
+liberator.plugins.pino = {};
 liberator.plugins.pino.api = (function() {
   // COMMAND /////////////////////////////////////////////////////// {{{
   commands.addUserCommand(
