@@ -36,11 +36,11 @@ var PLUGIN_INFO =
   <description>Open livedoor Reader pinned items</description>
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <maxVersion>2.1pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -57,6 +57,10 @@ var PLUGIN_INFO =
 
     g:pinoAscendingOrder:
       default: "false"
+
+    g:pinoBaseURL:
+      If you want to use fastladder, set "fastladder.com" into this variable.
+      default: "reader.livedoor.com"
 
     == API ==
     plugins.pino.items():
@@ -101,6 +105,10 @@ var PLUGIN_INFO =
     g:pinoAscendingOrder:
       ピンの一覧の表示順を昇順（古い順）とするかどうか
       default: "false" （新しい順）
+
+    g:pinoBaseURL:
+      fastladder を使う場合は、この変数を "fastladder.com" とする。
+      default: "reader.livedoor.com"
 
     == API ==
     plugins.pino.api.items():
@@ -166,9 +174,11 @@ liberator.plugins.pino.api = (function() {
   function openBehavior()
     window.eval(gv.pinoOpenBehavior) || liberator.NEW_BACKGROUND_TAB;
 
+  function baseURL()
+    "http://" + (gv.pinoBaseURL || "http://reader.livedoor.com");
+
   // }}}
   // CLASS ///////////////////////////////////////////////////////// {{{
-  const LDR_DOMAIN = "http://reader.livedoor.com"
 
   function Pins() {
     this.cache = null;
@@ -196,7 +206,7 @@ liberator.plugins.pino.api = (function() {
     remove : function(link) {
       var unescapedLink = unescapeHTML(link);
       var request = new libly.Request(
-        LDR_DOMAIN + "/api/pin/remove",
+        baseURL() + "/api/pin/remove",
         {
           //Cookie: "reader_sid=" + this.apiKey,
           //Referer: "http://reader.livedoor.com/reader/"
@@ -218,7 +228,7 @@ liberator.plugins.pino.api = (function() {
     _getPinnedItems : function() {
       var result = null;
       var request = new libly.Request(
-          LDR_DOMAIN + "/api/pin/all",
+          baseURL() + "/api/pin/all",
           null,
           { asynchronous: false }
       );
@@ -243,7 +253,7 @@ liberator.plugins.pino.api = (function() {
   function getLDRApiKey() {
     var uri = Cc["@mozilla.org/network/io-service;1"]
                 .getService(Ci.nsIIOService)
-                .newURI(LDR_DOMAIN, null, null);
+                .newURI(baseURL(), null, null);
     var cookie = Cc["@mozilla.org/cookieService;1"]
                 .getService(Ci.nsICookieService)
                 .getCookieString(uri, null);
