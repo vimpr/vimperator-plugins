@@ -1,5 +1,5 @@
 //
-//  pino.js (Open livedoorReader pinned items)
+//  pino.js  - Open livedoor Reader (and clone server) pinned items -
 //
 // LICENSE: {{{
 //
@@ -35,12 +35,12 @@ var PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Open livedoor Reader pinned items</description>
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
-  <minVersion>2.0pre</minVersion>
+  <minVersion>2.0</minVersion>
   <maxVersion>2.1pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -137,7 +137,7 @@ liberator.plugins.pino.api = (function() {
   // COMMAND /////////////////////////////////////////////////////// {{{
   commands.addUserCommand(
     ["pinneditemopen", "pino"],
-    "Open livedoor Reader pinned item",
+    "Open livedoor Reader(and clone server) pinned item",
     function(args) {
       let pins = new Pins();
       if (args.string == "") {
@@ -281,9 +281,6 @@ liberator.plugins.pino.api = (function() {
     [encodeURIComponent(i) + "=" + encodeURIComponent(source[i])
         for (i in source)
     ].join('&');
-
-  function $LX(a,b)
-    libly.$U.getFirstNodeFromXPath(a,b);
 
   // }}}
   // API /////////////////////////////////////////////////////////// {{{
