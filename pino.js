@@ -40,7 +40,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -63,7 +63,7 @@ var PLUGIN_INFO =
       default: "reader.livedoor.com"
 
     == API ==
-    plugins.pino.items():
+    plugins.pino.api.items():
       Return pinned items list array.
       Each item is following structure.
       >||
@@ -74,10 +74,10 @@ var PLUGIN_INFO =
       }
       ||<
 
-    plugins.pino.head():
+    plugins.pino.api.head():
       Return head item and remove pin.
 
-    plugins.pino.remove(link):
+    plugins.pino.api.remove(link):
       Remove pin from item that matched by 'link'.
 
   ]]></detail>
