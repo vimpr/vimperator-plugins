@@ -179,7 +179,7 @@ liberator.plugins.pino.api = (function() {
     window.eval(gv.pinoOpenBehavior) || liberator.NEW_BACKGROUND_TAB;
 
   function baseURL()
-    "http://" + (gv.pinoBaseURL || "http://reader.livedoor.com");
+    "http://" + (gv.pinoBaseURL || "reader.livedoor.com");
 
   // }}}
   // CLASS ///////////////////////////////////////////////////////// {{{
