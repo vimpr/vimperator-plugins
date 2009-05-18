@@ -59,8 +59,8 @@ var PLUGIN_INFO =
       default: "false"
 
     g:pinoBaseURL:
-      If you want to use fastladder, set "fastladder.com" into this variable.
-      default: "reader.livedoor.com"
+      If you want to use fastladder, set "http://fastladder.com" into this variable.
+      default: "http://reader.livedoor.com"
 
     == API ==
     plugins.pino.api.items():
@@ -108,8 +108,8 @@ var PLUGIN_INFO =
       default: "false" （新しい順）
 
     g:pinoBaseURL:
-      fastladder を使う場合は、この変数を "fastladder.com" とする。
-      default: "reader.livedoor.com"
+      fastladder を使う場合は、この変数を "http://fastladder.com" とする。
+      default: "http://reader.livedoor.com"
 
     == API ==
     plugins.pino.api.items():
@@ -179,7 +179,7 @@ liberator.plugins.pino.api = (function() {
     window.eval(gv.pinoOpenBehavior) || liberator.NEW_BACKGROUND_TAB;
 
   function baseURL()
-    "http://" + (gv.pinoBaseURL || "reader.livedoor.com");
+    gv.pinoBaseURL || "http://reader.livedoor.com";
 
   // }}}
   // CLASS ///////////////////////////////////////////////////////// {{{
