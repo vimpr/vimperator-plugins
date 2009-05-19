@@ -158,7 +158,7 @@ liberator.plugins.pino.api = (function() {
       count: true,
       completer: function(context) {
         var pins = new Pins();
-        context.title = ["title", "url"];
+        context.title = ["url", "title"];
         context.completions = [
           [i.link, i.title] for each (i in pins.items())
         ];
@@ -234,7 +234,10 @@ liberator.plugins.pino.api = (function() {
       var request = new libly.Request(
           baseURL() + "/api/pin/all",
           null,
-          { asynchronous: false }
+          {
+            asynchronous: false,
+            postBody: toQuery({ApiKey: this.apiKey})
+          }
       );
 
       request.addEventListener("onSuccess", function(data) {
@@ -255,12 +258,13 @@ liberator.plugins.pino.api = (function() {
   var libly = plugins.libly;
 
   function getLDRApiKey() {
-    var uri = Cc["@mozilla.org/network/io-service;1"]
-                .getService(Ci.nsIIOService)
-                .newURI(baseURL(), null, null);
+    var ioService = Cc["@mozilla.org/network/io-service;1"]
+                    .getService(Ci.nsIIOService);
+    var uri = ioService.newURI(baseURL(), null, null);
+    var channel = ioService.newChannelFromURI(uri);
     var cookie = Cc["@mozilla.org/cookieService;1"]
                 .getService(Ci.nsICookieService)
-                .getCookieString(uri, null);
+                .getCookieString(uri, channel);
     var apiKey = cookie.match(/reader_sid=([^;]+)/);
     return apiKey ? apiKey[1]: null;
   }
