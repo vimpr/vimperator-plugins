@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.2</version>
+  <version>1.2.4</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -312,4 +312,11 @@ let self = liberator.plugins.pino = (function() {
   };
   // }}}
 })();
+// for backward compatibility
+self.api = {};
+[
+  self.api[p] = self[p]
+    for each (p in "items head remove".split(' '))
+];
+
 // vim: ts=2 sw=2 et fdm=marker
