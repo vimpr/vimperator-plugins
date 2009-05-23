@@ -304,7 +304,8 @@ let self = liberator.plugins.pino = (function() {
     shift : function()
       (new Pins).shift(),
 
-    head : self.shift,    // @deprecated
+    head : function()   // @deprecated
+      self.shift(),
 
     remove : function(link)
       (new Pins).remove(link),
