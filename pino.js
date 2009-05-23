@@ -36,8 +36,9 @@ var PLUGIN_INFO =
   <description>Open livedoor Reader pinned items</description>
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <maxVersion>2.1</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
+  <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>1.2.2</version>
@@ -63,7 +64,7 @@ var PLUGIN_INFO =
       default: "http://reader.livedoor.com"
 
     == API ==
-    plugins.pino.api.items():
+    plugins.pino.items():
       Return pinned items list array.
       Each item is following structure.
       >||
@@ -74,10 +75,10 @@ var PLUGIN_INFO =
       }
       ||<
 
-    plugins.pino.api.head():
-      Return head item and remove pin.
+    plugins.pino.shift():
+      Return first item and remove pin.
 
-    plugins.pino.api.remove(link):
+    plugins.pino.remove(link):
       Remove pin from item that matched by 'link'.
 
   ]]></detail>
@@ -112,7 +113,7 @@ var PLUGIN_INFO =
       default: "http://reader.livedoor.com"
 
     == API ==
-    plugins.pino.api.items():
+    plugins.pino.items():
       ピンの一覧を配列で取得する。
       ピンのデータ構造は以下のとおりとなっている。
       >||
@@ -123,17 +124,16 @@ var PLUGIN_INFO =
       }
       ||<
 
-    plugins.pino.api.head():
+    plugins.pino.shift():
       先頭のピンを取得して、そのピンを一覧から削除する。
 
-    plugins.pino.api.remove(link):
+    plugins.pino.remove(link):
       linkに該当するピンを一覧から削除する。
 
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
-liberator.plugins.pino = {};
-liberator.plugins.pino.api = (function() {
+let self = liberator.plugins.pino = (function() {
   // COMMAND /////////////////////////////////////////////////////// {{{
   commands.addUserCommand(
     ["pinneditemopen", "pino"],
@@ -143,9 +143,18 @@ liberator.plugins.pino.api = (function() {
       if (args.string == "") {
         let pin;
         let max = (args.count >= 1) ? args.count : openItemsCount();
+        if (pins.items().length == 0) {
+          liberator.echo("Pinned item doesn't exists.");
+          return;
+        }
         for(let i = 0; i < max; i++) {
-          if (!(pin = pins.head())) break;
-          liberator.open(pin.link, openBehavior());
+          if (!(pin = pins.shift()))
+            break;
+          setTimeout(
+            function(link) liberator.open(link, openBehavior()),
+            200 * i,
+            pin.link
+          );
         }
       }
       else {
@@ -199,7 +208,7 @@ liberator.plugins.pino.api = (function() {
       return result.sort(this.sortOrder);
     },
 
-    head : function() {
+    shift : function() {
       if (this.items().length == 0)
         return null;
       var pin = this.items().shift();
@@ -292,12 +301,14 @@ liberator.plugins.pino.api = (function() {
     items : function()
       (new Pins).items(),
 
-    head : function()
-      (new Pins).head(),
+    shift : function()
+      (new Pins).shift(),
+
+    head : self.shift,    // @deprecated
 
     remove : function(link)
       (new Pins).remove(link),
-  }
+  };
   // }}}
 })();
 // vim: ts=2 sw=2 et fdm=marker
