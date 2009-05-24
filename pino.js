@@ -41,13 +41,16 @@ var PLUGIN_INFO =
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.4</version>
+  <version>1.3.0</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
 
     == Commands ==
     :[count]pino
+      Following option is avilable.
+      -list:
+        Show pinned item list.
 
     == Global variables ==
     g:pinoOpenItemsCount:
@@ -88,11 +91,14 @@ var PLUGIN_INFO =
     ことができます。
 
     == コマンド ==
-    :[count]pino
-    そのまま<Enter>で先頭のn件（デフォルト5件、グローバル変数で調整可能）
-    をバックグラウンドのタブで開きます。
-    <TAB>で補完候補の一覧にピンを立てた記事の一覧から選択することもできます。
-    count を指定すると、その件数だけ開きます。
+    :[count]pino:
+      そのまま<Enter>で先頭のn件（デフォルト5件、グローバル変数で調整可能）
+      をバックグラウンドのタブで開きます。
+      <TAB>で補完候補の一覧にピンを立てた記事の一覧から選択することもできます。
+      count を指定すると、その件数だけ開きます。
+      以下のオプションが指定可能です。
+      -list:
+        ピンの一覧を表示します。
 
     == グローバル変数 ==
     g:pinoOpenItemsCount:
@@ -140,6 +146,18 @@ let self = liberator.plugins.pino = (function() {
     "Open livedoor Reader(and clone server) pinned item",
     function(args) {
       let pins = new Pins();
+
+      if (args["-list"]) {
+        let items = pins.items();
+        let list = <div>{items.length} items.<ul>{[
+                      <li><a href={i.link}>{i.title}</a><br/></li>
+                        for each (i in items)
+                   ].reduce(function(a, b) a + b)}
+                   </ul></div>;
+        liberator.echo(list, commandline.FORCE_MULTILINE);
+        return;
+      }
+
       if (args.string == "") {
         let pin;
         let max = (args.count >= 1) ? args.count : openItemsCount();
@@ -150,11 +168,7 @@ let self = liberator.plugins.pino = (function() {
         for(let i = 0; i < max; i++) {
           if (!(pin = pins.shift()))
             break;
-          setTimeout(
-            function(link) liberator.open(link, openBehavior()),
-            200 * i,
-            pin.link
-          );
+          setTimeout(function(link) liberator.open(link, openBehavior()), 200 * i, pin.link);
         }
       }
       else {
@@ -172,6 +186,9 @@ let self = liberator.plugins.pino = (function() {
           [i.link, i.title] for each (i in pins.items())
         ];
       },
+      options: [
+        [["-list", "-l"], commands.OPTION_NOARG]
+      ]
     },
     true    // for Debug
   );
@@ -318,5 +335,4 @@ self.api = {};
   self.api[p] = self[p]
     for each (p in "items head remove".split(' '))
 ];
-
 // vim: ts=2 sw=2 et fdm=marker
