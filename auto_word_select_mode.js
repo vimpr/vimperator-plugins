@@ -154,6 +154,7 @@ const KEY = liberator.globalVariables.auto_word_select_key || 'I';
 if (!modes.AUTO_WORD_SELECT)
   modes.addMode(NEW_MODE, false, function() NEW_MODE);
 
+// MAPPINGS {{{
 mappings.addUserMap(
   [modes.NORMAL, modes.CARET, modes.VISUAL],
   [KEY],
@@ -206,7 +207,8 @@ mappings.add(
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["l"],
   "Move to right word and select.",
   function() {
@@ -215,7 +217,8 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["L"],
   "Extend to right word.",
   function() {
@@ -226,7 +229,8 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["h"],
   "Move to left word and select.",
   function() {
@@ -246,7 +250,8 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["H"],
   "Extend to left word.",
   function() {
@@ -257,7 +262,8 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["j"],
   "Move to below word and select.",
   function() {
@@ -267,7 +273,8 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
-mappings.add( [modes.AUTO_WORD_SELECT],
+mappings.add(
+  [modes.AUTO_WORD_SELECT],
   ["k"],
   "Move to above word and select.",
   function() {
@@ -287,6 +294,39 @@ mappings.add( [modes.AUTO_WORD_SELECT],
   }
 );
 
+// inherites key mappings from CARET mode
+[
+  // keys                     hasCount  caretModeMethod  caretModeArg
+  [["b", "B", "<C-Left>"],       true,  "wordMove",       false],
+  [["w", "W", "e", "<C-Right>"], true,  "wordMove",       true ],
+  [["<C-f>", "<PageDown>"],      true,  "pageMove",       true ],
+  [["<C-b>", "<PageUp>"],        true,  "pageMove",       false],
+  [["gg", "<C-Home>"],           false, "completeMove",   false],
+  [["G", "<C-End>"],             false, "completeMove",   true ],
+  [["0", "^", "<Home>"],         false, "intraLineMove",  false],
+  [["$", "<End>"],               false, "intraLineMove",  true ],
+].map(function(params) {
+  let [keys, hasCount, caretModeMethod, caretModeArg] = params;
+
+  let extraInfo = {};
+  if (hasCount)
+      extraInfo.flags = Mappings.flags.COUNT;
+
+  mappings.add([modes.AUTO_WORD_SELECT], keys, "",
+    function (count) {
+      if (typeof count != "number" || count < 1)
+        count = 1;
+
+      let controller = buffer.selectionController;
+      while (count--)
+        controller[caretModeMethod](caretModeArg, false);
+    },
+    extraInfo
+  );
+});
+
+// }}}
+// PRIVATE FUNCTIONS {{{
 function selectWord() {
   controller().wordMove(true, false);
   controller().wordMove(false, true);
@@ -316,6 +356,7 @@ function selectable() {
 
   return true;
 }
+// }}}
 
 //// for debuging
 //liberator.registerObserver("modeChange", function(oldModes, newModes, stack) {
@@ -326,6 +367,7 @@ function selectable() {
 //});
 //function getModeName(id) modes.getMode(id) ? modes.getMode(id).name : "";
 
+liberator.echo("loading ...");
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
