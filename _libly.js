@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.21</version>
+    <version>0.1.22</version>
     <minVersion>1.2</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -102,7 +102,72 @@ toStyleText(style):
         left: 10px;
     ||<
     のような文字列に変換します。
+
+== Object Request ==
+Request(url, headers, options):
+    コンストラクタ
+    url:
+        HTTPリクエスト先のURL
+    headers:
+        以下のようにHTTPヘッダの値を指定できる（省略可）
+        >||
+        {
+            'Referrer' : 'http://example.com/'
+        }
+        ||<
+        以下の値はデフォルトで設定される（'Content-type'はPOST時のみ）
+        >||
+        {
+            'Accept': 'text/javascript, application/javascript, text/html, application/xhtml+xml, application/xml, text/xml, */*;q=0.1',
+            'Content-type': 'application/x-www-form-urlencoded; charset=' + options.encodingの値
+        }
+        ||<
+
+    options:
+        オプションとして以下のようなオブジェクトを指定できる（省略可）
+        asynchronous:
+            true: 同期モード／false: 非同期モード（デフォルト:true）
+        encoding:
+            エンコーディング（デフォルト: 'UTF-8'）
+        username:
+            BASIC認証時のuser名
+        password:
+            BASIC認証時のパスワード
+        postBody:
+            POSTメソッドにより送信するbody
+addEventLister(name, func):
+    イベントリスナを登録する。
+    name:
+        'onSuccess':
+            成功時
+        'onFailure':
+            失敗を表すステータスコードが返ってきた時
+        'onException':
+            例外発生時
+    func:
+        イベント発火時の処理
+        引数として以下Responseオブジェクトが渡される
+get():
+    GETメソッドによりHTTPリクエストを発行する。
+post():
+    POSTメソッドによりHTTPリクエストを発行する。
+
+== Object Response ==
+HTTPレスポンスを表すオブジェクト
+req:
+    レスポンスと対となるRequestオブジェクト
+doc:
+    レスポンスから生成されたHTMLDocumentオブジェクト
+isSuccess():
+    ステータスコードが成功を表していればtrue、失敗であればfalse
+getStatus():
+    ステータスコードを取得する
+getStatusText():
+    ステータを表す文字列を取得する
+getHTMLDocument(xpath, xmlns, ignoreTags, callback, thisObj):
+    レスポンスからHTMLDocumentオブジェクトを生成し、xpath を評価した結果の snapshot の配列を返す
     ]]></detail>
+
 </VimperatorPlugin>;
 //}}}
 //if (!liberator.plugins.libly) {
