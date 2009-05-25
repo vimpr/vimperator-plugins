@@ -4,18 +4,14 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.0pre</maxVersion>
+    <maxVersion>2.1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
-This plugin use Tombloo library,
-so require install Tombloo Addon.
-http://wiki.github.com/to/tombloo
 
 === TODO ===
-- solve depends Tombloo
 
 ]]></detail>
 </VimperatorPlugin>;
@@ -24,7 +20,6 @@ http://wiki.github.com/to/tombloo
 (function(){
 
 var loginManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-var Tombloo = Cc["@brasil.to/tombloo-service;1"].getService().wrappedJSObject;
 
 var services = {
     pixiv: {
@@ -140,33 +135,24 @@ function Service(service) //{{{
         if (service.extraField && !self.setExtraField(content)) return false;
 
         let loginURL = host+service.LOGIN;
+        let error = function(e) liberator.echo('login failed "'+host+'" as '+username);
+        let success = function(e) liberator.echo('login "'+host+'" as '+username);
+        let login = function() request(loginURL, content, success, error);
         if (service.logoutBeforeLogin) {
             let logoutURL = host+service.LOGOUT;
-            if (request(logoutURL, content).addCallback(function()
-                request(loginURL, content)
-                .addCallback(function()
-                    liberator.echo('login "'+host+'" as '+username)))) return true;
+            return request(logoutURL, content, login, error);
         }
 
-        if (request(loginURL, content).addCallback(function()
-            liberator.echo('login "'+host+'" as '+username))) return true;
-
-        liberator.echoerr('login failed "'+host+'" as '+username);
-        return false;
+        login();
     };
     self.logout = function(){
         let content = {};
         let host = service.HOST[0];
         if (service.extraField && !self.setExtraField(content)) return false;
         let logoutURL = host+service.LOGOUT;
-        if (request(loginURL, content).addCallback(function()
-            liberator.echo('logout "'+host+'"'))) return true;
-
-        liberator.echoerr('logout failed "'+host+'"');
-        return false;
-        return request(logoutURL, content)
-            .addCallback(function()
-                liberator.echo('logout "'+host+'"'));
+        let error = function() liberator.echo('logout failed "'+host+'" as '+username);
+        let success = function() liberator.echo('logout "'+host+'" as '+username);
+        request(logoutURL, content, success, error);
     };
     self.getLogins = function() {
         return [loginManager.findLogins({}, host, host, null) for each(host in service.HOST)]
@@ -212,9 +198,16 @@ function Service(service) //{{{
     }
 } //}}}
 
-function request(url, content)
+function encode(content)
+    [k+"="+encodeURIComponent(content[k]) for(k in content)].join("&");
+function request(url, content, onload, onerror)
 {
-    return Tombloo.request(url, {sendContent: content});
+    let req = new XMLHttpRequest;
+    req.open("POST", url, false);
+    req.onload = onload;
+    req.onerror = onerror;
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.send(encode(content));
 }
 function tokenGetter(pattern) //{{{
 {
@@ -261,7 +254,6 @@ commands.addUserCommand(["logout"], "Logout",
         },
     });
 // }}}
-
 
 })();
 // vim: fdm=marker sw=4 ts=4 et:
