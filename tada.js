@@ -15,11 +15,11 @@ var PLUGIN_INFO =
   <description>Show ToDo items in commandline buffer. Also add item to your Ta-da list.</description>
   <description lang="ja">コマンドラインバッファからTa-Da list のToDo一覧を参照したり、からToDo項目を追加したりします。</description>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.8</version>
+  <version>0.8.1</version>
   <detail><![CDATA[
     == Subject ==
     Show ToDo items in commandline buffer.
@@ -150,18 +150,6 @@ liberator.plugins.tada = (function(){
     "Clear Ta-da lists cache",
     function() cachedLists = []
   );
-
-// }}}
-// PUBLIC {{{
-  var PUBLICS = {
-    // for DEBUG {{{
-    // getListId: getListId,
-    // getDefaultListId: getDefaultListId,
-    // getLists: getLists,
-    // showTodoItems: showTodoItems,
-    // addTodoItem: addTodoItem,
-    // }}}
-  };
 // }}}
 // PRIVATE {{{
 
@@ -225,8 +213,7 @@ liberator.plugins.tada = (function(){
 
     req.addEventListener('onSuccess', function(data) {
       liberator.log("success");
-      data.getHTMLDocument();
-      $LXs("//div[@id='Container']/div[2]/div/div/ul/li/a", data.doc).forEach(function(item){
+      data.getHTMLDocument("//div[@id='Container']/div[2]/div/div/ul/li/a").forEach(function(item){
         var left = $LX("../span/strong[text()]", item);
         cachedLists.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
       });
@@ -240,21 +227,25 @@ liberator.plugins.tada = (function(){
   }
 
   function showTodoItems(listId) {
-    var req = new libly.Request(getURI() + listId.toString());
+    let list = <ul></ul>;
+    getTodoItems(listId).forEach(function(item) {
+      list.li += <li>{item}</li>;
+    });
+    liberator.echo(list, commandline.FORCE_MULTILINE);
+  }
 
-    req.addEventListener('onSuccess', function(data) {
+  function getTodoItems(listId) {
+    let result = [];
+    var req = new libly.Request(getURI() + listId.toString(), null, {asynchronous: false});
+
+    req.addEventListener('onSuccess', function(res) {
       liberator.log("success");
-      data.getHTMLDocument();
-
-      var list = <ul></ul>;
-      $LXs("//ul[@id='incomplete_items']/li/form", data.doc).forEach(function(item){
-        list.li += <li>{item.textContent.replace(/^\s*|\n|\r|\s*$/g, '')}</li>;
+      res.getHTMLDocument("//ul[@id='incomplete_items']/li/form").forEach(function(item) {
+        result.push(item.textContent.replace(/^\s*|\n|\r|\s*$/g, ''));
       });
-
-      liberator.echo(list.toXMLString(), commandline.FORCE_MULTILINE);
-      liberator.log(list.toXMLString());
     });
     req.get();
+    return result;
   }
 
   function addTodoItem([listId, listName], content) {
@@ -300,7 +291,12 @@ liberator.plugins.tada = (function(){
   function $LXs(a,b) libly.$U.getNodesFromXPath(a, b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a, b);
 
-  return PUBLICS;
+// }}}
+// PUBLIC {{{
+  return {
+    getLists: getLists,
+    getTodoItems: getTodoItems,
+  };
 // }}}
 })();
 
