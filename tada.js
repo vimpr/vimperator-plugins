@@ -19,7 +19,8 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.8.1</version>
+  <version>0.9.0</version>
+  <require type="plugin">_libly.js</require>
   <detail><![CDATA[
     == Subject ==
     Show ToDo items in commandline buffer.
@@ -38,17 +39,21 @@ var PLUGIN_INFO =
 
     == Command ==
     Usage:
-      tada [list name] [subject]
-      - Show default list if no parameter supplied.
-      - Show specified list if 'list name' is supplied.
-      - Add todo item to default list if 'list name' is not supplied and 'subject' is supplied.
-      - Add todo item to specified list if 'list name' and 'subject' are supplied.
+      :tada [list name] [subject]:
+        Show default list unless 'list name' supplied.
+        Show specified list if 'list name' is supplied.
+        Add todo item to default list if 'list name' is not supplied and 'subject' is supplied.
+        Add todo item to specified list if 'list name' and 'subject' are supplied.
 
-      tadamail
-      - Send list to registered mail address.
+      :tada -open [list name]:
+        Open default list unless 'list name' supplied.
+        Open specified list if 'list name' is supplied.
 
-      tadaclearcache
-      - Clear cache data.
+      :tadamail:
+        Send list to registered mail address.
+
+      :tadaclearcache:
+        Clear cache data.
 
     == ToDo ==
       - 'Done' functionlity.
@@ -73,17 +78,21 @@ var PLUGIN_INFO =
 
     == コマンド ==
     Usage:
-      tada [list name] [subject]
-      - パラメタが省略された場合、デフォルトのリストの内容が表示されます。
-      - 'list name' が指定された場合、該当リストの内容が表示されます。
-      - 'list name' が指定されず 'subject' のみ指定されている場合、デフォルトのリストに'subject'の内容を追加します。
-      - 'list name' も 'subject' も指定されている場合、該当リストに'subject'の内容を追加します。
+      :tada [list name] [subject]:
+        パラメタが省略された場合、デフォルトのリストの内容が表示されます。
+        'list name' が指定された場合、該当リストの内容が表示されます。
+        'list name' が指定されず 'subject' のみ指定されている場合、デフォルトのリストに'subject'の内容を追加します。
+        'list name' も 'subject' も指定されている場合、該当リストに'subject'の内容を追加します。
 
-      tadamail
-      - Ta-da lists に登録されているアドレスにリストを送ります。
+      :tada -open [list name]:
+        'list name' が省略された場合、デフォルトのリストのページ開きます。
+        'list name' が指定された場合、該当リストのページを開きます。
 
-      clearcache
-      - キャッシュされたデータを破棄します
+      :tadamail:
+        Ta-da lists に登録されているアドレスにリストを送ります。
+
+      :clearcache:
+        キャッシュされたデータを破棄します
 
     == ToDo ==
       - 'Done'機能の実装
@@ -95,49 +104,65 @@ var PLUGIN_INFO =
 // }}}
 
 liberator.plugins.tada = (function(){
-// COMMAND {{{
+// COMMAND ////////////////////////////////////////////////////////////{{{
   commands.addUserCommand(
     ["tada"],
     "Show / Add ToDo items to Ta-Da list. (:tada [LISTNAME] [SUBJECT])",
     function(args) {
-
-      var listId;
-      switch (args.length)
-      {
-      case 0:
-       showTodoItems(getDefaultListId());
-       break;
-      case 1:
-       if (listId = getListId(args[0]))
-         showTodoItems(listId);
-       else
-         addTodoItem(getDefaultListId(), args[0]);
-       break;
-      default:
-       if (listId = getListId(args[0]))
-         addTodoItem([listId, args[0]], args[1]);
-       else
-         addTodoItem(getDefaultListId(), args.join(' '));
-      }
+        liberator.echo("Please wait ...");
+        let action = parseAction(args, args["-open"]);
+        action();
     }, {
       completer: tadaListCompleter,
       argCount: "*",
+      options: [
+        [["-open", "-o"], commands.OPTION_NOARG]
+      ],
       literal: true
     },
     true  // for DEVELOP
   );
 
+  function parseAction(args, isOpen) {
+    let listId;
+    let defaultListIdName = getDefaultListIdName();
+    let defaultListURI = getURI() + defaultListIdName[0];
+
+    switch (args.length) {
+    case 0:
+      // Open default tada list page
+      if (isOpen)
+        return function() liberator.open(defaultListURI, liberator.NEW_TAB);
+      // list default list items
+      return function() showTodoItems(defaultListIdName);
+
+    case 1:
+      // list name or tado item for default list.
+      if (listId = getListId(args[0])) {
+        if (isOpen)
+          return function() liberator.open(getURI() + listId, liberator.NEW_TAB);
+        return function() showTodoItems(listId);
+      }
+      if (isOpen)
+        return function() liberator.open(defaultListURI, liberator.NEW_TAB);
+      return function() addTodoItem(defaultListIdName, args[0]);
+    }
+
+    if (isOpen)
+        return function() liberator.open(defaultListURI, liberator.NEW_TAB);
+    // list name / tado item for selected list or
+    // tado item for default list
+    if (listId = getListId(args[0]))
+      return function() addTodoItem([listId, args[0]], args[1]);
+    return function() addTodoItem(defaultListIdName, args.join(' '));
+  }
+
   commands.addUserCommand(
     ["tadamail"],
     "Mail Ta-Da list. (:tadamail [LISTNAME])",
     function(args) {
-      //
-      switch(args.length) {
-      case 0:
-        break;
-      default:
+      if (args.length > 0)
         sendEmail([getListId(args[0]), args[0]]);
-      }
     }, {
       completer: tadaListCompleter,
       argCount: "*"
@@ -148,10 +173,11 @@ liberator.plugins.tada = (function(){
   commands.addUserCommand(
     ["tadaclearcache"],
     "Clear Ta-da lists cache",
-    function() cachedLists = []
+    function()
+      cachedLists = []
   );
 // }}}
-// PRIVATE {{{
+// PRIVATE ////////////////////////////////////////////////////////////{{{
 
   function tadaListCompleter(context, args) {
     if (args.length > 1)
@@ -161,9 +187,8 @@ liberator.plugins.tada = (function(){
   }
 
   function getURI() {
-    if (userId = g('tada_userId'))
+    if (userId = $g('tada_userId'))
       return "http://" + userId + ".tadalist.com/lists/";
-
     throw "Please specify your user id to global variable 'tada_userId'.";
   }
 
@@ -171,7 +196,6 @@ liberator.plugins.tada = (function(){
     let m;
     if (m = source.match(/\/lists\/([0-9]+)/))
       return m[1];
-
     return source;
   }
 
@@ -180,7 +204,6 @@ liberator.plugins.tada = (function(){
     for(var i in list) {
       if (list[i][1] == name) return list[i][0];
     }
-
     return null;
   }
 
@@ -189,11 +212,11 @@ liberator.plugins.tada = (function(){
   //         1.Use global variable g:tadaDefaultListName if specified.
   //         2.Use first list if global variable not specified or specified list name is not
   //           exist in your lists.
-  function getDefaultListId() {
+  function getDefaultListIdName() {
     var defaultId;
     var defaultName;
 
-    if (defaultName = g('tadaDefaultListName'))
+    if (defaultName = $g('tadaDefaultListName'))
       if (defaultId = getListId(defaultName))
         return [defaultId, defaultName];
 
@@ -287,12 +310,13 @@ liberator.plugins.tada = (function(){
   }
 
   // Utilities
-  function g(str)    liberator.globalVariables[str];
+  function $s(obj)   util.objectToString(obj);
+  function $g(str)   liberator.globalVariables[str];
   function $LXs(a,b) libly.$U.getNodesFromXPath(a, b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a, b);
 
 // }}}
-// PUBLIC {{{
+// API ////////////////////////////////////////////////////////////////{{{
   return {
     getLists: getLists,
     getTodoItems: getTodoItems,
