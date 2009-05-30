@@ -146,14 +146,21 @@ let self = liberator.plugins.pino = (function() {
     "Open livedoor Reader(and clone server) pinned item",
     function(args) {
       let pins = new Pins();
+      let items = pins.items();
+      if (items.length == 0) {
+        liberator.echo("Pinned item doesn't exists.");
+        return;
+      }
 
       if (args["-list"]) {
-        let items = pins.items();
-        let list = <div>{items.length} items.<ul>{[
-                      <li><a href={i.link}>{i.title}</a><br/></li>
+        //let items = pins.items();
+        let list = <div>{items.length} items.
+                    <ul>{
+                      [<li><a href={i.link}>{i.title}</a><br/></li>
                         for each (i in items)
-                   ].reduce(function(a, b) a + b)}
-                   </ul></div>;
+                      ].reduce(function(a, b) a + b)
+                    }</ul>
+                   </div>;
         liberator.echo(list, commandline.FORCE_MULTILINE);
         return;
       }
@@ -161,10 +168,6 @@ let self = liberator.plugins.pino = (function() {
       if (args.string == "") {
         let pin;
         let max = (args.count >= 1) ? args.count : openItemsCount();
-        if (pins.items().length == 0) {
-          liberator.echo("Pinned item doesn't exists.");
-          return;
-        }
         for(let i = 0; i < max; i++) {
           if (!(pin = pins.shift()))
             break;
