@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -147,7 +147,7 @@ let self = liberator.plugins.pino = (function() {
     function(args) {
       let pins = new Pins();
       let items = pins.items();
-      if (items.length == 0) {
+      if (!items || items.length == 0) {
         liberator.echo("Pinned item doesn't exists.");
         return;
       }
@@ -225,7 +225,7 @@ let self = liberator.plugins.pino = (function() {
       let result = this.cache
               ? this.cache
               : this.cache = this._getPinnedItems();
-      return result.sort(this.sortOrder);
+      return (result || []).sort(this.sortOrder);
     },
 
     shift : function() {
@@ -270,12 +270,14 @@ let self = liberator.plugins.pino = (function() {
       );
 
       request.addEventListener("onSuccess", function(data) {
-        liberator.log(data);
+        if (isLoginPage(data)) {
+          liberator.echoerr("Can't get pinned list. Maybe you should login to livedoor.");
+          return;
+        }
         result = liberator.eval(data.responseText);
       });
       request.addEventListener("onFailure", function(data) {
         liberator.echoerr("Can't get pinned list!!!");
-        liberator.log(data);
       });
       request.post();
 
@@ -314,6 +316,9 @@ let self = liberator.plugins.pino = (function() {
     [encodeURIComponent(i) + "=" + encodeURIComponent(source[i])
         for (i in source)
     ].join('&');
+
+  function isLoginPage(response)
+    response.responseText.substr(0, 5) == '<?xml'
 
   // }}}
   // API /////////////////////////////////////////////////////////// {{{
