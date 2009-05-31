@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.13</version>
+    <version>0.0.14</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
     <maxVersion>2.1pre</maxVersion>
@@ -59,7 +59,8 @@ let ignorePages = liberator.globalVariables.marker_reader_ignore ||
 /^http:\/\/(?:reader\.livedoor|fastladder)\.com\/(?:reader|public)\//];
 
 function near(p1, p2, e) p1-e <= p2 && p2 <= p1+e;
-function focusDocument(win) {
+function focusDocument(win)
+{
     let frames = win.frames;
     if (!frames) return win.document;
     for (let i=0,len=win.frames.length;i<len;++i) {
@@ -67,6 +68,29 @@ function focusDocument(win) {
         if (doc.hasFocus()) return doc;
     }
     return win.document;
+}
+function autoInsert(win)
+{
+    let uri = win.location.href;
+    if (ignorePages.some(function(r) r.test(uri))) return;
+    let doc = win.document;
+    if (!(doc instanceof HTMLDocument)) return;
+    if (doc.contentType != "text/html") return;
+
+    reader.removeMarkers(doc);
+    reader.insertMarkers(doc);
+
+    let frames = win.frames; for (let i=0,len=frames.length;i<len;++i) autoInsert(frames[i]);
+}
+function onResize(event)
+{
+    let win = event.target;
+    autoInsert(win);
+}
+function onLoad(event)
+{
+    let win = (event.target.contentDocument||event.target).defaultView;
+    autoInsert(win);
 }
 
 var reader = {
@@ -87,8 +111,10 @@ var reader = {
     // insertMarkers have to act synchronized function
     insertMarkers: function(doc)
     {
+        // this operation have to atomic {
         if (doc.markers) return false;
         doc.markers = [];
+        // }
 
         let win = doc.defaultView;
 
@@ -104,7 +130,7 @@ var reader = {
         let scroll = win.innerHeight * scroll_ratio;
         let count = Math.ceil(win.scrollMaxY / scroll);
 
-        for (let pageNum=1;pageNum<=count+1;++pageNum)
+        for (let pageNum=2;pageNum<=count+1;++pageNum)
         {
             let p = doc.createElementNS(HTML_NAMESPACE, "p");
             let id = "vimperator-marker_reader-" + pageNum;
@@ -112,6 +138,7 @@ var reader = {
             if (liberator.globalVariables.marker_reader_pagelink) {
                 p.innerHTML = '<a href="#' + id + '">' + pageNum + "</a>";
             } else {
+                p.setAttribute("mousethrough", "always");
                 //p.innerHTML = "";
             }
             p.className = "vimperator-marker_reader-marker";
@@ -126,13 +153,21 @@ var reader = {
     // removeMarkers have to act synchronized function
     removeMarkers: function(doc)
     {
+        // this operation have to atomic {
         let markers = doc.markers;
         if (!markers) return false;
         doc.markers = null;
+        // }
 
         for (let i=0,len=markers.length;i<len;++i)
         {
             doc.body.removeChild(markers[i]);
+        }
+        let win = doc.defaultView;
+        let frames = win.frames;
+        if (frames) {
+            for (let i=0,len=frames.length;i<len;++i)
+                if (!reader.removeMarkers(frames[i].document)) return false;
         }
         return true;
     },
@@ -161,7 +196,7 @@ var reader = {
         }
 
         // return n.5 if between n and n+1
-        let page = 1.0;
+        let page = 2.0;
         for (let i=0,len=markers.length;i<len;++i)
         {
             let pos = parseInt(markers[i].offsetTop);
@@ -198,6 +233,16 @@ var reader = {
 
         win.scrollTo(win.scrollX, win.scrollMaxY);
         return true;
+    },
+    setAutoInsert: function(set)
+    {
+        if (!set) {
+            window.removeEventListener("resize", onResize, true);
+            gBrowser.removeEventListener("load", onLoad, true);
+        } else {
+            window.addEventListener("resize", onResize, true);
+            gBrowser.addEventListener("load", onLoad, true);
+        }
     },
 };
 
@@ -239,34 +284,8 @@ commands.addUserCommand(["markerprev", "mprev"], "marker PageUp",
         reader.focusNavi(focusDocument(content), -1);
     });
 
-if (liberator.globalVariables.marker_reader_onload !== 0) {
-    function autoInsert(win)
-    {
-        //if (win.frameElement) return;
-        let uri = win.location.href;
-        if (ignorePages.some(function(r) r.test(uri))) return;
-        let doc = win.document;
-        if (!(doc instanceof HTMLDocument)) return;
-        if (doc.contentType != "text/html") return;
-
-        reader.removeMarkers(doc);
-        reader.insertMarkers(doc);
-
-        let frames = win.frames;
-        for (let i=0,len=frames.length;i<len;++i) autoInsert(frames[i]);
-    }
-    function onResize(event)
-    {
-        let win = event.target;
-        autoInsert(win);
-    }
-    function onLoad(event)
-    {
-        let win = (event.target.contentDocument||event.target).defaultView;
-        autoInsert(win);
-    }
-    window.addEventListener("resize", onResize, true);
-    gBrowser.addEventListener("load", onLoad, true);
+if (liberator.globalVariables.marker_reader_onload) {
+    reader.setAutoInsert(true);
 }
 
 return reader;
