@@ -19,7 +19,7 @@ var PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.9.0</version>
+  <version>0.10.0</version>
   <require type="plugin">_libly.js</require>
   <detail><![CDATA[
     == Subject ==
@@ -116,7 +116,7 @@ liberator.plugins.tada = (function(){
       completer: tadaListCompleter,
       argCount: "*",
       options: [
-        [["-open", "-o"], commands.OPTION_NOARG]
+        [["-open", "-o"], commands.OPTION_NOARG],
       ],
       literal: true
     },
@@ -155,6 +155,36 @@ liberator.plugins.tada = (function(){
     if (listId = getListId(args[0]))
       return function() addTodoItem([listId, args[0]], args[1]);
     return function() addTodoItem(defaultListIdName, args.join(' '));
+  }
+
+  commands.addUserCommand(
+    ["done"],
+    "Done to-do item.",
+    function(args) {
+      let listId = getListId(args[0]);
+      let itemId = args[1];
+
+      liberator.echo("Done...");
+      doneItem(listId, itemId);
+    },{
+      completer : function(context, args) {
+        context.title = ["id", "title"];
+        context.completions = args.length <= 1
+                                ? tadaListCompleter(context, args)
+                                : tadaItemCompleter(args[0]);
+      },
+      argCount : "*",
+      literal  : 1,
+    },
+    true
+  );
+
+  function tadaItemCompleter(listName) {
+    let result = [];
+    getTodoItems(getListId(listName)).forEach(function(item) {
+      result.push([item.itemId, item.title]);
+    });
+    return result;
   }
 
   commands.addUserCommand(
@@ -224,39 +254,39 @@ liberator.plugins.tada = (function(){
     return [lists[0][0], lists[0][1]];
   }
 
-  var cachedLists = [];
-
   // Get Your 'MyLists'
   // @return [[id, name, left], .... ]
   function getLists() {
-    if (cachedLists.length > 0)
-      return cachedLists;
-
+    let result = [];
     var req = new libly.Request(getURI(), null, {asynchronous: false});
 
     req.addEventListener('onSuccess', function(data) {
       liberator.log("success");
       data.getHTMLDocument("//div[@id='Container']/div[2]/div/div/ul/li/a").forEach(function(item){
         var left = $LX("../span/strong[text()]", item);
-        cachedLists.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
+        result.push([parseListId(item.href), item.innerHTML, left.innerHTML]);
       });
     });
     req.get();
 
-    if (cachedLists.length == 0)
+    if (result.length == 0)
       throw "Cannot get your list. Please chehek " + getURI() + " is accessible.";
 
-    return cachedLists;
+    return result;
   }
 
   function showTodoItems(listId) {
     let list = <ul></ul>;
     getTodoItems(listId).forEach(function(item) {
-      list.li += <li>{item}</li>;
+      list.li += <li>{item.title}</li>;
     });
     liberator.echo(list, commandline.FORCE_MULTILINE);
   }
 
+  /*
+   * getTodoItems
+   * @return  [[itemId, title], [itemId, title] ... ]
+   */
   function getTodoItems(listId) {
     let result = [];
     var req = new libly.Request(getURI() + listId.toString(), null, {asynchronous: false});
@@ -264,7 +294,10 @@ liberator.plugins.tada = (function(){
     req.addEventListener('onSuccess', function(res) {
       liberator.log("success");
       res.getHTMLDocument("//ul[@id='incomplete_items']/li/form").forEach(function(item) {
-        result.push(item.textContent.replace(/^\s*|\n|\r|\s*$/g, ''));
+        result.push({
+          itemId : item.id.match(/edit_item_([^\"]+)/)[1],
+          title  : item.textContent.replace(/^\s*|\n|\r|\s*$/g, '')
+        });
       });
     });
     req.get();
@@ -309,11 +342,38 @@ liberator.plugins.tada = (function(){
     req.post();
   }
 
+  function doneItem(listId, itemId) {
+    let endpoint = getURI() + listId + "/items/" + itemId;
+    liberator.dump("endpoint: " + endpoint);
+
+    var req = new libly.Request(endpoint, null,
+        {
+          postBody: toQuery({
+            "_method" : "put",
+            "item[completed]" : "1",
+          })
+        }
+    );
+    req.addEventListener('onSuccess', function(data) {
+      liberator.echo("Done: " + itemId);
+    });
+    req.addEventListener('onFailure', function(data) {
+      liberator.echoerr("Done item failed.");
+      liberator.log(data.responseText);
+    });
+    req.post();
+  }
+
   // Utilities
   function $s(obj)   util.objectToString(obj);
   function $g(str)   liberator.globalVariables[str];
   function $LXs(a,b) libly.$U.getNodesFromXPath(a, b);
   function $LX(a,b)  libly.$U.getFirstNodeFromXPath(a, b);
+  function toQuery(source)
+    [encodeURIComponent(i) + "=" + encodeURIComponent(source[i])
+        for (i in source)
+    ].join('&');
+
 
 // }}}
 // API ////////////////////////////////////////////////////////////////{{{
