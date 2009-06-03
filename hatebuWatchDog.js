@@ -13,7 +13,7 @@ plugins.hatebuWatchDog = (function() {
   let tasks = [];
 
   function addTask(target) {
-    liberator.echo(target.site);
+    liberator.dump(target.site);
     const MINUTE = 60; // sec.
     interval = getInterval() || (10 * MINUTE);       // default 10 min.
     interval = Math.max(interval, MINUTE);      // lower limt is 1 min.
@@ -39,7 +39,7 @@ plugins.hatebuWatchDog = (function() {
       function(currentValue) {
         let delta =  currentValue - target.previousValue;
         if (delta || notifyAlways()) {
-          showHatebuNotification(target, currentValue, delta);
+          showHatebuNotification(target.site, currentValue, delta);
         }
         target.previousValue = currentValue;
       },
@@ -83,13 +83,13 @@ plugins.hatebuWatchDog = (function() {
   function notifyAlways()
     window.eval(liberator.globalVariables.hatebuWatchDogAlways) || false;
 
-  function showHatebuNotification(target, currentValue, delta) {
+  function showHatebuNotification(targetSite, currentValue, delta) {
     let title = delta > 0 ? "\u304A\u3081\u3067\u3068\u3046\u3054\u3056\u3044\u307E\u3059"  // good news
               :(delta < 0 ? "\u6B8B\u5FF5\u306A\u304A\u77E5\u3089\u305B"                    // bad news
               :             "\u304A\u77E5\u3089\u305B");
     let suffix = delta != 0 ? "\u306B\u306A\u308A\u307E\u3057\u305F\u3002"
                             : "\u3067\u3059\u3002";
-    let message = "'" + target + "' \u306E\u88AB\u306F\u3066\u30D6\u6570\u306F '" +
+    let message = "'" + targetSite + "' \u306E\u88AB\u306F\u3066\u30D6\u6570\u306F '" +
                   currentValue + "' " + suffix + " (" + getSignedNum(delta) + ")";
 
     showAlertNotification(null, title, message);
