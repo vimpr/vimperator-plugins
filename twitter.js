@@ -18,6 +18,11 @@
 //      fav someone's last status..
 //  :twitter!- someone
 //      un-fav someone's last status..
+let PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
+</VimperatorPlugin>;
 
 (function(){
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
@@ -121,13 +126,23 @@
                          title={status.user.screen_name}
                          class="twitter photo"/>
                     <strong>{status.user.name}&#x202C;</strong>
-                    : <span class="twitter entry-content">{status.text}</span>
+                    : <span class="twitter entry-content">{detectLink(status.text)}</span>
                 </>.toSource()
                    .replace(/(?:\r\n|[\r\n])[ \t]*/g, " "))
                         .join("<br/>");
 
         //liberator.log(html);
         liberator.echo(html, true);
+    }
+    function detectLink(str) {
+        let m = str.match(/https?:\/\/\S+/);
+        if (m) {
+            let left = str.substr(0, m.index);
+            let url = m[0];
+            let right = str.substring(m.index + m[0].length);
+            return <>{detectLink(left)}<a highlight="URL" href={url}> {url} </a>{detectLink(right)}</>;
+        }
+        return str;
     }
     function showTwitterSearchResult(word){
         var xhr = new XMLHttpRequest();
