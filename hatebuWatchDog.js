@@ -36,11 +36,11 @@ let PLUGIN_INFO =
   <description>Make notify hatebu-count when specified site's hatebu-count changed.</description>
   <description lang="ja">指定されたサイトのはてブ数を監視、変動があったらお知らせします。</description>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatebuWatchDog.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.0</version>
+  <version>1.1.0</version>
   <detail><![CDATA[
     == Subject ==
       Make notify hatebu-count when specified site's hatebu-count changed.
