@@ -34,7 +34,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Make notify hatebu-count when specified site's hatebu-count changed.</description>
-  <description lang="ja">$B;XDj$5$l$?%5%$%H$N$O$F%V?t$r4F;k!"JQF0$,$"$C$?$i$*CN$i$;$7$^$9!#(B</description>
+  <description lang="ja">指定されたサイトのはてブ数を監視、変動があったらお知らせします。</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatebuWatchDog.js</updateURL>
@@ -64,28 +64,28 @@ let PLUGIN_INFO =
 
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    == $B35MW(B ==
-      $B;XDj$5$l$?%5%$%H$NHo$O$F%V?t$r4F;k$7$F!"$=$N?tCM$KJQF0$,$"$C$?$i$*CN$i$;$7$^$9!#(B
-      $B;H$$J}$O!"$3$N%9%/%j%W%H$r(BVimperator$B$N(Bplugin$B%G%#%l%/%H%j$K3JG<$9$k$@$1$G$9!#(B
+    == 概要 ==
+      指定されたサイトの被はてブ数を監視して、その数値に変動があったらお知らせします。
+      使い方は、このスクリプトをVimperatorのpluginディレクトリに格納するだけです。
 
-    == $B%0%m!<%P%kJQ?t(B ==
+    == グローバル変数 ==
       g:hatebuWatchDogInterval:
-        Number. $B4F;k$N4V3V(B($BIC(B). $B%G%U%)%k%H(B600 $B@_Dj2DG=$J:G>.CM(B:60
+        Number. 監視の間隔(秒). デフォルト600 設定可能な最小値:60
       g:hatebuWtachDogTargets:
         String. Sites where it wants you to watch
-        $B4F;kBP>]$N%5%$%H$,0l$D$@$1$N>l9g$O0J2<$N$h$&$K@_Dj$7$^$9!#(B
+        監視対象のサイトが一つだけの場合は以下のように設定します。
         >||
           :let g:hatebuWatchDogTargets = "http://d.hatena.ne.jp/snaka72/"
         ||<
-        $B4F;kBP>]$N%5%$%H$,$,J#?t$N>l9g$O0J2<$N$h$&$K@_Dj$7$^$9!#(B
+        監視対象のサイトがが複数の場合は以下のように設定します。
         >||
           :let g:hatebuWatchDogTargets = "['http://d.hatena.ne.jp/snaka72/', 'http://vimperator.g.hatena.ne.jp/snaka72/']"
         ||<
       g:hatebuWatchDogAlways:
-        Boole. $BKh2sJs9p$r5s$2$k$+$I$&$+!#%G%U%)%k%H(B:false $B!J<g$K$G%P%C%0MQ!K(B
+        Boole. 毎回報告を挙げるかどうか。デフォルト:false （主にでバッグ用）
 
     == ToDo ==
-      - $B?7Ce%V%C%/%^!<%/$N%f!<%6(Bid$B$H%3%a%s%H$NI=<((B
+      - 新着ブックマークのユーザidとコメントの表示
 
     ]]></detail>
   </VimperatorPlugin>;
