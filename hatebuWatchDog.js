@@ -183,7 +183,7 @@ let publics = plugins.hatebuWatchDog = (function() {
 
   function growl() Components.classes['@growlforwindows.com/growlgntp;1']
                    .getService().wrappedJSObject;
-  const growlIcon = "http://img.f.hatena.ne.jp/images/fotolife/s/snaka72/20090608/20090608045633.gif";  // temporary
+  const growlIcon = "http://img.f.hatena.ne.jp/images/fotolife/s/snaka72/20090608/20090608082837.png";  // temporary
 
   function growlRegister() {
     growl().register(
