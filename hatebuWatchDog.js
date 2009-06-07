@@ -40,7 +40,7 @@ let PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatebuWatchDog.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <detail><![CDATA[
     == Subject ==
       Make notify hatebu-count when specified site's hatebu-count changed.
@@ -144,23 +144,57 @@ let publics = plugins.hatebuWatchDog = (function() {
     let message = "'" + targetSite + "' \u306E\u88AB\u306F\u3066\u30D6\u6570\u306F '" +
                   currentValue + "' " + suffix + " (" + getSignedNum(delta) + ")";
 
-    showAlertNotification(null, title, message);
-  }
-
-  function showAlertNotification(icon, title, message) {
-    Cc['@mozilla.org/alerts-service;1']
-    .getService(Ci.nsIAlertsService)
-    .showAlertNotification(
-      icon, //'chrome://mozapps/skin/downloads/downloadIcon.png',
-      title,
-      message
-    );
+    //showAlertNotification(null, title, message);
+    //publics.notify(title, message);
+    (getNotifier())(title, message);
   }
 
   function getSignedNum(num) {
     if (num > 0) return "+" + num;
     if (num < 0) return "-" + Math.abs(num);
     return "0";
+  }
+
+  let _notifier = null;
+  const GROWL_EXTENSION_ID = "growlgntp@brian.dunnington";
+
+  function getNotifier() {
+    if (_notifier) return _notifier;
+
+    if (Application.extensions.has(GROWL_EXTENSION_ID) &&
+        Application.extensions.get(GROWL_EXTENSION_ID).enabled) {
+      _notifier = publics.notify;
+    }
+    else {
+      _notifier = showAlertNotification;
+    }
+    return _notifier;
+  } 
+
+  function showAlertNotification(title, message) {
+    Cc['@mozilla.org/alerts-service;1']
+    .getService(Ci.nsIAlertsService)
+    .showAlertNotification(
+      null, //'chrome://mozapps/skin/downloads/downloadIcon.png',
+      title,
+      message
+    );
+  }
+
+  function growl() Components.classes['@growlforwindows.com/growlgntp;1']
+                   .getService().wrappedJSObject;
+  const growlIcon = "http://img.f.hatena.ne.jp/images/fotolife/s/snaka72/20090608/20090608045633.gif";  // temporary
+
+  function growlRegister() {
+    growl().register(
+      PLUGIN_INFO.name,
+      growlIcon,
+      [
+        {name: 'announce', displayName: 'Announce from hatebuWatchDog'},
+        {name: 'sadlynews',displayName: 'Sadly announce from hatebuWatchdog'},
+        {name: 'failed',   displayName: 'Erroer report from hatebuWatchdog'}
+      ]
+    ); 
   }
 
   function getInterval()
@@ -242,6 +276,16 @@ let publics = plugins.hatebuWatchDog = (function() {
         function() {
           liberator.echoerr("Cannot get current value.");
         }
+      );
+    },
+    
+    notify: function(title, message) {
+      growlRegister();
+      growl().notify(
+        PLUGIN_INFO.name,
+        'announce',
+        title,
+        message
       );
     }
   };
