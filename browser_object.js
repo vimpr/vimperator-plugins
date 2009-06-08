@@ -3,7 +3,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Map behave like text-object</description>
-  <version>0.5</version>
+  <version>0.6</version>
   <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
   <license>New BSD License</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/browser_object.js</updateURL>
@@ -25,6 +25,8 @@ let PLUGIN_INFO =
            Delete
           r:
            Reload
+          m{register}:
+           Quick Mark
           y:
            Yank
           e:
@@ -111,6 +113,13 @@ let PLUGIN_INFO =
                     copyStrings.push(ary[i].linkedBrowser.contentDocument.location.href);
             liberator.modules.util.copyToClipboard(copyStrings.join(", "));
         },
+        mark: function(ary,arg){
+            var markStrings = [];
+            for (var i = 0 ; i < ary.length; i++)
+                if(typeof ary[i] == "object")
+                    markStrings.push(ary[i].linkedBrowser.contentDocument.location.href);
+            liberator.modules.quickmarks.add(arg,markStrings.join(", "));
+        },
         reload: function(ary){
             for (var i = 0 ; i < ary.length; i++)
                 if(typeof ary[i] == "object")
@@ -187,10 +196,12 @@ let PLUGIN_INFO =
             __iterator__: function(){
                 return iterator();
             },
-            add: function(id,handler){
+            add: function(id,handler,options){
+                options = options || {};
                 collections[id] = {
                     id: id,
                     handler: handler,
+                    options: options,
                 };
             },
             get: function(id) collections[id],
@@ -206,6 +217,7 @@ let PLUGIN_INFO =
     browserObject.motions.add('d','close');
     browserObject.motions.add('y','yank');
     browserObject.motions.add('r','reload');
+    browserObject.motions.add('m','mark',{ flags: liberator.modules.Mappings.flags.ARGUMENT });
     browserObject.motions.add('e','setPin');
     browserObject.motions.add('E','unsetPin');
 
@@ -239,30 +251,32 @@ let PLUGIN_INFO =
         let motion = it;
         for (let it in browserObject.scopes){
             let scope = it;
-            liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [prefix + motion.id + scope.id],
-                "Browser Object Mapping",
-                function (arg){
-                    var target, targetCollection;
+            for (let it in browserObject.targets){
+                let target = it;
+                liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], [prefix + motion.id + scope.id + target.id],
+                    "Browser Object Mapping",
+                    function (arg){
+                        var targetCollection;
+                        arg = arg || null;
 
-                    target = browserObject.targets.get(arg);
-                    if(!target){
-                        liberator.echoerr("BrowserObject: target not found");
-                        return;
-                    }
+                        if(!target){
+                            liberator.echoerr("Browser: target not found");
+                            return;
+                        }
 
-                    targetCollection = scope.handler.call(target.handler,target.handler.collection());
-                    if(target.handler[motion.handler])
-                        target.handler[motion.handler].call(target.handler,targetCollection);
-                    else
-                        liberator.echoerr("BrowserObject: motion handler not found");
-                },
-                { flags: liberator.modules.Mappings.flags.ARGUMENT });
+                        targetCollection = scope.handler.call(target.handler,target.handler.collection());
+                        if(target.handler[motion.handler])
+                            target.handler[motion.handler].call(target.handler,targetCollection,arg);
+                        else
+                            liberator.echoerr("Browser: motion handler not found");
+                    }, motion.options);
+            }
         }
         let map = liberator.modules.mappings.get(null,motion.id);
         if(!prefix && map){
             liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL],
                 [motion.id + motion.id], map.description, map.action,
-            {});
+            { flags: map.flags});
         }
         liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL],
             [prefix + motion.id + "/"], "Browser Object Mappings",
