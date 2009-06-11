@@ -97,6 +97,15 @@ Deferred.next = function (fun) {
     return d;
 };
 
+Deferred.wait = function (n) {
+    var d = new Deferred(), t = new Date();
+    var id = setTimeout(function () {
+        d.call((new Date).getTime() - t.getTime());
+    }, n * 1000);
+    d.canceller = function () { clearTimeout(id) };
+    return d;
+};
+
 function http (opts) {
     var d = Deferred();
     var req = new XMLHttpRequest();
@@ -199,20 +208,25 @@ function NiconicoFlvHandler(url, title) {
         liberator.echoerr(e);
     });
 }
+var count = 0;
 function NiconicoMylistHandler(url, title){
     let videoId = url.match(/\w{2}\d+/)[0];
 
-    Deferred.http.get(nicoWatchEndPoint + videoId).next(function(watchResult){
-        var html = parseHTML(watchResult.responseText, ['img', 'script']);
-        Firebug.Console.log(html);
-        var csrfToken = getElementsByXPath('//input[@name="csrf_token"]', html)[0].value;
-        Firebug.Console.log(csrfToken);
-        var mylists = getElementsByXPath('id("mylist_add_group_id")/option', html).map(function(element) [element.innerHTML, element.value]);
-        Firebug.Console.log(mylists);
+    Deferred.wait(count++ * 5).next(function(est){
+        return Deferred.http.get(nicoWatchEndPoint + videoId).next(function(watchResult){
+            var html = parseHTML(watchResult.responseText, ['img', 'script']);
+            Firebug.Console.log(html);
+            var csrfToken = getElementsByXPath('//input[@name="csrf_token"]', html)[0].value;
+            Firebug.Console.log(csrfToken);
+            var mylists = getElementsByXPath('id("mylist_add_group_id")/option', html).map(function(element) [element.innerHTML, element.value]);
+            Firebug.Console.log(mylists);
 
-        var params = [['ajax', '1'], ['mylist', 'add'], ['mylist_add', '“o˜^'], ['csrf_token', csrfToken], ['group_id', groupId]].map(function(p) p[0] + "=" + encodeURIComponent(p[1])).join("&");
-        return Deferred.http.post(nicoWatchEndPoint + videoId, params).next(function(mylistResult){
-                liberator.log(mylistResult.responseText);
+            var params = [['ajax', '1'], ['mylist', 'add'], ['mylist_add', '“o˜^'], ['csrf_token', csrfToken], ['group_id', groupId]].map(function(p) p[0] + "=" + encodeURIComponent(p[1])).join("&");
+            return Deferred.wait(count++ * 5).next(function(est){
+                return Deferred.http.post(nicoWatchEndPoint + videoId, params).next(function(mylistResult){
+                        liberator.log(mylistResult.responseText);
+                });
+            });
         });
     }).error(function(e){
         log(e);
