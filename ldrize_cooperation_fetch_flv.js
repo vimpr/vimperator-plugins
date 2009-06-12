@@ -215,11 +215,8 @@ function NiconicoMylistHandler(url, title){
     Deferred.wait(count++ * 5).next(function(est){
         return Deferred.http.get(nicoWatchEndPoint + videoId).next(function(watchResult){
             var html = parseHTML(watchResult.responseText, ['img', 'script']);
-            Firebug.Console.log(html);
             var csrfToken = getElementsByXPath('//input[@name="csrf_token"]', html)[0].value;
-            Firebug.Console.log(csrfToken);
             var mylists = getElementsByXPath('id("mylist_add_group_id")/option', html).map(function(element) [element.innerHTML, element.value]);
-            Firebug.Console.log(mylists);
 
             var params = [['ajax', '1'], ['mylist', 'add'], ['mylist_add', '“o˜^'], ['csrf_token', csrfToken], ['group_id', groupId]].map(function(p) p[0] + "=" + encodeURIComponent(p[1])).join("&");
             return Deferred.wait(count++ * 5).next(function(est){
