@@ -21,7 +21,28 @@
 let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
+<description>The script allows you to update Twitter status from Vimperator 0.6.*.</description>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
+<author>Trapezoid</author>
+<license>Creative Commons</license>
+<detail><![CDATA[
+    == Subject ==
+    The script allows you to update Twitter status from Vimperator 0.6.*.
+
+    == Commands ==
+    :twitter some thing text:
+        post "some thing text" to Twitter.
+    :twitter! someone:
+        show someone's statuses.
+    :twitter!? someword:
+        show search result of 'someword' from "http://search.twitter.com/".
+    :twitter!@:
+        show mentions.
+    :twitter!+ someone:
+        fav someone's last status..
+    :twitter!- someone:
+        un-fav someone's last status..
+]]></detail>
 </VimperatorPlugin>;
 
 (function(){
