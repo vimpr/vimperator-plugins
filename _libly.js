@@ -390,7 +390,7 @@ libly.$U = {//{{{
         try {
             return (new XMLSerializer()).serializeToString(xml)
                                         .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
-                                        .replace(/<[^>]+>/g, function(all) all.toLowerCase());
+                                        .replace(/<\s*\/?\s*\w+/g, function(all) all.toLowerCase());
         } catch (e) { return '' }
     },
     xmlToDom: function xmlToDom(node, doc, nodes)
