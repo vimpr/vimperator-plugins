@@ -10,7 +10,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>add "get element's XPath" hint mode</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpath_hint.js</updateURL>
@@ -37,7 +37,7 @@ let xh = plugins.xpath_hint = {
             return "";
         }
         if (elem.hasAttribute("id")) {
-            return '//*[@id="'+elem.getAttribute("id")+'"]';
+            return 'id("'+elem.getAttribute("id")+'")';
         }
         let name = elem.tagName.toLowerCase();
         let parent = elem.parentNode;
