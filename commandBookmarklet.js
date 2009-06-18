@@ -98,7 +98,7 @@ function toBoolean (value, def) {
 }
 
 function evalInSandbox (str) {
-  let sandbox = new Components.utils.Sandbox(buffer.URL);
+  let sandbox = new Components.utils.Sandbox("about:blank");
   sandbox.__proto__ = content.window.wrappedJSObject;
   return Components.utils.evalInSandbox(str, sandbox);
 }

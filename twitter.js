@@ -50,7 +50,7 @@ let PLUGIN_INFO =
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var evalFunc = window.eval;
     try {
-        var sandbox = new Components.utils.Sandbox(window);
+        var sandbox = new Components.utils.Sandbox("about:blank");
         if (Components.utils.evalInSandbox("true", sandbox) === true){
             evalFunc = function(text){
                 return Components.utils.evalInSandbox(text, sandbox);

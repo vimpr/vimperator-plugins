@@ -231,7 +231,7 @@ libly.$U = {//{{{
         var fnc = window.eval;
         var sandbox;
         try {
-            sandbox = new Components.utils.Sandbox(window);
+            sandbox = new Components.utils.Sandbox("about:blank");
             if (Components.utils.evalInSandbox('true', sandbox) === true) {
                 fnc = function(text) { return Components.utils.evalInSandbox(text, sandbox); };
             }

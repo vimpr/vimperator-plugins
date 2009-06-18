@@ -63,7 +63,7 @@ The script allows you to update Haiku status from Vimperator.
     var evalFunc = window.eval;
     var statuses = null;
     try {
-        var sandbox = new Components.utils.Sandbox(window);
+        var sandbox = new Components.utils.Sandbox("about:blank");
         if (Components.utils.evalInSandbox("true", sandbox) === true) {
             evalFunc = function(text) {
                 return Components.utils.evalInSandbox(text, sandbox);
