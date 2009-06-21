@@ -5,7 +5,7 @@
  * @description-ja 複数のアカウントを切り替える
  * @minVersion     2.1a1pre
  * @author         masa138
- * @version        0.0.4
+ * @version        0.0.5
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -25,9 +25,8 @@
     var targetElem = document.getElementById('page-report-button');
     var afterSLine = targetElem.nextSibling;
     var sbPannel   = document.createElementNS(ns, 'statusbarpannel');
+    var img        = sbPannel.appendChild(document.createElementNS(ns, 'image'));
     sbPannel.id    = 'account-switcher-pannel';
-    var img        = document.createElementNS(ns, 'image');
-    sbPannel.appendChild(img);
 
     var _services = {
         google: {
@@ -88,19 +87,18 @@
     }
 
     function changeAccount(user) {
+        var service = services[accounts[user].host];
+        if (service.host == null || service.logout == null) return;
+
         var username = accounts[user].username;
         var password = accounts[user].password;
-        var service  = services[accounts[user].host];
-
         var req = new XMLHttpRequest();
-        if (service.host   == null) return;
-        if (service.logout == null) return;
-        var url = (service.logout.indexOf('http') == -1) ? service.host + service.logout : service.logout;
+        var url = (service.logout.indexOf('http') != 0) ? service.host + service.logout : service.logout;
         req.open("POST", url, true);
         req.onload = function(e) {
+            if (service.login == null || service.id == null || service.pw == null) return;
             var req = new XMLHttpRequest();
-            if (service.login == null) return;
-            var url = (service.login.indexOf('http') == -1) ? service.host + service.login : service.login;
+            var url = (service.login.indexOf('http') != 0) ? service.host + service.login : service.login;
             req.open("POST", url, true);
             req.onload = function(e) {
                 if (service.jump != null) {
@@ -109,7 +107,8 @@
                 } else if(content.location != 'about:blank') {
                     content.location.reload();
                 }
-                if (service.host.match(/hatena\.ne\.jp/)) {
+                var needle = '.hatena.ne.jp';
+                if (service.host.toLowerCase().lastIndexOf(needle) == service.host.length - needle.length) {
                     img.setAttribute('src', 'http://www.hatena.ne.jp/users/' + username.substr(0, 2) + '/' + username + '/profile_s.gif');
                     if (!document.getElementById('account_switcher_pannel')) {
                         if (afterSLine != null) {
@@ -119,23 +118,22 @@
                         }
                     }
                 }
-            }
-            req.onerror = function(e) { liberator.echoerr('Login error in account_switcher.js'); }
+            };
+            req.onerror = function(e) { liberator.echoerr('Login error in account_switcher.js'); };
             req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            if (service.id == null || service.pw == null) return;
             req.send(
                 service.id + '=' + encodeURIComponent(username) + '&' +
                 service.pw + '=' + encodeURIComponent(password)
             );
             nowLogin[user.substr(user.lastIndexOf('@') + 1)] = user;
-        }
-        req.onerror = function(e) { liberator.echoerr('Logout error in account_switcher.js'); }
+        };
+        req.onerror = function(e) { liberator.echoerr('Logout error in account_switcher.js'); };
         req.send(null);
     }
 
     commands.addUserCommand(["account"], "Change Account",
         function(args) {
-            if ( !args ) {
+            if (!args) {
                 liberator.echo("Usage: account {username}@{servicename}");
             } else {
                 var user = args[args.length - 1];
@@ -155,7 +153,7 @@
                     for (var i = 0; i < args.length; i++) {
                         var user = args[i];
                         if (user != '') {
-                            compls = compls.filter(function(c) { return c[0].indexOf(user) != -1 });
+                            compls = compls.filter(function(c) c[0].indexOf(user) != -1);
                         }
                     }
                 }
