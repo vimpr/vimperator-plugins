@@ -5,7 +5,7 @@
  * @description-ja はてなのサービスに簡単にアクセス
  * @minVersion     2.1a1pre
  * @author         id:masa138, id:hitode909
- * @version        0.5.7
+ * @version        0.5.8
  * ==/VimperatorPlugin==
  *
  * Usage:
@@ -48,9 +48,9 @@
     };
 
     function init(flag) {
-        ids      = [];
-        pageFor  = [];
-        title = new Title();
+        ids     = [];
+        pageFor = [];
+        title   = new Title();
 
         alwaysCollect = liberator.globalVariables.accessHatenaAlwaysCollect;
         useWedata     = liberator.globalVariables.accessHatenaUseWedata;
@@ -78,7 +78,7 @@
         for (i in visited) if (visited.hasOwnProperty(i)) {
             var page = visited[i];
 
-            page.url.match('^https?://([a-zA-Z0-9.]*)\.hatena\.ne\.jp/([a-zA-Z]{1}[a-zA-Z0-9_-]{2,}/?)?');
+            page.url.match('^https?://([a-zA-Z0-9.-]+)\\.hatena\\.ne\\.jp/([a-zA-Z][a-zA-Z0-9_-]{1,30}[a-zA-Z0-9]/?)?');
             var host = RegExp.$1;
             var id   = RegExp.$2;
             if (host != '') {
@@ -89,10 +89,10 @@
                     pageFor[host] = page;
                 }
             }
-            if (id != '' && !id.match(ignoreIds.join('|')) && ids.indexOf(id) == -1) {
+            if (id != '' && !id.match('^(?:' + ignoreIds.join('|') + ')$') && ids.indexOf(id) == -1) {
                 ids.push(id);
                 if (id.indexOf('/') != -1) {
-                    if (page.url.match('^https?://' + host + '\.hatena\.ne\.jp/' + id + '$') && title.get(host, id) != page.title) {
+                    if (page.url.match('^https?://' + host + '\\.hatena\\.ne\\.jp/' + id + '$') && title.get(host, id) != page.title) {
                         title.set(host, id, page.title);
                     }
                 }
@@ -107,14 +107,14 @@
 
         req.open('GET', url, true);
         req.onload = registerIgnoreIds;
-        req.onerror = function(e) { liberator.echoerr('Error in access_hatena.js: loadWedata'); }
+        req.onerror = function(e) { liberator.echoerr('Error in access_hatena.js: loadWedata'); };
         req.send(null);
     }
 
     function registerIgnoreIds(e) {
         var req = this;
         var json = eval(req.responseText);
-        for (i in json) if (json.hasOwnProperty(i)) {
+        for (var i in json) if (json.hasOwnProperty(i)) {
             var id = json[i].data.id;
             if (wedataCache.indexOf(id) == -1 && id != '') {
                 wedataCache.push(id);
@@ -126,7 +126,7 @@
         function(args) {
             var host = args[0] ? encodeURIComponent(args[0].toString()) : 'www';
             var id   = args[1] ? encodeURIComponent(args[1].toString()).replace('%2F', '/') : '';
-            var uri = 'http://' + host + '.hatena.ne.jp/' + id;
+            var uri  = 'http://' + host + '.hatena.ne.jp/' + id;
             liberator.open(uri, liberator.CURRENT_TAB);
         }, {
             completer: function (context, args) {
