@@ -3,9 +3,9 @@ var PLUGIN_INFO =
 <VimperatorPlugin>
   <name>retweet</name>
   <description>ReTweet This Page.</description>
-  <description lang="ja">$B3+$$$F$$$k(BTweet$B$r(BReTweet$B$7$^$9!#(B</description>
+  <description lang="ja">開いているTweetをReTweetします。</description>
   <author mail="from.kyushu.island@gmail.com" homepage="http://iddy.jp/profile/from_kyushu">from_kyushu</author>
-  <version>0.1</version>
+  <version>0.2</version>
   <license>GPL</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.1</maxVersion>
@@ -33,8 +33,9 @@ Usage:
     function getBody()
     {
       var body = $U.getFirstNodeFromXPath("//span[@class='entry-content']").innerHTML;
-      var tags = body.match(/<.*?>/g);
-      for(tag in tags)
+      //return body.replace(/<[^>]*>/g, "");
+      var tags = body.match(/<[^>]*>/g);
+      for(var tag in tags)
       {
         body = body.replace(tags[tag],"");
       }
@@ -49,10 +50,10 @@ Usage:
     function getShortenUrl(longUrl)
     {
       var xhr = new XMLHttpRequest();
-      var req = "http://bit.ly/api?url=" + longUrl;
+      var req = "http://bit.ly/api?url=" + encodeURIComponent(longUrl);
       xhr.open('GET',req, false);
       xhr.send(null);
-      if (xhr.status != 200)
+      if(xhr.status != 200)
       {
         return longUrl;
       }
@@ -63,11 +64,11 @@ Usage:
     {
       var xhr = new XMLHttpRequest();
       var statusText = "RT @" + name + " [" + url +"]: " + body;
-      xhr.open("POST", "http://twitter.com/statuses/update.json", false, username, password);
+      xhr.open("POST", "https://twitter.com/statuses/update.json", false, username, password);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.send("status=" + encodeURIComponent(statusText) + "&source=Vimperator");
-    
-      liberator.echo("[RT] Your post was sent. " );
+
+      liberator.echo("[RT] Your post was sent.");
     }
 
     commands.addUserCommand(
@@ -87,7 +88,7 @@ Usage:
             password = logins[0].password;
             sendTwitter(url,name,body);
           }
-          else if (liberator.globalVariables.twitter_username && liberator.globalVariables.twitter_password)
+          else if(liberator.globalVariables.twitter_username && liberator.globalVariables.twitter_password)
           {
             username = liberator.globalVariables.twitter_username;
             password = liberator.globalVariables.twitter_password;
