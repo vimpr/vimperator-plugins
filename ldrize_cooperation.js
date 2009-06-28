@@ -178,10 +178,14 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
                         sandbox.window.addEventListener("focus",function(){
                             self.LDRize = liberator.eval("self",sandbox.LDRize.getSiteinfo);
                             self.Minibuffer = liberator.eval("command",sandbox.Minibuffer.addCommand);
+							if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.LDRize;
+							if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.Minibuffer.command;
                         },false);
                         if(window.content.wrappedJSObject == sandbox.unsafeWindow){
                             self.LDRize = liberator.eval("self",sandbox.LDRize.getSiteinfo);
                             self.Minibuffer = liberator.eval("command",sandbox.Minibuffer.addCommand);
+							if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.LDRize;
+							if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.Minibuffer.command;
                         }
                     }
                 });
