@@ -13,7 +13,7 @@ var PLUGIN_INFO =
     <version>0.0.14</version>
     <license>GPL</license>
     <minVersion>2.1pre</minVersion>
-    <maxVersion>2.1pre</maxVersion>
+    <maxVersion>2.1</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
 <detail><![CDATA[
     
@@ -229,6 +229,8 @@ var reader = {
 
         reader.removeMarkers(doc);
         reader.insertMarkers(doc);
+        curPage = reader.currentPage(doc);
+        page = (count < 0 ? Math.round : Math.floor)(curPage + count);
         if (navi(win, page)) return true;
 
         win.scrollTo(win.scrollX, win.scrollMaxY);
