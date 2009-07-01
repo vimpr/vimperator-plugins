@@ -269,6 +269,7 @@
               </head>
               <body>
                 {body}
+                <a href="./" class="back-to-index">back to index</a>
               </body>
             </html>.toString()
           );
