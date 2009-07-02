@@ -10,10 +10,10 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.14</version>
+    <version>0.0.15</version>
     <license>GPL</license>
-    <minVersion>2.1pre</minVersion>
-    <maxVersion>2.1</maxVersion>
+    <minVersion>2.2pre</minVersion>
+    <maxVersion>2.2pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
 <detail><![CDATA[
     
@@ -256,14 +256,14 @@ if (liberator.globalVariables.marker_reader_mapping) {
         {
             reader.focusNavi(focusDocument(content), count>1 ? count : 1);
         },
-        {flags: Mappings.flags.COUNT});
+        {count: true});
     mappings.addUserMap([config.browserModes],
         [up], "marker PageUp",
         function (count)
         {
             reader.focusNavi(focusDocument(content), -(count>1 ? count : 1));
         },
-        {flags: Mappings.flags.COUNT});
+        {count: true});
 }
 commands.addUserCommand(["markersinsert", "minsert"], "insert markers",
     function ()

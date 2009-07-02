@@ -273,7 +273,7 @@
             var where = /\bquickmark\b/.test(liberator.modules.options["activate"]) ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB;
             liberator.modules.quickmarks.jumpTo(arg, where, true);
         },
-        { flags: liberator.modules.Mappings.flags.ARGUMENT });
+        {arg: true});
 
     liberator.modules.mappings.addUserMap(modes,
         ["gd"], "Delete QuickMark for current URL",

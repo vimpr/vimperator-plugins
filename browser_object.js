@@ -3,12 +3,12 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Map behave like text-object</description>
-  <version>0.6</version>
+  <version>0.6.1</version>
   <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
   <license>New BSD License</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/browser_object.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.2pre</minVersion>
+  <maxVersion>2.2pre</maxVersion>
   <detail><![CDATA[
     == Variables ==
       g:browser_object_prefix:
@@ -217,7 +217,7 @@ let PLUGIN_INFO =
     browserObject.motions.add('d','close');
     browserObject.motions.add('y','yank');
     browserObject.motions.add('r','reload');
-    browserObject.motions.add('m','mark',{ flags: liberator.modules.Mappings.flags.ARGUMENT });
+    browserObject.motions.add('m','mark',{arg: true});
     browserObject.motions.add('e','setPin');
     browserObject.motions.add('E','unsetPin');
 

@@ -36,12 +36,12 @@ var PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Add auto word select mode.</description>
   <description lang="ja">単語を自動選択するモードを追加します</description>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <minVersion>2.2pre</minVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_word_select_mode.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <detail><![CDATA[
     == Subject ==
     Add auto word select mode.
@@ -310,7 +310,7 @@ mappings.add(
 
   let extraInfo = {};
   if (hasCount)
-      extraInfo.flags = Mappings.flags.COUNT;
+      extraInfo.count = true;
 
   mappings.add([modes.AUTO_WORD_SELECT], keys, "",
     function (count) {

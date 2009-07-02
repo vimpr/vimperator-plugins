@@ -4,9 +4,9 @@ var PLUGIN_INFO =
 	<description>Add Hatena Star.</description>
 	<description lang="ja">はてなスターをつける。</description>
 	<author mail="mattn.jp@gmail.com">mattn</author>
-	<version>0.1.0</version>
-	<minVersion>2.0pre</minVersion>
-	<maxVersion>2.0pre</maxVersion>
+	<version>0.1.1</version>
+	<minVersion>2.2pre</minVersion>
+	<maxVersion>2.2pre</maxVersion>
 	<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatenaStar.js</updateURL>
 </VimperatorPlugin>;
 (function() {
@@ -85,7 +85,7 @@ liberator.modules.mappings.addUserMap([liberator.modules.modes.NORMAL], nmap, 'a
 		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
 	}, {
 		noremap: true,
-		flags: liberator.modules.Mappings.flags.COUNT
+		count: true
 	}
 );
 
