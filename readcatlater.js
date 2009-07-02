@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Read Cat Later</name>
   <description>Read it later</description>
   <description lang="ja">後で読む</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/readcatlater.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :readcatlater [TAG]:
@@ -188,9 +188,6 @@ let PLUGIN_INFO =
 
   function addEntry (doc, tags) {
     var loc = doc.location.href;
-    //履歴の物が検出されてしまう。
-    //if (bookmarks.isBookmarked(makeURI(loc)))
-    //  return;
     var title = doc.title || loc;
     var uri = makeURI(loc);
     var bkmk = bookmarks.insertBookmark(folderId, uri, bookmarks.DEFAULT_INDEX, title);
@@ -276,7 +273,7 @@ let PLUGIN_INFO =
       // for HEAD
       if (args.string != undefined)
         args = args.string;
-      var res = addEntry(window.content.document, splitBySpaces(args)); // FIXME
+      var res = addEntry(window.content.document, splitBySpaces(args));
       if (res)
         liberator.echo('"' + buffer.title + '" was added');
       else
