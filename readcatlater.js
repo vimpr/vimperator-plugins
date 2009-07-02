@@ -278,11 +278,12 @@ let PLUGIN_INFO =
         args = args.string;
       var res = addEntry(window.content.document, splitBySpaces(args)); // FIXME
       if (res)
-        liberator.echo('"' + title + '" was added');
+        liberator.echo('"' + buffer.title + '" was added');
       else
         liberator.echo("this URI already exists!?");
     },
-    {}
+    {},
+    true
   );
 
   commands.addUserCommand(
