@@ -14,8 +14,8 @@ var PLUGIN_INFO =
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
   <version>0.3.9</version>
   <license>GPL</license>
-  <minVersion>1.2</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.2pre</minVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
@@ -172,18 +172,17 @@ NextLink.prototype = {
     this.pager.initDoc(context, doc);
   },
   getSiteinfo: function(doc) {
+    function valid(prop)
+      $U.getNodesFromXPath(MICROFORMAT[prop], doc).length > 0;
+    if (valid("nextLink") && valid("pageElement")) return MICROFORMAT;
     var url = doc.location.href;
     for (let i = 0, len = this.siteinfo.length; i < len; i++) {
       if (url.match(this.siteinfo[i].url) && this.siteinfo[i].url != "^https?://.") {
         return this.siteinfo[i];
       }
     }
-    function valid(prop)
-      $U.getNodesFromXPath(MICROFORMAT[prop], doc).length > 0;
 
-    if (!valid("nextLink") || !valid("pageElement")) return null;
-
-    return MICROFORMAT;
+    return null;
   },
   nextLink: function(count) {
     if (!this.initialized) {
@@ -199,11 +198,11 @@ NextLink.prototype = {
   customizeMap: function(context) {
     mappings.addUserMap(context.browserModes, [ prevMap ], "customize by nextlink.js",
       function(count) context.nextLink(count > 0 ? -1 * count : -1),
-      { flags: Mappings.flags.COUNT });
+      { count: true });
 
     mappings.addUserMap(context.browserModes, [ nextMap ], "customize by nextlink.js",
       function(count) context.nextLink(count > 0 ? count : 1),
-      { flags: Mappings.flags.COUNT });
+      { count: true });
   },
 };//}}}
 
