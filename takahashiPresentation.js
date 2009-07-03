@@ -26,7 +26,7 @@ start :presentation.
         ['<Left>', 'prev page', function() prevPage()],
         ['^', 'first page', function() loadPage(0)],
         ['$', 'last page', function() loadPage(pages.length-1)],
-        ['.', 'last page', function(count) loadPage(count?count-1:0), {count: true],
+        ['.', 'last page', function(count) loadPage(count?count-1:0), {count: true}],
         ['q', 'stop presentation', function() stop()],
     ];
     let win;
