@@ -309,8 +309,12 @@ mappings.add(
   let [keys, hasCount, caretModeMethod, caretModeArg] = params;
 
   let extraInfo = {};
-  if (hasCount)
+  if (hasCount) {
+    if (Mappings.flags)
+      extraInfo.flags = Mappings.flags.COUNT; // for backward compatibility
+    else
       extraInfo.count = true;
+  }
 
   mappings.add([modes.AUTO_WORD_SELECT], keys, "",
     function (count) {
@@ -320,6 +324,11 @@ mappings.add(
       let controller = buffer.selectionController;
       while (count--)
         controller[caretModeMethod](caretModeArg, false);
+
+      if (selectable()) {
+        liberator.dump(selectable());
+        selectWord();
+      }
     },
     extraInfo
   );
@@ -358,16 +367,8 @@ function selectable() {
 }
 // }}}
 
-//// for debuging
-//liberator.registerObserver("modeChange", function(oldModes, newModes, stack) {
-//  liberator.dump(getModeName(oldModes[0]) +" + "+ getModeName(oldModes[1])
-//                 + " -> " +
-//                 getModeName(newModes[0]) +" + "+ getModeName(newModes[1]));
-//  liberator.dumpStack();
-//});
-//function getModeName(id) modes.getMode(id) ? modes.getMode(id).name : "";
-
-liberator.echo("loading ...");
+liberator.dump("loading ...");
+setTimeout(function() commandline.close(), 1000);
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
