@@ -325,10 +325,7 @@ mappings.add(
       while (count--)
         controller[caretModeMethod](caretModeArg, false);
 
-      if (selectable()) {
-        liberator.dump(selectable());
-        selectWord();
-      }
+      if (selectable()) selectWord();
     },
     extraInfo
   );
@@ -367,8 +364,6 @@ function selectable() {
 }
 // }}}
 
-liberator.dump("loading ...");
-setTimeout(function() commandline.close(), 1000);
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
