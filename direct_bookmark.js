@@ -349,7 +349,7 @@ for Migemo search: require XUL/Migemo Extension
             description:'Hatena bookmark',
             account:['https://www.hatena.ne.jp', 'https://www.hatena.ne.jp', null],
             loginPrompt:{ user:'', password:'', description:'Enter username and password.' },
-            entryPage:'http://b.hatena.ne.jp/entry/%URL%',
+            entryPage:'http://b.hatena.ne.jp/entry/%URL::HATENA%',
             poster:function(user,password,url,title,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
                 var request =
@@ -596,8 +596,9 @@ for Migemo search: require XUL/Migemo Extension
                 return;
             }
             liberator.open(currentService.entryPage
-                .replace(/%URL(?:::(ESC|MD5))?%/g, function(x, t){
+                .replace(/%URL(?:::(HATENA|ESC|MD5))?%/g, function(x, t){
                     if(!t) return liberator.modules.buffer.URL.replace(/#/, '%23');
+                    if(t == "HATENA") return liberator.modules.buffer.URL.replace(/^http:\/\//, '').replace(/^https:\/\//, 's/').replace(/#/, '%23');
                     if(t == "ESC") return encodeURIComponent(liberator.modules.buffer.URL);
                     if(t == "MD5"){
                         var url = liberator.modules.buffer.URL;
