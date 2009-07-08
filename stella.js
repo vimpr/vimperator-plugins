@@ -37,14 +37,14 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Stella</name>
   <name lang="ja">すてら</name>
-  <description>Show video informations on the status line.</description>
-  <description lang="ja">ステータスラインに動画の再生時間などを表示する。</description>
-  <version>0.20.5</version>
+  <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
+  <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
+  <version>0.20.6</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -1006,17 +1006,17 @@ Thanks:
           videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
         }
       } catch (e) {
-        liberator.log(e)
+        liberator.log('stella: ' + e)
         failed = true;
       }
 
       // コメント欄からそれっぽいのを取得する
       // コメント欄のリンクの前のテキストをタイトルと見なす
       // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
-      {
-        let xpath = '//*[@id="des_2"]/p[2]';
+      try {
+        let xpath = 'id("des_2")/div';
         let comment = U.xpathGet(xpath).innerHTML;
-        let links = U.xpathGets(xpath + '/a')
+        let links = U.xpathGets(xpath + '/p/a')
                      .filter(function (it) /watch\//.test(it.href))
                      .map(function(v) v.textContent);
         links.forEach(function (link) {
@@ -1024,6 +1024,9 @@ Thanks:
           if (r)
             videos.push(new RelatedID(link, r[1].slice(-20)));
         });
+      } catch (e) {
+        liberator.log('stella: ' + e)
+        //failed = true;
       }
 
       if (!failed) {
