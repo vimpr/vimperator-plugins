@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.1</maxVersion>
+    <maxVersion>2.2pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
@@ -203,7 +203,7 @@ function encode(content)
 function request(url, content, onload, onerror)
 {
     let req = new XMLHttpRequest;
-    req.open("POST", url, false);
+    req.open("POST", url, true);
     req.onload = onload;
     req.onerror = onerror;
     req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
