@@ -40,7 +40,7 @@ let PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatebuWatchDog.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
   <detail><![CDATA[
     == Subject ==
       Make notify hatebu-count when specified site's hatebu-count changed.
@@ -86,6 +86,7 @@ let PLUGIN_INFO =
 
     == ToDo ==
       - 新着ブックマークのユーザidとコメントの表示
+      - 監視フレームワークにのっける
 
     ]]></detail>
   </VimperatorPlugin>;
@@ -144,9 +145,7 @@ let publics = plugins.hatebuWatchDog = (function() {
     let message = "'" + targetSite + "' \u306E\u88AB\u306F\u3066\u30D6\u6570\u306F '" +
                   currentValue + "' " + suffix + " (" + getSignedNum(delta) + ")";
 
-    //showAlertNotification(null, title, message);
-    //publics.notify(title, message);
-    (getNotifier())(title, message);
+    (getNotifier())(title, message, growlIcon);
   }
 
   function getSignedNum(num) {
@@ -169,9 +168,10 @@ let publics = plugins.hatebuWatchDog = (function() {
       _notifier = showAlertNotification;
     }
     return _notifier;
-  } 
+  }
 
-  function showAlertNotification(title, message) {
+  function showAlertNotification(title, message, icon) {
+    liberator.dump("icon:" + icon);
     Cc['@mozilla.org/alerts-service;1']
     .getService(Ci.nsIAlertsService)
     .showAlertNotification(
@@ -183,7 +183,7 @@ let publics = plugins.hatebuWatchDog = (function() {
 
   function growl() Components.classes['@growlforwindows.com/growlgntp;1']
                    .getService().wrappedJSObject;
-  const growlIcon = "http://img.f.hatena.ne.jp/images/fotolife/s/snaka72/20090608/20090608082837.png";  // temporary
+  const growlIcon = "http://img.f.hatena.ne.jp/images/fotolife/s/snaka72/20090608/20090608045633.gif";  // temporary
 
   function growlRegister() {
     growl().register(
@@ -194,7 +194,7 @@ let publics = plugins.hatebuWatchDog = (function() {
         {name: 'sadlynews',displayName: 'Sadly announce from hatebuWatchdog'},
         {name: 'failed',   displayName: 'Erroer report from hatebuWatchdog'}
       ]
-    ); 
+    );
   }
 
   function getInterval()
@@ -272,13 +272,20 @@ let publics = plugins.hatebuWatchDog = (function() {
             showHatebuNotification(target.site, currentValue, delta);
           }
           target.previousValue = currentValue;
+          if (delta > 0) {
+            liberator.dump("***hoge");
+            self.getBookmarklistByURL(target.site)
+            .slice(0, delta)
+            .forEach(function(item)
+                      self.reportBookmarkedItem(self.parseBookmarkItem(item)));
+          }
         },
         function() {
           liberator.echoerr("Cannot get current value.");
         }
       );
     },
-    
+
     notify: function(title, message) {
       growlRegister();
       growl().notify(
@@ -286,6 +293,73 @@ let publics = plugins.hatebuWatchDog = (function() {
         'announce',
         title,
         message
+      );
+    },
+
+    getBookmarkListRss: function(url) {
+      return util.httpGet("http://b.hatena.ne.jp/bookmarklist.rss?url=" + encodeURIComponent(url));
+    },
+
+    getBookmarklistByURL: function(url) {
+      liberator.dump("********** getBookmarklistByURL");
+      let res = util.httpGet('http://b.hatena.ne.jp/bookmarklist.rss?url=' + encodeURIComponent(url));
+      liberator.dump(res);
+      return self.evaluateXPath("//rss:item", res.responseXML, self.nsResolver);
+    },
+
+    nsResolver: {
+        lookupNamespaceURI: function(pfx) (({
+          'rdf'         : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+          'content'     : "http://purl.org/rss/1.0/modules/content/",
+          'taxo'        : "http://purl.org/rss/1.0/modules/taxonomy/",
+          'opensearch'  : "http://a9.com/-/spec/opensearchrss/1.0/",
+          'dc'          : "http://purl.org/dc/elements/1.1/",
+          'hatena'      : "http://www.hatena.ne.jp/info/xmlns#",
+          'media'       : "http://search.yahoo.com/mrss"
+        })[pfx] || 'http://purl.org/rss/1.0/')
+    },
+
+    // reffered  _libly.js
+    evaluateXPath: function(xpath, context, nsresolver) {
+      if (!xpath) return [];
+
+      var ret = [];
+      context = context || window.content.document;
+      var nodesSnapshot = (
+        context.ownerDocument ||
+        context
+      ).evaluate(
+        xpath,
+        context,
+        nsresolver || self.nsResolver,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+
+      for (let i = 0, l = nodesSnapshot.snapshotLength; i < l; i++) {
+          ret.push(nodesSnapshot.snapshotItem(i));
+      }
+      return ret;
+    },
+
+    parseBookmarkItem: function(item) {
+      let parsed = {
+        title: self.evaluateXPath("./rss:title", item)[0].textContent,
+        creator: self.evaluateXPath("./dc:creator", item)[0].textContent,
+        date: self.evaluateXPath("./dc:date", item)[0].textContent,
+        comment: self.evaluateXPath("./rss:description", item)[0].textContent,
+        tags: self.evaluateXPath("./dc:subject", item).map(function(i) i.textContent).join(",")
+      };
+      return parsed;
+    },
+
+    reportBookmarkedItem: function(item) {
+      liberator.dump(item);
+      (getNotifier())(
+          item.title,
+          item.creator + " bookmarked at " + item.date + "\n" +
+          item.tags + ":" + item.comment,
+          'http://www.hatena.ne.jp/users/' + item.creator.substr(0, 2) + '/' + item.creator + '/profile.gif'
       );
     }
   };
