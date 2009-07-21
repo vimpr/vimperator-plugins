@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto-focus-frame.js</updateURL>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
       Only install.
@@ -62,29 +62,49 @@ let PLUGIN_INFO =
     'DOMLoad',
     '.*',
     function () {
+      function doFocus () {
+        let [maxSize, maxFrame] = [-1, null];
+        for (let frame in util.Array.itervalues(content.frames)) {
+          try {
+            if (!(frame.frameElement instanceof HTMLFrameElement))
+              continue;
+            if (frame.scrollMaxX <= 0 && frame.scrollMaxY <= 0)
+              continue;
+            let size = frame.innerWidth * frame.innerHeight;
+            if (maxSize < size) {
+              maxSize = size;
+              maxFrame = frame;
+            }
+          } catch (e) {
+            liberator.log(e)
+            continue;
+          }
+        }
+        if (maxFrame)
+          maxFrame.focus();
+      }
+
+
       if (!(window.content.document instanceof HTMLDocument))
           return;
       if (content.frames.length <= 1)
         return;
-      let [maxSize, maxFrame] = [-1, null];
+
+      let nframes = content.frames.length;
       for (let frame in util.Array.itervalues(content.frames)) {
-        try {
-          if (!(frame.frameElement instanceof HTMLFrameElement))
-            continue;
-          if (frame.scrollMaxX <= 0 && frame.scrollMaxY <= 0)
-              continue;
-          let size = frame.innerWidth * frame.innerHeight;
-          if (maxSize < size) {
-            maxSize = size;
-            maxFrame = frame;
-          }
-        } catch (e) {
-          liberator.log(e)
-          continue;
+        if (frame.frameElement instanceof HTMLFrameElement) {
+          frame.addEventListener(
+            'DOMContentLoaded',
+            function () {
+              frame.removeEventListener('DOMContentLoaded', arguments.callee, true);
+              if (!--nframes)
+                doFocus();
+            },
+            true
+          );
         }
       }
-      if (maxFrame)
-        maxFrame.focus();
+
     }
   );
 
