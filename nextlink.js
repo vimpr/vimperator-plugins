@@ -52,8 +52,8 @@ n:
 [
   {
     "url":          "^http://[^.]+\\.google\\.(?:[^.]+\\.)?[^./]+/search\\b",
-    "nextLink":     'id("navbar")//td[last()]/a',
-    "pageElement":  'id("res")/div',
+    "nextLink":     "id('navbar')//td[last()]/a",
+    "pageElement":  "id('res')/div",
     "exampleUrl":   "http://www.google.com/search?q=nsIObserver",
   },
 ]
