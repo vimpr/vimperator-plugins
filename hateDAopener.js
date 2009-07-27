@@ -89,7 +89,7 @@ plugins.hateDAopener = (function(){
     let log  = liberator.log;
     let dump = function(title, obj) liberator.dump(title + "\n" + util.objectToString(obj));
     // \r\n separated string to array
-    let rns  = function(source) source.split("\r\n");
+    let rns  = function(source) source.split(/\r?\n/);
     // comma separated string to array
     let csv  = function(source) source.split(",");
     let libly = liberator.plugins.libly;
@@ -99,6 +99,7 @@ plugins.hateDAopener = (function(){
         extractTitleAndTags: extractTitleAndTags,
         generateCandidates:  generateCandidates,
         getDiaryEntries:    getDiaryEntries,
+        getFaviconURI:      getFaviconURI,
     };
     // }}}
     // COMMAND //////////////////////////////////////////////////////////////{{{
@@ -112,7 +113,7 @@ plugins.hateDAopener = (function(){
               context.format = {
                 anchored: false,
                 title: ["Title and URL", "Tags"],
-                keys: { text: "url", name: "name", tags: "tags"},
+                keys: { text: "url", baseUrl: "baseUrl", path: "path", name: "name", tags: "tags"},
                 process: [templateTitleAndUrl, templateTags]
               };
               context.filterFunc = null;
@@ -127,10 +128,7 @@ plugins.hateDAopener = (function(){
 
     // }}}
     // PRIVATE //////////////////////////////////////////////////////////////{{{
-    let cache = {
-        data: null,
-        userId: null
-    };
+    let cache = { };
 
     /**
      * @return accounts info
@@ -166,6 +164,7 @@ plugins.hateDAopener = (function(){
      * @return [{"url": "(url)", "name": "hogehoge", "tags": "[hoge]"}, ... ]
      */
     function generateCandidates() {
+      dump("generateCandidates");
       let allEntries = [];
       accounts().forEach(function([userId, diary]) {
           let entries =  getDiaryEntries(userId, diary);
@@ -176,6 +175,8 @@ plugins.hateDAopener = (function(){
               [title, tags] = extractTitleAndTags(titleAndTag);
               return {
                   "url"  : url,
+                  "baseUrl" : 'http://' + diary + '.hatena.ne.jp/' + userId,
+                  "path" : path,
                   "name" : title,
                   "tags" : tags
               };
@@ -191,6 +192,7 @@ plugins.hateDAopener = (function(){
      * @return [String dateTime, String path, String titleAndTag]
      */
     function getDiaryEntries(userId, diary) {
+        dump("getDalyEntries");
         if (cache[diary + userId])
             return cache[diary + userId];
 
@@ -244,12 +246,32 @@ plugins.hateDAopener = (function(){
 
     function templateTitleAndUrl(item){
       let simpleURL = item.text.replace(/^https?:\/\//, '');
+      let favicon = getFaviconURI(item.baseUrl + '/');
       return <>
+        <img src={favicon} />
         <span class="td-strut"/>{item.name}
         <a href={item.text} highlight="simpleURL">
           <span class="extra-info">{simpleURL}</span>
         </a>
       </>;
+    }
+
+    let faviconCache = {};
+    function getFaviconURI(pageURI) {
+        if (faviconCache[pageURI])
+            return faviconCache[pageURI];
+        try {
+            let uri = Cc["@mozilla.org/network/io-service;1"]
+                    .getService(Ci.nsIIOService)
+                    .newURI(pageURI, null, null);
+            let faviconURI = Cc["@mozilla.org/browser/favicon-service;1"]
+                    .getService(Ci.nsIFaviconService)
+                    .getFaviconImageForPage(uri);
+            return faviconCache[pageURI] = faviconURI.spec;
+        } catch(e) {
+            alert(pageURI);
+            return "";
+        }
     }
 
     // }}}
