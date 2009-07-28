@@ -86,7 +86,6 @@ let PLUGIN_INFO =
 // }}}
 plugins.hateDAopener = (function(){
 
-    let libly = liberator.plugins.libly;
     // PUBLIC ///////////////////////////////////////////////////////////////{{{
     let self = {
         extractTitleAndTags: extractTitleAndTags,
@@ -100,18 +99,26 @@ plugins.hateDAopener = (function(){
         ["hatedaopen", "ho"],
         "Hatena::Diary opener",
         function(args, bang) {
+            if (!args.string || args.string == '')
+                return;
             liberator.open(args.string, liberator.CURRENT_TAB);
         }, {
             completer: function(context, args) {
-              context.format = {
-                anchored: false,
-                title: ["Title and URL", "Tags"],
-                keys: { text: "url", baseUrl: "baseUrl", path: "path", name: "name", tags: "tags"},
-                process: [templateTitleAndUrl, templateTags]
-              };
-              context.filterFunc = null;
-              context.regenerate = true;
-              context.generate = function() filteredCandidates(args);
+                context.format = {
+                    anchored: false,
+                    title: ["Title and URL", "Tags"],
+                    keys: {
+                        text:   "url",
+                        baseUrl:"baseUrl",
+                        path:   "path",
+                        name:   "name",
+                        tags:   "tags"
+                    },
+                    process: [templateTitleAndUrl, templateTags]
+                };
+                context.filterFunc = null;
+                context.regenerate = true;
+                context.generate = function() filteredCandidates(args);
             },
             argCount: "*",
             bang: true,
@@ -123,11 +130,9 @@ plugins.hateDAopener = (function(){
     // PRIVATE //////////////////////////////////////////////////////////////{{{
 
     /**
+     * get accounts
      * @return accounts info
-     *      ex.
-     *          [['snaka72', 'd'],
-     *           ['Snaka',   'd'],
-     *           ['snaka72', 'vimperator.g']]
+     *          ex. [['snaka72', 'd'], ['snaka72', 'vimperator.g'], ...]
      */
     function accounts()
         liberator.globalVariables.hateDAopener_accounts || [];
@@ -142,9 +147,6 @@ plugins.hateDAopener = (function(){
                     words.every(function(word) targetString.match(word, 'i'))
                 );
     }
-
-    function hatenaDiaryUrl(diary, userId)
-        'http://' + diary + '.hatena.ne.jp/' + userId;
 
     /**
      * Get candidates list
@@ -188,33 +190,36 @@ plugins.hateDAopener = (function(){
         };
     })();
 
+    function hatenaDiaryUrl(diary, userId)
+        'http://' + diary + '.hatena.ne.jp/' + userId;
+
     /**
      * @param String Title and Tags ex. "[hoge, fuga]About me."
      * @return [String title, [String tags, ...]]
      */
-    function extractTitleAndTags(titleAndTag) {
-        let patternTags = /\[[^\]]+\]/g;
-        return [
+    function extractTitleAndTags(titleAndTag)
+        let (patternTags = /\[[^\]]+\]/g) [
             titleAndTag.replace(patternTags, ''),
             (titleAndTag.match(patternTags) || [])
         ];
-    }
 
-    function templateTitleAndUrl(item){
-      let simpleURL = item.text.replace(/^https?:\/\//, '');
-      let favicon = getFaviconURI(item.baseUrl + '/');
-      return <>
-        <img src={favicon} />
-        <span class="td-strut"/>{item.name}
-        <a href={item.text} highlight="simpleURL">
-          <span class="extra-info">{simpleURL}</span>
-        </a>
-      </>;
-    }
+    /**
+     * template: title & url
+     */
+    function templateTitleAndUrl(item)
+        <>
+            <img src={getFaviconURI(item.baseUrl + '/')} />
+            <span class="td-strut"/>{item.name}
+            <a href={item.text} highlight="simpleURL">
+              <span class="extra-info">{item.text.replace(/^https?:\/\//, '')}</span>
+            </a>
+        </>;
 
-    function templateTags(item){
-      return item.tags && item.tags.length > 0 ? item.tags.join("")  : "";
-    }
+    /**
+     * template: tags
+     */
+    function templateTags(item)
+        item.tags && item.tags.length > 0 ? item.tags.join("")  : "";
 
     let getFaviconURI = (function() {
         let faviconCache = {};
@@ -233,16 +238,8 @@ plugins.hateDAopener = (function(){
         }
     })();
 
-    // }}}
-    // UTILITY //////////////////////////////////////////////////////////////{{{
     function dump(title, obj)
         liberator.dump(title + "\n" + util.objectToString(obj));
-
-    function rns(source)
-        source.split(/\r?\n/);
-
-    function csv(source)
-        source.split(",");
 
     // }}}
     return self;
