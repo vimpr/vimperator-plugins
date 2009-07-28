@@ -85,21 +85,14 @@ let PLUGIN_INFO =
 </VimperatorPlugin>;
 // }}}
 plugins.hateDAopener = (function(){
-    // UTILITY //////////////////////////////////////////////////////////////{{{
-    let log  = liberator.log;
-    let dump = function(title, obj) liberator.dump(title + "\n" + util.objectToString(obj));
-    // \r\n separated string to array
-    let rns  = function(source) source.split(/\r?\n/);
-    // comma separated string to array
-    let csv  = function(source) source.split(",");
+
     let libly = liberator.plugins.libly;
-    // }}}
     // PUBLIC ///////////////////////////////////////////////////////////////{{{
     let self = {
         extractTitleAndTags: extractTitleAndTags,
         generateCandidates:  generateCandidates,
-        getDiaryEntries:    getDiaryEntries,
-        getFaviconURI:      getFaviconURI,
+        getDiaryEntries:     getDiaryEntries,
+        getFaviconURI:       getFaviconURI,
     };
     // }}}
     // COMMAND //////////////////////////////////////////////////////////////{{{
@@ -118,7 +111,7 @@ plugins.hateDAopener = (function(){
               };
               context.filterFunc = null;
               context.regenerate = true;
-              context.generate = function() inputFilter(args);
+              context.generate = function() filteredCandidates(args);
             },
             argCount: "*",
             bang: true,
@@ -128,7 +121,6 @@ plugins.hateDAopener = (function(){
 
     // }}}
     // PRIVATE //////////////////////////////////////////////////////////////{{{
-    let cache = { };
 
     /**
      * @return accounts info
@@ -137,50 +129,43 @@ plugins.hateDAopener = (function(){
      *           ['Snaka',   'd'],
      *           ['snaka72', 'vimperator.g']]
      */
-    function accounts() {
-        return liberator.globalVariables.hateDAopener_accounts || [];
-    }
+    function accounts()
+        liberator.globalVariables.hateDAopener_accounts || [];
 
     /**
      * filter candidates by words
      */
-    function inputFilter(words) {
-        var start = new Date;
-        dump(words.join(',') + "> start:" + start + "\n");
-        words = words.map(function(i) i.toLowerCase());
-        let filtered = generateCandidates().filter(
-            function(i) {
-                let targetString =  [i.tags, i.name].join(",").toLowerCase();
-                return words.every(function(word) targetString.indexOf(word) > -1);
-            }
-        );
-        var end = new Date;
-        dump(words.join(',') + "> end  :" + end + "[" + (end - start) + "]\n");
-        return filtered;
+    function filteredCandidates(words) {
+        return  generateCandidates()
+                .filter(function(i)
+                    let (targetString = '' + i.tags + ' ' + i.name)
+                    words.every(function(word) targetString.match(word, 'i'))
+                );
     }
+
+    function hatenaDiaryUrl(diary, userId)
+        'http://' + diary + '.hatena.ne.jp/' + userId;
 
     /**
      * Get candidates list
      * @return [{"url": "(url)", "name": "hogehoge", "tags": "[hoge]"}, ... ]
      */
     function generateCandidates() {
-      dump("generateCandidates");
       let allEntries = [];
+      let notEmpty = function(i) i && i != "";
+
       accounts().forEach(function([userId, diary]) {
-          let entries =  getDiaryEntries(userId, diary);
-          entries = entries.filter(function(i) i && i != "");
-          entries =  entries.map(function([dateTime, path, titleAndTag]) {
-              let url = 'http://' + diary + '.hatena.ne.jp/' + userId + path;
-              let title, tags;
-              [title, tags] = extractTitleAndTags(titleAndTag);
-              return {
-                  "url"  : url,
-                  "baseUrl" : 'http://' + diary + '.hatena.ne.jp/' + userId,
-                  "path" : path,
-                  "name" : title,
-                  "tags" : tags
-              };
-          });
+          let entries =  getDiaryEntries(userId, diary)
+          .filter(notEmpty)
+          .map(function([dateTime, path, titleAndTag])
+              let ([title, tags] = extractTitleAndTags(titleAndTag)) {
+                  "url"     : hatenaDiaryUrl(diary, userId) + path,
+                  "baseUrl" : hatenaDiaryUrl(diary, userId),
+                  "path"    : path,
+                  "name"    : title,
+                  "tags"    : tags
+              }
+          );
           allEntries = allEntries.concat(entries);
       });
       return allEntries;
@@ -191,57 +176,28 @@ plugins.hateDAopener = (function(){
      * @param String UserID
      * @return [String dateTime, String path, String titleAndTag]
      */
-    function getDiaryEntries(userId, diary) {
-        dump("getDalyEntries");
-        if (cache[diary + userId])
-            return cache[diary + userId];
-
-        let req = new libly.Request(
-            "http://"+ diary + ".hatena.ne.jp/" + userId + "/archive/plaintext",
-            null,
-            { asynchronous: false }
-        );
-        let result;
-        req.addEventListener("onSuccess", function(data) {
-            dump("request succeeded", data);
-            result = data;
-        });
-        req.addEventListener("onFailure", function(data) {
-            dump("request failed", data);
-            return;
-        });
-        req.get();
-
-        let entries = rns(result.responseText);
-        entries = entries.map(function(i) i.split(','));
-        return cache[diary + userId] = entries;
-    }
+    let getDiaryEntries = (function() {
+        let cache = {};
+        return function(userId, diary) {
+            if (cache[diary + userId])
+                return cache[diary + userId];
+            let res = util.httpGet(hatenaDiaryUrl(diary, userId) + "/archive/plaintext");
+            return cache[diary + userId] = res.responseText
+                                           .split(/\r?\n/)
+                                           .map(function(i) i.split(','));
+        };
+    })();
 
     /**
      * @param String Title and Tags ex. "[hoge, fuga]About me."
      * @return [String title, [String tags, ...]]
      */
     function extractTitleAndTags(titleAndTag) {
-        let patternTagAndTitle = /(\[.*\])?(.*)/;
-        if (!patternTagAndTitle.test(titleAndTag))
-            return [];
-
-        let tags, title;
-        [,tags, title] = titleAndTag.match(patternTagAndTitle);
-
-        let patternTags = /\[([^\]]+)\]/g;
-        if (!patternTags.test(tags))
-            return [title, []];
-
-        tags = tags.match(patternTags);
+        let patternTags = /\[[^\]]+\]/g;
         return [
-            title,
-            tags
+            titleAndTag.replace(patternTags, ''),
+            (titleAndTag.match(patternTags) || [])
         ];
-    }
-
-    function templateTags(item){
-      return item.tags && item.tags.length > 0 ? item.tags.join("")  : "";
     }
 
     function templateTitleAndUrl(item){
@@ -256,11 +212,17 @@ plugins.hateDAopener = (function(){
       </>;
     }
 
-    let faviconCache = {};
-    function getFaviconURI(pageURI) {
-        if (faviconCache[pageURI])
-            return faviconCache[pageURI];
-        try {
+    function templateTags(item){
+      return item.tags && item.tags.length > 0 ? item.tags.join("")  : "";
+    }
+
+    let getFaviconURI = (function() {
+        let faviconCache = {};
+
+        return function (pageURI) {
+            if (faviconCache[pageURI])
+                return faviconCache[pageURI];
+
             let uri = Cc["@mozilla.org/network/io-service;1"]
                     .getService(Ci.nsIIOService)
                     .newURI(pageURI, null, null);
@@ -268,14 +230,21 @@ plugins.hateDAopener = (function(){
                     .getService(Ci.nsIFaviconService)
                     .getFaviconImageForPage(uri);
             return faviconCache[pageURI] = faviconURI.spec;
-        } catch(e) {
-            alert(pageURI);
-            return "";
         }
-    }
+    })();
 
     // }}}
+    // UTILITY //////////////////////////////////////////////////////////////{{{
+    function dump(title, obj)
+        liberator.dump(title + "\n" + util.objectToString(obj));
 
+    function rns(source)
+        source.split(/\r?\n/);
+
+    function csv(source)
+        source.split(",");
+
+    // }}}
     return self;
 })();
 let(msg="loaded...") {
