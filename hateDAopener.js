@@ -41,7 +41,7 @@ let PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hateDAopener.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <detail><![CDATA[
     == Subject ==
     Open specified page of Hatena::Diary
@@ -61,13 +61,14 @@ let PLUGIN_INFO =
 
     == コマンド ==
     :hatedaopen or :ho :
-        ダイアリーを開く。<TAB>で候補を一覧表示。
-        キーワードを入力することで一覧をインクリメンタル検索(wildoptions=auto時)
-        キーワードが複数の場合は空白区切りで入力
+        コマンドを実行すると'Search Hatena::Diary?' というプロンプトが表示され、インクリメンタル検索モードになる。
+        キーワードを入力することでダイアリーの一覧をインクリメンタルに絞り込む事ができる。
+        キーワードを空白区切りで複数入力するとAnd検索となる。
 
     == グローバル変数 ==
     g:hatedaOpner_userId:
-        検索対象とするはてなidとダイアリー
+        検索対象とするはてなidとダイアリーを設定する。
+        この変数に設定されている情報を元にダイアリーのエントリ一覧を取得する。
         ex)
         >||
             js <<EOM
@@ -80,6 +81,7 @@ let PLUGIN_INFO =
         ||<
 
     == ToDo ==
+    - APIを用意する
 
   ]]></detail>
 </VimperatorPlugin>;
@@ -88,10 +90,7 @@ plugins.hateDAopener = (function(){
 
     // PUBLIC ///////////////////////////////////////////////////////////////{{{
     let self = {
-        extractTitleAndTags: extractTitleAndTags,
-        generateCandidates:  generateCandidates,
-        getDiaryEntries:     getDiaryEntries,
-        getFaviconURI:       getFaviconURI,
+        // Todo
     };
     // }}}
     // COMMAND //////////////////////////////////////////////////////////////{{{
@@ -99,28 +98,21 @@ plugins.hateDAopener = (function(){
         ["hatedaopen", "ho"],
         "Hatena::Diary opener",
         function(args, bang) {
-            if (!args.string || args.string == '')
-                return;
-            liberator.open(args.string, liberator.CURRENT_TAB);
+            commandline.input('Search Hatena::Diary? ', function(str) {
+                if (!str || str == '')
+                    return;
+                liberator.open(str, bang ? liberator.NEW_TAB
+                                         : liberator.CURRENT_TAB);
+            }, {
+                completer: function(context) {
+                    dump("context", context);
+                    hatedaCompleter(context, context.filter.split(' '));
+                },
+                onChange: function(str) {
+                    showCompletions();
+                }
+            });
         }, {
-            completer: function(context, args) {
-                context.format = {
-                    anchored: false,
-                    title: ["Title and URL", "Tags"],
-                    keys: {
-                        text:   "url",
-                        baseUrl:"baseUrl",
-                        path:   "path",
-                        name:   "name",
-                        tags:   "tags"
-                    },
-                    process: [templateTitleAndUrl, templateTags]
-                };
-                context.filterFunc = null;
-                context.regenerate = true;
-                context.generate = function() filteredCandidates(args);
-            },
-            argCount: "*",
             bang: true,
         },
         true
@@ -128,6 +120,28 @@ plugins.hateDAopener = (function(){
 
     // }}}
     // PRIVATE //////////////////////////////////////////////////////////////{{{
+
+   /**
+    * search diary
+    */
+   function hatedaCompleter(context, args) {
+        context.format = {
+            anchored: false,
+            title: ["Title and URL", "Tags"],
+            keys: {
+                text:   "url",
+                baseUrl:"baseUrl",
+                path:   "path",
+                name:   "name",
+                tags:   "tags"
+            },
+            process: [templateTitleAndUrl, templateTags]
+        };
+        context.filterFunc = null;
+        context.regenerate = true;
+        context.generate = function() filteredCandidates(args);
+        context.createRow = createRow;
+    }
 
     /**
      * get accounts
@@ -140,12 +154,42 @@ plugins.hateDAopener = (function(){
     /**
      * filter candidates by words
      */
-    function filteredCandidates(words) {
-        return  generateCandidates()
-                .filter(function(i)
-                    let (targetString = '' + i.tags + ' ' + i.name)
-                    words.every(function(word) targetString.match(word, 'i'))
-                );
+    function filteredCandidates(words) (
+        generateCandidates()
+        .filter(function(i)
+            let (targetString = '' + i.tags + ' ' + i.name)
+                (words || []).every(function(word) targetString.match(word, 'i'))
+        )
+    );
+
+    /**
+     *  create completion row
+     */
+    function createRow(item, highlightGroup) {
+        if (typeof icon == "function")
+            icon = icon();
+
+        if (highlightGroup)
+        {
+            var text = item[0] || "";
+            var desc = item[1] || "";
+        }
+        else
+        {
+            var text = this.process[0].call(this, item, item.text);
+            var desc = this.process[1].call(this, item, item.description);
+        }
+
+        // <e4x>
+        return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+                   <!-- The non-breaking spaces prevent empty elements
+                      - from pushing the baseline down and enlarging
+                      - the row.
+                      -->
+                   <li highlight="CompResult" style="width: 75%">{text}&#160;</li>
+                   <li highlight="CompDesc" style="width: 25%">{desc}&#160;</li>
+               </div>;
+        // </e4x>
     }
 
     /**
@@ -181,12 +225,13 @@ plugins.hateDAopener = (function(){
     let getDiaryEntries = (function() {
         let cache = {};
         return function(userId, diary) {
-            if (cache[diary + userId])
-                return cache[diary + userId];
+            let key = userId + '/' + diary;
+            if (cache[key])
+                return cache[key];
             let res = util.httpGet(hatenaDiaryUrl(diary, userId) + "/archive/plaintext");
-            return cache[diary + userId] = res.responseText
-                                           .split(/\r?\n/)
-                                           .map(function(i) i.split(','));
+            return cache[key] = res.responseText
+                                .split(/\r?\n/)
+                                .map(function(i) i.split(','));
         };
     })();
 
@@ -221,6 +266,7 @@ plugins.hateDAopener = (function(){
     function templateTags(item)
         item.tags && item.tags.length > 0 ? item.tags.join("")  : "";
 
+    // UTILITY //
     let getFaviconURI = (function() {
         let faviconCache = {};
 
@@ -237,6 +283,26 @@ plugins.hateDAopener = (function(){
             return faviconCache[pageURI] = faviconURI.spec;
         }
     })();
+
+    let showCompletions = function() {
+        if (!options.get('wildoptions').has('auto')) {
+            evalWithContext(function() {
+                completions.complete(true, false);
+                completions.itemList.show();
+            }, commandline.input);
+        }
+    };
+
+    let evalWithContext = function(func, context) {
+        let str;
+        let fstr = func.toString();
+        if (fstr.indexOf('function () {') == 0) {
+            str = fstr.replace(/.*?{([\s\S]+)}.*?/m, "$1");
+        } else {
+            str = '(' + fstr + ')()';
+        }
+        return liberator.eval(str, context);
+    };
 
     function dump(title, obj)
         liberator.dump(title + "\n" + util.objectToString(obj));
