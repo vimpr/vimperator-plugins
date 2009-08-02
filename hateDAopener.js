@@ -41,7 +41,7 @@ let PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hateDAopener.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <detail><![CDATA[
     == Subject ==
     Open specified page of Hatena::Diary
@@ -90,7 +90,9 @@ plugins.hateDAopener = (function(){
 
     // PUBLIC ///////////////////////////////////////////////////////////////{{{
     let self = {
-        // Todo
+        getEntryList:   function(keywords) {
+            return filteredCandidates(keywords);
+        },
     };
     // }}}
     // COMMAND //////////////////////////////////////////////////////////////{{{
@@ -104,6 +106,7 @@ plugins.hateDAopener = (function(){
                 liberator.open(str, bang ? liberator.NEW_TAB
                                          : liberator.CURRENT_TAB);
             }, {
+                default: args.string,
                 completer: function(context) {
                     dump("context", context);
                     hatedaCompleter(context, context.filter.split(' '));
@@ -112,8 +115,11 @@ plugins.hateDAopener = (function(){
                     showCompletions();
                 }
             });
+            if (args.string != "")
+                showCompletions();
         }, {
             bang: true,
+            count: "*",
         },
         true
     );
@@ -310,8 +316,4 @@ plugins.hateDAopener = (function(){
     // }}}
     return self;
 })();
-let(msg="loaded...") {
-    liberator.echo(msg);
-    setTimeout(function() commandline.close(), 1000);
-}
 // vim:sw=4 ts=4 et si fdm=marker fenc=utf-8
