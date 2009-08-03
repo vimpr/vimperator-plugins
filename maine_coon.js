@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.2.2</version>
+  <version>2.2.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -340,6 +340,14 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       }
       last = newValue;
       return newValue;
+    });
+  }
+
+  {
+    // for multiline input
+    let cmdline = document.getElementById("liberator-commandline");
+    messageBox.inputField.__defineGetter__("scrollWidth", function() {
+        return cmdline.clientWidth;
     });
   }
 
