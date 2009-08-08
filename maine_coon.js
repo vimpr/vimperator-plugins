@@ -364,7 +364,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
 
   options.add(
     ['mainecoon'],
-    'Make big screen like a Maine Coone',
+    'Make big screen like a Maine Coon',
     'charlist',
     '',
     {
