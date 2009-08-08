@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>tabsort</name>
   <description>Add ":tabsort" command.</description>
   <description lang="ja">tabsort コマンドを追加する</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.2pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
@@ -78,8 +78,7 @@ let PLUGIN_INFO =
         index: i,
         tab: gBrowser.mTabs[i],
         url: c.location.href,
-        title: c.title,
-        domain: c.location.domain
+        title: c.title
       });
     }
     ts.sort(cmp).forEach(function (it, i) (i == it.index) || getBrowser().moveTabTo(it.tab, i));
@@ -88,7 +87,6 @@ let PLUGIN_INFO =
   let targetOptions = [
     ['title', 'Title'],
     ['url', 'URL'],
-    ['domain', 'Domain']
   ];
 
   function targetValidater (value)
