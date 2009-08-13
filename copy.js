@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.7.1</version>
+<version>0.7.2</version>
 <detail><![CDATA[
 == Command ==
 :copy {copyString}:
@@ -153,7 +153,9 @@ const REPLACE_TABLE = {
         for (var i=0, c=selection.rangeCount; i<c; i++){
             htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
         }
-        return htmlsel;
+        return htmlsel.replace(/<(\/)?(\w+)(\s+[\s\S]*?)?>/g, function(all, close, tag, attr){
+            return "<" + close + tag.toLowerCase() + attr + ">";
+        });
     }
 };
 'hostname pathname host port protocol search hash'.split(' ').forEach(function (name){
