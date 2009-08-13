@@ -75,6 +75,11 @@ Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場
 :autocmd LocationChange 'www\.google\.com/calendar/' :fmap! -vkey -event keydown t a d w m x c e <Del> / + q s ?
 ||<
 
+=== FriendFeed の場合 ===
+>||
+:autocmd LocationChange 'friendfeed\.com/' :fmap! -vkey -event keydown p P q / gh gd gm gb
+||<
+
 Greasemonkey LDRizeの場合などにも使用可
 ]]></detail>
 </VimperatorPlugin>;
