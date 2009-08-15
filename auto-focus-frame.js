@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -60,12 +60,8 @@ let PLUGIN_INFO =
 (function () {
 
   function onLoad () {
-    liberator.log('auto-focus-frame.js - onLoad');
-
     if (!(window.content.document instanceof HTMLDocument) || (content.frames.length <= 1))
       return;
-
-    liberator.log('auto-focus-frame.js - onLoad');
 
     let targetFrames = [
       frame
