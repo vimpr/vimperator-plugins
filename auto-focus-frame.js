@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -60,60 +60,33 @@ let PLUGIN_INFO =
 (function () {
 
   function onLoad () {
-    function doFocus () {
-      let [maxSize, maxFrame] = [-1, null];
-      for (let frame in util.Array.itervalues(content.frames)) {
-        try {
-          if (!(frame.frameElement instanceof HTMLFrameElement))
-            continue;
-          if (frame.scrollMaxX <= 0 && frame.scrollMaxY <= 0)
-            continue;
-          let size = frame.innerWidth * frame.innerHeight;
-          if (maxSize < size) {
-            maxSize = size;
-            maxFrame = frame;
-          }
-        } catch (e) {
-          liberator.log(e)
-          continue;
-        }
-      }
-      if (maxFrame)
-        maxFrame.focus();
-    }
+    liberator.log('auto-focus-frame.js - onLoad');
 
-    if (!(window.content.document instanceof HTMLDocument))
-        return;
-
-    if (content.frames.length <= 1)
+    if (!(window.content.document instanceof HTMLDocument) || (content.frames.length <= 1))
       return;
 
-    let nframes = content.frames.length;
+    liberator.log('auto-focus-frame.js - onLoad');
 
-    function callDoFocus () {
-      if (!--nframes)
-        doFocus();
-    }
+    let targetFrames = [
+      frame
+      for (frame in util.Array.itervalues(content.frames))
+      if (frame.frameElement instanceof HTMLFrameElement)
+    ];
 
-    for (let frame in util.Array.itervalues(content.frames)) {
-      if (frame.frameElement instanceof HTMLFrameElement) {
-        if (frame.body) {
-          callDoFocus();
-        } else {
-          frame.addEventListener(
-            'DOMContentLoaded',
-            function () {
-              frame.removeEventListener('DOMContentLoaded', arguments.callee, true);
-              callDoFocus();
-            },
-            true
-          );
-        }
-      }
-    }
+    let [maxSize, maxFrame] = [-1, null];
+    targetFrames.forEach(function(frame) {
+      if (frame.scrollMaxX <= 0 && frame.scrollMaxY <= 0)
+        return;
+      let size = frame.innerWidth * frame.innerHeight;
+      if (maxSize < size)
+        [maxSize, maxFrame] = [size, frame];
+    });
+    if (maxFrame)
+      maxFrame.focus();
   }
 
-  autocommands.add('DOMLoad', '.*', onLoad);
+  tabs.getBrowser().addEventListener("DOMContentLoaded", onLoad, true);
+
 
 })();
 
