@@ -153,7 +153,7 @@ const REPLACE_TABLE = {
         for (var i=0, c=selection.rangeCount; i<c; i++){
             htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
         }
-        return htmlsel.replace(/<(\/)?(\w+)(\s+[\s\S]*?)?>/g, function(all, close, tag, attr){
+        return htmlsel.replace(/<(\/)?(\w+)([\s\S]*?)>/g, function(all, close, tag, attr){
             return "<" + close + tag.toLowerCase() + attr + ">";
         });
     }
