@@ -154,6 +154,9 @@ const REPLACE_TABLE = {
             htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
         }
         return htmlsel;
+    },
+    get CLIP () {
+        return util.readFromClipboard();
     }
 };
 'hostname pathname host port protocol search hash'.split(' ').forEach(function (name){
