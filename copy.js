@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.7.2</version>
+<version>0.7.1</version>
 <detail><![CDATA[
 == Command ==
 :copy {copyString}:
@@ -153,9 +153,7 @@ const REPLACE_TABLE = {
         for (var i=0, c=selection.rangeCount; i<c; i++){
             htmlsel += serializer.serializeToString(selection.getRangeAt(i).cloneContents());
         }
-        return htmlsel.replace(/<(\/)?(\w+)([\s\S]*?)>/g, function(all, close, tag, attr){
-            return "<" + close + tag.toLowerCase() + attr + ">";
-        });
+        return htmlsel;
     }
 };
 'hostname pathname host port protocol search hash'.split(' ').forEach(function (name){
@@ -166,7 +164,7 @@ const REPLACE_TABLE = {
 //const defaultValue = templates[0].label;
 commands.addUserCommand(['copy'],'Copy to clipboard',
     function(args){
-        liberator.plugins.exCopy.copy(args.string, args.bang);
+        liberator.plugins.exCopy.copy(args.string, args.bang, !!args["-append"]);
     },{
         completer: function(context, args){
             if (args.bang){
@@ -182,7 +180,10 @@ commands.addUserCommand(['copy'],'Copy to clipboard',
             var filter = context.filter.toLowerCase();
             context.completions = templates.filter(function(template) template[0].toLowerCase().indexOf(filter) == 0);
         },
-        bang: true
+        bang: true,
+        options: [
+            [["-append","-a"], commands.OPTION_NOARG]
+        ]
     },
     true
 );
@@ -296,7 +297,10 @@ var exCopyManager = {
     get: function(label){
         return getCopyTemplate(label);
     },
-    copy: function(arg, special){
+    copy: function(arg, special, appendMode){
+        if (appendMode){
+            arg = arg.replace(/^-a(ppend)?\s+/, "");
+        }
         var copyString = '';
         var isError = false;
         if (special && arg){
@@ -332,6 +336,10 @@ var exCopyManager = {
             } else {
                 copyString = replaceVariable(template.value);
             }
+        }
+
+        if (appendMode){
+            copyString = util.readFromClipboard() + copyString;
         }
 
         if (copyString)
