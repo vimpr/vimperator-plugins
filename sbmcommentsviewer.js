@@ -209,7 +209,7 @@ function openSBM(url, type, format, countOnly, openToBrowser){
 var SBM = { //{{{
     hatena: { //{{{
         getURL: function(url){
-            var urlPrefix = 'http://b.hatena.ne.jp/entry/json/?url=';
+            var urlPrefix = 'http://b.hatena.ne.jp/entry/jsonlite/?url=';
             return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#'));
         },
         parser: function(xhr){

@@ -7,7 +7,7 @@
 
 (function(){
     function showComments(url){
-        const endPoint = "http://b.hatena.ne.jp/entry/json/";
+        const endPoint = "http://b.hatena.ne.jp/entry/jsonlite/";
         var xhr = new XMLHttpRequest();
         var tagString,showString = "<div>";
         xhr.open("GET",endPoint + url.replace(/#/,"%23"),false);
