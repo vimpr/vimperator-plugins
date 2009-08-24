@@ -13,7 +13,7 @@
         xhr.open("GET",endPoint + url.replace(/#/,"%23"),false);
         xhr.send(null);
         var response;
-        if(!(response = window.eval(xhr.responseText))){
+            if(!(response = window.eval("("+xhr.responseText+")"))){
             liberator.echoerr("Does not exists!!");return;
         }
         var bookmarks = response["bookmarks"];

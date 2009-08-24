@@ -214,7 +214,7 @@ var SBM = { //{{{
         },
         parser: function(xhr){
             //var json = window.eval(xhr.responseText);
-            var json = jsonDecode(xhr.responseText, true);
+            var json = jsonDecode(xhr.responseText, false);
             var count = json.bookmarks.length;
             var c = new SBMContainer('h', json.count, {
                 faviconURL:'http://b.hatena.ne.jp/favicon.ico',
