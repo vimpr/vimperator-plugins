@@ -286,7 +286,7 @@ liberator.modules.commands.addUserCommand(
         groupId = arg.string;
     },
     {
-        completer: function(context,arg,special){
+        completer: function(context,arg){
             Deferred.http.get(nicoWatchEndPoint + "sm2757983").next(function(watchResult){
                 var html = parseHTML(watchResult.responseText, ['img', 'script']);
                 var mylists = getElementsByXPath('id("mylist_add_group_id")/option', html).map(function(element) [element.value, element.innerHTML]);

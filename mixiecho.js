@@ -111,12 +111,11 @@
 		xhr.send(params.join('&'));
 	}
 	commands.addUserCommand(["mixiecho"], "Change mixi echo",
-		function(arg, special){
-			arg = arg.string;
-			if (special || arg.length == 0)
+		function(arg){
+			if (arg.bang || arg.string.length == 0)
 				showFollowersStatus()
 			else
-				sayEcho(arg);
+				sayEcho(arg.string);
 		},{
 			bang: true
 		}

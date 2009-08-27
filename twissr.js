@@ -5,8 +5,8 @@
 
 (function(){
     liberator.modules.commands.addUserCommand(["twissr"], "Change Twitter & Wassr status",
-        function(arg, special){
-            arg = (special ? '! ' : ' ') + arg.string;
+        function(arg){
+            arg = (arg.bang ? '! ' : ' ') + arg.string;
             liberator.execute('twitter' + arg);
             liberator.execute('wassr' + arg);
         },

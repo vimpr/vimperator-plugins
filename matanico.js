@@ -260,7 +260,7 @@ let scraper = new NicoScraper();
 liberator.modules.commands.addUserCommand(
     ['matanico'],
     'update Twitter status to current video/search page information and comment',
-    function (args, special) {
+    function (args) {
         let arg = args.string;
         try {
             // build post string -----
@@ -285,7 +285,7 @@ liberator.modules.commands.addUserCommand(
             }
 
             // ':matanico!' display the evaluated format.
-            if (special) {
+            if (args.bang) {
                 liberator.modules.util.copyToClipboard(postString, true);
                 return;
             }

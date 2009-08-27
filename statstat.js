@@ -85,10 +85,10 @@
   commands.addUserCommand(
     ['statstat'],
     'Run statstat',
-    function (arg, bang, count) {
+    function (arg) {
       if (stat.handle)
         clearInterval(stat.handle);
-      let interval = count ? count * 100 : 100;
+      let interval = arg.count ? arg.count * 100 : 100;
       stat.action = e2a(arg.string);
       stat.handle = setInterval(function () stat.execute(), interval);
     },

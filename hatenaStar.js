@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 	<description>Add Hatena Star.</description>
 	<description lang="ja">はてなスターをつける。</description>
 	<author mail="mattn.jp@gmail.com">mattn</author>
-	<version>0.1.1</version>
+	<version>0.1.2</version>
 	<minVersion>2.2pre</minVersion>
 	<maxVersion>2.2pre</maxVersion>
 	<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatenaStar.js</updateURL>
@@ -57,9 +57,9 @@ function addHatenaStar (elem) {
 }
 
 liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena Star',
-	function (arg, special) {
+	function (args) {
 		try {
-			arg = arg.string;
+			var arg = args.string;
 			let result = buffer.evaluateXPath(StarXPath);
 			let m      = arg.match(/^(\d+)\?$/);
 			if (m) {
@@ -72,9 +72,6 @@ liberator.modules.commands.addUserCommand(['hatenastar', 'hatenas'], 'add Hatena
 				}
 			}
 		} catch (e) { liberator.echoerr('hatenaStar: ' + e); }
-	}, {
-		bang: true,
-		count: true
 	}
 );
 

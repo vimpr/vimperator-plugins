@@ -95,11 +95,10 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['tabso[rt]'],
     'Sort tabs',
-    function (arg, bang) {
+    function (arg) {
       tabSort(memberCompare(arg['-target'] || 'title'));
     },
     {
-      bang: false,
       argCount: '0',
       options: [
         [['-target', '-t'], commands.OPTION_STRING, targetValidater, targetOptions],

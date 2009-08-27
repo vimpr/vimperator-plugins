@@ -41,7 +41,7 @@ let PLUGIN_INFO =
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hateDAopener.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <detail><![CDATA[
     == Subject ==
     Open specified page of Hatena::Diary
@@ -99,11 +99,11 @@ plugins.hateDAopener = (function(){
     commands.addUserCommand(
         ["hatedaopen", "ho"],
         "Hatena::Diary opener",
-        function(args, bang) {
+        function(args) {
             commandline.input('Search Hatena::Diary? ', function(str) {
                 if (!str || str == '')
                     return;
-                liberator.open(str, bang ? liberator.NEW_TAB
+                liberator.open(str, args.bang ? liberator.NEW_TAB
                                          : liberator.CURRENT_TAB);
             }, {
                 default: args.string,

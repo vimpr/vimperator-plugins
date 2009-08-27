@@ -75,7 +75,7 @@ commands.addUserCommand(
 commands.addUserCommand(
     ['tombloo'],
     'Post by Tombloo',
-    function (args, special) {
+    function (args) {
         //let f = Tombloo.Service.extractors[args.string];
         let arg = args.string.replace(/\\(?=\u0020)/g, '');
         liberator.log(args.string, 0);
@@ -83,7 +83,7 @@ commands.addUserCommand(
 
         let f = Tombloo.Service.extractors[arg];
         (typeof f === 'object')
-            ? Tombloo.Service.share(getContext(), f, special)
+            ? Tombloo.Service.share(getContext(), f, args.bang)
             : liberator.echoerr(args.string + ' is not Tombloo command');
     },
     {

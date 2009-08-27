@@ -259,12 +259,12 @@ function applyProxy(proxy) {
 }
 
 commands.addUserCommand(['proxy'], 'Proxy settings',
-  function(args, bang) {
-    if (bang) applyProxyByName('default');
+  function(args) {
+    if (args.bang) applyProxyByName('default');
     else applyProxyByName(args.string);
   }, {
     bang: true,
-    completer: function(context, arg, special) {
+    completer: function(context, arg) {
       context.title = ['Name', 'Usage'];
       var list = context.filter ?
         proxy_settings.filter( function(el) this.test(el.name), new RegExp('^'+context.filter))

@@ -58,7 +58,7 @@ liberator.plugins.AppLauncher = (function(){
           arg = (typeof arg.string == 'undefined' ? arg : arg.string);
           self.launch(arg);
         }, {
-          completer: function( context, arg, special){
+          completer: function(context, arg){
             var filter = context.filter;
             context.title = [ 'Name', 'Description'];
             if (!filter){

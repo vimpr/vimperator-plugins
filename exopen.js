@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <maxVersion>2.0pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/exopen.js</updateURL>
 <author homepage="http://vimperator.g.hatena.ne.jp/pekepekesamurai/">pekepekesamurai</author>
-<version>0.10</version>
+<version>0.10.1</version>
 <detail lang="ja"><![CDATA[
 == Command ==
 :exopen [template_name]

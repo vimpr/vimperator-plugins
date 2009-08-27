@@ -258,7 +258,8 @@
         liberator.echo(html, true);
     }
     liberator.modules.commands.addUserCommand(["wassr"], "Change wassr status",
-        function(arg, special){
+        function(arg){
+            var special = arg.bang;
             var password;
             var username;
             try {

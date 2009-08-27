@@ -589,8 +589,8 @@ for Migemo search: require XUL/Migemo Extension
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {});
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
-        function(service, special){
-            service = service.string || useServicesByPost.split(/\s*/)[0];
+        function(args){
+            var service = args.string || useServicesByPost.split(/\s*/)[0];
             var currentService = services[service] || null;
             if(!currentService || !currentService.entryPage) {
                 return;
@@ -616,7 +616,7 @@ for Migemo search: require XUL/Migemo Extension
                         }
                         return ascii.join('').toLowerCase();
                     }
-                }), special ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+                }), args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         },{
             completer: function(filter)
                 [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
@@ -673,7 +673,7 @@ for Migemo search: require XUL/Migemo Extension
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
         },{
-            completer: function(context, arg, special){
+            completer: function(context, arg){
                 let filter = context.filter;
                 var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');

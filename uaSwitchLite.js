@@ -128,7 +128,7 @@ UASwitcherLite.prototype = {
       function(arg)
         self.switcher[ (arg.string || arg+'').replace(/\\+/g,'') ](),
       {
-        completer: function(context, args, special){
+        completer: function(context, args){
           var filter = context.filter;
           context.title = ['Description', 'User Agent'];
           if (!filter) {

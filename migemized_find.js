@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.9.2</version>
+  <version>2.9.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -649,14 +649,11 @@ let PLUGIN_INFO =
     ['rml', 'removemigelight'],
     'Remove migelight',
     function (args) {
-      // HEAD (2)
-      if (args != undefined)
-        args = args.string;
-      if (!args)
+      if (!args.string)
         return MF.removeHighlight(MF.highlightColor);
-      if (args == 'all')
+      if (args.string == 'all')
         return [f() for each (f in MF.storage.highlightRemovers)];
-      args.split(/\s+/).forEach(MF.removeHighlight, MF);
+      args.string.split(/\s+/).forEach(MF.removeHighlight, MF);
     }
   );
 

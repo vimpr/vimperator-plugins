@@ -312,7 +312,7 @@ liberator.plugins.LocalKeyMode = (function() {
             }
           }
         }, {
-          completer: function(context, arg, special) {
+          completer: function(context, arg) {
             let filter = context.filter;
             var names = self.completeNames;
             context.title = ['Name','Description'];

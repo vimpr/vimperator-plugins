@@ -2,7 +2,7 @@
 // @name           Nico Related Videos
 // @description-ja ニコニコ動画のオススメ動画のリスト
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.3.0
+// @version        1.3.1
 // ==/VimperatorPlugin==
 //
 //  Author:
@@ -78,8 +78,8 @@
   commands.addUserCommand(
     ['nicorelated'],
     'niconico related videos',
-    function (url, bang) {
-      (url.string === undefined) || (url = url.string);
+    function (args) {
+      let url = args.string;
       url = (function () {
         if (url == nothing)
           return 'http://www.nicovideo.jp/';
@@ -90,11 +90,11 @@
         if (url.indexOf('http://') == -1)
           return 'http://www.nicovideo.jp/search/' + encodeURIComponent(url);
       })() || url;
-      liberator.open(url, bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+      liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
     },
     {
       bang: true,
-      completer: function (context, arg, bang) {
+      completer: function (context, arg) {
         if ((buffer.URL != last.url) || !last.completions.length) {
           last.completions = [];
           getRelatedVideos().forEach(function (it) last.completions.push([it.url, it.title]));

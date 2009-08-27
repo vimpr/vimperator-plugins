@@ -255,7 +255,7 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
             liberator.modules.commands.addUserCommand(["mb","m","minibuffer"],"Execute Minibuffer",
                 function(arg){ self.Minibuffer.execute(arg.string.replace(/\\+/g,"")) },
                 {
-                    completer: function(context,arg,special){
+                    completer: function(context,arg){
                         var filter = context.filter;
                         var completionList = [];
                         var command = self.Minibuffer.command;

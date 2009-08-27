@@ -71,7 +71,7 @@ commands.addUserCommand(['ubi[quity]'], 'Vimperator Ubiquity Glue',
         }
         ubiquityManager.execute(args);
     }, {
-        completer: function(context, arg, special){
+        completer: function(context, arg){
             ubiquityManager.completer(context, arg.string)
         }
     },

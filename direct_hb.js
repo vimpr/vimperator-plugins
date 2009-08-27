@@ -199,7 +199,7 @@
             }
             addHatenaBookmarks(hatenaUser,hatenaPassword,modules.buffer.URL,arg,isNormalize);
         },{
-            completer: function(context, arg, special){
+            completer: function(context, arg){
                 let filter = context.filter;
                 //var match_result = filter.match(/(.*)\[(\w*)$/); //[all, commited, now inputting]
                 var match_result = filter.match(/((?:\[[^\]]*\])+)?\[?(.*)/); //[all, commited, now inputting]

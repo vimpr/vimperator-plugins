@@ -79,8 +79,8 @@
     commands.addUserCommand(
       ['fo[pen]', 'filteropen'],
       'Filtered open',
-      function (args, bang) {
-        let where = charToWhere(args['-where'], bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
+      function (args) {
+        let where = charToWhere(args['-where'], args.bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
         let [i, links] = [1, filteredLinks(args.join(''))];
         if (!links.length)
           return;
@@ -105,7 +105,7 @@
           [['-interval', '-i'], commands.OPTION_INT],
           [['-where', '-w'], commands.OPTION_STRING],
         ],
-        completer: function (context, arg, bang) {
+        completer: function (context, arg) {
           context.title = ['URL', 'Text Content'];
           context.completions = filteredLinks(context.filter).map(function (it) ([it.href, it.textContent]));
         },
@@ -131,8 +131,8 @@
     commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
-      function (args, bang) {
-        let where = charToWhere(args['-where'], bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+      function (args) {
+        let where = charToWhere(args['-where'], args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
         let numUrl = args[0];
         let m = numUrl.match(/^(\d+),(.+)$/);
         if (m) {

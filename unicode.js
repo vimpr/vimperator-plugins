@@ -68,8 +68,8 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['unicode', 'uc'],
     'unicode (un)escape',
-    function (arg, bang)
-      copyAndEcho((bang ? unescape : escape)(arg.string)),
+    function (arg)
+      copyAndEcho((arg.bang ? unescape : escape)(arg.string)),
     {argCount: '*', bang: true},
     true
   );

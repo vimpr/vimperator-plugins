@@ -486,12 +486,12 @@ liberator.modules.commands.addUserCommand(
 liberator.modules.commands.addUserCommand(
     ['nicoseek'],
     'controll seek bar',
-    function(args, special) {
+    function(args) {
         try      {
             let arg = (args.length > 1)
                 ? args[0].toString()
                 : args.string;
-            special ? controller.seekBy(arg) : controller.seekTo(arg);
+            args.bang ? controller.seekBy(arg) : controller.seekTo(arg);
         }
         catch(e) { liberator.echoerr(e); }
     },
@@ -503,12 +503,12 @@ liberator.modules.commands.addUserCommand(
 liberator.modules.commands.addUserCommand(
     ['nicovolume'],
     'controll volume',
-    function(args, special) {
+    function(args) {
         try      {
             let arg = (args.length > 1)
                 ? args[0].toString()
                 : args.string;
-            special ? controller.volumeBy(arg) : controller.volumeTo(arg);
+            args.bang ? controller.volumeBy(arg) : controller.volumeTo(arg);
         }
         catch(e) { liberator.echoerr(e); }
     },

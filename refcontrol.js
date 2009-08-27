@@ -138,7 +138,7 @@ commands.addUserCommand(['addref'], 'add referrer control setting', function(arg
   }
   sites[domain] = perf;
   }, {
-    completer: function(context, args, special) {
+    completer: function(context, args) {
       //var last = context.contextList.slice(-1)[0];
       var list;
       var pos = 0;

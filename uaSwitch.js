@@ -26,14 +26,13 @@
 		});
 
 	// register Vimperator command
-	liberator.modules.commands.addUserCommand(['ua'], 'Switch User Agent', function(arg, special){
-		arg = arg.string;
-		if (special) useragentswitcher_options();
-		else if (!arg) liberator.echo('UserAgent: ' + getItems().filter(function(n) n.checked)[0].label);
-		else window.eval(getItems().filter(function(n) n.label == arg)[0].oncommand);
+	liberator.modules.commands.addUserCommand(['ua'], 'Switch User Agent', function(args){
+    if (args.bang) useragentswitcher_options();
+		else if (!arg.string) liberator.echo('UserAgent: ' + getItems().filter(function(n) n.checked)[0].label);
+		else window.eval(getItems().filter(function(n) n.label == arg.string)[0].oncommand);
 	}, {
         bang: true,
-		completer: function(filter, special)
+		completer: function(filter)
 			[0, getItems().map(function(n) [n.label, n.label])]
 	});
 })();

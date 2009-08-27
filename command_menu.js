@@ -204,7 +204,7 @@ let PLUGIN_INFO =
           liberator.echoerr('menu not found');
       },
       {
-        completer: function (context, arg, bang) {
+        completer: function (context, arg) {
           const gps = function (it) getPathString(it, equal(root), getElementName, isClickable);
           const fp = function (it) [gps(it), it.tooltipText || ''];
           return [0, _find(context.filter).map(fp)];

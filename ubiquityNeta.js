@@ -8,7 +8,7 @@
 (function() {
 	if (typeof gUbiquity === 'undefined') return;
 	liberator.commands.addUserCommand(["ubiquity"], "Ubiquity",
-	function(arg, special){
+	function(arg){
 		var anchor = document.getElementById("content");
 		if (window.location == "chrome://browser/content/browser.xul")
 			anchor = anchor.selectedBrowser;
@@ -17,7 +17,7 @@
 		var context = gUbiquity.__makeContext();
 		var previewBlock = document.getElementById("cmd-preview").contentDocument.getElementById("preview");
 		gUbiquity.__cmdManager.updateInput(arg||'', context, previewBlock);
-		if (special) {
+		if (arg.special) {
 			gUbiquity.__cmdManager.execute(context);
 			gUbiquity.closeWindow();
 		}

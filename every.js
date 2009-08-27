@@ -155,7 +155,7 @@ let PLUGIN_INFO =
   liberator.modules.commands.addUserCommand(
     ['delay'],
     'delay',
-    function (arg, bang, count) {
+    function (arg) {
       let cmd = arg.string;
       let f = function () {
         if (liberator.mode == liberator.modules.modes.COMMAND_LINE) {
@@ -164,7 +164,7 @@ let PLUGIN_INFO =
           liberator.execute(cmd);
         }
       };
-      setTimeout(f, msec(count));
+      setTimeout(f, msec(arg.count));
     },
     {
       count: true,

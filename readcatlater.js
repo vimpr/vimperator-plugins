@@ -245,7 +245,7 @@ let PLUGIN_INFO =
     return liberator.globalVariables.readcatlater_reverse ? result.reverse() : result;
   } catch (e) { liberator.log(e); } }
 
-  function completer (context, arg, bang) {
+  function completer (context, arg) {
     context.title = ['URL', 'Title'];
     context.completions = RCL_Bookmarks(context.filter).
                             filter(function (it) it.id).
@@ -269,11 +269,8 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['readcatlater', 'rcl'],
     'read cat later',
-    function (args, _, num, extra) {
-      // for HEAD
-      if (args.string != undefined)
-        args = args.string;
-      var res = addEntry(window.content.document, splitBySpaces(args));
+    function (args) {
+      var res = addEntry(window.content.document, splitBySpaces(args.string));
       if (res)
         liberator.echo('"' + buffer.title + '" was added');
       else
@@ -286,20 +283,20 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['readcatnow', 'rcn'],
     'read cat now',
-    function (arg, bang, num, extra) {
+    function (arg) {
       let opennum = arg['-number'];
       if (opennum) {
         liberator.log(typeof opennum)
         let us = RCL_Bookmarks(arg.literalArg).reverse().splice(0, opennum).map(function (it) it.URI);
         liberator.open(us, liberator.NEW_BACKGROUND_TAB);
-        if (!bang) {
+        if (!arg.bang) {
           us.forEach(removeItems);
           liberator.echo('[' + us + '] was removed.');
         }
       } else {
         let uri = arg.string;
         openURI(uri);
-        if (!bang && removeItems(uri))
+        if (!arg.bang && removeItems(uri))
           liberator.echo('"' + uri + '" was removed.');
       }
     },
@@ -314,7 +311,7 @@ let PLUGIN_INFO =
   commands.addUserCommand(
     ['deletecatnow', 'dcn'],
     'delete cat now',
-    function (arg, bang, num, extra) {
+    function (arg) {
       let uri = arg.string;
       if (removeItems(uri))
         liberator.echo('"' + uri + '" was removed.');

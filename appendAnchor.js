@@ -53,7 +53,7 @@ let PLUGIN_INFO =
 
   // register command
   liberator.modules.commands.addUserCommand(['anc'], 'append anchors to texts look like url',
-    function(arg, special) {
+    function(arg) {
       const doc = window.content.document;
       const range = doc.createRange();
 

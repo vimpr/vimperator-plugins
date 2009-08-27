@@ -96,10 +96,10 @@ liberator.modules.commands.addUserCommand(['fileencoding','fenc'],'set the chara
         }
     },
     {
-        completer: function(context, arg, special){
+        completer: function(context){
             let filter = context.filter;
-            context.completions = completion( encodings, filter);
-	    	}
+            context.completions = completion(encodings, filter);
+        }
     }
 );
 liberator.modules.commands.addUserCommand(['autodetector','audet'],'set auto detect character encoding', function(args) {
@@ -128,10 +128,10 @@ liberator.modules.commands.addUserCommand(['autodetector','audet'],'set auto det
         }
     },
     {
-        completer: function(context, arg, special){
+        completer: function(context, arg){
             let filter = context.filter;
-            context.completions = completion( detectors, filter);
-	    	}
+            context.completions = completion(detectors, filter);
+        }
     }
 );
 function listCharset(arg, current, list){
@@ -157,10 +157,10 @@ liberator.modules.commands.addUserCommand(['listencoding','lsenc'],'list all enc
         var arg = args.string == undefined ? args: args.string;
         listCharset(arg, liberator.modules.options.fileencoding, encodings);
     },{
-        completer: function(context, arg, special){
+        completer: function(context, arg){
             let filter = context.filter;
-            context.completions = completion( encodings, filter);
-	    	}
+            context.completions = completion(encodings, filter);
+        }
     }
 );
 liberator.modules.commands.addUserCommand(['listdetector','lsdet'],'list all auto detectors',
@@ -168,10 +168,10 @@ liberator.modules.commands.addUserCommand(['listdetector','lsdet'],'list all aut
         var arg = args.string == undefined ? args: args.string;
         listCharset(arg, liberator.modules.options.autodetector, detectors);
     },{
-        completer: function(context, arg, special){
+        completer: function(context, arg){
             let filter = context.filter;
-            context.completions = completion( detectors, filter);
-	    	}
+            context.completions = completion(detectors, filter);
+        }
     }
 );
 
