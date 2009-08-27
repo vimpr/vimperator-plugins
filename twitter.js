@@ -21,8 +21,8 @@
 let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
-<description>The script allows you to update Twitter status from Vimperator 0.6.*.</description>
-<version>0</version>
+<description>The script allows you to update Twitter status from Vimperator</description>
+<version>1.0.1</version>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
 <author>Trapezoid</author>
 <license>Creative Commons</license>
@@ -193,7 +193,8 @@ let PLUGIN_INFO =
         liberator.echo(html, true);
     }
     liberator.modules.commands.addUserCommand(["twitter"], "Change Twitter status",
-        function(arg, special){
+        function(arg){
+            var special = arg.bang;
             var password;
             var username;
             try {
