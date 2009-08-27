@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.9.1</version>
+  <version>2.9.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -601,7 +601,7 @@ let PLUGIN_INFO =
     migemized.onSubmit = migemized.searchSubmitted;
     migemized.onCancel = migemized.searchCanceled;
     migemized.onKeyPress = migemized.searchKeyPressed;
-    search = finder;
+    var search = finder;
   }
 
   // オリジナルの状態に戻せるように保存しておく
