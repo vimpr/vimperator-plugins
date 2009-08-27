@@ -5,9 +5,9 @@ let PLUGIN_INFO =
 <description lang="ja">とけい</description>
 <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
 <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-<version>0.15.1</version>
+<version>0.15.2</version>
 <minVersion>2.0pre</minVersion>
-<maxVersion>2.0pre</maxVersion>
+<maxVersion>2.2pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/clock.js</updateURL>
 <detail><![CDATA[
 == USAGE ==
@@ -298,6 +298,14 @@ window.addEventListener(
         clock.justify(window.innerWidth);
     },
     false
+);
+
+autocommands.add(
+    'VimperatorEnter',
+    /.*/,
+    function () {
+        clock.justify(window.innerWidth);
+    }
 );
 
 // stuff functions ---
