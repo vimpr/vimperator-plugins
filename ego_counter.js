@@ -1,19 +1,22 @@
 /*
- * $B%9%F!<%?%9%P!<$K$O$F%V?t$rI=<((B
+ * ステータスバーにはてブ数を表示
  *
  * Usage:
- *   let g:ego_counter_hatenaId = 'Your hatena ID'
+ *   let g:ego_counter_uri = 'Your site URI'
  *     or
- *   js liberator.globalVariables.ego_counter_hatenaId = 'Your hatena ID'
+ *   js liberator.globalVariables.ego_counter_hatenaId = 'Your site URI'
+ *
+ *   ex.
+ *   let g:ego_counter_uri = 'http://d.hatena.ne.jp/snaka72'
  *
  */
 (function() {
 
-  const MY_ID = liberator.globalVariables.ego_counter_hatenaId || '';
+  const MY_SITE = liberator.globalVariables.ego_counter_uri || '';
   let update = function(color) {
     myHatebu.setAttribute(
       'src',
-      <>http://b.hatena.ne.jp/bc/{color}/http://d.hatena.ne.jp/{MY_ID}/</>.toSource()
+      <>http://b.hatena.ne.jp/bc/{color}/{MY_SITE}/</>.toSource()
     );
   };
 
