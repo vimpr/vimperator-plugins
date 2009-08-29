@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.20.7</version>
+  <version>0.20.8</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -64,7 +64,7 @@ let PLUGIN_INFO =
         seek to specified position.
         TIMECODE formats
           - :stseek 1:30 # 1分30秒
-          - :stseek 1.5  # 1.5分。90秒
+          label.style.marginRight = (r || 0) + 'px';
           - :stseek 90   # 90秒
       :stse[ek]! <TIMECODE>:
         seek to the specified position from current position at relatively.
@@ -1327,6 +1327,7 @@ Thanks:
 
       this.createStatusPanel();
       this.onLocationChange();
+      this.hidden = true;
 
       this.__onResize = window.addEventListener('resize', U.bindr(this, this.onResize), false);
       this.progressListener = new WebProgressListener({onLocationChange: U.bindr(this, this.onLocationChange)});
