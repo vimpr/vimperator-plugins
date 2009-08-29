@@ -20,12 +20,6 @@ function xmlToDom(xml, xmlns){
 
 function getFullScreenAttr(){
   let s = window.screen;
-  liberator.log({
-    top:    s.top,
-    left:   s.left,
-    width:  s.availWidth,
-    height: s.availHeight
-  })
   return {
     top:    s.top,
     left:   s.left,
@@ -553,15 +547,15 @@ self.init();
 // Commmand
 // -----------------------------------------------------
 commands.addUserCommand(['sl'],decodeURIComponent(escape('キータイプを矯正します。')),
-	function(args){
+  function(args){
     let opt = {};
-   
+
     args.string.split(/\s+/).forEach(function(arg){
       if (arg && arg.charAt(0) == "-"){
         for (let i=1, len=arg.length; i<len; i++){
           switch (arg.charAt(i)){
             case "a":
-              opt.accident = true; break; 
+              opt.accident = true; break;
             case "l":
               opt.logo = true; break;
             case "F":
@@ -572,8 +566,8 @@ commands.addUserCommand(['sl'],decodeURIComponent(escape('キータイプを矯�
         }
       }
     });
-		self.open(opt);
-	},{
+    self.open(opt);
+  },{
     options: [
       [["-l"], commands.OPTION_NOARG],
       [["-a"], commands.OPTION_NOARG],
