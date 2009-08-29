@@ -20,6 +20,12 @@ function xmlToDom(xml, xmlns){
 
 function getFullScreenAttr(){
   let s = window.screen;
+  liberator.log({
+    top:    s.top,
+    left:   s.left,
+    width:  s.availWidth,
+    height: s.availHeight
+  })
   return {
     top:    s.top,
     left:   s.left,
@@ -525,7 +531,7 @@ let self = {
       attr.speed
     );
     sl.start(attr.logo, attr.accident, attr.fly, attr.luckystar);
-    this.panel.openPopupAtScreen(attr.top || defAttr.top, attr.left || defAttr.left, false);
+    this.panel.openPopupAtScreen(attr.left || defAttr.left, attr.top || defAttr.top, false);
   },
   init: function(){
     let panel = document.getElementById("vimp-sl");
