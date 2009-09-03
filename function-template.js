@@ -67,7 +67,9 @@ let PLUGIN_INFO =
     function (args) {
       args.literalArg;
       args.length;
-      args['-force'];
+      args.bang;          // :command!
+      args.count;         // :10command  入力されていない時は -1
+      args['-option1'];
     },
     {
       literal: 0,
@@ -134,6 +136,7 @@ let PLUGIN_INFO =
     ['`moge'],
     'Description',
     // extraInfo で指定していない引数は渡されません
+    //   count => 入力されていない場合は - 1
     function (motion, count, arg) {
     },
     {
