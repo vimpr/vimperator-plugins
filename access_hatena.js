@@ -1,23 +1,52 @@
-/**
- * ==VimperatorPlugin==
- * @name           access_hatena.js
- * @description    Access to Hatena Service quickly
- * @description-ja はてなのサービスに簡単にアクセス
- * @minVersion     2.1a1pre
- * @author         id:masa138, id:hitode909
- * @version        0.6.0
- * ==/VimperatorPlugin==
- *
- * Usage:
- * :accesshatena -> access to http://www.hatena.ne.jp/
- *
- * :accesshatena {host} -> access to http://{host}.hatena.ne.jp/
- *
- * :accesshatena {host} {user_id} -> access to http://{host}.hatena.ne.jp/{user_id}/
- *
- * :accesshatena {group_name}.g {user_id} -> access to http://{group_name}.g.hatena.ne.jp/{user_id}/
- *
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>Access to Hatena Sevices quickly.</description>
+<description lang="ja">はてなのサーヴィスに簡単にアクセス出来ます．</description>
+<minVersion>2.1a1pre</minVersion>
+<maxVersion>2.1a1pre</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/access_hatena.js</updateURL>
+<author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA and id:hitode909</author>
+<version>0.61</version>
+<detail><![CDATA[
+
+== Commands ==
+:accesshatena
+    Access to http://www.hatena.ne.jp/
+
+:accesshatena {host}
+    Access to http://{host}.hatena.ne.jp/
+
+:accesshatena {host} {user_id}
+    Access to http://{host}.hatena.ne.jp/{user_id}/
+
+:accesshatena {group_name}.g {user_id}
+    Access to http://{group_name}.g.hatena.ne.jp/{user_id}/
+
+
+== Global variables ==
+maxRecentHostsSize
+    直近何件の履歴を検索してホスト補完をするか
+
+collectLogSpan
+    どのくらいの期間の履歴を検索するか
+
+accessHatenaUseWedata
+    Wedata から拒否 ID リストを取ってくるか
+
+accessHatenaIgnoreIds
+    Wedata の拒否リストに含まれないけれど拒否したい ID の記入用
+
+
+== .vimperatorrc ==
+コマンドが長いので，以下の様に短い物にマッピングすると便利です．
+>||
+map ; :accesshatena 
+||<
+# 最後にスペースを入れておくと直ぐにホストの入力から始められます．
+
+]]></detail>
+</VimperatorPlugin>;
 (function(){
     var useWedata;
     var wedataCache;
@@ -29,7 +58,10 @@
     var collectLogSpan;
     var pageFor;
     var title;
-    var _old_title_length;
+    var isFirst;
+    var isIncreased;
+    var isUpdated;
+    var lastLocation;
 
     function Title() {
         this.initialize.apply(this, arguments);
@@ -52,9 +84,6 @@
         get: function(host, id, title) {
             if (!this.title[this.key(host, id)]) return host + '.hatena.ne.jp/' + id;
             return this.title[this.key(host, id)];
-        },
-        length: function() {
-            return this.n;
         }
     };
 
@@ -65,16 +94,17 @@
         pageFor            = [];
         wedataCache        = [];
         title              = new Title();
-        _old_title_length  = -1;
+        isFirst            = true;
+        isIncreased        = false;
+        isUpdated          = false;
+        lastLocation       = window.content.location.href.replace(/^https?:\/\//, '');
 
         maxRecentHostsSize = liberator.globalVariables.maxRecentHostsSize || 10;
-        collectLogSpan     = liberator.globalVariables.collectLogSpan     || 24 * 7 * 4 * 60 * 60 * 1000000;
-        alwaysCollect      = liberator.globalVariables.accessHatenaAlwaysCollect;
+        collectLogSpan     = liberator.globalVariables.collectLogSpan     || 24 * 7 * 4 * 60 * 60 * 1000000; // 4 weeks
         useWedata          = liberator.globalVariables.accessHatenaUseWedata;
         ignoreIds          = liberator.globalVariables.accessHatenaIgnoreIds;
-        alwaysCollect      = (alwaysCollect != null) ? alwaysCollect : false;
-        useWedata          = (useWedata != null) ? useWedata         : true;
-        ignoreIds          = (ignoreIds != null) ? ignoreIds         : ['login'];
+        useWedata          = (useWedata != null) ? useWedata : true;
+        ignoreIds          = (ignoreIds != null) ? ignoreIds : ['login'];
 
         if (useWedata) {
             loadWedata();
@@ -107,7 +137,6 @@
         recentHosts          = [];
         historyCompletions   = [];
         historyCompletions.h = [];
-        var _title_length    = title.length();
 
         root.containerOpen = true;
         for (var i = 0, length = root.childCount; i < length; i++) {
@@ -119,8 +148,10 @@
             if (host != '') {
                 if (!pageFor[host]) {
                     pageFor[host] = page;
-                } else if (pageFor[host].uri.length > page.uri.length) {
+                    isIncreased = true;
+                } else if (pageFor[host].uri.length > page.uri.length) { // より短いアドレスのタイトルが妥当
                     pageFor[host] = page;
+                    isUpdated = true;
                 }
 
                 if (_recent_hosts_length < maxRecentHostsSize && recentHosts.indexOf(host) == -1) {
@@ -130,20 +161,21 @@
                     historyCompletions.h.push(host);
                 }
             }
-            if (id != '' && !id.match('^(?:' + ignoreIds.join('|') + ')$')) {
+            if (id != '' && !id.match('^(?:' + ignoreIds.join('|') + ')$')) { // Wedata の拒否リストに入っていなかったら
                 if (ids.indexOf(id) == -1) {
                     ids.push(id);
                 }
-                if (_title_length > _old_title_length && id.indexOf('/') != -1) {
-                    if (page.uri.match('^https?://' + host + '\\.hatena\\.ne\\.jp/' + id + '/?$') && title.get(host, id) != page.title) {
+                if (isFirst || isIncreased || isUpdated) { // 初回か，pageFor に何か追加されたか，pageFor が更新されたら
+                    isIncreased = false;
+                    isUpdated   = false;
+                    if (page.title != '' && title.get(host, id) != page.title) {
                         title.set(host, id, page.title);
                     }
                 }
             }
         }
         root.containerOpen = false;
-
-        _old_title_length = _title_length;
+        isFirst = false;
     }
     collectLog();
 
@@ -174,13 +206,14 @@
             var id   = args[1] ? encodeURIComponent(args[1].toString()).replace('%2F', '/') : '';
             var uri  = 'http://' + host + '.hatena.ne.jp/' + id;
             liberator.open(uri, liberator.CURRENT_TAB);
-            historyCompletions = [];
+            lastLocation = '';
         }, {
             completer: function (context, args) {
                 if (args.length == 1) {
                     context.title = ["Host", "Service"];
-                    if (alwaysCollect || historyCompletions.length == 0) {
+                    if (window.content.location.href.replace(/^https?:\/\//, '') != lastLocation) { // ページ遷移がない場合に何度も collectLog() しないように
                         collectLog();
+                        lastLocation = window.content.location.href.replace(/https?:\/\//, '');
                     }
                     context.completions = [[recentHosts[i], pageFor[recentHosts[i]].title] for (i in recentHosts) if (recentHosts.hasOwnProperty(i))].concat(historyCompletions);
                 } else if (args.length == 2) {
