@@ -35,7 +35,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Update blog more quickly.</description>
-  <description lang="ja">$B$O$F$J$G5?;w%^%$%/%m(BWeb$BF|5-(B</description>
+  <description lang="ja">はてなで疑似マイクロWeb日記</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/microUpdate.js</updateURL>
@@ -55,14 +55,14 @@ let PLUGIN_INFO =
 
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    == $B35MW(B ==
-    $B!J%W%i%0%$%s$N35MW!K(B
+    == 概要 ==
+    （プラグインの概要）
 
-    == $B%3%^%s%I(B ==
+    == コマンド ==
 
-    == $B%0%m!<%P%kJQ?t(B ==
+    == グローバル変数 ==
 
-    == $B%*%W%7%g%s(B ==
+    == オプション ==
 
     == ToDo ==
 
