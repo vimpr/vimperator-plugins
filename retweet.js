@@ -5,7 +5,7 @@ var PLUGIN_INFO =
   <description>ReTweet This Page.</description>
   <description lang="ja">開いているTweetをReTweetします。</description>
   <author mail="from.kyushu.island@gmail.com" homepage="http://iddy.jp/profile/from_kyushu">from_kyushu</author>
-  <version>0.2</version>
+  <version>0.3</version>
   <license>GPL</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.1</maxVersion>
@@ -44,7 +44,7 @@ Usage:
 
     function getUserName()
     {
-      return $U.getFirstNodeFromXPath("//div[@class='screen-name']/a").innerHTML;
+      return $U.getFirstNodeFromXPath('//a[contains(concat(" ",normalize-space(@class)," "),"screen-name")]').innerHTML;
     }
 
     function getShortenUrl(longUrl)
@@ -60,10 +60,11 @@ Usage:
       return xhr.responseText;
     }
 
-    function sendTwitter(url,name,body)
+    function sendTwitter(url,name,body,comment)
     {
       var xhr = new XMLHttpRequest();
-      var statusText = "RT @" + name + " [" + url +"]: " + body;
+      var statusText = (comment ? comment + " " : "") + "RT @" + name + " [" + url +"]: " + body;
+      return liberator.echo(statusText);
       xhr.open("POST", "https://twitter.com/statuses/update.json", false, username, password);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.send("status=" + encodeURIComponent(statusText) + "&source=Vimperator");
@@ -74,7 +75,7 @@ Usage:
     commands.addUserCommand(
       ['retweet[This]','rtt'],
       'ReTweet This.',
-      function()
+      function(args)
       {
         try
         {
@@ -86,13 +87,13 @@ Usage:
           {
             username = logins[0].username;
             password = logins[0].password;
-            sendTwitter(url,name,body);
+            sendTwitter(url,name,body,args.literalArg);
           }
           else if(liberator.globalVariables.twitter_username && liberator.globalVariables.twitter_password)
           {
             username = liberator.globalVariables.twitter_username;
             password = liberator.globalVariables.twitter_password;
-            sendTwitter(url,name,body);
+            sendTwitter(url,name,body,args.literalArg);
           }
           else
           {
@@ -103,7 +104,11 @@ Usage:
         {
           liberator.echoerr(e);
         }
-      }
+      },
+      {
+        literal: 0
+      },
+      true
     );
   }
 )();
