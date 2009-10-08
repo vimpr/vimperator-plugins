@@ -195,6 +195,7 @@ liberator.accountSwitcherOpenNewTab = 1;
                 var needle = '.hatena.ne.jp';
                 if (service.host.toLowerCase().lastIndexOf(needle) == service.host.length - needle.length) {
                     img.setAttribute('src', 'http://www.hatena.ne.jp/users/' + username.substr(0, 2) + '/' + username + '/profile_s.gif');
+                    img.setAttribute('tooltiptext', username);
                     if (!document.getElementById('account_switcher_pannel')) {
                         if (afterSLine != null) {
                             statusBar.insertBefore(sbPannel, afterSLine);
