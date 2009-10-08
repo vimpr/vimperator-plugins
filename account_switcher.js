@@ -201,7 +201,7 @@ liberator.accountSwitcherOpenNewTab = 1;
                         }
                     }
                 }
-            }
+            };
             req.onerror = function(e) { liberator.echoerr('Login error in account_switcher.js'); };
             req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             params.push(service.id + '=' + encodeURIComponent(username));
