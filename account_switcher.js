@@ -1,17 +1,56 @@
-/**
- * ==VimperatorPlugin==
- * @name           account_switcher.js
- * @description    switch account easily
- * @description-ja 複数のアカウントを切り替える
- * @minVersion     2.1a1pre
- * @author         masa138
- * @version        0.0.5
- * ==/VimperatorPlugin==
- *
- * Usage:
- * :account {username}@{servicename}
- *
- */
+var PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>Switch account easily.</description>
+<description lang="ja">複数のアカウントを切り替えることができます．</description>
+<minVersion>2.1a1pre</minVersion>
+<maxVersion>2.1a1pre</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/account_switcher.js</updateURL>
+<author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA</author>
+<version>0.07</version>
+<detail><![CDATA[
+
+== Commands ==
+:account {username}@{servicename}
+    {servicename} に {username} でログインします．
+    このとき，ログインマネージャーの値を使用するので，
+    ログインマネージャーにパスワードを保存しておく必要があります．
+
+:loginmultiaccounts
+    .vimperatorrc であらかじめ設定しておいたアカウントすべてにログインします．
+    日常的に使うサーヴィスのメインアカウントを登録しておくことで，コマンド一つで
+    すべてにログインできます．
+
+
+== Global variables ==
+accountSwitcherServices
+    Google, Hatena, Hatelabo 以外のアカウントにも対応することが出来ます．
+
+accountSwitcherLoginServices
+    :loginmultiaccounts でログインするアカウントの配列
+
+== .vimperatorrc ==
+以下の様に記述しておけば，:loginmultiaccounts を実行したときに
+すべてのアカウントにログインできます．
+>||
+js <<EOM
+liberator.globalVariables.accountSwitcherLoginServices = [
+    'bar@hatena',
+    'buz@hatelabo',
+    'foo@google',
+];
+||<
+
+accountSwitcherOpenNewTab
+    ログイン後に jump 先を新しいタブで開くかどうか指定することが出来ます．
+>||
+js <<EOM
+// タブで開く
+liberator.accountSwitcherOpenNewTab = 1;
+||<
+
+]]></detail>
+</VimperatorPlugin>;
 (function(){
     var services = [];
     var accounts = [];
@@ -28,35 +67,51 @@
     var img        = sbPannel.appendChild(document.createElementNS(ns, 'image'));
     sbPannel.id    = 'account-switcher-pannel';
 
+    var loginServices;
+
     var _services = {
         google: {
             host   : 'https://www.google.com',
             login  : '/accounts/LoginAuth',
             id     : 'Email',
             pw     : 'Passwd',
-            logout : '/accounts/Logout',
-            jump   : '/accounts/ManageAccount'
+            ex     : ['GALX'],
+            logout : 'http://mail.google.com/mail/?logout',
         },
         hatena: {
             host   : 'https://www.hatena.ne.jp',
             login  : '/login',
             id     : 'name',
             pw     : 'password',
-            logout : '/logout'
+            logout : '/logout',
         },
         hatelabo: {
             host   : 'https://www.hatelabo.jp',
             login  : '/login',
-            id     : 'mode=enter&key',
+            id     : 'key',
             pw     : 'password',
+            ex     : ['mode=enter'],
             logout : '/logout',
-            jump   : 'http://hatelabo.jp/'
-        }
+        },
+        twitter: {
+            host   : 'https://twitter.com',
+            login  : '/sessions',
+            id     : 'session[username_or_email]',
+            pw     : 'session[password]',
+            ex     : ['authenticity_token'],
+            exhost : 'https://twitter.com',
+            logout : '/sessions/destroy',
+            jump   : '/',
+        },
     };
 
     function init() {
         var rcServices = liberator.globalVariables.accountSwitcherServices;
         rcServices = !rcServices ? [] : rcServices;
+
+        // loginmultiaccounts でログインするアカウントの読み込み
+        loginServices = liberator.globalVariables.accountSwitcherLoginServices;
+        loginServices = !loginServices ? [] : loginServices;
 
         for (var key in _services)  if (_services.hasOwnProperty(key)) services[key] = _services[key];
         for (var key in rcServices) if (rcServices.hasOwnProperty(key)) {
@@ -76,35 +131,63 @@
             var logins = manager.findLogins({}, services[host].host, "", null);
             for (var i = 0; i < logins.length; i++) {
                 var login = logins[i];
-                accounts[[login.username, host].join('@')] = {};
-                var a = accounts[[login.username, host].join('@')];
-                a.username = login.username,
-                a.password=login.password,
-                a.host = host;
+                var usernameAndService = [login.username, host].join('@');
+                accounts[usernameAndService] = {};
+                var a = accounts[usernameAndService];
+                a.username = login.username;
+                a.password = login.password;
+                a.host     = host;
             }
         }
+
         isFirst = false;
     }
 
     function changeAccount(user) {
-        var service = services[accounts[user].host];
-        if (service.host == null || service.logout == null) return;
-
         var username = accounts[user].username;
         var password = accounts[user].password;
+        var params   = [];
+
+        var service = services[accounts[user].host];
+        if (service.host == null || service.logout == null) return;
+        if (!!service.params) params = service.params;
+
         var req = new XMLHttpRequest();
         var url = (service.logout.indexOf('http') != 0) ? service.host + service.logout : service.logout;
         req.open("POST", url, true);
         req.onload = function(e) {
+            var url = (service.login.indexOf('http') != 0) ? service.host + service.login : service.login;
+            var ex  = service.ex;
+            if (!!ex) {
+                var res;
+                if (!!service.exhost) {
+                    res = util.httpGet(service.exhost);
+                } else {
+                    res = util.httpGet(url);
+                }
+                for (var i = 0, length = ex.length; i < length; i++) {
+                    var value = ex[i];
+                    if (value.indexOf('=') > 0) {
+                        params.push(value);
+                    } else {
+                        res.responseText.match(new RegExp('(<.*\\bname=\"' + value + '\".*?>)'));
+                        RegExp.$1.match(/value=\"([a-zA-Z0-9-_]+)\"/);
+                        params.push(value + '=' + encodeURIComponent(RegExp.$1));
+                    }
+                }
+            }
             if (service.login == null || service.id == null || service.pw == null) return;
             var req = new XMLHttpRequest();
-            var url = (service.login.indexOf('http') != 0) ? service.host + service.login : service.login;
             req.open("POST", url, true);
             req.onload = function(e) {
                 if (service.jump != null) {
                     var url = (service.jump.indexOf('http') == -1) ? service.host + service.jump : service.jump;
-                    content.location = url;
-                } else if(content.location != 'about:blank') {
+                    if (!!liberator.globalVariables.accountSwitcherOpenNewTab && content.location.href != 'about:blank') {
+                        liberator.open(url, liberator.NEW_BACKGROUND_TAB);
+                    } else {
+                        content.location.href = url;
+                    }
+                } else if(content.location.href != 'about:blank') {
                     content.location.reload();
                 }
                 var needle = '.hatena.ne.jp';
@@ -118,18 +201,35 @@
                         }
                     }
                 }
-            };
+            }
             req.onerror = function(e) { liberator.echoerr('Login error in account_switcher.js'); };
             req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            req.send(
-                service.id + '=' + encodeURIComponent(username) + '&' +
-                service.pw + '=' + encodeURIComponent(password)
-            );
+            params.push(service.id + '=' + encodeURIComponent(username));
+            params.push(service.pw + '=' + encodeURIComponent(password));
+            req.send(params.join('&'));
             nowLogin[user.substr(user.lastIndexOf('@') + 1)] = user;
         };
         req.onerror = function(e) { liberator.echoerr('Logout error in account_switcher.js'); };
         req.send(null);
     }
+
+    function loginMultiAccounts() {
+        for (var i = 0, length = loginServices.length; i < length; i++) {
+            for (var key in accounts) if (accounts.hasOwnProperty(key)) {
+                if (key == loginServices[i]) {
+                    changeAccount(key);
+                    continue;
+                }
+            }
+        }
+    }
+
+    commands.addUserCommand(["loginmultiaccounts"], "Login multi accounts",
+        function() {
+            init();
+            loginMultiAccounts();
+        }
+    );
 
     commands.addUserCommand(["account"], "Change Account",
         function(args) {
