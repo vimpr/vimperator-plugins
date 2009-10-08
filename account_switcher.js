@@ -170,7 +170,7 @@ liberator.accountSwitcherOpenNewTab = 1;
                     if (value.indexOf('=') > 0) {
                         params.push(value);
                     } else {
-                        res.responseText.match(new RegExp('(<.*\\bname=\"' + value + '\".*?>)'));
+                        res.responseText.match(new RegExp('(<[\\S\\s]*?name=\"' + value + '\"[\\S\\s]*?>)'));
                         RegExp.$1.match(/value=\"([a-zA-Z0-9-_]+)\"/);
                         params.push(value + '=' + encodeURIComponent(RegExp.$1));
                     }
