@@ -49,7 +49,6 @@ map ; :accesshatena
 </VimperatorPlugin>;
 (function(){
     var useWedata;
-    var wedataCache;
     var ignoreIds;
     var ids;
     var recentHosts;
@@ -92,7 +91,6 @@ map ; :accesshatena
         recentHosts        = [];
         historyCompletions = [];
         pageFor            = [];
-        wedataCache        = [];
         title              = new Title();
         isFirst            = true;
         isIncreased        = false;
@@ -108,12 +106,6 @@ map ; :accesshatena
 
         if (useWedata) {
             loadWedata();
-            for (i in wedataCache) if (wedataCache.hasOwnProperty(i)) {
-                var id = wedataCache[i];
-                if (ignoreIds.indexOf(id) == -1) {
-                    ignoreIds.push(id)
-                }
-            }
         }
     }
     init();
@@ -161,7 +153,7 @@ map ; :accesshatena
                     historyCompletions.h.push(host);
                 }
             }
-            if (id != '' && !id.match('^(?:' + ignoreIds.join('|') + ')$')) { // Wedata の拒否リストに入っていなかったら
+            if (id != '' && !id.replace('/', '').match(new RegExp('^(?:' + ignoreIds.join('|') + ')$'))) { // Wedata の拒否リストに入っていなかったら
                 if (ids.indexOf(id) == -1) {
                     ids.push(id);
                 }
@@ -194,8 +186,8 @@ map ; :accesshatena
         var json = eval(req.responseText);
         for (var i in json) if (json.hasOwnProperty(i)) {
             var id = json[i].data.id;
-            if (wedataCache.indexOf(id) == -1 && id != '') {
-                wedataCache.push(id);
+            if (ignoreIds.indexOf(id) == -1 && id != '') {
+                ignoreIds.push(id)
             }
         }
     }
