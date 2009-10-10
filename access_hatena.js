@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <maxVersion>2.1a1pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/access_hatena.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA and id:hitode909</author>
-<version>0.61</version>
+<version>0.62</version>
 <detail><![CDATA[
 
 == Commands ==
@@ -154,8 +154,12 @@ map ; :accesshatena
                 }
             }
             if (id != '' && !id.replace('/', '').match(new RegExp('^(?:' + ignoreIds.join('|') + ')$'))) { // Wedata の拒否リストに入っていなかったら
-                if (ids.indexOf(id) == -1) {
-                    ids.push(id);
+                var index = ids.indexOf(id);
+                if (index == -1) {
+                    ids.unshift(id);
+                } else {
+                    ids.splice(index, 1);
+                    ids.unshift(id);
                 }
                 if (isFirst || isIncreased || isUpdated) { // 初回か，pageFor に何か追加されたか，pageFor が更新されたら
                     isIncreased = false;
