@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -36,10 +36,10 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
-  <version>2.2</version>
+  <version>2.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/happy_hacking_vimperator.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -61,34 +61,42 @@ let PLUGIN_INFO =
   let sound = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
   sound.init();
 
-  let meows = [
-    // mouse kara
-    '\u30DE\u30A6\u30B9\u304B\u3089\u624B\u3092\u96E2\u3059\u307E\u3067\u306F\u30A6\u30B8\u866B\u3060\uFF01 \u5730\u7403\u4E0A\u3067\u6700\u4E0B\u7B49\u306E\u751F\u547D\u4F53\u3060\uFF01',
-    // itumade
-    '\u3044\u3064\u307E\u3067\u305D\u306E\u7CDE\u3092\u63E1\u308A\u3057\u3081\u3066\u3044\u308B\u3064\u3082\u308A\u3060\uFF01',
-    // jobs
-    '\u30B8\u30E7\u30D6\u30BA\u306E\u30B1\u30C4\u306B\u30C9\u982D\u7A81\u3063\u8FBC\u3093\u3067\u304A\u3063\u6B7B\u306D\uFF01',
-    // kusonezu fuck
-    '\u305D\u306E\u7CDE\u30CD\u30BA\u30DF\u3068\u30D5\u30A1\u30C3\u30AF\u3057\u3066\u3084\u304C\u308C!',
-    // kusata
-    '\u8150\u3063\u305F\u30CD\u30BA\u30DF\u306E\u81ED\u3044\u304C\u3057\u3084\u304C\u308B\uFF01',
-    // click&drag
-    '\u3058\u3063\u304F\u308A\u53EF\u611B\u304C\u3063\u3066\u3084\u308B\u3002\u30AF\u30EA\u30C3\u30AF\u3057\u305F\u308A\u30C9\u30E9\u30C3\u30B0\u3057\u305F\u308A\u51FA\u6765\u306A\u304F\u3057\u3066\u3084\u308B\uFF01',
-    // tataki
-    '\u305D\u306E\u30DE\u30A6\u30B9\u3092\u3055\u3063\u3055\u3068\u3076\u3061\u58CA\u305B\uFF01',
-    // homep
-    '\u4FFA\u304C\u3053\u306E\u4E16\u3067\u305F\u3060\u4E00\u3064\u6211\u6162\u3067\u304D\u3093\u306E\u306F\u3001\u624B\u3092\u30AD\u30FC\u30DC\u30FC\u30C9\u304B\u3089\u96E2\u3059\u3053\u3068\u3060\uFF01',
-    // umare
-    '\u30DE\u30A6\u30B9\u3092\u624B\u306B\u304F\u3063\u3064\u3051\u3066\u751F\u307E\u308C\u3066\u304D\u305F\u304B\uFF1F\u305D\u308C\u3068\u3082\u52AA\u529B\u3057\u3066\u305D\u3046\u3057\u3066\u3044\u308B\u306E\u304B\uFF1F',
-    // aijou
-    '\u306A\u305C\u30DE\u30A6\u30B9\u3092\u4F7F\u3046\uFF1F\u30D1\u30D1\u3068\u30DE\u30DE\u306E\u611B\u60C5\u304C\u8DB3\u308A\u306A\u304B\u3063\u305F\u306E\u304B\uFF1F',
-    // cursor
-    '\u305D\u306E\u80F8\u304F\u305D\u60AA\u3044\u30AB\u30FC\u30BD\u30EB\u3092\u6D88\u305B\uFF01',
-    // sabetu
-    '\u30DE\u30A6\u30B9\u3001\u30C8\u30E9\u30C3\u30AF\u30DC\u30FC\u30EB\u3001\u30BF\u30D6\u30EC\u30C3\u30C8\u3092\u4FFA\u306F\u898B\u4E0B\u3055\u3093\u3002\u5168\u3066\u5E73\u7B49\u306B\u4FA1\u5024\u304C\u306A\u3044\uFF01',
-    // do write
-    '\u4F55\u3001\u30DE\u30A6\u30B9\u304C\u306A\u3044\u3068\u64CD\u4F5C\u3067\u304D\u306A\u3044\u3060\u3063\u3066\uFF1F\u9ED9\u3063\u3066\u30D7\u30E9\u30B0\u30A4\u30F3\u66F8\u3051\uFF01'
-  ];
+  let meows = {
+    mickey: [
+      // mouse kara
+      '\u30DE\u30A6\u30B9\u304B\u3089\u624B\u3092\u96E2\u3059\u307E\u3067\u306F\u30A6\u30B8\u866B\u3060\uFF01 \u5730\u7403\u4E0A\u3067\u6700\u4E0B\u7B49\u306E\u751F\u547D\u4F53\u3060\uFF01',
+      // itumade
+      '\u3044\u3064\u307E\u3067\u305D\u306E\u7CDE\u3092\u63E1\u308A\u3057\u3081\u3066\u3044\u308B\u3064\u3082\u308A\u3060\uFF01',
+      // jobs
+      '\u30B8\u30E7\u30D6\u30BA\u306E\u30B1\u30C4\u306B\u30C9\u982D\u7A81\u3063\u8FBC\u3093\u3067\u304A\u3063\u6B7B\u306D\uFF01',
+      // kusonezu fuck
+      '\u305D\u306E\u7CDE\u30CD\u30BA\u30DF\u3068\u30D5\u30A1\u30C3\u30AF\u3057\u3066\u3084\u304C\u308C!',
+      // kusata
+      '\u8150\u3063\u305F\u30CD\u30BA\u30DF\u306E\u81ED\u3044\u304C\u3057\u3084\u304C\u308B\uFF01',
+      // click&drag
+      '\u3058\u3063\u304F\u308A\u53EF\u611B\u304C\u3063\u3066\u3084\u308B\u3002\u30AF\u30EA\u30C3\u30AF\u3057\u305F\u308A\u30C9\u30E9\u30C3\u30B0\u3057\u305F\u308A\u51FA\u6765\u306A\u304F\u3057\u3066\u3084\u308B\uFF01',
+      // tataki
+      '\u305D\u306E\u30DE\u30A6\u30B9\u3092\u3055\u3063\u3055\u3068\u3076\u3061\u58CA\u305B\uFF01',
+      // homep
+      '\u4FFA\u304C\u3053\u306E\u4E16\u3067\u305F\u3060\u4E00\u3064\u6211\u6162\u3067\u304D\u3093\u306E\u306F\u3001\u624B\u3092\u30AD\u30FC\u30DC\u30FC\u30C9\u304B\u3089\u96E2\u3059\u3053\u3068\u3060\uFF01',
+      // umare
+      '\u30DE\u30A6\u30B9\u3092\u624B\u306B\u304F\u3063\u3064\u3051\u3066\u751F\u307E\u308C\u3066\u304D\u305F\u304B\uFF1F\u305D\u308C\u3068\u3082\u52AA\u529B\u3057\u3066\u305D\u3046\u3057\u3066\u3044\u308B\u306E\u304B\uFF1F',
+      // aijou
+      '\u306A\u305C\u30DE\u30A6\u30B9\u3092\u4F7F\u3046\uFF1F\u30D1\u30D1\u3068\u30DE\u30DE\u306E\u611B\u60C5\u304C\u8DB3\u308A\u306A\u304B\u3063\u305F\u306E\u304B\uFF1F',
+      // cursor
+      '\u305D\u306E\u80F8\u304F\u305D\u60AA\u3044\u30AB\u30FC\u30BD\u30EB\u3092\u6D88\u305B\uFF01',
+      // sabetu
+      '\u30DE\u30A6\u30B9\u3001\u30C8\u30E9\u30C3\u30AF\u30DC\u30FC\u30EB\u3001\u30BF\u30D6\u30EC\u30C3\u30C8\u3092\u4FFA\u306F\u898B\u4E0B\u3055\u3093\u3002\u5168\u3066\u5E73\u7B49\u306B\u4FA1\u5024\u304C\u306A\u3044\uFF01',
+      // do write
+      '\u4F55\u3001\u30DE\u30A6\u30B9\u304C\u306A\u3044\u3068\u64CD\u4F5C\u3067\u304D\u306A\u3044\u3060\u3063\u3066\uFF1F\u9ED9\u3063\u3066\u30D7\u30E9\u30B0\u30A4\u30F3\u66F8\u3051\uFF01'
+    ],
+    key: [
+      // dont touch
+      '\u305D\u306E\u6C5A\u3044\u30AD\u30FC\u3067\u4FFA\u306B\u89E6\u308B\u3093\u3058\u3083\u306D\u3047\uFF01',
+      // hikkonuke
+      '\u4ECA\u3059\u3050\u305D\u306E\u30AD\u30FC\u3092\u5F15\u3063\u3053\u629C\u3051\uFF01'
+    ]
+};
 
   let gunsou = 'data:image/gif;base64,'+
         'R0lGODlhYAB6AIQeAD8/P/j4+PDw8Ojo6ODg4NjY2NDQ0MjIyMDAwLi4uLCwsKioqKCgoJiYmJCQ'+
@@ -142,6 +150,9 @@ let PLUGIN_INFO =
         'erbgOXbCAPRngWCXFPgBONjFgU+zAQtoD+4mgiNwB+3BEhOAeCgYMtbAIGywgC+4Le5AIQhAXjUY'+
         'J04QDASAfeIRAgA7';
 
+  let uncleanKeys = '<Up> <Down> <Left> <Right> <Home> <End> <PageDown> <PageUp>'.split(/ /);
+  for (let i = 1, e = 20; i < e; i++)
+    uncleanKeys.push('<F' + i + '>');
 
   function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
 
@@ -154,8 +165,8 @@ let PLUGIN_INFO =
                   args);
   };
 
-  function shit ()
-    meows[Math.floor(Math.random() * meows.length)];
+  function shit (type)
+    meows[type][Math.floor(Math.random() * meows[type].length)];
 
   function fuck (msg) {
     let sz = innerWidth / msg.length / 1.5;
@@ -178,7 +189,7 @@ let PLUGIN_INFO =
       event.preventDefault();
       event.stopPropagation();
       if (msg) {
-        fuck(shit());
+        fuck(shit(msg));
         sound.play(makeURI('http://www.kurinton.net/~snca/files/meow.wav'));
       }
     }
@@ -199,9 +210,18 @@ let PLUGIN_INFO =
     }
   });
 
+  around(events, 'onKeyPress', function (next, [event]) {
+    let keyStr = events.toString(event);
+    if (!events.feedingKeys && uncleanKeys.some(function(v) v == keyStr)) {
+      return kill('key')(event);
+    }
+    next();
+  });
+
   window.addEventListener('keypress', function (event) {
     let elem = window.document.commandDispatcher.focusedElement;
-    if (events.toString(event) == '<Return>' && elem && elem.form) {
+    let keyStr = events.toString(event);
+    if (keyStr == '<Return>' && elem && elem.form) {
       ignore = true;
       setTimeout(function () ignore = false, 200);
     }
@@ -224,7 +244,7 @@ let PLUGIN_INFO =
     'click',
     function (event) {
       if ((new Date().getTime() - mousedownTime) < 500)
-        kill(true)(event);
+        kill('mickey')(event);
     },
     true
   );
