@@ -3,10 +3,10 @@ var PLUGIN_INFO =
   <name>localkeymode</name>
   <description>assign temporary keymap</description>
   <description lang="ja">一時的なキーマップの割り当て</description>
-  <version>0.2.1c</version>
+  <version>0.2.2</version>
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.2pre</minVersion>
+  <maxVersion>2.2pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/localkeymode.js</updateURL>
   <detail><![CDATA[
     == Usage ==
@@ -84,8 +84,16 @@ liberator.plugins.LocalKeyMode = (function() {
   function cloneMap(org, key) {
     return new Map(
       org.modes, key || org.names, org.description, org.action,
-      {flags:org.flags, rhs:org.rhs, noremap:org.noremap }
+      cloneExtraInfo(org)
     );
+  }
+
+  function cloneExtraInfo(org) {
+    let result = {};
+    for (let name in org)
+      if (/^(rhs|noremap|count|motion|arg|silent|route)$/.test(name))
+        result[name] = org[name];
+    return result;
   }
 
   var Class = function() function() {this.initialize.apply(this, arguments);};
@@ -217,7 +225,7 @@ liberator.plugins.LocalKeyMode = (function() {
           else self.delkeychars.push( key );
         } );
         mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action,
-          {flags:m.flags, rhs:m.rhs, noremap:m.noremap });
+          cloneExtraInfo(m));
         self.helpstring += m.names+'    -> '+m.rhs+'<br/>\n';
       } );
       this.isBinding = true;
@@ -273,7 +281,7 @@ liberator.plugins.LocalKeyMode = (function() {
         for (; 0 < this.storekeymaps.length; ) {
           let m = this.storekeymaps.shift();
           mappings.addUserMap([modes.NORMAL], m.names, m.description, m.action,
-            {flags:m.flags, rhs:m.rhs, noremap:m.noremap});
+            cloneExtraInfo(m));
         }
         for (; 0 < this.delkeychars.length; ) {
           let keys = this.delkeychars.shift();
