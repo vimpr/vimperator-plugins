@@ -4,7 +4,7 @@
  * @description     update Twitter's status to current URL and comment
  * @description-ja  今見てるページの URL とタイトルをコメントといっしょに Twitter に投稿する
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.23
+ * @version         0.24
  * @minversion      2.0pre 2008/10/16
  * ==/VimperatorPlugin==
  *
@@ -43,6 +43,7 @@
  *   2008/09/24 ver. 0.20   - add URL canonicalization.
  *   2008/10/02 ver. 0.21   - fix the bug not apply encodeURI
  *                            to querystring for Pathtraq API.
+ *   2009/10/16 ver. 0.24   - fix for https URL.
  * */
 
 (function() {
@@ -138,7 +139,8 @@ liberator.modules.commands.addUserCommand(['reading'], "update Twitter's status 
     // complete logic is none.
     {
         bang: true,
-    }
+    },
+    true
 );
 
 // stuff functions
@@ -176,7 +178,7 @@ function canonicalizeURL(url) {
     req.send(null);
     if(req.status === 200) {
         let canonicalized = req.responseText.replace(/^"|"$/g, '');
-        return canonicalized ? canonicalized : url;
+        return (canonicalized && canonicalized != 'undefined') ? canonicalized : url;
     }
     else {
         throw new Error(req.status + ' ' + req.statusText + "\n" + req.responseHeaders);
