@@ -22,7 +22,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>The script allows you to update Twitter status from Vimperator</description>
-<version>1.0.1</version>
+<version>1.1.1</version>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
 <author>Trapezoid</author>
 <license>Creative Commons</license>
@@ -46,7 +46,8 @@ let PLUGIN_INFO =
 ]]></detail>
 </VimperatorPlugin>;
 
-(function(){
+liberator.modules.twitter = (function(){
+    var statuses = null;
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var evalFunc = window.eval;
     try {
@@ -80,10 +81,19 @@ let PLUGIN_INFO =
         return result.singleNodeValue ? result.singleNodeValue : null;
     }
     function sayTwitter(username, password, stat){
+        var sendData = '';
+        if (stat.match(/^@([^\s#]+)(?:#(\d+))\s+(.*)$/)){
+            var [replyUser, replyID] = [RegExp.$1, RegExp.$2];
+            stat = "@" + replyUser + " " + RegExp.$3;
+            sendData = "status=" + encodeURIComponent(stat) + "&in_reply_to_status_id=" + replyID;
+        } else {
+            sendData = "status=" + encodeURIComponent(stat);
+        }
+        sendData += "&source=Vimperator";
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "https://twitter.com/statuses/update.json", false, username, password);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send("status=" + encodeURIComponent(stat) + "&source=Vimperator");
+        xhr.send(sendData);
         liberator.echo("[Twitter] Your post " + '"' + stat + '" (' + stat.length + " characters) was sent. " );
     }
     function favTwitter(username, password, user){
@@ -104,7 +114,7 @@ let PLUGIN_INFO =
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://twitter.com/statuses/mentions.json", false, username, password);
         xhr.send(null);
-        var statuses = evalFunc(xhr.responseText);
+        statuses = evalFunc(xhr.responseText);
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
@@ -134,7 +144,7 @@ let PLUGIN_INFO =
             : "https://twitter.com/statuses/friends_timeline.json";
         xhr.open("GET", endPoint, false, username, password);
         xhr.send(null);
-        var statuses = evalFunc(xhr.responseText) || [];
+        statuses = evalFunc(xhr.responseText) || [];
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
@@ -229,8 +239,31 @@ let PLUGIN_INFO =
                 sayTwitter(username, password, arg);
         },{
             bang: true,
-            literal: 0
+            literal: 0,
+            completer: function(context, args){
+                if (!statuses) return;
+                var matches= context.filter.match(/^@(\w*)$/);
+                if (!matches) return;
+                var list = [];
+                var target = matches[1];
+                context.title = ["ID","Entry"];
+                if (args.bang)
+                    list = statuses.map(function(s) ["@" + s.user.screen_name, s.text]);
+                else
+                    list = statuses.map(function(s) ["@" + s.user.screen_name+ "#" + s.id + " ", s.text]);
+
+                if (target){
+                    list = list.filter(function($_) $_[0].indexOf(target) >= 0);
+                }
+                context.completions = list;
+            },
         }
     );
+    let self = {
+        get statuses(){
+            return statuses;
+        },
+    };
+    return self;
 })();
 // vim:sw=4 ts=4 et:
