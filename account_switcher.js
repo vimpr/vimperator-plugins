@@ -103,6 +103,14 @@ liberator.accountSwitcherOpenNewTab = 1;
             logout : '/sessions/destroy',
             jump   : '/',
         },
+        tumblr : {
+            host   : 'http://www.tumblr.com',
+            login  : '/login',
+            id     : 'email',
+            pw     : 'password',
+            logout : '/logout',
+            jump   : '/dashboard',
+        },
     };
 
     function init() {
