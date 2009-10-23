@@ -86,9 +86,9 @@ liberator.modules.twitter = (function(){
     }
     function sayTwitter(username, password, stat){
         var sendData = '';
-        if (stat.match(/^@([^\s#]+)(?:#(\d+))\s+(.*)$/)){
-            var [replyUser, replyID] = [RegExp.$1, RegExp.$2];
-            stat = "@" + replyUser + " " + RegExp.$3;
+        if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)){
+            var [replyUser, replyID] = [RegExp.$2, RegExp.$3];
+            stat = RegExp.$1 + "@" + replyUser + RegExp.$4;
             sendData = "status=" + encodeURIComponent(stat) + "&in_reply_to_status_id=" + replyID;
         } else {
             sendData = "status=" + encodeURIComponent(stat);
@@ -272,10 +272,16 @@ liberator.modules.twitter = (function(){
             literal: 0,
             completer: let (getting, targetContext) function(context, args){
                 function compl(){
-                    if (args.bang)
+                    if (args.bang){
+                        targetContext.title = ["Name","Entry"];
                         list = statuses.map(function(s) ["@" + s.user.screen_name, s.text]);
-                    else
+                    } else if (/RT\s+@\w*$/.test(args[0])){
+                        targetContext.title = ["Name + Text"];
+                        list = statuses.map(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, "-"]);
+                    } else {
+                        targetContext.title = ["Name#ID","Entry"];
                         list = statuses.map(function(s) ["@" + s.user.screen_name+ "#" + s.id + " ", s.text]);
+                    }
 
                     if (target){
                         list = list.filter(function($_) $_[0].indexOf(target) >= 0);
@@ -285,12 +291,12 @@ liberator.modules.twitter = (function(){
                     targetContext = getting = null;
                 }
 
-                var matches= context.filter.match(/^@(\w*)$/);
+                var matches= context.filter.match(/@(\w*)$/);
                 if (!matches) return;
                 var list = [];
                 var target = matches[1];
                 var doGet = (expiredStatus || !(statuses && statuses.length)) && autoStatusUpdate;
-                context.title = ["ID","Entry"];
+                context.offset += matches.index;
                 context.incomplete = doGet;
                 context.hasitems = !doGet;
                 targetContext = context;
