@@ -22,7 +22,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>The script allows you to update Twitter status from Vimperator</description>
-<version>1.1.1</version>
+<version>1.2.0</version>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
 <author>Trapezoid</author>
 <license>Creative Commons</license>
@@ -48,6 +48,10 @@ let PLUGIN_INFO =
 
 liberator.modules.twitter = (function(){
     var statuses = null;
+    var expiredStatus = false;
+    var autoStatusUpdate = !!parseInt(liberator.globalVariables.twitter_auto_status_update || 0);
+    var statusValidDuration = parseInt(liberator.globalVariables.twitter_status_valid_duration || 90);
+    var statusRefreshTimer;
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var evalFunc = window.eval;
     try {
@@ -136,15 +140,40 @@ liberator.modules.twitter = (function(){
         //liberator.log(html);
         liberator.echo(html, true);
     }
-    function showFollowersStatus(username, password, target){
+    function getFollowersStatus(username, password, target, onComplete){
         // for debug
         //target = "otsune"
+        function setRefresher(){
+            expiredStatus = false;
+            if (statusRefreshTimer)
+                clearTimeout(statusRefreshTimer);
+            statusRefreshTimer = setTimeout(function () expiredStatus = true, statusValidDuration * 1000);
+        }
+
         var xhr = new XMLHttpRequest();
         var endPoint = target ? "https://twitter.com/statuses/user_timeline/" + target + ".json"
             : "https://twitter.com/statuses/friends_timeline.json";
-        xhr.open("GET", endPoint, false, username, password);
+        xhr.open("GET", endPoint, onComplete, username, password);
+        liberator.log('get!');
+        if (onComplete) {
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    liberator.log('got!');
+                    setRefresher();
+                    onComplete(statuses = evalFunc(xhr.responseText) || []);
+                }
+            }
+        }
         xhr.send(null);
+        if (onComplete)
+            return;
+        setRefresher();
         statuses = evalFunc(xhr.responseText) || [];
+    }
+    function showFollowersStatus(username, password, target){
+        // for debug
+        //target = "otsune"
+        getFollowersStatus.apply(null, arguments);
 
         var html = <style type="text/css"><![CDATA[
             span.twitter.entry-content a { text-decoration: none; }
@@ -166,7 +195,7 @@ liberator.modules.twitter = (function(){
         //liberator.log(html);
         liberator.echo(html, true);
     }
-    function detectLink(str) {
+    function detectLink(str){
         let m = str.match(/https?:\/\/\S+/);
         if (m) {
             let left = str.substr(0, m.index);
@@ -175,6 +204,19 @@ liberator.modules.twitter = (function(){
             return <>{detectLink(left)}<a highlight="URL" href={url}> {url} </a>{detectLink(right)}</>;
         }
         return str;
+    }
+    function getAccount(){
+        try {
+            var logins = passwordManager.findLogins({}, "http://twitter.com", "https://twitter.com", null);
+            if (logins.length)
+                return [logins[0].username, logins[0].password];
+            else
+                throw "Twitter: account not found";
+        }
+        catch (ex){
+            liberator.echoerr(ex);
+        }
+
     }
     function showTwitterSearchResult(word){
         var xhr = new XMLHttpRequest();
@@ -205,19 +247,7 @@ liberator.modules.twitter = (function(){
     liberator.modules.commands.addUserCommand(["twitter"], "Change Twitter status",
         function(arg){
             var special = arg.bang;
-            var password;
-            var username;
-            try {
-                var logins = passwordManager.findLogins({}, "http://twitter.com", "https://twitter.com", null);
-                if (logins.length)
-                    [username, password] = [logins[0].username, logins[0].password];
-                else
-                    throw "Twitter: account not found";
-            }
-            catch (ex){
-                liberator.echoerr(ex);
-            }
-
+            var [username, password] = getAccount();
             arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
                 .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
@@ -240,24 +270,42 @@ liberator.modules.twitter = (function(){
         },{
             bang: true,
             literal: 0,
-            completer: function(context, args){
-                if (!statuses) return;
+            completer: let (getting, targetContext) function(context, args){
+                function compl(){
+                    if (args.bang)
+                        list = statuses.map(function(s) ["@" + s.user.screen_name, s.text]);
+                    else
+                        list = statuses.map(function(s) ["@" + s.user.screen_name+ "#" + s.id + " ", s.text]);
+
+                    if (target){
+                        list = list.filter(function($_) $_[0].indexOf(target) >= 0);
+                    }
+                    targetContext.completions = list;
+                    targetContext.incomplete = false;
+                    targetContext = getting = null;
+                }
+
                 var matches= context.filter.match(/^@(\w*)$/);
                 if (!matches) return;
                 var list = [];
                 var target = matches[1];
+                var doGet = (expiredStatus || !(statuses && statuses.length)) && autoStatusUpdate;
                 context.title = ["ID","Entry"];
-                if (args.bang)
-                    list = statuses.map(function(s) ["@" + s.user.screen_name, s.text]);
-                else
-                    list = statuses.map(function(s) ["@" + s.user.screen_name+ "#" + s.id + " ", s.text]);
-
-                if (target){
-                    list = list.filter(function($_) $_[0].indexOf(target) >= 0);
+                context.incomplete = doGet;
+                context.hasitems = !doGet;
+                targetContext = context;
+                if (doGet) {
+                    if (!getting) {
+                        getting = true;
+                        var [username, password] = getAccount();
+                        getFollowersStatus(username, password, null, compl);
+                    }
+                } else {
+                    compl();
                 }
-                context.completions = list;
-            },
-        }
+            }
+        },
+        true
     );
     let self = {
         get statuses(){
