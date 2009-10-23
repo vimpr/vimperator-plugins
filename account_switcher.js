@@ -192,18 +192,18 @@ liberator.accountSwitcherOpenNewTab = 1;
             req.onload = function(e) {
                 if (service.jump != null) {
                     var url = (service.jump.indexOf('http') == -1) ? service.host + service.jump : service.jump;
-                    if (!!liberator.globalVariables.accountSwitcherOpenNewTab && content.location.href != 'about:blank') {
+                    if (!!liberator.globalVariables.accountSwitcherOpenNewTab && window.content.location.href != 'about:blank') {
                         liberator.open(url, liberator.NEW_BACKGROUND_TAB);
                     } else {
-                        content.location.href = url;
+                        window.content.location.href = url;
                     }
                 } else if(content.location.href != 'about:blank') {
-                    content.location.reload();
+                    window.content.location.reload();
                 }
                 var needle = '.hatena.ne.jp';
                 if (service.host.toLowerCase().lastIndexOf(needle) == service.host.length - needle.length) {
                     img.setAttribute('src', 'http://www.hatena.ne.jp/users/' + username.substr(0, 2) + '/' + username + '/profile_s.gif');
-                    img.setAttribute('tooltiptext', username);
+                    img.setAttribute('tooltiptext', 'id:' + username);
                     if (!document.getElementById('account_switcher_pannel')) {
                         if (afterSLine != null) {
                             statusBar.insertBefore(sbPannel, afterSLine);
