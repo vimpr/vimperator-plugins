@@ -277,7 +277,7 @@ liberator.modules.twitter = (function(){
                         list = statuses.map(function(s) ["@" + s.user.screen_name, s.text]);
                     } else if (/RT\s+@\w*$/.test(args[0])){
                         targetContext.title = ["Name + Text"];
-                        list = statuses.map(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, "-"]);
+                        list = statuses.map(function(s) ["@" + s.user.screen_name + ": " + s.text, "-"]);
                     } else {
                         targetContext.title = ["Name#ID","Entry"];
                         list = statuses.map(function(s) ["@" + s.user.screen_name+ "#" + s.id + " ", s.text]);
