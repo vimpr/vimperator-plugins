@@ -3,10 +3,10 @@ var PLUGIN_INFO=
 <name>{NAME}</name>
 <description>feed some defined key events into the Web content</description>
 <description lang="ja">定義したkeyイベントをWebページへ送ってあげる</description>
-<version>2.2</version>
+<version>2.2.2</version>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <minVersion>2.0pre</minVersion>
-<maxVersion>2.0b3pre</maxVersion>
+<maxVersion>2.2</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_2.js</updateURL>
 <detail lang="ja"><![CDATA[
 == 概要 ==
