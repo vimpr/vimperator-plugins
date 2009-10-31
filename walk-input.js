@@ -23,7 +23,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Walk Input</name>
   <description>The focus walks "input" and "textarea" elements.</description>
-  <version>1.1</version>
+  <version>1.2</version>
   <author mail="tekezo@pqrs.org">Takayama Fumihiko</author>
   <license>BSD</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js</updateURL>
