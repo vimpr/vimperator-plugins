@@ -140,7 +140,7 @@
       name: function () <a href={linkTo}>{otags.name.apply(otags, arguments)}</a>
     };
 
-    let files = io.readDirectory(pluginDirPath);
+    let files = io.File(pluginDirPath).readDirectory();
     let indexHtml = <></>;
     let allHtml = <></>;
     let pminfos = [];

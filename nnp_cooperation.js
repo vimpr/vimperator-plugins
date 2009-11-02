@@ -108,7 +108,7 @@ liberator.modules.commands.addUserCommand(
         }
 
         // check existence of items in NicoNicoPlaylist
-        let nodes = buffer.evaluateXPath(
+        let nodes = util.evaluateXPath(
             'id("' + playlistNode.id + '")/div[contains(concat(" ", @class, " "), " playlist-list-outer ")]/ul/li/a'
         );
         let nodesLength = nodes.snapshotLength;

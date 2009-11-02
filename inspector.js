@@ -4,9 +4,9 @@ let PLUGIN_INFO =
 <description>DOM Inspector command</description>
 <require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<version>0.2</version>
-<minVersion>2.0pre</minVersion>
-<maxVersion>2.0</maxVersion>
+<version>0.3</version>
+<minVersion>2.3pre</minVersion>
+<maxVersion>2.3pre</maxVersion>
 <detail><![CDATA[
 == Usage ==
 :inspect #{id}:
@@ -43,7 +43,7 @@ function runInspector(node){
 
 function getIDList(filter, isChrome){
 	var doc = isChrome ? document : content.document;
-	var iter = buffer.evaluateXPath('//*[@id and contains(@id,"' + filter + '")]',doc);
+	var iter = util.evaluateXPath('//*[@id and contains(@id,"' + filter + '")]',doc);
 	return [["#" + e.id, "TagName: "+ e.tagName] for (e in iter)];
 }
 

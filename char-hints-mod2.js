@@ -125,7 +125,7 @@ let g:hintlabeling:
     {
         let hints = [];
         (function (win) {
-            let elems = [elem for(elem in buffer.evaluateXPath('//*[@liberator:highlight="Hint" and @number]', win.document))];
+            let elems = [elem for(elem in util.evaluateXPath('//*[@liberator:highlight="Hint" and @number]', win.document))];
             hints = hints.concat(elems);
             Array.forEach(win.frames, arguments.callee);
         })(win);

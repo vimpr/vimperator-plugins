@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">自動リロード</name>
   <description>Watch local file, and automatically reload current page when the file is modified.</description>
   <description lang="ja">ローカルのファイルを監視して、現在のページをリロードする</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3pre</minVersion>
+  <maxVersion>2.3pre</maxVersion>
   <detail><![CDATA[
     制作中
   ]]></detail>
@@ -68,13 +68,13 @@ let PLUGIN_INFO =
       let func = reload = function () tabs.reload(tab);
       let time = parseInt(parseFloat(args[0] || 1) * 1000);
 
-      let (file = io.getFile(args.string)) {
+      let (file = io.File(args.string)) {
         if (file.exists() && file.isFile()) {
           let filepath = file.path;
           storage.lastModifiedTime = file.lastModifiedTime;
           time = 200;
           func = function () {
-            let file = io.getFile(filepath);
+            let file = io.File(filepath);
             let mt = file.lastModifiedTime;
             if (storage.lastModifiedTime == mt)
               return;

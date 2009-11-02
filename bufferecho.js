@@ -28,7 +28,7 @@ commands.addUserCommand(['bufferecho','becho'],'Display results of JavaScript to
 );
 var manager = {
     append: function(htmlString){
-        var body = buffer.evaluateXPath('/html/body').snapshotItem(0);
+        var body = util.evaluateXPath('/html/body').snapshotItem(0);
         body.innerHTML += htmlString;
     },
     open: function(str, forceNewTab) {

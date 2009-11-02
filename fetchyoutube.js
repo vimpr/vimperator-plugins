@@ -2,10 +2,10 @@
 // @name           Fetch YouTube Video
 // @description    Fetch YouTube Video (fmt=22)
 // @license        Creative Commons 2.1 (Attribution + Share Alike)
-// @version        1.1
+// @version        1.1.1
 // @author         anekos (anekos@snca.net)
-// @minVersion     2.0pre
-// @maxVersion     2.0pre
+// @minVersion     2.3pre
+// @maxVersion     2.3pre
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -54,7 +54,7 @@
 
       let file;
       if (filepath) {
-        file = io.getFile(io.expandPath(filepath));
+        file = io.File(io.expandPath(filepath));
       } else {
         file = dm.userDownloadsDirectory;
       }

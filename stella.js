@@ -200,7 +200,7 @@ Thanks:
       let file;
 
       if (filepath) {
-        file = io.getFile(io.expandPath(filepath));
+        file = io.File(io.expandPath(filepath));
       } else {
         file = dm.userDownloadsDirectory;
       }

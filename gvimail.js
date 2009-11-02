@@ -5,7 +5,7 @@
  * @description    Make Gmail behave like Vim
  * @author         Mahefa Randimbisoa (DotMG) <dotmg@users.sourceforge.net>
  * @license        GPL 2.0
- * @requires       Vimperator 0.6pre, Gmail v1 or v2
+ * @requires       Vimperator 2.3pre
  * @url            http://code.google.com/p/gvimail/
  * @version        0.1
  * ==/VimperatorPlugin==
@@ -36,7 +36,7 @@
 		if (canvas_frame) return (canvas_frame);
 		if (use_gmail_v1)
 		{// On older versions of Gmail, The main canvas is the iframe that has the attribute left: 0pt
-			return (buffer.evaluateXPath('//iframe[contains(@style, "left: 0pt")]', window.content.frames[0].document, null, true).iterateNext());
+			return (util.evaluateXPath('//iframe[contains(@style, "left: 0pt")]', window.content.frames[0].document, null, true).iterateNext());
 		}
 		return null;
 	},
@@ -44,7 +44,7 @@
 	/// or a part of the src attribute of the img element (for Gmail v1)
 	clickImage : function (classnamev2, imgsrcv1)
 	{
-		var elem = buffer.evaluateXPath('//*[contains(concat(" ", @class, " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
+		var elem = util.evaluateXPath('//*[contains(concat(" ", @class, " "), " '+classnamev2+' ")] | //img[contains(@src, "'+imgsrcv1+'")]', GViMail.getMainCanvas().contentDocument, null, true).iterateNext();
 		// hmm, the code below generates a log: Invalid argument for followLink.
 		buffer.followLink(elem, liberator.CURRENT_TAB);
 	},

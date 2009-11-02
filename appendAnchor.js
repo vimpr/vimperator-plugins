@@ -57,7 +57,7 @@ let PLUGIN_INFO =
       const doc = window.content.document;
       const range = doc.createRange();
 
-      let nodes = liberator.modules.buffer.evaluateXPath(xpathQueryPlainText);
+      let nodes = util.evaluateXPath(xpathQueryPlainText);
       for (let node in nodes) {
         while (node) {
           range.selectNode(node)

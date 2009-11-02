@@ -39,9 +39,9 @@ let PLUGIN_INFO =
     <description lang="ja">画像操作特集。</description>
     <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
     <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-    <version>0.20</version>
-    <minversion>2.0</minversion>
-    <maxversion>2.1pre</maxversion>
+    <version>0.21</version>
+    <minversion>2.3pre</minversion>
+    <maxversion>2.3pre</maxversion>
     <detail><![CDATA[
 == USAGE ==
 Extended-hints mode ';m' to yank image URL and ';M' to save image are
@@ -243,7 +243,7 @@ commands.addUserCommand(
     'download all images of current page',
     function () {
         // refer: http://d.hatena.ne.jp/amachang/20071108/1194501306
-        let images = buffer.evaluateXPath(query);
+        let images = util.evaluateXPath(query);
         let l = images.snapshotLength;
         let i = 0;
         setTimeout ( function a() {

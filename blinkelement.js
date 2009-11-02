@@ -4,8 +4,8 @@
  * @description     blink specified elements.
  * @description-ja  指定した要素を点滅させる。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.31
- * @minversion      2.0pre 2008/10/16
+ * @version         0.32
+ * @minversion      2.3pre 2009/11/02
  * ==/VimperatorPlugin==
  *
  * LICENSE
@@ -34,7 +34,7 @@
  *  let blink_element_opacity='0.7'
  *
  *  :bl content.document.getElementsByTagName('A');
- *  :bl buffer.evaluateXPath('//a');
+ *  :bl util.evaluateXPath('//a');
  *  :nobl
  * */
 
@@ -98,8 +98,10 @@ commands.addUserCommand(
         }
     },
     {
+        literal: 0,
         completer: function (filter) completion.javascript(filter),
-    }
+    },
+    true
 );
 
 commands.addUserCommand(

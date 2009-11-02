@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>simple takahashi-method presentation tool</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1</version>
-    <minVersion>2.0a1</minVersion>
-    <maxVersion>2.0a1</maxVersion>
+    <version>0.1.1</version>
+    <minVersion>2.3pre</minVersion>
+    <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/takahashiPresentation.js</updateURL>
     <date>2008/12/23 09:20:07</date>
     <detail><![CDATA[
@@ -103,13 +103,13 @@ start :presentation.
         options.guioptions = '';
         win = window.content;
         doc = win.document;
-        let text = buffer.evaluateXPath('//div[@id="text"]').snapshotItem(0);
+        let text = util.evaluateXPath('//div[@id="text"]').snapshotItem(0);
         pages = parsePages(text.innerHTML);
         addKeys();
 
-        header = buffer.evaluateXPath('//*[@id="header"]').snapshotItem(0);
+        header = util.evaluateXPath('//*[@id="header"]').snapshotItem(0);
 
-        pre = buffer.evaluateXPath('//pre[@id="page"]').snapshotItem(0);
+        pre = util.evaluateXPath('//pre[@id="page"]').snapshotItem(0);
         pre.style.fontSize = fontSize+'px';
         pre.style.margin = '0px';
 

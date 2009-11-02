@@ -5,9 +5,9 @@ var PLUGIN_INFO =
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
 <license>MPL 1.1</license>
-<version>1.0</version>
-<minVersion>1.2</minVersion>
-<maxVersion>2.0</maxVersion>
+<version>1.0.1</version>
+<minVersion>2.3pre</minVersion>
+<maxVersion>2.3pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpathBlink.js</updateURL>
 <detail><![CDATA[
 for test xpath
@@ -57,7 +57,7 @@ commands.addUserCommand(['xpathb[link]','xb'],'XPath blink nodes',
 	function(expression){
 		var result
 		try {
-			result = buffer.evaluateXPath(expression.string);
+			result = util.evaluateXPath(expression.string);
 		} catch(e) {
 			liberator.echoerr('XPath blink: ' + e);
 		}

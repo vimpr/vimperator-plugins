@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Reveal Image</name>
   <description>Reveal IE Ctrl-A images.</description>
   <description lang="ja">IE の Ctrl-A 画像を暴く</description>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/reveal-ie-ctrl-a-images.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <minVersion>2.3pre</minVersion>
+  <maxVersion>2.3pre</maxVersion>
   <detail><![CDATA[
     == Description ==
       Reveal IE Ctrl-A images.
@@ -111,7 +111,7 @@ let PLUGIN_INFO =
   // for debug
   if (0) {
     let xpath = '/html/body/div[2]/div[3]/table/tbody/tr/td[2]/div/table/tbody/tr/td[2]/div/img';
-    let node = buffer.evaluateXPath(xpath).snapshotItem(0);
+    let node = util.evaluateXPath(xpath).snapshotItem(0);
     reveal(node, 1);
   }
 

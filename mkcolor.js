@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">mkcolor</name>
   <description>Write current highlights to the specified file.</description>
   <description lang="ja">現在のHighlightを指定のファイルに書き出す。</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/mkcolor.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3pre</minVersion>
+  <maxVersion>2.3pre</maxVersion>
   <detail><![CDATA[
     == Commands ==
       - mkcolor <FILENAME>
@@ -78,7 +78,7 @@ let PLUGIN_INFO =
     'Write current highlights to the specified file',
     function (args) {
       let filename = args[0];
-      let file = io.getFile(filename);
+      let file = io.File(filename);
       if (file.exists() && !args.bang)
         return liberator.echoerr(filename + ' already exists (add ! to override)');
       io.writeFile(file, getcolor());

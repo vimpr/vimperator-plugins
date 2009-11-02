@@ -5,9 +5,9 @@ let PLUGIN_INFO =
 <description lang="ja">今見ている動画 / 検索結果の情報を Twitter に投稿する。</description>
 <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
 <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-<version>0.71</version>
-<minVersion>2.0pre</minVersion>
-<maxVersion>2.0pre</maxVersion>
+<version>0.72</version>
+<minVersion>2.3pre</minVersion>
+<maxVersion>2.3pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/matanico.js</updateURL>
 <detail><![CDATA[
 == EX-COMMANDS ==
@@ -182,7 +182,7 @@ NicoScraper.prototype = {
 
     getTagName: function () {
         if (this.pagecheck() === 'tag') {
-            let wordNodes = liberator.modules.buffer.evaluateXPath('id("search_words")/span[contains(concat(" ", @class, " "), " search_word ")]');
+            let wordNodes = liberator.modules.util.evaluateXPath('id("search_words")/span[contains(concat(" ", @class, " "), " search_word ")]');
             let words = [];
             for (let wordNode in wordNodes) words.push(wordNode.textContent);
             return words.join(' ');

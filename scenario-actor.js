@@ -4,8 +4,8 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>browser act scenario semi-automatic.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.6</version>
-    <minVersion>2.0a2</minVersion>
+    <version>0.0.7</version>
+    <minVersion>2.3pre</minVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -154,7 +154,7 @@ function ScenarioActor () { //{{{
             },
             xpath: function (xpath) {
                 if((typeof xpath)!='string'||!win.document) throw [name, value];
-                return buffer.evaluateXPath(xpath, win.document).snapshotItem(0);
+                return util.evaluateXPath(xpath, win.document).snapshotItem(0);
             },
             value: function (dst, src) {
                 let edst = self.eval({xpath: self.eval(dst)});

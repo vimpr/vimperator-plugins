@@ -4,8 +4,8 @@
  * @description     Factory for the object to highlight specified element[s]. this set in plugins.highlighterFactory.
  * @description-ja  指定した要素をハイライトするオブジェクトを返す Factory 。 plugins.highlighterFactory に構築される。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
- * @version         0.11
- * @minversion      2.0pre 2008/10/16
+ * @version         0.12
+ * @minversion      2.3pre 2009/11/02
  * ==/VimperatorPlugin==
  *
  * LICENSE
