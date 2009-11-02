@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">プラグインローダー</name>
   <description>to load plugins from specified directory at starting up Vimperator.</description>
   <description lang="ja">指定(ディレクトリ|プラグイン)を起動時にロードする</description>
-  <version>2.4</version>
+  <version>2.4.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3pre</minVersion>
+  <maxVersion>2.3pre</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/plugin_loader.js</updateURL>
   <detail><![CDATA[
     == Usage ==
@@ -80,9 +80,9 @@ let PLUGIN_INFO =
   liberator.log('plugin_loader: loading');
 
   roots.forEach(function (root) {
-    let dir = io.getFile(root);
+    let dir = io.File(root);
     if (dir.exists() && dir.isDirectory() && dir.isReadable()) {
-      let files = io.readDirectory(dir, true);
+      let files = dir.readDirectory(true);
       files.forEach(function (file) {
         if (filter.test(file.path)) {
           liberator.log("Sourcing: " + file.path);
