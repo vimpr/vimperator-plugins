@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.20.8</version>
+  <version>0.20.9</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1014,7 +1014,7 @@ Thanks:
       // コメント欄のリンクの前のテキストをタイトルと見なす
       // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
       try {
-        let xpath = 'id("des_2")/div';
+        let xpath = 'id("des_2")/table[2]/tbody/tr/td[2]';
         let comment = U.xpathGet(xpath).innerHTML;
         let links = U.xpathGets(xpath + '/p/a')
                      .filter(function (it) /watch\//.test(it.href))
