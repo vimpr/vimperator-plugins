@@ -26,8 +26,8 @@ https://addons.mozilla.org/ja/firefox/addon/4227
 == 設定例 ==
 .vimperatorrcに以下のような感じで設定すると良いかもしれません。
 >||
-    noremap <C-P> :removetabsleft<CR>
-    noremap <C-N> :removetabsright<CR>
+    noremap <C-S-p> :removetabsleft<CR>
+    noremap <C-S-n> :removetabsright<CR>
 ||<
 ]]></detail>
 </VimperatorPlugin>;
