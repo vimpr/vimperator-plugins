@@ -1,3 +1,119 @@
+var INFO =
+<plugin name="copy" version="0.7.6"
+        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js"
+        summary="copy strings from the template (like CopyURL+)"
+        xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="teramako@gmail.com">teramako</author>
+    <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <item>
+    <tags>:copy</tags>
+    <spec>:copy <a>label</a></spec>
+    <description>
+        <p>copy the argument replaced some certain string.</p>
+    </description>
+    </item>
+    <item>
+    <tags>:copy!</tags>
+    <spec>:copy! <a>expr</a></spec>
+    <description>
+        <p>evaluate the argument(javascript code) and copy the result.</p>
+    </description>
+    </item>
+    <item>
+    <tags>copy-keyword</tags>
+    <spec>copy-keyword</spec>
+    <description>
+        <p>replaces following keywords</p>
+        <dl>
+            <dt>%TITLE%</dt>
+            <dd>to the title of the current page</dd>
+            <dt>%URL%</dt>
+            <dd>to the currenet URL</dd>
+            <dt>%SEL</dt>
+            <dd>to the string of selection</dd>
+            <dt>%HTMLSEL</dt>
+            <dd>to the html string of selection</dd>
+            <dt>%HOSTNAME%</dt>
+            <dd>to the hostname of the current location</dd>
+            <dt>%PATHNAME%</dt>
+            <dd>to the pathname of the current location</dd>
+            <dt>%HOST%</dt>
+            <dd>to the host of the current location</dd>
+            <dt>%PORT%</dt>
+            <dd>to the port of the current location</dd>
+            <dt>%PROTOCOL%</dt>
+            <dd>to the protocol of the current location</dd>
+            <dt>%SERCH%</dt>
+            <dd>to the search(?...) of the curernt location</dd>
+            <dt>%HASH%</dt>
+            <dd>to the hash(anchor #..) of the current location</dd>
+        </dl>
+    </description>
+    </item>
+    <item>
+        <tags>copy-template</tags>
+        <spec>copy-template</spec>
+        <description>
+            <p>you can set your own template using inline JavaScript</p>
+            <code><![CDATA[
+javascript <<EOM
+liberator.globalVariables.copy_templates = [
+  { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
+  { label: 'title',          value: '%TITLE%', map: ',y' },
+  { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
+  { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
+  { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
+  { label: 'ASIN',   value: 'copy ASIN code from Amazon', custom: function(){return content.document.getElementById('ASIN').value;} },
+];
+EOM
+            ]]></code>
+            <dl>
+                <dt>label</dt>
+                <dd>template name which is command argument</dd>
+                <dt>value</dt>
+                <dd>copy string. <a>copy-keyword</a> is replaced</dd>
+                <dt>map</dt>
+                <dd>key map <a>lhs</a> (optional)</dd>
+                <dt>custom</dt>
+                <dd>
+                    <a>function</a> or <a>Array</a> (optional)
+                    <dl>
+                        <dt><a>function</a></dt>
+                        <dd>execute the function and copy return value, if specified</dd>
+                        <dt><a>Array</a></dt>
+                        <dd>
+                            replace to the <a>value</a> by normal way at first.
+                            then replace words matched <a>Array</a>[0] in the repalced string to <a>Array</a>[1].
+                            <dl>
+                            <dt><a>Array</a>[0]</dt>
+                            <dd>String or RegExp</dd>
+                            <dt><a>Array</a>[1]</dt>
+                            <dd>String or Function</dd>
+                            </dl>
+                            see: <link topic="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace">http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace</link>
+                        </dd>
+                    </dl>
+                </dd>
+            </dl>
+        </description>
+    </item>
+    <item>
+        <tags>copy-option</tags>
+        <spec>copy-option</spec>
+        <description>
+            <code><ex>liberator.globalVariables.copy_use_wedata = false; // false by default</ex></code>
+            <p>true に設定すると wedata からテンプレートを読込みます。</p>
+            <code><ex>liberator.globalVariables.copy_wedata_include_custom = true; // false by default</ex></code>
+            <p>custom が設定された wedata を読込みます。
+            SandBox でなく、window.eval を利用してオブジェクトする為、
+            セキュリティ上の理由で初期設定は false になっています。
+            true に設定する場合は、動作を理解したうえ自己責任でご利用ください。</p>
+            <code><ex>liberator.globalVariables.copy_wedata_exclude_labels = ['pathtraqnormalize', ];</ex></code>
+            <p>wedata から読込まない label のリストを定義します。</p>
+        </description>
+    </item>
+</plugin>;
 var PLUGIN_INFO =
 <VimperatorPlugin>
 <name>{NAME}</name>
@@ -9,98 +125,6 @@ var PLUGIN_INFO =
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.7.5</version>
-<detail><![CDATA[
-== Command ==
-:copy {copyString}:
-    copy the argument replaced some certain string
-:copy! {expr}:
-    evaluate the argument and copy the result
-
-=== Example ===
-:copy %TITLE%:
-    copied the title of the current page
-:copy title:
-    some as `:copy %TITLE%' by default
-:copy! liberator.version:
-    copy the value of `liberator.version'
-
-== Keyword ==
-%TITLE%:
-    to the title of the current page
-%URL%:
-    to the URL of the current page
-%SEL%:
-    to the string of selection
-%HTMLSEL%:
-    to the html string of selection
-%HOSTNAME%:
-    to the hostname of the current location
-%PATHNAME%:
-    to the pathname of the current location
-%HOST%:
-    to the host of the current location
-%PORT%:
-    to the port of the current location
-%PROTOCOL%:
-    to the protocol of the current location
-%SEARCH%:
-    to the search(?..) of the current location
-%HASH%:
-    to the hash(anchor #..) of the current location
-
-== How to create template ==
-you can set your own template using inline JavaScript.
->||
-javascript <<EOM
-liberator.globalVariables.copy_templates = [
-  { label: 'titleAndURL',    value: '%TITLE%\n%URL%' },
-  { label: 'title',          value: '%TITLE%', map: ',y' },
-  { label: 'anchor',         value: '<a href="%URL%">%TITLE%</a>' },
-  { label: 'selanchor',      value: '<a href="%URL%" title="%TITLE%">%SEL%</a>' },
-  { label: 'htmlblockquote', value: '<blockquote cite="%URL%" title="%TITLE%">%HTMLSEL%</blockquote>' }
-  { label: 'ASIN',   value: 'copy ASIN code from Amazon', custom: function(){return content.document.getElementById('ASIN').value;} },
-];
-EOM
-||<
-label:
-    template name which is command argument
-value:
-    copy string
-    the certain string is replace to ...
-map:
-    key map (optional)
-custom:
-    {function} or {Array} (optional)
-    {function}:
-        execute the function and copy return value, if specified.
-    {Array}:
-        replaced to the {value} by normal way at first.
-        then replace words matched {Array}[0] in the replaced string to {Array}[1].
-        {Array}[0]:
-            String or RegExp
-        {Array}[1]:
-            String or Function
-        see http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:String:replace
-
-== Options ==
->||
-liberator.globalVariables.copy_use_wedata = false; // false by default
-||<
-true に設定すると wedata からテンプレートを読込みます。
->||
-liberator.globalVariables.copy_wedata_include_custom = true; // false by default
-||<
-custom が設定された wedata を読込みます。
-SandBox でなく、window.eval を利用してオブジェクトする為、
-セキュリティ上の理由で初期設定は false になっています。
-true に設定する場合は、動作を理解したうえ自己責任でご利用ください。
->||
-liberator.globalVariables.copy_wedata_exclude_labels = [
-    'pathtraqnormalize',
-];
-||<
-wedata から読込まない label のリストを定義します。
-]]></detail>
 </VimperatorPlugin>;
 
 liberator.plugins.exCopy = (function(){
