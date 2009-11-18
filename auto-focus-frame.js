@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
   <description lang="ja">最も大きなフレームに自動的にフォーカスする。</description>
-  <version>1.0.9</version>
+  <version>1.0.10</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto-focus-frame.js</updateURL>
-  <minVersion>2.0</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <minVersion>2.3pre</minVersion>
+  <maxVersion>2.3pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
       Only install.
@@ -81,7 +81,7 @@ let PLUGIN_INFO =
       maxFrame.focus();
   }
 
-  tabs.getBrowser().addEventListener("DOMContentLoaded", onLoad, true);
+  getBrowser().addEventListener("DOMContentLoaded", onLoad, true);
 
 
 })();
