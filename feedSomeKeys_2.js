@@ -24,7 +24,6 @@ Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場
 
 :f[eed]map -d[epth] {num} ...:
     {num}はフレームの番号で :fmap lhs1,{num}rhs1 lhs2,{num}rhs2 ... と同等
-    Gmailの例を参照
 
 :f[eed]map -v[key] ....:
     仮想キーコードでイベントを送るように
