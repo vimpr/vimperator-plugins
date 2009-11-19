@@ -3,7 +3,7 @@ var PLUGIN_INFO=
 <name>{NAME}</name>
 <description>feed some defined key events into the Web content</description>
 <description lang="ja">定義したkeyイベントをWebページへ送ってあげる</description>
-<version>2.2.2</version>
+<version>2.2.3</version>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.2</maxVersion>
@@ -62,7 +62,7 @@ Gmailとかlivedoor ReaderとかGreasemonkeyでキーを割り当てている場
 
 === Gmail の場合 ===
 >||
-:autocmd LocationChange 'mail\.google\.com/mail' :fmap -depth 4 c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
+:autocmd LocationChange 'mail\.google\.com/mail' :fmap c / j k n p o u e x s r a # [ ] z ? gi gs gt gd ga gc
 ||<
 
 === Google Reader の場合 ===
