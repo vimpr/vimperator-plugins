@@ -36,7 +36,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
-  <version>2.3.0</version>
+  <version>2.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
@@ -170,6 +170,8 @@ let PLUGIN_INFO =
 
   function fuck (msg) {
     let sz = innerWidth / msg.length / 1.5;
+    if (plugins.namakubi && typeof plugins.namakubi.talk == 'function')
+      plugins.namakubi.talk(msg);
     liberator.echo(
       <div style="background: white; color: black;">
         <table>
@@ -227,7 +229,7 @@ let PLUGIN_INFO =
     }
   }, true);
 
-  ['mousemove', 'DOMMouseScroll', 'mouseup', 'dblclick'].forEach(
+  ['mousemove', 'DOMMouseScroll', 'dblclick'].forEach(
       function (name) window.addEventListener(name, kill(false), true)
   );
 
