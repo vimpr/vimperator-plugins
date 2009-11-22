@@ -36,7 +36,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
-  <version>2.4.0</version>
+  <version>2.4.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
@@ -168,21 +168,27 @@ let PLUGIN_INFO =
   function shit (type)
     meows[type][Math.floor(Math.random() * meows[type].length)];
 
-  function fuck (msg) {
-    let sz = innerWidth / msg.length / 1.5;
-    if (plugins.namakubi && typeof plugins.namakubi.talk == 'function')
-      plugins.namakubi.talk(msg);
-    liberator.echo(
-      <div style="background: white; color: black;">
-        <table>
-          <tr>
-            <td><img src={gunsou}/></td>
-            <td style={"font-size: " + sz + "px; white-space: nowrap;"}>{msg}</td>
-          </tr>
-        </table>
-      </div>
-    );
-  }
+  let fuck =
+    let (ignore)
+      function fuck (msg) {
+        if (ignore)
+          return;
+        setTimeout(function () (ignore = false), 1000);
+        ignore = true;
+        let sz = innerWidth / msg.length / 1.5;
+        if (plugins.namakubi && typeof plugins.namakubi.talk == 'function')
+          plugins.namakubi.talk(msg);
+        liberator.echo(
+          <div style="background: white; color: black;">
+            <table>
+              <tr>
+                <td><img src={gunsou}/></td>
+                <td style={"font-size: " + sz + "px; white-space: nowrap;"}>{msg}</td>
+              </tr>
+            </table>
+          </div>
+        );
+      }
 
   function kill (msg) {
     return function (event) {
@@ -229,7 +235,7 @@ let PLUGIN_INFO =
     }
   }, true);
 
-  ['mousemove', 'DOMMouseScroll', 'dblclick'].forEach(
+  ['mousemove', 'DOMMouseScroll', 'mouseup', 'dblclick'].forEach(
       function (name) window.addEventListener(name, kill(false), true)
   );
 
