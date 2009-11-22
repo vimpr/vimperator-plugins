@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>every.js</name>
   <description>to run a specified command every time at specified interval.</description>
   <description lang="ja">指定のコマンドを指定の間隔で実行する。</description>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -47,10 +47,10 @@ let PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
-      :[INTERVAL]every <COMMAND>:
+      :[INTERVAL]every [-i[nterval]=INTERVAL] <COMMAND>:
         run <COMMAND> every time at [INTERVAL] sec.
 
-      :[INTERVAL]delay <COMMAND>:
+      :[INTERVAL]delay [-i[nterval]=INTERVAL] <COMMAND>:
         run <COMMAND> after [INTERVAL] sec.
 
       :every! <PROCESS-ID>:
@@ -65,16 +65,17 @@ let PLUGIN_INFO =
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Usage ==
-      :[INTERVAL]every <COMMAND>:
+      :[INTERVAL]every [-i[nterval]=INTERVAL] <COMMAND>:
         [INTERVAL] 間隔で <COMMAND> を走らせる。
 
-      :[INTERVAL]delay <COMMAND>:
+      :[INTERVAL]delay [-i[nterval]=INTERVAL] <COMMAND>:
         [INTERVAL] 秒後に <COMMAND> を走らせる。
 
       :every! <PROCESS-ID>:
         指定のプロセスを殺す。
 
       [INTERVAL] のデフォルトは 1秒。
+      オプションでの指定時には、"s[ec]", "m[in]", "h[our]" の単位で指定可能。(e.g. "0.5hour")
       コマンドラインにいるときには、実行されないようになっている。
 
     == Links ==
@@ -99,7 +100,7 @@ let PLUGIN_INFO =
         liberator.execute(command);
     };
     every.ps.push({
-      handle: setInterval(fun, interval),
+      handle: setInterval(fun, parseInt(interval, 10)),
       command: command
     });
   }
@@ -125,20 +126,35 @@ let PLUGIN_INFO =
     return (count > 0) ? count * 1000 : 1000;
   }
 
+  function expandSuffix (s) {
+    const tbl = {
+      '^s(ec)?$': 1,
+      '^m(in)?$': 60,
+      '^h(our)?$': 60 * 60
+    };
+    let [, a, b]  = s.match(/^([\d\.]+)(.*)$/);
+    let v = parseFloat(a);
+    for (let e in tbl)
+      if (b.match(e))
+        return v * tbl[e];
+    return v;
+  }
+
   liberator.modules.commands.addUserCommand(
     ['every', 'ev'],
     'every',
     function (args) {
       if (args.bang) {
-        kill(args[0]);
+        kill(args.literalArg);
       } else {
-        run(args.string, msec(args.count));
+        let interval = args['-interval'];
+        run(args.literalArg, msec(interval ? expandSuffix(interval) : args.count));
       }
     },
     {
+      literal: 0,
       count: true,
       bang: true,
-      argCount: '+',
       completer: function (context, args) {
         if (args.bang) {
           context.title = ['PID', 'every process'];
@@ -146,7 +162,10 @@ let PLUGIN_INFO =
         } else {
           liberator.modules.completion.ex(context);
         }
-      }
+      },
+      options: [
+        [['-interval', '-i'], commands.OPTION_ANY]
+      ]
     },
     true
   );
@@ -156,7 +175,7 @@ let PLUGIN_INFO =
     ['delay'],
     'delay',
     function (arg) {
-      let cmd = arg.string;
+      let cmd = arg.literalArg;
       let f = function () {
         if (liberator.mode == liberator.modules.modes.COMMAND_LINE) {
           setTimeout(f, 500);
@@ -164,13 +183,18 @@ let PLUGIN_INFO =
           liberator.execute(cmd);
         }
       };
-      setTimeout(f, msec(arg.count));
+      let interval = args['-interval'];
+      setTimeout(f, msec(interval ? expandSuffix(interval) : arg.count));
     },
     {
+      literal: 0,
       count: true,
-      argCount: '+',
-      completer: function (context) liberator.modules.completion.ex(context)
-    }
+      completer: function (context) liberator.modules.completion.ex(context),
+      options: [
+        [['-interval', '-i'], commands.OPTION_ANY]
+      ]
+    },
+    true
   );
 
 })();
