@@ -155,9 +155,9 @@ __proto__ = (function(){
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
       let urls = [url for each(url in urls)];
-      liberator.assert(urls.length < 1, "None of URLs");
+      liberator.assert(urls.length > 0, "None of URLs");
 
-      if ((/\.zip$/i).test(path)){
+      if (!(/\.zip$/i).test(path)){
         path += ".zip";
       }
       let zipFile = getFile(path);
