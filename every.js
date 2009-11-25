@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>every.js</name>
   <description>to run a specified command every time at specified interval.</description>
   <description lang="ja">指定のコマンドを指定の間隔で実行する。</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -174,8 +174,8 @@ let PLUGIN_INFO =
   liberator.modules.commands.addUserCommand(
     ['delay'],
     'delay',
-    function (arg) {
-      let cmd = arg.literalArg;
+    function (args) {
+      let cmd = args.literalArg;
       let f = function () {
         if (liberator.mode == liberator.modules.modes.COMMAND_LINE) {
           setTimeout(f, 500);
@@ -184,7 +184,7 @@ let PLUGIN_INFO =
         }
       };
       let interval = args['-interval'];
-      setTimeout(f, msec(interval ? expandSuffix(interval) : arg.count));
+      setTimeout(f, msec(interval ? expandSuffix(interval) : args.count));
     },
     {
       literal: 0,
