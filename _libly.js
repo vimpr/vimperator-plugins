@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.25</version>
+    <version>0.1.26</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -650,7 +650,7 @@ libly.Wedata.prototype = {
         req.addEventListener('onSuccess', libly.$U.bind(this, function(res) {
             var text = res.responseText;
             if (!text) {
-                errDispatcher('respons is null.', cache);
+                errDispatcher('response is null.', cache);
                 return;
             }
             var json = libly.$U.evalJson(text);
