@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,10 +38,10 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.2.3</version>
+  <version>2.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/maine_coon.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -360,6 +360,13 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     if (autoHideCommandLine)
       messageBox.collapsed = true;
     return next();
+  });
+
+  around(commandline._callbacks.submit, modes.EX, function (next, args) {
+    let r = next();
+    if (autoHideCommandLine && !(modes.extended & modes.OUTPUT_MULTILINE))
+      commandline.close();
+    return r;
   });
 
   options.add(
