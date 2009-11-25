@@ -149,7 +149,7 @@
       if (!/\.js$/.test(file.path))
         return;
 
-      if (!/PLUGIN_INFO/.test(io.readFile(file.path)))
+      if (!/PLUGIN_INFO/.test(io.File(file.path).read()))
         return;
 
       try {
@@ -259,8 +259,7 @@
                 <div class="detail" id="detail">{detailBody}</div>
                 </div>;
 
-          io.writeFile(
-            io.getFile(outputDir + htmlFilename),
+          io.File(outputDir + htmlFilename).write(
             <html>
               <head>
                 <title>{pluginFilename}</title>
@@ -350,11 +349,11 @@
             </body>
           </html>.toString();
 
-    io.writeFile(io.getFile(outputDir + 'index.html'), indexHtml.toString());
-    io.writeFile(io.getFile(outputDir + 'all.html'), allHtml.toString());
+    io.File(outputDir + 'index.html').write(indexHtml.toString());
+    io.File(outputDir + 'all.html').write(allHtml.toString());
 
     let infoXML = <plugins>{concatXML(pminfos)}</plugins>;
-    io.writeFile(io.getFile(outputDir + 'info.xml'), infoXML.toString());
+    io.File(outputDir + 'info.xml').write(infoXML.toString());
   }
 
   commands.addUserCommand(
