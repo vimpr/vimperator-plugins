@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Option Selector</name>
   <description>Select a option of the select element.</description>
   <description lang="ja">select 要素の option を選択する。</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/option-selector.js</updateURL>
   <minVersion>2.2pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
      Type <C-i> on "select" element.
   ]]></detail>
@@ -64,6 +64,10 @@ let PLUGIN_INFO =
       'Select a option of the select element',
       function (args) {
         targetElement.value = args.string;
+        let event = content.document.createEvent('Event');
+        event.initEvent('change', true, true);
+        targetElement.dispatchEvent(event);
+        targetElement.focus();
       },
       {
         literal: 0,
