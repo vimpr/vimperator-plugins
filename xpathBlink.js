@@ -21,6 +21,30 @@ let INFO =
     </item>
 </plugin>;
 
+let PLUGIN_INFO =
+<VimperatorPlugin>
+<name>{NAME}</name>
+<description>blink elements by XPath</description>
+<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
+<require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
+<license>MPL 1.1</license>
+<version>1.1</version>
+<minVersion>2.2</minVersion>
+<maxVersion>2.3</maxVersion>
+<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpathBlink.js</updateURL>
+<detail><![CDATA[
+for test xpath
+
+== Usage==
+:xpathb[link] {expression}:
+:xb {expression}
+    blink specified elements with XPath {expression} 
+
+== Caution ==
+It's need "DOM Inspector" addon
+]]></detail>
+</VimperatorPlugin>;
+
 (function(){
 let extid = "inspector@mozilla.org";
 if (!Application.extensions.has(extid) || !Application.exntensions.get(extid).enabled){
