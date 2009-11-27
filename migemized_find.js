@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2009, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.9.3</version>
+  <version>2.9.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/migemized_find.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Usage ==
       検索ワードの一文字目が
@@ -574,7 +574,7 @@ let PLUGIN_INFO =
         liberator.echoerr('not found: ' + MF.lastSearchText);
     },
 
-    searchSubmitted: function searchSubmitted (command, forcedBackward) {
+    onSubmit: function searchSubmitted (command, forcedBackward) {
       if (delayCallTimer) {
         delayCallTimer = null;
         clearTimeout(delayCallTimer);
@@ -584,43 +584,28 @@ let PLUGIN_INFO =
         liberator.echoerr('not found: ' + MF.currentSearchText);
     },
 
-    searchCanceled: function searchCanceled () {
+    onCancel: function searchCanceled () {
       MF.cancel();
     },
 
-    searchKeyPressed: function (str) {
-      _findFirst(str, _backwards);
+    onKeyPress: function (str) {
+      liberator.log('onKeyPress');
+      if (typeof str == 'string') {
+        liberator.log('findFirst');
+        _findFirst(str, _backwards);
+      } else if (str === false)
+        MF.findAgain();
     },
   };
 
+  commandline.registerCallback("change", modes.SEARCH_FORWARD, migemized.onKeyPress);
+  commandline.registerCallback("submit", modes.SEARCH_FORWARD, migemized.onSubmit);
+  commandline.registerCallback("cancel", modes.SEARCH_FORWARD, migemized.onCancel);
+  commandline.registerCallback("change", modes.SEARCH_BACKWARD, migemized.onKeyPress);
+  commandline.registerCallback("submit", modes.SEARCH_BACKWARD, migemized.onSubmit);
+  commandline.registerCallback("cancel", modes.SEARCH_BACKWARD, migemized.onCancel);
 
-  // XXX for 2.1pre
-  // そのうち消す？
-  // http://vimperator.g.hatena.ne.jp/hogelog/20090511/1242060081
-  if (typeof search == "undefined") {
-    migemized.onSubmit = migemized.searchSubmitted;
-    migemized.onCancel = migemized.searchCanceled;
-    migemized.onKeyPress = migemized.searchKeyPressed;
-    var search = finder;
-  }
-
-  // オリジナルの状態に戻せるように保存しておく
-  let (original = {}) {
-    for (let name in migemized)
-      original[name] = search[name];
-
-    function set (funcs) {
-      for (let name in funcs)
-        search[name] = funcs[name];
-    }
-
-    if (do_install)
-      set(migemized);
-
-    MF.install = function () set(migemized);
-    MF.uninstall = function () set(original);
-  }
-
+  finder.findAgain = migemized.findAgain;
 
   // highlight コマンド
   commands.addUserCommand(
