@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">プラグインローダー</name>
   <description>to load plugins from specified directory at starting up Vimperator.</description>
   <description lang="ja">指定(ディレクトリ|プラグイン)を起動時にロードする</description>
-  <version>2.4.1</version>
+  <version>2.5.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -87,6 +87,13 @@ let PLUGIN_INFO =
         if (filter.test(file.path)) {
           liberator.log("Sourcing: " + file.path);
           io.source(file.path, false);
+          let ctx = liberator.plugins.contexts[file.path];
+          if (ctx) {
+            if (typeof liberator.plugins[ctx.NAME] === 'undefined')
+              liberator.plugins[ctx.NAME] = ctx;
+          } else {
+            liberator.echoerr('plugin_loader.js: context not found (' + file.path + ')');
+          }
         }
       });
     } else {
