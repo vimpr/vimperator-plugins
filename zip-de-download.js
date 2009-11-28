@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.5"
+<plugin name="zip-de-download" version="0.5.1"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -151,6 +151,10 @@ __proto__ = (function(){
                liberator.modules.services.get("directory").get("Home", Ci.nsIFile).path;
     return getFile(path);
   }
+  function fixFilename(filename){
+    const badChars = /[\\\/:;\*\?\"\<\>\|\#]/g;
+    return liberator.has('windows') ? filename.replace(badChars, '_') :  filename;
+  }
   let self = {
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
@@ -221,7 +225,7 @@ __proto__ = (function(){
       liberator.assert(info.xpath, "not registered in SITE_IFO");
 
       let urls = this.getURLs(info);
-      let title = liberator.modules.buffer.title;
+      let title = fixFilename(liberator.modules.buffer.title);
       let comment = [title, liberator.modules.buffer.URL].join("\n");
       let file;
       if (!zipPath){
