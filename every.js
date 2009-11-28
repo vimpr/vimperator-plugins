@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>every.js</name>
   <description>to run a specified command every time at specified interval.</description>
   <description lang="ja">指定のコマンドを指定の間隔で実行する。</description>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -47,7 +47,7 @@ let PLUGIN_INFO =
   <maxVersion>2.0pre</maxVersion>
   <detail><![CDATA[
     == Usage ==
-      :[INTERVAL]every [-i[nterval]=INTERVAL] <COMMAND>:
+      :[INTERVAL]every [-i[nterval]=INTERVAL] [-init=INITIALIZE_COMMAND] [-from=COUNTER_FORM] [-step=COUNTER_STEP]<COMMAND>:
         run <COMMAND> every time at [INTERVAL] sec.
 
       :[INTERVAL]delay [-i[nterval]=INTERVAL] <COMMAND>:
@@ -65,7 +65,7 @@ let PLUGIN_INFO =
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Usage ==
-      :[INTERVAL]every [-i[nterval]=INTERVAL] <COMMAND>:
+      :[INTERVAL]every [-i[nterval]=INTERVAL] [-init=INITIALIZE_COMMAND] [-from=COUNTER_FROM] [-step=COUNTER_STEP]<COMMAND>:
         [INTERVAL] 間隔で <COMMAND> を走らせる。
 
       :[INTERVAL]delay [-i[nterval]=INTERVAL] <COMMAND>:
@@ -74,9 +74,15 @@ let PLUGIN_INFO =
       :every! <PROCESS-ID>:
         指定のプロセスを殺す。
 
-      [INTERVAL] のデフォルトは 1秒。
-      オプションでの指定時には、"s[ec]", "m[in]", "h[our]" の単位で指定可能。(e.g. "0.5hour")
-      コマンドラインにいるときには、実行されないようになっている。
+      INTERVAL:
+        INTERVAL のデフォルトは 1秒。
+        オプションでの指定時には、"s[ec]", "m[in]", "h[our]" の単位で指定可能。(e.g. "0.5hour")
+        コマンドラインにいるときには、実行されないようになっている。
+      INITIALIZE_COMMAND:
+        指定すると、:every 実行直後にそれが実行されます。
+      COUNTER_FROM/COUNTER_STEP:
+        何れか一方を指定すると、COMMAND 中の "<counter>" という文字が、カウンター数字に置換されます。
+        この数字は、COUNTER_FROM で初期化され、every での実行毎に COUNTER_STEP ずつ増えます。
 
     == Links ==
       http://d.hatena.ne.jp/nokturnalmortum/20081102#1225552718
@@ -94,15 +100,34 @@ let PLUGIN_INFO =
     liberator.plugins.every = every = {ps: []};
   }
 
-  function run (command, interval) {
-    let fun = function () {
-      if (liberator.mode != liberator.modules.modes.COMMAND_LINE)
-        liberator.execute(command);
+  function defined (value)
+    (typeof value !== 'undefined');
+
+  function defaultValue (value, def)
+    (defined(value) ? value : def);
+
+  function run (command, interval, opts) {
+    let process = {
+      handle: null,
+      command: command,
+      options: opts
     };
-    every.ps.push({
-      handle: setInterval(fun, parseInt(interval, 10)),
-      command: command
-    });
+    if (opts.init)
+      liberator.execute(opts.init);
+    let fun = function () {
+      if (liberator.mode == liberator.modules.modes.COMMAND_LINE)
+        return;
+      let cmd = process.command;
+      if (defined(opts.from) || defined(opts.step)) {
+        if (!defined(process.counter))
+          process.counter = defaultValue(opts.from, 1);
+        cmd = cmd.replace(/<counter>/i, process.counter);
+        process.counter += defaultValue(opts.step, 1);
+      }
+      liberator.execute(cmd);
+    };
+    process.handle = setInterval(fun, parseInt(interval, 10));
+    every.ps.push(process);
   }
 
   function kill (index) {
@@ -148,7 +173,9 @@ let PLUGIN_INFO =
         kill(args.literalArg);
       } else {
         let interval = args['-interval'];
-        run(args.literalArg, msec(interval ? expandSuffix(interval) : args.count));
+        let opts = {};
+        'from step init'.split(' ').forEach(function (v) (opts[v] = args['-' + v]));
+        run(args.literalArg, msec(interval ? expandSuffix(interval) : args.count), opts);
       }
     },
     {
@@ -164,7 +191,10 @@ let PLUGIN_INFO =
         }
       },
       options: [
-        [['-interval', '-i'], commands.OPTION_ANY]
+        [['-interval', '-i'], commands.OPTION_ANY],
+        [['-from', '-f'], commands.OPTION_FLOAT],
+        [['-step', '-s'], commands.OPTION_FLOAT],
+        [['-init', '-i'], commands.OPTION_STRING],
       ]
     },
     true
