@@ -35,17 +35,17 @@ javascript <<EOM
 liberator.globalVariables.exopen_templates = [
   {
     label: 'vimpnightly',
-    value: 'http://download.vimperator.org/vimperator/nightly/',
+    value: 'http://code.google.com/p/vimperator-labs/downloads/list?can=1&q=label:project-vimperator',
     description: 'open vimperator nightly xpi page',
     newtab: true
   }, {
     label: 'vimplab',
-    value: 'http://vimperator.org/trac/',
+    value: 'http://www.vimperator.org/vimperator',
     description: 'open vimperator trac page',
     newtab: true
   }, {
     label: 'vimpscript',
-    value: 'http://vimperator.org/trac/wiki/Vimperator/Scripts/',
+    value: 'http://code.google.com/p/vimperator-labs/issues/list?can=2&q=label%3Aproject-vimperator+label%3Atype-plugin',
     description: 'open vimperator trac script page',
     newtab: true
   }, {
@@ -82,17 +82,17 @@ liberator.plugins.exOpen = (function() {
   if (!global) {
     global = [{
       label: 'vimpnightly',
-      value: 'http://download.vimperator.org/vimperator/nightly/',
+      value: 'http://code.google.com/p/vimperator-labs/downloads/list?can=1&q=label:project-vimperator',
       description: 'open vimperator nightly xpi page',
       newtab: true
     }, {
       label: 'vimplab',
-      value: 'http://vimperator.org/trac/',
+      value: 'http://www.vimperator.org/vimperator',
       description: 'open vimperator trac page',
       newtab: true
     }, {
       label: 'vimpscript',
-      value: 'http://vimperator.org/trac/wiki/Vimperator/Scripts/',
+      value: 'http://code.google.com/p/vimperator-labs/issues/list?can=2&q=label%3Aproject-vimperator+label%3Atype-plugin',
       description: 'open vimperator trac script page',
       newtab: true
     }, {
@@ -161,7 +161,7 @@ liberator.plugins.exOpen = (function() {
     registerCommand: function() {
       var self = this;
       commands.addUserCommand(['exopen'], 'Open byextension URL',
-        function(args) self.open(args.string, args.bang), {
+        function(args) self.open(args), {
           completer: function(context, args) {
             context.title = ['Template', 'Description - Value'];
             if (!context.filter) {
@@ -178,21 +178,26 @@ liberator.plugins.exOpen = (function() {
       global.some(function(template) (template.label == label) && (ret = template));
       return ret;
     },
-    open: function(arg) {
+    open: function(args) {
       var url = '';
-      if (!arg) return;
-      var template = this.find(arg) || {value: arg};
+      if (!args) return;
+      var name = args.string;
+      if (args instanceof Array) {
+        name = args.shift();
+        args.string = args.string.replace(new RegExp(name.replace(/(\W)/g,'\\$1')+'\\s+'),'');
+      }
+      var template = this.find(name) || {value: name};
       if (typeof template.custom == 'function') {
-        url = template.custom.call(this, template.value);
+        url = template.custom.call(this, template.value, args);
       } else if (template.custom instanceof Array) {
         url = replacer(template.value).replace(template.custom[0], template.custom[1], template.escape);
       } else {
         url = replacer(template.value, template.escape);
       }
       if (!url) return;
-      if (template.newtab) openTabOrSwitch(url);
+      if (template.newtab || args.bang) openTabOrSwitch(url);
       else liberator.open(url);
-    }
+    },
   };
   return new ExOpen();
 })();
