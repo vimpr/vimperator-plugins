@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.5.1"
+<plugin name="zip-de-download" version="0.5.2"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -177,10 +177,15 @@ __proto__ = (function(){
       let i = 0;
       for each(let url in urls){
         let ch = createChannel(url);
-        let stream = ch.open();
-        let entryName = ("000" + ++i).slice(-3) +"-"+ getEntryName(ch.URI, ch.contentType);
-        liberator.echomsg("zip: " + url + " to " + entryName, 3);
-        zipW.addEntryStream(entryName, Date.now() * 1000, Ci.nsIZipWriter.COMPRESSION_DEFAULT, stream, false);
+        try {
+          let stream = ch.open();
+          let entryName = ("000" + ++i).slice(-3) +"-"+ getEntryName(ch.URI, ch.contentType);
+          liberator.echomsg("zip: " + url + " to " + entryName, 3);
+          zipW.addEntryStream(entryName, Date.now() * 1000, Ci.nsIZipWriter.COMPRESSION_DEFAULT, stream, false);
+        } catch (e) {
+          // XXX エラー分を通知すべき？
+          liberator.log('zip-de-download: error: ' + e);
+        }
       }
       zipW.close();
       return zipFile;
