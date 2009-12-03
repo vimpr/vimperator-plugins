@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.5.2"
+<plugin name="zip-de-download" version="0.5.3"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -113,7 +113,7 @@ let SITE_INFO = [
   }
 ];
 
-__proto__ = (function(){
+(function(){
   // nsIZipWriter#open io-flags
   const PR_RDONLY      = 0x01;
   const PR_WRONLY      = 0x02;
@@ -286,6 +286,6 @@ __proto__ = (function(){
       completer: liberator.modules.completion.file
     }, true);
 
-  return self;
+  util.extend(__context__, self);
 })();
 // vim: sw=2 ts=2 et:
