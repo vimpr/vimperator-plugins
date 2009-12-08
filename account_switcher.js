@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <maxVersion>2.1a1pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/account_switcher.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA</author>
-<version>0.07</version>
+<version>0.08</version>
 <detail><![CDATA[
 
 == Commands ==
@@ -180,8 +180,8 @@ liberator.accountSwitcherOpenNewTab = 1;
                     if (value.indexOf('=') > 0) {
                         params.push(value);
                     } else {
-                        res.responseText.match(new RegExp('(<[\\S\\s]*?name=\"' + value + '\"[\\S\\s]*?>)'));
-                        RegExp.$1.match(/value=\"([a-zA-Z0-9-_]+)\"/);
+                        res.responseText.match(new RegExp('<([^<>]*?name=\"' + value + '\"[^<>]*?)>'));
+                        RegExp.$1.match(/value=\"([\w-]+)\"/);
                         params.push(value + '=' + encodeURIComponent(RegExp.$1));
                     }
                 }
