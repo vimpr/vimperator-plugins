@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="xpathBlink" version="1.1"
+<plugin name="xpathBlink" version="1.1.1"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpathBlink.js"
         summary="blink elements by XPath"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -28,7 +28,7 @@ let PLUGIN_INFO =
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
 <license>MPL 1.1</license>
-<version>1.1</version>
+<version>1.1.1</version>
 <minVersion>2.2</minVersion>
 <maxVersion>2.3</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpathBlink.js</updateURL>
@@ -47,7 +47,7 @@ It's need "DOM Inspector" addon
 
 (function(){
 let extid = "inspector@mozilla.org";
-if (!Application.extensions.has(extid) || !Application.exntensions.get(extid).enabled){
+if (!Application.extensions.has(extid) || !Application.extensions.get(extid).enabled){
     liberator.ecomsg("DOM Inspector is not installed or enabled", 2);
     return;
 }
