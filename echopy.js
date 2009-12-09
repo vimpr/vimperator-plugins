@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">{NAME}</name>
   <description>Echo and Copy(to clipboard)</description>
   <description lang="ja">:echo! で echo しつつクリップボードにコピーできる様にする</description>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/echopy.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :echo! <EXPRESSION>:
@@ -67,43 +67,13 @@ let PLUGIN_INFO =
 
 (function () {
 
-  function ea2s (arg) {
-    if (!arg)
-      return '';
-
-    let raw, res;
-    let value = liberator.eval(arg);
-
-    if (typeof value === 'object') {
-      res = util.objectToString(value, true);
-      raw = util.objectToString(value, false);
-    } else if (typeof value === 'function') {
-      raw = value.toString();
-      res = <pre>{raw}</pre>;
-    } else if (typeof value === 'string' && /\n/.test(value)) {
-      raw = value;
-      res = <span highlight="CmdOutput">{value}</span>;
-    } else {
-      raw = res = String(value);
-    }
-
-    return [raw, res];
-  }
-
   let echo = commands.get('echo');
   let original_action = echo.action;
 
   echo.action = function (args) {
-    try {
-      if (args.string == '')
-        return;
-      let [raw, res] = ea2s(args.string);
-      commandline.echo(res, commandline.HL_NORMAL);
-      if (args.bang)
-        util.copyToClipboard(raw);
-    } catch (e) {
-      liberator.echoerr(e);
-    }
+    original_action.apply(null, arguments);
+    if (args.bang)
+      util.copyToClipboard(CommandLine.echoArgumentToString(args.string, false));
   };
   echo.bang = true;
 
