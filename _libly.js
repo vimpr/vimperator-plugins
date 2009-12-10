@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.26</version>
+    <version>0.1.27</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -41,7 +41,8 @@ around(obj, name, func):
   という形で呼ばれます。
   next はオリジナルの関数を呼び出すための関数、
   args はオリジナルの引数列です。
-  next には引数を渡す必要はありません。
+  通常、next には引数を渡す必要はありません。
+  (任意の引数を渡したい場合は配列で渡します。)
 bind(obj, func):
     func に obj を bind します。
     func内からは this で obj が参照できるようになります。
@@ -227,7 +228,7 @@ libly.$U = {//{{{
         let next = obj[name];
         let current = obj[name] = function () {
             let self = this, args = arguments;
-            return func.call(self, function () next.apply(self, args), args);
+            return func.call(self, function (_args) next.apply(self, _args || args), args);
         };
         return [next, current];
     },
