@@ -340,5 +340,5 @@ let self = liberator.plugins.pino = (function() {
 // for backward compatibility
 self.api = {};
 for each (p in "items head remove".split(' '))
-  self.api[p] = self[p]
+  self.api[p] = self[p];
 // vim: ts=2 sw=2 et fdm=marker
