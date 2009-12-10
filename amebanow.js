@@ -48,8 +48,12 @@ let PLUGIN_INFO =
   <maxVersion>2.3</maxVersion>
   <require>_libly.js</require>
   <detail><![CDATA[
-     == command ==
-      :nau <MESSAGE>
+    == command ==
+    :nau <MESSAGE>
+    == multi post setting ==
+      >||
+        let g:amebanow_multipost = "twitter|wassr"
+      ||<
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -101,7 +105,10 @@ let INFO =
     ['amebanow', 'nau'], //XXX nau は typo に非ず！かぶり防止
     'Description',
     function (args) {
-      now(args.literalArg);
+      let msg = args.literalArg;
+      let mpCmds = (liberator.globalVariables.amebanow_multipost || '').split('|');
+      now(msg);
+      mpCmds.forEach(function (cmd) liberator.execute(cmd + ' ' + msg));
     },
     {
       literal: 0,
