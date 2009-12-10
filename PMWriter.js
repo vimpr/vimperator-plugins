@@ -12,6 +12,7 @@
 
   let pluginDirPath = liberator.globalVariables.pmwriter_plugin_dir;
   let outputDir = liberator.globalVariables.pmwriter_output_dir;
+  const VERSIONS = '2.2 2.1 2.0 1.2'.split(/\s+/);
 
 
   if (!(pluginDirPath && outputDir))
@@ -62,6 +63,7 @@
     const IOService = services.get('io');
     const DOCUMENT_TITLE = 'Vimperator Plugins in CodeRepos';
     const CodeRepos = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/';
+    const CodeReposBranch = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/branches/';
     const CodeReposFile = 'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/';
 
     function Context (file) {
@@ -230,6 +232,32 @@
                                    pluginInfo.description,
                                    true,
                                    function (it) (it.toString()) || '---')
+
+          let versionsBody = <></>;
+
+          VERSIONS.forEach(function (ver) {
+            let url = CodeReposBranch + ver + '/' + pluginFilename;
+            versionsBody +=
+              <>
+                <dt>{'for ' + ver}</dt>
+                <a href={url} class="coderepos" target="_blank">{url}</a>
+              </>;
+          });
+
+          versionsBody +=
+            <>
+              <dt>{'for Nightly'}</dt>
+              <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a>
+            </>;
+
+
+//                      <dt>Vimperator version</dt>
+//                      <dd>{(plugin.info.minVersion || '?') + ' - ' + (plugin.info.maxVersion || '?')}</dd>
+//                       <dt>URL</dt>
+//                       <dd><a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a></dd>
+//                       <dt>File URL</dt>
+//                       <dd><a id="file-link" href={CodeReposFile + pluginFilename} class="coderepos" target="_blank">{CodeReposFile + pluginFilename}</a></dd>
+
           let body = <div>
                 <div>{langselector}</div>
                 <div class="information" id="information">
@@ -240,12 +268,6 @@
                       <dd>{description}</dd>
                       <dt>Latest version</dt>
                       <dd>{plugin.info.version || '???'}</dd>
-                      <dt>Vimperator version</dt>
-                      <dd>{(plugin.info.minVersion || '?') + ' - ' + (plugin.info.maxVersion || '?')}</dd>
-                      <dt>URL</dt>
-                      <dd><a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a></dd>
-                      <dt>File URL</dt>
-                      <dd><a id="file-link" href={CodeReposFile + pluginFilename} class="coderepos" target="_blank">{CodeReposFile + pluginFilename}</a></dd>
                       <dt>Author</dt>
                       <dd>{authors}</dd>
                       <dt>License</dt>
@@ -254,6 +276,8 @@
                                    true,
                                    function (v) (v || '--'))}</dd>
                     </dl>
+                    <hr />
+                    <dl>{versionsBody}</dl>
                   </div>
                 </div>
                 <div class="detail" id="detail">{detailBody}</div>
