@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Amebaなう</name>
   <description>nau</description>
   <description lang="ja">Amebaなうする</description>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -106,7 +106,9 @@ let INFO =
     'Description',
     function (args) {
       let msg = args.literalArg;
-      let mpCmds = (liberator.globalVariables.amebanow_multipost || '').split('|');
+      let mpCmds =
+        let (gv = liberator.globalVariables.amebanow_multipost)
+          (gv ? gv.split('|') : []);
       now(msg);
       mpCmds.forEach(function (cmd) liberator.execute(cmd + ' ' + msg));
     },
