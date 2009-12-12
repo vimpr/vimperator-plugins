@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Amebaなう</name>
   <description>nau</description>
   <description lang="ja">Amebaなうする</description>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -59,7 +59,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="AmebaNow" version="1.0.0"
+<plugin name="AmebaNow" version="1.0.4"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/amebanow.js"
         summary="AmebaNau"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -83,9 +83,26 @@ let INFO =
 
 (function () {
 
-  function now (msg) {
+  function getToken (onSuccess) {
+    const url = 'http://now.ameba.jp/';
+    let req = new plugins.libly.Request(url);
+    req.addEventListener(
+      'onSuccess',
+      function (res) {
+        let m = res.responseText.match(/<input id="token" type="hidden" name="token" value="(\w+)"/);
+        if (m)
+          onSuccess(m[1]);
+      }
+    );
+    req.get();
+  }
+
+  function now (msg, token) {
     const url = 'http://ucsnow.ameba.jp/post';
-    let data = 'entryText=' + encodeURIComponent(msg) + '&inputBtn=%E6%8A%95%E7%A8%BF';
+    let data =
+      'entryText=' + encodeURIComponent(msg) +
+      '&token=' + token +
+      '&inputBtn=%E6%8A%95%E7%A8%BF';
     let req =
       new plugins.libly.Request(
         url,
@@ -109,7 +126,7 @@ let INFO =
       let mpCmds =
         let (gv = liberator.globalVariables.amebanow_multipost)
           (gv ? gv.split('|') : []);
-      now(msg);
+      getToken(function (token) now(msg, token));
       mpCmds.forEach(function (cmd) liberator.execute(cmd + ' ' + msg));
     },
     {
