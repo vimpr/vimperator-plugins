@@ -217,7 +217,7 @@ liberator.plugins.gmperator = (function(){ //{{{
      * @param {String} filename script filename
      */
     function triggerGMEvent(name,uri,filename){
-        autocommands.trigger(name,uri+'\n'+filename);
+        autocommands.trigger(name, {url: uri+'\n'+filename });
         liberator.log('gmpeartor: '+ name + ' ' + uri+'\n'+filename,8);
     }
     getBrowser().mTabContainer.addEventListener('TabClose',updateGmContainerList,false);
