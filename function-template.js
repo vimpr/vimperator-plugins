@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">関数テンプレート</name>
   <description>function Template</description>
   <description lang="ja">Vimperator の関数のテンプレート</description>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/function-template.js</updateURL>
-  <minVersion>2.1pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     Functions template
     (Fix|Add) me!
@@ -60,6 +60,7 @@ let PLUGIN_INFO =
 (function () {
   // XXX 以下は実行しないよ。
   return;
+
 
   commands.addUserCommand(
     ['co[mmand1]'],
@@ -79,10 +80,10 @@ let PLUGIN_INFO =
       options: [
         [['-force'], commands.OPTION_NOARG],
         [['-fullscreen', '-f'], commands.OPTION_BOOL],
-        [['-language'], commands.OPTION_STRING, validaterFunc, ['perl', 'ruby']],
+        [['-language'], commands.OPTION_STRING, null, [['perl', 'llama'], ['ruby', 'rabbit']]],
         [['-speed'], commands.OPTION_INT],
         [['-acceleration'], commands.OPTION_FLOAT],
-        [['-accessories'], commands.OPTION_LIST, null, ['foo', 'bar']],
+        [['-accessories'], commands.OPTION_LIST, validaterFunc, ['foo', 'bar']],
         [['-other'], commands.OPTION_ANY]
       ],
       completer: function (context, args) {
