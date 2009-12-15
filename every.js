@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>every.js</name>
   <description>to run a specified command every time at specified interval.</description>
   <description lang="ja">指定のコマンドを指定の間隔で実行する。</description>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/every.js</updateURL>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :[INTERVAL]every [-i[nterval]=INTERVAL] [-init=INITIALIZE_COMMAND] [-from=COUNTER_FORM] [-step=COUNTER_STEP]<COMMAND>:
@@ -90,14 +90,13 @@ let PLUGIN_INFO =
 </VimperatorPlugin>;
 // }}}
 
+ps = [];
 
 (function () {
 
-  let every = liberator.plugins.every;
-  if (every) {
-    kill('*');
-  } else {
-    liberator.plugins.every = every = {ps: []};
+  let (every = liberator.plugins.every) {
+    if (every && every.ps)
+      kill('*');
   }
 
   function defined (value)
@@ -127,19 +126,19 @@ let PLUGIN_INFO =
       liberator.execute(cmd);
     };
     process.handle = setInterval(fun, parseInt(interval, 10));
-    every.ps.push(process);
+    ps.push(process);
   }
 
   function kill (index) {
     if (index == '*') {
-      every.ps.forEach(function (process) clearInterval(process.handle));
-      liberator.echo(every.ps.length + ' processes were killed!');
-      every.ps = [];
+      ps.forEach(function (process) clearInterval(process.handle));
+      liberator.echo(ps.length + ' processes were killed!');
+      ps = [];
     } else {
-      let process = every.ps[index];
+      let process = ps[index];
       if (process) {
         clearInterval(process.handle);
-        every.ps.splice(index, index);
+        ps.splice(index, index);
         liberator.echo('process "' + process.command + '" was killed!');
       } else {
         liberator.echoerr('unknown process');
@@ -185,7 +184,7 @@ let PLUGIN_INFO =
       completer: function (context, args) {
         if (args.bang) {
           context.title = ['PID', 'every process'];
-          context.completions = [['*', 'kill em all']].concat(every.ps.map(function (p, i) ([i.toString(), p.command])));
+          context.completions = [['*', 'kill em all']].concat(ps.map(function (p, i) ([i.toString(), p.command])));
         } else {
           liberator.modules.completion.ex(context);
         }
