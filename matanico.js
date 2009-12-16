@@ -5,7 +5,7 @@ let PLUGIN_INFO =
 <description lang="ja">今見ている動画 / 検索結果の情報を Twitter に投稿する。</description>
 <author mail="janus_wel@fb3.so-net.ne.jp" homepage="http://d.hatena.ne.jp/janus_wel">janus_wel</author>
 <license document="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
-<version>0.72</version>
+<version>0.73</version>
 <minVersion>2.3pre</minVersion>
 <maxVersion>2.3pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/matanico.js</updateURL>
@@ -120,13 +120,13 @@ matanico_related_tag_servicename:
 function NicoScraper() {}
 NicoScraper.prototype = {
     _constants: {
-        VERSION:          '0.70',
-        PAGECHECK: {
-            watch:      '^http://[^.]+\\.nicovideo\\.jp/watch/',
-            live:       '^http://live\\.nicovideo\\.jp/watch/',
-            tag:        '^http://[^.]+\\.nicovideo\\.jp/tag/',
-            relatedTag: '^http://[^.]+\\.nicovideo\\.jp/related_tag/',
-        },
+        VERSION:          '0.73',
+        PAGECHECK: [
+            ['live',       '^http://live\\.nicovideo\\.jp/watch/'],
+            ['watch',      '^http://[^.]+\\.nicovideo\\.jp/watch/'],
+            ['tag',        '^http://[^.]+\\.nicovideo\\.jp/tag/'],
+            ['relatedTag', '^http://[^.]+\\.nicovideo\\.jp/related_tag/'],
+        ],
     },
 
     version: function () { return this.constants.VERSION; },
@@ -134,7 +134,7 @@ NicoScraper.prototype = {
     pagecheck: function () {
         const pageCheckData = this._constants.PAGECHECK;
         const currentURL = this.getURL();
-        for (let [name, url] in Iterator(pageCheckData)) {
+        for each (let [name, url] in pageCheckData) {
             if (currentURL.match(url)) return name;
         }
         throw new Error('current tab is not nicovideo.jp');
@@ -155,10 +155,10 @@ NicoScraper.prototype = {
         let subjectNode;
         switch (this.pagecheck()) {
             case 'watch':
-                subjectNode = $f('//h1/a[contains(concat(" ", @class, " "), " video ")]');
+                subjectNode = $f('id("des_2")/table[2]/tbody/tr/td[2]');
                 break;
             case 'live':
-                subjectNode = $f('//h1[contains(concat(" ", @class, " "), " title ")]');
+                subjectNode = $f('id("stream_description")');
                 break;
             default:
                 break;
@@ -310,7 +310,8 @@ liberator.modules.commands.addUserCommand(
     },
     {
         bang: true,
-    }
+    },
+    true
 );
 
 // sub
