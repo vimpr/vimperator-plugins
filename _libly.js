@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.29</version>
+    <version>0.1.30</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
@@ -34,7 +34,7 @@ extend(dst, src):
     オブジェクトを拡張します。
 A(iterable):
     オブジェクトを配列にします。
-around(obj, name, func):
+around(obj, name, func, autoRestore):
   obj がもつ name 関数を、func に置き換えます。
   func は
     function (next, args) {...}
@@ -43,6 +43,8 @@ around(obj, name, func):
   args はオリジナルの引数列です。
   通常、next には引数を渡す必要はありません。
   (任意の引数を渡したい場合は配列で渡します。)
+  また、autoRestore が真であれば、プラグインの再ロードなどで around が再実行されたときに、関数の置き換え前にオリジナル状態に書き戻します。
+  (多重に置き換えられなくなるので、auto_source.js などを使ったプラグイン開発で便利です)
   返値は以下のオブジェクトです
   >||
   {
@@ -232,18 +234,52 @@ libly.$U = {//{{{
         }
         return ret;
     },
-    around: function around (obj, name, func) {
-        let next = obj[name];
-        let current = obj[name] = function () {
-            let self = this, args = arguments;
-            return func.call(self, function (_args) next.apply(self, _args || args), args);
+    around: (function () {
+        function getPluginPath () {
+          let pluginPath;
+          Error('hoge').stack.split(/\n/).some(
+            function (s)
+              let (m = s.match(/^\(\)@chrome:\/\/liberator\/content\/liberator\.js -> (.+):\d+$/))
+                (m && (pluginPath = m[1]))
+          );
+          return pluginPath;
+        }
+
+        let restores = {};
+
+        return function (obj, name, func, autoRestore) {
+            let original;
+            let restore = function () obj[name] = original;
+            if (autoRestore) {
+                let pluginPath = getPluginPath();
+                if (!pluginPath)
+                    throw 'getPluginPath failed';
+                restores[pluginPath] =
+                    (restores[pluginPath] || []).filter(
+                        function (res) (
+                            res.object != obj ||
+                            res.name != name ||
+                            (res.restore() && false)
+                        )
+                    );
+                restores[pluginPath].push({
+                    object: obj,
+                    name: name,
+                    restore: restore
+                });
+            }
+            original = obj[name];
+            let current = obj[name] = function () {
+                let self = this, args = arguments;
+                return func.call(self, function (_args) original.apply(self, _args || args), args);
+            };
+            return libly.$U.extend({
+                original: original,
+                current: current,
+                restore: restore
+            }, [original, current]);
         };
-        return libly.$U.extend({
-            original: next,
-            current: current,
-            restore: function () (obj[name] = next)
-        }, [next, current]);
-    },
+    })(),
     bind: function(obj, func) {
         return function() {
             return func.apply(obj, arguments);
