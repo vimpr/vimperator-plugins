@@ -130,6 +130,8 @@ var reader = {
         let scroll = win.innerHeight * scroll_ratio;
         let count = Math.ceil(win.scrollMaxY / scroll);
 
+        let div = doc.createElementNS(HTML_NAMESPACE, "div");
+        div.id = "vimperator-marker_reader-markers";
         for (let pageNum=2;pageNum<=count+1;++pageNum)
         {
             let p = doc.createElementNS(HTML_NAMESPACE, "p");
@@ -145,9 +147,10 @@ var reader = {
 
             p.style.left = "0px";
             p.style.top = Math.ceil((pageNum-1)*scroll)+"px";
-            doc.body.appendChild(p);
+            div.appendChild(p);
             doc.markers.push(p);
         }
+        doc.body.appendChild(div);
         return doc.markers;
     },
     // removeMarkers have to act synchronized function
