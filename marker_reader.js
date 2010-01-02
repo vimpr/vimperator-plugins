@@ -157,15 +157,11 @@ var reader = {
     removeMarkers: function(doc)
     {
         // this operation have to atomic {
-        let markers = doc.markers;
-        if (!markers) return false;
+        if (!doc.markers) return false;
         doc.markers = null;
         // }
 
-        for (let i=0,len=markers.length;i<len;++i)
-        {
-            doc.body.removeChild(markers[i]);
-        }
+        doc.body.removeChild(doc.getElementById("vimperator-marker_reader-markers"));
         let win = doc.defaultView;
         let frames = win.frames;
         if (frames) {
