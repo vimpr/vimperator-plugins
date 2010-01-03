@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.20.9</version>
+  <version>0.20.10</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1020,7 +1020,8 @@ Thanks:
                      .filter(function (it) /watch\//.test(it.href))
                      .map(function(v) v.textContent);
         links.forEach(function (link) {
-          let r = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="video">').exec(comment);
+          let re = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="(watch|video)">');
+          let r = re.exec(comment);
           if (r)
             videos.push(new RelatedID(link, r[1].slice(-20)));
         });
