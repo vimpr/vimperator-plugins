@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.5.3"
+<plugin name="zip-de-download" version="0.5.4"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -22,7 +22,7 @@ let INFO =
   </p>
   <item>
     <tags>:zipd :zipdownload</tags>
-    <spec>:zipd<oa>ownload</oa> <oa>-l<oa>ist</oa></oa> <a>dawonloadPath</a></spec>
+    <spec>:zipd<oa>ownload</oa> <oa>-l<oa>ist</oa></oa> <a>downloadPath</a></spec>
     <description>
       <p>
         <a>downloadPath</a>へZIPでアーカイブする。
@@ -227,7 +227,7 @@ let SITE_INFO = [
         }
         info = infoBuf;
       }
-      liberator.assert(info.xpath, "not registered in SITE_IFO");
+      liberator.assert(info.xpath, "not registered in SITE_INFO");
 
       let urls = this.getURLs(info);
       let title = fixFilename(liberator.modules.buffer.title);
