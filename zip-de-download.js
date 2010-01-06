@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.6.0"
+<plugin name="zip-de-download" version="0.6.1"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -156,7 +156,7 @@ let SITE_INFO = [
     };
     let ext = mimeService.getPrimaryExtension(mime ? mime : mimeType, null)
     let name = uri.path.split("/").pop();
-    name = (name ? name : "index") + (mime ? "" : "."+ext);
+    name = (name ? name : "index") + (mime ? "" : "." + ext);
     return name;
   }
   function getDownloadDirectory(){
@@ -193,7 +193,7 @@ let SITE_INFO = [
         let ch = createChannel(url);
         try {
           let stream = ch.open();
-          let entryName = ("000" + ++i).slice(-3) +"-"+ getEntryName(ch.URI, ch.contentType);
+          let entryName = ("000" + ++i).slice(-3) + "-" + getEntryName(ch.URI, ch.contentType);
           liberator.echomsg("zip: " + url + " to " + entryName, 3);
           zipW.addEntryStream(entryName, Date.now() * 1000, Ci.nsIZipWriter.COMPRESSION_DEFAULT, stream, false);
         } catch (e) {
@@ -290,16 +290,17 @@ let SITE_INFO = [
         liberator.echo(xml, true);
         return;
       }
+      liberator.echo("Started DownloadZip");
       let zipFile = self.download(arg[0], false, option);
       liberator.echo("Completed DownloadZip: " + zipFile.path);
     }, {
       argCount: "?",
       literal: true,
       options: [
-        [["-list","-l"], liberator.modules.commands.OPTION_NOARG],
-        [["-append","-a"], liberator.modules.commands.OPTION_NOARG],
-        [["-xpath","-x"], liberator.modules.commands.OPTION_STRING],
-        [["-filter","-f"], liberator.modules.commands.OPTION_STRING],
+        [["-list", "-l"], liberator.modules.commands.OPTION_NOARG],
+        [["-append", "-a"], liberator.modules.commands.OPTION_NOARG],
+        [["-xpath", "-x"], liberator.modules.commands.OPTION_STRING],
+        [["-filter", "-f"], liberator.modules.commands.OPTION_STRING]
       ],
       completer: liberator.modules.completion.file
     }, true);
