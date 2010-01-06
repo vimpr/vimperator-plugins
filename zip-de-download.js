@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.5.4"
+<plugin name="zip-de-download" version="0.6.0"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -22,7 +22,7 @@ let INFO =
   </p>
   <item>
     <tags>:zipd :zipdownload</tags>
-    <spec>:zipd<oa>ownload</oa> <oa>-l<oa>ist</oa></oa> <a>downloadPath</a></spec>
+    <spec>:zipd<oa>ownload</oa> <oa>-l<oa>ist</oa></oa> <oa>-f<oa>ilter</oa>=filter</oa> <a>downloadPath</a></spec>
     <description>
       <p>
         <a>downloadPath</a>へZIPでアーカイブする。
@@ -38,6 +38,9 @@ let INFO =
         <oa>-l<oa>ist</oa></oa>オプションを指定すると、ダウンロードされるURLをリストする。
         (ダウンロードはされない)
       </p>
+      <p>
+        <oa>-f<oa>ilter</oa></oa>オプションを指定すると、マッチするURLのアイテムのみダウンロードする。
+      </p>
     </description>
   </item>
   <item>
@@ -47,7 +50,18 @@ let INFO =
     <description>
       <p>ダウンロード先ディレクトリ。<a>downloadPath</a>を省略した場合に、使用される。</p>
       <p>例
-        <code><ex>:let g:zipDownloadDir=~/downloads</ex></code>
+        <code><ex>:let g:zipDownloadDir="~/downloads"</ex></code>
+      </p>
+    </description>
+  </item>
+  <item>
+    <tags>g:zipDownloadFilter</tags>
+    <spec><oa>g:</oa>zipDownloadFilter</spec>
+    <spec>liberator.globalVariables.zipDownloadFilter</spec>
+    <description>
+      <p>デフォルトのフィルタ<a>filter</a>を省略した場合に、使用される。</p>
+      <p>例
+        <code><ex>:let g:zipDownloadFilter="\.(jpe?g|gif|png)$"</ex></code>
       </p>
     </description>
   </item>
@@ -200,7 +214,7 @@ let SITE_INFO = [
       return null;
     },
     getURLs: function(info){
-      let filter = new RegExp(info.filter ? info.filter : ".");
+      let filter = new RegExp(info.filter || liberator.globalVariables.zipDownloadFilter || ".");
       let i = 0;
       for (let elm in liberator.modules.util.evaluateXPath(info.xpath, content.document)){
         let url;
@@ -260,6 +274,9 @@ let SITE_INFO = [
       if ("-xpath" in arg){
         option.xpath = arg["-xpath"];
       }
+      if ("-filter" in arg){
+        option.filter = arg["-filter"];
+      }
       if ("-list" in arg){
         let [file, urls, comment] = self.download(arg[0], true, option);
         let xml = <>
@@ -282,6 +299,7 @@ let SITE_INFO = [
         [["-list","-l"], liberator.modules.commands.OPTION_NOARG],
         [["-append","-a"], liberator.modules.commands.OPTION_NOARG],
         [["-xpath","-x"], liberator.modules.commands.OPTION_STRING],
+        [["-filter","-f"], liberator.modules.commands.OPTION_STRING],
       ],
       completer: liberator.modules.completion.file
     }, true);
