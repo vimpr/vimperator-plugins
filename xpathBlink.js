@@ -48,7 +48,7 @@ It's need "DOM Inspector" addon
 (function(){
 let extid = "inspector@mozilla.org";
 if (!Application.extensions.has(extid) || !Application.extensions.get(extid).enabled){
-    liberator.ecomsg("DOM Inspector is not installed or enabled", 2);
+    liberator.echomsg("DOM Inspector is not installed or enabled", 2);
     return;
 }
 let flasher = null;
