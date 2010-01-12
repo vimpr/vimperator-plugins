@@ -244,7 +244,7 @@ liberator.plugins.LocalKeyMode = (function() {
     loadKeyMap: function() {
       var self = this;
       // 暫定処置
-      //if (liberator.plugins.feedKey && liberator.plugins.feedKey.origMap.length >0) return;
+      if (liberator.plugins.feedKey && liberator.plugins.feedKey.origMap.length >0) return;
       this.helpstring = '';
       if (this.isBinding) this.restoreKeyMap();
       if (!this.isEnable) {
