@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.25
-// Last Change: 12-Jun-2009. Jan 2008
+// Last Change: 22-Jan-2010. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -403,9 +403,11 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
             };
         },
         sendRawKeyEvent: function(keyCode,charCode){
+            modes.passAllKeys = true;
             var evt = window.content.wrappedJSObject.document.createEvent("KeyEvents");
-            evt.initKeyEvent("keypress",true,true,window.content.wrappedJSObject,false,false,false,false,keyCode,charCode);
+            evt.initKeyEvent("keypress",false,false,window.content.wrappedJSObject,false,false,false,false,keyCode,charCode);
             window.content.wrappedJSObject.document.dispatchEvent(evt);
+            modes.passAllKeys = false;
         },
     };
 
