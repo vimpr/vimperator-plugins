@@ -1,4 +1,4 @@
-// Last Change: 20-Jan-2010. Jan 2008
+// Last Change: 21-Jan-2010. Jan 2008
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
@@ -375,7 +375,7 @@ for Migemo search: require XUL/Migemo Extension
                         "Content-Type": "application/atom+xml",
                     },
                 }).next(function(xhr){
-                    if(xhr.status != 201) throw "Hatena Bookmark: faild";
+                    if(xhr.status != 201) throw "Hatena Bookmark: failed";
                 });
             },
             tags:function(user,password){
@@ -414,7 +414,7 @@ for Migemo search: require XUL/Migemo Extension
                     user: user,
                     password: password,
                 }).next(function(xhr){
-                    if(xhr.status != 200) throw "del.icio.us: faild";
+                    if(xhr.status != 200) throw "del.icio.us: failed";
                 });
             },
             tags:function(user,password){
@@ -467,7 +467,7 @@ for Migemo search: require XUL/Migemo Extension
                     user: user,
                     password: password,
                 }).next(function(xhr){
-                    if(xhr.status != 200) throw "livedoor clip: faild";
+                    if(xhr.status != 200) throw "livedoor clip: failed";
                 });
             },
             tags:function(user,password){
@@ -507,7 +507,7 @@ for Migemo search: require XUL/Migemo Extension
                         "User-Agent": navigator.userAgent + " GoogleToolbarFF 3.0.20070525",
                     },
                 }).next(function(xhr){
-                    if(xhr.status != 200) throw "Google Bookmarks: faild";
+                    if(xhr.status != 200) throw "Google Bookmarks: failed";
                 });
             },
             tags:function(user,password) [],
@@ -527,7 +527,7 @@ for Migemo search: require XUL/Migemo Extension
                     user: user,
                     password: password,
                 }).next(function(xhr){
-                    if(xhr.status != 200) throw "foves: faild";
+                    if(xhr.status != 200) throw "foves: failed";
                 });
             },
             tags:function(user,password){
@@ -556,7 +556,7 @@ for Migemo search: require XUL/Migemo Extension
                 try{
                     Application.bookmarks.tags.addBookmark(title, nsUrl);
                 }catch(e){
-                    throw "Places: faild";
+                    throw "Places: failed";
                 }
             },
             tags:function(user,password)
