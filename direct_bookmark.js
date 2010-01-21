@@ -459,7 +459,7 @@ for Migemo search: require XUL/Migemo Extension
                     rate = (RegExp.lastMatch.length > starFullRate)? starFullRate : RegExp.lastMatch.length;
                 }
                 var request_url = 'http://api.clip.livedoor.com/v1/posts/add?' + [
-                    ['url', url], ['description', title], ['extended', comment], ['rate', rate], ['tags', tags.join(' ')]
+                    ['url', url], ['description', title], ['extended', comment], ['rate', rate], ['tags', tags.join(' ')], ['cache', (new Date()).getTime()]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "get",
