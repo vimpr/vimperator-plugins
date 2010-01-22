@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.20.11</version>
+  <version>0.21.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -958,7 +958,13 @@ Thanks:
 
     get large () this.player.ext_getVideoSize() === NicoPlayer.SIZE_LARGE,
     set large (value) {
+        if (value && !this.large) {
+          let win = Buffer.findScrollableWindow();
+          this.storage.scrollPositionBeforeLarge = {x: win.scrollX, y: win.scrollY};
+        }
         this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL);
+        let (pos = this.storage.scrollPositionBeforeLarge)
+          (value || typeof pos == "undefined" || buffer.scrollTo(pos.x, pos.y));
         return this.large;
     },
 
@@ -1474,9 +1480,11 @@ Thanks:
     onIconDblClick: function () this.player.toggle('fullscreen'),
 
     onLargeClick: function () {
+      // XXX fullscreen と large の実装が同じ場合に問題になるので、toggle は使わない
+      let old = this.player.large;
       if (this.player.fullscreen)
         this.player.fullscreen = false;
-      this.player.toggle('large');
+      this.player.large = !old;
     },
 
     onLocationChange: function () {
