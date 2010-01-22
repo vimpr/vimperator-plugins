@@ -45,7 +45,7 @@
 // Hints:
 //  ';l':
 //      narrow down the candidates to LDRize paragraphes
-//  ',L':
+//  ';L':
 //      narrow down the candidates to LDRize paragraphes (in a new tab)
 // Options:
 //  'ldrc'
