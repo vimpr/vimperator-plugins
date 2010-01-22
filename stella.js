@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.20.10</version>
+  <version>0.20.11</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -877,98 +877,8 @@ Thanks:
 
     get fileExtension () '.flv',
 
-    get fullscreen () !!this.storage.fullscreen,
-    set fullscreen (value) {
-      let self = this;
-
-      function setVariables (fullscreen) {
-        NicoPlayer.Variables.forEach(function ([name, normal, full]) {
-          let v = fullscreen ? full : normal;
-          if (v !== null)
-            self.player.SetVariable(name, v);
-        });
-      }
-
-      function turnOn () {
-        // toggleMaximizePlayer でサイズが変わってしまうのであらかじめ保存しておく…
-        let oldStyle = content.getComputedStyle(player, '');
-        let oldHeight = oldStyle.height;
-        let oldWidth = oldStyle.width;
-        win.toggleMaximizePlayer();
-        turnOnMain();
-        // 保存したもので修正する for toggleMaximizePlayer問題
-        player.style.__stella_backup.height = oldHeight;
-        player.style.__stella_backup.width = oldWidth;
-        win.onresize = fixFullscreen;
-      }
-
-      function turnOnMain () {
-        let viewer = {w: 544, h: 384};
-        let screen = {
-          w: content.innerWidth,
-          h: content.innerHeight
-        };
-        let scale = {
-          w: Math.max(1, screen.w / viewer.w),
-          h: Math.max(1, screen.h / viewer.h)
-        };
-        scale.v = Math.min(scale.w, scale.h);
-
-        U.storeStyle(doc.body, {
-          backgroundImage:  'url()',
-          backgroundRepeat: '',
-          backgroundColor:  'black'
-        });
-        U.storeStyle(
-          player,
-          (scale.w >= scale.h) ? {
-            width:      Math.floor(viewer.w * scale.h) + 'px',
-            height:     screen.h + 'px',
-            marginLeft: ((screen.w - viewer.w * scale.h) / 2) + 'px',
-            marginTop:  '0px'
-          } : {
-            width:      screen.w + 'px',
-            height:     Math.floor(viewer.h * scale.w) + 'px',
-            marginLeft: '0px',
-            marginTop:  ((screen.h - viewer.h * scale.w) / 2) + 'px'
-          }
-        );
-
-        player.SetVariable('videowindow._xscale', 100 * scale.v);
-        player.SetVariable('videowindow._yscale', 100 * scale.v);
-        setVariables(true);
-      }
-
-      function turnOff () {
-        delete win.onresize;
-        win.toggleMaximizePlayer();
-        U.restoreStyle(doc.body, true);
-        U.restoreStyle(player, true);
-        player.style.marginLeft = '';
-        player.style.marginTop  = '';
-        setVariables(false);
-      }
-
-      function fixFullscreen ()
-        ((InVimperator && liberator.mode === modes.COMMAND_LINE) || setTimeout(turnOnMain, 500));
-
-      this.last.fullscreen = value;
-
-      // メイン
-      value = !!value;
-      if (this.storage.fullscreen === value)
-        return;
-
-      this.storage.fullscreen = value;
-
-      let player = this.player, win = content.wrappedJSObject, doc = content.document.wrappedJSObject;
-
-      if (player.ext_getVideoSize() === 'fit')
-        player.ext_setVideoSize('normal');
-
-      (value ? turnOn : turnOff)();
-      win.scrollTo(0, 0);
-    },
+    get fullscreen () this.large,
+    set fullscreen (value) (this.large = value),
 
     get id ()
       let (m = U.currentURL().match(/\/watch\/([a-z]{2}\d+)/))
