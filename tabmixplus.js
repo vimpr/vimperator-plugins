@@ -2,12 +2,12 @@
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
-    <description>add some tab commands</description>
+    <description>add some tabmixplus commands</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
     <version>0.0.1</version>
     <minVersion>2.2</minVersion>
     <maxVersion>2.2</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tabcommands.js</updateURL>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tabmixplus.js</updateURL>
     <detail><![CDATA[
 == COMMANDS ==
 dup[licate]:
