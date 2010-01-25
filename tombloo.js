@@ -116,6 +116,16 @@ function getTombloo() {
 function getContext() {
     const doc = window.content.document;
     const win = window.content.wrappedJSObject;
+
+    function getTarget() {
+        if (/^http:\/\/reader\.livedoor\.com/.test(buffer.URL)) {
+            let item = win.get_active_item && win.get_active_item(true);
+            return item ? item.element : doc;
+        } else {
+            return doc;
+        }
+    }
+
     return implant(
         implant(
             {
@@ -123,7 +133,7 @@ function getContext() {
                 window:     win,
                 title:      doc.title.toString() || '',
                 selection:  win.getSelection().toString(),
-                target:     doc,
+                target:     getTarget(),
                 //event     : event,
                 //mouse     : mouse,
                 //menu      : gContextMenu,
