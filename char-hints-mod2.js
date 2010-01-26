@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.3.0</version>
-    <minVersion>2.0pre 2008/12/12</minVersion>
-    <maxVersion>2.1pre</maxVersion>
+    <version>0.3.1</version>
+    <minVersion>2.3pre 2010/01/26</minVersion>
+    <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -73,7 +73,7 @@ let g:hintlabeling:
 (function () {
 
     const DEFAULT_HINTCHARS = "HJKLASDFGYUIOPQWERTNMZXCVB";
-    const hintContext = hints.addMode;
+    const hintContext = modules.hints;
 
     let hintchars = DEFAULT_HINTCHARS;
     let inputCase = function(str) str.toUpperCase();
@@ -169,7 +169,7 @@ let g:hintlabeling:
     } //}}}
     function clearOriginalTimeout() //{{{
     {
-        liberator.eval('if(activeTimeout) clearTimeout(activeTimeout);activeTimeout = null;', hintContext);
+        liberator.eval('if(_activeTimeout) clearTimeout(_activeTimeout);_activeTimeout = null;', hintContext);
     } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
@@ -189,21 +189,21 @@ let g:hintlabeling:
             // so alt handled as press number event by vimperator.
             let alt = new Object;
             alt.liberatorString = num;
-            charhints.original.onEvent(alt);
+            charhints.original.onEvent.apply(hintContext,[alt]);
         }
         clearOriginalTimeout();
         statusline.updateInputBuffer(hintInput);
 
         let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
         if(validHints.length == 1) {
-            charhints.original.processHints(true);
+            charhints.original.processHints.apply(hintContext,[true]);
             return true;
         }
 
         let timeout = options["hinttimeout"];
         if (timeout > 0) {
             timer = setTimeout(function () {
-                charhints.original.processHints(true);
+                charhints.original.processHints.apply(hintContext,[true]);
             }, timeout);
         }
 
@@ -213,7 +213,7 @@ let g:hintlabeling:
     var charhints = plugins.charhints = {
         show: function (minor, filter, win) //{{{
         {
-            charhints.original.show(minor, filter, win);
+            charhints.original.show.apply(hintContext, arguments);
             hintInput = "";
             let hints = getCharHints(window.content);
             showCharHints(hints);
@@ -227,7 +227,7 @@ let g:hintlabeling:
             let hintString = commandline.command;
             commandline.command = hintString.replace(inputRegex, "");
 
-            charhints.original.onInput(event);
+            charhints.original.onInput.apply(hintContext, arguments);
 
             for(let i=0,l=hintString.length;i<l;++i) {
                 if(inputRegex.test(hintString[i])) {
@@ -243,7 +243,7 @@ let g:hintlabeling:
             if(/^\d$/.test(events.toString(event))) {
                 charhints.onInput(event);
             } else {
-                charhints.original.onEvent(event);
+                charhints.original.onEvent.apply(hintContext,arguments);
                 clearOriginalTimeout();
                 statusline.updateInputBuffer(hintInput);
             }
@@ -254,26 +254,26 @@ let g:hintlabeling:
             // charhints.original.onEvent(alt) in processHintInput
             let caller = arguments.callee.caller;
             if(caller == charhints.original.onEvent && caller.caller == processHintInput)
-                return charhints.original.processHints(false);
+                return charhints.original.processHints.apply(hintContext,[false]);
 
-            return charhints.original.processHints(followFirst);
+            return charhints.original.processHints.apply(hintContext,arguments);
         }, //}}}
     };
 
     if(!charhints.original) {
         charhints.original = {
-            show: hints.show,
-            onInput: liberator.eval("onInput", hintContext),
-            onEvent: hints.onEvent,
-            processHints: liberator.eval("processHints", hintContext),
+            show: Hints.prototype.show,
+            onInput: Hints.prototype._onInput,
+            onEvent: Hints.prototype.onEvent,
+            processHints: Hints.prototype._processHints,
         };
 
         charhints.install = function () //{{{
         {
             hints.show = charhints.show;
             hints.onEvent = charhints.onEvent;
-            liberator.eval("onInput = plugins.charhints.onInput", hintContext);
-            liberator.eval("processHints = plugins.charhints.processHints", hintContext);
+            liberator.eval("_onInput = liberator.plugins.charhints.onInput", hintContext);
+            liberator.eval("_processHints = liberator.plugins.charhints.processHints", hintContext);
 
             liberator.execute(":hi Hint::after content: attr(hintchar)", true, true);
             if(liberator.globalVariables.hintsio) {
@@ -299,8 +299,8 @@ let g:hintlabeling:
         {
             hints.show = charhints.original.show;
             hints.onEvent = charhints.original.onEvent;
-            liberator.eval("onInput = plugins.charhints.original.onInput", hintContext);
-            liberator.eval("processHints = plugins.charhints.original.processHints", hintContext);
+            liberator.eval("_onInput = liberator.plugins.charhints.original.onInput", hintContext);
+            liberator.eval("_processHints = liberator.plugins.charhints.original.processHints", hintContext);
 
             liberator.execute(":hi Hint::after content: attr(number)", true, true);
         }; //}}}
