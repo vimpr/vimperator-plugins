@@ -6,8 +6,8 @@ var PLUGIN_INFO =
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
     <version>0.0.1</version>
     <minVersion>2.2</minVersion>
-    <maxVersion>2.2</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stylish.js</updateURL>
+    <maxVersion>2.3</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/atodeyomu.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
 ]]></detail>
@@ -20,7 +20,7 @@ if(!yomudata.get("yomulist"))
     yomudata.set("yomulist", {});
 var yomulist = yomudata.get("yomulist");
 
-plugins.atodeyomu.funcs = {
+__context__.funcs = {
     yomulist: function() yomulist,
     onload: function()
     {
@@ -29,23 +29,25 @@ plugins.atodeyomu.funcs = {
             delete yomulist[url];
         }
     },
-    install: function() gBrowser.addEventListener("load", plugins.atodeyomu.funcs.onload, true),
-    uninstall: function() gBrowser.removeEventListener("load", plugins.atodeyomu.funcs.onload, true),
+    install: function() gBrowser.addEventListener("load", __context__.funcs.onload, true),
+    uninstall: function() gBrowser.removeEventListener("load", __context__.funcs.onload, true),
 };
 
-plugins.atodeyomu.funcs.install();
+__context__.funcs.install();
 
 commands.addUserCommand(["atode"], "atode yomu",
     function(args){
-        yomulist[content.location.href] = content.document.title;
+        yomulist[content.location.href] = args.literalArg || content.document.title;
     }, {
+    literal: 0
     }, true);
 commands.addUserCommand(["yomu"], "ima yomu",
     function(args){
-        let url = args.string;
-        let where = /\btabopen\b/.test(options["activate"]) ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB;
+        let url = args.literalArg;
+        let where = options.get("activate").has("tabopen") ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB;
         liberator.open(url, where);
     }, {
+        literal: 0,
         completer: function(context, args){
             context.title = ["yomu"];
             context.completions = [[url, yomulist[url]] for(url in yomulist)];
