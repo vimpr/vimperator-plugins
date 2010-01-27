@@ -15,7 +15,7 @@ var PLUGIN_INFO =
 //}}}
 
 (function(){
-var yomudata = storage.newMap("atodeyomu", true);
+var yomudata = storage.newMap("atodeyomu", {store: true});
 if(!yomudata.get("yomulist"))
     yomudata.set("yomulist", {});
 var yomulist = yomudata.get("yomulist");
