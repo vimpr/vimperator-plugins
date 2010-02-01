@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto Source</name>
   <description>Sourcing automatically when the specified file is modified.</description>
   <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
-  <version>1.5.0</version>
+  <version>1.5.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -66,6 +66,36 @@ let PLUGIN_INFO =
       - :autoso[urce]! taro.js
   ]]></detail>
 </VimperatorPlugin>;
+let INFO =
+<plugin name="Auto Source" version="1.0.0"
+        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_source.js"
+        summary="Sourcing automatically when the specified file is modified."
+        xmlns="http://vimperator.org/namespaces/liberator">
+  <author email="anekos@snca.net">anekos</author>
+  <license>New BSD License</license>
+  <project name="Vimperator" minVersion="2.3"/>
+  <p>
+    Sourcing automatically when the specified file is modified.
+  </p>
+  <item>
+    <tags>:aso</tags>
+    <spec>:aso <oa>-f<oa>orce</oa></oa> <oa>-h<oa>elp</oa></oa> <oa>-c<oa>ommad</oa>=<a>command</a></oa> <a>file-path</a></spec>
+    <description>
+      <p>
+        source when the <a>file-path</a> is modified.
+      </p>
+      <p>The following options are interpreted.</p>
+      <dl>
+        <dt>-force</dt>
+        <dd>override if the file has been registered.</dd>
+        <dt>-command=<a>command</a></dt>
+        <dd>execute the <a>command</a> after source.</dd>
+        <dt>-help</dt>
+        <dd>re-initialize help files after source.</dd>
+      </dl>
+    </description>
+  </item>
+</plugin>;
 // }}}
 
 // Links:
