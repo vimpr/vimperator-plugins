@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,10 +38,10 @@ let PLUGIN_INFO =
   <name>Auto Source</name>
   <description>Sourcing automatically when the specified file is modified.</description>
   <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
-  <version>1.4.3</version>
+  <version>1.5.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_source.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -99,7 +99,7 @@ let PLUGIN_INFO =
     return cur.path;
   }
 
-  function startWatching (filepath, command, force) {
+  function startWatching (filepath, command, force, initHelp) {
     if (exists(filepath)) {
       if (force) {
         killWatcher(filepath);
@@ -124,6 +124,8 @@ let PLUGIN_INFO =
             liberator.log('command execute: ' + command);
             liberator.execute(command);
         }
+        if (initHelp)
+          liberator.initHelp();
       }
     }, interval);
     liberator.log('filepath: ' + filepath + (command ? ('; command: ' + command) : ''));
@@ -141,14 +143,17 @@ let PLUGIN_INFO =
     ['autoso[urce]', 'aso'],
     'Sourcing automatically when the specified file is modified.',
     function (arg) {
-      (arg.bang ? killWatcher : startWatching)(expandPath(arg[0]), arg['-command'], arg['-force']);
+      (arg.bang ? killWatcher : startWatching)(
+        expandPath(arg[0]), arg['-command'], arg['-force'], arg['-help']
+      );
     },
     {
       bang: true,
       argCount: '1',
       options: [
           [['-command', '-c'], commands.OPTION_STRING],
-          [['-force', '-f'], commands.OPTION_NOARG]
+          [['-force', '-f'], commands.OPTION_NOARG],
+          [['-help', '-h'], commands.OPTION_NOARG]
       ],
       completer: function (context, args) {
         if (args.bang) {
