@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.21.0</version>
+  <version>0.22.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -962,9 +962,13 @@ Thanks:
           let win = Buffer.findScrollableWindow();
           this.storage.scrollPositionBeforeLarge = {x: win.scrollX, y: win.scrollY};
         }
+
         this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_LARGE : NicoPlayer.SIZE_NORMAL);
-        let (pos = this.storage.scrollPositionBeforeLarge)
-          (value || typeof pos == "undefined" || buffer.scrollTo(pos.x, pos.y));
+
+        let pos = this.storage.scrollPositionBeforeLarge;
+        if (!value && typeof pos != "undefined")
+            setTimeout(function () buffer.scrollTo(pos.x, pos.y), 0);
+
         return this.large;
     },
 
