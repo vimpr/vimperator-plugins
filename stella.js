@@ -37,8 +37,8 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Stella</name>
   <name lang="ja">すてら</name>
-  <description>For Niconico/YouTube, Add control commands and information display(on status line).</description>
-  <description lang="ja">ニコニコ動画/YouTube 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
+  <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
+  <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
   <version>0.21.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
@@ -331,8 +331,8 @@ Thanks:
       return result;
     },
 
-    raise: (InVimperator ? function (error) {throw new Error(error)}
-                         : function (error) liberator.echoerr(error)),
+    raise: (InVimperator ? function (error) liberator.echoerr(error)
+                         : function (error) {throw new Error(error)}),
 
     restoreStyle: function (target, doDelete) {
       let style = target.style;
@@ -1124,6 +1124,93 @@ Thanks:
   // }}}
 
   /*********************************************************************************
+  * VimeoPlayer                                                                  {{{
+  *********************************************************************************/
+
+  function VimeoPlayer () {
+    Player.apply(this, arguments);
+  }
+
+  VimeoPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
+
+  VimeoPlayer.prototype = {
+    __proto__: Player.prototype,
+
+    functions: {
+      currentTime: 'w',
+      fileURL: '',
+      fullscreen: '',
+      makeURL: 'x',
+      muted: 'w',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
+      relatedIDs: '',
+      repeating: '',
+      title: 'r',
+      totalTime: '',
+      volume: ''
+    },
+
+    __initializePlayer: function (player) {
+      if (!player || player.__stella_initialized)
+        return player;
+
+      player.__stella_mute = false;
+      player.__stella_volume = 100;
+      player.__stella_initialized = true;
+
+      return player;
+    },
+
+    icon: 'http://www.vimeo.com/favicon.ico',
+
+    set currentTime (value) (this.player.api_seekTo(U.fromTimeCode(value)), value),
+
+    get muted () this.__mute,
+    set muted (value) (this.volume = value ? 0 : 100),
+
+    get player ()
+      this.__initializePlayer(U.xpathGet('//embed[contains(@id,"vimeo_clip_")]').wrappedJSObject),
+
+    get ready () !!this.player,
+
+    get state () {
+      if (this.player.api_isPlaying())
+        return Player.ST_PLAYING
+      if (this.player.api_isPaused())
+        return Player.ST_PAUSED;
+      return Player.ST_OTHER;
+    },
+
+    get title ()
+      U.xpathGet('//div[@class="title"]').textContent,
+
+    get isValid () buffer.URL.match(/^http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+$/),
+
+    // XXX setVolume は実際には存在しない？
+    get volume () parseInt(this.player.__stella_volume),
+    set volume (value) (this.api_setVolume(value), this.player.__stella_volume = value),
+
+    makeURL: function (value, type) {
+      switch (type) {
+        case Player.URL_ID:
+          return 'http://www.vimeo.com/' + value;
+        case Player.URL_SEARCH:
+          return 'http://www.vimeo.com/videos/search:' + encodeURIComponent(value);
+      }
+      return value;
+    },
+
+    play: function () this.player.api_play(),
+
+    pause: function () this.player.api_pause()
+  };
+
+  // }}}
+
+  /*********************************************************************************
   * ContextMenu                                                                  {{{
   *********************************************************************************/
 
@@ -1239,7 +1326,8 @@ Thanks:
 
       this.players = {
         niconico: new NicoPlayer(this.stella),
-        youtube: new YouTubePlayer(this.stella)
+        youtube: new YouTubePlayer(this.stella),
+        vimeo: new VimeoPlayer(this.stella)
       };
 
       this.createStatusPanel();
