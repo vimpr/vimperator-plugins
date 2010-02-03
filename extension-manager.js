@@ -47,10 +47,20 @@ let PLUGIN_INFO =
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
-    ----
+    アドオンの有効無効状態を保存＆復帰できるプラギン
+    :e.g.:
+    >||
+    :extstate store foobar
+    :extstate restore foobar
+    ||<
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    ----
+    Store / Restore current extensions state.
+    :e.g.:
+    >||
+    :extstate store foobar
+    :extstate restore foobar
+    ||<
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
