@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">No Reading</name>
   <description>No reading!</description>
   <description lang="ja">～からデータを転送していますなどの表示を消す(またはecho)</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -50,10 +50,12 @@ let PLUGIN_INFO =
   <detail><![CDATA[
     let g:no_reading_do_echo = 1
     let g:no_reading_on_statusline = 1
+    let g:no_reading_statusline_limit = 1
   ]]></detail>
   <detail lang="ja"><![CDATA[
     let g:no_reading_do_echo = 1
     let g:no_reading_on_statusline = 1
+    let g:no_reading_statusline_limit = 1
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -121,6 +123,7 @@ let INFO =
 
 (function () {
 
+    let eraseTimerHandle;
     let label;
     let (
       sl = document.getElementById('liberator-statusline'),
@@ -136,7 +139,10 @@ let INFO =
       liberator.globalVariables.no_reading_do_echo,
 
     get onStatusLine ()
-      !!liberator.globalVariables.no_reading_on_statusline
+      !!liberator.globalVariables.no_reading_on_statusline,
+
+    get statuslineLimit ()
+      liberator.globalVariables.no_reading_statusline_limit
   };
 
   let (doErase = true)
@@ -144,11 +150,23 @@ let INFO =
       statusline,
       'updateUrl',
       function (next, args) {
+        function setLabel (status) {
+          label.tooltipText = status;
+          label.value = status;
+        }
+
         function updateStatus (status) {
           doErase = true;
           if ($.onStatusLine) {
-            label.tooltipText = status;
-            label.value = status;
+            eraseTimerHandle && clearTimeout(eraseTimerHandle);
+            if ($.statuslineLimit) {
+              eraseTimerHandle =
+                setTimeout(
+                  function () (eraseTimerHandle = null, setLabel('')),
+                  $.statuslineLimit
+                );
+            }
+            setLabel(status);
           } else {
             if ($.doEcho)
               liberator.echo(status, commandline.FORCE_SINGLELINE)
@@ -157,7 +175,7 @@ let INFO =
 
         function showURL () {
           if ($.onStatusLine) {
-            label.value = '';
+            setLabel('');
           } else {
             if (doErase && $.doEcho)
               liberator.echo('', commandline.FORCE_SINGLELINE)
