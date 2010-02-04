@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">No Reading</name>
   <description>No reading!</description>
   <description lang="ja">～からデータを転送していますなどの表示を消す(またはecho)</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -49,33 +49,125 @@ let PLUGIN_INFO =
   <require type="plugin">_libly.js</require>
   <detail><![CDATA[
     let g:no_reading_do_echo = 1
+    let g:no_reading_on_statusline = 1
   ]]></detail>
   <detail lang="ja"><![CDATA[
     let g:no_reading_do_echo = 1
+    let g:no_reading_on_statusline = 1
   ]]></detail>
 </VimperatorPlugin>;
+// }}}
+// INFO {{{
+let INFO =
+<>
+  <plugin name="No-Reading" version="1.1.0"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/no-reading.js"
+          summary="No Reading"
+          lang="en-US"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      The below text is written in English. Believe!
+    </p>
+    <item>
+      <tags>g:no_reading_do_echo</tags>
+      <spec>let g:no_reading_do_echo</spec>
+      <spec>liberator.globalVariables.no_reading_do_echo</spec>
+      <description>
+        <p>表示をステータスラインに移動</p>
+      </description>
+    </item>
+    <item>
+      <tags>g:no_reading_on_statusline</tags>
+      <spec>let g:no_reading_on_statusline</spec>
+      <spec>liberator.globalVariables.no_reading_on_statusline</spec>
+      <description>
+        <p>echo で代用</p>
+      </description>
+    </item>
+  </plugin>
+  <plugin name="No-Reading" version="1.1.0"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/no-reading.js"
+          summary="～からデータを転送していますなどの表示を消したり移動したり"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      ～からデータを転送していますなどの表示を消したり、ステータスラインに移動したり、echo したり。
+    </p>
+    <item>
+      <tags>g:no_reading_do_echo</tags>
+      <spec>let g:no_reading_do_echo</spec>
+      <spec>liberator.globalVariables.no_reading_do_echo</spec>
+      <description>
+        <p>表示をステータスラインに移動</p>
+      </description>
+    </item>
+    <item>
+      <tags>g:no_reading_on_statusline</tags>
+      <spec>let g:no_reading_on_statusline</spec>
+      <spec>liberator.globalVariables.no_reading_on_statusline</spec>
+      <description>
+        <p>echo で代用</p>
+      </description>
+    </item>
+  </plugin>
+</>;
 // }}}
 
 (function () {
 
-  function doEcho ()
-    liberator.globalVariables.no_reading_do_echo;
+    let label;
+    let (
+      sl = document.getElementById('liberator-statusline'),
+      slfu = document.getElementById('liberator-statusline-field-inputbuffer')
+    ) {
+      label = document.createElement('label');
+      label.setAttribute('id', 'vimperator-plugin-no-reading-label');
+      sl.insertBefore(label, slfu);
+    }
+
+  let $ = {
+    get doEcho ()
+      liberator.globalVariables.no_reading_do_echo,
+
+    get onStatusLine ()
+      !!liberator.globalVariables.no_reading_on_statusline
+  };
 
   let (doErase = true)
     liberator.plugins.libly.$U.around(
       statusline,
       'updateUrl',
       function (next, args) {
-        let [url] = args;
-        if (url) {
+        function updateStatus (status) {
           doErase = true;
-          doEcho() && liberator.echo(url, commandline.FORCE_SINGLELINE)
-        } else {
-          if (doErase && doEcho())
-            liberator.echo('', commandline.FORCE_SINGLELINE)
+          if ($.onStatusLine) {
+            label.tooltipText = status;
+            label.value = status;
+          } else {
+            if ($.doEcho)
+              liberator.echo(status, commandline.FORCE_SINGLELINE)
+          }
+        }
+
+        function showURL () {
+          if ($.onStatusLine) {
+            label.value = '';
+          } else {
+            if (doErase && $.doEcho)
+              liberator.echo('', commandline.FORCE_SINGLELINE)
+          }
           doErase = false;
           return next();
         }
+
+        let [url] = args;
+        return (url ? updateStatus : showURL)(url);
       }
     );
 
