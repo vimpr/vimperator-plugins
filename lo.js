@@ -1,13 +1,93 @@
-// ==VimperatorPlugin==
-// @name           Link Opener
-// @description    Open filtered link(s).
-// @description-ja リンクをフィルタリングして開く
-// @license        Creative Commons Attribution-Share Alike 3.0 Unported
-// @version        1.3
-// @minVersion     2.0pre
-// @maxVersion     2.0pre
-// ==/VimperatorPlugin==
-//
+/* NEW BSD LICENSE {{{
+Copyright (c) 2010, anekos.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+    3. The names of the authors may not be used to endorse or promote products
+       derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+
+###################################################################################
+# http://sourceforge.jp/projects/opensource/wiki/licenses%2Fnew_BSD_license       #
+# に参考になる日本語訳がありますが、有効なのは上記英文となります。                #
+###################################################################################
+
+}}} */
+
+// PLUGIN_INFO {{{
+let PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>Link Opener</name>
+  <name lang="ja">Link Opener</name>
+  <description>Link Opener</description>
+  <description lang="ja">リンクを開く</description>
+  <version>2.0.0</version>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <license>new BSD License (Please read the source code comments of this plugin)</license>
+  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js</updateURL>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
+  <detail><![CDATA[
+    ----
+  ]]></detail>
+  <detail lang="ja"><![CDATA[
+    ----
+  ]]></detail>
+</VimperatorPlugin>;
+// }}}
+// INFO {{{
+let INFO =
+<plugin name="Link Opener" version="1.0.0"
+        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
+        summary="Link Opener"
+        lang="en-US"
+        xmlns="http://vimperator.org/namespaces/liberator">
+  <author email="anekos@snca.net">anekos</author>
+  <license>New BSD License</license>
+  <project name="Vimperator" minVersion="2.3"/>
+  <p>
+  </p>
+  <item>
+    <tags>:lopen</tags>
+    <tags>:lo</tags>
+    <tags>:linkopen</tags>
+    <spec>:lo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <a>link</a></spec>
+    <description>
+      <p>
+        Open selected <a>link</a>.
+        When used "!", open links in foreground.
+      </p>
+      <p>The values of <a>where</a> option</p>
+      <dl>
+        <dt>f, n, t</dt><dd>Open the link in new tab.</dd>
+        <dt>b</dt><dd>Open the link in new background tab.</dd>
+        <dt>c</dt><dd>Open the link in current tab.</dd>
+        <dt>w</dt><dd>Open the link in window.</dd>
+      </dl>
+    </description>
+  </item>
+</plugin>;
+// }}}
+
 // Usage:
 //    :fo[pen][!] <REGEXP> [-i <INTERVAL_SEC>] [-w <WHERE>]
 //      Open filtered links by regexp.
@@ -29,22 +109,20 @@
 //
 // Variables:
 //    let g:fopen_default_interval="<INTERVAL_SEC>"
-//
-// License:
-//    http://creativecommons.org/licenses/by-sa/3.0/
 
 
 (function () {
 
   let migemo = window.XMigemoCore;
 
-  function isHttpLink (link) {
-    return link.href && link.href.indexOf('http') == 0;
-  }
+  function isHttpLink (link)
+    (link.href && link.href.indexOf('http') == 0);
 
-  function lmatch (re, link) {
-    return isHttpLink(link) && (link.href.match(re) || link.textContent.toString().match(re));
-  }
+  function lmatch (re, link)
+    (isHttpLink(link) && (link.href.match(re) || link.textContent.toString().match(re)));
+
+  function getLinks ()
+    Array.slice(content.document.links).filter(isHttpLink);
 
   function makeRegExp (str) {
     return migemo ? (str.indexOf('/') == 0) ? new RegExp(str.slice(1), 'i')
@@ -53,10 +131,11 @@
   }
 
   function filteredLinks (word) {
+    let links = Array.slice(content.document.links);
     if (word.match(/^\s*$/))
-      return [];
+      return links;
     let re = makeRegExp(word);
-    return [it for each (it in content.document.links) if (lmatch(re, it))];
+    return [it for each (it in links) if (lmatch(re, it))];
   }
 
   function charToWhere (str, fail) {
@@ -72,7 +151,6 @@
   }
 
   const WHERE_COMPLETIONS = ['f', 't', 'n', 'b', 'c', 'w'];
-
 
   let (foihandle) {
 
@@ -123,38 +201,38 @@
 
   }
 
-  let (
-    lolinks = [],
-    looptions = [ [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS] ]
-  ) {
-
+  let (lolinks = []) {
     commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
       function (args) {
         let where = charToWhere(args['-where'], args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
-        let numUrl = args[0];
-        let m = numUrl.match(/^(\d+),(.+)$/);
-        if (m) {
-          let link = lolinks[parseInt(m[1], 10)];
-          if (link)
-            buffer.followLink(link, where);
-          else
-            liberator.open(m[2], where);
-        } else {
-          liberator.open(numUrl, where);
-        }
+        let m = args.literalArg.match(/^(\d+): (.+)$/);
+
+        if (!m)
+          return liberator.echoerr("huh?");
+
+        let link = lolinks[parseInt(m[1], 10)];
+        if (link)
+          buffer.followLink(link, where);
+        else
+          liberator.open(m[2], where);
       },
       {
-        argCount: '1',
-        options: looptions,
+        literal: 0,
+        options: [
+          [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS]
+        ],
         bang: true,
         completer: function (context) {
-          let last = context.contextList.slice(-1)[0];
-          lolinks = filteredLinks(last.filter);
+          lolinks = Array.slice(content.document.links);
           context.title = ['URL', 'Text Content'];
-          context.advance(last.offset - last.caret);
-          context.completions = lolinks.map(function (it, i) ([i + ',' + it.href, it.textContent]));
+          context.compare = CompletionContext.Sort.number;
+          context.completions =
+            lolinks.map(function (it, i) let (url = it.href, text = it.textContent) ([
+              [i + ": " + (text || url), i + ": " + url],
+              it.href
+            ]));
         }
       },
       true
