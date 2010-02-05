@@ -225,7 +225,7 @@ let INFO =
         ],
         bang: true,
         completer: function (context) {
-          lolinks = Array.slice(content.document.links);
+          lolinks = getLinks();
           context.title = ['URL', 'Text Content'];
           context.compare = CompletionContext.Sort.number;
           context.completions =
