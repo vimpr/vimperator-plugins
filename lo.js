@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Link Opener" version="2.0.0"
+  <plugin name="link-opener" version="2.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -106,7 +106,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="Link Opener" version="2.0.0"
+  <plugin name="link-opener" version="2.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="ja"
