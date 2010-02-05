@@ -47,10 +47,7 @@ let PLUGIN_INFO =
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
-    ----
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    ----
+    :help link-opener-plugin
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
