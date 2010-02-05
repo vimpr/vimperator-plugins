@@ -56,36 +56,105 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="Link Opener" version="1.0.0"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
-        summary="Link Opener"
-        lang="en-US"
-        xmlns="http://vimperator.org/namespaces/liberator">
-  <author email="anekos@snca.net">anekos</author>
-  <license>New BSD License</license>
-  <project name="Vimperator" minVersion="2.3"/>
-  <p>
-  </p>
-  <item>
-    <tags>:lopen</tags>
-    <tags>:lo</tags>
-    <tags>:linkopen</tags>
-    <spec>:lo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <a>link</a></spec>
-    <description>
-      <p>
-        Open selected <a>link</a>.
-        When used "!", open links in foreground.
-      </p>
-      <p>The values of <a>where</a> option</p>
-      <dl>
-        <dt>f, n, t</dt><dd>Open the link in new tab.</dd>
-        <dt>b</dt><dd>Open the link in new background tab.</dd>
-        <dt>c</dt><dd>Open the link in current tab.</dd>
-        <dt>w</dt><dd>Open the link in window.</dd>
-      </dl>
-    </description>
-  </item>
-</plugin>;
+<>
+  <plugin name="Link Opener" version="2.0.0"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
+          summary="Link Opener"
+          lang="en-US"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+    </p>
+    <item>
+      <tags>:fo</tags>
+      <tags>:fopen</tags>
+      <tags>:filteropen</tags>
+      <spec>:fo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <oa>-i<oa>nterval</oa>=<a>interval</a></oa> <a>filter</a></spec>
+      <description>
+        <p>
+          Open the links selected with <a>filter</a>.
+          <a>interval</a> is the interval of link opening.
+        </p>
+        <p>The values of <a>where</a> option</p>
+        <dl>
+          <dt>f, n, t</dt><dd>Open the link in new tab.</dd>
+          <dt>b</dt><dd>Open the link in new background tab.</dd>
+          <dt>c</dt><dd>Open the link in current tab.</dd>
+          <dt>w</dt><dd>Open the link in window.</dd>
+        </dl>
+      </description>
+    </item>
+    <item>
+      <tags>:lopen</tags>
+      <tags>:lo</tags>
+      <tags>:linkopen</tags>
+      <spec>:lo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <a>link</a></spec>
+      <description>
+        <p>
+          Open selected <a>link</a>.
+          When used "!", open links in foreground.
+        </p>
+        <p>The values of <a>where</a> option</p>
+        <dl>
+          <dt>f, n, t</dt><dd>Open the link in new tab.</dd>
+          <dt>b</dt><dd>Open the link in new background tab.</dd>
+          <dt>c</dt><dd>Open the link in current tab.</dd>
+          <dt>w</dt><dd>Open the link in window.</dd>
+        </dl>
+      </description>
+    </item>
+  </plugin>
+  <plugin name="Link Opener" version="2.0.0"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
+          summary="Link Opener"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+    </p>
+    <item>
+      <tags>:fo</tags>
+      <tags>:fopen</tags>
+      <tags>:filteropen</tags>
+      <spec>:fo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <oa>-i<oa>nterval</oa>=<a>interval</a></oa> <a>filter</a></spec>
+      <description>
+        <p>
+          <a>filter</a> で選択されたリンクを開きます。
+          <a>interval</a> はリンクを開く間隔です。
+        </p>
+        <p><a>where</a> オプションの値</p>
+        <dl>
+          <dt>f, n, t</dt><dd>新しいタブに開く</dd>
+          <dt>b</dt><dd>バックグラウンドの新しいタブに開く</dd>
+          <dt>c</dt><dd>現在のタブに開く</dd>
+          <dt>w</dt><dd>新しいウインドウに開く</dd>
+        </dl>
+      </description>
+    </item>
+    <item>
+      <tags>:lopen</tags>
+      <tags>:lo</tags>
+      <tags>:linkopen</tags>
+      <spec>:lo<oa>pen</oa><oa>!</oa> <oa>-w<oa>here</oa>=<a>where</a></oa> <a>link</a></spec>
+      <description>
+        <p>
+          選択されたリンク(<a>link</a>)を開きます。
+        </p>
+        <p><a>where</a> オプションの値</p>
+        <dl>
+          <dt>f, n, t</dt><dd>新しいタブに開く</dd>
+          <dt>b</dt><dd>バックグラウンドの新しいタブに開く</dd>
+          <dt>c</dt><dd>現在のタブに開く</dd>
+          <dt>w</dt><dd>新しいウインドウに開く</dd>
+        </dl>
+      </description>
+    </item>
+  </plugin>
+</>;
 // }}}
 
 // Usage:
@@ -119,7 +188,7 @@ let INFO =
     (link.href && link.href.indexOf('http') == 0);
 
   function lmatch (re, link)
-    (isHttpLink(link) && (link.href.match(re) || link.textContent.toString().match(re)));
+    ((link.href.match(re) || link.textContent.toString().match(re)));
 
   function getLinks ()
     Array.slice(content.document.links).filter(isHttpLink);
@@ -131,7 +200,7 @@ let INFO =
   }
 
   function filteredLinks (word) {
-    let links = Array.slice(content.document.links);
+    let links = getLinks();
     if (word.match(/^\s*$/))
       return links;
     let re = makeRegExp(word);
@@ -162,9 +231,12 @@ let INFO =
         let [i, links] = [1, filteredLinks(args.join(''))];
         if (!links.length)
           return;
+
         liberator.open(links[0].href, where);
+
         if (links.length <= 1)
           return;
+
         let interval = (args['-interval'] || liberator.globalVariables.fopen_default_interval || 1) * 1000;
         foihandle = setInterval(function () {
           try {
@@ -178,14 +250,17 @@ let INFO =
       },
       {
         bang: true,
-        argCount: '1',
+        literal: 0,
         options: [
           [['-interval', '-i'], commands.OPTION_INT],
-          [['-where', '-w'], commands.OPTION_STRING],
+          [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS]
         ],
         completer: function (context, arg) {
           context.title = ['URL', 'Text Content'];
-          context.completions = filteredLinks(context.filter).map(function (it) ([it.href, it.textContent]));
+          // 本来の補完の絞り込みを抑止
+          let filter = context.filter;
+          context.filter = "";
+          context.completions = filteredLinks(filter).map(function (it) ([it.href, it.textContent]));
         },
       },
       true
@@ -196,7 +271,9 @@ let INFO =
       'Stop filtered open',
       function () {
         clearInterval(foihandle);
-      }
+      },
+      {},
+      true
     );
 
   }
