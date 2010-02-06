@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">アドオン管理</name>
   <description>extension manager</description>
   <description lang="ja">アドオンを管理します。</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -67,7 +67,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="extension manager" version="1.0.0"
+  <plugin name="extension-manager" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/extension-manager.js"
           summary="extension manager"
           lang="en-US"
@@ -95,7 +95,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="extension manager" version="1.0.0"
+  <plugin name="extension-manager" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/extension-manager.js"
           summary="extension manager"
           lang="ja"
@@ -111,14 +111,41 @@ let INFO =
       <spec>:exts<oa>tate</oa> <a>sub-command</a> <a>name</a> <oa>extension-names...</oa></spec>
       <description>
         <p>
-          Store or restore current extensions state with <a>name</a>.
-          <p>The following <a>sub-commands</a> are interpreted.</p>
-          if the <oa>extension-names</oa> arguments are specified,
-          this command is only for these extensions.
-          <ul>
-            <li>store</li>
-            <li>restore</li>
-          </ul>
+          拡張の有効無効状態を <a>name</a> で保存復帰します。
+          <oa>extension-names</oa> で拡張名を指定しておくと、指定された拡張のみが保存復帰の対象になります。
+          <p>以下の <a>sub-commands</a> があります。</p>
+          <dl>
+            <dt>store</dt><dd>保存</dd>
+            <dt>restore</dt><dd>復帰</dd>
+          </dl>
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:extbisect</tags>
+      <spec>:extbisect <a>sub-command</a></spec>
+      <description>
+        <p>
+          問題のある拡張などをあぶり出すためのコマンドです。
+          二分探索ぽい方法よって、効率的に困った拡張を探し出します。
+          自動的に拡張の有効無効を切り替えていくので、かなり楽が出来ると思います。
+        </p>
+        <p>
+          作業手順。
+          (ok fail start を実行すると自動的に再起動します)
+          <ol>
+            <li>":extbisect start" で開始</li>
+            <li>問題が起きていないかテスト</li>
+            <li>起きていなければ":extbisect ok"、起きていれば":extbisect fail"を実行</li>
+            <li>再起動するので、2 を再び繰り返す。</li>
+          </ol>
+          <p>
+            問題のある拡張がなんであるか、確定したら ok/fail したときにメッセージが出ます。
+            メッセージを確認したら、":extbisect reset" で拡張の状態を元に戻してください。
+          </p>
+          <p>
+            テストを行うことで、エラーで Firefox が終了してしまう場合は、再起動後に ok / fail を実行してください。
+          </p>
         </p>
       </description>
     </item>
@@ -130,6 +157,9 @@ let INFO =
 (function () {
 
   let states = storage.newMap('plugins-extman-states', {store: true});
+  let bisect = storage.newMap('plugins-extman-bisect', {store: true});
+
+  states.modify = bisect.modify = function (name, func) this.set(name, func(this.get(name)));
 
   function xabled (id, enable)
     services.get("extensionManager")[enable ? 'enableItem' : 'disableItem'](id);
@@ -148,6 +178,12 @@ let INFO =
     let es = extFilter(liberator.extensions, targets);
     states.set(name, {extensions: es, date: new Date()});
   }
+
+  function slash (ary, index)
+    [ary.slice(0, index), ary.slice(index)];
+
+  function isVimp (ext)
+    (ext.name == 'Vimperator');
 
   store('last');
 
@@ -196,6 +232,106 @@ let INFO =
     }
   };
 
+  let extBisect = {
+    start: function () {
+      if (this.__notReady(false))
+        return;
+      let targets = liberator.extensions.filter(function (ext) !isVimp(ext) && ext.enabled);
+      bisect.set('store', liberator.extensions);
+      bisect.set('state', 'started');
+      let ([a, b] = slash(targets, targets.length / 2)) {
+        bisect.set('yet', a);
+        bisect.set('current', b);
+      }
+      bisect.save();
+      this.__reflectCurrent();
+      liberator.restart();
+    },
+
+    ok: function () {
+      if (this.__notReady(true))
+        return;
+      if (this.__finished(true))
+        return;
+      bisect.modify('yet', function (value) {
+        let [a, b] = slash(value, value.length / 2);
+        bisect.set('current', a);
+        return b;
+      });
+      this.__reflectCurrent();
+      liberator.restart();
+    },
+
+    fail: function () {
+      if (this.__notReady(true))
+        return;
+      if (this.__finished(false))
+        return;
+      bisect.modify('current', function (value) {
+        let [a, b] = slash(value, value.length / 2);
+        bisect.set('yet', a);
+        return b;
+      });
+      this.__reflectCurrent();
+      liberator.restart();
+    },
+
+    show: function () {
+      function f (ext) liberator.echo(' ' + ext.name);
+      liberator.echo('<<current>>');
+      bisect.get('current').forEach(f)
+      liberator.echo('<<yet>>');
+      bisect.get('yet').forEach(f)
+    },
+
+    reset: function () {
+      if (this.__notReady(true))
+        return;
+      bisect.set('state', '');
+      bisect.get('store').forEach(function (ext) xabled(ext.id, ext.enabled));
+      bisect.save();
+      liberator.echo('extensions were reset');
+      liberator.restart();
+    },
+
+    __notReady: function (started) {
+      if (!!(bisect.get('state') == 'started') == !!started)
+        return false;
+      liberator.echoerr('extbisect has ' + (started ? 'not ' : '') + 'been started.');
+      return true;
+    },
+
+    __finished: function (ok) {
+      function answer (ext) {
+        liberator.echo(util.escapeString(ext.name) + ' is the criminal!!');
+        return true;
+      }
+
+      let current = bisect.get('current');
+      let yet = bisect.get('yet');
+
+      if (ok && yet.length <= 1)
+        return answer(yet[0]);
+
+      if (!ok && current.length <= 1)
+        return answer(current[0]);
+
+      return false;
+    },
+
+    __reflectCurrent: function () {
+      let current = bisect.get('current');
+      liberator.extensions.forEach(
+        function (ext)
+          (xabled(ext.id, isVimp(ext) || current.some(function (e) e.id == ext.id)))
+      );
+    },
+
+    __noSuchMethod__: function (name) {
+      liberator.echoerr(name + ' is not valid sub-command');
+    }
+  };
+
   commands.addUserCommand(
     ['exts[tate]'],
     'store / restore extensions state (enabled / disabled).',
@@ -225,6 +361,32 @@ let INFO =
     },
     true
   );
+
+  commands.addUserCommand(
+    ['extbisect'],
+    'bisectrrrrrrrrrrr',
+    function (args) {
+      let [cmd,] = args;
+      extBisect[cmd]();
+    },
+    {
+      completer: function (context, args) {
+        if (args.length == 1) {
+          context.title = ['sub command', 'description'];
+          context.completions = [
+            ['start', 'start bisect'],
+            ['ok', ''],
+            ['fail', ''],
+            ['reset', ''],
+            ['show', '']
+          ];
+        }
+      }
+    },
+    true
+  );
+
+
 
   states.save();
 
