@@ -210,6 +210,7 @@ let INFO =
       ctypes.void_t,
       ctypes.uint8_t, ctypes.uint8_t, ctypes.int32_t, ctypes.int32_t
     );
+  let [short, long, interval] = [100, 400, 200];
 
   function u (string)
     unescape(encodeURIComponent(string));
@@ -221,15 +222,15 @@ let INFO =
         keybd_event(0x91, 0x45, 3, 0);
       }
 
-      function bong () {
-        _bing();
-        setTimeout(function () (next && next()), interval);
-      }
-
       return function () {
-          let time = ch == '.' ? short : long;
-          _bing();
-          setTimeout(bong, time);
+        if (ch == ' ')
+          return setTimeout(next, interval);
+        liberator.log(ch == '.' ? short : long);
+        _bing();
+        setTimeout(
+          function () (_bing(), setTimeout(next, interval)),
+          ch == '.' ? short : long
+        );
       };
     }
 
@@ -243,8 +244,6 @@ let INFO =
     return function (codes) bings(codes)();
   }
 
-
-  let morse = Morse(100, 500, 100);
   function toCode (text)
     Array.slice(text).map(function (c) codeTable[c.toLowerCase()] || '').join(' ');
 
