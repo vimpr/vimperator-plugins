@@ -255,10 +255,29 @@ let INFO =
     ['morse'],
     'Mooooooooooooorse',
     function (args) {
-      morse(code(args.literalArg));
+      let code = toCode(args.literalArg);
+
+      if (args['-code'])
+        util.copyToClipboard(code);
+
+      [short, long, interval] =
+        [
+          args['-short'] || short,
+          args['-long'] || long,
+          args['-interval'] || interval
+        ];
+
+      liberator.echo(code);
+      Morse(short, long, interval)(code);
     },
     {
-      literal: 0
+      literal: 0,
+      options: [
+        [['-clipboard', '-c'], commands.OPTION_NOARG],
+        [['-short', '-s'], commands.OPTION_INT],
+        [['-long', '-l'], commands.OPTION_INT],
+        [['-interval', '-i'], commands.OPTION_INT]
+      ],
     },
     true
   );
