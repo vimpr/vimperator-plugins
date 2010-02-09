@@ -203,8 +203,6 @@ let INFO =
 
   let [short, long, interval] = [100, 400, 200];
 
-  function u (string)
-    unescape(encodeURIComponent(string));
   let keybd_event =
     (function () {
       try {
