@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Morse</name>
   <description>Morse code (Windows only)</description>
   <description lang="ja">モールス信号 (Windows専用)</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="Morse" version="1.0.0"
+<plugin name="Morse" version="1.1.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/morse.js"
         summary="Morse code"
         xmlns="http://vimperator.org/namespaces/liberator">
