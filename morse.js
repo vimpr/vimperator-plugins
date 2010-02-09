@@ -201,19 +201,25 @@ let INFO =
     '\u30F3': '.-.-.',
   };
 
-  Components.utils.import("resource://gre/modules/ctypes.jsm");
-  let user32 = ctypes.open('user32.dll');
-  let keybd_event =
-    user32.declare(
-      'keybd_event',
-      ctypes.stdcall_abi,
-      ctypes.void_t,
-      ctypes.uint8_t, ctypes.uint8_t, ctypes.int32_t, ctypes.int32_t
-    );
   let [short, long, interval] = [100, 400, 200];
 
   function u (string)
     unescape(encodeURIComponent(string));
+  let keybd_event =
+    (function () {
+      try {
+        Components.utils.import("resource://gre/modules/ctypes.jsm");
+        let user32 = ctypes.open('user32.dll');
+        return user32.declare(
+            'keybd_event',
+            ctypes.stdcall_abi,
+            ctypes.void_t,
+            ctypes.uint8_t, ctypes.uint8_t, ctypes.int32_t, ctypes.int32_t
+          );
+      } catch (e) {
+        return function () "DO NOTHING";
+      }
+    })();
 
   function Morse (short, long, interval) {
     function bing (ch, next) {
