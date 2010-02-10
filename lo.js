@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.0.0"
+  <plugin name="link-opener" version="2.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.0.0"
+  <plugin name="link-opener" version="2.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -187,8 +187,11 @@ let INFO =
   function lmatch (re, link)
     ((link.href.match(re) || link.textContent.toString().match(re)));
 
-  function getLinks ()
-    Array.slice(content.document.links).filter(isHttpLink);
+  function getLinks () {
+    function _get (content)
+      Array.concat.apply(Array.slice(content.document.links), Array.slice(content.frames).map(_get));
+    return _get(content).filter(isHttpLink);
+  }
 
   function makeRegExp (str) {
     return migemo ? (str.indexOf('/') == 0) ? new RegExp(str.slice(1), 'i')
