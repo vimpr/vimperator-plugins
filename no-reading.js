@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">No Reading</name>
   <description>No reading!</description>
   <description lang="ja">～からデータを転送していますなどの表示を消す(またはecho)</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -62,7 +62,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="No-Reading" version="1.1.0"
+  <plugin name="No-Reading" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/no-reading.js"
           summary="No Reading"
           lang="en-US"
@@ -71,14 +71,14 @@ let INFO =
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="2.3"/>
     <p>
-      The below text is written in English. Believe!
+      Remove or move some messages for statusline.
     </p>
     <item>
       <tags>g:no_reading_do_echo</tags>
       <spec>let g:no_reading_do_echo</spec>
       <spec>liberator.globalVariables.no_reading_do_echo</spec>
       <description>
-        <p>表示をステータスラインに移動</p>
+        <p>Move displays into statusline.</p>
       </description>
     </item>
     <item>
@@ -86,11 +86,11 @@ let INFO =
       <spec>let g:no_reading_on_statusline</spec>
       <spec>liberator.globalVariables.no_reading_on_statusline</spec>
       <description>
-        <p>echo で代用</p>
+        <p>substitute by echo</p>
       </description>
     </item>
   </plugin>
-  <plugin name="No-Reading" version="1.1.0"
+  <plugin name="No-Reading" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/no-reading.js"
           summary="～からデータを転送していますなどの表示を消したり移動したり"
           lang="ja"
