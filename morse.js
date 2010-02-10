@@ -257,8 +257,8 @@ let INFO =
     function (args) {
       let code = toCode(args.literalArg);
 
-      if (args['-code'])
-        util.copyToClipboard(code);
+      args['-code'] && util.copyToClipboard(code);
+      args['-echo'] && liberator.echo(code);
 
       [short, long, interval] =
         [
@@ -267,13 +267,13 @@ let INFO =
           args['-interval'] || interval
         ];
 
-      liberator.echo(code);
       Morse(short, long, interval)(code);
     },
     {
       literal: 0,
       options: [
         [['-clipboard', '-c'], commands.OPTION_NOARG],
+        [['-echo', '-e'], commands.OPTION_NOARG],
         [['-short', '-s'], commands.OPTION_INT],
         [['-long', '-l'], commands.OPTION_INT],
         [['-interval', '-i'], commands.OPTION_INT]
