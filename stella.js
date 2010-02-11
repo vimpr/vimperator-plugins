@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.22.1</version>
+  <version>0.23.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -334,6 +334,12 @@ Thanks:
     raise: (InVimperator ? function (error) liberator.echoerr(error)
                          : function (error) {throw new Error(error)}),
 
+    raiseNotSupportedPage:
+      function () this.raise('Stella: Current page is not supported'),
+
+    raiseNotSupportedFunction:
+      function () this.raise('Stella: The function is not supported in this page.'),
+
     restoreStyle: function (target, doDelete) {
       let style = target.style;
       if (!style.__stella_backup)
@@ -450,6 +456,8 @@ Thanks:
       title: '',
       totalTime: '',
       volume: '',
+      quality: '',
+      qualities: ''
       // auto setting => fetch maxVolume playOrPause relations seek seekRelative turnUpDownVolume
     },
 
@@ -673,7 +681,9 @@ Thanks:
       repeating: '',
       title: 'r',
       totalTime: 'r',
-      volume: 'rw'
+      volume: 'rw',
+      quality: 'rw',
+      qualities: 'r'
     },
 
     icon: 'http://www.youtube.com/favicon.ico',
@@ -732,6 +742,11 @@ Thanks:
 
     get player ()
       U.getElementByIdEx('movie_player'),
+
+    get quality () this.player.getPlaybackQuality(),
+    set quality (value) this.player.setPlaybackQuality(value),
+
+    get qualities () this.player.getAvailableQualityLevels(),
 
     get ready () !!this.player,
 
@@ -844,7 +859,9 @@ Thanks:
       tags: 'r',
       title: 'r',
       totalTime: 'r',
-      volume: 'rw'
+      volume: 'rw',
+      quality: '',
+      qualities: ''
     },
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
@@ -1384,7 +1401,7 @@ Thanks:
             ? funcS
             : function (arg) {
                 if (!self.isValid)
-                  U.raise('Stella: Current page is not supported');
+                  U.raiseNotSupportedPage();
                 let p = self.player;
                 let func = arg.bang ? funcB : funcS;
                 if (p.has(func, 'rwt'))
@@ -1394,7 +1411,7 @@ Thanks:
                 else if (p.has(func, 'x'))
                   p[func].apply(p, arg);
                 else
-                  U.raise('Stella: The function is not supported in this page.');
+                  U.raiseNotSupportedFunction();
                 self.update();
               },
           {argCount: '*', bang: !!funcB},
@@ -1416,9 +1433,37 @@ Thanks:
         add('sa[y]', 'say');
 
       commands.addUserCommand(
+        ['stqu[ality]'],
+        'Quality - Stella',
+        function (args) {
+          if (!self.isValid)
+            return U.raiseNotSupportedPage();
+          if (self.player.has('quality', 'w'))
+            return U.raiseNotSupportedFunction();
+
+          self.player.quality = args.literalArg;
+        },
+        {
+          literal: 0,
+          completer: function (context) {
+            if (!self.player.has('qualities', 'r'))
+              return;
+            context.title = ['Quality', 'Description'];
+            context.completions = [[q, q] for each ([, q] in self.player.qualities)];
+          }
+        },
+        true
+      );
+
+      commands.addUserCommand(
         ['strel[ations]'],
         'relations - Stella',
         function (args) {
+          if (!self.isValid)
+            return U.raiseNotSupportedPage();
+          if (self.player.has('quality', 'w'))
+            return U.raiseNotSupportedFunction();
+
           let arg = args.string;
           let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;
           liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
@@ -1428,7 +1473,7 @@ Thanks:
           bang: true,
           completer: function (context, args) {
             if (!self.isValid)
-              U.raise('Stella: Current page is not supported');
+              U.raiseNotSupportedPage();
             if (!self.player.has('relations', 'r'))
               return;
             context.title = ['Tag/ID', 'Description'];
