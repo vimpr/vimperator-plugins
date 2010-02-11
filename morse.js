@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Morse</name>
   <description>Morse code (Windows only)</description>
   <description lang="ja">モールス信号 (Windows専用)</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="Morse" version="1.1.0"
+<plugin name="Morse" version="1.2.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/morse.js"
         summary="Morse code"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -255,7 +255,7 @@ let INFO =
     ['morse'],
     'Mooooooooooooorse',
     function (args) {
-      let code = toCode(args.literalArg);
+      let code = args['-raw'] ? args.literalArg : toCode(args.literalArg);
 
       args['-code'] && util.copyToClipboard(code);
       args['-echo'] && liberator.echo(code);
@@ -276,7 +276,8 @@ let INFO =
         [['-echo', '-e'], commands.OPTION_NOARG],
         [['-short', '-s'], commands.OPTION_INT],
         [['-long', '-l'], commands.OPTION_INT],
-        [['-interval', '-i'], commands.OPTION_INT]
+        [['-interval', '-i'], commands.OPTION_INT],
+        [['-raw', '-r'], commands.OPTION_NOARG]
       ],
     },
     true
