@@ -592,9 +592,14 @@ Thanks:
   }
 
   Relation.prototype = {
-    get command () undefined,
-    get description () undefined,
-    get completionItem () ([this.command, this.description]),
+    get command () this._command,
+    get description () this._description,
+    get thumbnail () this._thumbnail,
+    get completionItem () ({
+      text: this.command,
+      description: this.description,
+      thumbnail: this.thumbnail
+    })
   };
 
 
@@ -617,9 +622,10 @@ Thanks:
 
 
 
-  function RelatedID (id, title) {
+  function RelatedID (id, title, img) {
     this.id = id;
     this.title = title;
+    this._thumbnail = img;
     Relation.apply(this, arguments);
   }
 
@@ -902,7 +908,7 @@ Thanks:
     set fullscreen (value) (this.large = value),
 
     get id ()
-      let (m = U.currentURL().match(/\/watch\/([a-z]{2}\d+)/))
+      let (m = U.currentURL().match(/\/watch\/([a-z\d]+)/))
         (m && m[1]),
 
     get muted () this.player.ext_isMute(),
@@ -934,7 +940,13 @@ Thanks:
           for each (let c in cs)
             if (c.nodeName != '#text')
               video[c.nodeName] = c.textContent;
-          videos.push(new RelatedID(video.url.replace(/^.+?\/watch\//, ''), video.title));
+          videos.push(
+            new RelatedID(
+              video.url.replace(/^.+?\/watch\//, ''),
+              video.title,
+              video.thumbnail
+            )
+          );
         }
       } catch (e) {
         liberator.log('stella: ' + e)
@@ -1442,7 +1454,7 @@ Thanks:
         function (args) {
           if (!self.isValid)
             return U.raiseNotSupportedPage();
-          if (self.player.has('quality', 'w'))
+          if (!self.player.has('quality', 'w'))
             return U.raiseNotSupportedFunction();
 
           self.player.quality = args.literalArg;
@@ -1465,8 +1477,6 @@ Thanks:
         function (args) {
           if (!self.isValid)
             return U.raiseNotSupportedPage();
-          if (self.player.has('quality', 'w'))
-            return U.raiseNotSupportedFunction();
 
           let arg = args.string;
           let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;
@@ -1479,8 +1489,17 @@ Thanks:
             if (!self.isValid)
               U.raiseNotSupportedPage();
             if (!self.player.has('relations', 'r'))
-              return;
+              U.raiseNotSupportedFunction();
+
             context.title = ['Tag/ID', 'Description'];
+            context.keys = {text: 'text', description: 'description', thumbnail: 'thumbnail'};
+            let process = Array.slice(context.process);
+            context.process = [
+              process[0],
+              function (item, text)
+                (item.thumbnail ? <><img src={item.thumbnail} style="margin-right: 0.5em;"/>{text}</>
+                                : process[1].apply(this, arguments))
+            ];
             context.completions = self.player.relations.map(function (rel) rel.completionItem);
           },
         },
