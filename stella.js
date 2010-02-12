@@ -74,6 +74,8 @@ let PLUGIN_INFO =
         enlarge video screen.
       :stfu[llscreen]:
         turn on/off fullscreen.
+      :stqu[ality]:
+        Set video quality.
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Commands ==
@@ -104,6 +106,8 @@ let PLUGIN_INFO =
         画面を大きくする/戻す。
       :stfu[llscreen]:
         フルスクリーン表示のOn/Offを切り替える。
+      :stqu[ality]:
+        動画の品質を設定
     == Controls ==
       マウスのホイール:
         パネル上でホイールの上下することにより音量を上下できます
