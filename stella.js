@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.23.0</version>
+  <version>0.24.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -449,6 +449,7 @@ Thanks:
       large: '',
       makeURL: '',
       muted: '',
+      pageinfo: '',
       pause: '',
       play: '',
       playEx: '',
@@ -466,6 +467,8 @@ Thanks:
     },
 
     icon: null,
+
+    xpath: {},
 
     initialize: function () void null,
 
@@ -683,6 +686,7 @@ Thanks:
       fullscreen: 'rwt',
       makeURL: 'x',
       muted: 'rwt',
+      pageinfo: 'r',
       pause: 'x',
       play: 'x',
       playEx: 'x',
@@ -697,6 +701,10 @@ Thanks:
     },
 
     icon: 'http://www.youtube.com/favicon.ico',
+
+    xpath: {
+      comment: '//span[@class="description"]'
+    },
 
     get currentTime () parseInt(this.player.getCurrentTime()),
     set currentTime (value) (this.player.seekTo(U.fromTimeCode(value)), this.currentTime),
@@ -749,6 +757,10 @@ Thanks:
 
     get muted () this.player.isMuted(),
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
+
+    get pageinfo () [
+      ['comment', U.xpathGet(this.xpath.comment).innerHTML]
+    ],
 
     get player ()
       U.getElementByIdEx('movie_player'),
@@ -858,6 +870,7 @@ Thanks:
       large: 'rwt',
       makeURL: 'x',
       muted: 'rwt',
+      pageinfo: 'r',
       pause: 'x',
       play: 'x',
       playEx: 'x',
@@ -875,6 +888,10 @@ Thanks:
     },
 
     icon: 'http://www.nicovideo.jp/favicon.ico',
+
+    xpath: {
+      comment: 'id("des_2")/table[2]/tbody/tr/td[2]'
+    },
 
     initialize: function () {
       this.__info_cache = {};
@@ -913,6 +930,10 @@ Thanks:
 
     get muted () this.player.ext_isMute(),
     set muted (value) (this.player.ext_setMute(value), value),
+
+    get pageinfo () [
+      ['comment', U.xpathGet(this.xpath.comment).innerHTML]
+    ],
 
     get player () U.getElementByIdEx('flvplayer'),
 
@@ -957,7 +978,7 @@ Thanks:
       // コメント欄のリンクの前のテキストをタイトルと見なす
       // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
       try {
-        let xpath = 'id("des_2")/table[2]/tbody/tr/td[2]';
+        let xpath = this.xpath.comment;
         let comment = U.xpathGet(xpath).innerHTML;
         let links = U.xpathGets(xpath + '/p/a')
                      .filter(function (it) /watch\//.test(it.href))
@@ -1507,6 +1528,18 @@ Thanks:
       );
     },
 
+    addPageInfo: function () {
+      let self = this;
+      buffer.addPageInfoSection(
+        'S',
+        'Stella Info',
+        function (verbose)
+          (self.isValid && self.player.has('pageinfo', 'r')
+            ? self.player.pageinfo
+            : [])
+      );
+    },
+
     createStatusPanel: function () {
       let self = this;
 
@@ -1804,6 +1837,7 @@ Thanks:
     let install = function () {
       let stella = liberator.globalVariables.stella = new Stella(new Setting());
       stella.addUserCommands();
+      stella.addPageInfo();
       liberator.log('Stella: installed.');
     };
 
