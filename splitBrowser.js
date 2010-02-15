@@ -164,7 +164,8 @@ mappings.addUserMap([modes.NORMAL],['s'], 'SplitBrowser motion  Map', //{{{
             gBrowser = document.getElementById('content');
         }
     },{
-        flags: Mappings.flags.MOTION + Mappings.flags.COUNT,
+        motion: true,
+        count: true,
         rhs: 'Motion map for SplitBrowser'
     }
 );
@@ -202,7 +203,9 @@ mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
                 break;
         }
     },{
-        flags: Mappings.flags.COUNT + Mappings.flags.ARGUMENT,
+        //flags: Mappings.flags.COUNT + Mappings.flags.ARGUMENT,
+        count: true,
+        arg: true,
         rhs: 'select subbrowser'
     }
 ); //}}}
