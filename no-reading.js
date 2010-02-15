@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">No Reading</name>
   <description>No reading!</description>
   <description lang="ja">～からデータを転送していますなどの表示を消す(またはecho)</description>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -78,7 +78,7 @@ let INFO =
       <spec>let g:no_reading_do_echo</spec>
       <spec>liberator.globalVariables.no_reading_do_echo</spec>
       <description>
-        <p>Move displays into statusline.</p>
+        <p>substitute by echo</p>
       </description>
     </item>
     <item>
@@ -86,7 +86,7 @@ let INFO =
       <spec>let g:no_reading_on_statusline</spec>
       <spec>liberator.globalVariables.no_reading_on_statusline</spec>
       <description>
-        <p>substitute by echo</p>
+        <p>Move displays into statusline.</p>
       </description>
     </item>
   </plugin>
@@ -106,7 +106,7 @@ let INFO =
       <spec>let g:no_reading_do_echo</spec>
       <spec>liberator.globalVariables.no_reading_do_echo</spec>
       <description>
-        <p>表示をステータスラインに移動</p>
+        <p>echo で代用</p>
       </description>
     </item>
     <item>
@@ -114,7 +114,7 @@ let INFO =
       <spec>let g:no_reading_on_statusline</spec>
       <spec>liberator.globalVariables.no_reading_on_statusline</spec>
       <description>
-        <p>echo で代用</p>
+        <p>表示をステータスラインに移動</p>
       </description>
     </item>
   </plugin>
