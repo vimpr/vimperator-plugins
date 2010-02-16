@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>hash of file</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.1</version>
-    <minVersion>2.0pre</minVersion>
-    <maxVersion>2.0pre</maxVersion>
+    <version>0.2.2</version>
+    <minVersion>2.3</minVersion>
+    <maxVersion>2.3</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hash.js</updateURL>
     <detail><![CDATA[
 
