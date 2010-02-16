@@ -32,7 +32,7 @@ hash:
 
     function getStream(path)
     {
-        let file = io.getFile(path);
+        let file = io.File(path);
         let stream = Cc["@mozilla.org/network/file-input-stream;1"]
             .createInstance(Ci.nsIFileInputStream);
         stream.init(file, 0x01, 0444, 0);
@@ -81,7 +81,9 @@ hash:
                 }
             },
             literal: 1,
-        });
+        },
+        true
+        );
 
 })();
 // vim: fdm=marker sw=4 ts=4 et:
