@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.1</version>
+  <version>0.24.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -932,7 +932,7 @@ Thanks:
     set muted (value) (this.player.ext_setMute(value), value),
 
     get pageinfo () [
-      ['comment', U.xpathGet(this.xpath.comment).innerHTML]
+      ['comment', U.xpathGet(this.xpath.comment).innerHTML.replace(/<br>/g, '<br/>')]
     ],
 
     get player () U.getElementByIdEx('flvplayer'),
