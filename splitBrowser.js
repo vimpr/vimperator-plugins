@@ -213,58 +213,9 @@ mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
 ); //}}}
 
 /**
- * Overwrite liberator.open for SplitBrowser
- * @see liberator.js::vimperaotr.open
+ * Overwrite for SplitBrowser
  */
-liberator.open = function(urls, where, force){ //{{{
-    if (typeof urls == 'string') urls = util.stringToURLArray(urls);
-    if (urls.length > 20 && !force){
-        commandline.input("This will open " + urls.length + " new tabs. Would you like to continue? (yes/[no])",
-            function (resp) { if (resp && resp.match(/^y(es)?$/i)) liberator.open(urls, where, true); });
-        return true;
-    }
-    if (urls.length == 0) return false;
-    if (liberator.forceNewTab && liberator.has("tabs")){
-        where = liberator.NEW_TAB;
-    } else if (!where || !liberator.has("tabs")){
-        where = liberator.CURRENT_TAB;
-    }
-    var url = typeof urls[0] == 'string' ? urls[0] : urls[0][0];
-    var postdata = typeof urls[0] == 'string' ? null : urls[0][1];
-    var whichwindow = window;
-    var activeBrowser = SplitBrowser.activeBrowser;
-
-    switch (where) {
-        case liberator.CURRENT_TAB:
-            activeBrowser.loadURIWithFlags(url, null, null, null, postdata);
-            break;
-        case liberator.NEW_TAB:
-            var firsttab = activeBrowser.addTab(url, null, null, postdata);
-            activeBrowser.selectedTab = firsttab;
-            break;
-        case liberator.NEW_BACKGROUND_TAB:
-            activeBrowser.addTab(url, null, null, postdata);
-            break;
-        case liberator.NEW_WINDOW:
-            window.open();
-            var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                               .getService(Components.interfaces.nsIWindowMediator);
-            whichwindow = vm.getMostRecentWindow('navigator:browser');
-            whichwindow.loadURI(url, null, postdata);
-            break;
-        default:
-            liberator.echoerr("Exxx: Invalid 'where' directive in liberator.open(...)");
-            return false;
-    }
-    if (!liberator.has("tabs")) return true;
-
-    for (var i=1, l=urls.length; i < l; i++){
-        url = typeof urls[i] == 'string' ? urls[i] : urls[i][0];
-        postdata = typeof urls[i] == 'string' ? null : urls[i][1];
-        whichwindow.SplitBrowser.activeBrowser.addTab(url, null, null, postdata);
-    }
-    return true;
-}; //}}}
+config.__defineGetter__('browser', function () SplitBrowser.activeBrowser);
 
 var manager = {
     splitBrowserId: SplitBrowserAppID,
