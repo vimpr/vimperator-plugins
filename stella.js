@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.2</version>
+  <version>0.24.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -703,7 +703,8 @@ Thanks:
     icon: 'http://www.youtube.com/favicon.ico',
 
     xpath: {
-      comment: '//span[@class="description"]'
+      comment: '//span[@class="description"]',
+      tags: '//div[@id="watch-video-tags"]'
     },
 
     get currentTime () parseInt(this.player.getCurrentTime()),
@@ -759,7 +760,11 @@ Thanks:
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
     get pageinfo () [
-      ['comment', U.xpathGet(this.xpath.comment).innerHTML]
+      [
+        name,
+        U.xpathGet(this.xpath[name]).innerHTML.replace(/&nbsp;/g, ', ')
+      ]
+      for (name in this.xpath)
     ],
 
     get player ()
