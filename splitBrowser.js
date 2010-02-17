@@ -195,9 +195,11 @@ mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
             case 'd':
                 liberator.plugins.splitBrowser.closeSubBrowser();
                 break;
+            case 'v':
             case '<C-v>':
                 liberator.plugins.splitBrowser.openSubBrowser([buffer.URL],SplitBrowser.POSITION_RIGHT);
                 break;
+            case 's':
             case '<C-s>':
                 liberator.plugins.splitBrowser.openSubBrowser([buffer.URL],SplitBrowser.POSITION_TOP);
                 break;
