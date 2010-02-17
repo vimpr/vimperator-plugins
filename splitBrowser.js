@@ -196,10 +196,10 @@ mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
                 liberator.plugins.splitBrowser.closeSubBrowser();
                 break;
             case '<C-v>':
-                liberator.plugins.splitBrowser.openSubBrowser(buffer.URL,SplitBrowser.POSITION_RIGHT);
+                liberator.plugins.splitBrowser.openSubBrowser([buffer.URL],SplitBrowser.POSITION_RIGHT);
                 break;
             case '<C-s>':
-                liberator.plugins.splitBrowser.openSubBrowser(buffer.URL,SplitBrowser.POSITION_TOP);
+                liberator.plugins.splitBrowser.openSubBrowser([buffer.URL],SplitBrowser.POSITION_TOP);
                 break;
         }
     },{
