@@ -3,7 +3,7 @@ let PLUGIN_INFO =
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
   <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
-  <version>0.4.2</version>
+  <version>0.4.3</version>
   <author>SAKAI, Kazuaki</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -54,39 +54,47 @@ let PLUGIN_INFO =
   // register command
   liberator.modules.commands.addUserCommand(['anc'], 'append anchors to texts look like url',
     function(arg) {
-      const doc = window.content.document;
-      const range = doc.createRange();
+      function append() {
+        let result = 0;
+        const doc = window.content.document;
+        const range = doc.createRange();
 
-      let nodes = util.evaluateXPath(xpathQueryPlainText);
-      for (let node in nodes) {
-        while (node) {
-          range.selectNode(node)
+        let nodes = util.evaluateXPath(xpathQueryPlainText);
+        for (let node in nodes) {
+          while (node) {
+            range.selectNode(node)
 
-          // search string like URL
-          let start = range.toString().search(regexpLikeURL);
-          // go to next node when there is nothing look like URL in current node
-          if (!(start > -1)) break;
+            // search string like URL
+            let start = range.toString().search(regexpLikeURL);
+            // go to next node when there is nothing look like URL in current node
+            if (!(start > -1)) break;
 
-          // build URL
-          let href = 'h' + RegExp.$1 + '://' + RegExp.$2;
+            result++;
 
-          // reset range
-          range.setStart(node, start);
-          range.setEnd(node, start + RegExp.lastMatch.length);
+            // build URL
+            let href = 'h' + RegExp.$1 + '://' + RegExp.$2;
 
-          // build anchor element
-          let anchor = doc.createElement('a');
-          anchor.setAttribute('href', href);
-          range.surroundContents(anchor);
+            // reset range
+            range.setStart(node, start);
+            range.setEnd(node, start + RegExp.lastMatch.length);
 
-          // insert
-          range.insertNode(anchor);
+            // build anchor element
+            let anchor = doc.createElement('a');
+            anchor.setAttribute('href', href);
+            range.surroundContents(anchor);
 
-          // iterate
-          node = node.nextSibling.nextSibling.nextSibling;
+            // insert
+            range.insertNode(anchor);
+
+            // iterate
+            node = node.nextSibling.nextSibling.nextSibling;
+          }
         }
+        range.detach();
+        return result;
       }
-      range.detach();
+      for (let i = 0; i < 20 && append(); i++)
+        ;
     },
     {},
     true
