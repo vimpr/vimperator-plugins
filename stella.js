@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.4</version>
+  <version>0.24.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -76,6 +76,60 @@ let PLUGIN_INFO =
         turn on/off fullscreen.
       :stqu[ality]:
         Set video quality.
+
+    == Local Mappings Sample == 
+    >||
+function addLocalMappings(buffer, maps) {
+  maps.forEach(
+    function (map) {
+      let [cmd, action, extra] = map;
+      let actionFunc = action;
+      extra || (extra = {});
+
+      if (typeof action == "string") {
+        if (action.charAt(0) == ':')
+          actionFunc = extra.open ? function () commandline.open("", action, modes.EX)
+                                  : function () liberator.execute(action);
+        else
+          actionFunc = function () events.feedkeys(action, extra.noremap, true);
+      }
+      extra.matchingUrls = buffer;
+      mappings.addUserMap(
+        [modes.NORMAL],
+        [cmd],
+        "Local mapping for " + buffer,
+        actionFunc,
+        extra
+      );
+    }
+  );
+}
+
+addLocalMappings(
+  /^(http:\/\/(es|www).nicovideo.jp\/watch|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
+  [
+    ['<C-g>', ':pageinfo S',      ],
+    ['p',     ':stplay',          ],
+    ['m',     ':stmute',          ],
+    ['c',     ':stcomment',       ],
+    ['zz',    ':stlarge',         ],
+    ['r',     ':strepeat',        ],
+    ['+',     ':stvolume! 10',    ],
+    ['-',     ':stvolume! -10',   ],
+    ['h',     ':stseek! -10',     ],
+    ['l',     ':stseek! 10',      ],
+    ['k',     ':stvolume! 10',    ],
+    ['j',     ':stvolume! -10',   ],
+    ['s',     ':stseek ',         {open: true}],
+    ['S',     ':stseek! ',        {open: true}],
+    ['v',     ':stvolume ',       {open: true}],
+    ['V',     ':stvolume! ',      {open: true}],
+    ['o',     ':strelations ',    {open: true}],
+    ['O',     ':strelations! ',   {open: true}],
+  ]
+);
+||<
+
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Commands ==
@@ -131,6 +185,58 @@ let PLUGIN_INFO =
             ミュート(消音)
           R:
             リピート
+    == Local Mappings Sample ==
+    >||
+function addLocalMappings(buffer, maps) {
+  maps.forEach(
+    function (map) {
+      let [cmd, action, extra] = map;
+      let actionFunc = action;
+      extra || (extra = {});
+
+      if (typeof action == "string") {
+        if (action.charAt(0) == ':')
+          actionFunc = extra.open ? function () commandline.open("", action, modes.EX)
+                                  : function () liberator.execute(action);
+        else
+          actionFunc = function () events.feedkeys(action, extra.noremap, true);
+      }
+      extra.matchingUrls = buffer;
+      mappings.addUserMap(
+        [modes.NORMAL],
+        [cmd],
+        "Local mapping for " + buffer,
+        actionFunc,
+        extra
+      );
+    }
+  );
+}
+
+addLocalMappings(
+  /^(http:\/\/(es|www).nicovideo.jp\/watch|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
+  [
+    ['<C-g>', ':pageinfo S',      ],
+    ['p',     ':stplay',          ],
+    ['m',     ':stmute',          ],
+    ['c',     ':stcomment',       ],
+    ['zz',    ':stlarge',         ],
+    ['r',     ':strepeat',        ],
+    ['+',     ':stvolume! 10',    ],
+    ['-',     ':stvolume! -10',   ],
+    ['h',     ':stseek! -10',     ],
+    ['l',     ':stseek! 10',      ],
+    ['k',     ':stvolume! 10',    ],
+    ['j',     ':stvolume! -10',   ],
+    ['s',     ':stseek ',         {open: true}],
+    ['S',     ':stseek! ',        {open: true}],
+    ['v',     ':stvolume ',       {open: true}],
+    ['V',     ':stvolume! ',      {open: true}],
+    ['o',     ':strelations ',    {open: true}],
+    ['O',     ':strelations! ',   {open: true}],
+  ]
+);
+||<
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
