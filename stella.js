@@ -939,8 +939,8 @@ Thanks:
     get pageinfo () {
       let v = content.wrappedJSObject.Video;
       return [
-        ['comment', v.description],
         ['thumbnail', <img src={v.thumbnail} />],
+        ['comment', v.description],
         [
           'tag',
           [
