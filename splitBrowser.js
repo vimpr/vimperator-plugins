@@ -216,6 +216,7 @@ mappings.addUserMap([modes.NORMAL], ['<C-w>'], 'select subbrowser', //{{{
  * Overwrite for SplitBrowser
  */
 config.__defineGetter__('browser', function () SplitBrowser.activeBrowser);
+config.__defineGetter__('tabbrowser', function () SplitBrowser.activeBrowser);
 
 var manager = {
     splitBrowserId: SplitBrowserAppID,
