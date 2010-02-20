@@ -3,7 +3,7 @@ let PLUGIN_INFO =
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
   <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
-  <version>0.4.4</version>
+  <version>0.4.5</version>
   <author>SAKAI, Kazuaki</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -41,7 +41,7 @@ let PLUGIN_INFO =
   // process global variable
   if (stringToBoolean(liberator.globalVariables.auto_append_anchor, false)) {
     let originalHintsShow = liberator.modules.hints.show;
-    let once = stringToBoolean(liberator.globalVariables.auto_append_anchor_once, false);
+    let once = stringToBoolean(liberator.globalVariables.auto_append_anchor_once, true);
     hints.show = function () {
       if (!(once && content.document.anchor_appended)) {
         content.document.anchor_appended = true;
