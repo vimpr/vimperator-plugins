@@ -77,7 +77,7 @@ let PLUGIN_INFO =
       :stqu[ality]:
         Set video quality.
 
-    == Local Mappings Sample == 
+    == Local Mappings Sample ==
     >||
 function addLocalMappings(buffer, maps) {
   maps.forEach(
