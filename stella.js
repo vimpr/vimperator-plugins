@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.5</version>
+  <version>0.24.6</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -520,7 +520,6 @@ Thanks:
     setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
     setf('maxVolume', this.has('volume', 'rw') && 'r');
     setf('fetch', this.has('fileURL', 'r') && 'x');
-    setf('relations', [name for each (name in Player.RELATIONS) if (this.has(name, 'r'))].length && 'r');
     if (!this.functions.large)
       this.functions.large = this.functions.fullscreen;
   }
@@ -534,11 +533,6 @@ Thanks:
   Player.URL_SEARCH = 'search';
   Player.URL_TAG    = 'tag';
   Player.URL_URL    = 'url';
-
-  Player.RELATIONS = {
-    URL_TAG: 'relatedTags',
-    URL_ID: 'relatedIDs'
-  };
 
   // rwxt で機能の有無を表す
   // r = read
@@ -559,8 +553,7 @@ Thanks:
       pause: '',
       play: '',
       playEx: '',
-      relatedIDs: '',
-      relatedTags: '',
+      relations: '',
       repeating: '',
       say: '',
       tags: '',
@@ -614,18 +607,7 @@ Thanks:
 
     get ready () undefined,
 
-    get relatedIDs () undefined,
-
-    get relations () {
-      if (!this.has('relations', 'r'))
-        return [];
-      let result = [];
-      for (let [type, name] in Iterator(Player.RELATIONS)) {
-        if (this.has(name, 'r'))
-          result = result.concat(this[name]);
-      }
-      return result;
-    },
+    get relations () undefined,
 
     get repeating () undefined,
     set repeating (value) value,
@@ -797,7 +779,7 @@ Thanks:
       play: 'x',
       playEx: 'x',
       playOrPause: 'x',
-      relatedIDs: 'r',
+      relations: 'r',
       repeating: '',
       title: 'r',
       totalTime: 'r',
@@ -883,7 +865,7 @@ Thanks:
 
     get ready () !!this.player,
 
-    get relatedIDs () {
+    get relatedtions () {
       let result = [];
       let doc = content.document;
       let r = doc.evaluate("//div[@class='video-mini-title']/a", doc, null, 7, null);
@@ -986,8 +968,7 @@ Thanks:
       play: 'x',
       playEx: 'x',
       playOrPause: 'x',
-      relatedIDs: 'r',
-      relatedTags: 'r',
+      relations: 'r',
       repeating: 'rwt',
       say: 'x',
       tags: 'r',
@@ -1063,70 +1044,73 @@ Thanks:
 
     get ready () !!(this.player && this.player.ext_getVideoSize),
 
-    get relatedIDs () {
-      if (this.__rid_last_url == U.currentURL())
-        return this.__rid_cache || [];
+    get relations () {
+      let self = this;
 
-      let videos = [];
-      let failed = false;
+      function IDsFromAPI () {
+        if (self.__rid_last_url == U.currentURL())
+          return self.__rid_cache || [];
 
-      // API で取得
-      try {
-        let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + this.id;
-        let xhr = new XMLHttpRequest();
-        xhr.open('GET', uri, false);
-        xhr.send(null);
-        let xml = xhr.responseXML;
-        let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-        while (v = vs.iterateNext()) {
-          let [cs, video] = [v.childNodes, {}];
-          for each (let c in cs)
-            if (c.nodeName != '#text')
-              video[c.nodeName] = c.textContent;
-          videos.push(
-            new RelatedID(
-              video.url.replace(/^.+?\/watch\//, ''),
-              video.title,
-              video.thumbnail
-            )
-          );
+        let failed = false, videos = [];
+
+        try {
+          let uri = 'http://www.nicovideo.jp/api/getrelation?sort=p&order=d&video=' + self.id;
+          let xhr = new XMLHttpRequest();
+          xhr.open('GET', uri, false);
+          xhr.send(null);
+          let xml = xhr.responseXML;
+          let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+          while (v = vs.iterateNext()) {
+            let [cs, video] = [v.childNodes, {}];
+            for each (let c in cs)
+              if (c.nodeName != '#text')
+                video[c.nodeName] = c.textContent;
+            videos.push(
+              new RelatedID(
+                video.url.replace(/^.+?\/watch\//, ''),
+                video.title,
+                video.thumbnail
+              )
+            );
+          }
+
+          self.__rid_last_url = U.currentURL();
+          self.__rid_cache = videos;
+        } catch (e) {
+          liberator.log('stella: ' + e)
         }
-      } catch (e) {
-        liberator.log('stella: ' + e)
-        failed = true;
+
+        return videos;
       }
 
-      // コメント欄からそれっぽいのを取得する
-      // コメント欄のリンクの前のテキストをタイトルと見なす
-      // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
-      try {
-        let xpath = this.xpath.comment;
-        let comment = U.xpathGet(xpath).innerHTML;
-        let links = U.xpathGets(xpath + '//a')
-                     .filter(function (it) /watch\//.test(it.href))
-                     .map(function(v) v.textContent);
-        links.forEach(function (link) {
-          let re = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="(watch|video)">');
-          let r = re.exec(comment);
-          if (r)
-            videos.push(new RelatedID(link, r[1].slice(-20)));
-        });
-      } catch (e) {
-        liberator.log('stella: ' + e)
-        //failed = true;
+      function IDsFromComment () {
+        let videos = [];
+        // コメント欄のリンクの前のテキストをタイトルと見なす
+        // textContent を使うと改行が理解できなくなるので、innerHTML で頑張ったけれど頑張りたくない
+        try {
+          let xpath = self.xpath.comment;
+          let comment = U.xpathGet(xpath).innerHTML;
+          let links = U.xpathGets(xpath + '//a')
+                       .filter(function (it) /watch\//.test(it.href))
+                       .map(function(v) v.textContent);
+          links.forEach(function (link) {
+            let re = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="(watch|video)">');
+            let r = re.exec(comment);
+            if (r)
+              videos.push(new RelatedID(link, r[1].slice(-20)));
+          });
+        } catch (e) {
+          liberator.log('stella: ' + e)
+        }
+        return videos;
       }
 
-      if (!failed) {
-        this.__rid_last_url = U.currentURL();
-        this.__rid_cache = videos;
+      function tagsFromPage () {
+        let nodes = content.document.getElementsByClassName('nicopedia');
+        return [new RelatedTag(it.textContent) for each (it in nodes) if (it.rel == 'tag')];
       }
 
-      return videos;
-    },
-
-    get relatedTags() {
-      let nodes = content.document.getElementsByClassName('nicopedia');
-      return [new RelatedTag(it.textContent) for each (it in nodes) if (it.rel == 'tag')];
+      return [].concat(IDsFromComment(), IDsFromAPI(), tagsFromPage());
     },
 
     get repeating () this.player.ext_isRepeat(),
@@ -1318,19 +1302,13 @@ Thanks:
 
     functions: {
       currentTime: 'w',
-      fileURL: '',
-      fullscreen: '',
       makeURL: 'x',
       muted: 'w',
       pause: 'x',
       play: 'x',
       playEx: 'x',
       playOrPause: 'x',
-      relatedIDs: '',
-      repeating: '',
-      title: 'r',
-      totalTime: '',
-      volume: ''
+      title: 'r'
     },
 
     __initializePlayer: function (player) {
