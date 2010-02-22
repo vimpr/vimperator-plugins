@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
     <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.0pre</maxVersion>
+    <maxVersion>2.3</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
     <detail><![CDATA[
 == Usage ==
