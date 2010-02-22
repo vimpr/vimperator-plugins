@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.6</version>
+  <version>0.24.7</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -257,9 +257,6 @@ TODO
    ・パネルなどの要素にクラス名をつける
    ・上書き保存
    ・Fx の pref と liberator.globalVariables の両方で設定をできるようにする (Setting)
-
-FIXME
-    ・this.last.fullscreen = value;
 
 MEMO
    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
@@ -488,7 +485,7 @@ Thanks:
 
   function Setting () {
     this.niconico = {
-      autoFullscreenDelay: 4000
+      autoFullscreenDelay: 1000
     };
   }
 
@@ -506,7 +503,7 @@ Thanks:
     this.stella = stella;
 
     this.last = {
-      fullscreen: false
+      screenMode: null
     };
 
     function setf (name, value)
@@ -821,7 +818,7 @@ Thanks:
         );
       }
 
-      this.last.fullscreen = value;
+      this.last.screenMode = value ? 'fullscreen' : null;
       this.storage.fullscreen = value;
 
       // changeOuterNodes(value);
@@ -1042,7 +1039,15 @@ Thanks:
 
     get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
-    get ready () !!(this.player && this.player.ext_getVideoSize),
+    get ready () {
+      try {
+        if (!this.player)
+          return false;
+        return this.player.ext_getLoadedRatio() > 0.0
+      } catch (e) {
+        return false;
+      }
+    },
 
     get relations () {
       let self = this;
@@ -1128,6 +1133,8 @@ Thanks:
         let pos = this.storage.scrollPositionBeforeLarge;
         if (!value && typeof pos != "undefined")
             setTimeout(function () buffer.scrollTo(pos.x, pos.y), 0);
+
+        this.last.screenMode = this.large ? 'large' : null;
 
         return this.large;
     },
@@ -1848,7 +1855,7 @@ Thanks:
     onPlayClick: function () this.player.play(),
 
     onReady: function () {
-      if (this.player.last.fullscreen && !this.storage.alreadyAutoFullscreen
+      if (this.player.last.screenMode && !this.storage.alreadyAutoFullscreen
       && !this.__autoFullscreenTimer) {
         this.__autoFullscreenTimer = setInterval(
           U.bindr(this, function () {
@@ -1856,7 +1863,7 @@ Thanks:
               return;
             clearInterval(this.__autoFullscreenTimer)
             setTimeout(
-              U.bindr(this, function () (this.player.fullscreen = true)),
+              U.bindr(this, function () (this.player[this.player.last.screenMode] = true)),
               this.setting.niconico.autoFullscreenDelay
             );
             delete this.__autoFullscreenTimer;
