@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
-    <version>0.1c</version>
+    <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
@@ -458,25 +458,16 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         var format = (liberator.globalVariables.def_sbm_format || 'id,timestamp,tags,comment').split(',');
         var countOnly = false, openToBrowser = false;
         var url = buffer.URL;
-        for (let opt in arg){
-            switch(opt){
-                case '-count':
-                    countOnly = true;
-                    break;
-                case '-browser':
-                    openToBrowser = true;
-                    break;
-                case '-type':
-                    if (arg[opt]) types = arg[opt];
-                    break;
-                case '-format':
-                    if (arg[opt]) format = arg[opt];
-                    break;
-                case "arguments":
-                    if (arg[opt].length > 0) url = arg[opt][0];
-                    break;
-            }
-        }
+        [
+            let (v = arg['-' + name]) (v && f(v))
+            for ([name, f] in Iterator({
+                count: function () countOnly = true,
+                browser: function () openToBrowser = true,
+                type: function (v) (types = v),
+                format: function (v) (format = v),
+                arguments: function (v) (v.length > 0 && (url = v[0]))
+            }))
+        ]
 
         for (let i=0; i<types.length; i++){
             let type = types.charAt(i);
@@ -502,7 +493,8 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         argCount:"*",
         options: options,
         completer: function(context) completion.url(context, 'l')
-    }
+    },
+    true
 ); //}}}
 
 /**
