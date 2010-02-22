@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.24.7</version>
+  <version>0.25.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -483,10 +483,44 @@ Thanks:
   * Setting                                                                      {{{
   *********************************************************************************/
 
-  function Setting () {
-    this.niconico = {
-      autoFullscreenDelay: 1000
+  function Setting (isVimp) {
+    function ul (s)
+      s.replace(/[a-z][A-Z]/g, function (s) (s[0] + '_' + s[1].toLowerCase()));
+
+    function readFrom (obj, reader) {
+      function _readFrom (obj, parents) {
+        for (let [name, value] in Iterator(obj)) {
+          let _parents = parents.concat([name]);
+          if (typeof value === 'object') {
+            _readFrom(value, _parents);
+          } else {
+            let newValue = reader(ul(_parents.join('_')));
+            if (typeof newValue !== 'undefined')
+              obj[name] = newValue;
+          }
+        }
+      }
+      return _readFrom([]);
+    }
+
+    function vimpReader (name)
+      liberator.globalVariables['stella_' + name];
+
+    function firefoxReader (name)
+      undefined;
+
+    let setting = {
+      common: {
+        autoFullscreenDelay: 200
+      },
+      nico: {
+        useComment: false
+      }
     };
+
+    readFrom(setting, isVimp ? vimpReader : firefoxReader);
+
+    return setting;
   }
 
   // }}}
@@ -1573,7 +1607,7 @@ Thanks:
       add('fe[tch]', 'fetch');
       add('la[rge]', 'large');
       add('fu[llscreen]', 'fullscreen');
-      if (U.s2b(liberator.globalVariables.stella_use_nico_comment, false))
+      if (U.s2b(liberator.globalVariables.stella_nico_use_comment, false))
         add('sa[y]', 'say');
 
       commands.addUserCommand(
@@ -1864,7 +1898,7 @@ Thanks:
             clearInterval(this.__autoFullscreenTimer)
             setTimeout(
               U.bindr(this, function () (this.player[this.player.last.screenMode] = true)),
-              this.setting.niconico.autoFullscreenDelay
+              this.setting.common.autoFullscreenDelay
             );
             delete this.__autoFullscreenTimer;
           }),
