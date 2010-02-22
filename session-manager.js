@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="session-manager" version="1.0.0"
+  <plugin name="session-manager" version="1.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
@@ -75,9 +75,8 @@ let INFO =
         </p>
       </description>
     </item>
-    </item>
   </plugin>
-  <plugin name="session-manager" version="1.0.0"
+  <plugin name="session-manager" version="1.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
@@ -111,13 +110,22 @@ let INFO =
   function alias (obj, from, to)
     (obj[to] = function () obj[from].apply(obj, arguments));
 
+  function fixFilename (filename) {
+    let dir = io.File(gSessionManager.getSessionDir());
+    let file = dir.clone();
+    file.append(filename);
+    if (file.exists())
+      return filename;
+    return filename + '.session';
+  }
+
   const SubCommands = {
     save: function (name) {
       gSessionManager.save(name, name + '.session');
       liberator.echo('Session saved: '+ name);
     },
     load: function (name) {
-      gSessionManager.load(name, 'overwrite');
+      gSessionManager.load(fixFilename(name), 'overwrite');
       liberator.echo('Session loaded: '+ name);
     }
   };
