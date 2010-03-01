@@ -78,6 +78,60 @@ let INFO =
 (function () {
 
   const EVENTS = 'keypress keydown keyup'.split(/\s+/);
+  const EVENTS_WITH_V = EVENTS.concat(['v' + n for each (n in EVENTS)]);
+
+  const VKeys = {
+    '0': KeyEvent.DOM_VK_0,
+    '1': KeyEvent.DOM_VK_1,
+    '2': KeyEvent.DOM_VK_2,
+    '3': KeyEvent.DOM_VK_3,
+    '4': KeyEvent.DOM_VK_4,
+    '5': KeyEvent.DOM_VK_5,
+    '6': KeyEvent.DOM_VK_6,
+    '7': KeyEvent.DOM_VK_7,
+    '8': KeyEvent.DOM_VK_8,
+    '9': KeyEvent.DOM_VK_9,
+    ';': KeyEvent.DOM_VK_SEMICOLON,
+    '=': KeyEvent.DOM_VK_EQUALS,
+    'a': KeyEvent.DOM_VK_A,
+    'b': KeyEvent.DOM_VK_B,
+    'c': KeyEvent.DOM_VK_C,
+    'd': KeyEvent.DOM_VK_D,
+    'e': KeyEvent.DOM_VK_E,
+    'f': KeyEvent.DOM_VK_F,
+    'g': KeyEvent.DOM_VK_G,
+    'h': KeyEvent.DOM_VK_H,
+    'i': KeyEvent.DOM_VK_I,
+    'j': KeyEvent.DOM_VK_J,
+    'k': KeyEvent.DOM_VK_K,
+    'l': KeyEvent.DOM_VK_L,
+    'm': KeyEvent.DOM_VK_M,
+    'n': KeyEvent.DOM_VK_N,
+    'o': KeyEvent.DOM_VK_O,
+    'p': KeyEvent.DOM_VK_P,
+    'q': KeyEvent.DOM_VK_Q,
+    'r': KeyEvent.DOM_VK_R,
+    's': KeyEvent.DOM_VK_S,
+    't': KeyEvent.DOM_VK_T,
+    'u': KeyEvent.DOM_VK_U,
+    'v': KeyEvent.DOM_VK_V,
+    'w': KeyEvent.DOM_VK_W,
+    'x': KeyEvent.DOM_VK_X,
+    'y': KeyEvent.DOM_VK_Y,
+    'z': KeyEvent.DOM_VK_Z,
+    '*': KeyEvent.DOM_VK_MULTIPLY,
+    '+': KeyEvent.DOM_VK_ADD,
+    '-': KeyEvent.DOM_VK_SUBTRACT,
+    ',': KeyEvent.DOM_VK_COMMA,
+    '.': KeyEvent.DOM_VK_PERIOD,
+    '/': KeyEvent.DOM_VK_SLASH,
+    '?': KeyEvent.DOM_VK_SLASH,
+    '`': KeyEvent.DOM_VK_BACK_QUOTE,
+    '{': KeyEvent.DOM_VK_OPEN_BRACKET,
+    '\\': KeyEvent.DOM_VK_BACK_SLASH,
+    '}': KeyEvent.DOM_VK_CLOSE_BRACKET,
+    '\'': KeyEvent.DOM_VK_QUOTE
+  };
 
   function getFrame (num) {
     function bodyCheck (content)
@@ -97,6 +151,12 @@ let INFO =
     return get(content) || content;
   }
 
+  function virtualize (event) {
+    event.keyCode = VKeys[String.fromCharCode(event.charCode).toLowerCase()];
+    event.charCode = 0;
+    return event;
+  }
+
   function feed (keys, eventNames, elem) {
     let doc = document.commandDispatcher.focusedWindow.document;
     let _passAllKeys = modes.passAllKeys;
@@ -105,8 +165,11 @@ let INFO =
 
     for (let [, keyEvent] in Iterator(events.fromString(keys))) {
       eventNames.forEach(function (eventName) {
-        let evt = events.create(doc, eventName, keyEvent);
-        (elem || doc).dispatchEvent(evt);
+        let [, vkey, name] = eventName.match(/^(v)?(.+)$/);
+        let event = events.create(doc, name, keyEvent);
+        if (vkey)
+          virtualize(event);
+        (elem || doc).dispatchEvent(event);
       });
     }
 
@@ -122,50 +185,62 @@ let INFO =
   }
 
   function makeListValidator (list)
-    (function (values)
-      (liberator.log(values),
-      values && !values.some(
-        function (value) !list.some(function (event) event === value)
-      ))
-    );
+    function (values)
+      (values && !values.some(function (value) !list.some(function (event) event === value)));
 
-  commands.addUserCommand(
-    ['fmap'],
-    'Feed map a key sequence',
-    function (args) {
-      let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/);
-      mappings.addUserMap(
-        [modes.NORMAL],
-        [lhs],
-        args['description'] || 'by feedSomeKeys_3.js',
-        function () {
-          let frame = args['-frame'];
-          let elem = document.commandDispatcher.focusedWindow;
-          if (typeof frame === 'undefined')
-            elem  = getFrame(frame) || elem;
-          feed(rhs, args['-events'] || ['keypress'], args['-vkey'], elem);
-        },
-        {
-          urls: args['-urls']
-        },
-        true
-      );
-    },
-    {
-      literal: 0,
-      options: [
-        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator],
-        [['-vkey', '-v'], commands.OPTION_NOARG],
-        [
-          ['-events', '-e'],
-          commands.OPTION_LIST,
-          makeListValidator(EVENTS),
-          EVENTS.map(function (v) [v, v])
-        ]
-      ],
-    },
-    true
-  );
+  'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
+    let multi = cmd === 'fmaps';
+
+    commands.addUserCommand(
+      [cmd],
+      'Feed map a key sequence',
+      function (args) {
+        function add ([lhs, rhs]) {
+          rhs = rhs || lhs;
+          mappings.addUserMap(
+            [modes.NORMAL],
+            [lhs],
+            args['description'] || 'by feedSomeKeys_3.js',
+            function () {
+              let frame = args['-frame'];
+              let elem = document.commandDispatcher.focusedWindow;
+              if (typeof frame === 'undefined')
+                elem  = getFrame(frame) || elem;
+              feed(rhs, args['-events'] || ['keypress'], elem);
+            },
+            {
+              matchingUrls: args['-urls']
+            },
+            true
+          );
+        }
+
+        if (multi) {
+          let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
+          args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
+        } else {
+          let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/);
+          add([lhs, rhs]);
+        }
+      },
+      {
+        literal: 0,
+        options: [
+          [['-urls', '-u'], commands.OPTION_STRING, regexpValidator],
+          [
+            ['-events', '-e'],
+            commands.OPTION_LIST,
+            makeListValidator(EVENTS_WITH_V),
+            EVENTS_WITH_V.map(function (v) [v, v])
+          ]
+        ].concat(
+          multi ? [[['-separator', '-s'], commands.OPTION_STRING]]
+                : []
+        )
+      },
+      true
+    );
+  });
 
 })();
 
