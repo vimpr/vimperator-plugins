@@ -171,9 +171,9 @@ let INFO =
     for (let [, keyEvent] in Iterator(events.fromString(keys))) {
       eventNames.forEach(function (eventName) {
         let [, vkey, name] = eventName.match(/^(v)?(.+)$/);
-        let event = events.create(doc, name, keyEvent);
         if (vkey)
-          virtualize(event);
+          virtualize(keyEvent);
+        let event = events.create(doc, name, keyEvent);
         target.dispatchEvent(event);
       });
     }
