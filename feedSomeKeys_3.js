@@ -264,6 +264,13 @@ let INFO =
     );
   });
 
+  __context__.API =
+    'VKeys feed getFrames fromXPath virtualize'.split(/\s+/).reduce(
+      function (result, name)
+        (result[name] = eval(name), result),
+      {}
+    );
+
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
