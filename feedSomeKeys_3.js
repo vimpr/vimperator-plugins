@@ -133,6 +133,13 @@ let INFO =
     '\'': KeyEvent.DOM_VK_QUOTE
   };
 
+  function id (v)
+    v;
+
+  function or (list, func)
+    let ([head, tail] = list)
+      ((func || v)(head) || (tail && or(tail, func)));
+
   function getFrames () {
     function bodyCheck (content)
       (content.document.body.localName.toLowerCase() === 'body');
@@ -143,6 +150,11 @@ let INFO =
     let result = [];
     get(content);
     return result;
+  }
+
+  function fromXPath (doc, xpath) {
+    let result = util.evaluateXPath(xpath, doc);
+    return result.snapshotLength && result.snapshotItem(0);
   }
 
   function virtualize (event) {
@@ -196,12 +208,21 @@ let INFO =
             [lhs],
             args['description'] || 'by feedSomeKeys_3.js',
             function () {
+              let win = document.commandDispatcher.focusedWindow;
               let frames = getFrames();
-              let elem = document.commandDispatcher.focusedWindow;
+              let elem = win;
 
               if (typeof args['-frame'] !== 'undefined') {
                 frames = [frames[args['-frame']]];
                 elem = frames[0];
+              }
+
+              if (args['-xpath'])
+                elem = or(frames, function (f) fromXPath(args['-xpath']));
+
+              if (!elem) {
+                liberator.log('feedSomeKeys_3: Not found target element');
+                elem = win;
               }
 
               feed(rhs, args['-events'] || ['keypress'], elem);
