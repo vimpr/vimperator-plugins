@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.3.0</version>
+  <version>2.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -304,6 +304,7 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
 
   let useEcho = false;
   let autoHideCommandLine = false;
+  let inputting = false;
   let windowInfo = {};
 
   {
@@ -351,23 +352,34 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
     });
   }
 
+  around(commandline, 'input', function (next, args) {
+    let result = next();
+    inputting = true;
+    return result;
+  });
+
   around(commandline, 'open', function (next, args) {
     messageBox.collapsed = false;
     return next();
   });
 
   around(commandline, 'close', function (next, args) {
-    if (autoHideCommandLine)
+    if (autoHideCommandLine && !inputting)
       messageBox.collapsed = true;
     return next();
   });
 
   around(commandline._callbacks.submit, modes.EX, function (next, args) {
     let r = next();
-    if (autoHideCommandLine && !(modes.extended & modes.OUTPUT_MULTILINE))
+    if (autoHideCommandLine && !inputting && !(modes.extended & modes.OUTPUT_MULTILINE))
       commandline.close();
     return r;
   });
+
+  let (callback = function (next) (inputting = false, next())) {
+    around(commandline._callbacks.submit, modes.PROMPT, callback);
+    around(commandline._callbacks.cancel, modes.PROMPT, callback);
+  }
 
   options.add(
     ['mainecoon'],
