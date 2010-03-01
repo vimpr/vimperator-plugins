@@ -233,7 +233,7 @@ let INFO =
           let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
           args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
         } else {
-          let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/);
+          let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
           add([lhs, rhs]);
         }
       };
