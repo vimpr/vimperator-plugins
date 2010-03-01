@@ -15,12 +15,12 @@ var PLUGIN_INFO =
   <description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
   <description lang="ja">ページ遷移なしでlivedoor ReaderやFastladderにフィードを登録します。</description>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <require type="plugin">_libly.js</require>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.2.1</version>
+  <version>0.2.2</version>
   <detail><![CDATA[
     == Subject ==
     Adds subscriptions to livedoor Reader/Fastladder in place.
@@ -175,7 +175,11 @@ liberator.plugins.subscldr = (function() {
       command,
       "Register feed subscriptions to " + servicename + ".",
       function(args) {
-        handleFeedRequest({rate: args["-rate"]});
+        try {
+          handleFeedRequest({rate: args["-rate"]});
+        } catch (e) {
+          liberator.echoerr(e);
+        }
       },
       {
         options: [
