@@ -196,10 +196,8 @@ let INFO =
   'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
     let multi = cmd === 'fmaps';
 
-    commands.addUserCommand(
-      [cmd],
-      'Feed map a key sequence',
-      function (args) {
+    function action (multi) {
+      return function (args) {
         function add ([lhs, rhs]) {
           rhs = rhs || lhs;
           mappings.addUserMap(
@@ -240,7 +238,13 @@ let INFO =
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/);
           add([lhs, rhs]);
         }
-      },
+      };
+    }
+
+    commands.addUserCommand(
+      [cmd],
+      'Feed map a key sequence',
+      action(multi),
       {
         literal: 0,
         options: [
