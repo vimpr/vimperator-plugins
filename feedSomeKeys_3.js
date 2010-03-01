@@ -163,8 +163,7 @@ let INFO =
     return event;
   }
 
-  function feed (keys, eventNames, elem) {
-    let doc = document.commandDispatcher.focusedWindow.document;
+  function feed (keys, eventNames, target) {
     let _passAllKeys = modes.passAllKeys;
     modes.passAllKeys = true;
     modes.passNextKey = false;
@@ -175,7 +174,7 @@ let INFO =
         let event = events.create(doc, name, keyEvent);
         if (vkey)
           virtualize(event);
-        (elem || doc).dispatchEvent(event);
+        target.dispatchEvent(event);
       });
     }
 
