@@ -245,6 +245,7 @@ let INFO =
         literal: 0,
         options: [
           [['-urls', '-u'], commands.OPTION_STRING, regexpValidator],
+          [['-desc', '-description'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT],
           [
             ['-events', '-e'],
