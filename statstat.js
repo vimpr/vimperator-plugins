@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すた☆すた</name>
   <description>Show information on statusline.</description>
   <description lang="ja">ステータスラインに情報を表示</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="Stat Stat" version="1.0.1"
+<plugin name="Stat Stat" version="1.0.2"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/statstat.js"
         summary="Show information on statusline."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -108,10 +108,18 @@ let INFO =
     stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
 
     stat = liberator.plugins.statstat = {
+      previousText: null,
       panel: panel,
       label: label,
       interval: 1000,
-      set text (value) this.label.setAttribute('value', '<- ' + value + ' ->'),
+      set text (value) {
+        value = value.toString();
+        if (this.previousText === value)
+          return value;
+        this.label.setAttribute('value', '<- ' + value + ' ->');
+        this.previousText = value;
+        return value;
+      },
       action: function () new Date().toLocaleString(),
       execute: function () (this.text = this.action.apply(this, arguments)),
       run: function () {
