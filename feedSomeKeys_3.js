@@ -145,24 +145,6 @@ let INFO =
     return result;
   }
 
-  function getFrame (num) {
-    function bodyCheck (content)
-      (content.document.body.localName.toLowerCase() === 'body');
-
-    function get (content) {
-      if (bodyCheck(content) && num-- <= 0)
-        return content;
-      for each (frame in Array.slice(content.frames)) {
-        let result = get(frame);
-        if (result)
-          return result;
-      }
-      return void 0;
-    }
-
-    return get(content) || content;
-  }
-
   function virtualize (event) {
     event.keyCode = VKeys[String.fromCharCode(event.charCode).toLowerCase()];
     event.charCode = 0;
