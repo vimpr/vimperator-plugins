@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.0.0"
+<plugin name="feedSomeKeys" version="1.0.1"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -173,7 +173,7 @@ let INFO =
         let [, vkey, name] = eventName.match(/^(v)?(.+)$/);
         if (vkey)
           virtualize(keyEvent);
-        let event = events.create(doc, name, keyEvent);
+        let event = events.create(content.document, name, keyEvent);
         target.dispatchEvent(event);
       });
     }
