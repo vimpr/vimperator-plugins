@@ -107,7 +107,7 @@ let INFO =
       </p>
       <p>
         e.g. "&lt;Leader>&lt;S-j>,j"
-      <p>
+      </p>
     </description>
   </item>
   <h3 tag="fmap-event-names">event-name</h3>
