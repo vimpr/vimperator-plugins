@@ -6,7 +6,7 @@ let PLUGIN_INFO =
 <author>Trapezoid</author>
 <version>0.1e</version>
 <minVersion>2.0pre</minVersion>
-<maxVersion>2.0pre</maxVersion>
+<maxVersion>2.3</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tombloo.js</updateURL>
 <detail><![CDATA[
 
