@@ -205,22 +205,20 @@ let INFO =
             [lhs],
             args['description'] || 'by feedSomeKeys_3.js',
             function () {
+              function body (win)
+                (win.document.body || win.document);
+
               let win = document.commandDispatcher.focusedWindow;
               let frames = getFrames();
-              let elem = win;
+              let elem = body(win);
 
               if (typeof args['-frame'] !== 'undefined') {
                 frames = [frames[args['-frame']]];
-                elem = frames[0];
+                elem = body(frames[0]);
               }
 
               if (args['-xpath'])
-                elem = or(frames, function (f) fromXPath(args['-xpath']));
-
-              if (!elem) {
-                liberator.log('feedSomeKeys_3: Not found target element');
-                elem = win;
-              }
+                elem = or(frames, function (f) fromXPath(f, args['-xpath'])) || elem;
 
               feed(rhs, args['-events'] || ['keypress'], elem);
             },
