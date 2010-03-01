@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -48,15 +48,37 @@ let PLUGIN_INFO =
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     see ":help feedSomeKeys-plugin"
+    rc file setting sample:
+>||
+command! -nargs=+ lazy autocmd VimperatorEnter .* <args>
+lazy fmaps -u='mail\.google\.com/mail' c / j k n p o u e x s r a # [ ] ? gi gs gt gd ga gc
+lazy fmaps -u='mail\.google\.com/mail/.*/[0-9a-f]+$' c / j,n k,p n,j p,k o u e x s r a # [ ] ? gi gs gt gd ga gc
+lazy fmaps -u='www\.google\.co\.jp/reader' -events=vkeypress j k n p m s v A r S N P X O gh ga gs gt gu u / ? J K
+lazy fmaps -u='(fastladder|livedoor)\.com/reader' j k s a p o v c i,p <Space> <S-Space> z b < > q w e,g
+lazy fmaps -u='https?://www\.rememberthemilk\.com/home/' j k m i c t ? d F,f G,g S,s L,l Y,y H,h M,m <Del> <C-S-Left> <C-S-Right>
+lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
+lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
+||<
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    see ":help feedSomeKeys-plugin"
+    詳しくはヘルプを見てね。 ":help feedSomeKeys-plugin"
+    rc ファイルの設定サンプル:
+>||
+command! -nargs=+ lazy autocmd VimperatorEnter .* <args>
+lazy fmaps -u='mail\.google\.com/mail' c / j k n p o u e x s r a # [ ] ? gi gs gt gd ga gc
+lazy fmaps -u='mail\.google\.com/mail/.*/[0-9a-f]+$' c / j,n k,p n,j p,k o u e x s r a # [ ] ? gi gs gt gd ga gc
+lazy fmaps -u='www\.google\.co\.jp/reader' -events=vkeypress j k n p m s v A r S N P X O gh ga gs gt gu u / ? J K
+lazy fmaps -u='(fastladder|livedoor)\.com/reader' j k s a p o v c i,p <Space> <S-Space> z b < > q w e,g
+lazy fmaps -u='https?://www\.rememberthemilk\.com/home/' j k m i c t ? d F,f G,g S,s L,l Y,y H,h M,m <Del> <C-S-Left> <C-S-Right>
+lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
+lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
+||<
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.0.4"
+<plugin name="feedSomeKeys" version="1.0.5"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -64,14 +86,41 @@ let INFO =
   <license>New BSD License</license>
   <project name="Vimperator" minVersion="2.3"/>
   <p>
+    Feed key events directly into web contents.
   </p>
   <item>
     <tags>:fmap</tags>
     <spec>:fmap <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <a>lhs</a> <a>rhs</a></spec>
     <description>
-      <p></p>
+      <p>
+        Define one mapping.
+      </p>
     </description>
   </item>
+  <item>
+    <tags>:fmaps</tags>
+    <spec>:fmaps <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <a>mapping-pair</a> ....</spec>
+    <description>
+      <p>
+        Two or more mappings are defined at once.
+        <a>mapping-pair</a> is a pair of key names separated by ",".
+        e.g. "&lt;Leader>&lt;S-j>,j"
+      </p>
+    </description>
+  </item>
+  <h3 tag="fmap-event-names">event-name</h3>
+  <p>
+    <a>event-name-list</a> option follows a list of below values.
+    <ul>
+      <li>keypress</li>
+      <li>keydown</li>
+      <li>keyup</li>
+      <li>vkeypress</li>
+      <li>vkeydown</li>
+      <li>vkeyup</li>
+    </ul>
+    "v-" values use virtual key code.
+  </p>
   <h3 tag="fmaps-examples">fmaps examples for .vimperatorrc</h3>
   <p>If you input directly these commands in vimperator commandline, remove the ":lazy".</p>
   <code><ex>
