@@ -133,6 +133,18 @@ let INFO =
     '\'': KeyEvent.DOM_VK_QUOTE
   };
 
+  function getFrames () {
+    function bodyCheck (content)
+      (content.document.body.localName.toLowerCase() === 'body');
+
+    function get (content)
+      (bodyCheck(content) && result.push(content), Array.slice(content.frames).forEach(get))
+
+    let result = [];
+    get(content);
+    return result;
+  }
+
   function getFrame (num) {
     function bodyCheck (content)
       (content.document.body.localName.toLowerCase() === 'body');
@@ -202,10 +214,14 @@ let INFO =
             [lhs],
             args['description'] || 'by feedSomeKeys_3.js',
             function () {
-              let frame = args['-frame'];
+              let frames = getFrames();
               let elem = document.commandDispatcher.focusedWindow;
-              if (typeof frame === 'undefined')
-                elem  = getFrame(frame) || elem;
+
+              if (typeof args['-frame'] !== 'undefined') {
+                frames = [frames[args['-frame']]];
+                elem = frames[0];
+              }
+
               feed(rhs, args['-events'] || ['keypress'], elem);
             },
             {
@@ -227,6 +243,7 @@ let INFO =
         literal: 0,
         options: [
           [['-urls', '-u'], commands.OPTION_STRING, regexpValidator],
+          [['-frame', '-f'], commands.OPTION_INT],
           [
             ['-events', '-e'],
             commands.OPTION_LIST,
