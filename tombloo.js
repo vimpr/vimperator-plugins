@@ -4,7 +4,7 @@ let PLUGIN_INFO =
 <description>Tombloo integrate plugin</description>
 <description lang="ja">Tombloo 統合プラグイン</description>
 <author>Trapezoid</author>
-<version>0.1e</version>
+<version>0.1.1</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.3</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tombloo.js</updateURL>
