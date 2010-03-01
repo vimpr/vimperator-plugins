@@ -104,8 +104,10 @@ let INFO =
       <p>
         Two or more mappings are defined at once.
         <a>mapping-pair</a> is a pair of key names separated by ",".
-        e.g. "&lt;Leader>&lt;S-j>,j"
       </p>
+      <p>
+        e.g. "&lt;Leader>&lt;S-j>,j"
+      <p>
     </description>
   </item>
   <h3 tag="fmap-event-names">event-name</h3>
