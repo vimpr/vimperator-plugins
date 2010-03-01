@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.0.2</version>
+  <version>2.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.0.2"
+  <plugin name="link-opener" version="2.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.0.2"
+  <plugin name="link-opener" version="2.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -283,17 +283,18 @@ let INFO =
       ['lo[pen]', 'linkopen'],
       'Filtered open',
       function (args) {
+        let arg = args.literalArg;
         let where = charToWhere(args['-where'], args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
-        let m = args.literalArg.match(/^(\d+): (.+)$/);
+        let idx = parseInt(arg, 10);
 
-        if (!m)
-          return liberator.echoerr("huh?");
+        if (idx === NaN)
+          return liberator.open(arg, where);
 
-        let link = lolinks[parseInt(m[1], 10)];
+        let link = lolinks[idx];
         if (link)
           buffer.followLink(link, where);
         else
-          liberator.open(m[2], where);
+          liberator.open(arg, where);
       },
       {
         literal: 0,
