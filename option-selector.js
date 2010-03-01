@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Option Selector</name>
   <description>Select a option of the select element.</description>
   <description lang="ja">select 要素の option を選択する。</description>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -63,7 +63,7 @@ let PLUGIN_INFO =
       ['selectoption'],
       'Select a option of the select element',
       function (args) {
-        targetElement.value = args.string;
+        targetElement.selectedIndex = parseInt(args[0], 10);
         let event = content.document.createEvent('Event');
         event.initEvent('change', true, true);
         targetElement.dispatchEvent(event);
@@ -77,8 +77,10 @@ let PLUGIN_INFO =
             return;
 
           context.title = ['value', 'text'];
-          context.completions =
-            util.map(util.Array.itervalues(elem.options), function (opt) [opt.value, opt.textContent]);
+          context.completions = [
+            [[n + ': ' + s for each (s in [opt.textContent, opt.value])], opt.textContent]
+            for ([n, opt] in Iterator(Array.slice(elem.options)))
+          ];
         }
       },
       true
