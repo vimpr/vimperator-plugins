@@ -39,13 +39,14 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.0.5</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js</updateURL>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
+  <require type="plugin">_libly.js</require>
   <detail><![CDATA[
     see ":help feedSomeKeys-plugin"
     rc file setting sample:
@@ -78,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.0.5"
+<plugin name="feedSomeKeys" version="1.1.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -346,6 +347,17 @@ let INFO =
       true
     );
   });
+
+  plugins.libly.$U.around(
+    mappings,
+    'getCandidates',
+    function (next, [mode, prefix, patternOrUrl]) {
+      let map = mappings.get(mode, prefix, patternOrUrl);
+      if (map && map.matchingUrls)
+        return [];
+      return next();
+    }
+  );
 
   __context__.API =
     'VKeys feed getFrames fromXPath virtualize'.split(/\s+/).reduce(
