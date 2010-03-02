@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.3.0</version>
+  <version>1.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.3.0"
+<plugin name="feedSomeKeys" version="1.4.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -277,12 +277,28 @@ let INFO =
     function (values)
       (values && !values.some(function (value) !list.some(function (event) event === value)));
 
-  function clear (filter) {
+  function clear (patternOrUrl) {
     let mode = modes.NORMAL;
     mappings._user[mode] = [
       map
       for each (map in mappings._user[mode])
-      if (!map.feedSomeKeys)
+      if (
+        !map.feedSomeKeys ||
+        (patternOrUrl && !mappings._matchingUrlsTest(map, patternOrUrl))
+      )
+    ];
+  }
+
+  function unmap (filter, patternOrUrl) {
+    let mode = modes.NORMAL;
+    mappings._user[mode] = [
+      map
+      for each (map in mappings._user[mode])
+      if (
+        !map.feedSomeKeys ||
+        (filter && filter !== map.names[0]) ||
+        (!mappings._matchingUrlsTest(map, patternOrUrl))
+      )
     ];
   }
 
@@ -318,6 +334,29 @@ let INFO =
     }
     commandline.echo(list, commandline.HL_NORMAL, commandline.FORCE_MULTILINE);
   }
+
+  function fmapCompleter (context, args) {
+    context.title = ['name', 'rhs & url'];
+    context.completions = [
+      [
+        map.names[0],
+        map.feedSomeKeys.rhs + ' for ' + (map.matchingUrls ? map.matchingUrls : 'Global')
+      ]
+      for each (map in gets())
+    ];
+  }
+
+  function urlCompleter (context, args) {
+    let maps = gets();
+    let uniq = {};
+    return [
+      (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
+      for each (map in maps)
+      if (map.matchingUrls && !uniq[map.matchingUrls])
+    ];
+  }
+
+
 
   'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
     let multi = cmd === 'fmaps';
@@ -379,7 +418,7 @@ let INFO =
       {
         literal: 0,
         options: [
-          [['-urls', '-u'], commands.OPTION_STRING, regexpValidator],
+          [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
           [['-desc', '-description'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT],
           [
@@ -392,20 +431,7 @@ let INFO =
           multi ? [[['-separator', '-s'], commands.OPTION_STRING]]
                 : []
         ),
-        completer: function (context, args) {
-          if (multi)
-            return;
-          if (args.length > 1)
-            return;
-          context.title = ['name', 'rhs & url'];
-          context.completions = [
-            [
-              map.names[0],
-              map.feedSomeKeys.rhs + ' for ' + (map.matchingUrls ? map.matchingUrls : 'Global')
-            ]
-            for each (map in gets())
-          ];
-        }
+        completer: multi ? null : fmapCompleter
       },
       true
     );
@@ -414,10 +440,32 @@ let INFO =
   commands.addUserCommand(
     ['fmapc'],
     'Clear fmappings',
-    function () {
-      clear();
+    function (args) {
+      let urls = args['-urls'];
+      clear(urls && RegExp(urls));
     },
-    {},
+    {
+      options: [
+        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter]
+      ]
+    },
+    true
+  );
+
+  commands.addUserCommand(
+    ['funmap'],
+    'Remove fmappings',
+    function (args) {
+      let urls = args['-urls'];
+      unmap(args.literalArg, urls && RegExp(urls));
+    },
+    {
+      literal: 0,
+      options: [
+        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter]
+      ],
+      completer: fmapCompleter
+    },
     true
   );
 
