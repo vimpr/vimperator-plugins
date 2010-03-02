@@ -306,16 +306,25 @@ let INFO =
       (values && !values.some(function (value) !list.some(function (event) event === value)));
 
   function unmap (filter, patternOrUrl, ignoreUrls) {
+    let result = 0;
+
+    function match (map) {
+      let r = (
+        map.feedSomeKeys &&
+        (!filter || filter === map.names[0]) &&
+        (ignoreUrls || mappings._matchingUrlsTest(map, patternOrUrl))
+      );
+      result++;
+      return r;
+    }
+
     let mode = modes.NORMAL;
     mappings._user[mode] = [
       map
       for each (map in mappings._user[mode])
-      if (!(
-        map.feedSomeKeys &&
-        (!filter || filter === map.names[0]) &&
-        (ignoreUrls || mappings._matchingUrlsTest(map, patternOrUrl))
-      ))
+      if (!match(map))
     ];
+    return result;
   }
 
   function gets (filter) {
@@ -459,9 +468,14 @@ let INFO =
     function (args) {
       if (args.bang) {
         unmap(null, null, true);
+        liberator.log('All fmappings were removed');
       } else {
         let urls = args.literalArg;
-        unmap(null, urls && RegExp(urls), false);
+        liberator.echo(
+          unmap(null, urls && RegExp(urls), false) ?
+            'Some fmappings were removed' :
+            'Not found specifed fmappings'
+        );
       }
     },
     {
@@ -483,7 +497,12 @@ let INFO =
       let name = args.literalArg;
       if (!name)
         return liberator.echoerr('E471: Argument required');
-      unmap(name, urls && RegExp(urls), args['-ignoreurls']);
+
+      liberator.echo(
+        unmap(name, urls && RegExp(urls), args['-ignoreurls']) ?
+          'Some fmappings were removed' :
+          'Not found specifed fmappings'
+      );
     },
     {
       literal: 0,
