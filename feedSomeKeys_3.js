@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.4.1</version>
+  <version>1.5.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.4.1"
+<plugin name="feedSomeKeys" version="1.5.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -91,23 +91,39 @@ let INFO =
   </p>
   <item>
     <tags>:fmap</tags>
-    <spec>:fmap <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <a>lhs</a> <a>rhs</a></spec>
+    <spec>:fmap <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
     <description>
       <p>
         Define one mapping.
+      </p>
+      <p>
+        If <a>-urls=<a>urlpattern</a></a> is given,
+        the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
       </p>
     </description>
   </item>
   <item>
     <tags>:fmaps</tags>
-    <spec>:fmaps <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <a>mapping-pair</a> ....</spec>
+    <spec>:fmaps <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
     <description>
       <p>
         Two or more mappings are defined at once.
         <a>mapping-pair</a> is a pair of key names separated by ",".
+        <p>e.g. "&lt;Leader>&lt;S-j>,j"</p>
       </p>
       <p>
-        e.g. "&lt;Leader>&lt;S-j>,j"
+        If <a>-urls=<a>urlpattern</a></a> is given,
+        the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
+      </p>
+    </description>
+  </item>
+  <item>
+    <tags>:fmapc</tags>
+    <spec>:fmapc<oa>!</oa> <oa>url-pattern</oa></spec>
+    <description>
+      <p>
+        Remove the mappings matched with <oa>url-pattern</oa>.
+        If "!" is given, remove all mappings.
       </p>
     </description>
   </item>
@@ -429,19 +445,20 @@ let INFO =
     ['fmapc'],
     'Clear fmappings',
     function (args) {
-      let urls = args['-urls'];
       if (args.bang) {
         unmap(null, null, true);
       } else {
-        unmap(null, urls && RegExp(urls), args['-ignoreurls']);
+        let urls = args.literalArg;
+        unmap(null, urls && RegExp(urls), false);
       }
     },
     {
+      literal: 0,
       bang: true,
-      options: [
-        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
-        [['-ignoreurls', '-iu'], commands.OPTION_STRING, regexpValidator, urlCompleter]
-      ]
+      completer: function (context) {
+        context.title = ['URL Pattern'];
+        context.completions = urlCompleter(context);
+      }
     },
     true
   );
