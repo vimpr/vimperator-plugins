@@ -127,6 +127,18 @@ let INFO =
       </p>
     </description>
   </item>
+  <item>
+    <tags>:funmap</tags>
+    <spec>:funmap <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a></spec>
+    <description>
+      <p>
+        Remove the mappings.
+      </p>
+      <p>
+        If you wish to remove url-local mappings, give <a>-urls=<a>urlpattern</a></a>.
+      </p>
+    </description>
+  </item>
   <h3 tag="fmap-event-names">event-name</h3>
   <p>
     <a>event-name-list</a> option follows a list of below values.
