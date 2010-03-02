@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.1.0"
+<plugin name="feedSomeKeys" version="1.2.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -277,6 +277,40 @@ let INFO =
     function (values)
       (values && !values.some(function (value) !list.some(function (event) event === value)));
 
+  function list (filter) {
+    if (filter)
+      filter = mappings._expandLeader(filter);
+
+    liberator.log(filter);
+
+    let maps = [
+      map
+      for (map in mappings._mappingsIterator([modes.NORMAL], mappings._user))
+        if (map.feedSomeKeys && (!filter || map.names[0] == filter))
+    ];
+
+    let template = modules.template;
+    let list =
+      <table>
+        {
+          template.map(maps, function (map)
+            template.map(map.names, function (name)
+            <tr>
+              <td>{name}</td>
+              <td>{map.feedSomeKeys.rhs}</td>
+              <td>{map.matchingUrls ? map.matchingUrls : '[Global]'}</td>
+            </tr>))
+        }
+      </table>;
+
+    // TODO: Move this to an ItemList to show this automatically
+    if (list.*.length() == list.text().length()) {
+      liberator.echomsg("No mapping found");
+      return;
+    }
+    commandline.echo(list, commandline.HL_NORMAL, commandline.FORCE_MULTILINE);
+  }
+
   'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
     let multi = cmd === 'fmaps';
 
@@ -307,7 +341,10 @@ let INFO =
               feed(rhs, args['-events'] || ['keypress'], elem);
             },
             {
-              matchingUrls: args['-urls']
+              matchingUrls: args['-urls'],
+              feedSomeKeys: {
+                rhs: rhs
+              }
             },
             true
           );
@@ -318,7 +355,11 @@ let INFO =
           args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
-          add([lhs, rhs]);
+          if (!rhs) {
+            list(args.literalArg.trim());
+          } else {
+            add([lhs, rhs]);
+          }
         }
       };
     }
