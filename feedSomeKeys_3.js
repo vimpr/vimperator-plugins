@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="feedSomeKeys" version="1.4.0"
+<plugin name="feedSomeKeys" version="1.4.1"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
         summary="Feed some defined key events into the Web content"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -277,28 +277,16 @@ let INFO =
     function (values)
       (values && !values.some(function (value) !list.some(function (event) event === value)));
 
-  function clear (patternOrUrl) {
+  function unmap (filter, patternOrUrl, ignoreUrls) {
     let mode = modes.NORMAL;
     mappings._user[mode] = [
       map
       for each (map in mappings._user[mode])
-      if (
-        !map.feedSomeKeys ||
-        (patternOrUrl && !mappings._matchingUrlsTest(map, patternOrUrl))
-      )
-    ];
-  }
-
-  function unmap (filter, patternOrUrl) {
-    let mode = modes.NORMAL;
-    mappings._user[mode] = [
-      map
-      for each (map in mappings._user[mode])
-      if (
-        !map.feedSomeKeys ||
-        (filter && filter !== map.names[0]) ||
-        (!mappings._matchingUrlsTest(map, patternOrUrl))
-      )
+      if (!(
+        map.feedSomeKeys &&
+        (!filter || filter === map.names[0]) &&
+        (ignoreUrls || mappings._matchingUrlsTest(map, patternOrUrl))
+      ))
     ];
   }
 
@@ -442,11 +430,17 @@ let INFO =
     'Clear fmappings',
     function (args) {
       let urls = args['-urls'];
-      clear(urls && RegExp(urls));
+      if (args.bang) {
+        unmap(null, null, true);
+      } else {
+        unmap(null, urls && RegExp(urls), args['-ignoreurls']);
+      }
     },
     {
+      bang: true,
       options: [
-        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter]
+        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
+        [['-ignoreurls', '-iu'], commands.OPTION_STRING, regexpValidator, urlCompleter]
       ]
     },
     true
@@ -457,12 +451,16 @@ let INFO =
     'Remove fmappings',
     function (args) {
       let urls = args['-urls'];
-      unmap(args.literalArg, urls && RegExp(urls));
+      let name = args.literalArg;
+      if (!name)
+        return liberator.echoerr('E471: Argument required');
+      unmap(name, urls && RegExp(urls), args['-ignoreurls']);
     },
     {
       literal: 0,
       options: [
-        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter]
+        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
+        [['-ignoreurls', '-iu'], commands.OPTION_STRING, regexpValidator, urlCompleter]
       ],
       completer: fmapCompleter
     },
