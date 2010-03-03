@@ -527,7 +527,7 @@ let INFO =
   );
 
   __context__.API =
-    'VKeys feed getFrames fromXPath virtualize'.split(/\s+/).reduce(
+    'VKeys feed getFrames fromXPath virtualize unmap gets list'.split(/\s+/).reduce(
       function (result, name)
         (result[name] = eval(name), result),
       {}
