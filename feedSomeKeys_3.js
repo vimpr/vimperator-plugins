@@ -363,8 +363,15 @@ let INFO =
     context.title = ['name', 'rhs & url'];
     context.completions = [
       [
-        map.names[0],
-        map.feedSomeKeys.rhs + ' for ' + (map.matchingUrls ? map.matchingUrls : 'Global')
+        <span style="font-weight: bold">{map.names[0]}</span>,
+        <span>
+          <span style="font-weight: bold">{map.feedSomeKeys.rhs}</span>
+          <span>{
+            args['-ignoreurls']
+              ? <><span> for </span><span>{map.matchingUrls ? map.matchingUrls : 'Global'}</span></>
+              : ''
+          }</span>
+        </span>
       ]
       for each (map in findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
     ];
