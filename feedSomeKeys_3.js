@@ -82,6 +82,7 @@ let INFO = <>
   <plugin name="feedSomeKeys" version="1.6.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
+          lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
