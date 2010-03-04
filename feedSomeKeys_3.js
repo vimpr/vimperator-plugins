@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.6.0</version>
+  <version>1.6.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -78,93 +78,192 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 </VimperatorPlugin>;
 // }}}
 // INFO {{{
-let INFO =
-<plugin name="feedSomeKeys" version="1.5.2"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
-        summary="Feed some defined key events into the Web content"
-        xmlns="http://vimperator.org/namespaces/liberator">
-  <author email="anekos@snca.net">anekos</author>
-  <license>New BSD License</license>
-  <project name="Vimperator" minVersion="2.3"/>
-  <p>
-    Feed key events directly into web contents.
-  </p>
-  <item>
-    <tags>:fmap</tags>
-    <spec>:fmap <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
-    <description>
-      <p>
-        Define one mapping.
-      </p>
-      <p>
-        If <a>-urls=<a>urlpattern</a></a> is given,
-        the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
-      </p>
-    </description>
-  </item>
-  <item>
-    <tags>:fmaps</tags>
-    <spec>:fmaps <oa>-e<oa>vents</oa>=<a>event-name-list</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
-    <description>
-      <p>
-        Two or more mappings are defined at once.
-        <a>mapping-pair</a> is a pair of key names separated by ",".
-        <p>e.g. "&lt;Leader>&lt;S-j>,j"</p>
-      </p>
-      <p>
-        If <a>-urls=<a>urlpattern</a></a> is given,
-        the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
-      </p>
-    </description>
-  </item>
-  <item>
-    <tags>:fmapc</tags>
-    <spec>:fmapc<oa>!</oa> <oa>url-pattern</oa></spec>
-    <description>
-      <p>
-        Remove the mappings matched with <oa>url-pattern</oa>.
-        If "!" is given, remove all mappings.
-      </p>
-    </description>
-  </item>
-  <item>
-    <tags>:funmap</tags>
-    <spec>:funmap <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a></spec>
-    <description>
-      <p>
-        Remove the mappings.
-      </p>
-      <p>
-        If you wish to remove url-local mappings, give <a>-urls=<a>urlpattern</a></a>.
-      </p>
-    </description>
-  </item>
-  <h3 tag="fmap-event-names">event-name</h3>
-  <p>
-    <a>event-name-list</a> option follows a list of below values.
-    <ul>
-      <li>keypress</li>
-      <li>keydown</li>
-      <li>keyup</li>
-      <li>vkeypress</li>
-      <li>vkeydown</li>
-      <li>vkeyup</li>
-    </ul>
-    "v-" values use virtual key code.
-  </p>
-  <h3 tag="fmaps-examples">fmaps examples for .vimperatorrc</h3>
-  <p>If you input directly these commands in vimperator commandline, remove the ":lazy".</p>
-  <code><ex>
-:command! -nargs=+ lazy autocmd VimperatorEnter .* &lt;args>
-:lazy fmaps -u='mail\.google\.com/mail' c / j k n p o u e x s r a # [ ] ? gi gs gt gd ga gc
-:lazy fmaps -u='mail\.google\.com/mail/.*/[0-9a-f]+$' c / j,n k,p n,j p,k o u e x s r a # [ ] ? gi gs gt gd ga gc
-:lazy fmaps -u='www\.google\.co\.jp/reader' -events=vkeypress j k n p m s v A r S N P X O gh ga gs gt gu u / ? J K
-:lazy fmaps -u='(fastladder|livedoor)\.com/reader' j k s a p o v c i,p &lt;Space> &lt;S-Space> z b &lt; > q w e,g
-:lazy fmaps -u='https?://www\.rememberthemilk\.com/home/' j k m i c t ? d F,f G,g S,s L,l Y,y H,h M,m &lt;Del> &lt;C-S-Left> &lt;C-S-Right>
-:lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
-:lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
-  </ex></code>
-</plugin>;
+let INFO = <>
+  <plugin name="feedSomeKeys" version="1.6.1"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
+          summary="Feed some defined key events into the Web content"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      Feed key events directly into web contents.
+    </p>
+    <item>
+      <tags>:fmap</tags>
+      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
+      <description>
+        <p>
+          Define one mapping.
+        </p>
+        <p>
+          If <a>-urls=<a>urlpattern</a></a> is given,
+          the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:fmaps</tags>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
+      <description>
+        <p>
+          Two or more mappings are defined at once.
+          <a>mapping-pair</a> is a pair of key names separated by ",".
+          <p>e.g. "&lt;Leader>&lt;S-j>,j"</p>
+        </p>
+        <p>
+          If <a>-urls=<a>urlpattern</a></a> is given,
+          the mappings becomes effective mappings only on the page specifed by <a>urlpattern</a>.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:fmapc</tags>
+      <spec>:fmapc<oa>!</oa> <oa>urlpattern</oa></spec>
+      <description>
+        <p>
+          Remove the mappings matched with <oa>urlpattern</oa>.
+          If "!" is given, remove all mappings.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:funmap</tags>
+      <spec>:funmap <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a></spec>
+      <description>
+        <p>
+          Remove the mappings.
+        </p>
+        <p>
+          If you wish to remove url-local mappings, give <a>-urls=<a>urlpattern</a></a>.
+        </p>
+      </description>
+    </item>
+    <h3 tag="fmap-url-pattern">urlpattern</h3>
+    <p>
+      The value of <a>urlpattern</a> should be regular expression.
+    </p>
+    <h3 tag="fmap-event-name-list">eventnamelist</h3>
+    <p>
+      <a>eventnamelist</a> is a list of below values.
+      <ul>
+        <li>keypress</li>
+        <li>keydown</li>
+        <li>keyup</li>
+        <li>vkeypress</li>
+        <li>vkeydown</li>
+        <li>vkeyup</li>
+      </ul>
+      <p>"v-" values use virtual key code.</p>
+      <p>The default value of this option is "keypress".</p>
+    </p>
+    <h3 tag="fmaps-examples">fmaps examples for .vimperatorrc</h3>
+    <p>If you input directly these commands in vimperator commandline, remove the ":lazy".</p>
+    <code><ex>
+  :command! -nargs=+ lazy autocmd VimperatorEnter .* &lt;args>
+  :lazy fmaps -u='mail\.google\.com/mail' c / j k n p o u e x s r a # [ ] ? gi gs gt gd ga gc
+  :lazy fmaps -u='mail\.google\.com/mail/.*/[0-9a-f]+$' c / j,n k,p n,j p,k o u e x s r a # [ ] ? gi gs gt gd ga gc
+  :lazy fmaps -u='www\.google\.co\.jp/reader' -events=vkeypress j k n p m s v A r S N P X O gh ga gs gt gu u / ? J K
+  :lazy fmaps -u='(fastladder|livedoor)\.com/reader' j k s a p o v c i,p &lt;Space> &lt;S-Space> z b &lt; > q w e,g
+  :lazy fmaps -u='https?://www\.rememberthemilk\.com/home/' j k m i c t ? d F,f G,g S,s L,l Y,y H,h M,m &lt;Del> &lt;C-S-Left> &lt;C-S-Right>
+  :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
+  :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
+    </ex></code>
+  </plugin>
+  <plugin name="feedSomeKeys" version="1.6.1"
+          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
+          summary="Feed some defined key events into the Web content"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      Web コンテンツに直接キーイベントを送ります。
+    </p>
+    <item>
+      <tags>:fmap</tags>
+      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
+      <description>
+        <p>
+          マッピングを一つ定義します。
+        </p>
+        <p>
+          <a>-urls=<a>urlpattern</a></a> が与えられたとき、
+          そのマッピングは <a>urlpattern</a> で指定されたページのみで有効になります。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:fmaps</tags>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
+      <description>
+        <p>
+          一度に複数のマッピングを定義できます。
+          <a>mapping-pair</a> は、"," で区切られたキー名の組です。
+          <p>例: "&lt;Leader>&lt;S-j>,j"</p>
+        </p>
+        <p>
+          <a>-urls=<a>urlpattern</a></a> が与えられたとき、
+          そのマッピングは <a>urlpattern</a> で指定されたページのみで有効になります。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:fmapc</tags>
+      <spec>:fmapc<oa>!</oa> <oa>urlpattern</oa></spec>
+      <description>
+        <p>
+          <oa>urlpattern</oa> のマッピングを削除します。
+           "!" が与えられたときは、全てのマッピングが削除されます。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:funmap</tags>
+      <spec>:funmap <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a></spec>
+      <description>
+        <p>
+          マッピングを削除します。
+        </p>
+        <p>
+          <a>urlpattern</a> 付きのマッピングを削除するときは、<oa>-urls</oa> を指定する必要があります。
+        </p>
+      </description>
+    </item>
+    <h3 tag="fmap-url-pattern">urlpattern</h3>
+    <p>
+      <a>urlpattern</a> の値は正規表現でなければいけません。
+    </p>
+    <h3 tag="fmap-event-name-list">eventnamelist</h3>
+    <p>
+      <a>eventnamelist</a> は以下の値のリストです。
+      <ul>
+        <li>keypress</li>
+        <li>keydown</li>
+        <li>keyup</li>
+        <li>vkeypress</li>
+        <li>vkeydown</li>
+        <li>vkeyup</li>
+      </ul>
+      <p>"v-" のものは、仮想キーコードでイベントを発行します。</p>
+      <p>このオプションのデフォルト値は "keypress" です。</p>
+    </p>
+    <h3 tag="fmaps-examples">.vimperatorrc 用の fmaps サンプル</h3>
+    <p>コマンドラインで直接に入力するときは、":lazy" を除いてください。</p>
+    <code><ex>
+  :command! -nargs=+ lazy autocmd VimperatorEnter .* &lt;args>
+  :lazy fmaps -u='mail\.google\.com/mail' c / j k n p o u e x s r a # [ ] ? gi gs gt gd ga gc
+  :lazy fmaps -u='mail\.google\.com/mail/.*/[0-9a-f]+$' c / j,n k,p n,j p,k o u e x s r a # [ ] ? gi gs gt gd ga gc
+  :lazy fmaps -u='www\.google\.co\.jp/reader' -events=vkeypress j k n p m s v A r S N P X O gh ga gs gt gu u / ? J K
+  :lazy fmaps -u='(fastladder|livedoor)\.com/reader' j k s a p o v c i,p &lt;Space> &lt;S-Space> z b &lt; > q w e,g
+  :lazy fmaps -u='https?://www\.rememberthemilk\.com/home/' j k m i c t ? d F,f G,g S,s L,l Y,y H,h M,m &lt;Del> &lt;C-S-Left> &lt;C-S-Right>
+  :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
+  :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
+    </ex></code>
+  </plugin>
+</>;
+
 // }}}
 
 (function () {
