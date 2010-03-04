@@ -389,6 +389,9 @@ let INFO =
     function action (multi) {
       return function (args) {
         function add ([lhs, rhs]) {
+          if (!lhs)
+            return;
+
           rhs = rhs || lhs;
           mappings.addUserMap(
             [modes.NORMAL],
