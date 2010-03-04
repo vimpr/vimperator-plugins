@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.5.2</version>
+  <version>1.6.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -171,6 +171,7 @@ let INFO =
 
   const EVENTS = 'keypress keydown keyup'.split(/\s+/);
   const EVENTS_WITH_V = EVENTS.concat(['v' + n for each (n in EVENTS)]);
+  const IGNORE_URLS = /<ALL>/;
 
   const VKeys = {
     '0': KeyEvent.DOM_VK_0,
@@ -305,40 +306,38 @@ let INFO =
     function (values)
       (values && !values.some(function (value) !list.some(function (event) event === value)));
 
-  function unmap (filter, patternOrUrl, ignoreUrls) {
-    let result = 0;
-
+  function findMappings ({all, filter, urls, ignoreUrls, not, result}) {
     function match (map) {
       let r = (
         map.feedSomeKeys &&
-        (!filter || filter === map.names[0]) &&
-        (ignoreUrls || mappings._matchingUrlsTest(map, patternOrUrl))
+        (all ||
+         (!filter || filter === map.names[0]) &&
+         (ignoreUrls || urls === IGNORE_URLS || mappings._matchingUrlsTest(map, urls)))
       );
-      result++;
-      return r;
+      if (result && r) {
+        if (typeof result.matched === 'number')
+          result.matched++;
+        else
+          result.matched = 1;
+      }
+      return !!r ^ !!not;
     }
 
-    let mode = modes.NORMAL;
-    mappings._user[mode] = [
-      map
-      for each (map in mappings._user[mode])
-      if (!match(map))
-    ];
-    return result;
-  }
-
-  function gets (filter) {
     if (filter)
       filter = mappings._expandLeader(filter);
-    return [
-      map
-      for (map in mappings._mappingsIterator([modes.NORMAL], mappings._user))
-        if (map.feedSomeKeys && (!filter || map.names[0] == filter))
-    ];
+    if (urls)
+      urls = RegExp(urls);
+
+    return mappings._user[modes.NORMAL].filter(match);
   }
 
-  function list (filter) {
-    let maps = gets(filter);
+  function unmap (condition) {
+    condition.not = true;
+    mappings._user[modes.NORMAL] = findMappings(condition);
+  }
+
+  function list (condition) {
+    let maps = findMappings(condition);
     let template = modules.template;
     let list =
       <table>
@@ -346,8 +345,8 @@ let INFO =
           template.map(maps, function (map)
             template.map(map.names, function (name)
             <tr>
-              <td>{name}</td>
-              <td>{map.feedSomeKeys.rhs}</td>
+              <td style="font-weight: bold">{name}</td>
+              <td style="font-weight: bold">{map.feedSomeKeys.rhs}</td>
               <td>{map.matchingUrls ? map.matchingUrls : '[Global]'}</td>
             </tr>))
         }
@@ -367,12 +366,12 @@ let INFO =
         map.names[0],
         map.feedSomeKeys.rhs + ' for ' + (map.matchingUrls ? map.matchingUrls : 'Global')
       ]
-      for each (map in gets())
+      for each (map in findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
     ];
   }
 
   function urlCompleter (context, args) {
-    let maps = gets();
+    let maps = findMappings({all: true});
     let uniq = {};
     return [
       (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
@@ -418,7 +417,7 @@ let INFO =
             {
               matchingUrls: args['-urls'],
               feedSomeKeys: {
-                rhs: rhs
+                rhs: rhs,
               }
             },
             true
@@ -431,7 +430,11 @@ let INFO =
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
           if (!rhs) {
-            list(args.literalArg.trim());
+            list({
+              filter: args.literalArg.trim(),
+              urls: args['-urls'],
+              ignoreUrls: !args['-urls']
+            });
           } else {
             add([lhs, rhs]);
           }
@@ -470,15 +473,12 @@ let INFO =
     'Clear fmappings',
     function (args) {
       if (args.bang) {
-        unmap(null, null, true);
-        liberator.log('All fmappings were removed');
+        unmap({ignoreUrls: true});
+        liberator.log('All fmappings were removed.');
       } else {
-        let urls = args.literalArg;
-        liberator.echo(
-          unmap(null, urls && RegExp(urls), false) ?
-            'Some fmappings were removed' :
-            'Not found specifed fmappings'
-        );
+        let result = {};
+        unmap({urls: args.literalArg, result: result});
+        liberator.echo(result.matched ? 'Some fmappings were removed.' : 'Not found specifed fmappings.');
       }
     },
     {
@@ -501,11 +501,9 @@ let INFO =
       if (!name)
         return liberator.echoerr('E471: Argument required');
 
-      liberator.echo(
-        unmap(name, urls && RegExp(urls), args['-ignoreurls']) ?
-          'Some fmappings were removed' :
-          'Not found specifed fmappings'
-      );
+      let result = {};
+      unmap({filter: name, urls: urls, ignoreUrls: args['-ignoreurls'], result: result});
+      liberator.echo(result.matched ?  'Some fmappings were removed.' : 'Not found specifed fmappings.');
     },
     {
       literal: 0,
@@ -530,7 +528,7 @@ let INFO =
   );
 
   __context__.API =
-    'VKeys feed getFrames fromXPath virtualize unmap gets list'.split(/\s+/).reduce(
+    'VKeys feed getFrames fromXPath virtualize unmap findMappings list'.split(/\s+/).reduce(
       function (result, name)
         (result[name] = eval(name), result),
       {}
