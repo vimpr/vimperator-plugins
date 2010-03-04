@@ -6,8 +6,8 @@ var PLUGIN_INFO =
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
     <version>0.3.0</version>
     <minVersion>2.0pre 2008/12/12</minVersion>
-    <maxVersion>2.1pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
+    <maxVersion>2.2</maxVersion>
+    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/branches/2.2/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
 In default setting,
