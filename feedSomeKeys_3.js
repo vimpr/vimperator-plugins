@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.6.1</version>
+  <version>1.7.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -477,14 +477,21 @@ let INFO = <>
     ];
   }
 
-  function urlCompleter (context, args) {
-    let maps = findMappings({all: true});
-    let uniq = {};
-    return [
-      (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
-      for each (map in maps)
-      if (map.matchingUrls && !uniq[map.matchingUrls])
-    ];
+  function urlCompleter ({currentURL}) {
+    return function (context, args) {
+      let maps = findMappings({all: true});
+      let uniq = {};
+      let result = [
+        (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
+        for each (map in maps)
+        if (map.matchingUrls && !uniq[map.matchingUrls])
+      ];
+      if (currentURL) {
+        result.unshift([util.escapeRegex(buffer.URL), 'Current URL']);
+        result.unshift([util.escapeRegex(content.document.domain), 'Current domain']);
+      }
+      return result;
+    };
   }
 
 
@@ -556,7 +563,7 @@ let INFO = <>
       {
         literal: 0,
         options: [
-          [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
+          [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter({currentURL: true})],
           [['-desc', '-description'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT],
           [
@@ -593,7 +600,7 @@ let INFO = <>
       bang: true,
       completer: function (context) {
         context.title = ['URL Pattern'];
-        context.completions = urlCompleter(context);
+        context.completions = urlCompleter({})(context);
       }
     },
     true
@@ -615,7 +622,7 @@ let INFO = <>
     {
       literal: 0,
       options: [
-        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter],
+        [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter({})],
         [['-ignoreurls', '-iu'], commands.OPTION_NOARG]
       ],
       completer: fmapCompleter
