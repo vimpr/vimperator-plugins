@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">jQuery Loader</name>
   <description>jQuery Loader</description>
   <description lang="ja">jQuery Loader</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="jQueryLoader" version="1.0.0"
+  <plugin name="jQueryLoader" version="1.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/jquery-loader.js"
           summary="jQuery Loader"
           lang="en-US"
@@ -79,7 +79,8 @@ let INFO =
   let setup = function () {
     let context = {
       get window () content.window.wrappedJSObject,
-      get document () content.document.wrappedJSObject
+      get document () content.document.wrappedJSObject,
+      get location () content.window.location.wrappedJSObject
     };
     liberator.eval(File(filepath).read(), context);
     return context.window.jQuery;
