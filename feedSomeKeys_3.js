@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.7.0</version>
+  <version>1.7.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -330,15 +330,14 @@ let INFO = <>
     v;
 
   function or (list, func)
-    let ([head, tail] = list)
-      ((func || v)(head) || (tail && or(tail, func)));
+    (list.length && let ([head,] = list) (func(head) || or(list.slice(1), func)));
 
   function getFrames () {
     function bodyCheck (content)
       (content.document.body.localName.toLowerCase() === 'body');
 
     function get (content)
-      (bodyCheck(content) && result.push(content), Array.slice(content.frames).forEach(get))
+      (bodyCheck(content) && result.push(content), Array.slice(content.frames).forEach(get));
 
     let result = [];
     get(content);
@@ -397,6 +396,14 @@ let INFO = <>
   function regexpValidator (expr) {
     try {
       RegExp(expr);
+      return true;
+    } catch (e) {}
+    return false;
+  }
+
+  function xpathValidator (expr) {
+    try {
+      document.evaluate(expr, document, null, null, null);
       return true;
     } catch (e) {}
     return false;
@@ -494,6 +501,13 @@ let INFO = <>
     };
   }
 
+  function frameCompleter (context, args) {
+    return [
+      [i, frame.document.location]
+      for each ([i, frame] in Iterator(getFrames()))
+    ];
+  }
+
 
 
   'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
@@ -516,6 +530,7 @@ let INFO = <>
 
               let win = document.commandDispatcher.focusedWindow;
               let frames = getFrames();
+
               let elem = body(win);
 
               if (typeof args['-frame'] !== 'undefined') {
@@ -523,8 +538,9 @@ let INFO = <>
                 elem = body(frames[0]);
               }
 
-              if (args['-xpath'])
-                elem = or(frames, function (f) fromXPath(f, args['-xpath'])) || elem;
+              if (args['-xpath']) {
+                elem = or(frames, function (f) fromXPath(f.document, args['-xpath'])) || elem;
+              }
 
               feed(rhs, args['-events'] || ['keypress'], elem);
             },
@@ -565,7 +581,8 @@ let INFO = <>
         options: [
           [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter({currentURL: true})],
           [['-desc', '-description'], commands.OPTION_STRING],
-          [['-frame', '-f'], commands.OPTION_INT],
+          [['-frame', '-f'], commands.OPTION_INT, null, frameCompleter],
+          [['-xpath', '-x'], commands.OPTION_STRING, xpathValidator],
           [
             ['-events', '-e'],
             commands.OPTION_LIST,
