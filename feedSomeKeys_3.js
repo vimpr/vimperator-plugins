@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.7.1</version>
+  <version>1.7.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.7.0"
+  <plugin name="feedSomeKeys" version="1.7.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -105,11 +105,11 @@ let INFO = <>
     </item>
     <item>
       <tags>:fmaps</tags>
-      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mappingpair</a> ....</spec>
       <description>
         <p>
           Two or more mappings are defined at once.
-          <a>mapping-pair</a> is a pair of key names separated by ",".
+          <a>mappingpair</a> is a pair of key names separated by ",".
           <p>e.g. "&lt;Leader>&lt;S-j>,j"</p>
         </p>
         <p>
@@ -144,6 +144,15 @@ let INFO = <>
     <p>
       The value of <a>urlpattern</a> should be regular expression.
     </p>
+    <h3 tag="fmap-xpath">xpath</h3>
+    <p>
+      The XPath for a target element.
+    </p>
+    <h3 tag="fmap-frame-number">framenumber</h3>
+    <p>
+      The number of a target frame.
+      Refer the completion for this number.
+    </p>
     <h3 tag="fmap-event-name-list">eventnamelist</h3>
     <p>
       <a>eventnamelist</a> is a list of below values.
@@ -171,7 +180,7 @@ let INFO = <>
   :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.7.0"
+  <plugin name="feedSomeKeys" version="1.7.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="ja"
@@ -184,7 +193,7 @@ let INFO = <>
     </p>
     <item>
       <tags>:fmap</tags>
-      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
+      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
       <description>
         <p>
           マッピングを一つ定義します。
@@ -197,11 +206,11 @@ let INFO = <>
     </item>
     <item>
       <tags>:fmaps</tags>
-      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mapping-pair</a> ....</spec>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mappingpair</a> ....</spec>
       <description>
         <p>
           一度に複数のマッピングを定義できます。
-          <a>mapping-pair</a> は、"," で区切られたキー名の組です。
+          <a>mappingpair</a> は、"," で区切られたキー名の組です。
           <p>例: "&lt;Leader>&lt;S-j>,j"</p>
         </p>
         <p>
@@ -249,6 +258,15 @@ let INFO = <>
       </ul>
       <p>"v-" のものは、仮想キーコードでイベントを発行します。</p>
       <p>このオプションのデフォルト値は "keypress" です。</p>
+    </p>
+    <h3 tag="fmap-xpath">xpath</h3>
+    <p>
+      キーイベントを送るべき要素を指定するための XPath。
+    </p>
+    <h3 tag="fmap-frame-number">framenumber</h3>
+    <p>
+      キーイベントを送るべきフレームの番号。
+      番号は、補完を参考にしてください。
     </p>
     <h3 tag="fmaps-examples">.vimperatorrc 用の fmaps サンプル</h3>
     <p>コマンドラインで直接に入力するときは、":lazy" を除いてください。</p>
