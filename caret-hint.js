@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Caret Hint</name>
   <description>Move caret position by hint</description>
   <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/caret-hint.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     Move caret position by hint.
     == Global Variables ==
@@ -118,6 +118,8 @@ let PLUGIN_INFO =
   [headMode, tailMode, selectHeadMode, selectTailMode].forEach(
     function(mode) {
       let map = extendLeader + ';' + mode;
+      if (!mode)
+        return;
       mappings.remove(modes.NORMAL, map); // for debug
       mappings.remove(modes.VISUAL, map); // for debug
       mappings.addUserMap(
