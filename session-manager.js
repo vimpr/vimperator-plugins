@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -127,11 +127,20 @@ let INFO =
     load: function (name) {
       gSessionManager.load(fixFilename(name), 'overwrite');
       liberator.echo('Session loaded: '+ name);
+    },
+    delete: function (name) {
+      let file = File(fixFilename(name));
+      if (!file.exists())
+        return liberator.echoerr('file does not exist: ' + name);
+      file.remove();
+      liberator.echo('Session removed: '+ name);
     }
   };
 
   alias(SubCommands, 'save', 's');
   alias(SubCommands, 'load', 'l');
+  alias(SubCommands, 'delete', 'd');
+  alias(SubCommands, 'delete', 'del');
 
   commands.addUserCommand(
     ['sessionmanager', 'sm'],
@@ -149,6 +158,7 @@ let INFO =
           context.completions = [
             ['save', 'Save current session'],
             ['load', 'Load saved session (overwrite)'],
+            ['delete', 'Remove saved session'],
           ];
           return;
         }
