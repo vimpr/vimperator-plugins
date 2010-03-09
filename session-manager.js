@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -163,10 +163,11 @@ let INFO =
           return;
         }
 
+        context.compare = void 0;
         context.completions = [
           [file.leafName.replace(/\.session$/, ''), new Date(file.lastModifiedTime)]
           for each ([,file] in io.File(gSessionManager.getSessionDir()).readDirectory())
-        ]
+        ].sort(function ([, a], [, b]) (b - a));
       }
     },
     true
