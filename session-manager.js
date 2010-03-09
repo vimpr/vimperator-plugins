@@ -110,14 +110,19 @@ let INFO =
   function alias (obj, from, to)
     (obj[to] = function () obj[from].apply(obj, arguments));
 
-  function fixFilename (filename) {
+  function fixFile (filename) {
     let dir = io.File(gSessionManager.getSessionDir());
     let file = dir.clone();
     file.append(filename);
-    if (file.exists())
-      return filename;
-    return filename + '.session';
+    if (!file.exists()) {
+      file = dir.clone();
+      file.append(filename + '.session');
+    }
+    return file;
   }
+
+  function fixFilename (filename)
+    fixFile(filename).leafName;
 
   const SubCommands = {
     save: function (name) {
@@ -129,10 +134,10 @@ let INFO =
       liberator.echo('Session loaded: '+ name);
     },
     delete: function (name) {
-      let file = File(fixFilename(name));
+      let file = fixFile(name);
       if (!file.exists())
         return liberator.echoerr('file does not exist: ' + name);
-      file.remove();
+      file.remove(false);
       liberator.echo('Session removed: '+ name);
     }
   };
