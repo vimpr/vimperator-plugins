@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -36,10 +36,10 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
-  <version>2.4.1</version>
+  <version>2.4.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/happy_hacking_vimperator.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -203,6 +203,10 @@ let PLUGIN_INFO =
     }
   }
 
+  function shumagorasu (func)
+    function (event)
+      ('screenX screenY'.split(/\s+/).some(function (name) event[name]) && func(event));
+
   function damn (event)
     !/^(script|embed)$/i.test(event.target.tagName);
 
@@ -236,24 +240,18 @@ let PLUGIN_INFO =
   }, true);
 
   ['mousemove', 'DOMMouseScroll', 'mouseup', 'dblclick'].forEach(
-      function (name) window.addEventListener(name, kill(false), true)
+      function (name) window.addEventListener(name, shumagorasu(kill(false)), true)
   );
 
   window.addEventListener(
     'mousedown',
-    function (event) {
-      mousedownTime = new Date().getTime();
-      kill(false)(event);
-    },
+    shumagorasu(function (event) (mousedownTime = new Date().getTime(), kill(false)(event))),
     true
   );
 
   window.addEventListener(
     'click',
-    function (event) {
-      if ((new Date().getTime() - mousedownTime) < 500)
-        kill('mickey')(event);
-    },
+    shumagorasu(function (event) (((new Date().getTime() - mousedownTime) < 500) && kill('mickey')(event))),
     true
   );
 
