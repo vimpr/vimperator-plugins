@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.3.2</version>
+  <version>2.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -79,6 +79,11 @@ let PLUGIN_INFO =
         The default value of 'mainecoon' option.
         >||
           let g:maine_coon_default = "ac"
+        ||<
+      maine_coon_style:
+        The Style for message output.
+        >||
+          let g:maine_coon_style = "border: 1px solid pink; padding: 3px; color: pink; background: black; font: 18px/1 sans-serif;"
         ||<
     == Example ==
       === The mapping for large mode (l) ===
@@ -129,6 +134,11 @@ let PLUGIN_INFO =
         >||
           let g:maine_coon_default = "ac"
         ||<
+      maine_coon_style:
+        メッセージ表示のスタイル指定です。
+        >||
+          let g:maine_coon_style = "border: 1px solid pink; padding: 3px; color: pink; background: black; font: 18px/1 sans-serif;"
+        ||<
     == Example ==
       === ラージモード(l) 用のマッピング ===
         >||
@@ -143,6 +153,24 @@ let PLUGIN_INFO =
 </VimperatorPlugin>;
 
 let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/);
+let elemStyle =
+  (
+    liberator.globalVariables.maine_coon_style
+    ||
+    libly.$U.toStyleText({
+      height: '1em',
+      margin: 0,
+      padding: '3px',
+      border: '1px solid #b3b3b3',
+      borderLeft: 0,
+      borderBottom: 0,
+      textAlign: 'left',
+      color: '#000',
+      font: '11px/1 sans-serif',
+      background: '#ebebeb'
+    })
+  );
+
 
 (function () {
 
@@ -243,33 +271,26 @@ let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/)
       if (remove)
         remove();
       let doc = window.content.document;
-      let style = highlight.get('StatusLine').value +
-                  U.toStyleText({
-                    position: 'fixed',
-                    zIndex: 1000,
-                    left: 0,
-                    bottom: 0,
-                    opacity: 1,
-                    height: '1em',
-                    margin: 0,
-                    padding: '3px',
-                    border: '1px solid #b3b3b3',
-                    borderLeft: 0,
-                    borderBottom: 0,
-                    textAlign: 'left',
-                    color: '#000',
-                    font: '11px/1 sans-serif',
-                    background: '#ebebeb'
-                  });
+      let style =
+        highlight.get('StatusLine').value +
+        U.toStyleText({
+          position: 'fixed',
+          zIndex: 1000,
+          left: 0,
+          bottom: 0,
+          opacity: 1
+        }) +
+        elemStyle;
       let elem = U.xmlToDom(<div id="liberator_maine_coon" style={style}>{message}</div>, doc);
       doc.body.appendChild(elem);
       let count = time;
+      let startOpacity = elem.style.opacity
       let handle = setInterval(function () {
         if (count <= 0) {
           if (remove)
             remove();
         } else {
-          elem.style.opacity = count / time;
+          elem.style.opacity = (count / time) * startOpacity;
         }
         count--;
       }, 100);
