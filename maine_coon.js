@@ -289,13 +289,12 @@ let elemStyle =
       let elem = U.xmlToDom(<div id="liberator_maine_coon" style={style}>{message}</div>, doc);
       doc.body.appendChild(elem);
       let count = time;
-      let startOpacity = elem.style.opacity;
       let handle = setInterval(function () {
         if (count <= 0) {
           if (remove)
             remove();
         } else {
-          elem.style.MozOpacity = (count / time) * startOpacity;
+          elem.style.MozOpacity = count / time;
         }
         count--;
       }, 100);
