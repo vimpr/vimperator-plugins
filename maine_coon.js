@@ -264,7 +264,7 @@ let elemStyle =
     (value === undefined);
 
   function important (style)
-    style.replace(/;/g, ' !important;');
+    style.replace(/(!important)?\s*;/g, ' !important;');
 
   let echo = (function () {
     let time = 40;
