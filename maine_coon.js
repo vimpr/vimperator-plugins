@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.4.0</version>
+  <version>2.4.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -263,6 +263,9 @@ let elemStyle =
   function nothing (value)
     (value === undefined);
 
+  function important (style)
+    style.replace(/;/g, ' !important;');
+
   let echo = (function () {
     let time = 40;
     let remove;
@@ -272,15 +275,18 @@ let elemStyle =
         remove();
       let doc = window.content.document;
       let style =
-        highlight.get('StatusLine').value +
-        U.toStyleText({
-          position: 'fixed',
-          zIndex: 1000,
-          left: 0,
-          bottom: 0,
-          opacity: 1
-        }) +
-        elemStyle;
+        important(
+          highlight.get('StatusLine').value +
+          U.toStyleText({
+            position: 'fixed',
+            zIndex: 1000,
+            left: 0,
+            bottom: 0,
+            opacity: 1
+          }) +
+          elemStyle
+        );
+      liberator.log(style);
       let elem = U.xmlToDom(<div id="liberator_maine_coon" style={style}>{message}</div>, doc);
       doc.body.appendChild(elem);
       let count = time;
