@@ -417,7 +417,8 @@ libly.$U = {//{{{
         let uhService = Cc["@mozilla.org/feed-unescapehtml;1"].getService(Ci.nsIScriptableUnescapeHTML);
         let text = str.replace(/^[\s\S]*?<body([ \t\n\r][^>]*)?>[\s]*|<\/body[ \t\r\n]*>[\S\s]*$/ig, '');
         let fragment = uhService.parseFragment(text, false, null, root);
-        let htmlFragment = document.implementation.createDocument(null, 'html', null);
+        let doctype = document.implementation.createDocumentType('html', '-//W3C//DTD HTML 4.01//EN', 'http://www.w3.org/TR/html4/strict.dtd');
+        let htmlFragment = document.implementation.createDocument(null, 'html', doctype);
         htmlFragment.documentElement.appendChild(htmlFragment.importNode(fragment,true));
         return htmlFragment;
         /* うまく動いていない場合はこちらに戻してください
