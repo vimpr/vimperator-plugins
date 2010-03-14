@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>tabsort</name>
   <description>Add ":tabsort" and ":tabuniq" command.</description>
   <description lang="ja">":tabsort", ":tabuniq" コマンドを追加する</description>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -75,7 +75,7 @@ let PLUGIN_INFO =
       browser: #1=(tab.linkedBrowser),
       doc: #2=(#1#.contentDocument),
       url: (#1#.__SS_restore_data ? #1#.__SS_restore_data.url : (#2#.location && #2#.location.href)),
-      title: (#2#.title || #1#.__SS_restore_data.title)
+      title: (#1#.__SS_restore_data ? #1#.__SS_restore_data.title : #2#.title)
     }
     for ([i, tab] in util.Array(config.browser.mTabs))
   ];
