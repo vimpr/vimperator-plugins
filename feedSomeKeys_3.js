@@ -155,18 +155,19 @@ let INFO = <>
     </p>
     <h3 tag="fmap-event-name-list">eventnamelist</h3>
     <p>
-      <a>eventnamelist</a> is a list of below values.
-      <ul>
-        <li>keypress</li>
-        <li>keydown</li>
-        <li>keyup</li>
-        <li>vkeypress</li>
-        <li>vkeydown</li>
-        <li>vkeyup</li>
-      </ul>
-      <p>"v-" values use virtual key code.</p>
-      <p>The default value of this option is "keypress".</p>
+      <a>eventnamelist</a> is the list constructed with the below values.
     </p>
+    <ul>
+      <li>keypress</li>
+      <li>keydown</li>
+      <li>keyup</li>
+      <li>vkeypress</li>
+      <li>vkeydown</li>
+      <li>vkeyup</li>
+    </ul>
+    <p>"v..." values use virtual key code.</p>
+    <p>The event is generated in the order of writing of each key.</p>
+    <p>The default value of this option is "keypress".</p>
     <h3 tag="fmaps-examples">fmaps examples for .vimperatorrc</h3>
     <p>If you input directly these commands in vimperator commandline, remove the ":lazy".</p>
     <code><ex>
@@ -247,18 +248,19 @@ let INFO = <>
     </p>
     <h3 tag="fmap-event-name-list">eventnamelist</h3>
     <p>
-      <a>eventnamelist</a> は以下の値のリストです。
-      <ul>
-        <li>keypress</li>
-        <li>keydown</li>
-        <li>keyup</li>
-        <li>vkeypress</li>
-        <li>vkeydown</li>
-        <li>vkeyup</li>
-      </ul>
-      <p>"v-" のものは、仮想キーコードでイベントを発行します。</p>
-      <p>このオプションのデフォルト値は "keypress" です。</p>
+      <a>eventnamelist</a> は以下の値から構成されたリストです。
     </p>
+    <ul>
+      <li>keypress</li>
+      <li>keydown</li>
+      <li>keyup</li>
+      <li>vkeypress</li>
+      <li>vkeydown</li>
+      <li>vkeyup</li>
+    </ul>
+    <p>"v..." のものは、仮想キーコードでイベントを発行します。</p>
+    <p>キー毎に、書かれた順にイベントが発行されます。</p>
+    <p>このオプションのデフォルト値は "keypress" です。</p>
     <h3 tag="fmap-xpath">xpath</h3>
     <p>
       キーイベントを送るべき要素を指定するための XPath。
