@@ -413,21 +413,20 @@ let INFO = <>
     modes.passAllKeys = _passAllKeys;
   }
 
-  function regexpValidator (expr) {
-    try {
-      RegExp(expr);
-      return true;
-    } catch (e) {}
-    return false;
-  }
+  function makeTryValidator (func)
+    function (value) {
+      try {
+        liberator.log(value);
+        func(value);
+        return true;
+      } catch (e) {}
+      return false;
+    };
 
-  function xpathValidator (expr) {
-    try {
-      document.evaluate(expr, document, null, null, null);
-      return true;
-    } catch (e) {}
-    return false;
-  }
+  let regexpValidator = makeTryValidator(RegExp);
+
+  let xpathValidator =
+    makeTryValidator(function (expr) document.evaluate(expr, document, null, null, null))
 
   function makeListValidator (list)
     function (values)
