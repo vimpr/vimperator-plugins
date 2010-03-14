@@ -15,11 +15,11 @@ var PLUGIN_INFO =
   <description>At j,k key scrolling to be smooth.</description>
   <description lang="ja">j,kキーでのスクロールをスムースに</description>
   <minVersion>2.3pre</minVersion>
-  <maxVersion>2.3pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_smooziee.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.9.3</version>
+  <version>0.10.0</version>
   <detail><![CDATA[
     == Subject ==
     j,k key scrolling to be smoothly.
