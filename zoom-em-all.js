@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Zoom Em All</name>
   <description>Zoom them all.</description>
   <description lang="ja">ブラウザ全体をズーム</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="ZoomEmAll" version="1.0.0"
+  <plugin name="ZoomEmAll" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/zoom-em-all.js"
           summary="Zoom or pan for whole firefox."
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="ZoomEmAll" version="1.0.0"
+  <plugin name="ZoomEmAll" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/zoom-em-all.js"
           summary="ブラウザ全体をズーム"
           lang="ja"
@@ -115,7 +115,12 @@ let INFO =
     ['zooma[ll]', 'zoomemall'],
     'Zoom Em All',
     function (args) {
-      docViewer.fullZoom = parseInt(args.literalArg || '100', 10) / 100;
+      let [, s, d] = args.literalArg.trim().match(/^([-+])(\d+)/) || [];
+      if (d) {
+        docViewer.fullZoom += parseInt(args.literalArg || '100', 10) / 100;
+      } else {
+        docViewer.fullZoom = parseInt(args.literalArg || '100', 10) / 100;
+      }
     },
     {
       literal: 0
