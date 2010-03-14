@@ -71,9 +71,8 @@ let INFO =
       <tags>:zooma</tags>
       <spec>:zoomall <oa>percentage</oa></spec>
       <description>
-        <p>
-          Zoom!!!!
-        </p>
+        <p>Zoom to <oa>percentage</oa>.</p>
+        <p>If not given the argument, reset zoom.</p>
       </description>
     </item>
   </plugin>
@@ -91,9 +90,8 @@ let INFO =
       <tags>:zooma</tags>
       <spec>:zoomall <oa>percentage</oa></spec>
       <description>
-        <p>
-          Zoom!!!!
-        </p>
+        <p><oa>percentage</oa>(%)で拡縮します。</p>
+        <p>引数省略時は、100%にリセットします。</p>
       </description>
     </item>
   </plugin>
