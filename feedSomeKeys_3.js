@@ -533,6 +533,8 @@ let INFO = <>
 
     function action (multi) {
       return function (args) {
+        let prefix = args['-prefix'] || '';
+
         function add ([lhs, rhs]) {
           if (!lhs)
             return;
@@ -540,7 +542,7 @@ let INFO = <>
           rhs = rhs || lhs;
           mappings.addUserMap(
             [modes.NORMAL],
-            [lhs],
+            [prefix + lhs],
             args['description'] || 'by feedSomeKeys_3.js',
             function () {
               function body (win)
@@ -572,17 +574,14 @@ let INFO = <>
           );
         }
 
-        let prefix = let (p = args['-prefix'] || '') function (s) (s && p + s);
-
         if (multi) {
           let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
-          args.literalArg.split(/\s+/).map(String.trim).map(prefix).map(sep).forEach(add);
+          args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
-          lhs = prefix(lhs);
           if (!rhs) {
             list({
-              filter: args.literalArg.trim(),
+              filter: prefix + args.literalArg.trim(),
               urls: args['-urls'],
               ignoreUrls: !args['-urls']
             });
