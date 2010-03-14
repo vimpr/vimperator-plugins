@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>tabsort</name>
   <description>Add ":tabsort" and ":tabuniq" command.</description>
   <description lang="ja">":tabsort", ":tabuniq" コマンドを追加する</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -72,9 +72,10 @@ let PLUGIN_INFO =
     {
       index: i,
       tab: tab,
-      doc: #1=(tab.linkedBrowser.contentDocument),
-      url: #1#.location.href,
-      title: #1#.title,
+      browser: #1=(tab.linkedBrowser),
+      doc: #2=(#1#.contentDocument),
+      url: (#1#._userTypedValue || (#2#.location && #2#.location.href)),
+      title: #2#.title,
     }
     for ([i, tab] in util.Array(config.browser.mTabs))
   ];
@@ -92,6 +93,8 @@ let PLUGIN_INFO =
 
     rms.forEach(function (rm) config.tabbrowser.removeTab(rm.tab));
   }
+
+  getTabs().forEach(liberator.log);
 
   function tabSort (cmp) {
     getTabs().sort(cmp).forEach(function (it, i) (i == it.index) || config.tabbrowser.moveTabTo(it.tab, i));
