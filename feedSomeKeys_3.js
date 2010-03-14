@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.7.2</version>
+  <version>1.8.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.7.2"
+  <plugin name="feedSomeKeys" version="1.8.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -92,7 +92,7 @@ let INFO = <>
     </p>
     <item>
       <tags>:fmap</tags>
-      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
+      <spec>:fmap <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>lhs</a> <a>rhs</a></spec>
       <description>
         <p>
           Define one mapping.
@@ -105,7 +105,7 @@ let INFO = <>
     </item>
     <item>
       <tags>:fmaps</tags>
-      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mappingpair</a> ....</spec>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <oa>-p<oa>prefix</oa>=<a>prefix</a></oa> <a>mappingpair</a> ....</spec>
       <description>
         <p>
           Two or more mappings are defined at once.
@@ -180,7 +180,7 @@ let INFO = <>
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.7.2"
+  <plugin name="feedSomeKeys" version="1.8.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="ja"
@@ -206,7 +206,7 @@ let INFO = <>
     </item>
     <item>
       <tags>:fmaps</tags>
-      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <a>mappingpair</a> ....</spec>
+      <spec>:fmaps <oa>-e<oa>vents</oa>=<a>eventnamelist</a></oa> <oa>-x<oa>path</oa>=<a>xpath</a></oa> <oa>-f<oa>rame</oa>=<a>framenumber</a></oa> <oa>-urls=<a>urlpattern</a></oa> <oa>-p<oa>prefix</oa>=<a>prefix</a></oa> <a>mappingpair</a> ....</spec>
       <description>
         <p>
           一度に複数のマッピングを定義できます。
@@ -572,11 +572,14 @@ let INFO = <>
           );
         }
 
+        let prefix = let (p = args['-prefix'] || '') function (s) (s && p + s);
+
         if (multi) {
           let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
-          args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
+          args.literalArg.split(/\s+/).map(String.trim).map(prefix).map(sep).forEach(add);
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
+          lhs = prefix(lhs);
           if (!rhs) {
             list({
               filter: args.literalArg.trim(),
@@ -601,6 +604,7 @@ let INFO = <>
           [['-desc', '-description', '-d'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT, null, frameCompleter],
           [['-xpath', '-x'], commands.OPTION_STRING, xpathValidator],
+          [['-prefix', '-p'], commands.OPTION_STRING],
           [
             ['-events', '-e'],
             commands.OPTION_LIST,
