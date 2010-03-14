@@ -36,12 +36,12 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>tabsort</name>
-  <description>Add ":tabsort" command.</description>
-  <description lang="ja">tabsort コマンドを追加する</description>
-  <version>1.0.1</version>
+  <description>Add ":tabsort" and ":tabuniq" command.</description>
+  <description lang="ja">":tabsort", ":tabuniq" コマンドを追加する</description>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <minVersion>2.2pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.3</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tabsort.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -68,20 +68,33 @@ let PLUGIN_INFO =
   function memberCompare (name)
     function (a, b) a[name].toString().localeCompare(b[name].toString());
 
-  function tabSort (cmp) {
-    let nbrowsers = getBrowser().browsers.length;
-    let ts = [];
-    for (let [i,] in tabs.browsers) {
-      let b = getBrowser().getBrowserAtIndex(i);
-      let c = b.contentDocument;
-      ts.push({
-        index: i,
-        tab: gBrowser.mTabs[i],
-        url: c.location.href,
-        title: c.title
-      });
+  function getTabs () [
+    {
+      index: i,
+      tab: tab,
+      doc: #1=(tab.linkedBrowser.contentDocument),
+      url: #1#.location.href,
+      title: #1#.title,
     }
-    ts.sort(cmp).forEach(function (it, i) (i == it.index) || getBrowser().moveTabTo(it.tab, i));
+    for ([i, tab] in util.Array(config.browser.mTabs))
+  ];
+
+  function tabUniq (cmp) {
+    let rms = [];
+    let tabs = getTabs();
+
+    for (let [i, tabA] in Iterator(tabs)) {
+      for each (let tabB in tabs.slice(i + 1)) {
+        if (cmp(tabA, tabB) === 0)
+          rms.push(tabB);
+      }
+    }
+
+    rms.forEach(function (rm) config.tabbrowser.removeTab(rm.tab));
+  }
+
+  function tabSort (cmp) {
+    getTabs().sort(cmp).forEach(function (it, i) (i == it.index) || config.tabbrowser.moveTabTo(it.tab, i));
   }
 
   let targetOptions = [
@@ -92,17 +105,37 @@ let PLUGIN_INFO =
   function targetValidater (value)
     targetOptions.some(function ([n,]) n == value);
 
+  function completer (context) {
+    context.title = ['Target', 'Action'];
+    context.completions = targetOptions;
+  }
+
+  commands.addUserCommand(
+    ['tabu[niq]'],
+    'Uniq tabs',
+    function (arg) {
+      tabUniq(memberCompare(arg[0] || arg['-target'] || 'url'));
+    },
+    {
+      options: [
+        [['-target', '-t'], commands.OPTION_STRING, targetValidater, targetOptions],
+      ],
+      completer: completer
+    },
+    true
+  );
+
   commands.addUserCommand(
     ['tabso[rt]'],
     'Sort tabs',
     function (arg) {
-      tabSort(memberCompare(arg['-target'] || 'title'));
+      tabSort(memberCompare(arg[0] || arg['-target'] || 'title'));
     },
     {
-      argCount: '0',
       options: [
         [['-target', '-t'], commands.OPTION_STRING, targetValidater, targetOptions],
       ],
+      completer: completer
     },
     true
   );
