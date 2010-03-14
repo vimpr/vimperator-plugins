@@ -598,7 +598,7 @@ let INFO = <>
         literal: 0,
         options: [
           [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter({currentURL: true})],
-          [['-desc', '-description'], commands.OPTION_STRING],
+          [['-desc', '-description', '-d'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT, null, frameCompleter],
           [['-xpath', '-x'], commands.OPTION_STRING, xpathValidator],
           [
