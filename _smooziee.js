@@ -95,16 +95,22 @@ let self = liberator.plugins.smooziee = (function(){
     [modes.NORMAL],
     ["j"],
     "Smooth scroll down",
-    function(){
-      self.smoothScrollBy(getScrollAmount());
+    function(count){
+      self.smoothScrollBy(getScrollAmount() * (count || 1));
+    },
+    {
+      count: true
     }
   );
   mappings.addUserMap(
     [modes.NORMAL],
     ["k"],
     "Smooth scroll up",
-    function(){
-      self.smoothScrollBy(getScrollAmount() * -1);
+    function(count){
+      self.smoothScrollBy(getScrollAmount() * -(count || 1));
+    },
+    {
+      count: true
     }
   );
   // }}}
