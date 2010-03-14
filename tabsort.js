@@ -94,8 +94,6 @@ let PLUGIN_INFO =
     rms.forEach(function (rm) config.tabbrowser.removeTab(rm.tab));
   }
 
-  getTabs().forEach(liberator.log);
-
   function tabSort (cmp) {
     getTabs().sort(cmp).forEach(function (it, i) (i == it.index) || config.tabbrowser.moveTabTo(it.tab, i));
   }
