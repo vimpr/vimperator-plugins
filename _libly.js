@@ -12,7 +12,7 @@ var PLUGIN_INFO =
     <description lang="ja">適当なライブラリっぽいものたち。</description>
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <license>MIT</license>
-    <version>0.1.31</version>
+    <version>0.1.32</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
