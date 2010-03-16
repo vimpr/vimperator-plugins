@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">X-Hint</name>
   <description>Show the hints with given XPath.</description>
   <description lang="ja">指定のXPathでヒントを表示する。</description>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -59,7 +59,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="X-Hint" version="1.1.1"
+  <plugin name="X-Hint" version="1.1.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="en-US"
@@ -78,8 +78,20 @@ let INFO =
         </p>
       </description>
     </item>
+    <item>
+      <tags>:xhintdo</tags>
+      <tags>:xhdo</tags>
+      <spec>:xhintdo <a>XPath</a> <a>javascript</a></spec>
+      <description>
+        <p>
+          Show the hints with <a>XPath</a>.
+          And do <a>javascript</a> code.
+          This command gives the variable "elem" to the context of <a>javascript</a>.
+        </p>
+      </description>
+    </item>
   </plugin>
-  <plugin name="X-Hint" version="1.1.1"
+  <plugin name="X-Hint" version="1.1.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="ja"
@@ -95,6 +107,17 @@ let INFO =
       <description>
         <p>
           <a>XPath</a> で <a>HintMode</a> ヒントを表示する。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:xhintdo</tags>
+      <tags>:xhdo</tags>
+      <spec>:xhintdo <a>XPath</a> <a>javascript</a></spec>
+      <description>
+        <p>
+          <a>XPath</a> でヒントを出し、<a>javascript</a> コードを実行します。
+          <a>javascript</a> の context には 変数 "elem" が与えられます。
         </p>
       </description>
     </item>
