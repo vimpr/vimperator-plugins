@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">X-Hint</name>
   <description>Show the hints with given XPath.</description>
   <description lang="ja">指定のXPathでヒントを表示する。</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -59,7 +59,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="X-Hint" version="1.0.0"
+  <plugin name="X-Hint" version="1.1.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="en-US"
@@ -79,7 +79,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="X-Hint" version="1.0.0"
+  <plugin name="X-Hint" version="1.1.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="ja"
@@ -176,7 +176,11 @@ let INFO =
         hints.show(hintModeText);
       },
       {
-        literal: 1
+        literal: 1,
+        completer: function (context, args) {
+          if (args.completeArg == 1)
+            completion.javascript(context);
+        }
       },
       true
     );
