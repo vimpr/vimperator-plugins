@@ -158,10 +158,7 @@ let INFO =
       'x-hint-do',
       'X-Hint DO',
       function (elem) {
-        let context = {
-          __proto__: elem,
-          $: elem
-        };
+        let context = {__proto__: modules.userContext, elem: elem};
         try {
           liberator.eval(js, context);
         } catch (e) {
