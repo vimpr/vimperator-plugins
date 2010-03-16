@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">X-Hint</name>
   <description>Show the hints with given XPath.</description>
   <description lang="ja">指定のXPathでヒントを表示する。</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -110,13 +110,13 @@ let INFO =
   let last = {};
 
   function xpath ()
-    ((last.args && last.args.literalArg) || '//a')
+    (last.xpath || '//a')
 
   plugins.libly.$U.around(
     hints,
     'show',
     function (next, [minor, filter, win]) {
-      if (last.args) {
+      if (last.xpath) {
         // save
         last.hintMode = this._hintModes[minor];
         last.hintTags = last.hintMode.tags;
@@ -144,7 +144,7 @@ let INFO =
     ['xh[int]'],
     description,
     function (args) {
-      last.args = args;
+      last.xpath = args.literalArg;
       hints.show(args[0]);
     },
     {
@@ -152,6 +152,39 @@ let INFO =
     },
     true
   );
+
+  let (hintModeText = 'x-hint-do', js = null) {
+    hints.addMode(
+      'x-hint-do',
+      'X-Hint DO',
+      function (elem) {
+        let context = {
+          __proto__: elem,
+          $: elem
+        };
+        try {
+          liberator.eval(js, context);
+        } catch (e) {
+          liberator.echoerr(e);
+        }
+      }
+    );
+
+    commands.addUserCommand(
+      ['xhintdo', 'xhdo'],
+      'Run js-code with X-Hint',
+      function (args) {
+        last.xpath = args[0];
+        js  = args.literalArg;
+        hints.show(hintModeText);
+      },
+      {
+        literal: 1
+      },
+      true
+    );
+  }
+
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
