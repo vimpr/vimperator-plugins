@@ -44,7 +44,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/bitly.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Commands ==
       :bitly [<URL>]
@@ -81,7 +81,12 @@ let PLUGIN_INFO =
       });
     },
     {
-      literal: 0
+      literal: 0,
+      completer: function (context) {
+        context.completions = [
+          [buffer.URL, 'Current URL']
+        ];
+      }
     },
     true
   );
