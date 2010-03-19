@@ -77,6 +77,8 @@ SL.prototype = { // {{{
     this.count++;
     this.ctx.clearRect(0,0, this.width, this.height);
     this.ctx.save();
+    this.ctx.fillStyle = "rgba(0,0,0,0.8)";
+    this.ctx.fillRect(0, 0, this.width, this.height);
     if (this.isFly){
       this.ctx.rotate(this.rotateRadian);
       this.ctx.translate(0, - this.height/2);
@@ -512,7 +514,7 @@ let xulNS = new Namespace("http://www.mozilla.org/keymaster/gatekeeper/there.is.
 let xhtmlNS = new Namespace("http://www.w3.org/1999/xhtml");
 let dialog;
 let self = {
-  panel: xmlToDom(<panel id="vimp-sl" noautohide="true" style="background-color:rgba(0,0,0,0.8);border:none;" xmlns={xulNS}/>),
+  panel: xmlToDom(<panel id="vimp-sl" noautohide="true" style="background:transparent;border:none;" xmlns={xulNS}/>),
   open: function(attr){
     if (!attr) attr = {};
     let defAttr = getFullScreenAttr();
