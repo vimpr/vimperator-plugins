@@ -65,15 +65,27 @@ let PLUGIN_INFO =
 
   const File = io.File || io.getFile;
 
-  function openFileWith (path, block) {
+  function openClipBoardWith (path, overwrite, block) {
+    let buffer = '';
+    block({
+      write: function (s) buffer += s,
+      writeln: function (s) this.write(s + '\n')
+    });
+    util.copyToClipboard(buffer);
+  }
+
+  function openFileWith (path, overwrite, block) {
     let localFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
     let out = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
                             createInstance(Ci.nsIConverterOutputStream);
     let file = File(io.expandPath(path));
 
-    if (file.exists())
+    if (file.exists()) {
+      if (!overwrite)
+        return liberator.echoerr(path + ' already exists (add ! to override)');
       file.remove(false);
+    }
 
     localFile.initWithPath(file.path);
     out.init(localFile, 0x02 | 0x08, 0664, 0);
@@ -103,20 +115,27 @@ let PLUGIN_INFO =
       desc,
       function (args) {
         let filename = args[0];
-        return openFileWith(
+        let clip = args['-clipboard'];
+        if (!!clip === !!filename)
+          return liberator.echoerr(
+            clip ? 'E488: Trailing characters'
+                 : 'E471: Argument required');
+        return (clip ? openClipBoardWith : openFileWith)(
           filename,
+          args.bang,
           function (file) {
-            if (file.exists() && !args.bang)
-              return liberator.echoerr(filename + ' already exists (add ! to override)');
             return action(file, args);
           }
         );
       },
       {
-        argCount: '1',
+        literalArg: 0,
         bang: true,
-        options: options,
-        completer: function (context) completion.file(context, true)
+        options: [[['-clipboard', '-c'], commands.OPTION_NOARG]].concat(options),
+        completer: function (context, args) {
+          if (!args['-clipboard'])
+            completion.file(context, true)
+        }
       },
       true
     );
@@ -167,7 +186,7 @@ let PLUGIN_INFO =
         let value = options.getPref(name);
         if (typeof value === 'string' && limit && value.length > limit)
           continue;
-        file.writeln("set! " + name + "=" +  quote(value));
+        file.writeln("set! " + name + "=" +  esc(quote(value)));
       }
     },
 
@@ -194,6 +213,20 @@ let PLUGIN_INFO =
     desc: 'Write current preferences to the specified file',
     options: [LIMIT_OPTION],
     action: Writer.preferences
+  });
+
+  defineCommand({
+    names: ['mkplugins'],
+    desc: 'Write current plugin list to the specified file',
+    options: [LIMIT_OPTION],
+    action: Writer.plugins
+  });
+
+  defineCommand({
+    names: ['mkaddons'],
+    desc: 'Write current ' + config.hostApplication + ' Addon list to the specified file',
+    options: [LIMIT_OPTION],
+    action: Writer.addons
   });
 
   defineCommand({
