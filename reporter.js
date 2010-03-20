@@ -131,6 +131,8 @@ let PLUGIN_INFO =
       puts('Name', config.name);
       puts('Host', config.hostApplication);
       puts('Platform', navigator.platform);
+      puts('Version', liberator.version);
+      puts('UserAgent', navigator.userAgent);
     },
 
     colors: function (file) {
