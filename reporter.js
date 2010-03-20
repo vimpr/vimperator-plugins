@@ -62,7 +62,10 @@ let PLUGIN_INFO =
     let out = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
                             createInstance(Ci.nsIConverterOutputStream);
-    let file = File(path);
+    let file = File(io.expandPath(path));
+
+    if (file.exists())
+      file.remove(false);
 
     localFile.initWithPath(file.path);
     out.init(localFile, 0x02 | 0x08, 0664, 0);
@@ -142,16 +145,14 @@ let PLUGIN_INFO =
         let value = options.getPref(name);
         if (typeof value === 'string' && limit && value.length > limit)
           continue;
-        file.write("set! " + name + "=" +  quote(value));
+        file.writeln("set! " + name + "=" +  quote(value));
       }
     },
 
     addons: function (file) {
       for each (let ext in liberator.extensions) {
-        file.write(
-          ext.name + ' ' +
-          (ext.enabled ? 'enabled' : 'disabled')
-        );
+        file.writeln(ext.name);
+        file.writeln('  ' + (ext.enabled ? 'enabled' : 'disabled'));
       }
     }
   };
