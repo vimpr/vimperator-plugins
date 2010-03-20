@@ -176,11 +176,11 @@ let PLUGIN_INFO =
     options: [LIMIT_OPTION],
     action: function (file, args) {
       function writeSection (title, writer) {
-        file.write(
-          '""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""\n' +
-          '" ' + title + '\n\n'
-        );
+        file.writeln('""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""');
+        file.writeln('" ' + title);
+        file.writeln('');
         writer(file, args);
+        file.writeln('\n');
       }
 
       writeSection('Color Scheme', Writer.colors);
