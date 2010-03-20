@@ -43,7 +43,7 @@ let PLUGIN_INFO =
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/mkvimpref.js</updateURL>
-  <minVersion>2.3</minVersion>
+  <minVersion>2.2</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Commands ==
@@ -55,6 +55,34 @@ let PLUGIN_INFO =
 
 (function () {
 
+  const File = io.File || io.getFile;
+
+  function openFileWith (path, block) {
+    let localFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    let out = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+    let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
+                            createInstance(Ci.nsIConverterOutputStream);
+    let file = File(path);
+
+    localFile.initWithPath(file.path);
+    out.init(localFile, 0x02 | 0x08, 0664, 0);
+
+    let result = block({
+      __proto__: file,
+      write: function (s) {
+        conv.init(out, 'UTF-8', s.length,
+                  Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+        return conv.writeString(s)
+      },
+      writeln: function (s) this.write(s + '\n')
+    });
+
+    conv.close();
+    out.close();
+
+    return result;
+  }
+
   function pad (s, max)
     (s.length < max ? pad(s + ' ', max) : s);
 
@@ -64,10 +92,14 @@ let PLUGIN_INFO =
       desc,
       function (args) {
         let filename = args[0];
-        let file = io.File(filename);
-        if (file.exists() && !args.bang)
-          return liberator.echoerr(filename + ' already exists (add ! to override)');
-        return action(file, args);
+        return openFileWith(
+          filename,
+          function (file) {
+            if (file.exists() && !args.bang)
+              return liberator.echoerr(filename + ' already exists (add ! to override)');
+            return action(file, args);
+          }
+        );
       },
       {
         argCount: '1',
@@ -91,8 +123,8 @@ let PLUGIN_INFO =
         max = Math.max(h.class.length, max);
 
       for (let h in highlight)
-        file.write((h.value ? 'hi ' + pad(h.class, max) + '  ' + rmrem(h.value)
-                            : '" hi ' + h.class) + "\n");
+        file.writeln(h.value ? 'hi ' + pad(h.class, max) + '  ' + rmrem(h.value)
+                             : '" hi ' + h.class);
     },
 
     preferences: function (file, {'-length-limit': limit}) {
@@ -108,9 +140,18 @@ let PLUGIN_INFO =
         if (!Pref.prefHasUserValue(name))
           continue;
         let value = options.getPref(name);
-        if (typeof value === 'string' && limit && v.length > limit)
+        if (typeof value === 'string' && limit && value.length > limit)
           continue;
-        file.write("set! " + n + "=" +  quote(v) + "\n");
+        file.write("set! " + name + "=" +  quote(value));
+      }
+    },
+
+    addons: function (file) {
+      for each (let ext in liberator.extensions) {
+        file.write(
+          ext.name + ' ' +
+          (ext.enabled ? 'enabled' : 'disabled')
+        );
       }
     }
   };
@@ -142,7 +183,8 @@ let PLUGIN_INFO =
       }
 
       writeSection('Color Scheme', Writer.colors);
-      writeSection(config.hostApplication + ' preferences', Writer.preferences);
+      writeSection(config.hostApplication + ' Preference', Writer.preferences);
+      writeSection(config.hostApplication + ' Addon & Plugin', Writer.addons);
     }
   });
 
