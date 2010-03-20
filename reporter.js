@@ -35,20 +35,28 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>mkvimpref</name>
-  <description>Write current preferences to the specified file</description>
-  <description lang="ja">現在の preferences を指定のファイルに書き出す。</description>
+  <name>mkreport</name>
+  <description>Write current information to the specified file</description>
+  <description lang="ja">現在の情報を指定のファイルに書き出す。</description>
   <version>1.0.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/mkvimpref.js</updateURL>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/reporter.js</updateURL>
   <minVersion>2.2</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Commands ==
       - mkvimpref <FILENAME>
         <FILENAME> に現在の preferences を書き出します。
+      - mkcolor <FILENAME>
+        <FILENAME> に現在の colorschme を書き出します。
+      - mkreport <FILENAME>
+        <FILENAME> に以下の情報を書き出します。
+        - Firefox アドオン＆プラグインの一覧
+        - Vimperator プラグインの一覧
+        - デフォルトから変更されている preference (about:config でみられる設定) のリスト
+        - バージョンなどの情報
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
