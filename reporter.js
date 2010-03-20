@@ -117,6 +117,14 @@ let PLUGIN_INFO =
   const LIMIT_OPTION = [['-length-limit', '-ll'], commands.OPTION_INT];
 
   const Writer = {
+    basic: function (file) {
+      function puts (name, value)
+        file.writeln(pad(name + ': ', 20) + value);
+      puts('Name', config.name);
+      puts('Host', config.hostApplication);
+      puts('Platform', navigator.platform);
+    },
+
     colors: function (file) {
       function rmrem (s)
         s.replace(/\s*\/\*.*\*\//g, '');
@@ -154,6 +162,10 @@ let PLUGIN_INFO =
         file.writeln(ext.name);
         file.writeln('  ' + (ext.enabled ? 'enabled' : 'disabled'));
       }
+    },
+
+    plugins: function (file) {
+      [File(n).leafName for (n in plugins.contexts)].sort().forEach(function (n) file.writeln(n));
     }
   };
 
@@ -176,16 +188,19 @@ let PLUGIN_INFO =
     options: [LIMIT_OPTION],
     action: function (file, args) {
       function writeSection (title, writer) {
-        file.writeln('""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""');
+        const line = '"======================================================================';
+        file.writeln(line);
         file.writeln('" ' + title);
-        file.writeln('');
+        file.writeln(line + '\n');
         writer(file, args);
         file.writeln('\n');
       }
 
-      writeSection('Color Scheme', Writer.colors);
-      writeSection(config.hostApplication + ' Preference', Writer.preferences);
+      writeSection('Basic', Writer.basic);
+      writeSection(config.name + ' Plugin', Writer.plugins);
       writeSection(config.hostApplication + ' Addon & Plugin', Writer.addons);
+      writeSection(config.hostApplication + ' Preference', Writer.preferences);
+      writeSection('Color Scheme', Writer.colors);
     }
   });
 
