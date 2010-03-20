@@ -511,7 +511,7 @@ Thanks:
 
     let setting = {
       common: {
-        autoFullscreenDelay: 200
+        autoFullscreenDelay: 500
       },
       nico: {
         useComment: false
