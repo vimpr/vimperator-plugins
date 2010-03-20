@@ -149,7 +149,11 @@ let PLUGIN_INFO =
     },
 
     preferences: function (file, {'-length-limit': limit}) {
-      function quote(str)
+      // TODO エスケープ処理など怪しいので調べる
+      function esc (str)
+        (typeof str === 'string' ? str.replace(/\n/g, '\\n') : str);
+
+      function quote (str)
         (typeof str === 'string' ? Commands.quoteArg["'"](str) : str);
 
       function compareByName ([n1,], [n2,])
