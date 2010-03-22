@@ -163,15 +163,16 @@ var manager = {
 		return str.join('');
 	},
 	listClass: function(cFilter, iFilter, format){
-		var list = [];
+		var classes = {};
 		if (!cFilter) return null;
 		cReg = new RegExp(cFilter, 'i');
 		iReg = new RegExp((iFilter ? iFilter : '.*'), 'i');
 		for (let c in tree){
 			if (cReg.test(tree[c].name) && tree[c].has(iReg)){
-				list.push(tree[c]);
+				classes[tree[c].name] = tree[c];
 			}
 		}
+		var list =  [i for each (i in classes)];
 		if (format) return this.toHTML(list);
 
 		return list;
