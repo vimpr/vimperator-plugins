@@ -114,7 +114,7 @@ commands.addUserCommand(['lscc'], 'List XPCOM class',
 			liberator.echo(liberator.XPCOM.listClass(args[0], null, true), true);
 		} else if (args[1] in Ci){
 			let instance = tree[toKey(args[0])].interface[args[1]].create();
-			echo(liberator.modules.util.objectToString(instance, true), true);
+			liverator.echo(liberator.modules.util.objectToString(instance, true), true);
 		} else {
 			liberator.echo(liberator.XPCOM.listClass(args[0], args[1], true), true);
 		}
@@ -148,7 +148,7 @@ var manager = {
 	toHTML: function(list){
 		var str = ['<dl>'];
 		list.forEach(function(o){
-			str.push('<dt>' + o.name + ' ' + o.number + '</td>');
+			str.push('<dt>' + o.name + ' ' + o.number + '</dt>');
 			if (o.interface){
 				for (let i in o.interface){
 					str.push('<dd>' + o.interface[i].name + ' ' + o.interface[i].number + '</dd>');
