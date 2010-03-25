@@ -261,7 +261,7 @@ var SBM = { //{{{
                             case 'creator': id = node.textContent; break;
                             case 'link': link = node.textContent; break;
                             case 'date':
-                                date = window.eval('new Date(' + node.textContent.split(/[-T:Z]/,6).join(',') + ')');
+                                date = stringToDate(node.textContent);
                                 break;
                             case 'description': comment = node.textContent; break;
                             case 'subject': tags = node.textContent.split(/\s+/); break;
@@ -322,7 +322,7 @@ var SBM = { //{{{
                     pageURL:    'http://buzzurl.jp/entry/' + json[0].url
                 });
                 json[0].posts.forEach(function(entry){
-                    c.add( entry.user_name, window.eval('new Date(' + entry.date.split(/[-\s:]/,6).join(',') + ')'),
+                    c.add( entry.user_name, stringToDate(entry.date),
                            entry.comment ? entry.comment : '', entry.keywords.split(','),
                            {
                             userIcon: url + entry.user_name + '/photo',
@@ -371,6 +371,16 @@ function getMD5Hash(str){
     }
     var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : '' for (i in hash)].join('');
     return s;
+} //}}}
+/**
+ * stringToDate {{{
+ * @param {String} Date String
+ * @return {Date}
+ */
+function stringToDate(str){
+    let args = str.split(/[-T:Z]/,6).map(function (v) parseInt(v, 10));
+    args[1]--;
+    return new Date(args[0], args[1], args[2], args[3], args[4], args[5]);
 } //}}}
 /**
  * evaluateXPath {{{
