@@ -101,7 +101,7 @@ let INFO =
 
   const DESC = 'Hint for embedded object';
 
-  let modeName = liberator.globalVariables.hint_for_embeded_mode || 'hint-for-embedded';
+  let modeName = liberator.globalVariables.hint_for_embedded_mode || 'hint-for-embedded';
 
   let sites = {
     nico: {
