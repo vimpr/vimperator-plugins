@@ -75,6 +75,32 @@ let INFO =
         </p>
       </description>
     </item>
+    <item>
+      <tags>g:hints_for_embedded_mode </tags>
+      <spec>let g:hints_for_embedded_mode=<a>hints-mode-character</a></spec>
+      <description>
+        <p>
+          Hints mode characters.
+          Default is not available.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:hints_for_embedded_where </tags>
+      <spec>let g:hints_for_embedded_where=<a>where</a></spec>
+      <description>
+        <p>
+          Where to open.
+          <a>where</a> values.
+          <ul>
+            <li>new_tab</li>
+            <li>current_tab</li>
+            <li>new_background_tab</li>
+            <li>new_window</li>
+          </ul>
+        </p>
+      </description>
+    </item>
   </plugin>
   <plugin name="HintsForEmbeded" version="1.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
@@ -90,6 +116,32 @@ let INFO =
       <description>
         <p>
           埋め込みオブジェクト用ヒントを表示
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:hints_for_embedded_mode </tags>
+      <spec>let g:hints_for_embedded_mode=<a>hints-mode-character</a></spec>
+      <description>
+        <p>
+          ヒントモード文字。
+          デフォルト無効。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:hints_for_embedded_where </tags>
+      <spec>let g:hints_for_embedded_where=<a>where</a></spec>
+      <description>
+        <p>
+          どこに開くか？
+          <a>where</a> 値
+          <ul>
+            <li>new_tab</li>
+            <li>current_tab</li>
+            <li>new_background_tab</li>
+            <li>new_window</li>
+          </ul>
         </p>
       </description>
     </item>
