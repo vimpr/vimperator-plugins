@@ -102,6 +102,13 @@ let INFO =
   const DESC = 'Hint for embedded object';
 
   let modeName = liberator.globalVariables.hint_for_embedded_mode || 'hint-for-embedded';
+  let where = liberator.globalVariables.hint_for_embedded_where;
+
+  if (typeof where === 'undefined')
+    where = liberator.NEW_TAB;
+  if (typeof where === 'string')
+    where = liberator[where.replace(/[-\s]/g, '_').toUpperCase()];
+
 
   let sites = {
     nico: {
@@ -150,7 +157,7 @@ let INFO =
     modeName,
     DESC,
     function (elem) {
-      liberator.open(elemToURL(elem), liberator.NEW_TAB);
+      liberator.open(elemToURL(elem), where);
     },
     function () '//embed | //object | //img'
   );
