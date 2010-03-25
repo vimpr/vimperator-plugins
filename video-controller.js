@@ -124,7 +124,7 @@ let INFO =
   );
 
   commands.addUserCommand(
-    ['videocontroll'],
+    ['videocontrol'],
     'Controll HTML5 Videos',
     function (args) {
       lastArgs = args;
