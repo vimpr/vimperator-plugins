@@ -163,12 +163,18 @@ let INFO =
     true
   );
 
+  function showHintsWith (mode, xpath) {
+    last.xpath = xpath;
+    hints.show(mode);
+  }
+
+  __context__.show = showHintsWith;
+
   commands.addUserCommand(
     ['xh[int]'],
     description,
     function (args) {
-      last.xpath = args.literalArg;
-      hints.show(args[0]);
+      showHintsWith(args[0], args.literalArg);
     },
     {
       literal: 1
@@ -194,9 +200,8 @@ let INFO =
       ['xhintdo', 'xhdo'],
       'Run js-code with X-Hint',
       function (args) {
-        last.xpath = args[0];
         js  = args.literalArg;
-        hints.show(hintModeText);
+        showHintsWith(hintModeText, args[0]);
       },
       {
         literal: 1,
