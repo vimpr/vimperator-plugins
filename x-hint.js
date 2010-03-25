@@ -184,7 +184,7 @@ let INFO =
 
   let (hintModeText = 'x-hint-do', js = null) {
     hints.addMode(
-      'x-hint-do',
+      hintModeText,
       'X-Hint DO',
       function (elem) {
         let context = {__proto__: modules.userContext, elem: elem};
