@@ -128,7 +128,7 @@ let INFO =
 
 (function () {
 
-  const description = 'Show the hint with given xpath';
+  const description = 'Show the hint with given xpath.';
 
   let last = {};
 
@@ -172,7 +172,7 @@ let INFO =
 
   commands.addUserCommand(
     ['xh[int]'],
-    description,
+    description + '(:xhint <mode> <xpath>)',
     function (args) {
       showHintsWith(args[0], args.literalArg);
     },
@@ -198,7 +198,7 @@ let INFO =
 
     commands.addUserCommand(
       ['xhintdo', 'xhdo'],
-      'Run js-code with X-Hint',
+      'Run js-code with X-Hint. (:xhdo <xpath> <javascript>)',
       function (args) {
         js  = args.literalArg;
         showHintsWith(hintModeText, args[0]);
