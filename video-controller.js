@@ -35,15 +35,15 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name> --- </name>
-  <name lang="ja"> --- </name>
-  <description> --- </description>
-  <description lang="ja"> --- </description>
-  <version> --- </version>
+  <name>VideoController</name>
+  <name lang="ja">VideoController</name>
+  <description>Add :videocontrol command for HTML5 video.</description>
+  <description lang="ja">HTML5 Video のために :videocontrol コマンドを追加する。</description>
+  <version>1.0.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>{'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/' + __context__.PATH.match(/[^\\\/]+\.js$/)}</updateURL>
+  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/video-controller.js</updateURL>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
@@ -59,15 +59,15 @@ let INFO =
 <>
   <plugin name="VideoController" version="1.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/video-controller.js"
-          summary="Controll HTML5 Videos"
+          summary="Control HTML5 Videos"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="2.3"/>
     <item>
-      <tags>:videocontroll</tags>
-      <spec>:videocontroll <a>command</a> <oa>arguments...</oa></spec>
+      <tags>:videocontrol</tags>
+      <spec>:videocontrol <a>command</a> <oa>arguments...</oa></spec>
       <description>
         <p>
         </p>
@@ -76,15 +76,15 @@ let INFO =
   </plugin>
   <plugin name="VideoController" version="1.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/video-controller.js"
-          summary="Controll HTML5 Videos"
+          summary="Control HTML5 Videos"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="2.3"/>
     <item>
-      <tags>:videocontroll</tags>
-      <spec>:videocontroll <a>command</a> <oa>arguments...</oa></spec>
+      <tags>:videocontrol</tags>
+      <spec>:videocontrol <a>command</a> <oa>arguments...</oa></spec>
       <description>
         <p>
         </p>
@@ -125,7 +125,7 @@ let INFO =
 
   commands.addUserCommand(
     ['videocontrol'],
-    'Controll HTML5 Videos',
+    'Control HTML5 Videos',
     function (args) {
       lastArgs = args;
       hints.show(HintName);
