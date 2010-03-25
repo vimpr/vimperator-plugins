@@ -131,6 +131,19 @@ let PLUGIN_INFO =
     );
   });
 
+  commands.addUserCommand(
+    ['revealimage'],
+    'Reveal IE Ctrl-A images.',
+    function (args) {
+      hints.show(args.bang ? modeR : modeN);
+    },
+    {
+      bang: true
+    },
+    true
+  );
+
+
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
