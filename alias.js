@@ -124,6 +124,7 @@ let INFO =
         return liberator.echoerr('Not found command with: ' + oldName);
 
       cmd.specs.push(newName);
+      // XXX 必要でない気もする。実際コマンドの検索には要らない。
       Command.prototype.init.call(cmd, cmd.specs, cmd.description, cmd.action);
     },
     {
