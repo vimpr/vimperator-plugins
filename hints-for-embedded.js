@@ -101,8 +101,8 @@ let INFO =
 
   const DESC = 'Hint for embedded object';
 
-  let modeName = liberator.globalVariables.hint_for_embedded_mode || 'hint-for-embedded';
-  let where = liberator.globalVariables.hint_for_embedded_where;
+  let modeName = liberator.globalVariables.hints_for_embedded_mode || 'hints-for-embedded';
+  let where = liberator.globalVariables.hints_for_embedded_where;
 
   if (typeof where === 'undefined')
     where = liberator.NEW_TAB;
