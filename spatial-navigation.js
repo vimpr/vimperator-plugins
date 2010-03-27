@@ -49,10 +49,10 @@ let PLUGIN_INFO =
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
-    ----
+    Read the help. (:help SpatialNavigation-plugin)
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    ----
+    Read the help. (:help SpatialNavigation-plugin)
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -65,11 +65,16 @@ let INFO =
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <project name="Vimperator" minVersion="2.3"/>
-    <p></p>
     <item>
-      <tags>:hoge</tags>
-      <spec>:hoge</spec>
-      <description><p></p></description>
+      <tags>g:spatial_navigation_mappings</tags>
+      <spec>let g:spatial_navigation_mappings=<a>keys</a></spec>
+      <description>
+        <p>
+        </p>
+        <code><ex>
+let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
+        </ex></code>
+      </description>
     </item>
   </plugin>
   <plugin name="SpatialNavigation" version="1.0.0"
@@ -78,11 +83,16 @@ let INFO =
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <project name="Vimperator" minVersion="2.3"/>
-    <p></p>
     <item>
-      <tags>:hoge</tags>
-      <spec>:hoge</spec>
-      <description><p></p></description>
+      <tags>g:spatial_navigation_mappings</tags>
+      <spec>let g:spatial_navigation_mappings=<a>keys</a></spec>
+      <description>
+        <p>
+        </p>
+        <code><ex>
+let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
+        </ex></code>
+      </description>
     </item>
   </plugin>
 </>;
