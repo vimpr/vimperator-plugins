@@ -438,21 +438,36 @@ let INFO =
 
   }
 
-  [['<A-k>', DIR_U], ['<A-j>', DIR_D], ['<A-h>', DIR_L], ['<A-l>', DIR_R]].forEach(
-    function ([name, dir]) {
-      liberator.log(name);
-      mappings.addUserMap(
-        [modes.NORMAL],
-        [name],
-        'Spatial Navigation',
-        function () {
-          let (target = getFocusedElement())
-            target ? move(dir, target) : defaultMove(dir);
-        },
-        {}
-      )
-    }
-  );
+  // Define mappings
+  {
+    let ms =
+      (
+        liberator.globalVariables.spatial_navigation_mappings
+        ||
+        '<A-h> <A-j> <A-k> <A-l>'
+      ).split(/\s+/);
+
+    [
+      DIR_L,
+      DIR_D,
+      DIR_U,
+      DIR_R
+    ].forEach(
+      function (dir, index) {
+        mappings.addUserMap(
+          [modes.NORMAL],
+          [ms[index]],
+          'Spatial Navigation',
+          function () {
+            let (target = getFocusedElement())
+              target ? move(dir, target) : defaultMove(dir);
+          },
+          {}
+        )
+      }
+    );
+
+  }
 
 })();
 
