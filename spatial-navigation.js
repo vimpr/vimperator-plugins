@@ -42,7 +42,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Spatial Navigation</name>
   <name lang="ja">空間ナビゲーション</name>
-  <description>Spatial Navigation/description>
+  <description>Spatial Navigation</description>
   <description lang="ja">空間ナビゲーション</description>
   <version>1.0.0</version>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/spatial-navigation.js</updateURL>
