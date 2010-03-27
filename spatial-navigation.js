@@ -89,7 +89,7 @@ let INFO =
 
 (function () {
 
-  const [DIR_U, DIR_D, DIR_L, DIR_R] = [1, 2, 3, 4];
+  const DIR = {L: 1, D: 2, U: 3, R: 4};
   const gDirectionalBias = 10;
   const gRectFudge = 1;
 
@@ -97,19 +97,19 @@ let INFO =
     window.document.commandDispatcher.focusedElement;
 
   function isRectInDirection (dir, focusedRect, anotherRect) {
-    if (dir === DIR_L) {
+    if (dir === DIR.L) {
       return (anotherRect.left < focusedRect.left);
     }
 
-    if (dir === DIR_R) {
+    if (dir === DIR.R) {
       return (anotherRect.right > focusedRect.right);
     }
 
-    if (dir === DIR_U) {
+    if (dir === DIR.U) {
       return (anotherRect.top < focusedRect.top);
     }
 
-    if (dir === DIR_D) {
+    if (dir === DIR.D) {
       return (anotherRect.bottom > focusedRect.bottom);
     }
       return false;
@@ -136,7 +136,7 @@ let INFO =
     var inlineNavigation = false;
     var mx, my, nx, ny;
 
-    if (dir === DIR_L) {
+    if (dir === DIR.L) {
 
       //  |---|
       //  |---|
@@ -168,7 +168,7 @@ let INFO =
         nx = b.right;
         ny = 0;
       }
-    } else if (dir === DIR_R) {
+    } else if (dir === DIR.R) {
 
       //         |---|
       //         |---|
@@ -199,7 +199,7 @@ let INFO =
         nx = b.left;
         ny = 0;
       }
-    } else if (dir === DIR_U) {
+    } else if (dir === DIR.U) {
 
       //  |---|  |---|  |---|
       //  |---|  |---|  |---|
@@ -227,7 +227,7 @@ let INFO =
         nx = 0;
         ny = b.bottom;
       }
-    } else if (dir === DIR_D) {
+    } else if (dir === DIR.D) {
 
       //         |---|
       //         |---|
@@ -259,14 +259,14 @@ let INFO =
 
     let scopedRect = inflateRect(a, gRectFudge);
 
-    if (dir === DIR_L ||
-        dir === DIR_R) {
+    if (dir === DIR.L ||
+        dir === DIR.R) {
       scopedRect.left = 0;
       scopedRect.right = Infinity;
       inlineNavigation = containsRect(scopedRect, b);
     }
-    else if (dir === DIR_U ||
-             dir === DIR_D) {
+    else if (dir === DIR.U ||
+             dir === DIR.D) {
       scopedRect.top = 0;
       scopedRect.bottom = Infinity;
       inlineNavigation = containsRect(scopedRect, b);
@@ -282,7 +282,7 @@ let INFO =
   }
 
   function defaultMove (dir) {
-    if (dir === DIR_R || dir === DIR_D) {
+    if (dir === DIR.R || dir === DIR.D) {
       window.document.commandDispatcher.advanceFocus();
     } else {
       window.document.commandDispatcher.rewindFocus();
@@ -320,7 +320,7 @@ let INFO =
     flashFocusedElement();
   }
 
-  function move (dir, target, callback) {
+  function move (dir, target) {
     let doc = target.ownerDocument;
 
     // If it is XUL content (e.g. about:config), bail.
@@ -338,8 +338,8 @@ let INFO =
 
       // if there is no text, there is nothing special to do.
       if (target.textLength > 0) {
-        if (dir === DIR_R ||
-            dir === DIR_D) {
+        if (dir === DIR.R ||
+            dir === DIR.D) {
           // we are moving forward into the document
           if (target.textLength != target.selectionEnd)
             return;
@@ -356,12 +356,12 @@ let INFO =
     // Check to see if we are in a select
     if (target instanceof Ci.nsIDOMHTMLSelectElement)
     {
-      if (dir === DIR_D) {
+      if (dir === DIR.D) {
         if (target.selectedIndex + 1 < target.length)
           return;
       }
 
-      if (dir  === DIR_U) {
+      if (dir  === DIR.U) {
         if (target.selectedIndex > 0)
           return;
       }
@@ -438,6 +438,20 @@ let INFO =
 
   }
 
+
+  // Export API
+  __context__.API = {
+    DIR: DIR,
+    move: function (dir, target) {
+      if (!target)
+        target = getFocusedElement();
+      if (typeof dir === 'string')
+        dir = DIR[dir.slice(0, 1).toUpperCase()];
+      return (target ? move : defaultMove)(dir, target);
+    }
+  };
+
+
   // Define mappings
   {
     let ms =
@@ -448,10 +462,10 @@ let INFO =
       ).split(/\s+/);
 
     [
-      DIR_L,
-      DIR_D,
-      DIR_U,
-      DIR_R
+      DIR.L,
+      DIR.D,
+      DIR.U,
+      DIR.R
     ].forEach(
       function (dir, index) {
         mappings.addUserMap(
@@ -460,13 +474,12 @@ let INFO =
           'Spatial Navigation',
           function () {
             let (target = getFocusedElement())
-              target ? move(dir, target) : defaultMove(dir);
+              (target ? move : defaultMove)(dir, target);
           },
           {}
         )
       }
     );
-
   }
 
 })();
