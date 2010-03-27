@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">VideoController</name>
   <description>Add :videocontrol command for HTML5 video.</description>
   <description lang="ja">HTML5 Video のために :videocontrol コマンドを追加する。</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -99,6 +99,11 @@ let INFO =
 
   const HintName = 'anekos-video-controller-hint';
 
+  function timeCodeToSec (t) {
+    let [a, h, m, s] = (t.match(/(?:(\d+):)?(\d+):(\d+)/) || []).map(function (v) parseInt(v, 10) || 0);
+    return a ? (h * 60 * 60 + m * 60 + s) : parseInt(t, 10);
+  }
+
   let lastArgs = null;
   let controlls = {
     __proto__: null,
@@ -111,6 +116,9 @@ let INFO =
     volume: function (elem, value) {
       value = parseFloat(value);
       elem.volume = Math.min(value > 1 ? value / 100 : value, 100);
+    },
+    seek: function (elem, value) {
+      elem.currentTime = timeCodeToSec(value);
     }
   };
 
