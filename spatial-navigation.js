@@ -38,11 +38,11 @@
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name> --- </name>
-  <name lang="ja"> --- </name>
-  <description> --- </description>
-  <description lang="ja"> --- </description>
-  <version> --- </version>
+  <name>Spatial Navigation</name>
+  <name lang="ja">空間ナビゲーション</name>
+  <description>Spatial Navigation/description>
+  <description lang="ja">空間ナビゲーション</description>
+  <version>1.0.0</version>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/spatial-navigation.js</updateURL>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
