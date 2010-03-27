@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** }}} */
 
+/* Original version is "SpatialNavigation.js" of Firefox. */
+
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
