@@ -290,19 +290,28 @@ let INFO =
     flashFocusedElement();
   }
 
-  flasher = Cc['@mozilla.org/inspector/flasher;1'].createInstance(Ci.inIFlasher);
+  const flasher = Cc['@mozilla.org/inspector/flasher;1'].createInstance(Ci.inIFlasher);
   flasher.color = '#FF0000';
   flasher.thickness = 2;
 
   function flashFocusedElement () {
     let elem = getFocusedElement();
-    liberator.log(elem);
     if (!elem)
       return;
-    setTimeout(function () {
-      flasher.drawElementOutline(elem);
-      setTimeout(function () flasher.repaintElement(elem), 100);
-    }, 0);
+    setTimeout(
+      function () {
+        flasher.drawElementOutline(elem);
+        elem.addEventListener(
+          'blur',
+          function () {
+            elem.removeEventListener(arguments.callee);
+            flasher.repaintElement(elem);
+          },
+          false
+        );
+      },
+      0
+    );
   }
 
   function focusElement (elem) {
