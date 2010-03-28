@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.6.1"
+<plugin name="zip-de-download" version="0.7.0"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -169,6 +169,44 @@ let SITE_INFO = [
     const badChars = /[\\\/:;\*\?\"\<\>\|\#]/g;
     return liberator.has('windows') ? filename.replace(badChars, '_') :  filename;
   }
+  function getXPathFromExtensions(exts){
+    function getXPath(elem){
+      if (!elem)
+        return '';
+
+      // 連番かもしれない id は無視する
+      let id = elem.getAttribute('id');
+      if (id && !/\d/(id))
+        return 'id("' + id + '")';
+
+      return getXPath(elem.parentNode) + '/' + elem.tagName.toLowerCase();
+    }
+
+    let extPattern = RegExp('(' + exts.join('|')+')(\\W|$)');
+
+    let links =
+      Array.slice( content.document.querySelectorAll('a')).filter(
+        function (link) (link.href && extPattern(link.href)));
+
+    let xs = {};
+    for each(let link in links){
+      let xpath = getXPath(link);
+      if (xs[xpath])
+        xs[xpath]++;
+      else
+        xs[xpath] = 1;
+    }
+
+    let result = null, max = 0;
+    for(let [xpath, count] in Iterator(xs)){
+      if (count > max)
+        [result, max] = [xpath, count];
+    }
+    return result;
+  }
+  function extensionValidator(vs)
+    vs && vs.every(function (v) /^[\da-zA-Z]+$/(v));
+
   let self = {
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
@@ -271,6 +309,9 @@ let SITE_INFO = [
     function (arg){
       let option = {}
       option.append = ("-append" in arg);
+      if ("-auto-detect" in arg){
+        option.xpath = getXPathFromExtensions(arg["-auto-detect"]);
+      }
       if ("-xpath" in arg){
         option.xpath = arg["-xpath"];
       }
@@ -300,6 +341,8 @@ let SITE_INFO = [
         [["-list", "-l"], liberator.modules.commands.OPTION_NOARG],
         [["-append", "-a"], liberator.modules.commands.OPTION_NOARG],
         [["-xpath", "-x"], liberator.modules.commands.OPTION_STRING],
+        [["-auto-detect", "-d"], liberator.modules.commands.OPTION_LIST, extensionValidator,
+         [["jpeg,jpg,png", "images"]]],
         [["-filter", "-f"], liberator.modules.commands.OPTION_STRING]
       ],
       completer: liberator.modules.completion.file
