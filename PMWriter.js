@@ -3,6 +3,8 @@
  * さわるなきけん！
  * DO NOT USE!
  * このコードを読むと失明する場合があります。
+ *
+ * for 2.2
  * */
 
 
@@ -11,6 +13,7 @@
   const U = liberator.plugins.libly.$U;
 
   let pluginDirPath = liberator.globalVariables.pmwriter_plugin_dir;
+  let pluginRootDirPath = io.File(pluginDirPath).parent.path;
   let outputDir = liberator.globalVariables.pmwriter_output_dir;
   const VERSIONS = '2.2 2.1 2.0 1.2'.split(/\s+/);
 
@@ -237,10 +240,14 @@
 
           VERSIONS.forEach(function (ver) {
             let url = CodeReposBranch + ver + '/' + pluginFilename;
+            let file = io.File(pluginRootDirPath);
+            file.append('branches');
+            file.append(ver);
+            file.append(pluginFilename);
             versionsBody +=
               <>
                 <dt>{'for ' + ver}</dt>
-                <a href={url} class="coderepos" target="_blank">{url}</a>
+                {file.exists() ?  <a href={url} class="coderepos" target="_blank">{url}</a> : <>not supported</>}
               </>;
           });
 
