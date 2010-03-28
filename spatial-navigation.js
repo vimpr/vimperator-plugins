@@ -122,26 +122,19 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     return false;
   }
 
-  function inflateRect (rect, value) {
-    var newRect = new Object();
+  function inflateRect (rect, value) ({
+    left: rect.left - value,
+    top: rect.top - value,
+    right: rect.right  + value,
+    bottom: rect.bottom + value
+  });
 
-    newRect.left   = rect.left - value;
-    newRect.top    = rect.top - value;
-    newRect.right  = rect.right  + value;
-    newRect.bottom = rect.bottom + value;
-    return newRect;
-  }
-
-  function containsRect (a, b) {
-    return ( (b.left  <= a.right) &&
-             (b.right >= a.left)  &&
-             (b.top  <= a.bottom) &&
-             (b.bottom >= a.top) );
-  }
+  function containsRect (a, b)
+    ((b.left <= a.right) && (b.right >= a.left) && (b.top <= a.bottom) && (b.bottom >= a.top));
 
   function spatialDistance (dir, a, b) {
-    var inlineNavigation = false;
-    var mx, my, nx, ny;
+    let inlineNavigation = false;
+    let mx, my, nx, ny;
 
     if (dir === DIR.L) {
 
@@ -279,7 +272,7 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
       inlineNavigation = containsRect(scopedRect, b);
     }
 
-    var d = Math.pow((mx-nx), 2) + Math.pow((my-ny), 2);
+    let d = Math.pow((mx-nx), 2) + Math.pow((my-ny), 2);
 
     // prefer elements directly aligned with the focused element
     if (inlineNavigation)
