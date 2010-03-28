@@ -109,22 +109,17 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     window.document.commandDispatcher.focusedElement;
 
   function isRectInDirection (dir, focusedRect, anotherRect) {
-    if (dir === DIR.L) {
-      return (anotherRect.left < focusedRect.left);
+    switch (dir) {
+      case DIR.L:
+        return anotherRect.left < focusedRect.left;
+      case DIR.R:
+        return anotherRect.right > focusedRect.right;
+      case DIR.U:
+        return anotherRect.top < focusedRect.top;
+      case DIR.D:
+        return anotherRect.bottom > focusedRect.bottom
     }
-
-    if (dir === DIR.R) {
-      return (anotherRect.right > focusedRect.right);
-    }
-
-    if (dir === DIR.U) {
-      return (anotherRect.top < focusedRect.top);
-    }
-
-    if (dir === DIR.D) {
-      return (anotherRect.bottom > focusedRect.bottom);
-    }
-      return false;
+    return false;
   }
 
   function inflateRect (rect, value) {
