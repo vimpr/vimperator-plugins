@@ -185,7 +185,6 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
       let mx, my, nx, ny;
 
       if (dir === DIR.L) {
-
         //  |---|
         //  |---|
         //
@@ -194,8 +193,6 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
         //
         //  |---|
         //  |---|
-        //
-
         if (a.top > b.bottom) {
           // the b rect is above a.
           mx = a.left;
@@ -215,7 +212,6 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
           ny = 0;
         }
       } else if (dir === DIR.R) {
-
         //         |---|
         //         |---|
         //
@@ -224,8 +220,6 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
         //
         //         |---|
         //         |---|
-        //
-
         if (a.top > b.bottom) {
           // the b rect is above a.
           mx = a.right;
@@ -245,14 +239,11 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
           ny = 0;
         }
       } else if (dir === DIR.U) {
-
         //  |---|  |---|  |---|
         //  |---|  |---|  |---|
         //
         //         |---|
         //         |---|
-        //
-
         if (a.left > b.right) {
           // the b rect is to the left of a.
           mx = a.left;
@@ -273,14 +264,11 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
           ny = b.bottom;
         }
       } else if (dir === DIR.D) {
-
         //         |---|
         //         |---|
         //
         //  |---|  |---|  |---|
         //  |---|  |---|  |---|
-        //
-
         if (a.left > b.right) {
           // the b rect is to the left of a.
           mx = a.left;
