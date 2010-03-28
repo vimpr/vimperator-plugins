@@ -101,194 +101,18 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
 
 (function () {
 
+  // constant {{{
+
   const DIR = {L: 1, D: 2, U: 3, R: 4};
   const gDirectionalBias = 10;
   const gRectFudge = 1;
 
+  // }}}
+
+  // Functions {{{
+
   function getFocusedElement ()
     window.document.commandDispatcher.focusedElement;
-
-  function isRectInDirection (dir, focusedRect, anotherRect) {
-    switch (dir) {
-      case DIR.L:
-        return anotherRect.left < focusedRect.left;
-      case DIR.R:
-        return anotherRect.right > focusedRect.right;
-      case DIR.U:
-        return anotherRect.top < focusedRect.top;
-      case DIR.D:
-        return anotherRect.bottom > focusedRect.bottom
-    }
-    return false;
-  }
-
-  function inflateRect (rect, value) ({
-    left: rect.left - value,
-    top: rect.top - value,
-    right: rect.right  + value,
-    bottom: rect.bottom + value
-  });
-
-  function containsRect (a, b)
-    ((b.left <= a.right) && (b.right >= a.left) && (b.top <= a.bottom) && (b.bottom >= a.top));
-
-  function spatialDistance (dir, a, b) {
-    let inlineNavigation = false;
-    let mx, my, nx, ny;
-
-    if (dir === DIR.L) {
-
-      //  |---|
-      //  |---|
-      //
-      //  |---|  |---|
-      //  |---|  |---|
-      //
-      //  |---|
-      //  |---|
-      //
-
-      if (a.top > b.bottom) {
-        // the b rect is above a.
-        mx = a.left;
-        my = a.top;
-        nx = b.right;
-        ny = b.bottom;
-      }
-      else if (a.bottom < b.top) {
-        // the b rect is below a.
-        mx = a.left;
-        my = a.bottom;
-        nx = b.right;
-        ny = b.top;
-      }
-      else {
-        mx = a.left;
-        my = 0;
-        nx = b.right;
-        ny = 0;
-      }
-    } else if (dir === DIR.R) {
-
-      //         |---|
-      //         |---|
-      //
-      //  |---|  |---|
-      //  |---|  |---|
-      //
-      //         |---|
-      //         |---|
-      //
-
-      if (a.top > b.bottom) {
-        // the b rect is above a.
-        mx = a.right;
-        my = a.top;
-        nx = b.left;
-        ny = b.bottom;
-      }
-      else if (a.bottom < b.top) {
-        // the b rect is below a.
-        mx = a.right;
-        my = a.bottom;
-        nx = b.left;
-        ny = b.top;
-      } else {
-        mx = a.right;
-        my = 0;
-        nx = b.left;
-        ny = 0;
-      }
-    } else if (dir === DIR.U) {
-
-      //  |---|  |---|  |---|
-      //  |---|  |---|  |---|
-      //
-      //         |---|
-      //         |---|
-      //
-
-      if (a.left > b.right) {
-        // the b rect is to the left of a.
-        mx = a.left;
-        my = a.top;
-        nx = b.right;
-        ny = b.bottom;
-      } else if (a.right < b.left) {
-        // the b rect is to the right of a
-        mx = a.right;
-        my = a.top;
-        nx = b.left;
-        ny = b.bottom;
-      } else {
-        // both b and a share some common x's.
-        mx = 0;
-        my = a.top;
-        nx = 0;
-        ny = b.bottom;
-      }
-    } else if (dir === DIR.D) {
-
-      //         |---|
-      //         |---|
-      //
-      //  |---|  |---|  |---|
-      //  |---|  |---|  |---|
-      //
-
-      if (a.left > b.right) {
-        // the b rect is to the left of a.
-        mx = a.left;
-        my = a.bottom;
-        nx = b.right;
-        ny = b.top;
-      } else if (a.right < b.left) {
-        // the b rect is to the right of a
-        mx = a.right;
-        my = a.bottom;
-        nx = b.left;
-        ny = b.top;
-      } else {
-        // both b and a share some common x's.
-        mx = 0;
-        my = a.bottom;
-        nx = 0;
-        ny = b.top;
-      }
-    }
-
-    let scopedRect = inflateRect(a, gRectFudge);
-
-    if (dir === DIR.L ||
-        dir === DIR.R) {
-      scopedRect.left = 0;
-      scopedRect.right = Infinity;
-      inlineNavigation = containsRect(scopedRect, b);
-    }
-    else if (dir === DIR.U ||
-             dir === DIR.D) {
-      scopedRect.top = 0;
-      scopedRect.bottom = Infinity;
-      inlineNavigation = containsRect(scopedRect, b);
-    }
-
-    let d = Math.pow((mx-nx), 2) + Math.pow((my-ny), 2);
-
-    // prefer elements directly aligned with the focused element
-    if (inlineNavigation)
-      d /= gDirectionalBias;
-
-    return d;
-  }
-
-  function defaultMove (dir) {
-    if (dir === DIR.R || dir === DIR.D) {
-      window.document.commandDispatcher.advanceFocus();
-    } else {
-      window.document.commandDispatcher.rewindFocus();
-    }
-    flashFocusedElement();
-  }
 
   function flashFocusedElement () {
     const flasher =
@@ -321,17 +145,196 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     flashFocusedElement();
   }
 
+  function defaultMove (dir) {
+    if (dir === DIR.R || dir === DIR.D) {
+      window.document.commandDispatcher.advanceFocus();
+    } else {
+      window.document.commandDispatcher.rewindFocus();
+    }
+    flashFocusedElement();
+  }
+
   function move (dir, target) {
+    // Subs {{{
+    function isRectInDirection (dir, focusedRect, anotherRect) {
+      switch (dir) {
+        case DIR.L:
+          return anotherRect.left < focusedRect.left;
+        case DIR.R:
+          return anotherRect.right > focusedRect.right;
+        case DIR.U:
+          return anotherRect.top < focusedRect.top;
+        case DIR.D:
+          return anotherRect.bottom > focusedRect.bottom
+      }
+      return false;
+    }
+
+    function inflateRect (rect, value) ({
+      left: rect.left - value,
+      top: rect.top - value,
+      right: rect.right  + value,
+      bottom: rect.bottom + value
+    });
+
+    function containsRect (a, b)
+      ((b.left <= a.right) && (b.right >= a.left) && (b.top <= a.bottom) && (b.bottom >= a.top));
+
+    function spatialDistance (dir, a, b) {
+      let inlineNavigation = false;
+      let mx, my, nx, ny;
+
+      if (dir === DIR.L) {
+
+        //  |---|
+        //  |---|
+        //
+        //  |---|  |---|
+        //  |---|  |---|
+        //
+        //  |---|
+        //  |---|
+        //
+
+        if (a.top > b.bottom) {
+          // the b rect is above a.
+          mx = a.left;
+          my = a.top;
+          nx = b.right;
+          ny = b.bottom;
+        } else if (a.bottom < b.top) {
+          // the b rect is below a.
+          mx = a.left;
+          my = a.bottom;
+          nx = b.right;
+          ny = b.top;
+        } else {
+          mx = a.left;
+          my = 0;
+          nx = b.right;
+          ny = 0;
+        }
+      } else if (dir === DIR.R) {
+
+        //         |---|
+        //         |---|
+        //
+        //  |---|  |---|
+        //  |---|  |---|
+        //
+        //         |---|
+        //         |---|
+        //
+
+        if (a.top > b.bottom) {
+          // the b rect is above a.
+          mx = a.right;
+          my = a.top;
+          nx = b.left;
+          ny = b.bottom;
+        } else if (a.bottom < b.top) {
+          // the b rect is below a.
+          mx = a.right;
+          my = a.bottom;
+          nx = b.left;
+          ny = b.top;
+        } else {
+          mx = a.right;
+          my = 0;
+          nx = b.left;
+          ny = 0;
+        }
+      } else if (dir === DIR.U) {
+
+        //  |---|  |---|  |---|
+        //  |---|  |---|  |---|
+        //
+        //         |---|
+        //         |---|
+        //
+
+        if (a.left > b.right) {
+          // the b rect is to the left of a.
+          mx = a.left;
+          my = a.top;
+          nx = b.right;
+          ny = b.bottom;
+        } else if (a.right < b.left) {
+          // the b rect is to the right of a
+          mx = a.right;
+          my = a.top;
+          nx = b.left;
+          ny = b.bottom;
+        } else {
+          // both b and a share some common x's.
+          mx = 0;
+          my = a.top;
+          nx = 0;
+          ny = b.bottom;
+        }
+      } else if (dir === DIR.D) {
+
+        //         |---|
+        //         |---|
+        //
+        //  |---|  |---|  |---|
+        //  |---|  |---|  |---|
+        //
+
+        if (a.left > b.right) {
+          // the b rect is to the left of a.
+          mx = a.left;
+          my = a.bottom;
+          nx = b.right;
+          ny = b.top;
+        } else if (a.right < b.left) {
+          // the b rect is to the right of a
+          mx = a.right;
+          my = a.bottom;
+          nx = b.left;
+          ny = b.top;
+        } else {
+          // both b and a share some common x's.
+          mx = 0;
+          my = a.bottom;
+          nx = 0;
+          ny = b.top;
+        }
+      }
+
+      let scopedRect = inflateRect(a, gRectFudge);
+
+      if (dir === DIR.L || dir === DIR.R) {
+        scopedRect.left = 0;
+        scopedRect.right = Infinity;
+        inlineNavigation = containsRect(scopedRect, b);
+      } else if (dir === DIR.U || dir === DIR.D) {
+        scopedRect.top = 0;
+        scopedRect.bottom = Infinity;
+        inlineNavigation = containsRect(scopedRect, b);
+      }
+
+      let d = Math.pow((mx - nx), 2) + Math.pow((my - ny), 2);
+
+      // prefer elements directly aligned with the focused element
+      if (inlineNavigation)
+        d /= gDirectionalBias;
+
+      return d;
+    }
+    // }}}
+
     let doc = target.ownerDocument;
 
-    // If it is XUL content (e.g. about:config), bail.
-    /*
     if (doc instanceof Ci.nsIDOMXULDocument)
       return ;
-    */
 
-    if ((target instanceof Ci.nsIDOMHTMLInputElement && (target.type == "text" || target.type == "password")) ||
-        target instanceof Ci.nsIDOMHTMLTextAreaElement ) {
+    // XXX いらないかも
+    if (
+      (target instanceof Ci.nsIDOMHTMLInputElement && (target.type == "text" || target.type == "password"))
+      ||
+      target instanceof Ci.nsIDOMHTMLTextAreaElement
+    ) {
 
       // if there is any selection at all, just ignore
       if (target.selectionEnd - target.selectionStart > 0)
@@ -339,14 +342,11 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
 
       // if there is no text, there is nothing special to do.
       if (target.textLength > 0) {
-        if (dir === DIR.R ||
-            dir === DIR.D) {
+        if (dir === DIR.R || dir === DIR.D) {
           // we are moving forward into the document
           if (target.textLength != target.selectionEnd)
             return;
-        }
-        else
-        {
+        } else {
           // we are at the start of the text, okay to move
           if (target.selectionStart != 0)
             return;
@@ -355,64 +355,53 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     }
 
     // Check to see if we are in a select
-    if (target instanceof Ci.nsIDOMHTMLSelectElement)
-    {
+    if (target instanceof Ci.nsIDOMHTMLSelectElement) {
       if (dir === DIR.D) {
         if (target.selectedIndex + 1 < target.length)
           return;
       }
 
-      if (dir  === DIR.U) {
+      if (dir === DIR.U) {
         if (target.selectedIndex > 0)
           return;
       }
     }
 
-    function snavfilter(node) {
-
-      if (node instanceof Ci.nsIDOMHTMLLinkElement ||
-          node instanceof Ci.nsIDOMHTMLAnchorElement) {
+    function snavfilter (node) {
+      if (node instanceof Ci.nsIDOMHTMLLinkElement || node instanceof Ci.nsIDOMHTMLAnchorElement) {
         // if a anchor doesn't have a href, don't target it.
         if (node.href == "")
           return Ci.nsIDOMNodeFilter.FILTER_SKIP;
         return  Ci.nsIDOMNodeFilter.FILTER_ACCEPT;
       }
-
-      if ((node instanceof Ci.nsIDOMHTMLButtonElement ||
-           //node instanceof Ci.nsIDOMHTMLInputElement ||
-           node instanceof Ci.nsIDOMHTMLLinkElement ||
-           node instanceof Ci.nsIDOMHTMLOptGroupElement ||
-           node instanceof Ci.nsIDOMHTMLSelectElement
-           //node instanceof Ci.nsIDOMHTMLTextAreaElement
-          ) &&
-          node.disabled == false)
+      if (
+        (node instanceof Ci.nsIDOMHTMLButtonElement ||
+         node instanceof Ci.nsIDOMHTMLLinkElement ||
+         node instanceof Ci.nsIDOMHTMLOptGroupElement ||
+         node instanceof Ci.nsIDOMHTMLSelectElement)
+        &&
+        node.disabled == false
+      )
         return Ci.nsIDOMNodeFilter.FILTER_ACCEPT;
-
       return Ci.nsIDOMNodeFilter.FILTER_SKIP;
     }
 
-    var bestElementToFocus = null;
-    var distanceToBestElement = Infinity;
-    var focusedRect = inflateRect(target.getBoundingClientRect(), -gRectFudge);
+    let bestElementToFocus = null;
+    let distanceToBestElement = Infinity;
+    let focusedRect = inflateRect(target.getBoundingClientRect(), -gRectFudge);
 
-    var treeWalker = doc.createTreeWalker(doc, Ci.nsIDOMNodeFilter.SHOW_ELEMENT, snavfilter, false);
-    var nextNode;
+    let treeWalker = doc.createTreeWalker(doc, Ci.nsIDOMNodeFilter.SHOW_ELEMENT, snavfilter, false);
+    let nextNode;
 
-    while ((nextNode = treeWalker.nextNode())) {
-
+    while (nextNode = treeWalker.nextNode()) {
       if (nextNode == target)
         continue;
 
-      var nextRect = inflateRect(nextNode.getBoundingClientRect(),
-                                  - gRectFudge);
-
-      if (! isRectInDirection(dir, focusedRect, nextRect))
+      let nextRect = inflateRect(nextNode.getBoundingClientRect(), -gRectFudge);
+      if (!isRectInDirection(dir, focusedRect, nextRect))
         continue;
 
-      var distance = spatialDistance(dir, focusedRect, nextRect);
-
-      //dump("looking at: " + nextNode + " " + distance);
-
+      let distance = spatialDistance(dir, focusedRect, nextRect);
       if (distance <= distanceToBestElement && distance > 0) {
         distanceToBestElement = distance;
         bestElementToFocus = nextNode;
@@ -420,27 +409,32 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     }
 
     if (bestElementToFocus != null) {
-      //dump("focusing element  " + bestElementToFocus.nodeName + " " + bestElementToFocus) + "id=" + bestElementToFocus.getAttribute("id");
-
       // Wishing we could do element.focus()
       focusElement(bestElementToFocus);
 
       // if it is a text element, select all.
-      if((bestElementToFocus instanceof Ci.nsIDOMHTMLInputElement && (bestElementToFocus.type == "text" || bestElementToFocus.type == "password")) ||
-         bestElementToFocus instanceof Ci.nsIDOMHTMLTextAreaElement ) {
+      if (
+        (bestElementToFocus instanceof Ci.nsIDOMHTMLInputElement &&
+         (bestElementToFocus.type == "text" || bestElementToFocus.type == "password"))
+        ||
+        bestElementToFocus instanceof Ci.nsIDOMHTMLTextAreaElement
+      ) {
         bestElementToFocus.selectionStart = 0;
         bestElementToFocus.selectionEnd = bestElementToFocus.textLength;
       }
 
     } else {
       // couldn't find anything.  just advance and hope.
-      defaultMove(dir);
+      // XXX XUL をフォーカスしてしまう場合があるので、とりあえずコメントアウト
+      // defaultMove(dir);
     }
 
   }
 
+  // }}}
 
-  // Export API
+  // Export API {{{
+
   __context__.API = {
     DIR: DIR,
     move: function (dir, target) {
@@ -452,8 +446,10 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     }
   };
 
+  // }}}
 
-  // Define mappings
+  // Define mappings {{{
+
   {
     let ms =
       (
@@ -482,6 +478,8 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
       }
     );
   }
+
+  // }}}
 
 })();
 
