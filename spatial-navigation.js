@@ -380,7 +380,7 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
          node instanceof Ci.nsIDOMHTMLOptGroupElement ||
          node instanceof Ci.nsIDOMHTMLSelectElement)
         &&
-        node.disabled == false
+        !node.disabled
       )
         return Ci.nsIDOMNodeFilter.FILTER_ACCEPT;
       return Ci.nsIDOMNodeFilter.FILTER_SKIP;
