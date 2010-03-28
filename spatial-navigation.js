@@ -297,14 +297,15 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
     flashFocusedElement();
   }
 
-  const flasher = Cc['@mozilla.org/inspector/flasher;1'].createInstance(Ci.inIFlasher);
-  flasher.color = '#FF0000';
-  flasher.thickness = 2;
-
   function flashFocusedElement () {
+    const flasher =
+      let (f = Cc['@mozilla.org/inspector/flasher;1'].createInstance(Ci.inIFlasher))
+        (f.color = '#FF0000', f.thickness = 2, f);
+
     let elem = getFocusedElement();
     if (!elem)
       return;
+
     setTimeout(
       function () {
         flasher.drawElementOutline(elem);
