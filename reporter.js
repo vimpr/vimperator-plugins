@@ -51,7 +51,7 @@ let PLUGIN_INFO =
         <FILENAME> に現在の preferences を書き出します。
       - mkcolor <FILENAME>
         <FILENAME> に現在の colorschme を書き出します。
-      - mkreport <FILENAME>
+      - mkreport [-include=<SECTIONS>] <FILENAME>
         <FILENAME> に以下の情報を書き出します。
         - Firefox アドオン＆プラグインの一覧
         - Vimperator プラグインの一覧
