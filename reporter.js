@@ -226,7 +226,14 @@ let PLUGIN_INFO =
         function values (obj)
           [null for (_ in obj)].length;
 
+        let (cnt = [0, 0]) {
+          for each (let ext in liberator.extensions)
+            cnt[0 + !!ext.enabled]++;
+          puts('addons', cnt[0] + cnt[1] + ' (enabled: ' + cnt[1] + ', disabled: ' + cnt[0] + ')');
+        }
         puts('plugins', values(plugins.contexts));
+        puts('bookmarks', bookmarks.get('').length);
+        puts('history', history.get('').length);
         puts('commands', values(commands));
         puts('hint-modes', values(hints._hintModes));
         puts(
