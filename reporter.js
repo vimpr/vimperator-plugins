@@ -232,9 +232,16 @@ let PLUGIN_INFO =
         puts(
           'user-mappings',
           [ms for each (ms in mappings._user)].reduce(function (init ,ms) init + ms.length, 0)
+          + ' (n: ' +
+          mappings._user[modes.NORMAL].length +
+          ', c: ' +
+          mappings._user[modes.COMMAND_LINE].length +
+          ', i: ' +
+          mappings._user[modes.INSERT].length +
+          ', v: ' +
+          mappings._user[modes.VISUAL].length +
+          ')'
         );
-        puts('user-nmappings', mappings._user[modes.NORMAL].length);
-        puts('user-cmappings', mappings._user[modes.COMMAND_LINE].length);
       }
     )
   };
