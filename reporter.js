@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>mkreport</name>
   <description>Write current information to the specified file</description>
   <description lang="ja">現在の情報を指定のファイルに書き出す。</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -252,20 +252,6 @@ let PLUGIN_INFO =
     desc: 'Write current preferences to the specified file',
     options: [LIMIT_OPTION],
     action: Writers.preferences.action
-  });
-
-  defineCommand({
-    names: ['mkplugins'],
-    desc: 'Write current plugin list to the specified file',
-    options: [LIMIT_OPTION],
-    action: Writer.plugins
-  });
-
-  defineCommand({
-    names: ['mkaddons'],
-    desc: 'Write current ' + config.hostApplication + ' Addon list to the specified file',
-    options: [LIMIT_OPTION],
-    action: Writer.addons
   });
 
   defineCommand({
