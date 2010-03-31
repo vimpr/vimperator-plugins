@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.26.0</version>
+  <version>0.26.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -380,7 +380,7 @@ Thanks:
     // 上手い具合に秒数に直すよ
     fromTimeCode: function (code, max) {
       var m;
-      if (max && (m = /^(\d+(?:\.\d)?)%/(code)))
+      if (max && (m = /^(-?\d+(?:\.\d)?)%/(code)))
         return Math.round(max * (parseFloat(m[1]) / 100));
       if (m = /^(([-+]?)\d+):(\d+)$/(code))
         return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
@@ -692,7 +692,7 @@ Thanks:
     },
 
     seekRelative: function (v)
-      this.currentTime = Math.min(Math.max(this.currentTime + U.fromTimeCode(v), 0), this.totalTime),
+      this.currentTime = Math.min(Math.max(this.currentTime + U.fromTimeCode(v, this.totalTime), 0), this.totalTime),
 
     toggle: function (name) {
       if (!this.has(name, 'rwt'))
