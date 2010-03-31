@@ -385,7 +385,7 @@ Thanks:
       if (m = /^(([-+]?)\d+):(\d+)$/(code))
         return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
       if (m = /^([-+]?\d+\.\d+)$/(code))
-        return Math.round(parseFloat(m[1], 10) * 60);
+        return Math.round(parseFloat(m[1]) * 60);
       return parseInt(code, 10);
     },
 
