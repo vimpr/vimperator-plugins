@@ -141,78 +141,117 @@ let PLUGIN_INFO =
     );
   }
 
-  const LIMIT_OPTION = [['-length-limit', '-ll'], commands.OPTION_INT];
+  function Writer (title, action)
+    ({title: title, action: action});
 
-  const Writer = {
-    basic: function (file) {
-      function puts (name, value)
-        file.writeln(pad(name + ': ', 20) + value);
-      puts('Name', config.name);
-      puts('Host', config.hostApplication);
-      puts('Platform', navigator.platform);
-      puts('Version', liberator.version);
-      puts('UserAgent', navigator.userAgent);
-    },
-
-    colors: function (file) {
-      function rmrem (s)
-        s.replace(/\s*\/\*.*\*\//g, '');
-
-      let max = 0;
-      for (let h in highlight)
-        max = Math.max(h.class.length, max);
-
-      for (let h in highlight)
-        file.writeln(h.value ? 'hi ' + pad(h.class, max) + '  ' + rmrem(h.value)
-                             : '" hi ' + h.class);
-    },
-
-    preferences: function (file, {'-length-limit': limit}) {
-      // TODO エスケープ処理など怪しいので調べる
-      function esc (str)
-        (typeof str === 'string' ? str.replace(/\n/g, '\\n') : str);
-
-      function quote (str)
-        (typeof str === 'string' ? Commands.quoteArg["'"](str) : str);
-
-      function compareByName ([n1,], [n2,])
-        n1.localeCompare(n2);
-
-      let Pref = services.get("pref");
-
-      for each (let name in options.allPrefs().sort(compareByName)) {
-        if (!Pref.prefHasUserValue(name))
-          continue;
-        let value = options.getPref(name);
-        if (typeof value === 'string' && limit && value.length > limit)
-          continue;
-        file.writeln("set! " + name + "=" +  esc(quote(value)));
+  const Writers = {
+    basic: Writer(
+      'Basic',
+      function (file) {
+        function puts (name, value)
+          file.writeln(pad(name + ': ', 20) + value);
+        puts('Name', config.name);
+        puts('Host', config.hostApplication);
+        puts('Platform', navigator.platform);
+        puts('Version', liberator.version);
+        puts('UserAgent', navigator.userAgent);
       }
-    },
+    ),
 
-    addons: function (file) {
-      for each (let ext in liberator.extensions) {
-        file.writeln(ext.name);
-        file.writeln('  ' + (ext.enabled ? 'enabled' : 'disabled'));
+    colors: Writer(
+      'Color Scheme',
+        function (file) {
+        function rmrem (s)
+          s.replace(/\s*\/\*.*\*\//g, '');
+
+        let max = 0;
+        for (let h in highlight)
+          max = Math.max(h.class.length, max);
+
+        for (let h in highlight)
+          file.writeln(h.value ? 'hi ' + pad(h.class, max) + '  ' + rmrem(h.value)
+                               : '" hi ' + h.class);
       }
-    },
+    ),
 
-    plugins: function (file) {
-      [File(n).leafName for (n in plugins.contexts)].sort().forEach(function (n) file.writeln(n));
-    }
+    preferences: Writer(
+      config.hostApplication + ' Preference',
+        function (file, {'-length-limit': limit}) {
+        // TODO エスケープ処理など怪しいので調べる
+        function esc (str)
+          (typeof str === 'string' ? str.replace(/\n/g, '\\n') : str);
+
+        function quote (str)
+          (typeof str === 'string' ? Commands.quoteArg["'"](str) : str);
+
+        function compareByName ([n1,], [n2,])
+          n1.localeCompare(n2);
+
+        let Pref = services.get("pref");
+
+        for each (let name in options.allPrefs().sort(compareByName)) {
+          if (!Pref.prefHasUserValue(name))
+            continue;
+          let value = options.getPref(name);
+          if (typeof value === 'string' && limit && value.length > limit)
+            continue;
+          file.writeln("set! " + name + "=" +  esc(quote(value)));
+        }
+      }
+    ),
+
+    addons: Writer(
+      config.hostApplication + ' Addon & Plugin',
+      function (file) {
+        for each (let ext in liberator.extensions) {
+          file.writeln(ext.name);
+          file.writeln('  ' + (ext.enabled ? 'enabled' : 'disabled'));
+        }
+      }
+    ),
+
+    plugins: Writer(
+      config.hostApplication + ' Addon & Plugin',
+      function (file) {
+        [File(n).leafName for (n in plugins.contexts)].sort().forEach(function (n) file.writeln(n));
+      }
+    ),
+
+    numbers: Writer(
+      'Numbers',
+      function (file) {
+        function puts (name, value)
+          file.writeln(pad(name + ': ', 20) + value);
+
+        function values (obj)
+          [null for (_ in obj)].length;
+
+        puts('plugins', values(plugins.contexts));
+        puts('commands', values(commands));
+        puts('hint-modes', values(hints._hintModes));
+        puts(
+          'user-mappings',
+          [ms for each (ms in mappings._user)].reduce(function (init ,ms) init + ms.length, 0)
+        );
+        puts('user-nmappings', mappings._user[modes.NORMAL].length);
+        puts('user-cmappings', mappings._user[modes.COMMAND_LINE].length);
+      }
+    )
   };
+
+  const LIMIT_OPTION = [['-length-limit', '-ll'], commands.OPTION_INT];
 
   defineCommand({
     names: ['mkco[lor]'],
     desc: 'Write current highlights to the specified file',
-    action: Writer.colors
+    action: Writers.colors.action
   });
 
   defineCommand({
     names: ['mkvimpref'],
     desc: 'Write current preferences to the specified file',
     options: [LIMIT_OPTION],
-    action: Writer.preferences
+    action: Writers.preferences.action
   });
 
   defineCommand({
@@ -232,22 +271,23 @@ let PLUGIN_INFO =
   defineCommand({
     names: ['mkreport'],
     desc: 'Write the report for your question.',
-    options: [LIMIT_OPTION],
+    options: [
+      LIMIT_OPTION,
+      [['-include', '-i'], commands.OPTION_LIST, null, [[n, n] for (n in Writers)]]
+    ],
     action: function (file, args) {
-      function writeSection (title, writer) {
+      function writeSection (name) {
         const line = '"======================================================================';
+        if (!Writers[name])
+          return liberator.echoerr('Unknown section: ' + name);
         file.writeln(line);
-        file.writeln('" ' + title);
+        file.writeln('" ' + Writers[name].title);
         file.writeln(line + '\n');
-        writer(file, args);
+        Writers[name].action(file, args);
         file.writeln('\n');
       }
 
-      writeSection('Basic', Writer.basic);
-      writeSection(config.name + ' Plugin', Writer.plugins);
-      writeSection(config.hostApplication + ' Addon & Plugin', Writer.addons);
-      writeSection(config.hostApplication + ' Preference', Writer.preferences);
-      writeSection('Color Scheme', Writer.colors);
+      (args['-include'] || [n for (n in Writers)]).forEach(writeSection);
     }
   });
 
