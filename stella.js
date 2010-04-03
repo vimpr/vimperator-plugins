@@ -1893,10 +1893,6 @@ Thanks:
           timerHandle = setTimeout(
             U.bindr(this, function () {
               this.player.currentTime = this.__currentTimeTo;
-              liberator.log({
-                pl: this.player.currentTime,
-                to: this.__currentTimeTo
-              })
               delete this.__currentTimeTo;
             }),
             1000
@@ -2012,7 +2008,6 @@ Thanks:
     // すでにインストール済みの場合は、一度ファイナライズする
     // (デバッグ時に前のパネルが残ってしまうため)
     if (estella) {
-      liberator.log(estella)
       estella.finalize();
       install();
     } else {
