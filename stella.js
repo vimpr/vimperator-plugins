@@ -1086,9 +1086,9 @@ Thanks:
         [
           'tag',
           [
-            <span><a href={this.makeURL(t, Player.URL_TAG)}>{t}</a></span>
+            <span>[<a href={this.makeURL(t, Player.URL_TAG)}>{t}</a>]</span>
             for each (t in Array.slice(v.tags))
-          ].join(' ')
+          ].join('')
         ]
       ];
     },
