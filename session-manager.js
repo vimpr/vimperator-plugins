@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="session-manager" version="1.0.1"
+  <plugin name="session-manager" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="session-manager" version="1.0.1"
+  <plugin name="session-manager" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
@@ -133,6 +133,10 @@ let INFO =
       gSessionManager.load(fixFilename(name), 'overwrite');
       liberator.echo('Session loaded: '+ name);
     },
+    append: function (name) {
+      gSessionManager.load(fixFilename(name), 'append');
+      liberator.echo('Session loaded: '+ name);
+    },
     delete: function (name) {
       let file = fixFile(name);
       if (!file.exists())
@@ -146,6 +150,8 @@ let INFO =
   alias(SubCommands, 'load', 'l');
   alias(SubCommands, 'delete', 'd');
   alias(SubCommands, 'delete', 'del');
+  alias(SubCommands, 'append', 'a');
+  alias(SubCommands, 'append', 'add');
 
   commands.addUserCommand(
     ['sessionmanager', 'sm'],
@@ -164,6 +170,7 @@ let INFO =
             ['save', 'Save current session'],
             ['load', 'Load saved session (overwrite)'],
             ['delete', 'Remove saved session'],
+            ['append', 'Load saved session (append)'],
           ];
           return;
         }
