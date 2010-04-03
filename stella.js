@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.26.2</version>
+  <version>0.26.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -475,7 +475,32 @@ Thanks:
 
     toTimeCode: function (v)
       (U.isNum(v) ? (parseInt((v / 60)) + ':' + U.lz(v % 60, 2))
-                : '??:??')
+                : '??:??'),
+
+    toXML: function (html) {
+      function createHTMLDocument (source) {
+        let wcnt = window.content;
+        let doc = wcnt.document.implementation.createDocument(
+          'http://www.w3.org/1999/xhtml',
+          'html',
+          wcnt.document.implementation.createDocumentType(
+            'html',
+            '-//W3C//DTD HTML 4.01//EN',
+            'http://www.w3.org/TR/html4/strict.dtd'
+          )
+        );
+        let range = wcnt.document.createRange();
+        range.selectNodeContents(wcnt.document.documentElement);
+        let content = doc.adoptNode(range.createContextualFragment(source));
+        doc.documentElement.appendChild(content);
+        return doc;
+      }
+
+      function replaceHTML (s)
+        s.replace(/<br>/g, '<br />').replace(/&nbsp;/g, ' ');
+
+      return replaceHTML(createHTMLDocument(html).documentElement.innerHTML);
+    }
   };
 
 
@@ -881,11 +906,8 @@ Thanks:
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
     get pageinfo () [
-      [
-        name,
-        U.xpathGet(this.xpath[name]).innerHTML.replace(/&nbsp;/g, ', ')
-      ]
-      for (name in this.xpath)
+      ['comment', U.toXML(U.xpathGet(this.xpath.comment).innerHTML)],
+      ['tags', U.toXML(U.xpathGet(this.xpath.tags).innerHTML)]
     ],
 
     get player ()
@@ -1060,13 +1082,13 @@ Thanks:
       let v = content.wrappedJSObject.Video;
       return [
         ['thumbnail', <img src={v.thumbnail} />],
-        ['comment', v.description],
+        ['comment', U.toXML(v.description)],
         [
           'tag',
           [
             <span><a href={this.makeURL(t, Player.URL_TAG)}>{t}</a></span>
             for each (t in Array.slice(v.tags))
-          ].join()
+          ].join(' ')
         ]
       ];
     },
