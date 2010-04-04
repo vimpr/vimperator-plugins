@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="session-manager" version="1.2.0"
+  <plugin name="session-manager" version="1.3.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="session-manager" version="1.2.0"
+  <plugin name="session-manager" version="1.3.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
@@ -106,6 +106,8 @@ let INFO =
 
   if(!gSessionManager)
     return;
+
+  let ignoreAuto = liberator.globalVariables.session_manager_ignore_auto || 0;
 
   function alias (obj, from, to)
     (obj[to] = function () obj[from].apply(obj, arguments));
@@ -162,6 +164,9 @@ let INFO =
     },
     {
       literal: 1,
+      options: [
+        [['-auto'], commands.OPTION_NOARG],
+      ],
       completer: function (context, args) {
         context.title = ['Session name', 'Saved time'];
 
@@ -179,6 +184,7 @@ let INFO =
         context.completions = [
           [file.leafName.replace(/\.session$/, ''), new Date(file.lastModifiedTime)]
           for each ([,file] in io.File(gSessionManager.getSessionDir()).readDirectory())
+          if (!ignoreAuto || args['-auto'] || !/^(backup(-\d+)?|autosave)\.session$/(file.leafName))
         ].sort(function ([, a], [, b]) (b - a));
       }
     },
