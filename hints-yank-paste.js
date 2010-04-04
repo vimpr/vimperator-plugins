@@ -4,11 +4,11 @@ var PLUGIN_INFO =
     <description>Adds "Yank element's text/html/attrs" or "Paste to element" hint mode</description>
     <description lang="ja">要素の text/html/attrs をコピーするヒントモードを追加する</description>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.0</maxVersion>
+    <maxVersion>2.3</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-yank-paste.js</updateURL>
     <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
     <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-    <version>0.1</version>
+    <version>0.1.1</version>
     <detail><![CDATA[
 ; の hint モードにおいて、c/C で要素の text / HTML / attributes をクリップボードにコピー(Yank)できるようにするプラグインです。
 ソースコードや段落, 画像のURL, input/textarea の値などをさくっとコピーしたり、どこかの部分の HTML 自体をコピりたいなー、という時に活用できます。
@@ -59,6 +59,8 @@ options.add(["hintpastetags"],
     "string", DEFAULT_PASTE_HINTTAGS);
 
 let maps = liberator.globalVariables.hints_copy_maps || DEFAULT_MAPS;
+if (typeof maps === "string")
+  maps = maps.split(/\s+/);
 
 var stripText = function(text) {
     text = text.replace(/^[ \t]+(?:\r\n|[\r\n])|\s+$/m, ''); //mg?
