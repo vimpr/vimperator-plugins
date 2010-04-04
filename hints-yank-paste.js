@@ -18,9 +18,11 @@ var PLUGIN_INFO =
 マップするキーや hint の XPath などは変更できます。
 
 liberator.globalVariables.hints_copy_maps = ['c', 'C', 'p', 'P'];
+let g:hints_copy_maps = "c C p P"
 
 例: paste のほうは設定しない
 liberator.globalVariables.hints_copy_maps = ['c', 'C', null, null];
+let g:hints_copy_maps = "c C <nop> <nop>"
 
 set hintyanktags='//xpath|//xpath2';
 set hintpastetags='//xpath|//xpath2';
