@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Hints For Embedded Objects</name>
   <description>Add the hints mode for Embedded objects.</description>
   <description lang="ja">埋め込み(embed)オブジェクト用ヒントモード</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="HintsForEmbeded" version="1.1.0"
+  <plugin name="HintsForEmbeded" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
           lang="en-US"
@@ -102,7 +102,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="HintsForEmbeded" version="1.1.0"
+  <plugin name="HintsForEmbeded" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
           summary="埋め込み(embed)オブジェクト用ヒントモード"
           lang="ja"
@@ -155,6 +155,7 @@ let INFO =
 
   let modeName = liberator.globalVariables.hints_for_embedded_mode || 'hints-for-embedded';
   let where = liberator.globalVariables.hints_for_embedded_where;
+  let openParent = liberator.globalVariables.hints_for_embedded_open_parent_link || 0;
 
   if (typeof where === 'undefined')
     where = liberator.NEW_TAB;
@@ -194,8 +195,14 @@ let INFO =
   function elemToURL (elem) {
     let info = getInfo(elem.wrappedJSObject);
 
-    if (elem.tagName === 'IMG' && elem.src)
+    if (elem.tagName === 'IMG' && elem.src) {
+      if (openParent) {
+        let p = elem.parentNode;
+        if (p.tagName === 'A' && /(gif|png|jpe?g)$/i(p.href))
+          return liberator.open(p.href, liberator.NEW_TAB);
+      }
       return liberator.open(elem.src, liberator.NEW_TAB);
+    }
 
     let site =
       (function () {
