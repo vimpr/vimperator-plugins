@@ -283,6 +283,7 @@ let elemStyle =
             zIndex: 1000,
             left: 0,
             bottom: 0,
+            MozBoxSizing: 'content-box',
           }) +
           elemStyle
         );
