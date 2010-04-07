@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.4.2</version>
+  <version>2.4.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -177,15 +177,6 @@ let elemStyle =
   let U = libly.$U;
   let mainWindow = document.getElementById('main-window');
   let messageBox = document.getElementById('liberator-message');
-
-  function around (obj, name, func) {
-    let next = obj[name];
-    obj[name] = function ()
-      let (self = this, args = arguments)
-        func.call(self,
-                  function () next.apply(self, args),
-                  args);
-  }
 
   function s2b (s, d) !!((!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s);
 
@@ -388,24 +379,24 @@ let elemStyle =
     });
   }
 
-  around(commandline, 'input', function (next, args) {
+  U.around(commandline, 'input', function (next, args) {
     let result = next();
     inputting = true;
     return result;
   });
 
-  around(commandline, 'open', function (next, args) {
+  U.around(commandline, 'open', function (next, args) {
     messageBox.collapsed = false;
     return next();
   });
 
-  around(commandline, 'close', function (next, args) {
+  U.around(commandline, 'close', function (next, args) {
     if (autoHideCommandLine && !inputting)
       messageBox.collapsed = true;
     return next();
   });
 
-  around(commandline._callbacks.submit, modes.EX, function (next, args) {
+  U.around(commandline._callbacks.submit, modes.EX, function (next, args) {
     let r = next();
     if (autoHideCommandLine && !inputting && !(modes.extended & modes.OUTPUT_MULTILINE))
       commandline.close();
@@ -413,8 +404,8 @@ let elemStyle =
   });
 
   let (callback = function (next) (inputting = false, next())) {
-    around(commandline._callbacks.submit, modes.PROMPT, callback);
-    around(commandline._callbacks.cancel, modes.PROMPT, callback);
+    U.around(commandline._callbacks.submit, modes.PROMPT, callback);
+    U.around(commandline._callbacks.cancel, modes.PROMPT, callback);
   }
 
   options.add(
