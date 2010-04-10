@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Option Selector</name>
   <description>Select a option of the select element.</description>
   <description lang="ja">select 要素の option を選択する。</description>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -82,7 +82,7 @@ let PLUGIN_INFO =
         }
       }
     );
-    events.feedkeys('<Tab>', true); // FIXME
+    events.feedkeys('<Space><C-u>', true); // FIXME
   }
 
   autocommands.add(
