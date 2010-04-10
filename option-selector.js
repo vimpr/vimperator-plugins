@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Option Selector</name>
   <description>Select a option of the select element.</description>
   <description lang="ja">select 要素の option を選択する。</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,21 +56,19 @@ let PLUGIN_INFO =
 
 (function () {
 
-  {
-    let targetElement = null;
+  function select () {
+    let targetElement = buffer.lastInputField;
 
-    commands.addUserCommand(
-      ['selectoption'],
-      'Select a option of the select element',
-      function (args) {
-        targetElement.selectedIndex = parseInt(args[0], 10);
+    commandline.input(
+      'Select a option of the select element: ',
+      function (arg) {
+        targetElement.selectedIndex = parseInt(arg, 10);
         let event = content.document.createEvent('Event');
         event.initEvent('change', true, true);
         targetElement.dispatchEvent(event);
         targetElement.focus();
       },
       {
-        literal: 0,
         completer: function (context, args) {
           let elem = targetElement = buffer.lastInputField;
           if (!elem)
@@ -82,9 +80,9 @@ let PLUGIN_INFO =
             for ([n, opt] in Iterator(Array.slice(elem.options)))
           ];
         }
-      },
-      true
+      }
     );
+    events.feedkeys('<Tab>', true); // FIXME
   }
 
   autocommands.add(
@@ -95,7 +93,7 @@ let PLUGIN_INFO =
       let action = mapping.action;
       mapping.action = function () {
         if (buffer.lastInputField instanceof HTMLSelectElement)
-          commandline.open(':', 'selectoption ', modes.EX)
+          select()
         else
           action.apply(action, arguments);
       };
