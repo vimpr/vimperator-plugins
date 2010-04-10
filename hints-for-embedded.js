@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Hints For Embedded Objects</name>
   <description>Add the hints mode for Embedded objects.</description>
   <description lang="ja">埋め込み(embed)オブジェクト用ヒントモード</description>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="HintsForEmbeded" version="1.2.0"
+  <plugin name="HintsForEmbeded" version="1.3.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
           lang="en-US"
@@ -102,7 +102,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="HintsForEmbeded" version="1.2.0"
+  <plugin name="HintsForEmbeded" version="1.3.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
           summary="埋め込み(embed)オブジェクト用ヒントモード"
           lang="ja"
@@ -192,7 +192,7 @@ let INFO =
       getAttrs(elem),
       (Array.slice(elem.querySelectorAll('object,embed,param')) || []).map(getInfo));
 
-  function elemToURL (elem) {
+  function open (elem) {
     let info = getInfo(elem.wrappedJSObject);
 
     if (elem.tagName === 'IMG' && elem.src) {
@@ -216,13 +216,30 @@ let INFO =
       if (m)
         return site.url(Array.slice(m, 1));
     }
+
+    let urls = info.filter(function ([n, v]) /^https?:\/\//(v));
+    if (!urls.length)
+      return liberator.echoerr('Could not found URL');
+
+    commandline.input(
+      'Select the link you wish to open: ',
+      function (url) {
+        liberator.open(url, where);
+      },
+      {
+        default: urls[0][1],
+        completer: function (context) {
+          context.completions = [[v, n] for each ([n, v] in urls)];
+        }
+      }
+    );
   }
 
   hints.addMode(
     modeName,
     DESC,
     function (elem) {
-      liberator.open(elemToURL(elem), where);
+      liberator.open(open(elem), where);
     },
     function () '//embed | //object | //img'
   );
