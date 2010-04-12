@@ -216,11 +216,13 @@ let INFO =
           if (info.some(function (nv) nv.some(function (v) site.site.test(v))))
             return site;})();
 
-    for each (let [n, v] in info) {
-      let m = n.match(site.value) || v.match(site.value);
-      liberator.log(v);
-      if (m)
-        return site.url(Array.slice(m, 1));
+    if (site) {
+      for each (let [n, v] in info) {
+        let m = n.match(site.value) || v.match(site.value);
+        liberator.log(v);
+        if (m)
+          return site.url(Array.slice(m, 1));
+      }
     }
 
     let urls = info.filter(function ([n, v]) /^https?:\/\//(v));
