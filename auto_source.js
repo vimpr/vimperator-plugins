@@ -133,6 +133,19 @@ let INFO =
     return normalize(cur.path);
   }
 
+  function source (filepath) {
+    io.source(filepath);
+    let ctx = liberator.plugins.contexts[filepath];
+    liberator.log(filepath);
+    if (ctx) {
+      liberator.log(ctx.NAME);
+      if (typeof liberator.plugins[ctx.NAME] === 'undefined')
+        liberator.plugins[ctx.NAME] = ctx;
+    } else {
+      liberator.echoerr('plugin_loader.js: context not found (' + filepath + ')');
+    }
+  }
+
   function startWatching (filepath, command, force, initHelp) {
     if (exists(filepath)) {
       if (force) {
@@ -153,7 +166,7 @@ let INFO =
       if (last != current) {
         liberator.log('sourcing: ' + filepath);
         last = current;
-        io.source(filepath);
+        source(filepath);
         if (command) {
             liberator.log('command execute: ' + command);
             liberator.execute(command);
