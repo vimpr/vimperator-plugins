@@ -181,6 +181,12 @@ let INFO =
       name: /.*/,
       value: /clip_id=(\d+)/,
       url: function (id) ('http://vimeo.com/' + id)
+    },
+    collegehumor: {
+      site: /collegehumor/,
+      name: /.*/,
+      value: /clip_id=(\d+)/,
+      url: function (id) ('http://www.collegehumor.com/video:' + id)
     }
   };
 
