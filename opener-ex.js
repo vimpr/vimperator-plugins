@@ -23,6 +23,8 @@ function createAround(isAddTab){
    */
   return function openerAround(wrappedOriginalFunction, args){
     let url = args[0], uri;
+    if (!url)
+      return wrappedOriginalFunction();
     try {
       uri = getRedirectedURL(util.createURI(url));
       args[0] = uri.spec;
