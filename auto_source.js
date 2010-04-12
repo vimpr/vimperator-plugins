@@ -121,12 +121,16 @@ let INFO =
     (files = files.filter(function (it) (!(it.path.indexOf(filepath) === 0 && func(it)+'-'))));
 
   function expandPath (filepath) {
+    function normalize (filepath)
+      let (file = io.File(filepath))
+        (file.normalize(), file.path);
+
     filepath = io.expandPath(filepath);
     if (filepath.match(/\/|\w:[\\\/]/))
-      return filepath;
+      return normalize(filepath);
     let cur = io.getCurrentDirectory();
     cur.appendRelativePath(filepath);
-    return cur.path;
+    return normalize(cur.path);
   }
 
   function startWatching (filepath, command, force, initHelp) {
