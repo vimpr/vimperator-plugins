@@ -657,7 +657,7 @@ let INFO = <>
 
       let result = {};
       unmap({filter: name, urls: urls, ignoreUrls: args['-ignoreurls'], result: result});
-      liberator.echo(result.matched ?  'Some fmappings were removed.' : 'Not found specifed fmappings.');
+      liberator.echo(result.matched ? 'Some fmappings were removed.' : 'Not found specifed fmappings.');
     },
     {
       literal: 0,
