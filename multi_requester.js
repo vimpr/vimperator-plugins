@@ -116,7 +116,7 @@ var SITEINFO = [
     name: "alc",
     description: "SPACE ALC (\u82F1\u8F9E\u6717 on the Web)",
     url: "http://eow.alc.co.jp/%s/UTF-8/",
-    xpath: 'id("resultList")'
+    xpath: 'id("resultsList")'
   }
 ];
 var libly = liberator.plugins.libly;
