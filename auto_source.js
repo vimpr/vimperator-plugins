@@ -151,7 +151,7 @@ let INFO =
       if (force) {
         killWatcher(filepath);
       } else {
-        throw 'The file has already been watched: ' + filepath;
+        return liberator.echoerr('The file has already been watched: ' + filepath);
       }
     }
     let last = firstTime ? null : getFileModifiedTime(filepath);
@@ -181,7 +181,7 @@ let INFO =
 
   function killWatcher (filepath) {
     if (!exists(filepath))
-      throw 'The file is not watched: ' + filepath;
+      return liberator.echoerr('The file is not watched: ' + filepath);
     remove(filepath, function (it) clearInterval(it.handle));
     liberator.echo('stopped the watching for the file');
   }
