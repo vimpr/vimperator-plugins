@@ -11,10 +11,10 @@ var PLUGIN_INFO =
   <description>request, and the result is displayed to the buffer.</description>
   <description lang="ja">リクエストの結果をバッファに出力する。</description>
   <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.4.15</version>
+  <version>0.4.16</version>
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <maxVersion>2.2</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/multi_requester.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
@@ -116,7 +116,7 @@ var SITEINFO = [
     name: "alc",
     description: "SPACE ALC (\u82F1\u8F9E\u6717 on the Web)",
     url: "http://eow.alc.co.jp/%s/UTF-8/",
-    xpath: 'id("resultList")'
+    xpath: 'id("resultsList")'
   }
 ];
 var libly = liberator.plugins.libly;
