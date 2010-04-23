@@ -143,7 +143,7 @@ let INFO =
         if (typeof liberator.plugins[ctx.NAME] === 'undefined')
           liberator.plugins[ctx.NAME] = ctx;
       } else {
-        liberator.echoerr('plugin_loader.js: context not found (' + filepath + ')');
+        liberator.echoerr('auto_source.js: context not found (' + filepath + ')');
       }
     }
   }
