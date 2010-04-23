@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Write a memo to the specified file.</description>
   <description lang="ja">指定のファイルにメモを書く</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/memo.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
+  <maxVersion>2.3</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :memo:
@@ -119,9 +119,15 @@ let PLUGIN_INFO =
       if (arg.string) {
         puts(arg.string);
       } else {
-        liberator.echo(gets());
+        let out = <></>;
+        gets().split(/\n/).reverse().forEach(function (l) {
+          out += <li>{l}</li>
+        });
+        liberator.echo(out);
       }
-    }
+    },
+    {},
+    true
   );
 
 })();
