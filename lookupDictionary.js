@@ -13,7 +13,7 @@ const SITE_DEFINITION = [{
     names: ['eiji[ro]'],
     url: 'http://eow.alc.co.jp/%s/UTF-8/',
     shortHelp: 'SPACE ALC (\u82F1\u8F9E\u6717 on the Web)',
-    xpath: 'id("resultList")',
+    xpath: 'id("resultsList")',
     dictionary: 'en-US'
 },{
     names: ['goo[dictionary]'],
