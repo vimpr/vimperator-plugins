@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>character hint mode.</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <minVersion>2.3pre 2010/01/26</minVersion>
-    <maxVersion>2.3pre</maxVersion>
+    <maxVersion>2.4pre</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -262,10 +262,10 @@ let g:hintlabeling:
 
     if(!charhints.original) {
         charhints.original = {
-            show: Hints.prototype.show,
-            onInput: Hints.prototype._onInput,
-            onEvent: Hints.prototype.onEvent,
-            processHints: Hints.prototype._processHints,
+            show: hints.show,
+            onInput: hints._onInput,
+            onEvent: hints.onEvent,
+            processHints: hints._processHints,
         };
 
         charhints.install = function () //{{{
