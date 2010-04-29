@@ -3,10 +3,10 @@ let PLUGIN_INFO =
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
   <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
-  <version>0.4.5</version>
+  <version>0.4.6</version>
   <author>SAKAI, Kazuaki</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4pre</maxVersion>
   <detail><![CDATA[
     == Commands ==
       :anc:
@@ -102,6 +102,8 @@ let PLUGIN_INFO =
 
   // stuff function
   function stringToBoolean(str, defaultValue) {
+    if (typeof str === 'number')
+      str = str.toString();
     return !str                          ? (defaultValue ? true : false)
          : str.toLowerCase() === 'false' ? false
          : /^\d+$/.test(str)             ? (parseInt(str) ? true : false)
