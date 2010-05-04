@@ -906,10 +906,19 @@ Thanks:
     get muted () this.player.isMuted(),
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
-    get pageinfo () [
-      ['comment', U.toXML(U.xpathGet(this.xpath.comment).innerHTML)],
-      ['tags', U.toXML(U.xpathGet(this.xpath.tags).innerHTML)]
-    ],
+    get pageinfo () {
+      let doc = content.document;
+      return [
+        [
+          'comment',
+          doc.querySelector('#watch-description > div > span > span > a').nextSibling.textContent.trim()
+        ],
+        [
+          'tags',
+          U.toXML(doc.querySelector('#watch-tags > div').innerHTML)
+        ]
+      ];
+    },
 
     get player ()
       U.getElementByIdEx('movie_player'),
