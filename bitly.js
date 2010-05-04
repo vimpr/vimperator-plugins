@@ -77,6 +77,7 @@ let PLUGIN_INFO =
   }
 
   function setupAuth (callback) {
+    liberator.open('http://bit.ly/a/your_api_key', liberator.NEW_TAB);
     commandline.input(
       'Login name for bit.ly: ',
       function (username) {
