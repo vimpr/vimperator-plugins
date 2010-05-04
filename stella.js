@@ -497,7 +497,7 @@ Thanks:
       }
 
       function replaceHTML (s)
-        s.replace(/<br>/g, '<br />').replace(/&nbsp;/g, ' ');
+        s.replace(/<br>/g, '<br />').replace(/&nbsp;/g, '<span style="margin-left: 0.5em"></span>');
 
       return replaceHTML(createHTMLDocument(html).documentElement.innerHTML);
     }
