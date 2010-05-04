@@ -35,19 +35,21 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>bit.ly</name>
-  <description>Get short alias by bit.ly</description>
-  <description lang="ja">Bit.ly で短縮URLを得る</description>
-  <version>1.1.1</version>
+  <name>j.mp</name>
+  <description>Get short alias by bit.ly and j.mp</description>
+  <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
+  <version>2.0.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/bitly.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Commands ==
       :bitly [<URL>]
+        Copy to clipboard.
+      :jmp [<URL>]
         Copy to clipboard.
   ]]></detail>
 </VimperatorPlugin>;
@@ -56,44 +58,100 @@ let PLUGIN_INFO =
 
 (function () {
 
-  function bitly (uri, callback) {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function () {
-      if (req.readyState != 4)
-        return;
-      if (req.status == 200)
-        return callback && callback(req.responseText, req);
-      else
-        throw new Error(req.statusText);
-    };
-    req.open('GET', 'http://bit.ly/api?url=' + encodeURIComponent(uri), callback);
-    req.send(null);
-    return !callback && req.responseText;
+  const Realm = 'API Key for bit.ly (bitly.js)';
+  const HostName = 'http://api.bit.ly';
+  const ApiUrl = 'http://api.bit.ly/v3';
+  const PasswordManager = Cc['@mozilla.org/login-manager;1'].getService(Ci.nsILoginManager);
+  const LoginInfo =
+    new Components.Constructor(
+      '@mozilla.org/login-manager/loginInfo;1',
+      Ci.nsILoginInfo,
+      'init'
+    );
+
+  function getAuth () {
+    let count = {};
+    let logins = PasswordManager.findLogins(count, HostName, null, Realm);
+    if (logins.length)
+      return logins[0];
   }
 
-  commands.addUserCommand(
-    ['bitly'],
-    'Copy bitly url',
-    function (args) {
-      bitly(args.literalArg || buffer.URL, function (short) {
-        util.copyToClipboard(short);
-        liberator.echo('`' + short + "' was copied to clipboard.");
-      });
-    },
-    {
-      literal: 0,
-      completer: function (context) {
-        context.completions = [
-          [buffer.URL, 'Current URL']
-        ];
+  function setupAuth (callback) {
+    commandline.input(
+      'Login name for bit.ly: ',
+      function (username) {
+        commandline.input(
+          'API Key: ',
+          function (apiKey) {
+            let login = LoginInfo(HostName, null, Realm, username, apiKey, '', '');
+            PasswordManager.addLogin(login);
+            callback(login);
+          }
+        );
       }
-    },
-    true
-  );
+    );
+  }
 
-  // 外から使えるように
-  liberator.plugins.bitly = {
-    get: bitly
-  };
+  function jmp (uri, domain, callback) {
+    function get () {
+      let req = new XMLHttpRequest();
+      req.onreadystatechange = function () {
+        if (req.readyState != 4)
+          return;
+        if (req.status == 200)
+          return callback && callback(req.responseText, req);
+        else
+          throw new Error(req.statusText);
+      };
+      let requestUri =
+        ApiUrl + '/shorten?' +
+        'apiKey=' + auth.password + '&' +
+        'login=' + auth.username + '&' +
+        'uri=' + encodeURIComponent(uri) + '&' +
+        'domain=' + (domain || 'bit.ly') + '&' +
+        'format=txt';
+      req.open('GET', requestUri, callback);
+      req.send(null);
+      return !callback && req.responseText;
+    }
+
+    let auth = getAuth();
+
+    if (auth)
+      return get();
+
+    if (callback) {
+      setupAuth(get);
+    } else {
+      liberator.echoerr('Not found API Key!! Try :bitly command, before use.');
+    }
+  }
+
+  [
+    ['jmp', 'j.mp'],
+    ['bitly', 'bit.ly'],
+  ].forEach(function ([name, domain]) {
+    commands.addUserCommand(
+      [name],
+      'Copy ' + domain + ' url',
+      function (args) {
+        jmp(args.literalArg || buffer.URL, domain, function (short) {
+          util.copyToClipboard(short);
+          liberator.echo('`' + short + "' was copied to clipboard.");
+        });
+      },
+      {
+        literal: 0,
+        completer: function (context) {
+          context.completions = [
+            [buffer.URL, 'Current URL']
+          ];
+        }
+      },
+      true
+    );
+  });
+
+  __context__.get = jmp;
 
 })();
