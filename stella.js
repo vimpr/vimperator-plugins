@@ -925,7 +925,6 @@ Thanks:
       let result = [];
       let doc = content.document;
       for each (let item in Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
-        liberator.log(item);
         result.push(new RelatedTag(item.textContent));
       }
       for each (let item in Array.slice(doc.querySelectorAll('.video-list-item'))) {
