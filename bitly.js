@@ -93,7 +93,7 @@ let PLUGIN_INFO =
     );
   }
 
-  function jmp (uri, domain, callback) {
+  function shorten (uri, domain, callback) {
     function get () {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
@@ -136,7 +136,7 @@ let PLUGIN_INFO =
       [name],
       'Copy ' + domain + ' url',
       function (args) {
-        jmp(args.literalArg || buffer.URL, domain, function (short) {
+        shorten(args.literalArg || buffer.URL, domain, function (short) {
           util.copyToClipboard(short);
           liberator.echo('`' + short + "' was copied to clipboard.");
         });
@@ -151,8 +151,8 @@ let PLUGIN_INFO =
       },
       true
     );
+    __context__[name] = function (url, callback) shorten(url, domain, callback);
   });
 
-  __context__.get = jmp;
-
+  __context__.get = shorten;
 })();
