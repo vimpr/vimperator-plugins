@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.26.4</version>
+  <version>0.26.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -923,10 +923,14 @@ Thanks:
     get relations () {
       let result = [];
       let doc = content.document;
-      let r = doc.evaluate("//div[@class='video-mini-title']/a", doc, null, 7, null);
-      for (let i = 0, l = r.snapshotLength; i < l; i++) {
-        let e = r.snapshotItem(i);
-        result.push(new RelatedID(YouTubePlayer.getIDfromURL(e.href), e.textContent));
+      for each (let item in Array.slice(doc.querySelectorAll('.video-list-item'))) {
+        result.push(
+          new RelatedID(
+            YouTubePlayer.getIDfromURL(item.querySelector('a').href),
+            item.querySelector('span.title').textContent,
+            item.querySelector('img').src
+          )
+        );
       }
       return result;
     },
