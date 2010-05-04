@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // PLUGIN_INFO {{{
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>j.mp</name>
+  <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
   <version>2.0.0</version>
