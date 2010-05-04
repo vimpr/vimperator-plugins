@@ -138,11 +138,11 @@ let PLUGIN_INFO =
       [name],
       'Copy ' + domain + ' url',
       function (args) {
-        let url = util.stringToURLArray(args.literalArg)[0];
+        let url = args.literalArg ? util.stringToURLArray(args.literalArg)[0] : buffer.URL;
 
         shorten(url || buffer.URL, domain, function (short) {
           util.copyToClipboard(short);
-          liberator.echo('`' + short + "' was copied to clipboard.");
+          liberator.echo(short + ' <= ' + url);
         });
       },
       {
