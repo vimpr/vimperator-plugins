@@ -51,6 +51,8 @@ let PLUGIN_INFO =
         Copy to clipboard.
       :jmp [<URL>]
         Copy to clipboard.
+    == Require ==
+      bit.ly API Key
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -147,6 +149,7 @@ let PLUGIN_INFO =
           context.completions = [
             [buffer.URL, 'Current URL']
           ];
+          context.fork('URL', 0, context, completion.url);
         }
       },
       true
