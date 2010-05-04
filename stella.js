@@ -1716,7 +1716,7 @@ Thanks:
               ];
               lastCompletions = self.player.relations;
               context.completions =
-                self.player.relations.map(function (rel, index) rel.completionItem(index + 1));
+                lastCompletions.map(function (rel, index) rel.completionItem(index + 1));
             },
           },
           true
