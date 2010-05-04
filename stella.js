@@ -984,6 +984,8 @@ Thanks:
       switch (type) {
         case Player.URL_ID:
           return 'http://www.youtube.com/watch?v=' + value + '&fmt=22'; //XXX さりげなく高画質に！
+        case Player.URL_TAG:
+          return 'http://www.youtube.com/results?search=tag&search_query=' + encodeURIComponent(value);
         case Player.URL_SEARCH:
           return 'http://www.youtube.com/results?search_query=' + encodeURIComponent(value);
       }
