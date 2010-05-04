@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.26.7</version>
+  <version>0.26.8</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -983,7 +983,7 @@ Thanks:
     makeURL: function (value, type) {
       switch (type) {
         case Player.URL_ID:
-          return 'http://www.youtube.com/watch?v=' + value + '&fmt=22'; //XXX さりげなく高画質に！
+          return 'http://www.youtube.com/watch?v=' + value;
         case Player.URL_TAG:
           return 'http://www.youtube.com/results?search=tag&search_query=' + encodeURIComponent(value);
         case Player.URL_SEARCH:
