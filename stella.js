@@ -1008,23 +1008,6 @@ Thanks:
     Player.apply(this, arguments);
   }
 
-  // name, Normal, Fullscreen
-  // 任意の順で設定できるように配列で持つ
-  NicoPlayer.Variables = [
-    ['videowindow._xscale',                     100,   null],
-    ['videowindow._yscale',                     100,   null],
-    ['videowindow._x',                            6,      0],
-    ['videowindow._y',                           65,      0],
-    ['controller._x',                             6,  -1000],
-    ['inputArea._x',                              4,  -1000],
-    ['controller._visible',                       1,      1],
-    ['inputArea._visible',                        1,      1],
-    ['waku._visible',                             1,      0],
-    ['tabmenu._visible',                          1,      0],
-    ['videowindow.video_mc.video.smoothing',   null,      1],
-    ['videowindow.video_mc.video.deblocking',  null,      5]
-  ];
-
   NicoPlayer.SIZE_LARGE  = 'fit';
   NicoPlayer.SIZE_NORMAL = 'normal';
 
