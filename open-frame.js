@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">openframeコマンド</name>
   <description>Add ":openframe" command.</description>
   <description lang="ja">":openframe" コマンドを追加する</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="openframe-command" version="1.0.0"
+  <plugin name="openframe-command" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="en-US"
@@ -72,11 +72,11 @@ let INFO =
     </item>
     <item>
       <tags>:tabopenframe</tags>
-      <spec>:tabopenf<oa>rame</oa></spec>
+      <spec>:t<oa>ab</oa>o<oa>pen</oa>f<oa>rame</oa></spec>
       <description><p>Open the selected frame in new tab.</p></description>
     </item>
   </plugin>
-  <plugin name="openframe-command" version="1.0.0"
+  <plugin name="openframe-command" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="ja"
@@ -91,7 +91,7 @@ let INFO =
     </item>
     <item>
       <tags>:tabopenframe</tags>
-      <spec>:tabopenf<oa>rame</oa></spec>
+      <spec>:t<oa>ab</oa>o<oa>pen</oa>f<oa>rame</oa></spec>
       <description><p>新しいタブに選択したフレームを開く</p></description>
     </item>
   </plugin>
@@ -100,28 +100,52 @@ let INFO =
 
 (function () {
 
+  function frames () {
+    let result = [];
+
+    (function (win) {
+      result = result.concat(Array.map(win.frames, function (win) win));
+      Array.forEach(win.frames, arguments.callee);
+    })(config.browser.contentWindow);
+
+    return result;
+  }
+
   [true, false].forEach(function (tab) {
     let desc = 'Open frame in ' + (tab ? 'current tab' : 'new tab');
     let modeName = (tab ? 'tab-' : '') + 'open-frame';
+
+    let open = function (url) liberator.open(url, tab ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+
     hints.addMode(
       modeName,
       desc,
       function (elem) {
-        liberator.open(
-          elem.ownerDocument.location.href,
-          tab ? liberator.NEW_TAB : liberator.CURRENT_TAB
-        );
+        open(elem.ownerDocument.location.href);
       },
       function () util.makeXPath(["body"])
     );
 
     commands.addUserCommand(
-      [(tab ? 'tab' : '') + 'openf[rame]'],
+      tab ? ['tabopenf[rame]', 'topenf[rame]', 'tof[rame]']
+          : ['openf[rame]'],
       desc,
       function (args) {
-        hints.show(modeName);
+        if (args.literalArg) {
+          open(args.literalArg);
+        } else {
+          hints.show(modeName);
+        }
       },
-      {},
+      {
+        literal: 0,
+        completer: function (context) {
+          context.completions = [
+            [f.location.href, f.document.title || '<No Title>']
+            for each (f in frames())
+          ];
+        }
+      },
       true
     );
   });
