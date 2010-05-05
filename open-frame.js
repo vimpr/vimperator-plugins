@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">openframeコマンド</name>
   <description>Add ":openframe" command.</description>
   <description lang="ja">":openframe" コマンドを追加する</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="openframe-command" version="1.1.0"
+  <plugin name="openframe-command" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       <description><p>Open the selected frame in new tab.</p></description>
     </item>
   </plugin>
-  <plugin name="openframe-command" version="1.1.0"
+  <plugin name="openframe-command" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="ja"
@@ -100,6 +100,11 @@ let INFO =
 
 (function () {
 
+  let gvModeName = {
+    current: liberator.globalVariables.open_frame_hint_mode_current,
+    tab: liberator.globalVariables.open_frame_hint_mode_tab
+  };
+
   function frames () {
     let result = [];
 
@@ -113,7 +118,7 @@ let INFO =
 
   [true, false].forEach(function (tab) {
     let desc = 'Open frame in ' + (tab ? 'current tab' : 'new tab');
-    let modeName = (tab ? 'tab-' : '') + 'open-frame';
+    let modeName = gvModeName[tab ? 'tab' : 'current'] || ((tab ? 'tab-' : '') + 'open-frame');
 
     let open = function (url) liberator.open(url, tab ? liberator.NEW_TAB : liberator.CURRENT_TAB);
 
