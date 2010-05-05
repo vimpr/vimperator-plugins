@@ -45,7 +45,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js</updateURL>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     Add "openframe" and "tabopenframe" command.
   ]]></detail>
