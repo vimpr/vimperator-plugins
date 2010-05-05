@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2010, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
