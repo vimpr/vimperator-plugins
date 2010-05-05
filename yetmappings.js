@@ -38,17 +38,19 @@ let PLUGIN_INFO =
   <name>Yet Mappings</name>
   <description>Display the keys that are not mapped yet.</description>
   <description lang="ja">まだマップされていないキーを表示する</description>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/yetmappings.js</updateURL>
-  <minVersion>2.0</minVersion>
-  <maxVersion>2.1pre</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Usage ==
        :yetmap[pings] [<KEYS>]
        :ymap [<KEYS>]
+       :yethintmodes
+       :ymode
     == Links ==
       http://d.hatena.ne.jp/nokturnalmortum/20081109/1226223461
   ]]></detail>
@@ -59,6 +61,7 @@ let PLUGIN_INFO =
   const other = '! @ # $ % ^ & * ( ) _ + | ~ { } : " < > ? - = \\ ` [ ] ; \' , . /'.split(/\s/);
   const special = 'Esc Return Tab Del BS Home Insert End Left Right Up Down PageUp PageDown F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12'.split(/\s/).map(function (it) ("<" + it + ">"));
   const alpha = 'a b c d e f g h i j k l m n o p q r s t u v w x y z'.split(/\s/);
+  const number = '0 1 2 3 4 5 6 7 8 9'.split(/\s/);
   const keys = alpha.concat(alpha.map(String.toUpperCase)).concat(other).concat(special);
 
   function exists (modes, key)
@@ -75,6 +78,19 @@ let PLUGIN_INFO =
     },
     {
       argCount: '*'
+    },
+    true
+  );
+
+  commands.addUserCommand(
+    ['yethintmodes', 'ymode'],
+    'display the hint-modes that are not mapped yet.',
+    function (arg) {
+      const keys = alpha.concat(alpha.map(String.toUpperCase)).concat(other).concat(number);
+      liberator.echo(keys.filter(function (m) !hints._hintModes[m]).join(' '));
+    },
+    {
+      argCount: '0'
     },
     true
   );
