@@ -140,6 +140,7 @@ let INFO =
       {
         literal: 0,
         completer: function (context) {
+          context.title = ['URL', 'Title'];
           context.completions = [
             [f.location.href, f.document.title || '<No Title>']
             for each (f in frames())
