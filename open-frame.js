@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">openframeコマンド</name>
   <description>Add ":openframe" command.</description>
   <description lang="ja">":openframe" コマンドを追加する</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="openframe-command" version="1.2.0"
+  <plugin name="openframe-command" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       <description><p>Open the selected frame in new tab.</p></description>
     </item>
   </plugin>
-  <plugin name="openframe-command" version="1.2.0"
+  <plugin name="openframe-command" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/open-frame.js"
           summary="Add openframe command."
           lang="ja"
@@ -133,7 +133,7 @@ let INFO =
 
     commands.addUserCommand(
       tab ? ['tabopenf[rame]', 'topenf[rame]', 'tof[rame]']
-          : ['openf[rame]'],
+          : ['openf[rame]', 'of[rame]'],
       desc,
       function (args) {
         if (args.literalArg) {
