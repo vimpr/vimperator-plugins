@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.27.0</version>
+  <version>0.28.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -301,7 +301,18 @@ Thanks:
     currentURL: function ()
       content.document.location.href,
 
-    download: function (url, filepath, ext, title) {
+    download: function (url, filepath, ext, title, postData) {
+      function makePostStream (postData) {
+        let sis = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
+        sis.setData(postData, postData.length);
+        let mis = Cc["@mozilla.org/network/mime-input-stream;1"].createInstance(Ci.nsIMIMEInputStream);
+        mis.addHeader("Accept-Charset", "utf-8");
+        mis.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        mis.addContentLength = true;
+        mis.setData(sis);
+        return mis;
+      }
+
       let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
       let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
       let file;
@@ -311,18 +322,21 @@ Thanks:
       } else {
         file = dm.userDownloadsDirectory;
       }
-      if (file.isDirectory() && title)
-        file.appendRelativePath(U.fixFilename(title) + ext);
-      if (file.exists())
-        return liberator.echoerr('The file already exists! -> ' + file.path);
+      if (file.exists()) {
+        if (file.isDirectory() && title) {
+          file.appendRelativePath(U.fixFilename(title) + ext);
+        } else {
+          return liberator.echoerr('The file already exists! -> ' + file.path);
+        }
+      }
       file = makeFileURI(file);
 
       let dl = dm.addDownload(0, U.makeURL(url, null, null), file, title, null, null, null, null, wbp);
       wbp.progressListener = dl;
       wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-      wbp.saveURI(U.makeURL(url), null, null, null, null, file);
+      wbp.saveURI(U.makeURL(url), null, null, postData && makePostStream(postData), null, file);
 
-      return true;
+      return file;
     },
 
     xpathGet: function (xpath, doc, root) {
@@ -1225,13 +1239,33 @@ Thanks:
     set volume (value) (this.player.ext_setVolume(value), this.volume),
 
     fetch: function (filepath) {
-      let onComplete = U.bindr(this, function (xhr) {
-          let res = xhr.responseText;
-          let info = {};
-          res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
-          U.download(decodeURIComponent(info.url), filepath, this.fileExtension, this.title);
-      });
-      U.httpRequest('http://www.nicovideo.jp/api/getflv?v=' + this.id, null, onComplete);
+      let self = this;
+
+      let watchURL = buffer.URL;
+      let [,id] = watchURL.match(/watch\/(.+)$/);
+      let apiURL = 'http://www.nicovideo.jp/api/getflv?v=' + id;
+
+      U.httpRequest(
+        watchURL,
+        null,
+        function () {
+          U.httpRequest(
+            'http://www.nicovideo.jp/api/getflv?v=' + self.id,
+            null,
+            function (xhr) {
+              let res = xhr.responseText;
+              let info = {};
+              res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
+              U.download(decodeURIComponent(info.url), filepath, self.fileExtension, self.title);
+              let postData = '<thread thread="' + info.thread_id + '"' + ' version="20061206" res_from="-1000" />';
+              // FIXME
+              let msgFilepath = filepath.replace(/\.[^\.]+$/, '.xml');
+              liberator.echo(msgFilepath);
+              U.download(decodeURIComponent(info.ms), msgFilepath, '.xml', self.title, postData);
+            }
+          );
+        }
+      );
     },
 
     makeURL: function (value, type) {
@@ -1639,6 +1673,24 @@ Thanks:
       add('fu[llscreen]', 'fullscreen');
       if (U.s2b(liberator.globalVariables.stella_nico_use_comment, false))
         add('sa[y]', 'say');
+
+      commands.addUserCommand(
+        ['stfe[tch]'],
+        'Download movie file - Stella',
+        function (args) {
+          if (!self.isValid)
+            return U.raiseNotSupportedPage();
+          if (!self.player.has('fetch', 'x'))
+            return U.raiseNotSupportedFunction();
+
+          self.player.fetch(args.literalArg);
+        },
+        {
+          literal: 0,
+          completer: function (context) completion.file(context)
+        },
+        true
+      );
 
       commands.addUserCommand(
         ['stqu[ality]'],
