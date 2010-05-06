@@ -325,7 +325,7 @@ Thanks:
         if (file.isDirectory() && title) {
           file.appendRelativePath(U.fixFilename(title) + ext);
         } else {
-          return liberator.echoerr('The file already exists! -> ' + file.path);
+          return U.echoerr('The file already exists! -> ' + file.path);
         }
       }
       file = makeFileURI(file);
@@ -337,6 +337,14 @@ Thanks:
 
       return file;
     },
+
+    // FIXME
+    echo: function (msg)
+      (void liberator.echo(msg)),
+
+    // FIXME
+    echoError: function (msg)
+      (void liberator.echoerr(msg)),
 
     xpathGet: function (xpath, doc, root) {
       if (!doc)
@@ -432,6 +440,9 @@ Thanks:
 
     lz: function (s, n)
       String(Math.pow(10, n) + s).substring(1),
+
+    log: function (msg)
+      Application.console.log(msg),
 
     makeFile: function (s) {
       var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
@@ -1095,8 +1106,8 @@ Thanks:
       try {
       return parseInt(this.player.ext_getPlayheadTime())
       } catch (e) {
-        liberator.log(e)
-        liberator.log(e.stack)
+        U.log(e)
+        U.log(e.stack)
       }
     },
     set currentTime (value) (this.player.ext_setPlayheadTime(U.fromTimeCode(value)), this.currentTime),
@@ -1175,7 +1186,7 @@ Thanks:
           self.__rid_last_url = U.currentURL;
           self.__rid_cache = videos;
         } catch (e) {
-          liberator.log('stella: ' + e)
+          U.log('stella: ' + e)
         }
 
         return videos;
@@ -1198,7 +1209,7 @@ Thanks:
               videos.push(new RelatedID(link, r[1].slice(-20)));
           });
         } catch (e) {
-          liberator.log('stella: ' + e)
+          U.log('stella: ' + e)
         }
         return videos;
       }
@@ -1275,7 +1286,6 @@ Thanks:
               let postData = '<thread thread="' + info.thread_id + '"' + ' version="20061206" res_from="-1000" />';
               // FIXME
               let msgFilepath = filepath.replace(/\.[^\.]+$/, '.xml');
-              liberator.echo(msgFilepath);
               U.download(decodeURIComponent(info.ms), msgFilepath, '.xml', self.title, postData);
             }
           );
@@ -1309,7 +1319,7 @@ Thanks:
     },
 
     say: function (message) {
-      liberator.log('stsay');
+      U.log('stsay');
       this.sendComment(message);
     },
 
@@ -1329,7 +1339,7 @@ Thanks:
       }
 
       function getThumbInfo () {
-        liberator.log('getThumbInfo');
+        U.log('getThumbInfo');
         if (self.cachedInfo.block_no !== undefined)
           return;
         let xhr = U.httpRequest(self.baseURL + 'api/getthumbinfo/' + self.id);
@@ -1339,7 +1349,7 @@ Thanks:
       }
 
       function getFLV () {
-        liberator.log('getFLV');
+        U.log('getFLV');
         if (self.cachedInfo.flvInfo !== undefined)
           return;
         let xhr = U.httpRequest(self.baseURL + 'api/getflv?v=' + self.id);
@@ -1348,7 +1358,7 @@ Thanks:
       }
 
       function getPostkey () {
-        liberator.log('getPostkey');
+        U.log('getPostkey');
         let info = self.cachedInfo;
         if (info.postkey !== undefined)
           return;
@@ -1360,14 +1370,14 @@ Thanks:
                       block_no: info.block_no
                     }
                   );
-        liberator.log(url);
+        U.log(url);
         let xhr = U.httpRequest(url);
         let res = xhr.responseText;
         info.postkey = res.replace(/^.*=/, '');
       }
 
       function getComments () {
-        liberator.log('getComments');
+        U.log('getComments');
         let info = self.cachedInfo;
         if (info.ticket !== undefined)
           return;
@@ -1379,7 +1389,7 @@ Thanks:
       }
 
       function sendChat () {
-        liberator.log('sendChat');
+        U.log('sendChat');
         let info = self.cachedInfo;
         let tmpl = '<chat premium="--is_premium--" postkey="--postkey--" user_id="--user_id--" ticket="--ticket--" mail="--mail--" vpos="--vpos--" thread="--thread_id--">--body--</chat>';
         let args = {
@@ -1390,13 +1400,13 @@ Thanks:
           vpos: Math.max(100, parseInt(vpos || (self.player.ext_getPlayheadTime() * 100), 10)),
           body: message
         };
-        liberator.log(args);
+        U.log(args);
         let data = U.fromTemplate(tmpl, args);
         let xhr = U.httpRequest(info.flvInfo.ms, data);
-        liberator.log(xhr.responseText);
+        U.log(xhr.responseText);
       }
 
-      liberator.log('sendcommnet');
+      U.log('sendcommnet');
       getThumbInfo();
       getFLV();
       getPostkey();
@@ -2083,7 +2093,7 @@ Thanks:
       let stella = liberator.globalVariables.stella = new Stella(new Setting());
       stella.addUserCommands();
       stella.addPageInfo();
-      liberator.log('Stella: installed.');
+      U.log('Stella: installed.');
     };
 
     // すでにインストール済みの場合は、一度ファイナライズする
