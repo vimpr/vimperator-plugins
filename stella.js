@@ -298,8 +298,7 @@ Thanks:
     capitalize: function (s)
       s.replace(/^[a-z]/, String.toUpperCase).replace(/-[a-z]/, function (s) s.slice(1).toUpperCase()),
 
-    currentURL: function ()
-      content.document.location.href,
+    get currentURL() content.document.location.href,
 
     download: function (url, filepath, ext, title, postData) {
       function makePostStream (postData) {
@@ -695,7 +694,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/watch\//.test(buffer.URL),
+    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/watch\//.test(U.currentURL),
 
     get volume () undefined,
     set volume (value) value,
@@ -991,7 +990,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.getDuration()),
 
-    get isValid () buffer.URL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/),
+    get isValid () U.currentURL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/),
 
     get volume () parseInt(this.player.getVolume()),
     set volume (value) (this.player.setVolume(value), this.volume),
@@ -1000,11 +999,11 @@ Thanks:
       let self = this;
 
       U.httpRequest(
-        buffer.URL,
+        U.currentURL,
         null,
         function (xhr) {
           let [, t] = xhr.responseText.match(/swfHTML.*&t=([^&]+)/);
-          let id = YouTubePlayer.getIDfromURL(buffer.URL);
+          let id = YouTubePlayer.getIDfromURL(U.currentURL);
           let url = "http://youtube.com/get_video?video_id=" + id + "&t=" + decodeURIComponent(t);
           U.download(url, filepath, '.flv', self.title);
         }
@@ -1083,7 +1082,7 @@ Thanks:
     get baseURL () 'http://www.nicovideo.jp/',
 
     get cachedInfo () {
-      let url = U.currentURL();
+      let url = U.currentURL;
       if (this.__info_cache.url != url)
         this.__info_cache = {url: url};
       return this.__info_cache;
@@ -1108,7 +1107,7 @@ Thanks:
     set fullscreen (value) (this.large = value),
 
     get id ()
-      let (m = U.currentURL().match(/\/watch\/([a-z\d]+)/))
+      let (m = U.currentURL.match(/\/watch\/([a-z\d]+)/))
         (m && m[1]),
 
     get muted () this.player.ext_isMute(),
@@ -1147,7 +1146,7 @@ Thanks:
       let self = this;
 
       function IDsFromAPI () {
-        if (self.__rid_last_url == U.currentURL())
+        if (self.__rid_last_url == U.currentURL)
           return self.__rid_cache || [];
 
         let failed = false, videos = [];
@@ -1173,7 +1172,7 @@ Thanks:
             );
           }
 
-          self.__rid_last_url = U.currentURL();
+          self.__rid_last_url = U.currentURL;
           self.__rid_cache = videos;
         } catch (e) {
           liberator.log('stella: ' + e)
@@ -1257,7 +1256,7 @@ Thanks:
     fetch: function (filepath) {
       let self = this;
 
-      let watchURL = buffer.URL;
+      let watchURL = U.currentURL;
       let [,id] = watchURL.match(/watch\/(.+)$/);
       let apiURL = 'http://www.nicovideo.jp/api/getflv?v=' + id;
 
@@ -1466,7 +1465,7 @@ Thanks:
     get title ()
       U.xpathGet('//div[@class="title"]').textContent,
 
-    get isValid () buffer.URL.match(/^http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+$/),
+    get isValid () U.currentURL.match(/^http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+$/),
 
     // XXX setVolume は実際には存在しない？
     get volume () parseInt(this.player.__stella_volume),
