@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -95,7 +95,7 @@ let PLUGIN_INFO =
     );
   }
 
-  function shorten (uri, domain, callback) {
+  function shorten (url, domain, callback) {
     function get () {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
@@ -110,13 +110,16 @@ let PLUGIN_INFO =
         ApiUrl + '/shorten?' +
         'apiKey=' + auth.password + '&' +
         'login=' + auth.username + '&' +
-        'uri=' + encodeURIComponent(uri) + '&' +
+        'uri=' + encodeURIComponent(url) + '&' +
         'domain=' + (domain || 'bit.ly') + '&' +
         'format=txt';
       req.open('GET', requestUri, callback);
       req.send(null);
       return !callback && req.responseText.trim();
     }
+
+    if (!url)
+      url = buffer.URL;
 
     let auth = getAuth();
 
@@ -138,9 +141,9 @@ let PLUGIN_INFO =
       [name],
       'Copy ' + domain + ' url',
       function (args) {
-        let url = args.literalArg ? util.stringToURLArray(args.literalArg)[0] : buffer.URL;
+        let url = args.literalArg && util.stringToURLArray(args.literalArg)[0];
 
-        shorten(url || buffer.URL, domain, function (short) {
+        shorten(url, domain, function (short) {
           util.copyToClipboard(short);
           liberator.echo(short + ' <= ' + url);
         });
