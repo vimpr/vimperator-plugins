@@ -146,7 +146,7 @@ Request(url, headers, options):
             BASIC認証時のパスワード
         postBody:
             POSTメソッドにより送信するbody
-addEventLister(name, func):
+addEventListener(name, func):
     イベントリスナを登録する。
     name:
         'onSuccess':
