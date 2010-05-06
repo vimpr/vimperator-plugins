@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.29.0</version>
+  <version>0.30.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1009,6 +1009,10 @@ Thanks:
     fetch: function (filepath) {
       let self = this;
 
+      // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
+      // FIXME 一番初めが最高画質だと期待
+      let quality = content.wrappedJSObject.yt.config_.SWF_CONFIG.args.fmt_map.match(/^\d+/);
+
       U.httpRequest(
         U.currentURL,
         null,
@@ -1016,7 +1020,10 @@ Thanks:
           // XXX t が変わるために、キャッシュを利用できない問題アリアリアリアリ
           let [, t] = xhr.responseText.match(/swfHTML.*&t=([^&]+)/);
           let id = YouTubePlayer.getIDfromURL(U.currentURL);
-          let url = "http://youtube.com/get_video?video_id=" + id + "&t=" + decodeURIComponent(t);
+          let url =
+            "http://youtube.com/get_video?video_id=" + id +
+            "&t=" + decodeURIComponent(t) +
+            (quality ? "&fmt=" + quality : '');
           U.download(url, filepath, '.flv', self.title);
         }
       );
