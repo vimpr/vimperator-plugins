@@ -1013,6 +1013,7 @@ Thanks:
         U.currentURL,
         null,
         function (xhr) {
+          // XXX t が変わるために、キャッシュを利用できない問題アリアリアリアリ
           let [, t] = xhr.responseText.match(/swfHTML.*&t=([^&]+)/);
           let id = YouTubePlayer.getIDfromURL(U.currentURL);
           let url = "http://youtube.com/get_video?video_id=" + id + "&t=" + decodeURIComponent(t);
