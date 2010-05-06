@@ -346,27 +346,6 @@ Thanks:
     echoError: function (msg)
       (void liberator.echoerr(msg)),
 
-    xpathGet: function (xpath, doc, root) {
-      if (!doc)
-        doc = content.document;
-      if (!root)
-        root = doc;
-      return doc.evaluate(xpath, doc, null, 9, null, 7, null).singleNodeValue;
-    },
-
-    xpathGets: function (xpath, doc, root) {
-      if (!doc)
-        doc = content.document;
-      if (!root)
-        root = doc;
-      let result = [];
-      let r = doc.evaluate(xpath, root, null, 7, null);
-      for (let i = 0, l = r.snapshotLength; i < l; i++) {
-        result.push(r.snapshotItem(i));
-      }
-      return result;
-    },
-
     fixDoubleClick: function (obj, click, dblClick) {
       let clicked = 0;
       let original = {click: obj[click], dblClick: obj[dblClick]};
@@ -524,6 +503,27 @@ Thanks:
         s.replace(/<br>/g, '<br />').replace(/&nbsp;/g, '<span style="margin-left: 0.5em"></span>');
 
       return replaceHTML(createHTMLDocument(html).documentElement.innerHTML);
+    },
+
+    xpathGet: function (xpath, doc, root) {
+      if (!doc)
+        doc = content.document;
+      if (!root)
+        root = doc;
+      return doc.evaluate(xpath, doc, null, 9, null, 7, null).singleNodeValue;
+    },
+
+    xpathGets: function (xpath, doc, root) {
+      if (!doc)
+        doc = content.document;
+      if (!root)
+        root = doc;
+      let result = [];
+      let r = doc.evaluate(xpath, root, null, 7, null);
+      for (let i = 0, l = r.snapshotLength; i < l; i++) {
+        result.push(r.snapshotItem(i));
+      }
+      return result;
     }
   };
 
