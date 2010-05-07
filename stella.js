@@ -1007,11 +1007,25 @@ Thanks:
     set volume (value) (this.player.setVolume(value), this.volume),
 
     fetch: function (filepath) {
+      function _fetch (id, t) {
+        let url =
+          "http://youtube.com/get_video?video_id=" + id +
+          "&t=" + decodeURIComponent(t) +
+          (quality ? "&fmt=" + quality : '');
+        U.download(url, filepath, '.flv', self.title);
+      }
+
       let self = this;
+      let id = YouTubePlayer.getIDfromURL(U.currentURL);
 
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
-      let quality = content.wrappedJSObject.yt.config_.SWF_CONFIG.args.fmt_map.match(/^\d+/);
+      let cargs = content.wrappedJSObject.yt.config_.SWF_CONFIG.args
+      let quality = cargs.fmt_map.match(/^\d+/);
+      let t = cargs.t;
+
+      // 時間が経っていると無効化されてしまっている
+      //_fetch(t, id);
 
       U.httpRequest(
         U.currentURL,
@@ -1019,12 +1033,7 @@ Thanks:
         function (xhr) {
           // XXX t が変わるために、キャッシュを利用できない問題アリアリアリアリ
           let [, t] = xhr.responseText.match(/swfHTML.*&t=([^&]+)/);
-          let id = YouTubePlayer.getIDfromURL(U.currentURL);
-          let url =
-            "http://youtube.com/get_video?video_id=" + id +
-            "&t=" + decodeURIComponent(t) +
-            (quality ? "&fmt=" + quality : '');
-          U.download(url, filepath, '.flv', self.title);
+          _fetch(id, t);
         }
       );
     },
