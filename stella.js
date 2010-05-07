@@ -934,10 +934,14 @@ Thanks:
 
     get pageinfo () {
       let doc = content.document;
+      let wd = doc.querySelector('#watch-description > div > span > span.watch-video-date');
+      let desc = wd.nextSibling;
+      while (desc && desc.tagName != 'SPAN')
+        desc = desc.nextSibling;
       return [
         [
           'comment',
-          doc.querySelector('#watch-description > div > span > span > a').nextSibling.textContent.trim()
+          desc ? desc.textContent.trim() : ''
         ],
         [
           'tags',
