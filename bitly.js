@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
-  <version>2.0.2</version>
+  <version>2.0.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -141,7 +141,7 @@ let PLUGIN_INFO =
       [name],
       'Copy ' + domain + ' url',
       function (args) {
-        let url = args.literalArg && util.stringToURLArray(args.literalArg)[0];
+        let url = args.literalArg ? util.stringToURLArray(args.literalArg)[0] : buffer.URL;
 
         shorten(url, domain, function (short) {
           util.copyToClipboard(short);
