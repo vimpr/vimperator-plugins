@@ -257,6 +257,7 @@ TODO
    ・パネルなどの要素にクラス名をつける
    ・上書き保存
    ・Fx の pref と liberator.globalVariables の両方で設定をできるようにする (Setting)
+   ・ext_setInputMessage(String, String)
 
 MEMO
    ・prototype での定義順: 単純な値 initialize finalize (get|set)ter メソッド
