@@ -323,7 +323,7 @@ var SBM = { //{{{
                 });
                 json[0].posts.forEach(function(entry){
                     c.add( entry.user_name, stringToDate(entry.date),
-                           entry.comment ? entry.comment : '', entry.keywords.split(','),
+                           entry.comment ? entry.comment : '', (entry.keywords || '').split(','),
                            {
                             userIcon: url + entry.user_name + '/photo',
                             link: url + '/' + entry.user_name
