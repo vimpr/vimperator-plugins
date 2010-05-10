@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager.js</updateURL>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     sm <sub-command> <session-name>
   ]]></detail>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="session-manager" version="1.3.0"
+  <plugin name="session-manager" version="1.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
@@ -76,7 +76,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="session-manager" version="1.3.0"
+  <plugin name="session-manager" version="1.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
@@ -126,14 +126,46 @@ let INFO =
   function fixFilename (filename)
     fixFile(filename).leafName;
 
+  function confirm (prompt, yes, no) {
+    let args = arguments;
+    commandline.input(
+      prompt + ' [yes/no]: ',
+      function (a) {
+        /^y(es)?$/i(a) ? yes() :
+        /^n(o)?$/i(a)  ? (no || function () 0)() :
+                         confirm.apply(this, args);
+      },
+      {}
+    );
+  }
+
+  function overwriteCheck (name, ok) {
+    let file = fixFile(name);
+    if (file.exists()) {
+      confirm('Overwrite?', ok, function () liberator.echoerr('This process was canceled'));
+    } else {
+      ok();
+    }
+  }
+
   const SubCommands = {
     save: function (name) {
-      gSessionManager.save(name, name + '.session');
-      liberator.echo('Session saved: '+ name);
+      overwriteCheck(
+        name,
+        function () {
+          gSessionManager.save(name, name + '.session');
+          liberator.echo('Session saved: '+ name);
+        }
+      );
     },
     load: function (name) {
-      gSessionManager.load(fixFilename(name), 'overwrite');
-      liberator.echo('Session loaded: '+ name);
+      overwriteCheck(
+        name,
+        function () {
+          gSessionManager.load(fixFilename(name), 'overwrite');
+          liberator.echo('Session loaded: '+ name);
+        }
+      );
     },
     append: function (name) {
       gSessionManager.load(fixFilename(name), 'append');
