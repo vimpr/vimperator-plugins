@@ -66,8 +66,12 @@ let INFO =
     <p></p>
     <item>
       <tags>:foxageopen</tags>
-      <spec>:foxageo<oa>pen</oa></spec>
-      <description><p></p></description>
+      <spec>:foxageo<oa>pen</oa> <a>thread</a></spec>
+      <description>
+        <p>
+          Open the selected <a>thread</a>
+        </p>
+      </description>
     </item>
   </plugin>
   <plugin name="FoxAge2ch" version="1.0.0"
@@ -81,8 +85,17 @@ let INFO =
     <p></p>
     <item>
       <tags>:foxageopen</tags>
-      <spec>:foxageo<oa>pen</oa></spec>
-      <description><p></p></description>
+      <spec>:foxageo<oa>pen</oa> <a>thread</a></spec>
+      <description>
+        <p>
+          選択された <a>thread</a> を開く
+        </p>
+        <dl>
+          <dt>☀</dt><dd>新着アリ(?)</dd>
+          <dt>☁</dt><dd>生存中</dd>
+          <dt>☂</dt><dd>死亡</dd>
+        </dl>
+      </description>
     </item>
   </plugin>
 </>;
