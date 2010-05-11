@@ -97,9 +97,9 @@ let INFO =
   let svc = FoxAge2chUtils.service;
 
   const Status = {
-    Live: 0,
-    New: 2,
-    Dead: 4
+    live: 0,
+    new: 2,
+    dead: 4
   };
 
   const StatusIcon = {
@@ -137,9 +137,11 @@ let INFO =
     {
       literal: 0,
       options: [
-        [['-live', '-l'], commands.OPTION_NOARG],
-        [['-dead', '-d'], commands.OPTION_NOARG],
-        [['-new', '-n'], commands.OPTION_NOARG],
+        [
+          ['-status', '-s'],
+          commands.OPTION_STRING,
+          null,
+          [[v, StatusIcon[k]] for ([v, k] in Iterator(Status))]]
       ],
       completer: function (context, args) {
         context.completions = [
@@ -150,11 +152,7 @@ let INFO =
           ]
           for ([idx, thread] in Iterator(threads()))
           if (
-            (!args['-live'] || thread.status === Status.Live)
-            &&
-            (!args['-dead'] || thread.status === Status.Dead)
-            &&
-            (!args['-new'] || thread.status === Status.New)
+            (!('-status' in args) || (thread.status === Status[args['-status']]))
           )
         ];
       }
