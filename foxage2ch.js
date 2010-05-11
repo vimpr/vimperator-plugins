@@ -65,8 +65,8 @@ let INFO =
     <project name="Vimperator" minVersion="2.4"/>
     <p></p>
     <item>
-      <tags>:faopen</tags>
-      <spec>:fao<oa>pen</oa></spec>
+      <tags>:foxageopen</tags>
+      <spec>:foxageo<oa>pen</oa></spec>
       <description><p></p></description>
     </item>
   </plugin>
@@ -80,8 +80,8 @@ let INFO =
     <project name="Vimperator" minVersion="2.4"/>
     <p></p>
     <item>
-      <tags>:faopen</tags>
-      <spec>:fao<oa>pen</oa></spec>
+      <tags>:foxageopen</tags>
+      <spec>:foxageo<oa>pen</oa></spec>
       <description><p></p></description>
     </item>
   </plugin>
@@ -92,6 +92,8 @@ let INFO =
 (function () {
 
   Components.utils.import("resource://foxage2ch/utils.jsm");
+
+  let cmdPrefix = liberator.globalVariables.foxage2ch_command_prefix || 'foxage';
   let svc = FoxAge2chUtils.service;
 
   const Status = {
@@ -123,7 +125,7 @@ let INFO =
     );
 
   commands.addUserCommand(
-    ['fao[pen]'],
+    [cmdPrefix + 'o[pen]'],
     'Open the borard from FoxAge2ch',
     function (args) {
       let thread = threads()[parseInt(args.literalArg.replace(/^.\s/, ''), 10) - 1];
