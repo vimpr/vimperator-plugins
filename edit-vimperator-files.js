@@ -122,8 +122,8 @@ let INFO =
 
   completion.vimperatorFiles =
     function (context, args) {
-      let items = getItems();
-      context.completions = items.map(function ([file, dir]) [file, dir]);
+      context.title = ['Filename', 'Directory'];
+      context.completions = getItems().map(function ([file, dir]) [file, dir]);
     };
 
   commands.addUserCommand(
