@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Auto Source</name>
   <description>Sourcing automatically when the specified file is modified.</description>
   <description lang="ja">指定のファイルが変更されたら自動で :so する。</description>
-  <version>1.5.3</version>
+  <version>1.6.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -67,7 +67,7 @@ let PLUGIN_INFO =
   ]]></detail>
 </VimperatorPlugin>;
 let INFO =
-<plugin name="Auto Source" version="1.5.3"
+<plugin name="Auto Source" version="1.6.0"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_source.js"
         summary="Sourcing automatically when the specified file is modified."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -207,7 +207,9 @@ let INFO =
           context.title = ['Path'];
           context.completions = files.map(function (it) ([it.path, '']));
         } else {
-          completion.file(context);
+          context.fork('File', 0, context, completion.file);
+          if (completion.vimperatorFiles)
+            context.fork('VimperatorFile', 0, context, completion.vimperatorFiles);
         }
       }
     },
