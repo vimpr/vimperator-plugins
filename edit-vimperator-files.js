@@ -98,10 +98,15 @@ let INFO =
     (obj instanceof Array ? obj : obj.toString().split(/[,| \t\r\n]+/));
 
   let dirs = toArray(liberator.globalVariables.plugin_loader_roots);
+
   'HOME USERPROFILE HOMEDRIVE'.split(/\s/).forEach(
     function (envName) dirs.push(services.get("environment").get(envName))
   );
-  dirs = dirs.concat(io.getRuntimeDirectories("plugin").map(function (file) file.path));
+
+  'plugin colors styles style'.split(/\s/).forEach(
+    function (name) (dirs = dirs.concat(io.getRuntimeDirectories(name).map(function (file) file.path)))
+  );
+
   dirs = util.Array.compact(dirs).map(io.expandPath);
 
   let getItems =
