@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Yet Mappings</name>
   <description>Display the keys that are not mapped yet.</description>
   <description lang="ja">まだマップされていないキーを表示する</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -67,20 +67,30 @@ let PLUGIN_INFO =
   function exists (modes, key)
     (mappings.getCandidates(modes, key).length || mappings.get(modes, key));
 
-  function getYetMappings (pre)
-    keys.filter(function (key) (!exists([modes.NORMAL], pre + key)));
+  function getYetMappings (pre, modes)
+    keys.filter(function (key) (!exists(modes, pre + key)));
 
-  commands.addUserCommand(
-    ['yetmap[pings]', 'ymap'],
-    'display the keys that are not mapped yet.',
-    function (arg) {
-      liberator.echo(getYetMappings(arg.string || '').join(' '));
-    },
-    {
-      argCount: '*'
-    },
-    true
-  );
+
+  function addCommand (char, modes) {
+    commands.addUserCommand(
+      [char + 'yetmap[pings]', char + 'ymap'],
+      'display the keys that are not mapped yet.',
+      function (arg) {
+        liberator.echo(getYetMappings(arg.string || '', modes).join(' '));
+      },
+      {
+        argCount: '*'
+      },
+      true
+    );
+  }
+
+  for (let [name, mode] in Iterator(modes._modeMap)) {
+    if (!mode.char)
+      continue;
+    addCommand(mode.char, [modes[name]]);
+  }
+  addCommand('', [modes.NORMAL]);
 
   commands.addUserCommand(
     ['yethintmodes', 'ymode'],
