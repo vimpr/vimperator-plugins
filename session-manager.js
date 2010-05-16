@@ -159,13 +159,8 @@ let INFO =
       );
     },
     load: function (name) {
-      overwriteCheck(
-        name,
-        function () {
-          gSessionManager.load(fixFilename(name), 'overwrite');
-          liberator.echo('Session loaded: '+ name);
-        }
-      );
+      gSessionManager.load(fixFilename(name), 'overwrite');
+      liberator.echo('Session loaded: '+ name);
     },
     append: function (name) {
       gSessionManager.load(fixFilename(name), 'append');
