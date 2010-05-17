@@ -103,7 +103,8 @@ let INFO =
     function (envName) dirs.push(services.get("environment").get(envName))
   );
 
-  'plugin colors styles style'.split(/\s/).forEach(
+  // XXX dont remove first space
+  ' plugin colors styles style'.split(/\s/).forEach(
     function (name) (dirs = dirs.concat(io.getRuntimeDirectories(name).map(function (file) file.path)))
   );
 
