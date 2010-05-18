@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.30.3</version>
+  <version>0.31.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1015,6 +1015,63 @@ Thanks:
   // }}}
 
   /*********************************************************************************
+  * YouTubeUserChannelPlayer                                                                {{{
+  *********************************************************************************/
+
+  function YouTubeUserChannelPlayer () {
+    Player.apply(this, arguments);
+  }
+
+  YouTubeUserChannelPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/\/([^\/]+)($|[\?]+)/)) r;
+  YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
+
+  YouTubeUserChannelPlayer.prototype = {
+    __proto__: YouTubePlayer.prototype,
+
+    get id ()
+      YouTubeUserChannelPlayer.getIDfromURL(U.currentURL),
+
+    get isValid () U.currentURL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/user\//),
+
+    fetch: function (filepath) {
+      // TODO 動画変数が手に入らない？
+      throw "not implmented!!";
+    },
+
+    get pageinfo () {
+      let doc = content.document;
+      let wd = doc.querySelector('#playnav-curvideo-description');
+      return [
+        [
+          'comment',
+          wd.textContent
+        ]
+      ];
+    },
+
+    get relations () {
+      let result = [];
+      let doc = content.document;
+      for each (let item in Array.slice(doc.querySelectorAll('div.playnav-item.playnav-video'))) {
+        let link = item.querySelector('a.playnav-item-title.ellipsis');
+        let url = link.href;
+        if (!YouTubePlayer.isVideoURL(url))
+          continue;
+        result.push(
+          new RelatedID(
+            YouTubePlayer.getIDfromURL(url),
+            link.querySelector('span').textContent,
+            item.querySelector('img').src
+          )
+        );
+      }
+      return result;
+    },
+
+  };
+
+
+  /*********************************************************************************
   * NicoPlayer                                                                   {{{
   *********************************************************************************/
 
@@ -1589,6 +1646,7 @@ Thanks:
       this.players = {
         niconico: new NicoPlayer(this.stella),
         youtube: new YouTubePlayer(this.stella),
+        youtubeuc: new YouTubeUserChannelPlayer(this.stella),
         vimeo: new VimeoPlayer(this.stella)
       };
 
@@ -1760,6 +1818,7 @@ Thanks:
 
     addPageInfo: function () {
       let self = this;
+      delete buffer.pageInfo.S;
       buffer.addPageInfoSection(
         'S',
         'Stella Info',
