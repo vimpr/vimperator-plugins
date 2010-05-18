@@ -875,6 +875,9 @@ Thanks:
       let (as = content.document.defaultView.wrappedJSObject.swfArgs)
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
 
+    get id ()
+      YouTubePlayer.getIDfromURL(U.currentURL),
+
     get muted () this.player.isMuted(),
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
 
@@ -970,13 +973,13 @@ Thanks:
       }
 
       let self = this;
-      let id = YouTubePlayer.getIDfromURL(U.currentURL);
 
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
-      let cargs = content.wrappedJSObject.yt.config_.SWF_CONFIG.args
+      let cargs = content.wrappedJSObject.yt.config_.SWF_CONFIG.args;
       let quality = cargs.fmt_map.match(/^\d+/);
       let t = cargs.t;
+      let id = this.id;
 
       // 時間が経っていると無効化されてしまっている
       //_fetch(t, id);
