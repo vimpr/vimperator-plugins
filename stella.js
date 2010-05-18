@@ -837,19 +837,6 @@ Thanks:
   YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
   YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
 
-  YouTubePlayer.OUTER_NODES = [
-    'old-masthead',
-    'watch-vid-title',
-    'watch-other-vids',
-    'old-footer',
-    'copyright',
-    'watch-main-area',
-    'watch-comments-stats',
-    'watch-video-response',
-    'chrome-promo',
-    'watch-video-quality-setting',
-  ];
-
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,
 
@@ -887,46 +874,6 @@ Thanks:
     get fileURL ()
       let (as = content.document.defaultView.wrappedJSObject.swfArgs)
         ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
-
-    get fullscreen () this.storage.fullscreen,
-    // FIXME - うまく元に戻らないことがある？
-    set fullscreen (value) {
-      function changeOuterNodes (hide) {
-        return;
-        const st = {display: 'none'};
-        let f = hide ? function (node) U.storeStyle(node, st)
-                     : function (node) U.restoreStyle(node);
-        YouTubePlayer.OUTER_NODES.forEach(
-          function (id) {
-            let (node = U.getElementById(id)) {
-              node && f(node);
-            }
-          }
-        );
-      }
-
-      this.last.screenMode = value ? 'fullscreen' : null;
-      this.storage.fullscreen = value;
-
-      // changeOuterNodes(value);
-
-      let p = this.player;
-      let r = p.getBoundingClientRect();
-      if (this.fullscreen) {
-        if (this.storage.r === undefined)
-          this.storage.r = options['guioptions'].indexOf('r') >= 0;
-        U.storeStyle(p, {
-          marginLeft: -r.left + 'px',
-          marginTop: -r.top + 'px',
-          width: content.innerWidth + 'px',
-          height: content.innerHeight + 'px',
-        });
-        p.setSize(content.innerWidth, content.innerHeight);
-      } else {
-        p.setSize(640, 385);
-        U.restoreStyle(p);
-      }
-    },
 
     get muted () this.player.isMuted(),
     set muted (value) ((value ? this.player.mute() : this.player.unMute()), value),
