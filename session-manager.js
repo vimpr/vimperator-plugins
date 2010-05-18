@@ -172,6 +172,10 @@ let INFO =
         return liberator.echoerr('file does not exist: ' + name);
       file.remove(false);
       liberator.echo('Session removed: '+ name);
+    },
+    pop: function (name) {
+      this.load(name);
+      this.delete(name);
     }
   };
 
@@ -203,6 +207,7 @@ let INFO =
             ['load', 'Load saved session (overwrite)'],
             ['delete', 'Remove saved session'],
             ['append', 'Load saved session (append)'],
+            ['pop', 'Load and delete settion'],
           ];
           return;
         }
