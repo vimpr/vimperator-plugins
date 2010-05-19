@@ -1797,6 +1797,7 @@ Thanks:
               if (!self.player.has('relations', 'r'))
                 U.raiseNotSupportedFunction();
 
+              context.anchored = false;
               context.title = ['Tag/ID', 'Description'];
               context.keys = {text: 'text', description: 'description', thumbnail: 'thumbnail'};
               let process = Array.slice(context.process);
