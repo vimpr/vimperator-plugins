@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.31.0</version>
+  <version>0.31.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -770,8 +770,8 @@ Thanks:
     get description () this._description,
     get thumbnail () this._thumbnail,
     get completionText () this.command,
-    completionItem: function (index) ({
-      text: [this.completionText, index + ': ' + this.description],
+    get completionItem () ({
+      text: this.completionText,
       description: this.description,
       thumbnail: this.thumbnail
     })
@@ -1797,6 +1797,7 @@ Thanks:
               if (!self.player.has('relations', 'r'))
                 U.raiseNotSupportedFunction();
 
+              context.filters = [CompletionContext.Filter.textDescription];
               context.anchored = false;
               context.title = ['Tag/ID', 'Description'];
               context.keys = {text: 'text', description: 'description', thumbnail: 'thumbnail'};
@@ -1808,8 +1809,7 @@ Thanks:
                                   : process[1].apply(this, arguments))
               ];
               lastCompletions = self.player.relations;
-              context.completions =
-                lastCompletions.map(function (rel, index) rel.completionItem(index + 1));
+              context.completions = lastCompletions.map(function (rel) rel.completionItem);
             },
           },
           true
