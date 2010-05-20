@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -304,11 +304,13 @@ let INFO =
         bang: true,
         completer: function (context) {
           lolinks = getLinks();
+          context.filters = [CompletionContext.Filter.textDescription];
+          context.anchored = false;
           context.title = ['URL', 'Text Content'];
           context.compare = CompletionContext.Sort.number;
           context.completions =
             lolinks.map(function (it, i) let (url = it.href, text = it.textContent) ([
-              [i + ": " + (text || url), i + ": " + url],
+              i + ": " + (text || url),
               it.href
             ]));
         }
