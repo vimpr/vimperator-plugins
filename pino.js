@@ -35,13 +35,13 @@ var PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Open livedoor Reader pinned items</description>
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
-  <minVersion>2.0</minVersion>
-  <maxVersion>2.1</maxVersion>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.4</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.3.2</version>
+  <version>1.3.3</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -185,6 +185,8 @@ let self = liberator.plugins.pino = (function() {
       completer: function(context) {
         var pins = new Pins();
         context.title = ["url", "title"];
+        context.filters = [CompletionContext.Filter.textDescription];
+        context.anchored = false;
         context.completions = [
           [i.link, i.title] for each (i in pins.items())
         ];
