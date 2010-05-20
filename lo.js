@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.1.1</version>
+  <version>2.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.1.0"
+  <plugin name="link-opener" version="2.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.1.0"
+  <plugin name="link-opener" version="2.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -178,6 +178,8 @@ let INFO =
 
 
 (function () {
+
+  const CompItemStyle = "margin-right: 0.5em; max-height: 3em !important; max-width 6em !important;"
 
   let migemo = window.XMigemoCore;
 
@@ -307,12 +309,20 @@ let INFO =
           context.filters = [CompletionContext.Filter.textDescription];
           context.anchored = false;
           context.title = ['URL', 'Text Content'];
+          context.keys = {
+            text: function ({elem, index}) (index + ': ' + (elem.textContent || elem.href)),
+            description: function ({elem}) (elem.href),
+            thumbnail: function ({elem}) let (img = elem.querySelector('img')) (img && img.src)
+          };
           context.compare = CompletionContext.Sort.number;
-          context.completions =
-            lolinks.map(function (it, i) let (url = it.href, text = it.textContent) ([
-              i + ": " + (text || url),
-              it.href
-            ]));
+          let process = Array.slice(context.process);
+          context.process = [
+            process[0],
+            function (item, text)
+              (item.thumbnail ? <><img src={item.thumbnail} style={CompItemStyle}/>{text}</>
+                              : process[1].apply(this, arguments))
+          ];
+          context.completions = lolinks.map(function (it, i) ({elem: it, index: i}));
         }
       },
       true
