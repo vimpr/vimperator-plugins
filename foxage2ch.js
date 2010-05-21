@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -114,6 +114,8 @@ let INFO =
     new: 2,
     dead: 4
   };
+  for (let [k, v] in Iterator(Status))
+    Status[v] = k;
 
   const StatusIcon = {
     0: '\u2601', // 曇
@@ -137,41 +139,52 @@ let INFO =
       }
     );
 
-  commands.addUserCommand(
-    [cmdPrefix + 'o[pen]'],
-    'Open the borard from FoxAge2ch',
-    function (args) {
-      let thread = threads()[parseInt(args.literalArg.replace(/^.\s/, ''), 10) - 1];
-      if (!thread)
-        return;
-      liberator.log(thread);
-      liberator.open(FoxAge2chUtils.parseToURL(thread), liberator.NEW_TAB);
-    },
-    {
-      literal: 0,
-      options: [
-        [
-          ['-status', '-s'],
-          commands.OPTION_STRING,
-          null,
-          [[v, StatusIcon[k]] for ([v, k] in Iterator(Status))]]
-      ],
-      completer: function (context, args) {
-        context.completions = [
+  function addUserCommand (tab) {
+    commands.addUserCommand(
+      (tab ? ['t' + cmdPrefix + 'o[pen]', 'tab' + cmdPrefix + 'o[pen]'] : [cmdPrefix + 'o[pen]']),
+      'Open the borard from FoxAge2ch' + (tab ? ' in new tab' : 'in current tab'),
+      function (args) {
+        let thread = threads()[parseInt(args.literalArg.replace(/^.\s/, ''), 10) - 1];
+        if (!thread)
+          return;
+        FoxAge2chUtils.service.openItem(thread, tab, false);
+      },
+      {
+        literal: 0,
+        options: [
           [
-            let (icon = StatusIcon[thread.status])
-            (icon ? icon + ' ' : '') + (idx + 1) + ': ' + thread.title,
-            thread.id
+            ['-status', '-s'],
+            commands.OPTION_STRING,
+            null,
+            [[v, StatusIcon[k]] for ([v, k] in Iterator(Status)) if (typeof v === 'string')]
           ]
-          for ([idx, thread] in Iterator(threads()))
-          if (
-            (!('-status' in args) || (thread.status === Status[args['-status']]))
-          )
-        ];
-      }
-    },
-    true
-  );
+        ].concat([
+          [['-' + k, '-' + k.slice(0, 1)], commands.OPTION_NOARG]
+          for ([v, k] in Iterator(Status))
+          if (typeof v === 'number')
+        ]),
+        completer: function (context, args) {
+          for (let [v, k] in Iterator(Status)) {
+            if (typeof v === 'string' && ('-' + v in args))
+              args['-status'] = v;
+          }
+          context.completions = [
+            [
+              let (icon = StatusIcon[thread.status])
+              (icon ? icon + ' ' : '') + (idx + 1) + ': ' + thread.title,
+              thread.id
+            ]
+            for ([idx, thread] in Iterator(threads()))
+            if (!('-status' in args) || (thread.status === Status[args['-status']]))
+          ];
+        }
+      },
+      true
+    );
+  }
+
+  addUserCommand(true);
+  addUserCommand(false);
 
 })();
 
