@@ -71,6 +71,31 @@ let g:hintlabeling:
 //}}}
 
 (function () {
+    (function(){
+        //override _showHints
+        const key = "Hints.prototype._showHints";
+        let conf = userContext[key],original;
+        if(conf) original = conf;
+        else original = userContext[key] = Hints.prototype._showHints;
+
+        const target = "String(hintnum).indexOf(String(activeHint)) == 0";
+
+        let source = original.toSource();
+        if(source.indexOf(target)>=0){
+            source = source.replace(target,
+                "num2chars(hintnum).indexOf(num2chars(activeHint)) == 0");
+            Hints.prototype._showHints = eval("(function() "+source+")()");
+        }else{
+            liberator.echoerr(new Error("_showHints override failed!"));
+        }
+    })()
+    ;
+    (function(){
+        const source = Hints.prototype._checkUnique.toSource();
+        if(source.indexOf("10")<0) return;
+        Hints.prototype._checkUnique = eval("(function() "+source.replace("10",<>hintchars.length</>)+")()");
+    })()
+    ;
 
     const DEFAULT_HINTCHARS = "HJKLASDFGYUIOPQWERTNMZXCVB";
     const hintContext = modules.hints;
@@ -173,40 +198,15 @@ let g:hintlabeling:
     } //}}}
     function processHintInput(hintInput, hints) //{{{
     {
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
         let start = getStartCount(hintchars.length, hints.length);
         let num = chars2num(hintInput)-start;
         if(num < 0) return;
 
-        let numstr = String(num);
-        for(let i=0,l=numstr.length;i<l;++i) {
-            let num = numstr[i];
-            // events.toString(e) return e.liberatorString
-            // if e.liberatorString.
-            // so alt handled as press number event by vimperator.
-            let alt = new Object;
-            alt.liberatorString = num;
-            charhints.original.onEvent.apply(hintContext,[alt]);
-        }
-        clearOriginalTimeout();
+        hintContext._hintNumber = Math.floor(num/10);
+        charhints.original.onEvent.apply(hintContext,[{
+            liberatorString: String(num%10)
+        }]);
         statusline.updateInputBuffer(hintInput);
-
-        let validHints = hints.filter(function(hint) isValidHint(hintInput, hint));
-        if(validHints.length == 1) {
-            charhints.original.processHints.apply(hintContext,[true]);
-            return true;
-        }
-
-        let timeout = options["hinttimeout"];
-        if (timeout > 0) {
-            timer = setTimeout(function () {
-                charhints.original.processHints.apply(hintContext,[true]);
-            }, timeout);
-        }
-
     } //}}}
 
     var hintInput = "";
