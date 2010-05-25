@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
-  <version>2.0.3</version>
+  <version>2.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -95,7 +95,7 @@ let PLUGIN_INFO =
     );
   }
 
-  function shorten (url, domain, callback) {
+  function shorten (url, domain, command, callback) {
     function get () {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
@@ -104,13 +104,13 @@ let PLUGIN_INFO =
         if (req.status == 200)
           return callback && callback(req.responseText, req);
         else
-          throw new Error(req.statusText);
+          return liberator.echoerr(req.statusText);
       };
       let requestUri =
-        ApiUrl + '/shorten?' +
+        ApiUrl + '/' + (command || 'shorten') + '?' +
         'apiKey=' + auth.password + '&' +
         'login=' + auth.username + '&' +
-        'uri=' + encodeURIComponent(url) + '&' +
+        (command !== 'expand' ? 'uri=' : 'shortUrl=') + encodeURIComponent(url) + '&' +
         'domain=' + (domain || 'bit.ly') + '&' +
         'format=txt';
       req.open('GET', requestUri, callback);
@@ -142,14 +142,18 @@ let PLUGIN_INFO =
       'Copy ' + domain + ' url',
       function (args) {
         let url = args.literalArg ? util.stringToURLArray(args.literalArg)[0] : buffer.URL;
+        let cmd = args['-expand'] ? 'expand' : 'shorten';
 
-        shorten(url, domain, function (short) {
+        shorten(url, domain, cmd, function (short) {
           util.copyToClipboard(short);
           liberator.echo(short + ' <= ' + url);
         });
       },
       {
         literal: 0,
+        options: [
+          [['-expand', '-e'], commands.OPTION_NOARG]
+        ],
         completer: function (context) {
           context.completions = [
             [buffer.URL, 'Current URL']
@@ -159,7 +163,7 @@ let PLUGIN_INFO =
       },
       true
     );
-    __context__[name] = function (url, callback) shorten(url, domain, callback);
+    __context__[name] = function (url, cmd, callback) shorten(url, domain, cmd, callback);
   });
 
   __context__.get = shorten;
