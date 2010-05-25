@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -55,7 +55,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="FoxAge2ch" version="1.0.0"
+  <plugin name="FoxAge2ch" version="1.0.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="for FoxAge2ch addon"
           lang="en-US"
@@ -74,7 +74,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="FoxAge2ch" version="1.0.0"
+  <plugin name="FoxAge2ch" version="1.0.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="FoxAge2ch アドオン用"
           lang="ja"
@@ -147,9 +147,10 @@ let INFO =
         let thread = threads()[parseInt(args.literalArg.replace(/^.\s/, ''), 10) - 1];
         if (!thread)
           return;
-        FoxAge2chUtils.service.openItem(thread, tab, false);
+        FoxAge2chUtils.service.openItem(thread, !tab ^ !args.bang, false);
       },
       {
+        bang: true,
         literal: 0,
         options: [
           [
