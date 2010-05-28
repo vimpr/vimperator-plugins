@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -159,6 +159,26 @@ let INFO =
     },
     true
   );
+
+
+  'translate'.split(/\s/).forEach(function (cmd) {
+    let gv = liberator.globalVariables['gmail_commando_map_' + cmd];
+    if (!gv)
+      return;
+    mappings.addUserMap(
+      [modes.NORMAL],
+      gv.split(/\s+/),
+      cmd + ' - Gmail Commando',
+      function () {
+        Commands.translate();
+      },
+      {
+        matchingUrls: RegExp('https://mail\\.google\\.com/mail/*')
+      }
+    );
+  });
+
+  __context__.command  = Commands;
 
 })();
 
