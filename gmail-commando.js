@@ -191,6 +191,7 @@ let INFO =
     ['', 'Unknown']
   ];
 
+
   const Elements = {
     get doc() content.frames[3].document,
 
@@ -214,13 +215,35 @@ let INFO =
   };
 
 
+  const Commando = {
+    get inGmail () {
+      try {
+        var result = /^mail\.google\.com$/(Elements.doc.location.hostname)
+      } catch (e) {}
+      return result;
+    },
+
+    search: function (args) {
+      const URL = 'https://mail.google.com/mail/#search/';
+
+      if (this.inGmail) {
+        Elements.input.value = args;
+        buffer.followLink(Elements.searchButton);
+      } else {
+        liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
+      }
+    }
+  };
+
   const Commands = {
     translate: function () buffer.followLink(Elements.translateButton),
     fold: function () buffer.followLink(Elements.foldButton),
     unfold: function () buffer.followLink(Elements.unfoldButton),
   };
 
+
   const GMailSearchKeyword = 'label subject from to cc bcc has is in lang'.split(/\s/);
+
 
   const KeywordValueCompleter = {
     __noSuchMethod__: function () void 0,
@@ -253,26 +276,12 @@ let INFO =
     }
   };
 
-  function search (args) {
-    const URL = 'https://mail.google.com/mail/#search/';
-
-    try {
-      var inGmail = /^mail\.google\.com$/(Elements.doc.location.hostname)
-    } catch (e) {}
-
-    if (inGmail) {
-      Elements.input.value = args;
-      buffer.followLink(Elements.searchButton);
-    } else {
-      liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
-    }
-  }
 
   commands.addUserCommand(
     ['gmail'],
     'GMail Commando',
     function (args) {
-      search(args.literalArg);
+      Commando.search(args.literalArg);
     },
     {
       literal: 0,
