@@ -98,16 +98,30 @@ let INFO =
 
   const Elements = {
     get doc() content.frames[3].document,
+
     get labels() A(this.doc.querySelectorAll('a.n0')),
+
     get input() this.doc.getElementById(':rh'),
+
     get searchButton() this.doc.getElementById(':rj'),
+
+    get translateButton () this.mail.querySelector('tr > td.SA > .iL.B9'),
+    get translateButtons () A(this.doc.querySelector('tr > td.SA > .iL.B9')),
+
+    get mail ()
+      A(this.doc.querySelectorAll('.h7')).filter(
+        function (it) !it.querySelector('.hF.hH > img.hG')
+      )[0],
+    get mails () A(this.doc.querySelectorAll('.h7')),
   };
+  // Array.slice(content.frames[3].document.querySelectorAll('.hF.hH > .hG'))
+
 
   const Commands = {
+    translate: function () buffer.followLink(Elements.translateButton)
   };
 
   const GMailSearchKeyword = 'label intitle'.split(/\s/);
-
 
   commands.addUserCommand(
     ['gmail'],
