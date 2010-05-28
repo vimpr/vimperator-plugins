@@ -135,7 +135,21 @@ let INFO =
         [label.textContent.replace(/\s*\(\d+\+?\)$/, ''), label.textContent]
         for ([, label] in Iterator(Elements.labels))
       ];
-    }
+    },
+
+    is: function (context) {
+      const values = 'anywhere inbox drafts span trash'.split(/\s/);
+      context.completions = [
+        [v, v] for ([, v] in Iterator(values))
+      ];
+    },
+
+    in: function (context) {
+      const values = 'starred chat voicemail muted sent'.split(/\s/);
+      context.completions = [
+        [v, v] for ([, v] in Iterator(values))
+      ];
+    },
   };
 
   commands.addUserCommand(
