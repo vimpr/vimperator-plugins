@@ -253,12 +253,26 @@ let INFO =
     }
   };
 
+  function search (args) {
+    const URL = 'https://mail.google.com/mail/#search/';
+
+    try {
+      var inGmail = /^mail\.google\.com$/(Elements.doc.location.hostname)
+    } catch (e) {}
+
+    if (inGmail) {
+      Elements.input.value = args;
+      buffer.followLink(Elements.searchButton);
+    } else {
+      liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
+    }
+  }
+
   commands.addUserCommand(
     ['gmail'],
     'GMail Commando',
     function (args) {
-      Elements.input.value = args.literalArg;
-      buffer.followLink(Elements.searchButton);
+      search(args.literalArg);
     },
     {
       literal: 0,
