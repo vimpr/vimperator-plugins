@@ -127,6 +127,17 @@ let INFO =
 
   const GMailSearchKeyword = 'label subject from to cc bcc has is in'.split(/\s/);
 
+  const KeywordValueCompleter = {
+    __noSuchMethod__: function () void 0,
+
+    label: function (context) {
+      context.completions = [
+        [label.textContent.replace(/\s*\(\d+\+?\)$/, ''), label.textContent]
+        for ([, label] in Iterator(Elements.labels))
+      ];
+    }
+  };
+
   commands.addUserCommand(
     ['gmail'],
     'GMail Commando',
@@ -140,19 +151,14 @@ let INFO =
         let input = args.string.slice(0, context.caret);
         let m;
 
-        if (m = /(\s|^)(label):([^\s]*)$/(input)) {
+        if (m = /([\(\)\s]|^)([a-z]+):([^\s\(\)]*)$/(input)) {
           context.advance(input.length - m[3].length);
           let key = m[2];
-          if (key === 'label') {
-            context.completions = [
-              [label.textContent.replace(/\s*\(\d+\+?\)$/, ''), label.textContent]
-              for ([, label] in Iterator(Elements.labels))
-            ];
-          }
+          KeywordValueCompleter[key](context, args);
           return;
         }
 
-        if (m = /\s*([^\s:]*)$/(input)) {
+        if (m = /\s*([^\s:\(\)]*)$/(input)) {
           context.advance(input.length - m[1].length);
           context.completions = [
             [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
