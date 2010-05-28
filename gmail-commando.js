@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.3.0"
+  <plugin name="GMailCommando" version="1.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.3.0"
+  <plugin name="GMailコマンドー" version="1.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -195,7 +195,7 @@ let INFO =
   const Elements = {
     get doc() content.frames[3].document,
 
-    get labels() A(this.doc.querySelectorAll('a.n0')),
+    get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
 
     get input() this.doc.getElementById(':rh'),
 
