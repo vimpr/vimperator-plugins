@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.0.0"
+  <plugin name="GMailCommando" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.0.0"
+  <plugin name="GMailコマンドー" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -113,12 +113,16 @@ let INFO =
         function (it) !it.querySelector('.hF.hH > img.hG')
       )[0],
     get mails () A(this.doc.querySelectorAll('.h7')),
+
+    get foldButton () this.doc.querySelector('#\\:54'),
+    get unfoldButton () this.doc.querySelector('#\\:55'),
   };
-  // Array.slice(content.frames[3].document.querySelectorAll('.hF.hH > .hG'))
 
 
   const Commands = {
-    translate: function () buffer.followLink(Elements.translateButton)
+    translate: function () buffer.followLink(Elements.translateButton),
+    fold: function () buffer.followLink(Elements.foldButton),
+    unfold: function () buffer.followLink(Elements.unfoldButton),
   };
 
   const GMailSearchKeyword = 'label intitle'.split(/\s/);
@@ -161,7 +165,7 @@ let INFO =
   );
 
 
-  'translate'.split(/\s/).forEach(function (cmd) {
+  'translate fold unfold'.split(/\s/).forEach(function (cmd) {
     let gv = liberator.globalVariables['gmail_commando_map_' + cmd];
     if (!gv)
       return;
