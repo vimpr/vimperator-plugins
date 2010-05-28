@@ -204,6 +204,8 @@ let INFO =
     get translateButton () this.mail.querySelector('tr > td.SA > .iL.B9'),
     get translateButtons () A(this.doc.querySelector('tr > td.SA > .iL.B9')),
 
+    get translateThreadButton () this.doc.querySelector('#\\:27'),
+
     get mail ()
       A(this.doc.querySelectorAll('.h7')).filter(
         function (it) !it.querySelector('.hF.hH > img.hG')
@@ -239,9 +241,12 @@ let INFO =
 
   const Commands = {
     translate: function () buffer.followLink(Elements.translateButton),
+    translateThread: function () buffer.followLink(Elements.translateThreadButton),
     fold: function () buffer.followLink(Elements.foldButton),
     unfold: function () buffer.followLink(Elements.unfoldButton),
   };
+
+  liberator.log(Elements.translateThreadButton.textContent);
 
 
   const GMailSearchKeyword = 'label subject from to cc bcc has is in lang'.split(/\s/);
@@ -319,8 +324,12 @@ let INFO =
   );
 
 
-  'translate fold unfold'.split(/\s/).forEach(function (cmd) {
-    let gv = liberator.globalVariables['gmail_commando_map_' + cmd];
+  'translate translateThread fold unfold'.split(/\s/).forEach(function (cmd) {
+    let gv =
+      liberator.globalVariables[
+        'gmail_commando_map_' +
+        cmd.replace(/[A-Z]/g, function (m) ('_' + m.toLowerCase()))
+      ];
     if (!gv)
       return;
     mappings.addUserMap(
