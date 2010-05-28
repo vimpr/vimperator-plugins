@@ -125,7 +125,7 @@ let INFO =
     unfold: function () buffer.followLink(Elements.unfoldButton),
   };
 
-  const GMailSearchKeyword = 'label intitle'.split(/\s/);
+  const GMailSearchKeyword = 'label subject from to cc bcc has is in'.split(/\s/);
 
   commands.addUserCommand(
     ['gmail'],
@@ -155,7 +155,7 @@ let INFO =
         if (m = /\s*([^\s:]*)$/(input)) {
           context.advance(input.length - m[1].length);
           context.completions = [
-            ['label:', 'label']
+            [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
           ];
           return;
         }
