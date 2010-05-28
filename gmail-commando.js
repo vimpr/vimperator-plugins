@@ -232,7 +232,9 @@ let INFO =
       } else {
         liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
       }
-    }
+    },
+
+    storage: storage.newMap('gmail-commando', {store: true})
   };
 
   const Commands = {
@@ -249,10 +251,13 @@ let INFO =
     __noSuchMethod__: function () void 0,
 
     label: function (context) {
-      context.completions = [
+      let completions = [
         [label.textContent.replace(/\s*\(\d+\+?\)$/, ''), label.textContent]
-        for ([, label] in Iterator(Elements.labels))
+        for ([, label] in Iterator(Commando.inGmail ? Elements.labels : Commando.storage.get('labels', [])))
       ];
+      if (Commando.inGmail)
+        Commando.storage.set('labels', Elements.labels);
+      context.completions = completions;
     },
 
     is: function (context) {
