@@ -240,7 +240,10 @@ let INFO =
   };
 
   const Commands = {
-    translate: function () buffer.followLink(Elements.translateButton),
+    translate: function () {
+      let button = Elements.translateButton || Elements.translateButtons[0];
+      buffer.followLink(button);
+    },
     translateThread: function () buffer.followLink(Elements.translateThreadButton),
     fold: function () buffer.followLink(Elements.foldButton),
     unfold: function () buffer.followLink(Elements.unfoldButton),
