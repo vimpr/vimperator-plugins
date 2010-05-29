@@ -246,8 +246,6 @@ let INFO =
     unfold: function () buffer.followLink(Elements.unfoldButton),
   };
 
-  liberator.log(Elements.translateThreadButton.textContent);
-
 
   const GMailSearchKeyword = 'label subject from to cc bcc has is in lang'.split(/\s/);
 
