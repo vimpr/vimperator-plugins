@@ -225,10 +225,10 @@ let INFO =
       return result;
     },
 
-    search: function (args) {
+    search: function (args, newtab) {
       const URL = 'https://mail.google.com/mail/#search/';
 
-      if (this.inGmail) {
+      if (this.inGmail && !newtab) {
         Elements.input.value = args;
         buffer.followLink(Elements.searchButton);
       } else {
@@ -294,9 +294,10 @@ let INFO =
     ['gmail'],
     'GMail Commando',
     function (args) {
-      Commando.search(args.literalArg);
+      Commando.search(args.literalArg, args.bang);
     },
     {
+      bang: true,
       literal: 0,
       completer: function (context, args) {
         let input = args.string.slice(0, context.caret);
