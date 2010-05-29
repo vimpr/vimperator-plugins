@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.3.1</version>
+  <version>1.3.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.3.1"
+  <plugin name="GMailCommando" version="1.3.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.3.1"
+  <plugin name="GMailコマンドー" version="1.3.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -201,15 +201,14 @@ let INFO =
 
     get searchButton() this.doc.getElementById(':rj'),
 
-    get translateButton () this.mail.querySelector('tr > td.SA > .iL.B9'),
-    get translateButtons () A(this.doc.querySelector('tr > td.SA > .iL.B9')),
+    get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
+    get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
 
     get translateThreadButton () this.doc.querySelector('#\\:27'),
 
     get mail ()
-      A(this.doc.querySelectorAll('.h7')).filter(
-        function (it) !it.querySelector('.hF.hH > img.hG')
-      )[0],
+      let (es = this.mails.filter(function (it) !it.querySelector('.hF.hH > img.hG')))
+        (es.length && es[0]),
     get mails () A(this.doc.querySelectorAll('.h7')),
 
     get foldButton () this.doc.querySelector('#\\:54'),
