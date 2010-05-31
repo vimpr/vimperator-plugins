@@ -322,6 +322,8 @@ let INFO =
       ];
     },
 
+    has: simpleValueCompleter('attachment'.split(/\s/).sort()),
+
     is: simpleValueCompleter('read unread starred chat voicemail muted sent'.split(/\s/).sort()),
 
     in: simpleValueCompleter('anywhere inbox drafts spam trash'.split(/\s/).sort()),
