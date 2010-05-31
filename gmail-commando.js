@@ -296,6 +296,13 @@ let INFO =
   // sort はなんで破壊的なの！？
   const GMailSearchKeyword = 'label subject from to cc bcc has is in lang filename before after'.split(/\s/).sort();
 
+  function simpleValueCompleter (values) {
+    return function (context) {
+      context.completions = [
+        [v, v] for ([, v] in Iterator(values))
+      ];
+    };
+  }
 
   const KeywordValueCompleter = {
     __noSuchMethod__: function () void 0,
@@ -315,19 +322,9 @@ let INFO =
       ];
     },
 
-    is: function (context) {
-      const values = 'read unread starred chat voicemail muted sent'.split(/\s/).sort();
-      context.completions = [
-        [v, v] for ([, v] in Iterator(values))
-      ];
-    },
+    is: simpleValueCompleter('read unread starred chat voicemail muted sent'.split(/\s/).sort()),
 
-    in: function (context) {
-      const values = 'anywhere inbox drafts spam trash'.split(/\s/).sort();
-      context.completions = [
-        [v, v] for ([, v] in Iterator(values))
-      ];
-    },
+    in: simpleValueCompleter('anywhere inbox drafts spam trash'.split(/\s/).sort()),
 
     lang: function (context) {
       context.completions = [
