@@ -65,11 +65,33 @@ let INFO =
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="2.4"/>
-    <p></p>
+    <p>Search with good completer.</p>
     <item>
       <tags>:gmail</tags>
-      <spec>:gmail</spec>
-      <description><p></p></description>
+      <spec>:gmail<oa>!</oa> <a>gmail-search-words</a></spec>
+      <description>
+        <p>
+          Start to search with <a>gmail-search-words</a>.
+          If <oa>!</oa> is given,  open the new tab.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:gmail_commando_map_</tags>
+      <spec>g:gmail_commando_map_<a>function-name</a> = <a>key-sequence</a></spec>
+      <description>
+        <p>
+          Set the mappings for Gmail page.
+        <p>
+        </p>
+          Available values for <a>function-name</a>:
+          <dl>
+            <dt>translate</dt><dd>メール翻訳</dd>
+            <dt>fold</dt><dd>折りたたみ</dd>
+            <dt>unfold</dt><dd>折りたたみ解除</dd>
+          </dl>
+        </p>
+      </description>
     </item>
   </plugin>
   <plugin name="GMailコマンドー" version="1.3.5"
@@ -80,11 +102,33 @@ let INFO =
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="2.4"/>
-    <p></p>
+    <p>ステキ補完で検索</p>
     <item>
       <tags>:gmail</tags>
-      <spec>:gmail</spec>
-      <description><p></p></description>
+      <spec>:gmail<oa>!</oa> <a>gmail-search-words</a></spec>
+      <description>
+        <p>
+          <a>gmail-search-words</a> で検索をします。
+          <oa>!</oa> 付きの場合は、新しいタブで Gmail を開きます。
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:gmail_commando_map_</tags>
+      <spec>g:gmail_commando_map_<a>function-name</a> = <a>key-sequence</a></spec>
+      <description>
+        <p>
+          Gmail のページ内でのみ有効なマッピングを設定します。
+        <p>
+        </p>
+          <a>function-name</a> は以下の値が有効です。
+          <dl>
+            <dt>translate</dt><dd>メール翻訳</dd>
+            <dt>fold</dt><dd>折りたたみ</dd>
+            <dt>unfold</dt><dd>折りたたみ解除</dd>
+          </dl>
+        </p>
+      </description>
     </item>
   </plugin>
 </>;
