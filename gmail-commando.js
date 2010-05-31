@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.3.5</version>
+  <version>1.3.6</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.3.5"
+  <plugin name="GMailCommando" version="1.3.6"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -94,7 +94,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.3.5"
+  <plugin name="GMailコマンドー" version="1.3.6"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -373,7 +373,7 @@ let INFO =
           }
         }
 
-        if (Commando.inGmail)
+        if (Commando.inGmail && Elements.input.value)
           context.fork('Current', 0, context, currentInputCompleter);
         context.fork('Search', 0, context, normalCompleter);
       }
