@@ -249,7 +249,7 @@ let INFO =
   };
 
 
-  const GMailSearchKeyword = 'label subject from to cc bcc has is in lang'.split(/\s/);
+  const GMailSearchKeyword = 'label subject from to cc bcc has is in lang filename'.split(/\s/);
 
 
   const KeywordValueCompleter = {
