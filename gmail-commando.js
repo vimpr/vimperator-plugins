@@ -272,14 +272,14 @@ let INFO =
     },
 
     is: function (context) {
-      const values = 'anywhere inbox drafts span trash read unread'.split(/\s/).sort();
+      const values = 'read unread starred chat voicemail muted sent'.split(/\s/).sort();
       context.completions = [
         [v, v] for ([, v] in Iterator(values))
       ];
     },
 
     in: function (context) {
-      const values = 'starred chat voicemail muted sent'.split(/\s/).sort();
+      const values = 'anywhere inbox drafts spam trash'.split(/\s/).sort();
       context.completions = [
         [v, v] for ([, v] in Iterator(values))
       ];
