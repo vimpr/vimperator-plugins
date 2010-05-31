@@ -249,7 +249,8 @@ let INFO =
   };
 
 
-  const GMailSearchKeyword = 'label subject from to cc bcc has is in lang filename'.split(/\s/);
+  // sort はなんで破壊的なの！？
+  const GMailSearchKeyword = 'label subject from to cc bcc has is in lang filename before after'.split(/\s/);
 
 
   const KeywordValueCompleter = {
@@ -271,7 +272,7 @@ let INFO =
     },
 
     is: function (context) {
-      const values = 'anywhere inbox drafts span trash'.split(/\s/);
+      const values = 'anywhere inbox drafts span trash read unread'.split(/\s/);
       context.completions = [
         [v, v] for ([, v] in Iterator(values))
       ];
