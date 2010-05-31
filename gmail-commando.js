@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.3.3</version>
+  <version>1.3.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.3.3"
+  <plugin name="GMailCommando" version="1.3.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.3.3"
+  <plugin name="GMailコマンドー" version="1.3.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -302,28 +302,35 @@ let INFO =
       bang: true,
       literal: 0,
       completer: function (context, args) {
-        let input = args.string.slice(0, context.caret);
-        let m;
+        function currentInputCompleter (context) {
+          context.title = ['Current'];
+          context.completions = [[Elements.input.value, 'Current']];
+        }
 
-        if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/(input)) {
-          if (m[2]) {
-            context.advance(input.length - m[2].length);
-          } else {
-            let tail = /[^\s]*$/(m[3]);
-            context.advance(input.length - tail[0].length);
+        function normalCompleter (context) {
+          let input = args.string.slice(0, context.caret);
+          let m;
+
+          if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/(input)) {
+            if (m[2]) {
+              context.advance(input.length - m[2].length);
+            } else {
+              let tail = /[^\s]*$/(m[3]);
+              context.advance(input.length - tail[0].length);
+            }
+            let key = m[1];
+            KeywordValueCompleter[key](context, args);
+          } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/(input)) {
+            context.advance(input.length - m[1].length);
+            context.completions = [
+              [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
+            ];
           }
-          let key = m[1];
-          KeywordValueCompleter[key](context, args);
-          return;
         }
 
-        if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/(input)) {
-          context.advance(input.length - m[1].length);
-          context.completions = [
-            [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
-          ];
-          return;
-        }
+        if (Commando.inGmail)
+          context.fork('Current', 0, context, currentInputCompleter);
+        context.fork('Search', 0, context, normalCompleter);
       }
     },
     true
