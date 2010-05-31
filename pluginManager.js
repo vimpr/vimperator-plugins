@@ -4,9 +4,9 @@ var PLUGIN_INFO =
 <description>Manage Vimperator Plugins</description>
 <description lang="ja">Vimpeatorプラグインの管理</description>
 <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-<version>0.6.5</version>
-<minVersion>2.3pre</minVersion>
-<maxVersion>2.3</maxVersion>
+<version>0.6.6</version>
+<minVersion>2.3</minVersion>
+<maxVersion>2.4</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
 <detail lang="ja"><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
@@ -345,7 +345,7 @@ Plugin.prototype = { // {{{
             return '<span highlight="WarningMsg">source is null.</span>';
 
         try {
-            io.writeFile(file, source);
+            file.write(source);
         } catch (e){
             liberator.log('Could not write to ' + file.path + ': ' + e.message);
             return 'E190: Cannot open ' + file.path.quote() + ' for writing';
