@@ -395,7 +395,7 @@ let INFO =
       gv.split(/\s+/),
       cmd + ' - Gmail Commando',
       function () {
-        Commands.translate();
+        Commands[cmd]();
       },
       {
         matchingUrls: RegExp('https://mail\\.google\\.com/mail/*')
