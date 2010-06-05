@@ -255,8 +255,9 @@ let INFO =
         (es.length && es[0]),
     get mails () A(this.doc.querySelectorAll('.h7')),
 
-    get foldButton () this.doc.querySelector('#\\:54'),
-    get unfoldButton () this.doc.querySelector('#\\:55'),
+    // XXX 毎度 ID が変わるっぽいので、u から選択
+    get foldButton () this.doc.querySelectorAll('div.hk > span > u')[3],
+    get unfoldButton () this.doc.querySelectorAll('div.hk > span > u')[2],
   };
 
 
