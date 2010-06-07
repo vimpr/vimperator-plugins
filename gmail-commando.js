@@ -140,6 +140,18 @@ let INFO =
   function A (list)
     Array.slice(list);
 
+  const Conf = (function () {
+    let gv = liberator.globalVariables;
+    let conf = {};
+    'label_shortcut'.split(/\s/).forEach(function (n) {
+      conf.__defineGetter__(
+        n.replace(/_./g, function (m) m.slice(1).toUpperCase()),
+        function () gv['gmail_commando_' + n]
+      );
+    });
+    return conf;
+  })();
+
   const Languages = [
     ['af', 'Afrikaans'],
     ['sq', 'Albanian'],
@@ -325,6 +337,13 @@ let INFO =
       ];
     },
 
+    labelAndValue: function (context) {
+      KeywordValueCompleter.label(context);
+      context.completions.forEach(function (it) {
+        it[0] = 'label:' + it[0];
+      });
+    },
+
     has: simpleValueCompleter('attachment'.split(/\s/).sort()),
 
     is: simpleValueCompleter('read unread starred chat voicemail muted sent'.split(/\s/).sort()),
@@ -372,6 +391,8 @@ let INFO =
             context.completions = [
               [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
             ];
+            if (Conf.labelShortcut)
+              context.fork('Label+', 0, context, KeywordValueCompleter.labelAndValue);
           }
         }
 
