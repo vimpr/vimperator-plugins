@@ -1427,8 +1427,7 @@ Thanks:
           __proto__: info.flvInfo,
           ticket: info.ticket,
           postkey: info.postkey,
-          // 0 秒コメントはうざいらしいので勝手に自重する
-          vpos: Math.max(100, parseInt(vpos || (self.player.ext_getPlayheadTime() * 100), 10)),
+          vpos: vpos * 100,
           body: message
         };
         U.log(args);
@@ -1437,12 +1436,20 @@ Thanks:
         U.log(xhr.responseText);
       }
 
+      function sendDummyComment (message, command, position) {
+        self.player.ext_sendLocalMessage(message, command, vpos);
+      }
+
+      // 0 秒コメントはうざいらしいので勝手に自重する
+      vpos = Math.max(1, parseInt(vpos || self.currentTime, 10));
+
       U.log('sendcommnet');
       getThumbInfo();
       getFLV();
       getPostkey();
       getComments();
       sendChat();
+      sendDummyComment(message, command, vpos);
     }
   };
 
@@ -1491,7 +1498,7 @@ Thanks:
     set muted (value) (this.volume = value ? 0 : 100),
 
     get player ()
-      this.__initializePlayer(U.xpathGet('//embed[contains(@id,"vimeo_clip_")]').wrappedJSObject),
+      this.__initializePlayer(content.document.querySelector('.player > object').wrappedJSObject),
 
     get ready () !!this.player,
 
