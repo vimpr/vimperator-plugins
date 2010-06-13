@@ -1428,6 +1428,7 @@ Thanks:
           ticket: info.ticket,
           postkey: info.postkey,
           vpos: vpos * 100,
+          mail: command,
           body: message
         };
         U.log(args);
