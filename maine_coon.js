@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.5.0</version>
+  <version>2.5.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -269,6 +269,11 @@ let elemStyle =
       if (remove)
         remove();
       let doc = window.content.document;
+
+      // XXX 中身なしっぽいときは、あきらめる。代替手段が欲しい
+      if (!doc.body)
+        return;
+
       let style =
         'opacity: 1; ' +
         important(
