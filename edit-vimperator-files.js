@@ -97,6 +97,13 @@ let INFO =
   function toArray (obj)
     (obj instanceof Array ? obj : obj.toString().split(/[,| \t\r\n]+/));
 
+  function editFileExternally (path) {
+    let args = commands.parseArgs(options["editor"], [], "*", true);
+    liberator.assert(args.length >= 1, "No editor specified");
+    args.push(path);
+    liberator.callFunctionInThread(null, io.run, io.expandPath(args.shift()), args, false);
+  }
+
   let dirs = toArray(liberator.globalVariables.plugin_loader_roots);
 
   'HOME USERPROFILE HOMEDRIVE'.split(/\s/).forEach(
@@ -139,7 +146,7 @@ let INFO =
     function (args) {
       if (args['-autosource'])
         plugins.auto_source.start(args.literalArg);
-      editor.editFileExternally(args.literalArg);
+      editFileExternally(args.literalArg);
     },
     {
       literal: 0,
