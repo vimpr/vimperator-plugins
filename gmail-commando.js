@@ -272,8 +272,31 @@ let INFO =
     // XXX 毎度 ID が変わるっぽいので、u から選択
     get foldButton () this.threadButtons[3],
     get unfoldButton () this.threadButtons[2],
+
+    get labelButtons () {
+      function labels ()
+        Elements.doc.querySelectorAll('.J-LC-Jz');
+      function show ()
+        Elements.doc.getElementById(':ps');
+
+      let result = labels();
+      if (result)
+        return A(result);
+
+      buffer.followLink(show());
+      result = labels();
+      buffer.followLink(show());
+
+      return A(result);
+    }
   };
 
+  //'.J-M-JJ > input'
+  //let (e = Elements.doc.querySelector('.J-LC-Jz')) {
+  //  liberator.log(e);
+  //  buffer.followLink(e);
+  //  //plugins.feedSomeKeys_3.API.feed('<Cr>', ['keydown'], e)
+  //}
 
   const Commando = {
     get inGmail () {
@@ -305,6 +328,13 @@ let INFO =
     translateThread: function () buffer.followLink(Elements.translateThreadButton),
     fold: function () buffer.followLink(Elements.foldButton),
     unfold: function () buffer.followLink(Elements.unfoldButton),
+    label: function (names) {
+      Elements.labelButtons.forEach(function (e) {
+        if (names.some(function (v) (v == e.textContent)))
+          buffer.followLink(e);
+          liberator.log('pressed: ' + e.textContent);
+      });
+    }
   };
 
 

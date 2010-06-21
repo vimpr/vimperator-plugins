@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.4.3</version>
+  <version>2.5.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
@@ -65,10 +65,12 @@ let PLUGIN_INFO =
             (e.g. "Yanked http://..." "-- CARET --")
           l:
             Large mode (Hide status line)
+          u:
+            Displays the message of current page URL when page is loaded.
         >||
           :set mainecoon=ac
         ||<
-        The default value of this option is "am".
+        The default value of this option is "amu".
         === note ===
           The C and c options probably are supported on some OSs only.
     == Global Variables ==
@@ -116,11 +118,13 @@ let PLUGIN_INFO =
             ("Yanked http://..." "-- CARET --" など)
           l:
             ラージモード (Hide status line)
+          u:
+            ページが読み込まれたときにURLをポップアップ表示する。
         "c" と "f" の併用は意味がありません。
         >||
           :set mainecoon=ac
         ||<
-        デフォルト値は "am"
+        デフォルト値は "amu"
         === 備考 ===
           C c オプションはいくつかの OS でのみ有効です。多分。
     == Global Variables ==
@@ -331,6 +335,7 @@ let elemStyle =
 
   let useEcho = false;
   let autoHideCommandLine = false;
+  let displayURL = true;
   let inputting = false;
   let windowInfo = {};
 
@@ -339,8 +344,8 @@ let elemStyle =
     let d = liberator.globalVariables.maine_coon_default;
 
     let def = !nothing(d) ? d :
-              nothing(a)  ? 'am' :
-              s2b(a)      ? 'am' :
+              nothing(a)  ? 'amu' :
+              s2b(a)      ? 'amu' :
               'm';
 
     autocommands.add(
@@ -408,6 +413,15 @@ let elemStyle =
     U.around(commandline._callbacks.cancel, modes.PROMPT, callback);
   }
 
+  autocommands.add(
+    'DOMLoad',
+    /.*/,
+    function (args) {
+      if (displayURL)
+        echo(args.url);
+    }
+  );
+
   options.add(
     ['mainecoon'],
     'Make big screen like a Maine Coon',
@@ -436,6 +450,7 @@ let elemStyle =
 
         setAutoHideCommandLine(has('a'));
         useEcho = has('m');
+        displayURL = has('u');
 
         return value;
       },
@@ -448,6 +463,7 @@ let elemStyle =
           ['C', 'Hide caption bar (maximize)'],
           ['m', 'Displays the message to command-line'],
           ['l', 'Large mode. Hide status-line'],
+          ['u', 'Displays the message of current page URL when page is loaded.'],
         ];
       },
       validater: function (value) /^[cfa]*$/.test(value)
