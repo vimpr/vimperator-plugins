@@ -291,16 +291,22 @@ let elemStyle =
       doc.body.appendChild(elem);
       let count = time;
       let handle = setInterval(function () {
-        if (count <= 0) {
-          if (remove)
-            remove();
-        } else {
-          elem.style.MozOpacity = count / time;
+        try {
+          if (count <= 0) {
+            if (remove)
+              remove();
+          } else {
+            elem.style.MozOpacity = count / time;
+          }
+          count--;
+        } catch (e) { // XXX ほんとは DOM 関連だけキャッチしたい
+          remove(true);
+          liberator.log(e);
         }
-        count--;
       }, 100);
-      remove = function () {
-        doc.body.removeChild(elem);
+      remove = function (noDOM) {
+        if (!noDOM)
+          doc.body.removeChild(elem);
         clearInterval(handle);
         remove = null;
       };
