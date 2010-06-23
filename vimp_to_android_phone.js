@@ -11,8 +11,12 @@ var PLUGIN_INFO =
 
 (function() {
 
-var baseURL = 'http://chrometophone.appspot.com/send';
-var loginURL = 'https://www.google.com/accounts/ServiceLoginAuth?service=ah&sig=d71ef8b8d6150b23958ad03b3bf546b7';
+var apiVersion = '3';
+var base = 'http://chrometophone.appspot.com';
+var baseURL = base + '/send?ver=' + apiVersion;
+var signInURL = base + '/signin?extret=about:blankZ&ver=' + apiVersion;
+var signOutURL = base + '/signout?extret=about:blankZ&ver=' + apiVersion;
+// var loginURL = 'https://www.google.com/accounts/ServiceLoginAuth?service=ah&sig=d71ef8b8d6150b23958ad03b3bf546b7';
 
 var serialize = function(hash) {
   var res = [];
@@ -23,16 +27,21 @@ var serialize = function(hash) {
 }
 
 var sendToPhone = function(requestURL) {
-  requestURL = baseURL + '?' + requestURL;
+  requestURL = baseURL + '&' + requestURL;
   var req = new libly.Request(requestURL, {
+    'Content-Type': 'application/x-www-form-urlencoded',
     'X-Extension': 'true'
   });
   req.addEventListener('onSuccess', function(res) {
-    if (res.responseText.substring(0, 2) == 'OK') {
+    var body = res.responseText;
+    if (body.substring(0, 2) == 'OK') {
       liberator.echo('Send to phone successed.');
-    } else {
+    } else if (body.indexOf('LOGIN_REQUIRED' == 0)) {
       liberator.echo('Please login first');
-      liberator.open(requestURL, liberator.NEW_TAB);
+      liberator.open(signInURL, liberator.NEW_TAB);
+    } else if (body.indexOf('DEVICE_NOT_REGISTERED') == 0) {
+      liberator.echo('device not registered');
+      liberator.open(signOutURL, liberator.NEW_TAB);
     }
   });
   req.addEventListener('onFailure', function(res) {
@@ -44,7 +53,10 @@ var sendToPhone = function(requestURL) {
 liberator.modules.commands.addUserCommand(["sp[hone]"], "Sent to your Android Phone",
 function(args) {
   if (args && args['-login']) {
-    liberator.open(loginURL, liberator.NEW_TAB);
+    liberator.open(signInURL, liberator.NEW_TAB);
+    return;
+  } else if (args && args['-logout']) {
+    liberator.open(signOutURL, liberator.NEW_TAB);
     return;
   }
 
@@ -74,6 +86,7 @@ function(args) {
   options: [
     [["-title",   "-t"], liberator.modules.commands.OPTION_STRING],
     [["-login"], liberator.modules.commands.OPTION_NOARG],
+    [["-logout"], liberator.modules.commands.OPTION_NOARG],
   ]
 }, {
 //  replace: true
