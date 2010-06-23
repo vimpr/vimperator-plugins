@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">feedSomeKeys 3</name>
   <description>feed some defined key events into the Web content</description>
   <description lang="ja">キーイベントをWebコンテンツ側に送る</description>
-  <version>1.8.1</version>
+  <version>1.8.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -79,7 +79,7 @@ lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
 // }}}
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.8.1"
+  <plugin name="feedSomeKeys" version="1.8.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -181,7 +181,7 @@ let INFO = <>
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.8.1"
+  <plugin name="feedSomeKeys" version="1.8.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="ja"
@@ -354,7 +354,7 @@ let INFO = <>
 
   function getFrames () {
     function bodyCheck (content)
-      (content.document.body.localName.toLowerCase() === 'body');
+      (content.document && content.document.body && content.document.body.localName.toLowerCase() === 'body');
 
     function get (content)
       (bodyCheck(content) && result.push(content), Array.slice(content.frames).forEach(get));
