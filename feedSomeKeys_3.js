@@ -514,8 +514,8 @@ let INFO = <>
         if (map.matchingUrls && !uniq[map.matchingUrls])
       ];
       if (currentURL) {
-        result.unshift([util.escapeRegex(buffer.URL), 'Current URL']);
-        result.unshift([util.escapeRegex(content.document.domain), 'Current domain']);
+        result.unshift(['^' + util.escapeRegex(buffer.URL), 'Current URL']);
+        result.unshift(['^' + util.escapeRegex(content.document.domain), 'Current domain']);
       }
       return result;
     };
