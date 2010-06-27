@@ -424,13 +424,15 @@ let elemStyle =
     U.around(commandline._callbacks.cancel, modes.PROMPT, callback);
   }
 
-  autocommands.add(
-    'DOMLoad',
-    /.*/,
-    function (args) {
-      if (displayURL)
-        echo(args.url);
-    }
+  events.addSessionListener(
+    document.getElementById("appcontent"),
+    "DOMContentLoaded",
+    function (event) {
+      let doc = event.originalTarget;
+      if (doc instanceof HTMLDocument && !doc.defaultView.frameElement && displayURL)
+        echo(doc.location.href);
+    },
+    true
   );
 
   options.add(
