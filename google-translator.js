@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Google Translator</name>
   <name lang="ja">Google Translator</name>
   <description>Translate with Google AJAX Language API</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -186,7 +186,7 @@ let INFO =
 
   const settings = {
     get pair ()
-      (liberator.globalVariables.google_translator_pair || 'en ja').split(' '),
+      (liberator.globalVariables.google_translator_pair || 'ja en').split(' '),
     get actions ()
       (liberator.globalVariables.google_translator_actions || 'echo').split(' ')
   };
