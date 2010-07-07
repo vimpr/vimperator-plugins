@@ -1057,6 +1057,9 @@ let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_
 let statusRefreshTimer;
 
 function showTL (s) {
+  function unescapeHTML (str)
+    str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
   let html = <style type="text/css"><![CDATA[
       span.twitter.entry-content a { text-decoration: none; }
       span.twitter.entry-content.rt:before { content: "RT "; color: silver; }
@@ -1071,13 +1074,13 @@ function showTL (s) {
             <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
             <strong>{rt.user.screen_name}&#x202C;</strong>
             <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-            : <span class="twitter entry-content rt">{detectLink(rt.text)}</span>
+            : <span class="twitter entry-content rt">{detectLink(unescapeHTML(rt.text))}</span>
           </>
         } else {
          xml = <>
             <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
             <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
-            : <span class="twitter entry-content">{detectLink(status.text)}</span>
+            : <span class="twitter entry-content">{detectLink(unescapeHTML(status.text))}</span>
           </>;
         }
         return xml.toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
