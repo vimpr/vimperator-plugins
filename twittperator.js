@@ -1036,9 +1036,9 @@ function xmlhttpRequest(options){
   let xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url, true);
   if (typeof options.onload == "function"){
-	  xhr.onload = function(){
-		  options.onload(xhr);
-	  }
+    xhr.onload = function(){
+      options.onload(xhr);
+    }
   }
   xhr.send(null);
 }
