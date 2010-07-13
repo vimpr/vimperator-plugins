@@ -1,10 +1,3 @@
-var GM_OAuth = <><![CDATA[
-// ==UserScript==
-// @name oauth for Greasemonkey
-// @namespace http://efcl.info/
-// @include http://*
-// ==/UserScript==
-]]></>;
 
 // TwitterOauth for Greasemonkey
 function TwitterOauth(){
@@ -1061,30 +1054,38 @@ function showTL (s) {
     str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
   let html = <style type="text/css"><![CDATA[
-      span.twitter.entry-content a { text-decoration: none; }
-      span.twitter.entry-content.rt:before { content: "RT "; color: silver; }
+      .twitter.user { vertical-align: top; }
+      .twitter.entry-content { white-space: normal !important; }
+      .twitter.entry-content a { text-decoration: none; }
+      .twitter.entry-content.rt:before { content: "RT "; color: silver; }
       img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
   ]]></style>.toSource()
              .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
-      s.map(function(status){
-        let xml;
-        if ("retweeted_status" in status) {
-          let rt = status.retweeted_status;
-          xml = <>
-            <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
-            <strong>{rt.user.screen_name}&#x202C;</strong>
-            <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-            : <span class="twitter entry-content rt">{detectLink(unescapeHTML(rt.text))}</span>
-          </>
-        } else {
-         xml = <>
-            <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-            <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
-            : <span class="twitter entry-content">{detectLink(unescapeHTML(status.text))}</span>
-          </>;
-        }
-        return xml.toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
-      }).join("<br/>");
+      s.reduce(function(table, status){
+        return table.appendChild(
+          ("retweeted_status" in status) ?
+          let (rt = status.retweeted_status)
+          <tr>
+            <td class="twitter user">
+              <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
+              <strong>{rt.user.screen_name}&#x202C;</strong>
+              <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+            </td><td class="twitter entry-content rt">
+              {detectLink(unescapeHTML(rt.text))}
+            </td>
+          </tr> :
+          <tr>
+            <td class="twitter user">
+              <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+              <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
+            </td><td class="twitter entry-content">
+              {detectLink(unescapeHTML(status.text))}
+            </td>
+          </tr>
+          );
+
+      }, <table/>)
+        .toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
 
   //liberator.log(html);
   liberator.echo(html, true);
