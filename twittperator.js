@@ -1,3 +1,31 @@
+/*
+ * Twittperator
+ * Vimperator用Twitterクライアント
+ *
+ * 最初にPINコードを取得し設定する必要があります。
+ * :tw -getPIN
+ * 実行すると新規タブに本アプリケーションを許可するかを問うページが開かれます
+ * 許可をすると、PINコード(数値)が表示されるのでコピーしてください。
+ *
+ * :tw -setPIN コピーしたPINコード
+ * で初期設定完了です。
+ *
+ * コマンド
+ * :tw[ittperator] ～
+ *
+ * :tw -getPIN
+ * :tw -setPIN {PINcode}
+ *   初期設定時のみのコマンド
+ * 
+ * :tw[!]
+ *  タイムライン表示。!が付くと強制的に取得
+ *  !が付いていない場合はキャッシュから表示（賞味期限が切れている場合は再取得）
+ *
+ * :tw ～
+ *  ポスト
+ * 
+ * @see http://twitter.com/oauth_clients/details/197565
+ */
 
 // TwitterOauth for Greasemonkey
 function TwitterOauth(){
