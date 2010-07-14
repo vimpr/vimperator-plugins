@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.31.1</version>
+  <version>0.32.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1279,7 +1279,7 @@ Thanks:
         case 'end':
           return Player.ST_ENDED;
         case 'playing':
-          return Player.ST_PLAYING;
+          return this.storage.bug_paused ? Player.ST_PAUSED : Player.ST_PLAYING;
         case 'paused':
           return Player.ST_PAUSED;
         case 'buffering':
@@ -1336,9 +1336,15 @@ Thanks:
       return value;
     },
 
-    pause: function () this.player.ext_play(false),
+    pause: function () {
+      this.storage.bug_paused = true;
+      this.player.ext_play(false);
+    },
 
-    play: function () this.player.ext_play(true),
+    play: function () {
+      this.storage.bug_paused = false;
+      this.player.ext_play(true)
+    },
 
     playOrPause: function () {
       if (this.is(Player.ST_PLAYING)) {
