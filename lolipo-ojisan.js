@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">ロリポおじさん</name>
   <description>Talk with lolipo-ojisan.</description>
   <description lang="ja">ロリポおじさんと話す</description>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -63,7 +63,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="lolipo-ojisan" version="1.0.0"
+  <plugin name="lolipo-ojisan" version="1.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lolipo-ojisan.js"
           summary="Chat with lolipo-ojisan."
           lang="en-US"
@@ -81,7 +81,7 @@ let INFO =
       </p></description>
     </item>
   </plugin>
-  <plugin name="lolipo-ojisan" version="1.0.0"
+  <plugin name="lolipo-ojisan" version="1.0.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lolipo-ojisan.js"
           summary="ロリポおじさんとチャットしよう"
           lang="ja"
@@ -165,11 +165,21 @@ let INFO =
   let query =
     let (inputField = document.getElementById('liberator-commandline-command').inputField)
       function query () {
+        let restore =
+          let (oldStyle = inputField.style.imeMod)
+            function () inputField.style.imeMode = oldStyle || 'inactive';
+
         inputField.style.imeMode = 'active';
+
         commandline.input(
           'loli-chat: ',
-          function (msg)
+          function (msg) {
+            restore();
             chatPo(msg, function () setTimeout(query, 0))
+          },
+          {
+            onCancel: restore
+          }
         );
       };
 
