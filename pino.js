@@ -41,7 +41,7 @@ var PLUGIN_INFO =
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.3.3</version>
+  <version>1.4.0</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -65,6 +65,9 @@ var PLUGIN_INFO =
     g:pinoBaseURL:
       If you want to use fastladder, set "http://fastladder.com" into this variable.
       default: "http://reader.livedoor.com"
+
+    g:pinoOpenInterval:
+      Interval of opening tabs. (msec)
 
     == API ==
     plugins.pino.items():
@@ -117,6 +120,9 @@ var PLUGIN_INFO =
     g:pinoBaseURL:
       fastladder を使う場合は、この変数を "http://fastladder.com" とする。
       default: "http://reader.livedoor.com"
+
+    g:pinoOpenInterval:
+      タブを開く間隔(ミリ秒)
 
     == API ==
     plugins.pino.items():
@@ -171,7 +177,7 @@ let self = liberator.plugins.pino = (function() {
         for(let i = 0; i < max; i++) {
           if (!(pin = pins.shift()))
             break;
-          setTimeout(function(link) liberator.open(link, openBehavior()), 200 * i, pin.link);
+          setTimeout(function(link) liberator.open(link, openBehavior()), openInterval() * i, pin.link);
         }
       }
       else {
@@ -211,6 +217,9 @@ let self = liberator.plugins.pino = (function() {
 
   function baseURL()
     gv.pinoBaseURL || "http://reader.livedoor.com";
+
+  function openInterval()
+    gv.pinoOpenInterval || 200;
 
   // }}}
   // CLASS ///////////////////////////////////////////////////////// {{{
