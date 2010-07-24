@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <maxVersion>2.1a1pre</maxVersion>
 <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/access_hatena.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA and id:hitode909</author>
-<version>0.62</version>
+<version>0.63</version>
 <detail><![CDATA[
 
 == Commands ==
@@ -138,6 +138,8 @@ map ; :accesshatena
             var id   = RegExp.$2;
             var _recent_hosts_length = recentHosts.length;
             if (host != '') {
+                if (!page.uri || !page.uri.length) continue;
+
                 if (!pageFor[host]) {
                     pageFor[host] = page;
                     isIncreased = true;
@@ -201,7 +203,8 @@ map ; :accesshatena
             var host = args[0] ? encodeURIComponent(args[0].toString()) : 'www';
             var id   = args[1] ? encodeURIComponent(args[1].toString()).replace('%2F', '/') : '';
             var uri  = 'http://' + host + '.hatena.ne.jp/' + id;
-            liberator.open(uri, liberator.CURRENT_TAB);
+            var targetTab = args.bang ? liberator.CURRENT_TAB : liberator.NEW_TAB;
+            liberator.open(uri, targetTab);
             lastLocation = '';
         }, {
             completer: function (context, args) {
