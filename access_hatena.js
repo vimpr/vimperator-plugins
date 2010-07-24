@@ -138,7 +138,7 @@ map ; :accesshatena
             var id   = RegExp.$2;
             var _recent_hosts_length = recentHosts.length;
             if (host != '') {
-                if (!page.uri || !page.uri.length) continue;
+                if (!page.uri) continue;
 
                 if (!pageFor[host]) {
                     pageFor[host] = page;
