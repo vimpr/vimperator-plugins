@@ -28,11 +28,11 @@
  */
 
 // TwitterOauth for Greasemonkey
-function TwitterOauth(){
+function TwitterOauth() {
     this.initialize.apply(this, arguments);
 }
 
-TwitterOauth.prototype = (function(){
+TwitterOauth.prototype = (function() {
 
   // {{{2 oauth.js
   /*
@@ -134,7 +134,7 @@ TwitterOauth.prototype = (function(){
           if (s instanceof Array) {
               var e = "";
               for (var i = 0; i < s.length; ++s) {
-                  if (e != "") e += '&';
+                  if (e != "") e += "&";
                   e += OAuth.percentEncode(s[i]);
               }
               return e;
@@ -144,9 +144,9 @@ TwitterOauth.prototype = (function(){
           // encodeURIComponent ignores: - _ . ! ~ * ' ( )
           // OAuth dictates the only ones you can ignore are: - _ . ~
           // Source: http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Functions:encodeURIComponent
-          s = s.replace(/\!/g, "%21");
+          s = s.replace(/!/g, "%21");
           s = s.replace(/\*/g, "%2A");
-          s = s.replace(/\'/g, "%27");
+          s = s.replace(/'/g, "%27");
           s = s.replace(/\(/g, "%28");
           s = s.replace(/\)/g, "%29");
           return s;
@@ -219,22 +219,22 @@ TwitterOauth.prototype = (function(){
           for (var p = 0; p < list.length; ++p) {
               var value = list[p][1];
               if (value == null) value = "";
-              if (form != "") form += '&';
+              if (form != "") form += "&";
               form += OAuth.percentEncode(list[p][0])
-                +'='+ OAuth.percentEncode(value);
+                +"="+ OAuth.percentEncode(value);
           }
           return form;
       }
   ,
       decodeForm: function decodeForm(form) {
           var list = [];
-          var nvps = form.split('&');
+          var nvps = form.split("&");
           for (var n = 0; n < nvps.length; ++n) {
               var nvp = nvps[n];
               if (nvp == "") {
                   continue;
               }
-              var equals = nvp.indexOf('=');
+              var equals = nvp.indexOf("=");
               var name;
               var value;
               if (equals < 0) {
@@ -282,7 +282,7 @@ TwitterOauth.prototype = (function(){
       /** Fill in parameters to help construct a request message.
           This function doesn't fill in every parameter.
           The accessor object should be like:
-          {consumerKey:'foo', consumerSecret:'bar', accessorSecret:'nurn', token:'krelm', tokenSecret:'blah'}
+          {consumerKey:"foo", consumerSecret:"bar", accessorSecret:"nurn", token:"krelm", tokenSecret:"blah"}
           The accessorSecret property is optional.
        */
       completeRequest: function completeRequest(message, accessor) {
@@ -318,9 +318,9 @@ TwitterOauth.prototype = (function(){
           if (parameters != null) {
               var toAdd = OAuth.formEncode(parameters);
               if (toAdd.length > 0) {
-                  var q = url.indexOf('?');
-                  if (q < 0) newURL += '?';
-                  else       newURL += '&';
+                  var q = url.indexOf("?");
+                  if (q < 0) newURL += "?";
+                  else       newURL += "&";
                   newURL += toAdd;
               }
           }
@@ -335,7 +335,7 @@ TwitterOauth.prototype = (function(){
               var parameter = list[p];
               var name = parameter[0];
               if (name.indexOf("oauth_") == 0) {
-                  header += ',' + OAuth.percentEncode(name) + '="' + OAuth.percentEncode(parameter[1]) + '"';
+                  header += "," + OAuth.percentEncode(name) + '="' + OAuth.percentEncode(parameter[1]) + '"';
               }
           }
           return header;
@@ -344,7 +344,7 @@ TwitterOauth.prototype = (function(){
       /** Correct the time using a parameter from the URL from which the last script was loaded. */
       correctTimestampFromSrc: function correctTimestampFromSrc(parameterName) {
           parameterName = parameterName || "oauth_timestamp";
-          var scripts = document.getElementsByTagName('script');
+          var scripts = document.getElementsByTagName("script");
           if (scripts == null || !scripts.length) return;
           var src = scripts[scripts.length-1].src;
           if (!src) return;
@@ -401,7 +401,7 @@ TwitterOauth.prototype = (function(){
   }
 
   /** An abstract algorithm for signing messages. */
-  OAuth.declareClass(OAuth, "SignatureMethod", function OAuthSignatureMethod(){});
+  OAuth.declareClass(OAuth, "SignatureMethod", function OAuthSignatureMethod() {});
 
   OAuth.setProperties(OAuth.SignatureMethod.prototype, // instance members
   {
@@ -456,7 +456,7 @@ TwitterOauth.prototype = (function(){
           var err = new Error("signature_method_rejected");
           var acceptable = "";
           for (var r in OAuth.SignatureMethod.REGISTERED) {
-              if (acceptable != "") acceptable += '&';
+              if (acceptable != "") acceptable += "&";
               acceptable += OAuth.percentEncode(r);
           }
           err.oauth_acceptable_signature_methods = acceptable;
@@ -482,7 +482,7 @@ TwitterOauth.prototype = (function(){
           var superClass = OAuth.SignatureMethod;
           var subClass = function() {
               superClass.call(this);
-          };
+          }
           subClass.prototype = new superClass();
           // Delete instance variables from prototype:
           // delete subclass.prototype... There aren't any.
@@ -493,7 +493,7 @@ TwitterOauth.prototype = (function(){
   ,
       getBaseString: function getBaseString(message) {
           var URL = message.action;
-          var q = URL.indexOf('?');
+          var q = URL.indexOf("?");
           var parameters;
           if (q < 0) {
               parameters = message.parameters;
@@ -506,8 +506,8 @@ TwitterOauth.prototype = (function(){
               }
           }
           return OAuth.percentEncode(message.method.toUpperCase())
-           +'&'+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeUrl(URL))
-           +'&'+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeParameters(parameters));
+           +"&"+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeUrl(URL))
+           +"&"+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeParameters(parameters));
       }
   ,
       normalizeUrl: function normalizeUrl(url) {
@@ -531,7 +531,7 @@ TwitterOauth.prototype = (function(){
           return scheme + "://" + authority + path;
       }
   ,
-      parseUri: function parseUri (str) {
+      parseUri: function parseUri(str) {
           /* This function was adapted from parseUri 1.2.1
              http://stevenlevithan.com/demo/parseuri/js/assets/parseuri.js
            */
@@ -560,7 +560,7 @@ TwitterOauth.prototype = (function(){
               }
           }
           sortable.sort(function(a,b) {
-                            if (a[0] < b[0]) return  -1;
+                            if (a[0] < b[0]) return -1;
                             if (a[0] > b[0]) return 1;
                             return 0;
                         });
@@ -582,7 +582,7 @@ TwitterOauth.prototype = (function(){
   OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
       OAuth.SignatureMethod.makeSubclass(
           function getSignature(baseString) {
-              b64pad = '=';
+              b64pad = "=";
               var signature = b64_hmac_sha1(this.key, baseString);
               return signature;
           }
@@ -615,9 +615,9 @@ TwitterOauth.prototype = (function(){
   function hex_sha1(s){return binb2hex(core_sha1(str2binb(s),s.length * chrsz));}
   function b64_sha1(s){return binb2b64(core_sha1(str2binb(s),s.length * chrsz));}
   function str_sha1(s){return binb2str(core_sha1(str2binb(s),s.length * chrsz));}
-  function hex_hmac_sha1(key, data){ return binb2hex(core_hmac_sha1(key, data));}
-  function b64_hmac_sha1(key, data){ return binb2b64(core_hmac_sha1(key, data));}
-  function str_hmac_sha1(key, data){ return binb2str(core_hmac_sha1(key, data));}
+  function hex_hmac_sha1(key, data){return binb2hex(core_hmac_sha1(key, data));}
+  function b64_hmac_sha1(key, data){return binb2b64(core_hmac_sha1(key, data));}
+  function str_hmac_sha1(key, data){return binb2str(core_hmac_sha1(key, data));}
 
   /*
    * Perform a simple self-test to see if the VM is working
@@ -643,7 +643,7 @@ TwitterOauth.prototype = (function(){
     var d =  271733878;
     var e = -1009589776;
 
-    for(var i = 0; i < x.length; i += 16)
+    for (var i = 0; i < x.length; i += 16)
     {
       var olda = a;
       var oldb = b;
@@ -651,9 +651,9 @@ TwitterOauth.prototype = (function(){
       var oldd = d;
       var olde = e;
 
-      for(var j = 0; j < 80; j++)
+      for (var j = 0; j < 80; j++)
       {
-        if(j < 16) w[j] = x[i + j];
+        if (j < 16) w[j] = x[i + j];
         else w[j] = rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
         var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)),
                          safe_add(safe_add(e, w[j]), sha1_kt(j)));
@@ -680,9 +680,9 @@ TwitterOauth.prototype = (function(){
    */
   function sha1_ft(t, b, c, d)
   {
-    if(t < 20) return (b & c) | ((~b) & d);
-    if(t < 40) return b ^ c ^ d;
-    if(t < 60) return (b & c) | (b & d) | (c & d);
+    if (t < 20) return (b & c) | ((~b) & d);
+    if (t < 40) return b ^ c ^ d;
+    if (t < 60) return (b & c) | (b & d) | (c & d);
     return b ^ c ^ d;
   }
 
@@ -691,7 +691,7 @@ TwitterOauth.prototype = (function(){
    */
   function sha1_kt(t)
   {
-    return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
+    return (t < 20) ?  1518500249 : (t < 40) ? 1859775393 :
            (t < 60) ? -1894007588 : -899497514;
   }
 
@@ -701,10 +701,10 @@ TwitterOauth.prototype = (function(){
   function core_hmac_sha1(key, data)
   {
     var bkey = str2binb(key);
-    if(bkey.length > 16) bkey = core_sha1(bkey, key.length * chrsz);
+    if (bkey.length > 16) bkey = core_sha1(bkey, key.length * chrsz);
 
     var ipad = Array(16), opad = Array(16);
-    for(var i = 0; i < 16; i++)
+    for (var i = 0; i < 16; i++)
     {
       ipad[i] = bkey[i] ^ 0x36363636;
       opad[i] = bkey[i] ^ 0x5C5C5C5C;
@@ -741,7 +741,7 @@ TwitterOauth.prototype = (function(){
   {
     var bin = Array();
     var mask = (1 << chrsz) - 1;
-    for(var i = 0; i < str.length * chrsz; i += chrsz)
+    for (var i = 0; i < str.length * chrsz; i += chrsz)
       bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (32 - chrsz - i%32);
     return bin;
   }
@@ -753,7 +753,7 @@ TwitterOauth.prototype = (function(){
   {
     var str = "";
     var mask = (1 << chrsz) - 1;
-    for(var i = 0; i < bin.length * 32; i += chrsz)
+    for (var i = 0; i < bin.length * 32; i += chrsz)
       str += String.fromCharCode((bin[i>>5] >>> (32 - chrsz - i%32)) & mask);
     return str;
   }
@@ -765,7 +765,7 @@ TwitterOauth.prototype = (function(){
   {
     var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
     var str = "";
-    for(var i = 0; i < binarray.length * 4; i++)
+    for (var i = 0; i < binarray.length * 4; i++)
     {
       str += hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8+4)) & 0xF) +
              hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8  )) & 0xF);
@@ -780,14 +780,14 @@ TwitterOauth.prototype = (function(){
   {
     var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     var str = "";
-    for(var i = 0; i < binarray.length * 4; i += 3)
+    for (var i = 0; i < binarray.length * 4; i += 3)
     {
       var triplet = (((binarray[i   >> 2] >> 8 * (3 -  i   %4)) & 0xFF) << 16)
                   | (((binarray[i+1 >> 2] >> 8 * (3 - (i+1)%4)) & 0xFF) << 8 )
                   |  ((binarray[i+2 >> 2] >> 8 * (3 - (i+2)%4)) & 0xFF);
-      for(var j = 0; j < 4; j++)
+      for (var j = 0; j < 4; j++)
       {
-        if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;
+        if (i * 8 + j * 6 > binarray.length * 32) str += b64pad;
         else str += tab.charAt((triplet >> 6*(3-j)) & 0x3F);
       }
     }
@@ -811,7 +811,7 @@ TwitterOauth.prototype = (function(){
       tokenSecret: ""// response oauth_token_secret
     },
     // トークンが取得済みかの真偽値を返す
-    isAuthorize : function(){
+    isAuthorize : function() {
       let accessor = this.getAccessor();
       if (accessor.consumerKey && accessor.consumerSecret &&
           accessor.token && accessor.tokenSecret) {
@@ -820,7 +820,7 @@ TwitterOauth.prototype = (function(){
         return false;
       }
     },
-    getAccessor: function(){
+    getAccessor: function() {
       return {
         consumerKey: this.accessor.get("consumerKey",""),
         consumerSecret: this.accessor.get("consumerSecret",""),
@@ -828,7 +828,7 @@ TwitterOauth.prototype = (function(){
         tokenSecret: this.accessor.get("tokenSecret","")
       };
     },
-    deleteAccessor : function(){
+    deleteAccessor : function() {
       var clientInfo = {
         clientName: this.accessor.get("clientName", ""),
         consumerKey: this.accessor.get("consumerKey",""),
@@ -840,7 +840,7 @@ TwitterOauth.prototype = (function(){
       this.accessor.set("consumerSecret", clientInfo.consumerSecret);
     },
     // 認証ページのURLを取得
-    getRequestToken : function(callback){
+    getRequestToken : function(callback) {
       let message = {
         method: "GET",
         action: "https://twitter.com/oauth/request_token",
@@ -857,13 +857,13 @@ TwitterOauth.prototype = (function(){
         method: message.method,
         url: target,
         onload: function(d) {
-          if(d.status == 200){
+          if (d.status == 200){
             var res = d.responseText;
             var parameter = self.getParameter(res);
             self.request.token = parameter["oauth_token"];
             self.request.tokenSecret = parameter["oauth_token_secret"];
             // requestURLを引数にcallback
-            if(callback){
+            if (callback){
               callback("https://twitter.com/oauth/authorize?oauth_token="+self.request.token);
             }
           }else{
@@ -874,15 +874,15 @@ TwitterOauth.prototype = (function(){
       xmlhttpRequest(options);
 
     },
-    setPin: function (pin) {
+    setPin: function(pin) {
       let self = this;
-      this.getAccessToken(pin, function(){
+      this.getAccessToken(pin, function() {
         liberator.echo("Twittperator: getting access token is success.", true);
         self.initialize();
       });
     },
     // pinを元にAccess Tokenを取得して保存、callbackにはaccessorオブジェクトを渡す
-    getAccessToken: function(pin ,callback) {
+    getAccessToken: function(pin, callback) {
       var message = {
         method: "GET",
         action: "https://twitter.com/oauth/access_token",
@@ -901,7 +901,7 @@ TwitterOauth.prototype = (function(){
         method: message.method,
         url: target,
         onload: function(d) {
-          if(d.status == 200){
+          if (d.status == 200){
             /* 返り値からAccess Token/Access Token Secretを取り出す */
             var res = d.responseText;
             var parameter = self.getParameter(res);
@@ -909,7 +909,7 @@ TwitterOauth.prototype = (function(){
             self.accessor.set("tokenSecret", parameter["oauth_token_secret"]);
             // Accessorの保存
             //self.saveAccessor();
-            if(callback){
+            if (callback){
               callback(self.accessor);
             }
           }else{
@@ -939,8 +939,8 @@ TwitterOauth.prototype = (function(){
         method: message.method,
         url: target,
         onload: function(d) {
-          if(d.status == 200){
-            if(callback){
+          if (d.status == 200){
+            if (callback){
                 callback(d.responseText);
             }
           }else{
@@ -985,39 +985,39 @@ TwitterOauth.prototype = (function(){
     },
     // utility関数
     // http://kevin.vanzonneveld.net
-    urlencode : function (str) {
-      str = (str+'').toString();
-      return encodeURIComponent(str).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28')
-                                    .replace(/\)/g, '%29').replace(/\*/g, '%2A').replace(/%20/g, '+');
+    urlEncode : function(str) {
+      str = (str+"").toString();
+      return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28")
+                                    .replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
     },
     // オブジェクトからクエリを生成
     buildQuery : function(formdata, numeric_prefix, arg_separator) {
-      // * example 1: http_build_query({foo: 'bar', php: 'hypertext processor', baz: 'boom', cow: 'milk'}, '', '&amp;');
-      // * returns 1: 'foo=bar&amp;php=hypertext+processor&amp;baz=boom&amp;cow=milk'
-      // * example 2: http_build_query({'php': 'hypertext processor', 0: 'foo', 1: 'bar', 2: 'baz', 3: 'boom', 'cow': 'milk'}, 'myvar_');
-      // * returns 2: 'php=hypertext+processor&myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk'
+      // * example 1: http_build_query({foo: "bar", php: "hypertext processor", baz: "boom", cow: "milk"}, "", "&amp;");
+      // * returns 1: "foo=bar&amp;php=hypertext+processor&amp;baz=boom&amp;cow=milk"
+      // * example 2: http_build_query({"php": "hypertext processor", 0: "foo", 1: "bar", 2: "baz", 3: "boom", "cow": "milk"}, "myvar_");
+      // * returns 2: "php=hypertext+processor&myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk"
       var value, key, tmp = [];
       var self = this;
-      var _http_build_query_helper = function (key, val, arg_separator) {
+      var _http_build_query_helper = function(key, val, arg_separator) {
         var k, tmp = [];
         if (val === true) {
           val = "1";
         } else if (val === false) {
           val = "0";
         }
-        if (val !== null && typeof(val) === "object") {
+        if (val !== null && typeof val === "object") {
           for (k in val) {
             if (val[k] !== null) {
               tmp.push(_http_build_query_helper(key + "[" + k + "]", val[k], arg_separator));
             }
           }
           return tmp.join(arg_separator);
-        } else if (typeof(val) !== "function") {
-          return self.urlencode(key) + "=" + self.urlencode(val);
+        } else if (typeof val !== "function") {
+          return self.urlEncode(key) + "=" + self.urlEncode(val);
         } else {
-          throw new Error('There was an error processing for http_build_query().');
+          throw new Error("There was an error processing for http_build_query().");
         }
-      };
+      }
 
       if (!arg_separator) {
         arg_separator = "&";
@@ -1033,16 +1033,16 @@ TwitterOauth.prototype = (function(){
       return tmp.join(arg_separator);
     },
     // Query String から 連想配列を返す
-    getParameter: function(str){
+    getParameter: function(str) {
       var dec = decodeURIComponent;
       var par = {}, itm;
-      if(typeof(str) == 'undefined') return par;
-      if(str.indexOf('?', 0) > -1) str = str.split('?')[1];
-      str = str.split('&');
-      for(var i = 0; str.length > i; i++){
+      if (typeof str == "undefined") return par;
+      if (str.indexOf("?", 0) > -1) str = str.split("?")[1];
+      str = str.split("&");
+      for (var i = 0; str.length > i; i++){
         itm = str[i].split("=");
-        if(itm[0] != ''){
-          par[itm[0]] = typeof(itm[1]) == 'undefined' ? true : dec(itm[1]);
+        if (itm[0] != ""){
+          par[itm[0]] = typeof itm[1] == "undefined" ? true : dec(itm[1]);
         }
       }
       return par;
@@ -1053,11 +1053,11 @@ TwitterOauth.prototype = (function(){
 
 
 // Twittperator
-function xmlhttpRequest(options){
+function xmlhttpRequest(options) {
   let xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url, true);
   if (typeof options.onload == "function"){
-    xhr.onload = function(){
+    xhr.onload = function() {
       options.onload(xhr);
     }
   }
@@ -1077,9 +1077,9 @@ let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_st
 let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
 let statusRefreshTimer;
 
-function showTL (s) {
-  function unescapeHTML (str)
-    str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+function showTL(s) {
+  function unescapeBrakets(str)
+    str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
   let html = <style type="text/css"><![CDATA[
       .twitter.user { vertical-align: top; }
@@ -1089,7 +1089,7 @@ function showTL (s) {
       img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
   ]]></style>.toSource()
              .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
-      s.reduce(function(table, status){
+      s.reduce(function(table, status) {
         return table.appendChild(
           ("retweeted_status" in status) ?
           let (rt = status.retweeted_status)
@@ -1099,7 +1099,7 @@ function showTL (s) {
               <strong>{rt.user.screen_name}&#x202C;</strong>
               <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
             </td><td class="twitter entry-content rt">
-              {detectLink(unescapeHTML(rt.text))}
+              {detectLink(unescapeBrakets(rt.text))}
             </td>
           </tr> :
           <tr>
@@ -1107,7 +1107,7 @@ function showTL (s) {
               <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
               <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
             </td><td class="twitter entry-content">
-              {detectLink(unescapeHTML(status.text))}
+              {detectLink(unescapeBrakets(status.text))}
             </td>
           </tr>
           );
@@ -1118,7 +1118,7 @@ function showTL (s) {
   //liberator.log(html);
   liberator.echo(html, true);
 }
-function detectLink (str) {
+function detectLink(str) {
   let m = str.match(/https?:\/\/\S+/);
   if (m) {
     let left = str.substr(0, m.index);
@@ -1128,18 +1128,18 @@ function detectLink (str) {
   }
   return str;
 }
-function showTwitterSearchResult(word){ // {{{
-  tw.get("http://search.twitter.com/search.json", { q: word }, function(text){
+function showTwitterSearchResult(word) { // {{{
+  tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
     let results = JSON.parse(text);
     showTL(results);
   });
 } // }}}
-function getFollowersStatus(target, force, onload){
-  function setRefresher(){
+function getFollowersStatus(target, force, onload) {
+  function setRefresher() {
     expiredStatus = false;
     if (statusRefreshTimer)
       clearTimeout(statusRefreshTimer);
-    statusRefreshTimer = setTimeout(function () expiredStatus = true, statusValidDuration * 1000);
+    statusRefreshTimer = setTimeout(function() expiredStatus = true, statusValidDuration * 1000);
   }
   if (!force && !expiredStatus && statuses.length > 0){
     onload();
@@ -1152,20 +1152,20 @@ function getFollowersStatus(target, force, onload){
     } else {
       query = null;
     }
-    tw.get(api, query, function(text){
+    tw.get(api, query, function(text) {
       setRefresher();
       statuses = JSON.parse(text);
       onload();
     });
   }
 }
-function showFollowersStatus(arg, force){ // {{{
-  getFollowersStatus(arg, force, function(text){
+function showFollowersStatus(arg, force) { // {{{
+  getFollowersStatus(arg, force, function(text) {
     showTL(statuses);
   });
 } // }}}
 
-function showTwitterMentions(arg){ // {{{
+function showTwitterMentions(arg) { // {{{
   if (/^@/.test(arg))
     arg = arg.substr(1);
   tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
@@ -1173,19 +1173,19 @@ function showTwitterMentions(arg){ // {{{
     showTL(statuses);
   });
 } // }}}
-function favTwitter(id){ // {{{
-  tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text){
+function favTwitter(id) { // {{{
+  tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
     let res = JSON.parse(text);
     liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
   });
 } // }}}
-function unfavTwitter(id){ // {{{
-  tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text){
+function unfavTwitter(id) { // {{{
+  tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
     let res = JSON.parse(text);
     liberator.echo("[Twittperator] unfav: " + res.user.name + " " + res.text, true);
   });
 } // }}}
-function sayTwitter(stat){ // {{{
+function sayTwitter(stat) { // {{{
   let sendData = {};
   if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)){
     let [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
@@ -1199,13 +1199,13 @@ function sayTwitter(stat){ // {{{
   }
   sendData.status = stat;
   sendData.source = "Twittperator";
-  tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text){
+  tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
     let result = JSON.parse(text || "{}");
     let t = result.text;
     liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
   });
 } // }}}
-function ReTweet(id){ // {{{
+function ReTweet(id) { // {{{
   let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
   tw.post(url, null, function(text) {
     let res = JSON.parse(text);
@@ -1215,7 +1215,7 @@ function ReTweet(id){ // {{{
 } // }}}
 function setup() {
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
-    function (arg) {
+    function(arg) {
       var special = arg.bang;
       arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
           .replace(/%TITLE%/g, liberator.modules.buffer.title);
@@ -1223,10 +1223,10 @@ function setup() {
       if (special && arg.match(/^\?\s*(.*)/))
           showTwitterSearchResult(RegExp.$1);
       else
-      if (special && arg.match(/^\+\s*.*#(\d+)/))
+      if (special && arg.match(/^\+.*#(\d+)/))
           favTwitter(RegExp.$1);
       else
-      if (special && arg.match(/^-\s*.*#(\d+)/))
+      if (special && arg.match(/^-.*#(\d+)/))
           unfavTwitter(RegExp.$1);
       else
       if (special && arg.match(/^@/))
@@ -1239,14 +1239,14 @@ function setup() {
     }, {
       bang: true,
       literal: 0,
-      completer: let (getting, targetContext) function(context, args){
-        function compl(){
+      completer: let (getting, targetContext) function(context, args) {
+        function compl() {
           if (args.bang && !/^[-+]/.test(args[0])){
             targetContext.title = ["Name","Entry"];
             list = statuses.map(function(s) ("retweeted_status" in s) ?
               ["@" + s.retweeted_status.user.screen_name, s.retweeted_status.text ] :
               ["@" + s.user.screen_name, s.text]);
-          } else if (/RT\s+@\w*$/.test(args[0])){
+          } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])){
             targetContext.title = ["Name + Text"];
             list = statuses.map(function(s) ("retweeted_status" in s) ?
               ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, "-" ] :
@@ -1266,7 +1266,7 @@ function setup() {
           targetContext = getting = null;
         }
 
-        var matches= context.filter.match(/@(\w*)$/);
+        var matches = context.filter.match(/@([A-Za-z0-9_]{1,15})$/);
         if (!matches) return;
         var list = [];
         var target = matches[1];
@@ -1289,9 +1289,9 @@ function setup() {
 // PIN code を取得して AccessToken を得る前
 function preSetup() {
   commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
-    function (args) {
+    function(args) {
       if (args["-getPIN"]){
-        tw.getRequestToken(function(url){
+        tw.getRequestToken(function(url) {
           liberator.open(url, { where: liberator.NEW_TAB });
         });
         liberator.echo("Twittperator","Please get PIN code and execute\n :tw -setPIN {PINcode}");
