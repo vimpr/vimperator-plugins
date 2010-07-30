@@ -32,6 +32,7 @@ function TwitterOauth() {
     this.initialize.apply(this, arguments);
 }
 
+// OAuth {{{
 TwitterOauth.prototype = (function() {
 
   // {{{2 oauth.js
@@ -1050,10 +1051,11 @@ TwitterOauth.prototype = (function() {
  };
  return p;
 })();
+// }}}
 
 
 // Twittperator
-function xmlhttpRequest(options) {
+function xmlhttpRequest(options) { // {{{
   let xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url, true);
   if (typeof options.onload == "function"){
@@ -1062,8 +1064,9 @@ function xmlhttpRequest(options) {
     }
   }
   xhr.send(null);
-}
+} // }}}
 
+// Variables {{{
 let accessor = storage.newMap("twittperator", { store: true });
 accessor.set("clientName", "Twittperator");
 accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
@@ -1076,8 +1079,9 @@ let expiredStatus = false;
 let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
 let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
 let statusRefreshTimer;
+// }}}
 
-function showTL(s) {
+function showTL(s) { // {{{
   function unescapeBrakets(str)
     str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
@@ -1117,8 +1121,8 @@ function showTL(s) {
 
   //liberator.log(html);
   liberator.echo(html, true);
-}
-function detectLink(str) {
+} // }}}
+function detectLink (str) { // {{{
   let m = str.match(/https?:\/\/\S+/);
   if (m) {
     let left = str.substr(0, m.index);
@@ -1134,8 +1138,8 @@ function showTwitterSearchResult(word) { // {{{
     showTL(results);
   });
 } // }}}
-function getFollowersStatus(target, force, onload) {
-  function setRefresher() {
+function getFollowersStatus(target, force, onload) { // {{{
+  function setRefresher(){
     expiredStatus = false;
     if (statusRefreshTimer)
       clearTimeout(statusRefreshTimer);
@@ -1213,7 +1217,7 @@ function ReTweet(id) { // {{{
     liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
   });
 } // }}}
-function setup() {
+function setup() { // {{{
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
     function(arg) {
       var special = arg.bang;
@@ -1285,8 +1289,8 @@ function setup() {
         }
       }
     }, true);
-}
-// PIN code を取得して AccessToken を得る前
+} // }}}
+// PIN code を取得して AccessToken を得る前 {{{
 function preSetup() {
   commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
     function(args) {
@@ -1304,6 +1308,6 @@ function preSetup() {
         [["-setPIN"], commands.OPTION_STRING, null, null]
       ],
     }, true);
-}
+} // }}}
 
 // vim: sw=2 ts=2 et fdm=marker:
