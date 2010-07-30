@@ -984,6 +984,20 @@ TwitterOauth.prototype = (function() {
       };
       xmlhttpRequest(options); // 送信
     },
+    getUrl: function (api) {
+      var message = {
+        method: "GET",
+        action: api,
+        parameters: {
+          oauth_signature_method: "HMAC-SHA1",
+          oauth_consumer_key: this.accessor.get("consumerKey",""),// queryの構築
+          oauth_token: this.accessor.get("token","") // Access Token
+        }
+      };
+      OAuth.setTimestampAndNonce(message);
+      OAuth.SignatureMethod.sign(message, this.getAccessor());
+      return OAuth.addToURL(message.action, message.parameters);
+    },
     // utility関数
     // http://kevin.vanzonneveld.net
     urlEncode : function(str) {
@@ -1053,6 +1067,138 @@ TwitterOauth.prototype = (function() {
 })();
 // }}}
 
+// ChirpUserStream
+let ChirpUserStream = (function () {
+
+  const JSON = Cc['@mozilla.org/dom/json;1'].getService(Ci.nsIJSON);
+
+  function getUserInfo () {
+    let host = ['http://twitter.com', 'https://twitter.com'];
+    let loginManager = Cc['@mozilla.org/login-manager;1'].getService(Ci.nsILoginManager);
+    let login = loginManager.findLogins({}, host[0], host[1], null)[0];
+    return login;
+  }
+
+
+  function extractURL (s)
+    let (m = s.match(/https?:\/\/[\S]+/))
+      (m && m[0]);
+
+
+  function start () {
+    stop();
+
+    let host = 'chirpstream.twitter.com';
+    let path = '/2b/user.json';
+
+    if (0) {
+      host = 'api.twitter.com';
+      host = '/1/statuses/mentions.json';
+    }
+
+    let {username, password} = getUserInfo();
+    let socketService =
+      let (stsvc = Cc['@mozilla.org/network/socket-transport-service;1'])
+        let (svc = stsvc.getService())
+          svc.QueryInterface(Ci['nsISocketTransportService']);
+
+    let transport = socketService.createTransport(null, 0, host, 80, null);
+    let os = transport.openOutputStream(0, 0, 0);
+    let is = transport.openInputStream(0, 0, 0);
+    let sis = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
+    let sos = Cc['@mozilla.org/binaryoutputstream;1'].createInstance(Ci.nsIBinaryOutputStream);
+
+    sis.init(is);
+    sos.setOutputStream(os);
+
+    let params = ['Authorization: Basic ' + btoa(username + ':' + password)];
+    if (0) {
+      let param = tw.getUrl('http://' + host + path);
+      let params = param.split(/\?/)[1].split(/&/).map(function (it)
+        let ([n, v] = it.split(/=/))
+          n + ': ' + decodeURIComponent(v)
+      );
+    }
+
+    let get = [
+      'GET ' + path + ' HTTP/1.1',
+      'Host: ' + host,
+      params.join('\n'),
+      ''
+    ].join('\n');
+    get += '\n\n';
+
+    sos.write(get, get.length);
+
+    let buf = '';
+    let interval = setInterval(function () {
+      let len = sis.available();
+      if (len <= 0)
+        return;
+      let data = sis.read(len);
+      liberator.log(data);
+      let lines = data.split(/\n/);
+      if (lines.length > 2) {
+        lines[0] = buf + lines[0];
+        for (let [, line] in Iterator(lines.slice(0, -1))) {
+          try {
+            onMsg(JSON.decode(line), line);
+          } catch (e) {}
+        }
+        buf = lines.slice(-1)[0];
+      } else {
+        buf += data;
+      }
+    }, 500);
+
+    __context__.prev = {
+      sos: sos,
+      sis: sis,
+      interval: interval,
+    };
+  }
+
+
+  function stop () {
+    let prev = __context__.prev;
+
+    if (!prev)
+      return;
+
+    clearInterval(prev.interval);
+    prev.sos.close();
+    prev.sis.close();
+
+    delete __context__.prev;
+  }
+
+
+  function onMsg (msg, raw) {
+    if (msg.text) {
+      let talk = msg.user.screen_name + ': ' + msg.text;
+
+      liberator.echo(talk, commandline.FORCE_SINGLELINE);
+      liberator.log(talk);
+
+      history.unshift(msg);
+      if (history.length > 1000)
+        history = history.slice(0, 1000);
+
+      if (plugins.namakubi)
+        plugins.namakubi.talk(talk);
+    } else {
+      let s = [];
+      for (let [n, v] in Iterator(msg))
+        s.push(n + ': ' + (n == 'user' ? v.screen_name : v));
+      liberator.log(s.join('\n'));
+    }
+  }
+
+  return {
+    start: start,
+    stop: stop
+  };
+})();
 
 // Twittperator
 function xmlhttpRequest(options) { // {{{
@@ -1071,10 +1217,18 @@ let accessor = storage.newMap("twittperator", { store: true });
 accessor.set("clientName", "Twittperator");
 accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
 accessor.set("consumerSecret","gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
+
+let history;
+if (__context__.hasOwnProperty('history')) {
+  history = __context__.history;
+  liberator.registerObserver('exit', function () accessor.set("history", history));
+} else {
+  history = __context__.history = accessor.get("history", []);
+}
+
 let tw = new TwitterOauth(accessor);
 plugins.twittperator = tw;
 
-let statuses = [];
 let expiredStatus = false;
 let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
 let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
@@ -1139,6 +1293,18 @@ function showTwitterSearchResult(word) { // {{{
   });
 } // }}}
 function getFollowersStatus(target, force, onload) { // {{{
+  if (target) {
+    api = "http://api.twitter.com/1/statuses/user_timeline.json";
+    query.screen_name = target;
+    tw.get(api, query, function(text){
+      onload(JSON.parse(text));
+    });
+  } else {
+    onload(history);
+  }
+  return;
+
+  // TODO 両対応に
   function setRefresher(){
     expiredStatus = false;
     if (statusRefreshTimer)
@@ -1158,7 +1324,7 @@ function getFollowersStatus(target, force, onload) { // {{{
     }
     tw.get(api, query, function(text) {
       setRefresher();
-      statuses = JSON.parse(text);
+      history = JSON.parse(text);
       onload();
     });
   }
@@ -1244,22 +1410,43 @@ function setup() { // {{{
       bang: true,
       literal: 0,
       completer: let (getting, targetContext) function(context, args) {
-        function compl() {
+        function filter (item)
+          let (desc = item.description)
+            (this.match(desc.user.screen_name) || this.match(desc.text));
+
+        function compl(){
+          targetContext.createRow = function (item, highlightGroup) {
+            let desc = item[1] || this.process[1].call(this, item, item.description);
+
+            if (desc && desc.user) {
+              return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+                  <li highlight="CompDesc">
+                    <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
+                    &#160;{desc.user.screen_name}: {desc.text}
+                  </li>
+              </div>;
+            }
+
+            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+                <li highlight="CompDesc">{desc}&#160;</li>
+            </div>;
+          };
+
           if (args.bang && !/^[-+]/.test(args[0])){
             targetContext.title = ["Name","Entry"];
-            list = statuses.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name, s.retweeted_status.text ] :
+            list = history.map(function(s) ("retweeted_status" in s) ?
+              ["@" + s.retweeted_status.user.screen_name, s ] :
               ["@" + s.user.screen_name, s.text]);
           } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])){
             targetContext.title = ["Name + Text"];
-            list = statuses.map(function(s) ("retweeted_status" in s) ?
-              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, "-" ] :
-              ["@"+s.user.screen_name+"#"+s.id+": "+s.text, "-"]);
+            list = history.map(function(s) ("retweeted_status" in s) ?
+              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, s] :
+              ["@"+s.user.screen_name+"#"+s.id+": "+s.text, s]);
           } else {
             targetContext.title = ["Name#ID","Entry"];
-            list = statuses.map(function(s) ("retweeted_status" in s) ?
-              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+" ", s.retweeted_status.text] :
-              ["@"+s.user.screen_name+"#"+s.id+" ", s.text]);
+            list = history.map(function(s) ("retweeted_status" in s) ?
+              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+" ", s] :
+              ["@"+s.user.screen_name+"#"+s.id+" ", s]);
           }
 
           if (target){
@@ -1270,11 +1457,13 @@ function setup() { // {{{
           targetContext = getting = null;
         }
 
-        var matches = context.filter.match(/@([A-Za-z0-9_]{1,15})$/);
-        if (!matches) return;
-        var list = [];
-        var target = matches[1];
-        var doGet = (expiredStatus || !(statuses && statuses.length)) && autoStatusUpdate;
+        let matches = context.filter.match(/@([A-Za-z0-9_]{1,15})$/);
+        if (!matches)
+          return;
+        let list = [];
+        let target = matches[1];
+        let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
+
         context.offset += matches.index;
         context.incomplete = doGet;
         context.hasitems = !doGet;
@@ -1289,6 +1478,7 @@ function setup() { // {{{
         }
       }
     }, true);
+  ChirpUserStream.start();
 } // }}}
 // PIN code を取得して AccessToken を得る前 {{{
 function preSetup() {
