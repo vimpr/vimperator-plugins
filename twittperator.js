@@ -1311,7 +1311,7 @@ function getFollowersStatus(target, force, onload) { // {{{
       clearTimeout(statusRefreshTimer);
     statusRefreshTimer = setTimeout(function() expiredStatus = true, statusValidDuration * 1000);
   }
-  if (!force && !expiredStatus && statuses.length > 0){
+  if (!force && !expiredStatus && history.length > 0){
     onload();
   } else {
     let api = "http://api.twitter.com/1/statuses/home_timeline.json",
@@ -1328,9 +1328,9 @@ function getFollowersStatus(target, force, onload) { // {{{
       onload();
     });
   }
-}
+} // }}}
 function showFollowersStatus(arg, force) { // {{{
-  getFollowersStatus(arg, force, function(text) {
+  getFollowersStatus(arg, force, function(statuses) {
     showTL(statuses);
   });
 } // }}}
@@ -1339,8 +1339,7 @@ function showTwitterMentions(arg) { // {{{
   if (/^@/.test(arg))
     arg = arg.substr(1);
   tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
-    statuses = JSON.parse(text);
-    showTL(statuses);
+    showTL(JSON.parse(text));
   });
 } // }}}
 function favTwitter(id) { // {{{
@@ -1433,16 +1432,19 @@ function setup() { // {{{
           };
 
           if (args.bang && !/^[-+]/.test(args[0])){
+            liberator.log(1);
             targetContext.title = ["Name","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name, s ] :
-              ["@" + s.user.screen_name, s.text]);
+              ["@" + s.retweeted_status.user.screen_name, s] :
+              ["@" + s.user.screen_name, s]);
           } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])){
+            liberator.log(2);
             targetContext.title = ["Name + Text"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, s] :
               ["@"+s.user.screen_name+"#"+s.id+": "+s.text, s]);
           } else {
+            liberator.log(3);
             targetContext.title = ["Name#ID","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+" ", s] :
