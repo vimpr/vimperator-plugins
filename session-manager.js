@@ -109,7 +109,9 @@ let INFO =
 
   let ignoreAuto = liberator.globalVariables.session_manager_ignore_auto || 0;
 
-  Cu.import("resource://sessionmanager/modules/session_manager.jsm");
+  let jsm = {};
+  Cu.import("resource://sessionmanager/modules/session_manager.jsm", jsm);
+  let gSessionManager = jsm.gSessionManager;
 
   function alias (obj, from, to)
     (obj[to] = function () obj[from].apply(obj, arguments));
