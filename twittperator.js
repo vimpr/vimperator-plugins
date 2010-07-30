@@ -1459,7 +1459,7 @@ function setup() { // {{{
           targetContext = getting = null;
         }
 
-        let matches = context.filter.match(/@([A-Za-z0-9_]{1,15})$/);
+        let matches = context.filter.match(/@([A-Za-z0-9_]{0,15})$/);
         if (!matches)
           return;
         let list = [];
