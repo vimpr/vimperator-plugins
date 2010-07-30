@@ -1136,7 +1136,6 @@ let ChirpUserStream = (function () {
       if (len <= 0)
         return;
       let data = sis.read(len);
-      liberator.log(data);
       let lines = data.split(/\n/);
       if (lines.length > 2) {
         lines[0] = buf + lines[0];
@@ -1178,7 +1177,6 @@ let ChirpUserStream = (function () {
       let talk = msg.user.screen_name + ': ' + msg.text;
 
       liberator.echo(talk, commandline.FORCE_SINGLELINE);
-      liberator.log(talk);
 
       history.unshift(msg);
       if (history.length > 1000)
@@ -1432,19 +1430,16 @@ function setup() { // {{{
           };
 
           if (args.bang && !/^[-+]/.test(args[0])){
-            liberator.log(1);
             targetContext.title = ["Name","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@" + s.retweeted_status.user.screen_name, s] :
               ["@" + s.user.screen_name, s]);
           } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])){
-            liberator.log(2);
             targetContext.title = ["Name + Text"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, s] :
               ["@"+s.user.screen_name+"#"+s.id+": "+s.text, s]);
           } else {
-            liberator.log(3);
             targetContext.title = ["Name#ID","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+" ", s] :
