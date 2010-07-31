@@ -1423,7 +1423,7 @@ function setup() { // {{{
   }
 
   function subCommandCompleter(context, args) {
-    if (!args.bang)
+    if (!args.bang || context.filter.length > 0)
       return;
 
     context.title = ["Sub command", "Description"];
@@ -1466,9 +1466,8 @@ function setup() { // {{{
         let list = [];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
 
-        let matches = args.bang && args.literalArg.match(/[-+?@]/);
-        liberator.log(matches + ' ' + (matches ? matches.index : 0));
-        context.offset += matches ? matches.index + 1: 0;
+        let matches = args.bang && args.literalArg.match(/[-+?]/);
+        context.offset += matches ? matches.index + 1 : 0;
         context.incomplete = doGet;
         context.hasitems = !doGet;
         targetContext = context;
