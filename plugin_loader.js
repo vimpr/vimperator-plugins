@@ -71,6 +71,9 @@ let PLUGIN_INFO =
   }
 
   function around () {
+    if (!liberator.plugins.libly)
+      return false;
+
     liberator.plugins.libly.$U.around(
       io,
       'getRuntimeDirectories',
@@ -90,6 +93,7 @@ let PLUGIN_INFO =
         return dirs;
       }
     );
+    return true;
   }
 
   let roots = toArray(liberator.globalVariables.plugin_loader_roots).map(io.expandPath);
@@ -118,10 +122,8 @@ let PLUGIN_INFO =
           } else {
             liberator.echoerr('plugin_loader.js: context not found (' + file.path + ')');
           }
-          if (!arounded && file.leafName === '_libly.js') {
-            arounded = true;
-            around();
-          }
+          if (!arounded && file.leafName === '_libly.js')
+            arounded = around();
         }
       });
     } else {
