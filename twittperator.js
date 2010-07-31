@@ -1204,6 +1204,10 @@ function xmlhttpRequest(options) { // {{{
 } // }}}
 
 // Variables {{{
+let setting = {
+  useChirp: liberator.globalVariables.twittperator_use_chirp
+};
+
 let accessor = storage.newMap("twittperator", { store: true });
 accessor.set("clientName", "Twittperator");
 accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
@@ -1220,7 +1224,7 @@ if (__context__.hasOwnProperty('history')) {
 let tw = new TwitterOauth(accessor);
 plugins.twittperator = tw;
 
-let expiredStatus = false;
+let expiredStatus = true;
 let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
 let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
 let statusRefreshTimer;
@@ -1284,39 +1288,33 @@ function showTwitterSearchResult(word) { // {{{
   });
 } // }}}
 function getFollowersStatus(target, force, onload) { // {{{
-  if (target) {
-    api = "http://api.twitter.com/1/statuses/user_timeline.json";
-    query.screen_name = target;
-    tw.get(api, query, function(text) {
-      onload(JSON.parse(text));
-    });
-  } else {
-    onload(history);
-  }
-  return;
-
-  // TODO 両対応に
   function setRefresher(){
     expiredStatus = false;
     if (statusRefreshTimer)
       clearTimeout(statusRefreshTimer);
     statusRefreshTimer = setTimeout(function() expiredStatus = true, statusValidDuration * 1000);
   }
+
   if (!force && !expiredStatus && history.length > 0) {
-    onload();
+    onload(history);
   } else {
-    let api = "http://api.twitter.com/1/statuses/home_timeline.json",
-        query = {};
+    let api = "http://api.twitter.com/1/statuses/home_timeline.json", query = {};
+
     if (target) {
       api = "http://api.twitter.com/1/statuses/user_timeline.json";
       query.screen_name = target;
     } else {
       query = null;
+      if (setting.useChirp) {
+        onload(history);
+        return;
+      }
     }
+
     tw.get(api, query, function(text) {
       setRefresher();
-      history = JSON.parse(text);
-      onload();
+      // TODO 履歴をちゃんと "追記" するようにするようにするべき
+      onload(history = JSON.parse(text));
     });
   }
 } // }}}
@@ -1487,7 +1485,9 @@ function setup() { // {{{
         }
       }
     }, true);
-  ChirpUserStream.start();
+
+  if (setting.useChirp)
+    ChirpUserStream.start();
 } // }}}
 // PIN code を取得して AccessToken を得る前 {{{
 function preSetup() {
