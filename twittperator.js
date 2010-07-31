@@ -1326,6 +1326,7 @@ function showFollowersStatus(arg, force) { // {{{
   });
 } // }}}
 
+// XXX 引数には何の意味が？
 function showTwitterMentions(arg) { // {{{
   if (/^@/.test(arg))
     arg = arg.substr(1);
@@ -1419,9 +1420,20 @@ function setup() { // {{{
     context.completions = list;
     context.filters = [statusObjectFilter];
     context.incomplete = false;
-    context = getting = null;
   }
 
+  function subCommandCompleter(context, args) {
+    if (!args.bang)
+      return;
+
+    context.title = ["Sub command", "Description"];
+    context.completions = [
+      ["@", "Show mentions"],
+      ["?", "Twitter search"],
+      ["+", "Fav a tweet"],
+      ["-", "Unfav a tweet"],
+    ];
+  }
 
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
     function(args) {
@@ -1439,7 +1451,7 @@ function setup() { // {{{
           unfavTwitter(RegExp.$1);
       else
       if (bang && arg.match(/^@/))
-          showTwitterMentions();
+          showTwitterMentions(arg);
       else
       if (bang || arg.length == 0)
           showFollowersStatus(arg, bang);
@@ -1448,23 +1460,28 @@ function setup() { // {{{
     }, {
       bang: true,
       literal: 0,
-      completer: let (getting, targetContext) function(context, args) {
-        let matches = context.filter.match(/@([A-Za-z0-9_]{0,15})$/);
-        if (!matches) return;
+      completer: let (getting) function(context, args) {
+        context.fork('File', 0, context, function (context) subCommandCompleter(context, args));
+
         let list = [];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
 
-        context.offset += matches.index;
+        let matches = args.bang && args.literalArg.match(/[-+?@]/);
+        liberator.log(matches + ' ' + (matches ? matches.index : 0));
+        context.offset += matches ? matches.index + 1: 0;
         context.incomplete = doGet;
         context.hasitems = !doGet;
         targetContext = context;
         if (doGet) {
           if (!getting) {
             getting = true;
-            getFollowersStatus(null, function () commandCompelter(context, args));
+            getFollowersStatus(null, function() {
+              getting = false;
+              context.fork('Twittperator', 0, context, function (context) commandCompelter(context, args));
+            });
           }
         } else {
-          commandCompelter(context, args);
+          context.fork('Twittperator', 0, context, function (context) commandCompelter(context, args));
         }
       }
     }, true);
