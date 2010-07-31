@@ -1374,10 +1374,13 @@ function ReTweet(id) { // {{{
   });
 } // }}}
 function setup() { // {{{
+  let SubCommands = [
+  ];
+
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
-    function(arg) {
-      let bang = arg.bang;
-      arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
+    function(args) {
+      let bang = args.bang;
+      let arg = args.literalArg.replace(/%URL%/g, liberator.modules.buffer.URL)
           .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
       if (bang && arg.match(/^\?\s*(.*)/))
