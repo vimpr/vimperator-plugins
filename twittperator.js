@@ -1084,7 +1084,7 @@
         (m && m[0]);
 
     function stop() {
-      let prev = __context__.prev;
+      let prev = debugVars.prev;
 
       if (!prev)
         return;
@@ -1093,7 +1093,7 @@
       prev.sos.close();
       prev.sis.close();
 
-      delete __context__.prev;
+      delete debugVars.prev;
     }
 
     function start() {
