@@ -1268,7 +1268,7 @@
       expiredStatus = false;
       if (statusRefreshTimer)
         clearTimeout(statusRefreshTimer);
-      statusRefreshTimer = setTimeout(function() expiredStatus = true, statusValidDuration * 1000);
+      statusRefreshTimer = setTimeout(function() expiredStatus = true, setting.statusValidDuration * 1000);
     }
 
     if (!force && !expiredStatus && history.length > 0) {
@@ -1437,7 +1437,7 @@
           context.fork('File', 0, context, function (context) subCommandCompleter(context, args));
 
           let list = [];
-          let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
+          let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
           let matches = args.bang ? args.literalArg.match(/([-+?])/)
                                   : args.literalArg.match(/(RT\s|)@/);
@@ -1485,9 +1485,15 @@
   } // }}}
 
   // Initialization {{{
-  let setting = {
-    useChirp: liberator.globalVariables.twittperator_use_chirp
-  };
+  let setting =
+    let (gv = liberator.globalVariables) ({
+      useChirp: !!gv.twittperator_use_chirp,
+      autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
+      statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90)
+    });
+
+  let statusRefreshTimer;
+  let expiredStatus = true;
 
   let accessor = storage.newMap("twittperator", { store: true });
   accessor.set("clientName", "Twittperator");
@@ -1507,11 +1513,6 @@
   }
 
   let tw = new TwitterOauth(accessor);
-
-  let expiredStatus = true;
-  let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
-  let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
-  let statusRefreshTimer;
   // }}}
 
 })();
