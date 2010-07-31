@@ -104,7 +104,7 @@ let INFO =
 
 (function () {
 
-  if(!gSessionManager)
+  if(!window.gSessionManager)
     return;
 
   let ignoreAuto = liberator.globalVariables.session_manager_ignore_auto || 0;
