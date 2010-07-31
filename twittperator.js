@@ -1068,6 +1068,7 @@
   })();
   // }}}
 
+  // Twittperator
   // ChirpUserStream // {{{
   // XXX if (0) の部分は認証に対するテストコード
   let ChirpUserStream = (function() {
@@ -1195,8 +1196,6 @@
       stop: stop
     };
   })(); // }}}
-
-  // Twittperator
   function xmlhttpRequest(options) { // {{{
     let xhr = new XMLHttpRequest();
     xhr.open(options.method, options.url, true);
@@ -1207,33 +1206,6 @@
     }
     xhr.send(null);
   } // }}}
-
-  // Variables {{{
-  let setting = {
-    useChirp: liberator.globalVariables.twittperator_use_chirp
-  };
-
-  let accessor = storage.newMap("twittperator", { store: true });
-  accessor.set("clientName", "Twittperator");
-  accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
-  accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
-
-  let history;
-  if (__context__.hasOwnProperty('history')) {
-    history = __context__.history;
-    liberator.registerObserver('exit', function () accessor.set("history", history));
-  } else {
-    history = __context__.history = accessor.get("history", []);
-  }
-
-  let tw = new TwitterOauth(accessor);
-
-  let expiredStatus = true;
-  let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
-  let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
-  let statusRefreshTimer;
-  // }}}
-
   function showTL(s) { // {{{
     function unescapeBrakets(str)
       str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
@@ -1327,9 +1299,8 @@
       showTL(statuses);
     });
   } // }}}
-
-  // XXX 引数には何の意味が？
   function showTwitterMentions(arg) { // {{{
+    // XXX 引数には何の意味が？
     if (/^@/.test(arg))
       arg = arg.substr(1);
     tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
@@ -1512,6 +1483,32 @@
         ],
       }, true);
   } // }}}
+
+  // Initialization {{{
+  let setting = {
+    useChirp: liberator.globalVariables.twittperator_use_chirp
+  };
+
+  let accessor = storage.newMap("twittperator", { store: true });
+  accessor.set("clientName", "Twittperator");
+  accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
+  accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
+
+  let history;
+  if (__context__.hasOwnProperty('history')) {
+    history = __context__.history;
+    liberator.registerObserver('exit', function () accessor.set("history", history));
+  } else {
+    history = __context__.history = accessor.get("history", []);
+  }
+
+  let tw = new TwitterOauth(accessor);
+
+  let expiredStatus = true;
+  let autoStatusUpdate = !!parseInt(liberator.globalVariables.twittperator_auto_status_update || 0);
+  let statusValidDuration = parseInt(liberator.globalVariables.twitperator_status_valid_duration || 90);
+  let statusRefreshTimer;
+  // }}}
 
 })();
 
