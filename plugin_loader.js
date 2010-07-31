@@ -70,6 +70,28 @@ let PLUGIN_INFO =
                                 : obj.toString().split(/[,| \t\r\n]+/);
   }
 
+  function around () {
+    liberator.plugins.libly.$U.around(
+      io,
+      'getRuntimeDirectories',
+      function (next, [path]) {
+        let dirs = next();
+        // XXX Win 以外でも \\ を考慮しちゃうつ
+        let [m, dirname] = path.match(/^plugin[\/\\]?(.*)$/) || [];
+        if (m) {
+          roots.forEach(function (root) {
+            let rf = io.File(root);
+            if (dirname)
+              rf.append(dirname);
+            if (rf.exists() && rf.isDirectory())
+              dirs.push(rf);
+          });
+        }
+        return dirs;
+      }
+    );
+  }
+
   let roots = toArray(liberator.globalVariables.plugin_loader_roots).map(io.expandPath);
   let plugins = toArray(liberator.globalVariables.plugin_loader_plugins);
   let filter = new RegExp('[\\\\/](?:' +
@@ -78,6 +100,8 @@ let PLUGIN_INFO =
                           ')\\.(?:js|vimp)$');
 
   liberator.log('plugin_loader: loading');
+
+  let arounded = false;
 
   roots.forEach(function (root) {
     let dir = io.File(root);
@@ -93,6 +117,10 @@ let PLUGIN_INFO =
               liberator.plugins[ctx.NAME] = ctx;
           } else {
             liberator.echoerr('plugin_loader.js: context not found (' + file.path + ')');
+          }
+          if (!arounded && file.leafName === '_libly.js') {
+            arounded = true;
+            around();
           }
         }
       });
