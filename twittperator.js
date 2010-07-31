@@ -1164,7 +1164,7 @@
         }
       }, 500);
 
-      __context__.prev = {
+      debugVars.prev = {
         sos: sos,
         sis: sis,
         interval: interval,
@@ -1494,12 +1494,16 @@
   accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
   accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
 
+  if (!__context__.hasOwnProperty('__debugVars__'))
+    __context__.__debugVars__ = {};
+  let debugVars = __context__.__debugVars__;
+
   let history;
-  if (__context__.hasOwnProperty('history')) {
-    history = __context__.history;
+  if (debugVars.history) {
+    history = debugVars.history;
     liberator.registerObserver('exit', function () accessor.set("history", history));
   } else {
-    history = __context__.history = accessor.get("history", []);
+    history = debugVars.history = accessor.get("history", []);
   }
 
   let tw = new TwitterOauth(accessor);
