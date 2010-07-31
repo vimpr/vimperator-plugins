@@ -1527,9 +1527,9 @@ function loadPlugins() { // {{{
   let history;
   if (debugVars.history) {
     history = debugVars.history;
-    liberator.registerObserver('exit', function () accessor.set("history", history));
   } else {
     history = debugVars.history = accessor.get("history", []);
+    liberator.registerObserver('exit', function () accessor.set("history", history));
   }
 
   let tw = new TwitterOauth(accessor);
