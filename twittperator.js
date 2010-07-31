@@ -1376,24 +1376,24 @@ function ReTweet(id) { // {{{
 function setup() { // {{{
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
     function(arg) {
-      var special = arg.bang;
+      let bang = arg.bang;
       arg = arg.string.replace(/%URL%/g, liberator.modules.buffer.URL)
           .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
-      if (special && arg.match(/^\?\s*(.*)/))
+      if (bang && arg.match(/^\?\s*(.*)/))
           showTwitterSearchResult(RegExp.$1);
       else
-      if (special && arg.match(/^\+.*#(\d+)/))
+      if (bang && arg.match(/^\+.*#(\d+)/))
           favTwitter(RegExp.$1);
       else
-      if (special && arg.match(/^-.*#(\d+)/))
+      if (bang && arg.match(/^-.*#(\d+)/))
           unfavTwitter(RegExp.$1);
       else
-      if (special && arg.match(/^@/))
+      if (bang && arg.match(/^@/))
           showTwitterMentions();
       else
-      if (special || arg.length == 0)
-          showFollowersStatus(arg, special);
+      if (bang || arg.length == 0)
+          showFollowersStatus(arg, bang);
       else
           sayTwitter(arg);
     }, {
