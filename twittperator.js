@@ -1349,11 +1349,20 @@
   } // }}}
 function sourceScriptFile(file) { // {{{
   // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
-  file = file.clone;
+  function getScriptName(file)
+    file.leafName.replace(/\..*/, "").replace(/-([a-z])/g, function (m, n1) n1.toUpperCase());
+
+  file = file.clone();
   let toString = file.toString;
+  let scriptName = getScriptName(file);
+  let script = liberator.plugins[scriptName];
   file.toString = function () this.path.replace(/\.tw$/, ".js");
-  io.source(file, false);
-  file.toString = toString;
+  try {
+    io.source(file, false);
+  } finally {
+    liberator.plugins[scriptName] = script;
+    file.toString = toString;
+  }
 } // }}}
 function loadPlugins() { // {{{
   io.getRuntimeDirectories("plugin/twittperator").forEach(function(dir) {
@@ -1477,9 +1486,6 @@ function loadPlugins() { // {{{
           }
         }
       }, true);
-
-    if (setting.useChirp)
-      ChirpUserStream.start();
   } // }}}
   // PIN code を取得して AccessToken を得る前 {{{
   function preSetup() {
@@ -1533,6 +1539,11 @@ function loadPlugins() { // {{{
 
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
+
+  loadPlugins();
+
+  if (setting.useChirp)
+    ChirpUserStream.start();
   // }}}
 
 })();
