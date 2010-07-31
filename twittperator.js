@@ -1104,7 +1104,10 @@ let ChirpUserStream = (function() {
       host = "/1/statuses/mentions.json";
     }
 
-    let {username, password} = getUserInfo();
+    let {username, password} = getUserInfo() || {};
+    if (!(username && password))
+      return liberator.echoerr('Not found basic authorization setting in Firefox');
+
     let socketService =
       let (stsvc = Cc["@mozilla.org/network/socket-transport-service;1"])
         let (svc = stsvc.getService())
