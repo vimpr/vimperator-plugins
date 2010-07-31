@@ -1358,9 +1358,13 @@ function sourceScriptFile(file) { // {{{
   }
 } // }}}
 function loadPlugins() { // {{{
+  function getVariableName(file)
+    file.leafName.replace(/\..*/, "").replace(/-/g, "_");
+
   io.getRuntimeDirectories("plugin/twittperator").forEach(function(dir) {
     dir.readDirectory().forEach(function(file) {
-      if (/\.tw$/(file.path))
+      let name = getVariableName(file);
+      if (/\.tw$/(file.path) && liberator.globalVariables["twittperator_plugin_" + name])
         sourceScriptFile(file);
     });
   });
