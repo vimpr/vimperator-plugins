@@ -1069,9 +1069,6 @@ TwitterOauth.prototype = (function() {
 
 // ChirpUserStream
 let ChirpUserStream = (function () {
-
-  const JSON = Cc['@mozilla.org/dom/json;1'].getService(Ci.nsIJSON);
-
   function getUserInfo () {
     let host = ['http://twitter.com', 'https://twitter.com'];
     let loginManager = Cc['@mozilla.org/login-manager;1'].getService(Ci.nsILoginManager);
@@ -1079,11 +1076,22 @@ let ChirpUserStream = (function () {
     return login;
   }
 
-
   function extractURL (s)
     let (m = s.match(/https?:\/\/[\S]+/))
       (m && m[0]);
 
+  function stop () {
+    let prev = __context__.prev;
+
+    if (!prev)
+      return;
+
+    clearInterval(prev.interval);
+    prev.sos.close();
+    prev.sis.close();
+
+    delete __context__.prev;
+  }
 
   function start () {
     stop();
@@ -1141,7 +1149,7 @@ let ChirpUserStream = (function () {
         lines[0] = buf + lines[0];
         for (let [, line] in Iterator(lines.slice(0, -1))) {
           try {
-            onMsg(JSON.decode(line), line);
+            onMsg(JSON.parse(line), line);
           } catch (e) {}
         }
         buf = lines.slice(-1)[0];
@@ -1156,21 +1164,6 @@ let ChirpUserStream = (function () {
       interval: interval,
     };
   }
-
-
-  function stop () {
-    let prev = __context__.prev;
-
-    if (!prev)
-      return;
-
-    clearInterval(prev.interval);
-    prev.sos.close();
-    prev.sis.close();
-
-    delete __context__.prev;
-  }
-
 
   function onMsg (msg, raw) {
     if (msg.text) {
