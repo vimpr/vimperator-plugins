@@ -1374,8 +1374,52 @@ function ReTweet(id) { // {{{
   });
 } // }}}
 function setup() { // {{{
-  let SubCommands = [
-  ];
+  function commandCompelter(context, args) {
+    function statusObjectFilter(item)
+      let (desc = item.description)
+        (this.match(desc.user.screen_name) || this.match(desc.text));
+
+    context.createRow = function(item, highlightGroup) {
+      let desc = item[1] || this.process[1].call(this, item, item.description);
+
+      if (desc && desc.user) {
+        return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+            <li highlight="CompDesc">
+              <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
+              &#160;{desc.user.screen_name}: {desc.text}
+            </li>
+        </div>;
+      }
+
+      return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+          <li highlight="CompDesc">{desc}&#160;</li>
+      </div>;
+    };
+
+    if (args.bang && !/^[-+]/.test(args[0])) {
+      context.title = ["Name","Entry"];
+      list = history.map(function(s) ("retweeted_status" in s) ?
+        ["@" + s.retweeted_status.user.screen_name, s] :
+        ["@" + s.user.screen_name, s]);
+    } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])) {
+      context.title = ["Name + Text"];
+      list = history.map(function(s) ("retweeted_status" in s) ?
+        ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + 
+         ": " + s.retweeted_status.text, s] :
+        ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]);
+    } else {
+      context.title = ["Name#ID","Entry"];
+      list = history.map(function(s) ("retweeted_status" in s) ?
+        ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + " ", s] :
+        ["@" + s.user.screen_name+"#" + s.id + " ", s]);
+    }
+
+    context.completions = list;
+    context.filters = [statusObjectFilter];
+    context.incomplete = false;
+    context = getting = null;
+  }
+
 
   commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
     function(args) {
@@ -1403,57 +1447,9 @@ function setup() { // {{{
       bang: true,
       literal: 0,
       completer: let (getting, targetContext) function(context, args) {
-        function filter (item)
-          let (desc = item.description)
-            (this.match(desc.user.screen_name) || this.match(desc.text));
-
-        function compl() {
-          targetContext.createRow = function(item, highlightGroup) {
-            let desc = item[1] || this.process[1].call(this, item, item.description);
-
-            if (desc && desc.user) {
-              return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-                  <li highlight="CompDesc">
-                    <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                    &#160;{desc.user.screen_name}: {desc.text}
-                  </li>
-              </div>;
-            }
-
-            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-                <li highlight="CompDesc">{desc}&#160;</li>
-            </div>;
-          };
-
-          if (args.bang && !/^[-+]/.test(args[0])) {
-            targetContext.title = ["Name","Entry"];
-            list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name, s] :
-              ["@" + s.user.screen_name, s]);
-          } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])) {
-            targetContext.title = ["Name + Text"];
-            list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + 
-               ": " + s.retweeted_status.text, s] :
-              ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]);
-          } else {
-            targetContext.title = ["Name#ID","Entry"];
-            list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + " ", s] :
-              ["@" + s.user.screen_name+"#" + s.id + " ", s]);
-          }
-
-          if (target)
-            list = list.filter(function($_) $_[0].indexOf(target) >= 0);
-          targetContext.completions = list;
-          targetContext.incomplete = false;
-          targetContext = getting = null;
-        }
-
         let matches = context.filter.match(/@([A-Za-z0-9_]{0,15})$/);
         if (!matches) return;
         let list = [];
-        let target = matches[1];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
 
         context.offset += matches.index;
@@ -1463,10 +1459,10 @@ function setup() { // {{{
         if (doGet) {
           if (!getting) {
             getting = true;
-            getFollowersStatus(null, compl);
+            getFollowersStatus(null, function () commandCompelter(context, args));
           }
         } else {
-          compl();
+          commandCompelter(context, args);
         }
       }
     }, true);
