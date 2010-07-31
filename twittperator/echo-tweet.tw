@@ -1,0 +1,15 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_echo_tweet = 1
+ */
+
+(function () {
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      if (msg.text)
+        liberator.echo(msg.user.screen_name + ": " + msg.text, commandline.FORCE_SINGLELINE);
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:

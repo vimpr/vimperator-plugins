@@ -1,0 +1,20 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_urusai_namakubi = 1
+ */
+
+
+(function () {
+  if (!plugins.namakubi)
+    return;
+
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      liberator.log(msg.text);
+      if (msg.text)
+        plugins.namakubi.talk(msg.user.screen_name + ": " + msg.text);
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
