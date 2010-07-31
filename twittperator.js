@@ -1513,6 +1513,7 @@
   }
 
   let tw = new TwitterOauth(accessor);
+  __context__.OAuth = tw;
   // }}}
 
 })();
