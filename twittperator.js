@@ -1068,6 +1068,7 @@ TwitterOauth.prototype = (function() {
 // }}}
 
 // ChirpUserStream // {{{
+// XXX if (0) の部分は認証に対するテストコード
 let ChirpUserStream = (function() {
   function getUserInfo() {
     let host = ["http://twitter.com", "https://twitter.com"];
