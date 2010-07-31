@@ -1347,6 +1347,22 @@
       liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
     });
   } // }}}
+function sourceScriptFile(file) { // {{{
+  // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
+  file = file.clone;
+  let toString = file.toString;
+  file.toString = function () this.path.replace(/\.tw$/, ".js");
+  io.source(file, false);
+  file.toString = toString;
+} // }}}
+function loadPlugins() { // {{{
+  io.getRuntimeDirectories("plugin/twittperator").forEach(function(dir) {
+    dir.readDirectory().forEach(function(file) {
+      if (/\.tw$/(file.path))
+        sourceScriptFile(file);
+    });
+  });
+} // }}}
   function setup() { // {{{
     function commandCompelter(context, args) {
       function statusObjectFilter(item)
@@ -1514,7 +1530,9 @@
   }
 
   let tw = new TwitterOauth(accessor);
+
   __context__.OAuth = tw;
+  __context__.ChirpUserStream = ChirpUserStream;
   // }}}
 
 })();
