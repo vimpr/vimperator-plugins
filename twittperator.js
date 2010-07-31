@@ -1370,6 +1370,8 @@
         </div>;
       };
 
+      let list = [];
+
       if (args.bang && !/^[-+]/.test(args[0])) {
         context.title = ["Name","Entry"];
         list = history.map(function(s) ("retweeted_status" in s) ?
@@ -1436,7 +1438,6 @@
         completer: let (getting) function(context, args) {
           context.fork('File', 0, context, function (context) subCommandCompleter(context, args));
 
-          let list = [];
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
           let matches = args.bang ? args.literalArg.match(/([-+?])/)
