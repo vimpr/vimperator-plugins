@@ -1172,28 +1172,21 @@
     }
 
     function onMsg (msg, raw) {
+      listeners.forEach(function (listener) liberator.trapErrors(function () listener(msg, raw)));
+
       if (msg.text) {
-        let talk = msg.user.screen_name + ": " + msg.text;
-
-        liberator.echo(talk, commandline.FORCE_SINGLELINE);
-
         history.unshift(msg);
         if (history.length > 1000)
           history = history.slice(0, 1000);
-
-        if (plugins.namakubi)
-          plugins.namakubi.talk(talk);
-      } else {
-        let s = [];
-        for (let [n, v] in Iterator(msg))
-          s.push(n + ": " + (n == "user" ? v.screen_name : v));
-        liberator.log(s.join("\n"));
       }
     }
 
+    let listeners = [];
+
     return {
       start: start,
-      stop: stop
+      stop: stop,
+      addListener: function (func) listeners.push(func)
     };
   })(); // }}}
   function xmlhttpRequest(options) { // {{{
