@@ -1466,8 +1466,9 @@ function setup() { // {{{
         let list = [];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
 
-        let matches = args.bang && args.literalArg.match(/[-+?]/);
-        context.offset += matches ? matches.index + 1 : 0;
+        let matches = args.bang ? args.literalArg.match(/[-+?]/)
+                                : args.literalArg.match(/(?:\b)RT\s/);
+        context.offset += matches ? matches.index + (matches[0].length) : 0;
         context.incomplete = doGet;
         context.hasitems = !doGet;
         targetContext = context;
