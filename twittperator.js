@@ -1414,6 +1414,8 @@ function setup() { // {{{
         ["@" + s.user.screen_name+"#" + s.id + " ", s]);
     }
 
+    // 本文でも検索できるように、@ はなかったことにする
+    context.filter = context.filter.replace(/^@/, '');
     context.completions = list;
     context.filters = [statusObjectFilter];
     context.incomplete = false;
