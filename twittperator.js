@@ -800,7 +800,7 @@ TwitterOauth.prototype = (function() {
     initialize: function(accessor) {
       if (accessor)
         this.accessor = accessor;
-      if (this.isAuthorize()){
+      if (this.isAuthorize()) {
         setup();
       } else {
         preSetup();
@@ -858,13 +858,13 @@ TwitterOauth.prototype = (function() {
         method: message.method,
         url: target,
         onload: function(d) {
-          if (d.status == 200){
+          if (d.status == 200) {
             var res = d.responseText;
             var parameter = self.getParameter(res);
             self.request.token = parameter["oauth_token"];
             self.request.tokenSecret = parameter["oauth_token_secret"];
             // requestURLを引数にcallback
-            if (callback){
+            if (callback) {
               callback("https://twitter.com/oauth/authorize?oauth_token="+self.request.token);
             }
           }else{
@@ -902,7 +902,7 @@ TwitterOauth.prototype = (function() {
         method: message.method,
         url: target,
         onload: function(d) {
-          if (d.status == 200){
+          if (d.status == 200) {
             /* 返り値からAccess Token/Access Token Secretを取り出す */
             var res = d.responseText;
             var parameter = self.getParameter(res);
@@ -910,7 +910,7 @@ TwitterOauth.prototype = (function() {
             self.accessor.set("tokenSecret", parameter["oauth_token_secret"]);
             // Accessorの保存
             //self.saveAccessor();
-            if (callback){
+            if (callback) {
               callback(self.accessor);
             }
           }else{
@@ -940,8 +940,8 @@ TwitterOauth.prototype = (function() {
         method: message.method,
         url: target,
         onload: function(d) {
-          if (d.status == 200){
-            if (callback){
+          if (d.status == 200) {
+            if (callback) {
                 callback(d.responseText);
             }
           }else{
@@ -1056,7 +1056,7 @@ TwitterOauth.prototype = (function() {
       str = str.split("&");
       for (var i = 0; str.length > i; i++){
         itm = str[i].split("=");
-        if (itm[0] != ""){
+        if (itm[0] != "") {
           par[itm[0]] = typeof itm[1] == "undefined" ? true : dec(itm[1]);
         }
       }
@@ -1067,20 +1067,20 @@ TwitterOauth.prototype = (function() {
 })();
 // }}}
 
-// ChirpUserStream
-let ChirpUserStream = (function () {
-  function getUserInfo () {
-    let host = ['http://twitter.com', 'https://twitter.com'];
-    let loginManager = Cc['@mozilla.org/login-manager;1'].getService(Ci.nsILoginManager);
+// ChirpUserStream // {{{
+let ChirpUserStream = (function() {
+  function getUserInfo() {
+    let host = ["http://twitter.com", "https://twitter.com"];
+    let loginManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     let login = loginManager.findLogins({}, host[0], host[1], null)[0];
     return login;
   }
 
-  function extractURL (s)
+  function extractURL(s)
     let (m = s.match(/https?:\/\/[\S]+/))
       (m && m[0]);
 
-  function stop () {
+  function stop() {
     let prev = __context__.prev;
 
     if (!prev)
@@ -1093,52 +1093,52 @@ let ChirpUserStream = (function () {
     delete __context__.prev;
   }
 
-  function start () {
+  function start() {
     stop();
 
-    let host = 'chirpstream.twitter.com';
-    let path = '/2b/user.json';
+    let host = "chirpstream.twitter.com";
+    let path = "/2b/user.json";
 
     if (0) {
-      host = 'api.twitter.com';
-      host = '/1/statuses/mentions.json';
+      host = "api.twitter.com";
+      host = "/1/statuses/mentions.json";
     }
 
     let {username, password} = getUserInfo();
     let socketService =
-      let (stsvc = Cc['@mozilla.org/network/socket-transport-service;1'])
+      let (stsvc = Cc["@mozilla.org/network/socket-transport-service;1"])
         let (svc = stsvc.getService())
-          svc.QueryInterface(Ci['nsISocketTransportService']);
+          svc.QueryInterface(Ci["nsISocketTransportService"]);
 
     let transport = socketService.createTransport(null, 0, host, 80, null);
     let os = transport.openOutputStream(0, 0, 0);
     let is = transport.openInputStream(0, 0, 0);
-    let sis = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
-    let sos = Cc['@mozilla.org/binaryoutputstream;1'].createInstance(Ci.nsIBinaryOutputStream);
+    let sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+    let sos = Cc["@mozilla.org/binaryoutputstream;1"].createInstance(Ci.nsIBinaryOutputStream);
 
     sis.init(is);
     sos.setOutputStream(os);
 
-    let params = ['Authorization: Basic ' + btoa(username + ':' + password)];
+    let params = ["Authorization: Basic " + btoa(username + ":" + password)];
     if (0) {
-      let param = tw.getUrl('http://' + host + path);
+      let param = tw.getUrl("http://" + host + path);
       let params = param.split(/\?/)[1].split(/&/).map(function (it)
         let ([n, v] = it.split(/=/))
-          n + ': ' + decodeURIComponent(v)
+          n + ": " + decodeURIComponent(v)
       );
     }
 
     let get = [
-      'GET ' + path + ' HTTP/1.1',
-      'Host: ' + host,
-      params.join('\n'),
-      ''
-    ].join('\n');
-    get += '\n\n';
+      "GET " + path + " HTTP/1.1",
+      "Host: " + host,
+      params.join("\n"),
+      ""
+    ].join("\n");
+    get += "\n\n";
 
     sos.write(get, get.length);
 
-    let buf = '';
+    let buf = "";
     let interval = setInterval(function () {
       let len = sis.available();
       if (len <= 0)
@@ -1167,7 +1167,7 @@ let ChirpUserStream = (function () {
 
   function onMsg (msg, raw) {
     if (msg.text) {
-      let talk = msg.user.screen_name + ': ' + msg.text;
+      let talk = msg.user.screen_name + ": " + msg.text;
 
       liberator.echo(talk, commandline.FORCE_SINGLELINE);
 
@@ -1180,8 +1180,8 @@ let ChirpUserStream = (function () {
     } else {
       let s = [];
       for (let [n, v] in Iterator(msg))
-        s.push(n + ': ' + (n == 'user' ? v.screen_name : v));
-      liberator.log(s.join('\n'));
+        s.push(n + ": " + (n == "user" ? v.screen_name : v));
+      liberator.log(s.join("\n"));
     }
   }
 
@@ -1189,13 +1189,13 @@ let ChirpUserStream = (function () {
     start: start,
     stop: stop
   };
-})();
+})(); // }}}
 
 // Twittperator
 function xmlhttpRequest(options) { // {{{
   let xhr = new XMLHttpRequest();
   xhr.open(options.method, options.url, true);
-  if (typeof options.onload == "function"){
+  if (typeof options.onload == "function") {
     xhr.onload = function() {
       options.onload(xhr);
     }
@@ -1207,7 +1207,7 @@ function xmlhttpRequest(options) { // {{{
 let accessor = storage.newMap("twittperator", { store: true });
 accessor.set("clientName", "Twittperator");
 accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
-accessor.set("consumerSecret","gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
+accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
 
 let history;
 if (__context__.hasOwnProperty('history')) {
@@ -1276,7 +1276,7 @@ function detectLink (str) { // {{{
     return <>{detectLink(left)}<a highlight="URL" href={url}> {url} </a>{detectLink(right)}</>;
   }
   return str;
-}
+} // }}}
 function showTwitterSearchResult(word) { // {{{
   tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
     let results = JSON.parse(text);
@@ -1287,7 +1287,7 @@ function getFollowersStatus(target, force, onload) { // {{{
   if (target) {
     api = "http://api.twitter.com/1/statuses/user_timeline.json";
     query.screen_name = target;
-    tw.get(api, query, function(text){
+    tw.get(api, query, function(text) {
       onload(JSON.parse(text));
     });
   } else {
@@ -1302,7 +1302,7 @@ function getFollowersStatus(target, force, onload) { // {{{
       clearTimeout(statusRefreshTimer);
     statusRefreshTimer = setTimeout(function() expiredStatus = true, statusValidDuration * 1000);
   }
-  if (!force && !expiredStatus && history.length > 0){
+  if (!force && !expiredStatus && history.length > 0) {
     onload();
   } else {
     let api = "http://api.twitter.com/1/statuses/home_timeline.json",
@@ -1347,9 +1347,9 @@ function unfavTwitter(id) { // {{{
 } // }}}
 function sayTwitter(stat) { // {{{
   let sendData = {};
-  if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)){
+  if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
     let [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
-    if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0){
+    if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
       ReTweet(replyID);
       return;
     }
@@ -1404,8 +1404,8 @@ function setup() { // {{{
           let (desc = item.description)
             (this.match(desc.user.screen_name) || this.match(desc.text));
 
-        function compl(){
-          targetContext.createRow = function (item, highlightGroup) {
+        function compl() {
+          targetContext.createRow = function(item, highlightGroup) {
             let desc = item[1] || this.process[1].call(this, item, item.description);
 
             if (desc && desc.user) {
@@ -1422,34 +1422,33 @@ function setup() { // {{{
             </div>;
           };
 
-          if (args.bang && !/^[-+]/.test(args[0])){
+          if (args.bang && !/^[-+]/.test(args[0])) {
             targetContext.title = ["Name","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
               ["@" + s.retweeted_status.user.screen_name, s] :
               ["@" + s.user.screen_name, s]);
-          } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])){
+          } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])) {
             targetContext.title = ["Name + Text"];
             list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+": "+s.retweeted_status.text, s] :
-              ["@"+s.user.screen_name+"#"+s.id+": "+s.text, s]);
+              ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + 
+               ": " + s.retweeted_status.text, s] :
+              ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]);
           } else {
             targetContext.title = ["Name#ID","Entry"];
             list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@"+s.retweeted_status.user.screen_name+"#"+s.retweeted_status.id+" ", s] :
-              ["@"+s.user.screen_name+"#"+s.id+" ", s]);
+              ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + " ", s] :
+              ["@" + s.user.screen_name+"#" + s.id + " ", s]);
           }
 
-          if (target){
+          if (target)
             list = list.filter(function($_) $_[0].indexOf(target) >= 0);
-          }
           targetContext.completions = list;
           targetContext.incomplete = false;
           targetContext = getting = null;
         }
 
         let matches = context.filter.match(/@([A-Za-z0-9_]{0,15})$/);
-        if (!matches)
-          return;
+        if (!matches) return;
         let list = [];
         let target = matches[1];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
@@ -1474,11 +1473,11 @@ function setup() { // {{{
 function preSetup() {
   commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
     function(args) {
-      if (args["-getPIN"]){
+      if (args["-getPIN"]) {
         tw.getRequestToken(function(url) {
           liberator.open(url, { where: liberator.NEW_TAB });
         });
-        liberator.echo("Twittperator","Please get PIN code and execute\n :tw -setPIN {PINcode}");
+        liberator.echo("Twittperator", "Please get PIN code and execute\n :tw -setPIN {PINcode}");
       } else if (args["-setPIN"]) {
         tw.setPin(args["-setPIN"]);
       }
