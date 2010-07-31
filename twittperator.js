@@ -1402,7 +1402,7 @@ function setup() { // {{{
       list = history.map(function(s) ("retweeted_status" in s) ?
         ["@" + s.retweeted_status.user.screen_name, s] :
         ["@" + s.user.screen_name, s]);
-    } else if (/(?:^|\b)RT\s+@[A-Za-z0-9_]{1,15}$/.test(args[0])) {
+    } else if (/(?:^|\b)RT\s+@.*$/.test(args[0])) {
       context.title = ["Name + Text"];
       list = history.map(function(s) ("retweeted_status" in s) ?
         ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + 
@@ -1466,9 +1466,11 @@ function setup() { // {{{
         let list = [];
         let doGet = (expiredStatus || !(history && history.length)) && autoStatusUpdate;
 
-        let matches = args.bang ? args.literalArg.match(/[-+?]/)
-                                : args.literalArg.match(/(?:\b)RT\s/);
-        context.offset += matches ? matches.index + (matches[0].length) : 0;
+        let matches = args.bang ? args.literalArg.match(/([-+?])/)
+                                : args.literalArg.match(/(RT\s|)@/);
+        if (!args.bang && !matches)
+          return;
+        context.offset += matches ? matches.index + matches[1].length : 0;
         context.incomplete = doGet;
         context.hasitems = !doGet;
         targetContext = context;
