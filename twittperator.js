@@ -1177,7 +1177,7 @@
       if (msg.text) {
         history.unshift(msg);
         if (history.length > 1000)
-          history = history.slice(0, 1000);
+          __context__.Tweets = history = history.slice(0, 1000);
       }
     }
 
@@ -1371,6 +1371,20 @@ function loadPlugins() { // {{{
 } // }}}
   function setup() { // {{{
     function commandCompelter(context, args) {
+      const SubCommands = [
+        {
+          command: ["+", "fav"],
+          action: function (args) {
+          },
+          completer: function (context, args) {
+            context.title = ["Name","Entry"];
+            list = history.map(function(s) ("retweeted_status" in s) ?
+              ["@" + s.retweeted_status.user.screen_name, s] :
+              ["@" + s.user.screen_name, s]);
+          }
+        }
+      ];
+
       function statusObjectFilter(item)
         let (desc = item.description)
           (this.match(desc.user.screen_name) || this.match(desc.text));
@@ -1525,10 +1539,10 @@ function loadPlugins() { // {{{
   let debugVars = __context__.__debugVars__;
 
   let history;
-  if (debugVars.history) {
-    history = debugVars.history;
+  if (__context__.Tweets) {
+    history = __context__.Tweets;
   } else {
-    history = debugVars.history = accessor.get("history", []);
+    history = __context__.Tweets = accessor.get("history", []);
     liberator.registerObserver('exit', function () accessor.set("history", history));
   }
 
