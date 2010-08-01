@@ -1360,16 +1360,21 @@ function sourceScriptFile(file) { // {{{
   }
 } // }}}
 function loadPlugins() { // {{{
-  function getVariableName(file)
-    file.leafName.replace(/\..*/, "").replace(/-/g, "_");
+  function isEnabled(file)
+    let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
+      liberator.globalVariables["twittperator_plugin_" + name];
 
-  io.getRuntimeDirectories("plugin/twittperator").forEach(function(dir) {
-    dir.readDirectory().forEach(function(file) {
-      let name = getVariableName(file);
-      if (/\.tw$/(file.path) && liberator.globalVariables["twittperator_plugin_" + name])
-        sourceScriptFile(file);
-    });
-  });
+  function loadPluginFromDir(checkGV) {
+    return function(dir) {
+      dir.readDirectory().forEach(function(file) {
+        if (/\.tw$/(file.path) && (!checkGV || isEnabled(file)))
+          sourceScriptFile(file);
+      });
+    }
+  }
+
+  io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
+  io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
 } // }}}
   function setup() { // {{{
     function commandCompelter(context, args) {
