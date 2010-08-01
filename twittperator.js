@@ -1097,6 +1097,8 @@
     }
 
     function start() {
+      liberator.log('Twittperator: start chirp user stream');
+
       stop();
 
       let host = "chirpstream.twitter.com";
