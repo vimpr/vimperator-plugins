@@ -1177,7 +1177,7 @@
       if (msg.text) {
         history.unshift(msg);
         if (history.length > 1000)
-          __context__.Tweets = history = history.slice(0, 1000);
+          history.splice(1000);
       }
     }
 
