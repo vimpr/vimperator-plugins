@@ -1307,6 +1307,7 @@
   } // }}}
   function favTwitter(id) { // {{{
     tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
+      liberator.log(text.responseText);
       let res = JSON.parse(text);
       liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
     });
@@ -1380,21 +1381,76 @@ function loadPlugins() { // {{{
   io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
 } // }}}
   function setup() { // {{{
-    function commandCompelter(context, args) {
-      const SubCommands = [
-        {
-          command: ["+", "fav"],
-          action: function (args) {
-          },
-          completer: function (context, args) {
-            context.title = ["Name","Entry"];
-            list = history.map(function(s) ("retweeted_status" in s) ?
-              ["@" + s.retweeted_status.user.screen_name, s] :
-              ["@" + s.user.screen_name, s]);
-          }
-        }
-      ];
+    function rt(func)
+      function (status)
+        let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
+          func(s);
 
+    const Completers = {
+      name_text: function (context, args) {
+        context.title = ["Name","Entry"];
+        context.completions =
+          history.map(rt(function(s) ["@" + s.user.screen_name, s]));
+      },
+      name_id_text: function (context, args) {
+        context.title = ["Name","Entry"];
+        context.completions =
+          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
+      },
+      name_id_text: function (context, args) {
+        context.title = ["Name","Entry"];
+        context.completions =
+          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
+      }
+    };
+
+    const SubCommands = [
+      {
+        match: function (s) s.match(/^\+/),
+        command: "+",
+        description: "Fav a tweet",
+        action: function (args) {
+          let m = args.literalArg.match(/^\+.*#(\d+)/);
+          if (m)
+            favTwitter(m[1]);
+        },
+        completer: Completers.name_id_text
+      },
+      {
+        match: function (s) s.match(/^\-/),
+        command: "-",
+        description: "Unfav a tweet",
+        action: function (args) {
+          let m = args.literalArg.match(/^\-.*#(\d+)/);
+          if (m)
+            unfavTwitter(m[1]);
+        },
+        completer: Completers.name_id_text
+      },
+      {
+        match: function (s) s.match(/^@/),
+        command: "@",
+        description: "Show mentions",
+        action: function (args) showTwitterMentions(args.literalArg),
+        completer: Completers.name_text
+      },
+      {
+        match: function (s) s.match(/^\?/),
+        command: "?",
+        description: "Twitter search",
+        action: function (args) showTwitterSearchResult(args.literalArg),
+        completer: Completers.name_text
+      }
+    ];
+
+    function findSubCommand(s) {
+      for (let [, cmd] in Iterator(SubCommands)) {
+        if (cmd.match(s))
+          return cmd;
+      }
+    }
+
+    function commandCompelter(context, args) {
       function statusObjectFilter(item)
         let (desc = item.description)
           (this.match(desc.user.screen_name) || this.match(desc.text));
@@ -1416,44 +1472,41 @@ function loadPlugins() { // {{{
         </div>;
       };
 
-      let list = [];
+      let len = 0;
 
-      if (args.bang && !/^[-+]/.test(args[0])) {
-        context.title = ["Name","Entry"];
-        list = history.map(function(s) ("retweeted_status" in s) ?
-          ["@" + s.retweeted_status.user.screen_name, s] :
-          ["@" + s.user.screen_name, s]);
-      } else if (/(?:^|\b)RT\s+@.*$/.test(args[0])) {
-        context.title = ["Name + Text"];
-        list = history.map(function(s) ("retweeted_status" in s) ?
-          ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id +
-           ": " + s.retweeted_status.text, s] :
-          ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]);
+      if (args.bang) {
+        let subCmd = findSubCommand(args.literalArg);
+        if (subCmd) {
+          subCmd.completer(context, args);
+          len = 1;
+        }
       } else {
-        context.title = ["Name#ID","Entry"];
-        list = history.map(function(s) ("retweeted_status" in s) ?
-          ["@" + s.retweeted_status.user.screen_name + "#" + s.retweeted_status.id + " ", s] :
-          ["@" + s.user.screen_name+"#" + s.id + " ", s]);
+        let m;
+        if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
+          Completers.name_id_text(context, args);
+        } else if (m = args.literalArg.match(/(^|\b)@.*$/)) {
+          Completers.name_id(context, args);
+        }
+
+        if (m) {
+          len = m.index + m[1].length;
+        }
       }
 
-      // 本文でも検索できるように、@ はなかったことにする
-      context.filter = context.filter.replace(/^@/, '');
-      context.completions = list;
+      context.title = ["Name#ID", "Entry"];
+      context.offset += len;
       context.filters = [statusObjectFilter];
+      // XXX 本文でも検索できるように、@ はなかったことにする
+      context.filter = context.filter.replace(/^@/, '');
+
       context.incomplete = false;
     }
 
     function subCommandCompleter(context, args) {
       if (!args.bang || context.filter.length > 0)
         return;
-
       context.title = ["Sub command", "Description"];
-      context.completions = [
-        ["@", "Show mentions"],
-        ["?", "Twitter search"],
-        ["+", "Fav a tweet"],
-        ["-", "Unfav a tweet"],
-      ];
+      context.completions = SubCommands.map(function ({command, description}) [command, description]);
     }
 
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
@@ -1462,22 +1515,15 @@ function loadPlugins() { // {{{
         let arg = args.literalArg.replace(/%URL%/g, liberator.modules.buffer.URL)
             .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
-        if (bang && arg.match(/^\?\s*(.*)/))
-            showTwitterSearchResult(RegExp.$1);
-        else
-        if (bang && arg.match(/^\+.*#(\d+)/))
-            favTwitter(RegExp.$1);
-        else
-        if (bang && arg.match(/^-.*#(\d+)/))
-            unfavTwitter(RegExp.$1);
-        else
-        if (bang && arg.match(/^@/))
-            showTwitterMentions(arg);
-        else
-        if (bang || arg.length == 0)
-            showFollowersStatus(arg, bang);
-        else
+        if (args.bang) {
+          let subCmd = findSubCommand(args.literalArg);
+          subCmd.action(args);
+        } else {
+          if (arg.length === 0)
+            showFollowersStatus();
+          else
             sayTwitter(arg);
+        }
       }, {
         bang: true,
         literal: 0,
@@ -1486,14 +1532,14 @@ function loadPlugins() { // {{{
 
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
-          let matches = args.bang ? args.literalArg.match(/([-+?])/)
+          let matches = args.bang ? args.literalArg.match(/^(\s*[-+?])/)
                                   : args.literalArg.match(/(RT\s|)@/);
           if (!args.bang && !matches)
             return;
-          context.offset += matches ? matches.index + matches[1].length : 0;
+
           context.incomplete = doGet;
           context.hasitems = !doGet;
-          targetContext = context;
+
           if (doGet) {
             if (!getting) {
               getting = true;
