@@ -1285,7 +1285,10 @@
       tw.get(api, query, function(text) {
         setRefresher();
         // TODO 履歴をちゃんと "追記" するようにするようにするべき
-        onload(history = JSON.parse(text));
+        let result = JSON.parse(text);
+        if (!target)
+          history = result;
+        onload(result);
       });
     }
   } // }}}
