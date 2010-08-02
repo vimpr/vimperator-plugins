@@ -1338,6 +1338,12 @@
       liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
     });
   } // }}}
+  function openLink(text) { // {{{
+    // TODO 複数のリンクに対応
+    let m = text.match(/https?:\/\/\S+/);
+    if (m)
+      liberator.open(m[0], liberator.NEW_TAB);
+  } // }}}
   function ReTweet(id) { // {{{
     let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
     tw.post(url, null, function(text) {
@@ -1387,12 +1393,22 @@ function loadPlugins() { // {{{
           func(s);
 
     const Completers = {
-      name_text: function (context, args) {
+      name: function (context, args) {
         context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name, s]));
       },
-      name_id_text: function (context, args) {
+      link: function (context, args) {
+        context.title = ["Name","Entry"];
+        context.completions =
+          history.filter(function (s) /https?:\/\//(s.text)).map(rt(function(s) [s.text, s]));
+      },
+      text: function (context, args) {
+        context.title = ["Name","Entry"];
+        context.completions =
+          history.map(rt(function(s) [s.text, s]));
+      },
+      name_id: function (context, args) {
         context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
@@ -1432,14 +1448,21 @@ function loadPlugins() { // {{{
         command: "@",
         description: "Show mentions",
         action: function (args) showTwitterMentions(args.literalArg),
-        completer: Completers.name_text
+        completer: Completers.name
       },
       {
         match: function (s) s.match(/^\?/),
         command: "?",
         description: "Twitter search",
         action: function (args) showTwitterSearchResult(args.literalArg),
-        completer: Completers.name_text
+        completer: Completers.text
+      },
+      {
+        match: function (s) s.match(/^\//),
+        command: "/",
+        description: "Open link",
+        action: function (args) openLink(args.literalArg),
+        completer: Completers.link
       }
     ];
 
