@@ -20,8 +20,6 @@
 
   plugins.twittperator.ChirpUserStream.addListener(
     function onMsg (msg, raw) {
-      if (msg.text && msg.user)
-        liberator.log(msg.user.screen_name + ' -> ' + msg.in_reply_to_screen_name + ': ' + msg.text);
       if (msg.text && msg.user && msg.in_reply_to_screen_name === screenName)
         simplePopupAlert(msg.user.screen_name, msg.text, msg.user.profile_image_url);
     }
