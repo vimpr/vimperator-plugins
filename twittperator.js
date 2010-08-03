@@ -1337,9 +1337,25 @@
   } // }}}
   function openLink(text) { // {{{
     // TODO 複数のリンクに対応
-    let m = text.match(/https?:\/\/\S+/);
-    if (m)
-      liberator.open(m[0], liberator.NEW_TAB);
+    let links = [];
+    text.replace(/https?:\/\/\S+/g, function(m) links.push(m));
+    if (links.length <= 0)
+      return;
+
+    if (links.length == 1)
+      return liberator.open(links[0], liberator.NEW_TAB);
+
+    commandline.input(
+      'Select URL: ',
+      function (arg) {
+        liberator.open(arg, liberator.NEW_TAB);
+      },
+      {
+        completer: function(context) {
+          context.completions = [[link, link] for ([, link] in Iterator(links))];
+        }
+      }
+    );
   } // }}}
   function ReTweet(id) { // {{{
     let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
