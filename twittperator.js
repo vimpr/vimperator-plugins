@@ -1391,27 +1391,22 @@ function loadPlugins() { // {{{
 
     const Completers = {
       name: function (context, args) {
-        context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name, s]));
       },
       link: function (context, args) {
-        context.title = ["Name","Entry"];
         context.completions =
           history.filter(function (s) /https?:\/\//(s.text)).map(rt(function(s) [s.text, s]));
       },
       text: function (context, args) {
-        context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) [s.text, s]));
       },
       name_id: function (context, args) {
-        context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
       },
       name_id_text: function (context, args) {
-        context.title = ["Name","Entry"];
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
       }
@@ -1497,6 +1492,7 @@ function loadPlugins() { // {{{
       if (args.bang) {
         let subCmd = findSubCommand(args.literalArg);
         if (subCmd) {
+          context.title = ["Hidden", "Entry"];
           subCmd.completer(context, args);
           len = 1;
         }
