@@ -1201,10 +1201,10 @@
     }
     xhr.send(null);
   } // }}}
+  function unescapeBrakets(str) // {{{
+    str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  // }}}
   function showTL(s) { // {{{
-    function unescapeBrakets(str)
-      str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-
     let html = <style type="text/css"><![CDATA[
         .twitter.user { vertical-align: top; }
         .twitter.entry-content { white-space: normal !important; }
@@ -1479,7 +1479,7 @@ function loadPlugins() { // {{{
           return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
               <li highlight="CompDesc">
                 <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                &#160;{desc.user.screen_name}: {desc.text}
+                &#160;{desc.user.screen_name}: {unescapeBrakets(desc.text)}
               </li>
           </div>;
         }
