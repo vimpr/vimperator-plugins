@@ -1569,6 +1569,9 @@ function loadPlugins() { // {{{
         let bang = args.bang;
         let arg = args.literalArg;
 
+        if (!arg)
+          return showFollowersStatus(null, args.bang);
+
         if (args.bang) {
           let [subCmd] = findSubCommand(arg);
           subCmd.action(args);
