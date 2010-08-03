@@ -1544,9 +1544,8 @@ function loadPlugins() { // {{{
           Completers.name_id(context, args);
         }
 
-        if (m) {
+        if (m)
           len = m.index + m[1].length;
-        }
       }
 
       context.title = ["Name#ID", "Entry"];
