@@ -1405,6 +1405,8 @@ function loadPlugins() { // {{{
         let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
           func(s);
 
+    let ub = unescapeBrakets;
+
     const Completers = {
       name: function (context, args) {
         context.completions =
@@ -1412,11 +1414,11 @@ function loadPlugins() { // {{{
       },
       link: function (context, args) {
         context.completions =
-          history.filter(function (s) /https?:\/\//(s.text)).map(rt(function(s) [s.text, s]));
+          history.filter(function (s) /https?:\/\//(s.text)).map(rt(function(s) [ub(s.text), s]));
       },
       text: function (context, args) {
         context.completions =
-          history.map(rt(function(s) [s.text, s]));
+          history.map(rt(function(s) [ub(s.text), s]));
       },
       name_id: function (context, args) {
         context.completions =
@@ -1424,7 +1426,7 @@ function loadPlugins() { // {{{
       },
       name_id_text: function (context, args) {
         context.completions =
-          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
+          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + ub(s.text), s]));
       }
     };
 
