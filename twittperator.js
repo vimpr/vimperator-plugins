@@ -1455,8 +1455,13 @@ function loadPlugins() { // {{{
         match: function (s) s.match(/^@/),
         command: ["@"],
         description: "Show mentions or follower tweets",
-        action: function (args)
-          (args.literalArg ? showFollowersStatus(args.literalArg, true) : showTwitterMentions()),
+        action: function (args) {
+          if (args.literalArg.match(/^@.+/)) {
+            showFollowersStatus(args.literalArg, true);
+          } else {
+            showTwitterMentions();
+          }
+        },
         completer: Completers.name
       },
       {
@@ -1493,7 +1498,8 @@ function loadPlugins() { // {{{
         str = str.slice(len);
         result = m;
       }
-      result.index += head;
+      if (result)
+        result.index += head;
       return result;
     }
 
