@@ -10,7 +10,6 @@
 
   plugins.twittperator.ChirpUserStream.addListener(
     function onMsg (msg, raw) {
-      liberator.log(msg.text);
       if (msg.text)
         plugins.namakubi.talk(msg.user.screen_name + ": " + msg.text);
     }
