@@ -1483,6 +1483,20 @@ function loadPlugins() { // {{{
       }
     }
 
+    function tailMatch(re, str) {
+      let result, m;
+      let head = 0;
+      let len = 0;
+      while (str && (m = str.match(re))) {
+        head += len;
+        len = m.index + m[0].length;
+        str = str.slice(len);
+        result = m;
+      }
+      result.index += head;
+      return result;
+    }
+
     function commandCompelter(context, args) {
       function statusObjectFilter(item)
         let (desc = item.description)
@@ -1518,7 +1532,7 @@ function loadPlugins() { // {{{
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
           Completers.name_id_text(context, args);
-        } else if (m = args.literalArg.match(/(^|\b)@.*$/)) {
+        } else if (m = tailMatch(/(^|\b)@[^@]*/, args.literalArg)) {
           Completers.name_id(context, args);
         }
 
