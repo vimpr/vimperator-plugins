@@ -1530,11 +1530,10 @@ function loadPlugins() { // {{{
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
       function(args) {
         let bang = args.bang;
-        let arg = args.literalArg.replace(/%URL%/g, liberator.modules.buffer.URL)
-            .replace(/%TITLE%/g, liberator.modules.buffer.title);
+        let arg = args.literalArg;
 
         if (args.bang) {
-          let [subCmd] = findSubCommand(args.literalArg);
+          let [subCmd] = findSubCommand(arg);
           subCmd.action(args);
         } else {
           if (arg.length === 0)
