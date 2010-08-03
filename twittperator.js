@@ -1415,7 +1415,7 @@ function loadPlugins() { // {{{
     const SubCommands = [
       {
         match: function (s) s.match(/^\+/),
-        command: "+",
+        command: ["+"],
         description: "Fav a tweet",
         action: function (args) {
           let m = args.literalArg.match(/^\+.*#(\d+)/);
@@ -1426,7 +1426,7 @@ function loadPlugins() { // {{{
       },
       {
         match: function (s) s.match(/^\-/),
-        command: "-",
+        command: ["-"],
         description: "Unfav a tweet",
         action: function (args) {
           let m = args.literalArg.match(/^\-.*#(\d+)/);
@@ -1437,21 +1437,21 @@ function loadPlugins() { // {{{
       },
       {
         match: function (s) s.match(/^@/),
-        command: "@",
-        description: "Show mentions",
+        command: ["@"],
+        description: "Show mentions or follower tweets",
         action: function (args) showTwitterMentions(args.literalArg),
         completer: Completers.name
       },
       {
         match: function (s) s.match(/^\?/),
-        command: "?",
+        command: ["?"],
         description: "Twitter search",
         action: function (args) showTwitterSearchResult(args.literalArg),
         completer: Completers.text
       },
       {
-        match: function (s) s.match(/^\//),
-        command: "/",
+        match: function (s) s.match(/^(open\s|\/)/),
+        command: ["/"],
         description: "Open link",
         action: function (args) openLink(args.literalArg),
         completer: Completers.link
@@ -1460,8 +1460,9 @@ function loadPlugins() { // {{{
 
     function findSubCommand(s) {
       for (let [, cmd] in Iterator(SubCommands)) {
-        if (cmd.match(s))
-          return cmd;
+        let m = cmd.match(s);
+        if (m)
+          return [cmd, m];
       }
     }
 
@@ -1490,11 +1491,11 @@ function loadPlugins() { // {{{
       let len = 0;
 
       if (args.bang) {
-        let subCmd = findSubCommand(args.literalArg);
+        let [subCmd, m] = findSubCommand(args.literalArg);
         if (subCmd) {
           context.title = ["Hidden", "Entry"];
           subCmd.completer(context, args);
-          len = 1;
+          len = m[0] === '@' ? 0 : m[0].length;
         }
       } else {
         let m;
@@ -1522,7 +1523,7 @@ function loadPlugins() { // {{{
       if (!args.bang || context.filter.length > 0)
         return;
       context.title = ["Sub command", "Description"];
-      context.completions = SubCommands.map(function ({command, description}) [command, description]);
+      context.completions = SubCommands.map(function ({command, description}) [command[0], description]);
     }
 
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
@@ -1532,7 +1533,7 @@ function loadPlugins() { // {{{
             .replace(/%TITLE%/g, liberator.modules.buffer.title);
 
         if (args.bang) {
-          let subCmd = findSubCommand(args.literalArg);
+          let [subCmd] = findSubCommand(args.literalArg);
           subCmd.action(args);
         } else {
           if (arg.length === 0)
