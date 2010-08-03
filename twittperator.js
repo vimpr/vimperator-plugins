@@ -1560,6 +1560,7 @@ function loadPlugins() { // {{{
       }, {
         bang: true,
         literal: 0,
+        hereDoc: true,
         completer: let (getting) function(context, args) {
           context.fork('File', 0, context, function (context) subCommandCompleter(context, args));
 
