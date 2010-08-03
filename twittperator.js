@@ -1440,7 +1440,7 @@ function loadPlugins() { // {{{
         command: ["@"],
         description: "Show mentions or follower tweets",
         action: function (args)
-          (args.literalArg ? showFollowersStatus(args.literalArg) : showTwitterMentions()),
+          (args.literalArg ? showFollowersStatus(args.literalArg, true) : showTwitterMentions()),
         completer: Completers.name
       },
       {
