@@ -1298,9 +1298,6 @@
     });
   } // }}}
   function showTwitterMentions(arg) { // {{{
-    // XXX 引数には何の意味が？
-    if (/^@/.test(arg))
-      arg = arg.substr(1);
     tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
       showTL(JSON.parse(text));
     });
