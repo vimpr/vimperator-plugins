@@ -1439,7 +1439,8 @@ function loadPlugins() { // {{{
         match: function (s) s.match(/^@/),
         command: ["@"],
         description: "Show mentions or follower tweets",
-        action: function (args) showTwitterMentions(args.literalArg),
+        action: function (args)
+          (args.literalArg ? showFollowersStatus(args.literalArg) : showTwitterMentions()),
         completer: Completers.name
       },
       {
