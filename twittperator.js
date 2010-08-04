@@ -1104,11 +1104,6 @@
       let host = "chirpstream.twitter.com";
       let path = "/2b/user.json";
 
-      if (0) {
-        host = "api.twitter.com";
-        host = "/1/statuses/mentions.json";
-      }
-
       let {username, password} = getUserInfo() || {};
       if (!(username && password))
         return liberator.echoerr('Not found basic authorization setting in Firefox');
@@ -1128,13 +1123,6 @@
       sos.setOutputStream(os);
 
       let params = ["Authorization: Basic " + btoa(username + ":" + password)];
-      if (0) {
-        let param = tw.getUrl("http://" + host + path);
-        let params = param.split(/\?/)[1].split(/&/).map(function (it)
-          let ([n, v] = it.split(/=/))
-            n + ": " + decodeURIComponent(v)
-        );
-      }
 
       let get = [
         "GET " + path + " HTTP/1.1",
