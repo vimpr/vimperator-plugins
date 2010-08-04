@@ -1,0 +1,31 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_dump_msg = 1
+ */
+
+
+(function () {
+  function objectToString (obj, head) {
+    if (!head)
+      head = '';
+
+    let result = '';
+    for (let [n, v] in Iterator(obj)) {
+      if (v && typeof v === 'object') {
+        result += head + n + ':\n' + objectToString(v, head + '  ');
+      } else {
+        result += head + n + ': ' + v + '\n';
+      }
+    }
+
+    return result;
+  }
+
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      liberator.log('\n' + objectToString(msg));
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
