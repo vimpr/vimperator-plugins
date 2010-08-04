@@ -984,19 +984,20 @@
         };
         xmlhttpRequest(options); // 送信
       },
-      getUrl: function (api) {
+      getAuthorizationHeader: function (api) {
         var message = {
           method: "GET",
           action: api,
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.get("consumerKey",""),// queryの構築
-            oauth_token: this.accessor.get("token","") // Access Token
+            oauth_token: this.accessor.get("token",""), // Access Token
+            oauth_version: "1.0"
           }
         };
         OAuth.setTimestampAndNonce(message);
         OAuth.SignatureMethod.sign(message, this.getAccessor());
-        return OAuth.addToURL(message.action, message.parameters);
+        return OAuth.getAuthorizationHeader("Twitter", message.parameters);
       },
       // utility関数
       // http://kevin.vanzonneveld.net
@@ -1071,13 +1072,6 @@
   // ChirpUserStream // {{{
   // XXX if (0) の部分は認証に対するテストコード
   let ChirpUserStream = (function() {
-    function getUserInfo() {
-      let host = ["http://twitter.com", "https://twitter.com"];
-      let loginManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-      let login = loginManager.findLogins({}, host[0], host[1], null)[0];
-      return login;
-    }
-
     function extractURL(s)
       let (m = s.match(/https?:\/\/[\S]+/))
         (m && m[0]);
@@ -1103,9 +1097,13 @@
       let host = "chirpstream.twitter.com";
       let path = "/2b/user.json";
 
-      let {username, password} = getUserInfo() || {};
-      if (!(username && password))
-        return liberator.echoerr('Not found basic authorization setting in Firefox');
+      let get = [
+        "GET " + path + " HTTP/1.1",
+        "Host: " + host,
+        "Authorization: " + tw.getAuthorizationHeader("http://" + host + path),
+        "",
+        ""
+      ].join("\n");
 
       let socketService =
         let (stsvc = Cc["@mozilla.org/network/socket-transport-service;1"])
@@ -1120,16 +1118,6 @@
 
       sis.init(is);
       sos.setOutputStream(os);
-
-      let params = ["Authorization: Basic " + btoa(username + ":" + password)];
-
-      let get = [
-        "GET " + path + " HTTP/1.1",
-        "Host: " + host,
-        params.join("\n"),
-        "",
-        ""
-      ].join("\n");
 
       sos.write(get, get.length);
 
