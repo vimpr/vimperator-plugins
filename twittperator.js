@@ -1232,9 +1232,20 @@
     return str;
   } // }}}
   function showTwitterSearchResult(word) { // {{{
+    // フォーマットが違うの変換
+    function konbuArt(obj) {
+      return {
+        __proto__: obj,
+        user: {
+          __proto__: obj,
+          screen_name: obj.from_user,
+          id: obj.from_id
+        }
+      };
+    }
+
     tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
-      let results = JSON.parse(text);
-      showTL(results);
+      showTL(JSON.parse(text).results.map(konbuArt));
     });
   } // }}}
   function getFollowersStatus(target, force, onload) { // {{{
