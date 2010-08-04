@@ -984,7 +984,7 @@
         };
         xmlhttpRequest(options); // 送信
       },
-      getAuthorizationHeader: function (api) {
+      getAuthorizationHeader: function(api) {
         var message = {
           method: "GET",
           action: api,
@@ -1090,7 +1090,7 @@
     }
 
     function start() {
-      liberator.log('Twittperator: start chirp user stream');
+      liberator.log("Twittperator: start chirp user stream");
 
       stop();
 
@@ -1122,7 +1122,7 @@
       sos.write(get, get.length);
 
       let buf = "";
-      let interval = setInterval(function () {
+      let interval = setInterval(function() {
         try {
           let len = sis.available();
           if (len <= 0)
@@ -1152,8 +1152,8 @@
       };
     }
 
-    function onMsg (msg, raw) {
-      listeners.forEach(function (listener) liberator.trapErrors(function () listener(msg, raw)));
+    function onMsg(msg, raw) {
+      listeners.forEach(function(listener) liberator.trapErrors(function() listener(msg, raw)));
 
       if (msg.text) {
         history.unshift(msg);
@@ -1167,7 +1167,7 @@
     return {
       start: start,
       stop: stop,
-      addListener: function (func) listeners.push(func)
+      addListener: function(func) listeners.push(func)
     };
   })(); // }}}
   function xmlhttpRequest(options) { // {{{
@@ -1325,10 +1325,8 @@
       return liberator.open(links[0], liberator.NEW_TAB);
 
     commandline.input(
-      'Select URL: ',
-      function (arg) {
-        liberator.open(arg, liberator.NEW_TAB);
-      },
+      "Select URL: ",
+      function(arg) liberator.open(arg, liberator.NEW_TAB),
       {
         completer: function(context) {
           context.completions = [[link, link] for ([, link] in Iterator(links))];
@@ -1347,13 +1345,13 @@
 function sourceScriptFile(file) { // {{{
   // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
   function getScriptName(file)
-    file.leafName.replace(/\..*/, "").replace(/-([a-z])/g, function (m, n1) n1.toUpperCase());
+    file.leafName.replace(/\..*/, "").replace(/-([a-z])/g, function(m, n1) n1.toUpperCase());
 
   file = file.clone();
   let toString = file.toString;
   let scriptName = getScriptName(file);
   let script = liberator.plugins[scriptName];
-  file.toString = function () this.path.replace(/\.tw$/, ".js");
+  file.toString = function() this.path.replace(/\.tw$/, ".js");
   try {
     io.source(file, false);
   } finally {
@@ -1380,30 +1378,30 @@ function loadPlugins() { // {{{
 } // }}}
   function setup() { // {{{
     function rt(func)
-      function (status)
+      function(status)
         let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
           func(s);
 
     let ub = unescapeBrakets;
 
     const Completers = {
-      name: function (context, args) {
+      name: function(context, args) {
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name, s]));
       },
-      link: function (context, args) {
+      link: function(context, args) {
         context.completions =
-          history.filter(function (s) /https?:\/\//(s.text)).map(rt(function(s) [ub(s.text), s]));
+          history.filter(function(s) /https?:\/\//(s.text)).map(rt(function(s) [ub(s.text), s]));
       },
-      text: function (context, args) {
+      text: function(context, args) {
         context.completions =
           history.map(rt(function(s) [ub(s.text), s]));
       },
-      name_id: function (context, args) {
+      name_id: function(context, args) {
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
       },
-      name_id_text: function (context, args) {
+      name_id_text: function(context, args) {
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + ub(s.text), s]));
       }
@@ -1411,10 +1409,10 @@ function loadPlugins() { // {{{
 
     const SubCommands = [
       {
-        match: function (s) s.match(/^\+/),
+        match: function(s) s.match(/^\+/),
         command: ["+"],
         description: "Fav a tweet",
-        action: function (args) {
+        action: function(args) {
           let m = args.literalArg.match(/^\+.*#(\d+)/);
           if (m)
             favTwitter(m[1]);
@@ -1422,10 +1420,10 @@ function loadPlugins() { // {{{
         completer: Completers.name_id_text
       },
       {
-        match: function (s) s.match(/^\-/),
+        match: function(s) s.match(/^\-/),
         command: ["-"],
         description: "Unfav a tweet",
-        action: function (args) {
+        action: function(args) {
           let m = args.literalArg.match(/^\-.*#(\d+)/);
           if (m)
             unfavTwitter(m[1]);
@@ -1433,10 +1431,10 @@ function loadPlugins() { // {{{
         completer: Completers.name_id_text
       },
       {
-        match: function (s) s.match(/^@/),
+        match: function(s) s.match(/^@/),
         command: ["@"],
         description: "Show mentions or follower tweets",
-        action: function (args) {
+        action: function(args) {
           if (args.literalArg.match(/^@.+/)) {
             showFollowersStatus(args.literalArg, true);
           } else {
@@ -1446,17 +1444,17 @@ function loadPlugins() { // {{{
         completer: Completers.name
       },
       {
-        match: function (s) s.match(/^\?/),
+        match: function(s) s.match(/^\?/),
         command: ["?"],
         description: "Twitter search",
-        action: function (args) showTwitterSearchResult(args.literalArg),
+        action: function(args) showTwitterSearchResult(args.literalArg),
         completer: Completers.text
       },
       {
-        match: function (s) s.match(/^(open\s|\/)/),
+        match: function(s) s.match(/^(open\s|\/)/),
         command: ["/"],
         description: "Open link",
-        action: function (args) openLink(args.literalArg),
+        action: function(args) openLink(args.literalArg),
         completer: Completers.link
       }
     ];
@@ -1513,7 +1511,7 @@ function loadPlugins() { // {{{
         if (subCmd) {
           context.title = ["Hidden", "Entry"];
           subCmd.completer(context, args);
-          len = m[0] === '@' ? 0 : m[0].length;
+          len = m[0] === "@" ? 0 : m[0].length;
         }
       } else {
         let m;
@@ -1531,7 +1529,7 @@ function loadPlugins() { // {{{
       context.offset += len;
       context.filters = [statusObjectFilter];
       // XXX 本文でも検索できるように、@ はなかったことにする
-      context.filter = context.filter.replace(/^@/, '');
+      context.filter = context.filter.replace(/^@/, "");
 
       context.incomplete = false;
     }
@@ -1540,7 +1538,7 @@ function loadPlugins() { // {{{
       if (!args.bang || context.filter.length > 0)
         return;
       context.title = ["Sub command", "Description"];
-      context.completions = SubCommands.map(function ({command, description}) [command[0], description]);
+      context.completions = SubCommands.map(function({command, description}) [command[0], description]);
     }
 
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
@@ -1565,7 +1563,7 @@ function loadPlugins() { // {{{
         literal: 0,
         hereDoc: true,
         completer: let (getting) function(context, args) {
-          context.fork('File', 0, context, function (context) subCommandCompleter(context, args));
+          context.fork("File", 0, context, function(context) subCommandCompleter(context, args));
 
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
@@ -1582,11 +1580,11 @@ function loadPlugins() { // {{{
               getting = true;
               getFollowersStatus(null, function() {
                 getting = false;
-                context.fork('Twittperator', 0, context, function (context) commandCompelter(context, args));
+                context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
               });
             }
           } else {
-            context.fork('Twittperator', 0, context, function (context) commandCompelter(context, args));
+            context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
           }
         }
       }, true);
@@ -1627,7 +1625,7 @@ function loadPlugins() { // {{{
   accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
   accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
 
-  if (!__context__.hasOwnProperty('__debugVars__'))
+  if (!__context__.hasOwnProperty("__debugVars__"))
     __context__.__debugVars__ = {};
   let debugVars = __context__.__debugVars__;
 
@@ -1636,7 +1634,7 @@ function loadPlugins() { // {{{
     history = __context__.Tweets;
   } else {
     history = __context__.Tweets = accessor.get("history", []);
-    liberator.registerObserver('exit', function () accessor.set("history", history));
+    liberator.registerObserver("exit", function() accessor.set("history", history));
   }
 
   let tw = new TwitterOauth(accessor);
