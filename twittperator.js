@@ -1128,9 +1128,9 @@
         "GET " + path + " HTTP/1.1",
         "Host: " + host,
         params.join("\n"),
+        "",
         ""
       ].join("\n");
-      get += "\n\n";
 
       sos.write(get, get.length);
 
