@@ -590,7 +590,6 @@
             }
         ));
 
-    OAuth.correctTimestamp(new Date());
     // oauth.js 2}}}
     // {{{2 sha1.js
     /*
