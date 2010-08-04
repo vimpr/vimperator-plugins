@@ -1136,21 +1136,25 @@
 
       let buf = "";
       let interval = setInterval(function () {
-        let len = sis.available();
-        if (len <= 0)
-          return;
-        let data = sis.read(len);
-        let lines = data.split(/\n/);
-        if (lines.length > 2) {
-          lines[0] = buf + lines[0];
-          for (let [, line] in Iterator(lines.slice(0, -1))) {
-            try {
-              onMsg(JSON.parse(line), line);
-            } catch (e) {}
+        try {
+          let len = sis.available();
+          if (len <= 0)
+            return;
+          let data = sis.read(len);
+          let lines = data.split(/\n/);
+          if (lines.length > 2) {
+            lines[0] = buf + lines[0];
+            for (let [, line] in Iterator(lines.slice(0, -1))) {
+              try {
+                onMsg(JSON.parse(line), line);
+              } catch (e) {}
+            }
+            buf = lines.slice(-1)[0];
+          } else {
+            buf += data;
           }
-          buf = lines.slice(-1)[0];
-        } else {
-          buf += data;
+        } catch (e) {
+          stop();
         }
       }, 500);
 
