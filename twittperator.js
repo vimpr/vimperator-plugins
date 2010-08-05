@@ -1574,7 +1574,8 @@ function loadPlugins() { // {{{
 
         if (args.bang) {
           let [subCmd] = findSubCommand(arg);
-          subCmd.action(args);
+          if (subCmd)
+            subCmd.action(args);
         } else {
           if (arg.length === 0)
             showFollowersStatus();
