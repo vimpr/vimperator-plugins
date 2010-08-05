@@ -1,3 +1,28 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2010 teramako
+ * Copyright (c) 2010 anekos
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>twittperator</name>
@@ -6,6 +31,9 @@ let PLUGIN_INFO =
   <version>1.0.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
+  <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
+  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <license>MIT License</license>
   <updateURL>http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/twittperator.js</updateURL>
   <detail lang="ja"><![CDATA[
     これはOAuth認証を用いたTwitterクライアントプラグインです。
@@ -66,12 +94,39 @@ let PLUGIN_INFO =
 </VimperatorPlugin>;
 
 (function() {
-  // TwitterOauth for Greasemonkey
+
+  // TwitterOauth for Greasemonkey {{{
+
+  /*
+   * http://efcl.info/2010/0610/res1721/
+   *
+   * The MIT License
+   *
+   * Copyright (c) 2010 azu
+   *
+   * Permission is hereby granted, free of charge, to any person obtaining a copy
+   * of this software and associated documentation files (the "Software"), to deal
+   * in the Software without restriction, including without limitation the rights
+   * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   * copies of the Software, and to permit persons to whom the Software is
+   * furnished to do so, subject to the following conditions:
+   *
+   * The above copyright notice and this permission notice shall be included in
+   * all copies or substantial portions of the Software.
+   *
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   * THE SOFTWARE.
+   */
+
   function TwitterOauth() {
       this.initialize.apply(this, arguments);
   }
 
-  // OAuth {{{
   TwitterOauth.prototype = (function() {
 
     // {{{2 oauth.js
