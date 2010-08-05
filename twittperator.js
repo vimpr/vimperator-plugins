@@ -1157,8 +1157,8 @@
 
       if (msg.text) {
         history.unshift(msg);
-        if (history.length > 1000)
-          history.splice(1000);
+        if (history.length > setting.historyLimit)
+          history.splice(setting.historyLimit);
       }
     }
 
@@ -1625,7 +1625,8 @@ function loadPlugins() { // {{{
     let (gv = liberator.globalVariables) ({
       useChirp: !!gv.twittperator_use_chirp,
       autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
-      statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90)
+      statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
+      historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
     });
 
   let statusRefreshTimer;
