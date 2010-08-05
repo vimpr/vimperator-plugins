@@ -1602,7 +1602,7 @@ function loadPlugins() { // {{{
           if (doGet) {
             if (!getting) {
               getting = true;
-              getFollowersStatus(null, function() {
+              getFollowersStatus(null, true, function() {
                 getting = false;
                 context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
               });
