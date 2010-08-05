@@ -1142,6 +1142,7 @@
           }
         } catch (e) {
           stop();
+          liberator.echoerr('ChirpUserStream was stopped.');
         }
       }, 500);
 
