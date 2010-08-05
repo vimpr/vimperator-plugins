@@ -1133,8 +1133,8 @@
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                onMsg(JSON.parse(line), line);
-              } catch (e) {}
+                onMsg(fixStatusObject(JSON.parse(line)), line);
+              } catch (e) {liberator.log('E =>\n' + line);}
             }
             buf = lines.slice(-1)[0];
           } else {
@@ -1181,9 +1181,18 @@
     }
     xhr.send(null);
   } // }}}
-  function unescapeBrakets(str) // {{{
-    str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-  // }}}
+  function fixStatusObject(st) { // {{{
+    function unescapeBrakets(str)
+      str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+
+    let result = {};
+    for (let [n, v] in Iterator(st)) {
+      result[n] = v && typeof v === 'object' ? fixStatusObject(v) :
+                  n === 'text'               ? unescapeBrakets(v) :
+                  v;
+    }
+    return result;
+  } // }}}
   function showTL(s) { // {{{
     let html = <style type="text/css"><![CDATA[
         .twitter.user { vertical-align: top; }
@@ -1203,7 +1212,7 @@
                 <strong>{rt.user.screen_name}&#x202C;</strong>
                 <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
               </td><td class="twitter entry-content rt">
-                {detectLink(unescapeBrakets(rt.text))}
+                {detectLink(rt.text)}
               </td>
             </tr> :
             <tr>
@@ -1211,7 +1220,7 @@
                 <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
                 <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
               </td><td class="twitter entry-content">
-                {detectLink(unescapeBrakets(status.text))}
+                {detectLink(status.text)}
               </td>
             </tr>
             );
@@ -1246,7 +1255,7 @@
     }
 
     tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
-      showTL(JSON.parse(text).results.map(konbuArt));
+      showTL(JSON.parse(text).results.map(fixStatusObject).map(konbuArt));
     });
   } // }}}
   function getFollowersStatus(target, force, onload) { // {{{
@@ -1276,7 +1285,7 @@
       tw.get(api, query, function(text) {
         setRefresher();
         // TODO 履歴をちゃんと "追記" するようにするようにするべき
-        let result = JSON.parse(text);
+        let result = JSON.parse(text).map(fixStatusObject);
         if (!target)
           history = result;
         onload(result);
@@ -1290,19 +1299,18 @@
   } // }}}
   function showTwitterMentions(arg) { // {{{
     tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
-      showTL(JSON.parse(text));
+      showTL(JSON.parse(text).map(fixStatusObject));
     });
   } // }}}
   function favTwitter(id) { // {{{
     tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
-      liberator.log(text.responseText);
-      let res = JSON.parse(text);
+      let res = fixStatusObject(JSON.parse(text));
       liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
     });
   } // }}}
   function unfavTwitter(id) { // {{{
     tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
-      let res = JSON.parse(text);
+      let res = fixStatusObject(JSON.parse(text));
       liberator.echo("[Twittperator] unfav: " + res.user.name + " " + res.text, true);
     });
   } // }}}
@@ -1321,8 +1329,7 @@
     sendData.status = stat;
     sendData.source = "Twittperator";
     tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
-      let result = JSON.parse(text || "{}");
-      let t = result.text;
+      let t = fixStatusObject(JSON.parse(text || "{}")).text;
       liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
     });
   } // }}}
@@ -1356,8 +1363,7 @@
   function ReTweet(id) { // {{{
     let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
     tw.post(url, null, function(text) {
-      let res = JSON.parse(text);
-      liberator.log(res.toSource(), 0);
+      let res = fixStatusObject(JSON.parse(text));
       liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
     });
   } // }}}
@@ -1401,8 +1407,6 @@ function loadPlugins() { // {{{
         let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
           func(s);
 
-    let ub = unescapeBrakets;
-
     const Completers = {
       name: function(context, args) {
         context.completions =
@@ -1410,11 +1414,11 @@ function loadPlugins() { // {{{
       },
       link: function(context, args) {
         context.completions =
-          history.filter(function(s) /https?:\/\//(s.text)).map(rt(function(s) [ub(s.text), s]));
+          history.filter(function(s) /https?:\/\//(s.text)).map(rt(function(s) [s.text, s]));
       },
       text: function(context, args) {
         context.completions =
-          history.map(rt(function(s) [ub(s.text), s]));
+          history.map(rt(function(s) [s.text, s]));
       },
       name_id: function(context, args) {
         context.completions =
@@ -1422,7 +1426,7 @@ function loadPlugins() { // {{{
       },
       name_id_text: function(context, args) {
         context.completions =
-          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + ub(s.text), s]));
+          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
       }
     };
 
@@ -1513,7 +1517,7 @@ function loadPlugins() { // {{{
           return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
               <li highlight="CompDesc">
                 <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                &#160;{desc.user.screen_name}: {unescapeBrakets(desc.text)}
+                &#160;{desc.user.screen_name}: {desc.text}
               </li>
           </div>;
         }
