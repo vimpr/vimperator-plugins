@@ -1530,7 +1530,7 @@ function loadPlugins() { // {{{
       let len = 0;
 
       if (args.bang) {
-        let [subCmd, m] = findSubCommand(args.literalArg);
+        let [subCmd, m] = findSubCommand(args.literalArg) || [];
         if (subCmd) {
           context.title = ["Hidden", "Entry"];
           subCmd.completer(context, args);
