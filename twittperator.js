@@ -1,31 +1,69 @@
-/*
- * Twittperator
- * Vimperator用Twitterクライアント
- *
- * 最初にPINコードを取得し設定する必要があります。
- * :tw -getPIN
- * 実行すると新規タブに本アプリケーションを許可するかを問うページが開かれます
- * 許可をすると、PINコード(数値)が表示されるのでコピーしてください。
- *
- * :tw -setPIN コピーしたPINコード
- * で初期設定完了です。
- *
- * コマンド
- * :tw[ittperator] ～
- *
- * :tw -getPIN
- * :tw -setPIN {PINcode}
- *   初期設定時のみのコマンド
- *
- * :tw[!]
- *  タイムライン表示。!が付くと強制的に取得
- *  !が付いていない場合はキャッシュから表示（賞味期限が切れている場合は再取得）
- *
- * :tw ～
- *  ポスト
- *
- * @see http://twitter.com/oauth_clients/details/197565
- */
+let PLUGIN_INFO =
+<VimperatorPlugin>
+  <name>twittperator</name>
+  <description>Twitter Client using ChirpStream</description>
+  <description lang="ja">OAuth対応Twitterクライアント</description>
+  <version>1.0.0</version>
+  <minVersion>2.3</minVersion>
+  <maxVersion>2.4</maxVersion>
+  <updateURL>http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/twittperator.js</updateURL>
+  <detail lang="ja"><![CDATA[
+    これはOAuth認証を用いたTwitterクライアントプラグインです。
+    == Command ==
+    - 適当に補完しましょう。
+    :tw[ittperator] -getPIN
+        PINコード取得ページを開きます。
+    :tw[ittperator] -setPIN {PINcode}
+        PINcodeを設定します。
+
+    :tw[ittperator]
+        前回取得したタイムラインを表示します。 (キャッシュが90秒以上古い場合は再取得。)
+    :tw[ittperator]!
+        強制的に取得したタイムラインを表示します。
+    :tw[ittperator]!@user
+        @useridへのmentionを表示します。
+    :tw[ittperator] {TweetText}
+        {TweetText}をポストします。
+    :tw[ittperator] RT @user#id: {refTweet}
+        公式RTになるはずです。
+    :tw[ittperator] {TweetText} RT @user#id: {refTweet}
+        非公式RTになるはずです。
+    :tw[ittperator]!+@user#id
+        tweetをfavoriteします。
+    :tw[ittperator]!-@user#id
+        tweetをunfavoriteします。
+    :tw[ittperator]!?{SearchText}
+        {SearchText}の検索結果を表示します。
+    :tw[ittperator]!/{URI}
+        {URI}を開きます。
+    == Authentication Setting ==
+    最初にPINコードを取得し設定する必要があります。
+    >||
+        :tw -getPIN
+    ||<
+    を実行すると新規タブに本アプリケーションを許可するかを問うページが開かれます。
+    許可をすると、PINコード(数値)が表示されるのでコピーしてください。
+
+    >||
+        :tw -setPIN コピーしたPINコード
+    ||<
+    で初期設定完了です。
+    == FAQ ==
+    - なんて読むんだ
+        知らん。トゥイットゥペレータと自分は勝手に読んでいる
+    - 何のためのクライアント？
+        Vimperatorを使っていて、さくっと呟きたいとき用です（ぉ
+    - TL表示をもっと工夫しろ
+        ごめんなさい。改良してコミットしてくれると嬉しいです。
+    - つーか、TLくらい自動取得しろ
+        はい、がんばります。改良してコミットしてくれると嬉しいです。
+    - ぶっちゃけTL表示とか面倒だよね？
+        はい、がんばります・・・
+        でかい表示領域と行の折り返し方法が確立できれば、もっと頑張れる気がします
+    - Growl GNTP との連携しないの？
+        プラグイン書きましょう。
+  ]]></detail>
+</VimperatorPlugin>;
 
 (function() {
   // TwitterOauth for Greasemonkey
