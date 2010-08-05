@@ -1326,25 +1326,32 @@
       liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
     });
   } // }}}
-  function openLink(text) { // {{{
-    // TODO 複数のリンクに対応
-    let links = [];
-    text.replace(/https?:\/\/\S+/g, function(m) links.push(m));
-    if (links.length <= 0)
+  function selectAndOpenLink(links) { // {{{
+    if (!links || !links.length)
       return;
 
-    if (links.length == 1)
-      return liberator.open(links[0], liberator.NEW_TAB);
+    if (links.length === 1)
+      return liberator.open(links[0][0], liberator.NEW_TAB);
 
     commandline.input(
       "Select URL: ",
       function(arg) liberator.open(arg, liberator.NEW_TAB),
       {
         completer: function(context) {
-          context.completions = [[link, link] for ([, link] in Iterator(links))];
+          context.completions = links;
         }
       }
     );
+  } // }}}
+  function openLink(text) { // {{{
+    let m = text.match(/.*?(https?:\/\/[\S]+)/g);
+    if (!m)
+      return;
+
+    let links =
+      m.map(function (s) s.match(/^(.*?)(https?:\/\/[\S]+)/).slice(1)) .
+        map(function (ss) (ss.reverse(), ss.map(String.trim)))
+    selectAndOpenLink(links);
   } // }}}
   function ReTweet(id) { // {{{
     let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
