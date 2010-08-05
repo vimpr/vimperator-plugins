@@ -1402,12 +1402,12 @@ function loadPlugins() { // {{{
   io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
 } // }}}
   function setup() { // {{{
-    function rt(func)
+    function rt(func) // {{{
       function(status)
         let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
-          func(s);
+          func(s); // }}}
 
-    const Completers = {
+    const Completers = { // {{{
       name: function(context, args) {
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name, s]));
@@ -1428,9 +1428,9 @@ function loadPlugins() { // {{{
         context.completions =
           history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
       }
-    };
+    }; // }}}
 
-    const SubCommands = [
+    const SubCommands = [ // {{{
       {
         match: function(s) s.match(/^\+/),
         command: ["+"],
@@ -1480,17 +1480,17 @@ function loadPlugins() { // {{{
         action: function(args) openLink(args.literalArg),
         completer: Completers.link
       }
-    ];
+    ]; // }}}
 
-    function findSubCommand(s) {
+    function findSubCommand(s) { // {{{
       for (let [, cmd] in Iterator(SubCommands)) {
         let m = cmd.match(s);
         if (m)
           return [cmd, m];
       }
-    }
+    } // }}}
 
-    function tailMatch(re, str) {
+    function tailMatch(re, str) { // {{{
       let result, m;
       let head = 0;
       let len = 0;
@@ -1503,9 +1503,9 @@ function loadPlugins() { // {{{
       if (result)
         result.index += head;
       return result;
-    }
+    } // }}}
 
-    function commandCompelter(context, args) {
+    function commandCompelter(context, args) { // {{{
       function statusObjectFilter(item)
         let (desc = item.description)
           (this.match(desc.user.screen_name) || this.match(desc.text));
@@ -1555,16 +1555,16 @@ function loadPlugins() { // {{{
       context.filter = context.filter.replace(/^@/, "");
 
       context.incomplete = false;
-    }
+    } // }}}
 
-    function subCommandCompleter(context, args) {
+    function subCommandCompleter(context, args) { // {{{
       if (!args.bang || context.filter.length > 0)
         return;
       context.title = ["Sub command", "Description"];
       context.completions = SubCommands.map(function({command, description}) [command[0], description]);
-    }
+    } // }}}
 
-    commands.addUserCommand(["tw[ittperator]"], "Twittperator command",
+    commands.addUserCommand(["tw[ittperator]"], "Twittperator command", // {{{
       function(args) {
         let bang = args.bang;
         let arg = args.literalArg;
@@ -1611,7 +1611,7 @@ function loadPlugins() { // {{{
             context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
           }
         }
-      }, true);
+      }, true); // }}}
   } // }}}
   // PIN code を取得して AccessToken を得る前 {{{
   function preSetup() {
