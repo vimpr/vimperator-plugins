@@ -1076,17 +1076,17 @@
       let (m = s.match(/https?:\/\/[\S]+/))
         (m && m[0]);
 
-    function stop() {
-      let prev = debugVars.prev;
+    let connectionInfo;
 
-      if (!prev)
+    function stop() {
+      if (!connectionInfo)
         return;
 
-      clearInterval(prev.interval);
-      prev.sos.close();
-      prev.sis.close();
+      clearInterval(connectionInfo.interval);
+      connectionInfo.sos.close();
+      connectionInfo.sis.close();
 
-      delete debugVars.prev;
+      connectionInfo = void 0;
     }
 
     function start() {
@@ -1146,7 +1146,7 @@
         }
       }, 500);
 
-      debugVars.prev = {
+      connectionInfo = {
         sos: sos,
         sis: sis,
         interval: interval,
@@ -1650,16 +1650,11 @@ function loadPlugins() { // {{{
   accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
   accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
 
-  if (!__context__.hasOwnProperty("__debugVars__"))
-    __context__.__debugVars__ = {};
-  let debugVars = __context__.__debugVars__;
-
   let history;
   if (__context__.Tweets) {
     history = __context__.Tweets;
   } else {
     history = __context__.Tweets = accessor.get("history", []);
-    liberator.registerObserver("exit", function() accessor.set("history", history));
   }
 
   let tw = new TwitterOauth(accessor);
@@ -1671,6 +1666,11 @@ function loadPlugins() { // {{{
 
   if (setting.useChirp)
     ChirpUserStream.start();
+
+  __context__.onUnload = function () {
+    accessor.set("history", history);
+    ChirpUserStream.stop();
+  };
   // }}}
 
 })();
