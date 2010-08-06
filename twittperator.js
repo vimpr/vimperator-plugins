@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1287,6 +1287,9 @@ let PLUGIN_INFO =
     return result;
   } // }}}
   function showTL(s) { // {{{
+    function userURL(name)
+      ("https://twitter.com/" + name);
+
     let html = <style type="text/css"><![CDATA[
         .twitter.user { vertical-align: top; }
         .twitter.entry-content { white-space: normal !important; }
@@ -1301,17 +1304,23 @@ let PLUGIN_INFO =
             let (rt = status.retweeted_status)
             <tr>
               <td class="twitter user">
-                <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
-                <strong>{rt.user.screen_name}&#x202C;</strong>
-                <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                <a href={userURL(rt.user.screen_name)}>
+                  <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
+                  <strong>{rt.user.screen_name}&#x202C;</strong>
+                </a>
+                <a href={userURL(status.user.screen_name)}>
+                  <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                </a>
               </td><td class="twitter entry-content rt">
                 {detectLink(rt.text)}
               </td>
             </tr> :
             <tr>
               <td class="twitter user">
-                <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-                <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
+                <a href={userURL(status.user.screen_name)}>
+                  <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                  <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
+                </a>
               </td><td class="twitter entry-content">
                 {detectLink(status.text)}
               </td>
