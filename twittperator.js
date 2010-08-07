@@ -1169,10 +1169,28 @@ let PLUGIN_INFO =
         (m && m[0]);
 
     let connectionInfo;
+    let restartCount = 0;
+    let startTime;
+
+    function restart() {
+      stop();
+
+      if (restartCount > 13)
+        return liberator.echoerr('Twittperator: Gave up to connect to ChirpUserStream...');
+
+      liberator.echoerr('Twittperator: ChirpUserStream will be restared...');
+
+      // 試行済み回数^2 秒後にリトライ
+      setTimeout(start, Math.pow(2, restartCount) * 1000);
+
+      restartCount++;
+    }
 
     function stop() {
       if (!connectionInfo)
         return;
+
+      liberator.log("Twittperator: stop chirp user stream");
 
       clearInterval(connectionInfo.interval);
       connectionInfo.sos.close();
@@ -1185,6 +1203,8 @@ let PLUGIN_INFO =
       liberator.log("Twittperator: start chirp user stream");
 
       stop();
+
+      startTime = new Date();
 
       let host = "chirpstream.twitter.com";
       let path = "/2b/user.json";
@@ -1219,6 +1239,12 @@ let PLUGIN_INFO =
           let len = sis.available();
           if (len <= 0)
             return;
+
+          // 5分間接続されていたら、カウントをクリア
+          // 何かの事情で即切断されてしまうときに、高頻度でアクセスしないための処置です。
+          if (restartCount && (new Date().getTime() - startTime.getTime()) > (5 * 60 * 1000))
+            restartCount = 0;
+
           let data = sis.read(len);
           let lines = data.split(/\n/);
           if (lines.length > 2) {
@@ -1226,15 +1252,18 @@ let PLUGIN_INFO =
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
                 onMsg(fixStatusObject(JSON.parse(line)), line);
-              } catch (e) {liberator.log('E =>\n' + line);}
+              } catch (e) {}
             }
             buf = lines.slice(-1)[0];
           } else {
             buf += data;
           }
+        } catch (e if /NS_ERROR_NET_RESET|NS_BASE_STREAM_CLOSED/(e)) {
+          restart();
+          liberator.echoerr('Twittperator: ChirpStream was stopped by ' + e.name + '.');
         } catch (e) {
-          stop();
-          liberator.echoerr('ChirpUserStream was stopped.');
+          restart();
+          liberator.echoerr('Twittperator: Unknown error on ChirpStream connection: ' + e.name);
         }
       }, 500);
 
