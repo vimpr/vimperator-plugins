@@ -1259,11 +1259,11 @@ let PLUGIN_INFO =
             buf += data;
           }
         } catch (e if /NS_ERROR_NET_RESET|NS_BASE_STREAM_CLOSED/(e)) {
-          restart();
           liberator.echoerr('Twittperator: ChirpStream was stopped by ' + e.name + '.');
-        } catch (e) {
           restart();
+        } catch (e) {
           liberator.echoerr('Twittperator: Unknown error on ChirpStream connection: ' + e.name);
+          restart();
         }
       }, 500);
 
