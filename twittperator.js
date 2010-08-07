@@ -1163,7 +1163,6 @@ let PLUGIN_INFO =
 
   // Twittperator
   // ChirpUserStream // {{{
-  // XXX if (0) の部分は認証に対するテストコード
   let ChirpUserStream = (function() {
     function extractURL(s)
       let (m = s.match(/https?:\/\/[\S]+/))
