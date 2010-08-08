@@ -1314,8 +1314,8 @@ let PLUGIN_INFO =
     return result;
   } // }}}
   function showTL(s) { // {{{
-    function userURL(name)
-      ("http" + (setting.showTLWithHTTPURL ? "" : "s") + "://twitter.com/" + name);
+    function userURL(screen_name)
+      (setting.showTLURLScheme + "://twitter.com/" + screen_name);
 
     let html = <style type="text/css"><![CDATA[
         .twitter.user { vertical-align: top; }
@@ -1778,7 +1778,7 @@ function loadPlugins() { // {{{
       autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
       statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
       historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
-      showTLWithHTTPURL: gv.twittperator_show_tl_with_http_url,
+      showTLURLScheme: let (v = gv.twittperator_show_tl_with_https_url) ("http" + (v === false ? "" : "s")),
     });
 
   let statusRefreshTimer;
@@ -1789,10 +1789,8 @@ function loadPlugins() { // {{{
   accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
   accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
 
-  let history;
-  if (__context__.Tweets) {
-    history = __context__.Tweets;
-  } else {
+  let history = __context__.Tweets;
+  if (!history)
     history = __context__.Tweets = accessor.get("history", []);
   }
 
