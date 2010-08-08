@@ -1511,7 +1511,7 @@ function sourceScriptFile(file) { // {{{
   try {
     io.source(file, false);
   } finally {
-    liberator.plugins[scriptName] = script;
+    liberator.plugins[scriptName] = liberator.plugins.contexts[file.path];
     file.toString = toString;
   }
 } // }}}
