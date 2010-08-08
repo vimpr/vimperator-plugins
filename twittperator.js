@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1323,7 +1323,7 @@ let PLUGIN_INFO =
         .twitter.entry-content { white-space: normal !important; }
         .twitter.entry-content a { text-decoration: none; }
         .twitter.entry-content.rt:before { content: "RT "; color: silver; }
-        img.twitter.photo { border; 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
+        img.twitter.photo { border: 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
     ]]></style>.toSource()
                .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
         s.reduce(function(table, status) {
