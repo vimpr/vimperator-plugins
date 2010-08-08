@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.8</version>
+  <version>1.0.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -78,7 +78,7 @@ let PLUGIN_INFO =
     で初期設定完了です。
     == FAQ ==
     - なんて読むんだ
-        知らん。トゥイットゥペレータと自分は勝手に読んでいる
+        知らん。トゥイットゥペレータと自分は勝手に読んでいる。
     - 何のためのクライアント？
         Vimperatorを使っていて、さくっと呟きたいとき用です（ぉ
     - TL表示をもっと工夫しろ
@@ -87,7 +87,7 @@ let PLUGIN_INFO =
         はい、がんばります。改良してコミットしてくれると嬉しいです。
     - ぶっちゃけTL表示とか面倒だよね？
         はい、がんばります・・・
-        でかい表示領域と行の折り返し方法が確立できれば、もっと頑張れる気がします
+        でかい表示領域と行の折り返し方法が確立できれば、もっと頑張れる気がします。
     - Growl GNTP との連携しないの？
         プラグイン書きましょう。
   ]]></detail>
@@ -296,14 +296,13 @@ let PLUGIN_INFO =
         }
     ,
         getParameter: function getParameter(parameters, name) {
-            if (parameters instanceof Array) {
-                for (var p = 0; p < parameters.length; ++p) {
-                    if (parameters[p][0] == name) {
-                        return parameters[p][1]; // first value wins
-                    }
-                }
-            } else {
+            if (!parameters instanceof Array) {
                 return OAuth.getParameterMap(parameters)[name];
+            }
+            for (var p = 0; p < parameters.length; ++p) {
+                if (parameters[p][0] == name) {
+                    return parameters[p][1]; // first value wins
+                }
             }
             return null;
         }
@@ -910,9 +909,8 @@ let PLUGIN_INFO =
         if (accessor.consumerKey && accessor.consumerSecret &&
             accessor.token && accessor.tokenSecret) {
           return true;
-        }else{
-          return false;
         }
+        return false;
       },
       getAccessor: function() {
         return {
@@ -1121,11 +1119,11 @@ let PLUGIN_INFO =
               }
             }
             return tmp.join(arg_separator);
-          } else if (typeof val !== "function") {
-            return self.urlEncode(key) + "=" + self.urlEncode(val);
-          } else {
-            throw new Error("There was an error processing for http_build_query().");
           }
+          if (typeof val !== "function") {
+            return self.urlEncode(key) + "=" + self.urlEncode(val);
+          }
+          throw new Error("There was an error processing for http_build_query().");
         }
 
         if (!arg_separator) {
@@ -1148,7 +1146,7 @@ let PLUGIN_INFO =
         if (typeof str == "undefined") return par;
         if (str.indexOf("?", 0) > -1) str = str.split("?")[1];
         str = str.split("&");
-        for (var i = 0; str.length > i; i++){
+        for (var i = 0; str.length > i; i++) {
           itm = str[i].split("=");
           if (itm[0] != "") {
             par[itm[0]] = typeof itm[1] == "undefined" ? true : dec(itm[1]);
@@ -1165,7 +1163,7 @@ let PLUGIN_INFO =
   // ChirpUserStream // {{{
   let ChirpUserStream = (function() {
     function extractURL(s)
-      let (m = s.match(/https?:\/\/[\S]+/))
+      let (m = s.match(/https?:\/\/\S+/))
         (m && m[0]);
 
     let connectionInfo;
@@ -1246,7 +1244,7 @@ let PLUGIN_INFO =
             restartCount = 0;
 
           let data = sis.read(len);
-          let lines = data.split(/\n/);
+          let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length > 2) {
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
@@ -1258,7 +1256,7 @@ let PLUGIN_INFO =
           } else {
             buf += data;
           }
-        } catch (e if /NS_ERROR_NET_RESET|NS_BASE_STREAM_CLOSED/(e)) {
+        } catch (e if /^(?:NS_ERROR_NET_RESET|NS_BASE_STREAM_CLOSED)$/(e)) {
           liberator.echoerr('Twittperator: ChirpStream was stopped by ' + e.name + '.');
           restart();
         } catch (e) {
@@ -1290,7 +1288,7 @@ let PLUGIN_INFO =
       start: start,
       stop: stop,
       addListener: function(func) listeners.push(func),
-      removeListener: function(func) (listeners = listeners.filter(function (l) (l != func)))
+      removeListener: function(func) (listeners = listeners.filter(function(l) (l != func)))
     };
   })(); // }}}
   function xmlhttpRequest(options) { // {{{
@@ -1317,7 +1315,7 @@ let PLUGIN_INFO =
   } // }}}
   function showTL(s) { // {{{
     function userURL(name)
-      ("https://twitter.com/" + name);
+      ("http" + (setting.showTLWithHTTPURL ? "" : "s") + "://twitter.com/" + name);
 
     let html = <style type="text/css"><![CDATA[
         .twitter.user { vertical-align: top; }
@@ -1362,7 +1360,7 @@ let PLUGIN_INFO =
     //liberator.log(html);
     liberator.echo(html, true);
   } // }}}
-  function detectLink (str) { // {{{
+  function detectLink(str) { // {{{
     let m = str.match(/https?:\/\/\S+/);
     if (m) {
       let left = str.substr(0, m.index);
@@ -1390,7 +1388,7 @@ let PLUGIN_INFO =
     });
   } // }}}
   function getFollowersStatus(target, force, onload) { // {{{
-    function setRefresher(){
+    function setRefresher() {
       expiredStatus = false;
       if (statusRefreshTimer)
         clearTimeout(statusRefreshTimer);
@@ -1482,13 +1480,13 @@ let PLUGIN_INFO =
     );
   } // }}}
   function openLink(text) { // {{{
-    let m = text.match(/.*?(https?:\/\/[\S]+)/g);
+    let m = text.match(/.*?(https?:\/\/\S+)/g);
     if (!m)
       return;
 
     let links =
-      m.map(function (s) s.match(/^(.*?)(https?:\/\/[\S]+)/).slice(1)) .
-        map(function (ss) (ss.reverse(), ss.map(String.trim)))
+      m.map(function(s) s.match(/^(.*?)(https?:\/\/\S+)/).slice(1)) .
+        map(function(ss) (ss.reverse(), ss.map(String.trim)))
     selectAndOpenLink(links);
   } // }}}
   function ReTweet(id) { // {{{
@@ -1564,10 +1562,10 @@ function loadPlugins() { // {{{
         get expr() {
           return RegExp(
             '^' +
-            this.command.map(function (c)
+            this.command.map(function(c)
               let (r = util.escapeRegex(c))
-                (/^[\W]$/(c) ? r : r + ' ')
-            ).join(/|/)
+                (/^\W$/(c) ? r : r + ' ')
+            ).join("|" /* /|/ */)
           );
         },
         match: function(s) s.match(this.expr),
@@ -1680,7 +1678,7 @@ function loadPlugins() { // {{{
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
           Completers.name_id_text(context, args);
-        } else if (m = tailMatch(/(^|[\b\s])@[^@]*/, args.literalArg)) {
+        } else if (m = tailMatch(/(?:^|\b|\s)@[^@]*/, args.literalArg)) {
           (m.index === 0 ? Completers.name_id : Completers.name)(context, args);
         }
 
@@ -1732,7 +1730,7 @@ function loadPlugins() { // {{{
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
           let matches = args.bang ? args.literalArg.match(/^(\s*[-+?])/)
-                                  : args.literalArg.match(/(RT\s|)@/);
+                                  : args.literalArg.match(/(RT\s+|)@/);
           if (!args.bang && !matches)
             return;
 
@@ -1780,6 +1778,7 @@ function loadPlugins() { // {{{
       autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
       statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
       historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
+      showTLWithHTTPURL: gv.twittperator_show_tl_with_http_url,
     });
 
   let statusRefreshTimer;
@@ -1807,7 +1806,7 @@ function loadPlugins() { // {{{
   if (setting.useChirp)
     ChirpUserStream.start();
 
-  __context__.onUnload = function () {
+  __context__.onUnload = function() {
     accessor.set("history", history);
     ChirpUserStream.stop();
   };
