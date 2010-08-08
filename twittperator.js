@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1558,56 +1558,68 @@ function loadPlugins() { // {{{
       }
     }; // }}}
 
+    const SubCommand = function(init) {
+      return {
+        __proto__: init,
+        get expr() {
+          return RegExp(
+            '^' +
+            this.command.map(function (c)
+              let (r = util.escapeRegex(c))
+                (/^[\W]$/(c) ? r : r + ' ')
+            ).join(/|/)
+          );
+        },
+        match: function(s) s.match(this.expr),
+        action: function(args) init.action(args.literalArg.replace(this.expr, '').trim())
+      };
+    };
+
     const SubCommands = [ // {{{
-      {
-        match: function(s) s.match(/^\+/),
+      SubCommand({
         command: ["+"],
         description: "Fav a tweet",
-        action: function(args) {
-          let m = args.literalArg.match(/^\+.*#(\d+)/);
+        action: function(arg) {
+          let m = arg.match(/^.*#(\d+)/);
           if (m)
             favTwitter(m[1]);
         },
         completer: Completers.name_id_text
-      },
-      {
-        match: function(s) s.match(/^\-/),
+      }),
+      SubCommand({
         command: ["-"],
         description: "Unfav a tweet",
-        action: function(args) {
-          let m = args.literalArg.match(/^\-.*#(\d+)/);
+        action: function(arg) {
+          let m = arg.match(/^.*#(\d+)/);
           if (m)
             unfavTwitter(m[1]);
         },
         completer: Completers.name_id_text
-      },
-      {
-        match: function(s) s.match(/^@/),
+      }),
+      SubCommand({
         command: ["@"],
         description: "Show mentions or follower tweets",
-        action: function(args) {
-          if (args.literalArg.match(/^@.+/)) {
-            showFollowersStatus(args.literalArg, true);
+        action: function(arg) {
+          if (arg.match(/^.+/)) {
+            showFollowersStatus(arg, true);
           } else {
             showTwitterMentions();
           }
         },
         completer: Completers.name
-      },
-      {
-        match: function(s) s.match(/^\?/),
+      }),
+      SubCommand({
         command: ["?"],
         description: "Twitter search",
-        action: function(args) showTwitterSearchResult(args.literalArg),
+        action: function(arg) showTwitterSearchResult(arg),
         completer: Completers.text
-      },
-      {
-        match: function(s) s.match(/^(open\s|\/)/),
+      }),
+      SubCommand({
         command: ["/"],
         description: "Open link",
-        action: function(args) openLink(args.literalArg),
+        action: function(arg) openLink(arg),
         completer: Completers.link
-      }
+      })
     ]; // }}}
 
     function findSubCommand(s) { // {{{
@@ -1701,7 +1713,7 @@ function loadPlugins() { // {{{
           return showFollowersStatus(null, args.bang);
 
         if (args.bang) {
-          let [subCmd] = findSubCommand(arg);
+          let [subCmd] = findSubCommand(arg) || [];
           if (subCmd)
             subCmd.action(args);
         } else {
