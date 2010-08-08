@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1500,18 +1500,15 @@ let PLUGIN_INFO =
   } // }}}
 function sourceScriptFile(file) { // {{{
   // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
-  function getScriptName(file)
-    file.leafName.replace(/\..*/, "").replace(/-([a-z])/g, function(m, n1) n1.toUpperCase());
-
   file = file.clone();
   let toString = file.toString;
-  let scriptName = getScriptName(file);
-  let script = liberator.plugins[scriptName];
+  let script = liberator.plugins.contexts[file.path];
   file.toString = function() this.path.replace(/\.tw$/, ".js");
   try {
     io.source(file, false);
   } finally {
-    liberator.plugins[scriptName] = liberator.plugins.contexts[file.path];
+    if (script)
+      liberator.plugins[script.NAME] = script;
     file.toString = toString;
   }
 } // }}}
