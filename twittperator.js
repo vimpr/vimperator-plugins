@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.9</version>
+  <version>1.0.10</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1678,7 +1678,7 @@ function loadPlugins() { // {{{
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
           Completers.name_id_text(context, args);
-        } else if (m = tailMatch(/(?:^|\b|\s)@[^@]*/, args.literalArg)) {
+        } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, args.literalArg)) {
           (m.index === 0 ? Completers.name_id : Completers.name)(context, args);
         }
 
