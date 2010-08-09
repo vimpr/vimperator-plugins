@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.8.0.0.0.0.0.0.0.0.0.0.0.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1</version>
+  <version>1.0.9</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1540,7 +1540,7 @@ function loadPlugins() { // {{{
       },
       link: function(context, args) {
         context.completions =
-          history.filter(function(s) /https?:\/\//(s.text)).map(rt(function(s) [s.text, s]));
+          history.map(rt(function(s) [s.text, s])).filter(function([t]) /https?:\/\//(t));
       },
       text: function(context, args) {
         context.completions =
