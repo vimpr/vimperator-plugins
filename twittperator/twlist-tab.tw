@@ -1,0 +1,224 @@
+/*
+ほぼ、マウス前提なので、Vimperatorらしからぬプラグインですが...
+
+== Settings ==
+
+g:twittperator_plugin_twlist = 1
+  $RUNTIMEDIR/plugin/twittperator に入れている場合は設定してください。
+
+g:twlist_screen_name = "<your screen name>"
+  あなたのScreenName、返信された時ににMentionsタブにも入ります
+
+== ScreenShot ==
+http://gyazo.com/6832f5a0e615e8d1242ecedb8f9e0812.png
+
+== Options ==
+
+set [no]showtwlist[!]
+  show twittperator timeline
+  :noremap {lhs} :set showtwlist!<CR> しておくと便利かも！
+
+ */
+let ID_TIMELINE = "twlist-timeline",
+    ID_MENTION =  "twlist-mentions",
+    ID_ROOT =     "twlist-box",
+    ID_SPLITTER = "twlist-splitter";
+let rows = 6;
+let timelineBox = null, mentionsBox = null, root = null, screenName = null, screenNameReg = null;
+let contextPath = 'liberator.plugins.contexts["'+PATH.replace("\\","\\\\","g")+'"]';
+let baseXML = <>
+<splitter id="twlist-splitter" collapse="after" substate="after" resizeafter="closest" xmlns={XUL}>
+  <grippy/>
+</splitter>
+<hbox id="twlist-box" flex="1" xmlns={XUL}>
+  <tabbox id="twlist-tabbox" flex="1">
+    <tabs>
+      <tab label="TimeLine"/>
+      <tab label="Mentions"/>
+    </tabs>
+    <tabpanels flex="1">
+      <tabpanel flex="1">
+        <richlistbox id={ID_TIMELINE} rows={rows} flex="1"/>
+      </tabpanel>
+      <tabpanel flex="1">
+        <richlistbox id={ID_MENTION} rows={rows} flex="1"/>
+      </tabpanel>
+    </tabpanels>
+  </tabbox>
+</hbox>
+</>;
+
+function setStyleSheet() {
+  highlight.loadCSS(<><![CDATA[
+    TwlistBox,#twlist-box,chrome://browser/content/browser.xul  max-height: 260px;
+    TwlistItemContent,.twlist-item-content,chrome://browser/content/browser.xul {
+      -moz-user-select: -moz-all; border-bottom: solid thin silver;
+    }
+    TwlistItemContent[selected],.twlist-item-content[selected=true],chrome://browser/content/browser.xul {
+      background-color: #EEE !important;
+      color: -moz-fieldtext !important;
+    }
+    TwlistItemRT,.twlist-item-rt,chrome://browser/content/browser.xul
+    TwlistRTMark,.twlist-rt-mark,chrome://browser/content/browser.xul { 
+      color: white; font-weight: bold; background-color: gray;
+      padding: 2px 5px; margin: 0;
+      -moz-border-radius: 4px;
+    }
+    TwlistText,.twlist-text,chrome://browser/content/browser.xul
+    TwlistTextLabel,.twlist-text>label,chrome://browser/content/browser.xul   margin: 1px 2px 2px 2px !important;
+    TwlistMetaInfo,.twlist-metainfo,chrome://browser/content/browser.xul
+    TwlistScreenName,.twlist-screenname,chrome://browser/content/browser.xul  font-weight: bold;
+    TwlistLink,.twlist-link,chrome://browser/content/browser.xul              color: -moz-hyperlinktext;
+    TwlistLink:hover,.twlist-link:hover,chrome://browser/content/browser.xul  cursor: pointer !important;
+    TwlistLinkHash,.twlist-hash,chrome://browser/content/browser.xul          color: DarkGreen !important;
+    TwlistLinkUser,.twlist-user,chrome://browser/content/browser.xul
+    TwlistLinkURL,.twlist-url,chrome://browser/content/browser.xul
+  ]]></>.toString());  
+}
+
+function add (msg, target) {
+  if (!target)
+    target = timelineBox;
+  let isRT = ("retweeted_status" in msg);
+  let text = formatText(isRT ? msg.retweeted_status.text : msg.text);
+  let xml = isRT ?
+  <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content twlist-item-rt">
+    <vbox>
+      <image src={msg.retweeted_status.user.profile_image_url} width="32" height="32"/>
+      <spacer flex="1"/>
+    </vbox>
+    <spacer width="2"/>
+    <vbox flex="1">
+      <hbox>
+        <label value={"\u21BB"} class="twlist-rt-mark"/>
+        <label class="twlist-screenname">{msg.retweeted_status.user.screen_name}</label>
+        <hbox class="twlist-metainfo">
+          <label>{"(" + msg.retweeted_status.user.name + ")"}</label>
+          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+          <label>{"ReTweeted by " + msg.user.screen_name}</label>
+        </hbox>
+      </hbox>
+      {text}
+    </vbox>
+  </richlistitem> :
+  <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content">
+    <vbox>
+      <image src={msg.user.profile_image_url} width="32" height="32"/>
+      <spacer flex="1"/>
+    </vbox>
+    <spacer width="2"/>
+    <vbox flex="1">
+      <hbox>
+        <label class="twlist-screenname">{msg.user.screen_name}</label>
+        <hbox class="twlist-metainfo">
+          <label>{"(" + msg.user.name + ")"}</label>
+          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+        </hbox>
+      </hbox>
+      {text}
+    </vbox>
+  </richlistitem>;
+  let dom = xmlToDom(xml, XUL);
+  target.insertBefore(dom, target.firstChild);
+  if (target.getRowCount() > 50) {
+    target.removeChild(target.lastChild);
+  }
+}
+
+function onLoad () {
+  screenName = liberator.globalVariables.twlist_screen_name || "";
+  if (screenName)
+    screenNameReg = new RegExp("@" + screenName + "\\b");
+
+  setStyleSheet();
+
+  let (app  = document.getElementById("appcontent")) {
+    app.appendChild(xmlToDom(baseXML));
+  }
+  root = document.getElementById(ID_ROOT);
+  timelineBox = document.getElementById(ID_TIMELINE);
+  mentionsBox = document.getElementById(ID_MENTION);
+  splitter = document.getElementById(ID_SPLITTER);
+
+  plugins.twittperator.ChirpUserStream.addListener(streamListener);
+
+  options.add(["showtwlist"], "expand/collapse twittperator list",
+    "boolean", true, {
+      setter: function (value) {
+        document.getElementById(ID_SPLITTER)
+                .setAttribute("state", value ? "open" : "collapsed");
+        return value;
+      },
+      getter: function() document.getElementById(ID_SPLITTER).getAttribute("state") != "collapsed"
+    });
+}
+
+function onUnload () {
+  let elm = document.getElementById(ID_ROOT);
+  if (elm)
+    elm.parentNode.removeChild(elm);
+  plugins.twittperator.ChirpUserStream.removeListener(streamListener);
+  styles.removeSheet(false, "twlist");
+}
+
+function xmlToDom(xml, xmlns) {
+  XML.prettyPrinting = false;
+  var doc = (new DOMParser).parseFromString(
+    '<root xmlns="' + xmlns + '">' + xml.toXMLString() + "</root>",
+    "application/xml");
+  var imported = document.importNode(doc.documentElement, true);
+  var range = document.createRange();
+  range.selectNodeContents(imported);
+  var fragment = range.extractContents();
+  range.detach();
+  return fragment.childNodes.length > 1 ? fragment : fragment.firstChild; 
+}
+
+function streamListener(msg, raw) {
+  if (msg.text && msg.user) {
+    add(msg, timelineBox);
+    if (msg.in_reply_to_status_id == screenName ||
+        (screenNameReg && screenNameReg.test(msg.text))){
+      add(msg, mentionsBox);
+    }
+  }
+}
+function formatText (str) {
+  str = str.trim();
+  let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
+  let m, i = 0, buf = "", x = <description class="twlist-text" xmlns={XUL}/>;
+  while((m=reg.exec(str))){
+    buf = str.substring(i, m.index).trim();
+    if (buf)
+      x.appendChild(<label>{buf}</label>);
+    let class = "twlist-link", href = "";
+    switch (m[0].charAt(0)){
+      case "@":
+        class += " twlist-user";
+        href = "http://twitter.com/" + m[0].substr(1);
+        break;
+      case "#":
+        class += " twlist-hash";
+        href = "http://twitter.com/search?q=%23" + m[0].substr(1);
+        break;
+      default:
+        class += " twlist-url";
+        href = m[0];
+    }
+    x.appendChild(<label class={class} href={href}
+                         onclick={contextPath + ".onClick(event)"}>{m[0]}</label>);
+    i=reg.lastIndex;
+  }
+  buf = str.substr(i).trim();
+  if (buf)
+    x.appendChild(<label>{buf}</label>);
+  return x;
+}
+function onClick (evt) {
+  let where = (evt.ctrlKey || evt.button == 1) ? liberator.NEW_TAB : liberator.CURRENT_TAB;
+  let url = evt.target.getAttribute("href");
+  liberator.open(url, {where: where});
+}
+onLoad();
+
+// vim: sw=2 ts=2 et filetype=javascript:
