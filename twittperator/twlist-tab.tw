@@ -64,7 +64,7 @@ function setStyleSheet() {
       padding: 2px 5px; margin: 0;
       -moz-border-radius: 4px;
     }
-    TwlistText,.twlist-text,chrome://browser/content/browser.xul
+    TwlistText,.twlist-text,chrome://browser/content/browser.xul              margin: 2px 1em;
     TwlistTextLabel,.twlist-text>label,chrome://browser/content/browser.xul   margin: 1px 2px 2px 2px !important;
     TwlistMetaInfo,.twlist-metainfo,chrome://browser/content/browser.xul
     TwlistScreenName,.twlist-screenname,chrome://browser/content/browser.xul  font-weight: bold;
@@ -80,15 +80,15 @@ function add (msg, target) {
   if (!target)
     target = timelineBox;
   let isRT = ("retweeted_status" in msg);
-  let text = formatText(isRT ? msg.retweeted_status.text : msg.text);
+  let domContent = formatText(isRT ? msg.retweeted_status.text : msg.text);
+  XML.ignoreWhitespace = true;
   let xml = isRT ?
   <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content twlist-item-rt">
     <vbox>
       <image src={msg.retweeted_status.user.profile_image_url} width="32" height="32"/>
       <spacer flex="1"/>
     </vbox>
-    <spacer width="2"/>
-    <vbox flex="1">
+    <vbox flex="1" class="twlist-content">
       <hbox>
         <label value={"\u21BB"} class="twlist-rt-mark"/>
         <label class="twlist-screenname">{msg.retweeted_status.user.screen_name}</label>
@@ -98,16 +98,14 @@ function add (msg, target) {
           <label>{"ReTweeted by " + msg.user.screen_name}</label>
         </hbox>
       </hbox>
-      {text}
     </vbox>
   </richlistitem> :
-  <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content">
+  <richlistitem value={msg.id} searchlabel={msg.user.screen_name+"#"+msg.id} xmlns={XUL} class="twlist-item-content">
     <vbox>
       <image src={msg.user.profile_image_url} width="32" height="32"/>
       <spacer flex="1"/>
     </vbox>
-    <spacer width="2"/>
-    <vbox flex="1">
+    <vbox flex="1" class="twlist-content">
       <hbox>
         <label class="twlist-screenname">{msg.user.screen_name}</label>
         <hbox class="twlist-metainfo">
@@ -115,10 +113,10 @@ function add (msg, target) {
           <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
         </hbox>
       </hbox>
-      {text}
     </vbox>
   </richlistitem>;
   let dom = xmlToDom(xml, XUL);
+  dom.querySelector(".twlist-content").appendChild(domContent);
   target.insertBefore(dom, target.firstChild);
   if (target.getRowCount() > 50) {
     target.removeChild(target.lastChild);
@@ -145,8 +143,8 @@ function onLoad () {
   options.add(["showtwlist"], "expand/collapse twittperator list",
     "boolean", true, {
       setter: function (value) {
-        document.getElementById(ID_SPLITTER)
-                .setAttribute("state", value ? "open" : "collapsed");
+        let elm = document.getElementById(ID_SPLITTER);
+        elm.setAttribute("state", value ? "open" : "collapsed");
         return value;
       },
       getter: function() document.getElementById(ID_SPLITTER).getAttribute("state") != "collapsed"
@@ -186,11 +184,12 @@ function streamListener(msg, raw) {
 function formatText (str) {
   str = str.trim();
   let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
-  let m, i = 0, buf = "", x = <description class="twlist-text" xmlns={XUL}/>;
+  XML.ignoreWhitespace = false;
+  let m, i = 0, buf = "", x = <xhtml:p class="twlist-text" xmlns:xhtml={XHTML}/>;
   while((m=reg.exec(str))){
-    buf = str.substring(i, m.index).trim();
+    buf = str.substring(i, m.index);
     if (buf)
-      x.appendChild(<label>{buf}</label>);
+      x.appendChild(buf);
     let class = "twlist-link", href = "";
     switch (m[0].charAt(0)){
       case "@":
@@ -205,14 +204,14 @@ function formatText (str) {
         class += " twlist-url";
         href = m[0];
     }
-    x.appendChild(<label class={class} href={href}
-                         onclick={contextPath + ".onClick(event)"}>{m[0]}</label>);
+    x.appendChild(<xhtml:a class={class} href={href}
+                         onclick={contextPath + ".onClick(event)"} xmlns:xhtml={XHTML}>{m[0]}</xhtml:a>);
     i=reg.lastIndex;
   }
-  buf = str.substr(i).trim();
+  buf = str.substr(i);
   if (buf)
-    x.appendChild(<label>{buf}</label>);
-  return x;
+    x.appendChild(buf);
+  return xmlToDom(x, "http://www.w3.org/1999/xhtml");
 }
 function onClick (evt) {
   evt.preventDefault();
