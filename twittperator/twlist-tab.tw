@@ -30,7 +30,7 @@ let baseXML = <>
 <splitter id="twlist-splitter" collapse="after" substate="after" resizeafter="closest" xmlns={XUL}>
   <grippy/>
 </splitter>
-<hbox id="twlist-box" flex="1" xmlns={XUL}>
+<hbox id="twlist-box" flex="1" contextmenu="contentAreaContextMenu" xmlns={XUL}>
   <tabbox id="twlist-tabbox" flex="1">
     <tabs>
       <tab label="TimeLine"/>
@@ -214,6 +214,8 @@ function formatText (str) {
   return xmlToDom(x, "http://www.w3.org/1999/xhtml");
 }
 function onClick (evt) {
+  if (evt.button == 2)
+    return;
   evt.preventDefault();
   evt.stopPropagation();
   let where = (evt.ctrlKey || evt.button == 1) ? liberator.NEW_TAB : liberator.CURRENT_TAB;
