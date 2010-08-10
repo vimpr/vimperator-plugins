@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1804,7 +1804,7 @@ function loadPlugins() { // {{{
 
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
-  __context__.loadPlugins = loadPlugins();
+  __context__.loadPlugins = loadPlugins;
 
   loadPlugins();
 
