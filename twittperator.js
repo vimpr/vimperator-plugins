@@ -963,7 +963,7 @@ let PLUGIN_INFO =
             }
           },
         };
-        xmlhttpRequest(options);
+        Util.xmlhttpRequest(options);
 
       },
       setPin: function(pin) {
@@ -1010,7 +1010,7 @@ let PLUGIN_INFO =
           },
         };
 
-        xmlhttpRequest(options); // 送信
+        Util.xmlhttpRequest(options); // 送信
       },
       // api+?+query にアクセスした結果をcallbackに渡す
       get: function(api, query, callback) {
@@ -1040,7 +1040,7 @@ let PLUGIN_INFO =
             }
           },
         };
-        xmlhttpRequest(options); // 送信
+        Util.xmlhttpRequest(options); // 送信
       },
       post: function(api, content, callback) {
         var message = {
@@ -1073,7 +1073,7 @@ let PLUGIN_INFO =
             }
           }
         };
-        xmlhttpRequest(options); // 送信
+        Util.xmlhttpRequest(options); // 送信
       },
       getAuthorizationHeader: function(api) {
         var message = {
@@ -1160,8 +1160,7 @@ let PLUGIN_INFO =
   // }}}
 
   // Twittperator
-  // ChirpUserStream // {{{
-  let ChirpUserStream = (function() {
+  let ChirpUserStream = (function() { // {{{
     function extractURL(s)
       let (m = s.match(/https?:\/\/\S+/))
         (m && m[0]);
@@ -1249,8 +1248,9 @@ let PLUGIN_INFO =
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                onMsg(fixStatusObject(JSON.parse(line)), line);
-              } catch (e) {}
+                liberator.log(line);
+                onMsg(Util.fixStatusObject(JSON.parse(line)), line);
+              } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
           } else {
@@ -1296,244 +1296,251 @@ let PLUGIN_INFO =
       clearPluginData: clearPluginData
     };
   })(); // }}}
-  function xmlhttpRequest(options) { // {{{
-    let xhr = new XMLHttpRequest();
-    xhr.open(options.method, options.url, true);
-    if (typeof options.onload == "function") {
-      xhr.onload = function() {
-        options.onload(xhr);
+  let Twitter = { // {{{
+    favorite: function (id) { // {{{
+      tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
+        let res = Util.fixStatusObject(JSON.parse(text));
+        liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
+      });
+    }, // }}}
+    getFollowersStatus: function (target, force, onload) { // {{{
+      function setRefresher() {
+        expiredStatus = false;
+        if (statusRefreshTimer)
+          clearTimeout(statusRefreshTimer);
+        statusRefreshTimer = setTimeout(function() expiredStatus = true, setting.statusValidDuration * 1000);
       }
-    }
-    xhr.send(null);
-  } // }}}
-  function fixStatusObject(st) { // {{{
-    function unescapeBrakets(str)
-      str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
-    let result = {};
-    for (let [n, v] in Iterator(st)) {
-      result[n] = v && typeof v === 'object' ? fixStatusObject(v) :
-                  n === 'text'               ? unescapeBrakets(v) :
-                  v;
-    }
-    return result;
-  } // }}}
-  function showTL(s) { // {{{
-    function userURL(screen_name)
-      (setting.showTLURLScheme + "://twitter.com/" + screen_name);
-
-    let html = <style type="text/css"><![CDATA[
-        .twitter.user { vertical-align: top; }
-        .twitter.entry-content { white-space: normal !important; }
-        .twitter.entry-content a { text-decoration: none; }
-        .twitter.entry-content.rt:before { content: "RT "; color: silver; }
-        img.twitter.photo { border: 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
-    ]]></style>.toSource()
-               .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
-        s.reduce(function(table, status) {
-          return table.appendChild(
-            ("retweeted_status" in status) ?
-            let (rt = status.retweeted_status)
-            <tr>
-              <td class="twitter user">
-                <a href={userURL(rt.user.screen_name)}>
-                  <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
-                  <strong>{rt.user.screen_name}&#x202C;</strong>
-                </a>
-                <a href={userURL(status.user.screen_name)}>
-                  <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-                </a>
-              </td><td class="twitter entry-content rt">
-                {detectLink(rt.text)}
-              </td>
-            </tr> :
-            <tr>
-              <td class="twitter user">
-                <a href={userURL(status.user.screen_name)}>
-                  <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
-                  <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
-                </a>
-              </td><td class="twitter entry-content">
-                {detectLink(status.text)}
-              </td>
-            </tr>
-            );
-
-        }, <table/>)
-          .toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
-
-    //liberator.log(html);
-    liberator.echo(html, true);
-  } // }}}
-  function detectLink(str) { // {{{
-    let m = str.match(/https?:\/\/\S+/);
-    if (m) {
-      let left = str.substr(0, m.index);
-      let url = m[0];
-      let right = str.substring(m.index + m[0].length);
-      return <>{detectLink(left)}<a highlight="URL" href={url}> {url} </a>{detectLink(right)}</>;
-    }
-    return str;
-  } // }}}
-  function showTwitterSearchResult(word) { // {{{
-    // フォーマットが違うの変換
-    function konbuArt(obj) {
-      return {
-        __proto__: obj,
-        user: {
-          __proto__: obj,
-          screen_name: obj.from_user,
-          id: obj.from_id
-        }
-      };
-    }
-
-    tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
-      showTL(JSON.parse(text).results.map(fixStatusObject).map(konbuArt));
-    });
-  } // }}}
-  function getFollowersStatus(target, force, onload) { // {{{
-    function setRefresher() {
-      expiredStatus = false;
-      if (statusRefreshTimer)
-        clearTimeout(statusRefreshTimer);
-      statusRefreshTimer = setTimeout(function() expiredStatus = true, setting.statusValidDuration * 1000);
-    }
-
-    if (!force && !expiredStatus && history.length > 0) {
-      onload(history);
-    } else {
-      let api = "http://api.twitter.com/1/statuses/home_timeline.json", query = {};
-
-      if (target) {
-        api = "http://api.twitter.com/1/statuses/user_timeline.json";
-        query.screen_name = target;
+      if (!force && !expiredStatus && history.length > 0) {
+        onload(history);
       } else {
-        query = null;
-        if (setting.useChirp) {
-          onload(history);
+        let api = "http://api.twitter.com/1/statuses/home_timeline.json", query = {};
+
+        if (target) {
+          api = "http://api.twitter.com/1/statuses/user_timeline.json";
+          query.screen_name = target;
+        } else {
+          query = null;
+          if (setting.useChirp) {
+            onload(history);
+            return;
+          }
+        }
+
+        tw.get(api, query, function(text) {
+          setRefresher();
+          // TODO 履歴をちゃんと "追記" するようにするようにするべき
+          let result = JSON.parse(text).map(Util.fixStatusObject);
+          if (!target)
+            history = result;
+          onload(result);
+        });
+      }
+    }, // }}}
+    say: function (stat) { // {{{
+      let sendData = {};
+      if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
+        let [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
+        if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
+          Twitter.reTweet(replyID);
           return;
         }
+        stat = prefix + "@" + replyUser + postfix;
+        if (replyID && !prefix)
+          sendData.in_reply_to_status_id = replyID;
       }
-
-      tw.get(api, query, function(text) {
-        setRefresher();
-        // TODO 履歴をちゃんと "追記" するようにするようにするべき
-        let result = JSON.parse(text).map(fixStatusObject);
-        if (!target)
-          history = result;
-        onload(result);
+      sendData.status = stat;
+      sendData.source = "Twittperator";
+      tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
+        let t = Util.fixStatusObject(JSON.parse(text || "{}")).text;
+        liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
       });
-    }
-  } // }}}
-  function showFollowersStatus(arg, force) { // {{{
-    getFollowersStatus(arg, force, function(statuses) {
-      showTL(statuses);
-    });
-  } // }}}
-  function showTwitterMentions(arg) { // {{{
-    tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
-      showTL(JSON.parse(text).map(fixStatusObject));
-    });
-  } // }}}
-  function favTwitter(id) { // {{{
-    tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
-      let res = fixStatusObject(JSON.parse(text));
-      liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
-    });
-  } // }}}
-  function unfavTwitter(id) { // {{{
-    tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
-      let res = fixStatusObject(JSON.parse(text));
-      liberator.echo("[Twittperator] unfav: " + res.user.name + " " + res.text, true);
-    });
-  } // }}}
-  function sayTwitter(stat) { // {{{
-    let sendData = {};
-    if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
-      let [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
-      if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
-        ReTweet(replyID);
-        return;
+    }, // }}}
+    reTweet: function (id) { // {{{
+      let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
+      tw.post(url, null, function(text) {
+        let res = Util.fixStatusObject(JSON.parse(text));
+        liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
+      });
+    }, // }}}
+    unfavorite: function (id) { // {{{
+      tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
+        let res = Util.fixStatusObject(JSON.parse(text));
+        liberator.echo("[Twittperator] unfav: " + res.user.name + " " + res.text, true);
+      });
+    }, // }}}
+  }; // }}}
+  let Util = { // {{{
+    anchorLink: function (str) { // {{{
+      let m = str.match(/https?:\/\/\S+/);
+      if (m) {
+        let left = str.substr(0, m.index);
+        let url = m[0];
+        let right = str.substring(m.index + m[0].length);
+        return <>{Util.anchorLink(left)}<a highlight="URL" href={url}> {url} </a>{Util.anchorLink(right)}</>;
       }
-      stat = prefix + "@" + replyUser + postfix;
-      if (replyID && !prefix)
-        sendData.in_reply_to_status_id = replyID;
-    }
-    sendData.status = stat;
-    sendData.source = "Twittperator";
-    tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
-      let t = fixStatusObject(JSON.parse(text || "{}")).text;
-      liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
-    });
-  } // }}}
-  function selectAndOpenLink(links) { // {{{
-    if (!links || !links.length)
-      return;
+      return str;
+    }, // }}}
+    fixStatusObject: function (st) { // {{{
+      function unescapeBrakets(str)
+        str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
-    if (links.length === 1)
-      return liberator.open(links[0][0], liberator.NEW_TAB);
-
-    commandline.input(
-      "Select URL: ",
-      function(arg) liberator.open(arg, liberator.NEW_TAB),
-      {
-        completer: function(context) {
-          context.completions = links;
+      let result = {};
+      for (let [n, v] in Iterator(st)) {
+        result[n] = v && typeof v === 'object' ? Util.fixStatusObject(v) :
+                    n === 'text'               ? unescapeBrakets(v) :
+                    v;
+      }
+      return result;
+    }, // }}}
+    xmlhttpRequest: function (options) { // {{{
+      let xhr = new XMLHttpRequest();
+      xhr.open(options.method, options.url, true);
+      if (typeof options.onload == "function") {
+        xhr.onload = function() {
+          options.onload(xhr);
         }
       }
-    );
-  } // }}}
-  function openLink(text) { // {{{
-    let m = text.match(/.*?(https?:\/\/\S+)/g);
-    if (!m)
-      return;
+      xhr.send(null);
+    }, // }}}
+  }; // }}}
+  let Twittperator = { // {{{
+    loadPlugins: function () { // {{{
+      function isEnabled(file)
+        let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
+          liberator.globalVariables["twittperator_plugin_" + name];
 
-    let links =
-      m.map(function(s) s.match(/^(.*?)(https?:\/\/\S+)/).slice(1)) .
-        map(function(ss) (ss.reverse(), ss.map(String.trim)))
-    selectAndOpenLink(links);
-  } // }}}
-  function ReTweet(id) { // {{{
-    let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
-    tw.post(url, null, function(text) {
-      let res = fixStatusObject(JSON.parse(text));
-      liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
-    });
-  } // }}}
-function sourceScriptFile(file) { // {{{
-  // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
-  file = file.clone();
-  let toString = file.toString;
-  let script = liberator.plugins.contexts[file.path];
-  file.toString = function() this.path.replace(/\.tw$/, ".js");
-  try {
-    io.source(file, false);
-  } finally {
-    if (script)
-      liberator.plugins[script.NAME] = script;
-    file.toString = toString;
-  }
-} // }}}
-function loadPlugins() { // {{{
-  function isEnabled(file)
-    let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
-      liberator.globalVariables["twittperator_plugin_" + name];
+      function loadPluginFromDir(checkGV) {
+        return function(dir) {
+          dir.readDirectory().forEach(function(file) {
+            if (/\.tw$/(file.path) && (!checkGV || isEnabled(file)))
+              Twittperator.sourceScriptFile(file);
+          });
+        }
+      }
 
-  function loadPluginFromDir(checkGV) {
-    return function(dir) {
-      dir.readDirectory().forEach(function(file) {
-        if (/\.tw$/(file.path) && (!checkGV || isEnabled(file)))
-          sourceScriptFile(file);
+      ChirpUserStream.clearPluginData();
+
+      io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
+      io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
+    }, // }}}
+    openLink: function (text) { // {{{
+      let m = text.match(/.*?(https?:\/\/\S+)/g);
+      if (!m)
+        return;
+
+      let links =
+        m.map(function(s) s.match(/^(.*?)(https?:\/\/\S+)/).slice(1)) .
+          map(function(ss) (ss.reverse(), ss.map(String.trim)))
+      Twittperator.selectAndOpenLink(links);
+    }, // }}}
+    selectAndOpenLink: function (links) { // {{{
+      if (!links || !links.length)
+        return;
+
+      if (links.length === 1)
+        return liberator.open(links[0][0], liberator.NEW_TAB);
+
+      commandline.input(
+        "Select URL: ",
+        function(arg) liberator.open(arg, liberator.NEW_TAB),
+        {
+          completer: function(context) {
+            context.completions = links;
+          }
+        }
+      );
+    }, // }}}
+    showFollowersStatus: function (arg, force) { // {{{
+      Twitter.getFollowersStatus(arg, force, function(statuses) {
+        Twittperator.showTL(statuses);
       });
-    }
-  }
+    }, // }}}
+    showTL: function (s) { // {{{
+      function userURL(screen_name)
+        (setting.showTLURLScheme + "://twitter.com/" + screen_name);
 
-  ChirpUserStream.clearPluginData();
+      let html = <style type="text/css"><![CDATA[
+          .twitter.user { vertical-align: top; }
+          .twitter.entry-content { white-space: normal !important; }
+          .twitter.entry-content a { text-decoration: none; }
+          .twitter.entry-content.rt:before { content: "RT "; color: silver; }
+          img.twitter.photo { border: 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
+      ]]></style>.toSource()
+                 .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
+          s.reduce(function(table, status) {
+            return table.appendChild(
+              ("retweeted_status" in status) ?
+              let (rt = status.retweeted_status)
+              <tr>
+                <td class="twitter user">
+                  <a href={userURL(rt.user.screen_name)}>
+                    <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
+                    <strong>{rt.user.screen_name}&#x202C;</strong>
+                  </a>
+                  <a href={userURL(status.user.screen_name)}>
+                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                  </a>
+                </td><td class="twitter entry-content rt">
+                  {Util.anchorLink(rt.text)}
+                </td>
+              </tr> :
+              <tr>
+                <td class="twitter user">
+                  <a href={userURL(status.user.screen_name)}>
+                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                    <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
+                  </a>
+                </td><td class="twitter entry-content">
+                  {Util.anchorLink(status.text)}
+                </td>
+              </tr>
+              );
 
-  io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
-  io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
-} // }}}
+          }, <table/>)
+            .toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
+
+      //liberator.log(html);
+      liberator.echo(html, true);
+    }, // }}}
+    showTwitterMentions: function (arg) { // {{{
+      tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
+        Twittperator.showTL(JSON.parse(text).map(Util.fixStatusObject));
+      });
+    }, // }}}
+    showTwitterSearchResult: function (word) { // {{{
+      // フォーマットが違うの変換
+      function konbuArt(obj) {
+        return {
+          __proto__: obj,
+          user: {
+            __proto__: obj,
+            screen_name: obj.from_user,
+            id: obj.from_id
+          }
+        };
+      }
+
+      tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
+        Twittperator.showTL(JSON.parse(text).results.map(Util.fixStatusObject).map(konbuArt));
+      });
+    }, // }}}
+    sourceScriptFile: function (file) { // {{{
+      // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
+      file = file.clone();
+      let toString = file.toString;
+      let script = liberator.plugins.contexts[file.path];
+      file.toString = function() this.path.replace(/\.tw$/, ".js");
+      try {
+        io.source(file, false);
+      } finally {
+        if (script)
+          liberator.plugins[script.NAME] = script;
+        file.toString = toString;
+      }
+    }, // }}}
+  }; // }}}
+
   function setup() { // {{{
     function rt(func) // {{{
       function(status)
@@ -1587,7 +1594,7 @@ function loadPlugins() { // {{{
         action: function(arg) {
           let m = arg.match(/^.*#(\d+)/);
           if (m)
-            favTwitter(m[1]);
+            Twitter.favorite(m[1]);
         },
         completer: Completers.name_id_text
       }),
@@ -1597,7 +1604,7 @@ function loadPlugins() { // {{{
         action: function(arg) {
           let m = arg.match(/^.*#(\d+)/);
           if (m)
-            unfavTwitter(m[1]);
+            Twitter.unfavorite(m[1]);
         },
         completer: Completers.name_id_text
       }),
@@ -1608,7 +1615,7 @@ function loadPlugins() { // {{{
           if (arg.match(/^.+/)) {
             showFollowersStatus(arg, true);
           } else {
-            showTwitterMentions();
+            Twittperator.showTwitterMentions();
           }
         },
         completer: Completers.name
@@ -1616,13 +1623,13 @@ function loadPlugins() { // {{{
       SubCommand({
         command: ["?"],
         description: "Twitter search",
-        action: function(arg) showTwitterSearchResult(arg),
+        action: function(arg) Twittperator.showTwitterSearchResult(arg),
         completer: Completers.text
       }),
       SubCommand({
         command: ["/"],
         description: "Open link",
-        action: function(arg) openLink(arg),
+        action: function(arg) Twittperator.openLink(arg),
         completer: Completers.link
       })
     ]; // }}}
@@ -1725,7 +1732,7 @@ function loadPlugins() { // {{{
           if (arg.length === 0)
             showFollowersStatus();
           else
-            sayTwitter(arg);
+            Twitter.say(arg);
         }
       }, {
         bang: true,
@@ -1747,7 +1754,7 @@ function loadPlugins() { // {{{
           if (doGet) {
             if (!getting) {
               getting = true;
-              getFollowersStatus(null, true, function() {
+              Twitter.getFollowersStatus(null, true, function() {
                 getting = false;
                 context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
               });
@@ -1802,11 +1809,12 @@ function loadPlugins() { // {{{
 
   let tw = new TwitterOauth(accessor);
 
+  // 公開オブジェクト
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
-  __context__.loadPlugins = loadPlugins;
+  __context__.Twittperator = Twittperator;
 
-  loadPlugins();
+  Twittperator.loadPlugins();
 
   if (setting.useChirp)
     ChirpUserStream.start();
