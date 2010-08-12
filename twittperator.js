@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.0.12</version>
+  <version>1.1.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1203,13 +1203,18 @@ let PLUGIN_INFO =
 
       startTime = new Date();
 
+      let useProxy = !!setting.proxyHost;
       let host = "chirpstream.twitter.com";
       let path = "/2b/user.json";
+      let authHeader = tw.getAuthorizationHeader("http://" + host + path);
+
+      if (useProxy)
+        path = "http://" + host + path;
 
       let get = [
-        "GET " + path + " HTTP/1.1",
+        "GET " + path + " HTTP/1.0",
         "Host: " + host,
-        "Authorization: " + tw.getAuthorizationHeader("http://" + host + path),
+        "Authorization: " + authHeader,
         "",
         ""
       ].join("\n");
@@ -1219,7 +1224,12 @@ let PLUGIN_INFO =
           let (svc = stsvc.getService())
             svc.QueryInterface(Ci["nsISocketTransportService"]);
 
-      let transport = socketService.createTransport(null, 0, host, 80, null);
+      let transport =
+        socketService.createTransport(
+          null, 0,
+          useProxy ? setting.proxyHost : host,
+          useProxy ? parseInt(setting.proxyPort || '3128', 10) : 80,
+          null);
       let os = transport.openOutputStream(0, 0, 0);
       let is = transport.openInputStream(0, 0, 0);
       let sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
@@ -1244,12 +1254,12 @@ let PLUGIN_INFO =
 
           let data = sis.read(len);
           let lines = data.split(/\r\n|[\r\n]/);
-          if (lines.length > 2) {
+          if (lines.length >= 2) {
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                liberator.log(line);
-                onMsg(Util.fixStatusObject(JSON.parse(line)), line);
+                if (/^\s*\{/(line))
+                  onMsg(Util.fixStatusObject(JSON.parse(line)), line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
@@ -1613,7 +1623,7 @@ let PLUGIN_INFO =
         description: "Show mentions or follower tweets",
         action: function(arg) {
           if (arg.match(/^.+/)) {
-            showFollowersStatus(arg, true);
+            Twittperator.showFollowersStatus(arg, true);
           } else {
             Twittperator.showTwitterMentions();
           }
@@ -1722,7 +1732,7 @@ let PLUGIN_INFO =
         let arg = args.literalArg;
 
         if (!arg)
-          return showFollowersStatus(null, args.bang);
+          return Twittperator.showFollowersStatus(null, args.bang);
 
         if (args.bang) {
           let [subCmd] = findSubCommand(arg) || [];
@@ -1730,7 +1740,7 @@ let PLUGIN_INFO =
             subCmd.action(args);
         } else {
           if (arg.length === 0)
-            showFollowersStatus();
+            Twittperator.showFollowersStatus();
           else
             Twitter.say(arg);
         }
@@ -1793,6 +1803,8 @@ let PLUGIN_INFO =
       statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
       historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
       showTLURLScheme: let (v = gv.twittperator_show_tl_with_https_url) ("http" + (v === false ? "" : "s")),
+      proxyHost: gv.twittperator_proxy_host,
+      proxyPort: gv.twittperator_proxy_port,
     });
 
   let statusRefreshTimer;
