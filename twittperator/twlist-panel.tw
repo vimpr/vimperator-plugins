@@ -1,0 +1,363 @@
+/*
+ほぼ、マウス前提なので、Vimperatorらしからぬプラグインですが...
+
+== Settings ==
+
+g:twittperator_plugin_twlist = 1
+  $RUNTIMEDIR/plugin/twittperator に入れている場合は設定してください。
+
+g:twlist_screen_name = "<your screen name>"
+  あなたのScreenName、返信された時ににMentionsタブにも入ります
+
+g:twlist_auto_poup = {0 | 1}
+  ツイートがあったときに自動でポップアップするか
+
+g:twlist_popup_time = second
+  自動ポップアップ時から閉じるまでの秒数
+
+== Options ==
+
+set [no]showtwlist[!]
+  ポップアップを永続的にするかどうか
+
+ */
+let ID_PANEL    = "twlist-panel",
+    ID_TIMELINE = "twlist-timeline",
+    ID_MENTION =  "twlist-mentions",
+    ID_ROOT =     "twlist-box",
+    ID_SPLITTER = "twlist-splitter";
+let rows = 6;
+let timelineBox = null, mentionsBox = null, root = null, panel = null;
+    screenName = null, screenNameReg = null, autoPopup = true, popupTime = 20;
+let contextPath = 'liberator.plugins.contexts["'+PATH.replace("\\","\\\\","g")+'"]';
+let baseXML =
+<panel id="twlist-panel" noautofocus="true" noautohide="true"
+       width="500"
+       style="background: transparent; border: none;"
+       xmlns={XUL}>
+<vbox id="twlist-box" flex="1"
+      contextmenu="contentAreaContextMenu">
+  <tabbox id="twlist-tabbox" flex="1">
+    <tabs id="twlist-tabs">
+      <tab label="TimeLine"/>
+      <tab label="Mentions"/>
+    </tabs>
+    <tabpanels id="twlist-panels" flex="1" style="background: transparent;">
+      <tabpanel flex="1">
+        <richlistbox id={ID_TIMELINE} rows={rows} contextmenu="contentAreaContextMenu"
+                     flex="1" onselect={contextPath + ".onSelect(event)"}/>
+      </tabpanel>
+      <tabpanel flex="1">
+        <richlistbox id={ID_MENTION} rows={rows} flex="1"/>
+      </tabpanel>
+    </tabpanels>
+  </tabbox>
+</vbox>
+</panel>;
+
+function setStyleSheet() {
+  highlight.loadCSS(<><![CDATA[
+    TwlistPanel,#twlist-panel,chrome://browser/content/browser.xul {
+      -moz-border-radius: 10px;
+    }
+    TwlistBox,#twlist-box,chrome://browser/content/browser.xul  max-width: 400px; max-height: 500px;
+    TwlistTabs,#twlist-tabs,chrome://browser/content/browser.xul {
+      background-color: transparent;
+    }
+    TwlistTabbox,#twlist-tabbox,chrome://browser/content/browser.xul
+    TwlistTab,#twlist-tabs>tab,chrome://browser/content/browser.xul {
+      text-shadow: rgba(240,240,240,0.8) 3px 3px 2px;
+      background-color: rgba(224,2224,224,0.8) !important;
+      padding: 2px 5px;
+      margin: 0 2px;
+    }
+    TwlistTab[selected],#twlist-tabs>tab[selected=true]         border-bottom: 2px solid rgba(240,128,128,0.8);
+    TwlistPanels,#twlist-panels,chrome://browser/content/browser.xul {
+      background-color: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    TwlistItemContent,.twlist-item-content,chrome://browser/content/browser.xul {
+      -moz-user-select: -moz-all; border-bottom: solid thin silver;
+      background-color: rgba(240,240,240,0.3);
+    }
+    TwlistItemContent[selected],.twlist-item-content[selected=true],chrome://browser/content/browser.xul {
+      background-color: #EEE !important;
+      color: -moz-fieldtext !important;
+    }
+    TwlistItemRT,.twlist-item-rt,chrome://browser/content/browser.xul
+    TwlistRTMark,.twlist-rt-mark,chrome://browser/content/browser.xul { 
+      color: white; font-weight: bold; background-color: gray;
+      padding: 2px 5px; margin: 0;
+      -moz-border-radius: 4px;
+    }
+    TwlistProfileImage,.twlist-profile-iimage,chrome://browser/content/browser.xul
+    TwlistContent,.twlist-content,chrome://browser/content/browser.xul {
+      background-color: rgba(240,240,240,0.9);
+    }
+    TwlistText,.twlist-text,chrome://browser/content/browser.xul              margin: 2px 1em;
+    TwlistTextLabel,.twlist-text>label,chrome://browser/content/browser.xul   margin: 1px 2px 2px 2px !important;
+    TwlistMetaInfo,.twlist-metainfo,chrome://browser/content/browser.xul
+    TwlistScreenName,.twlist-screenname,chrome://browser/content/browser.xul  font-weight: bold;
+    TwlistLink,.twlist-link,chrome://browser/content/browser.xul              color: -moz-hyperlinktext;
+    TwlistLink:hover,.twlist-link:hover,chrome://browser/content/browser.xul  cursor: pointer !important;
+    TwlistLinkHash,.twlist-hash,chrome://browser/content/browser.xul          color: DarkGreen !important;
+    TwlistLinkUser,.twlist-user,chrome://browser/content/browser.xul
+    TwlistLinkURL,.twlist-url,chrome://browser/content/browser.xul
+    TwlistImage,.twlist-image,chrome://browser/content/browser.xul            max-height: 300px; border:thin solid 
+  ]]></>.toString());  
+  styles.addSheet(true, "twlist-styles", "chrome://browser/content/browser.xul",
+  <><![CDATA[
+    #twlist-tabs > spacer { border: none !important; }
+    #twlist-tabs > tab {
+      -moz-appearance: none !important;
+      border: none !important;
+    }
+    #twlist-panels richlistbox {
+      -moz-appearance: none !important;
+      background-color: transparent !important;
+    }
+  ]]></>.toString());
+}
+
+function add (msg, target) {
+  if (!target)
+    target = timelineBox;
+  let isRT = ("retweeted_status" in msg);
+  let domContent = formatText(isRT ? msg.retweeted_status.text : msg.text);
+  XML.ignoreWhitespace = true;
+  let xml = isRT ?
+  <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content twlist-item-rt">
+    <vbox class="twlist-profile-image">
+      <image src={msg.retweeted_status.user.profile_image_url} width="32" height="32"/>
+      <spacer flex="1"/>
+    </vbox>
+    <vbox flex="1" class="twlist-content">
+      <hbox>
+        <label value={"\u21BB"} class="twlist-rt-mark"/>
+        <label class="twlist-screenname">{msg.retweeted_status.user.screen_name}</label>
+        <hbox class="twlist-metainfo">
+          <label>{"(" + msg.retweeted_status.user.name + ")"}</label>
+          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+          <label>{"By " + msg.user.screen_name}</label>
+        </hbox>
+      </hbox>
+    </vbox>
+  </richlistitem> :
+  <richlistitem value={msg.id} searchlabel={msg.user.screen_name+"#"+msg.id} xmlns={XUL} class="twlist-item-content">
+    <vbox class="twlist-profile-image">
+      <image src={msg.user.profile_image_url} width="32" height="32"/>
+      <spacer flex="1"/>
+    </vbox>
+    <vbox flex="1" class="twlist-content">
+      <hbox>
+        <label class="twlist-screenname">{msg.user.screen_name}</label>
+        <hbox class="twlist-metainfo">
+          <label>{"(" + msg.user.name + ")"}</label>
+          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+        </hbox>
+      </hbox>
+    </vbox>
+  </richlistitem>;
+  let dom = xmlToDom(xml, XUL);
+  dom.querySelector(".twlist-content").appendChild(domContent);
+  target.insertBefore(dom, target.firstChild);
+  if (target.getRowCount() > 50) {
+    target.removeChild(target.lastChild);
+  }
+  if (autoPopup)
+    popup(true);
+}
+
+function onLoad () {
+  let gv = liberator.globalVariables;
+  screenName = gv.twlist_screen_name || "";
+  autoPopup  = gv.twlist_auto_poup ? !!gv.twlist_auto_popup :  true;
+  popupTime = gv.twlist_popup_time || 20;
+
+  if (screenName)
+    screenNameReg = new RegExp("@" + screenName + "\\b");
+
+  setStyleSheet();
+
+  let (app  = document.getElementById("liberator-visualbell")) {
+    app.parentNode.appendChild(xmlToDom(baseXML));
+  }
+  panel = document.getElementById(ID_PANEL);
+  root = document.getElementById(ID_ROOT);
+  timelineBox = document.getElementById(ID_TIMELINE);
+  mentionsBox = document.getElementById(ID_MENTION);
+  splitter = document.getElementById(ID_SPLITTER);
+
+  plugins.twittperator.ChirpUserStream.addListener(streamListener);
+
+  options.add(["showtwpanel"], "popup/hide twittperator panel",
+    "boolean", false, {
+      setter: function (value) {
+        if (value) 
+          popup();
+        else
+          panel.hidePopup();
+        return value;
+      },
+    });
+}
+
+let t = null;
+function popup(autoHide) {
+  if (panel.state != "open") {
+    panel.openPopup(document.getElementById("browser-bottombox"), "after_end", 0, 0, false, true);
+  }
+  if (t) {
+    clearTimeout(t);
+    t = null;
+  }
+  if (autoHide && !options["showtwpanel"])
+    t = setTimeout(function() panel.hidePopup(), popupTime * 1000);
+}
+function onUnload () {
+  let elm = document.getElementById(ID_PANEL);
+  if (elm)
+    elm.parentNode.removeChild(elm);
+  plugins.twittperator.ChirpUserStream.removeListener(streamListener);
+}
+
+function xmlToDom(xml, xmlns) {
+  XML.prettyPrinting = false;
+  var doc = (new DOMParser).parseFromString(
+    '<root xmlns="' + xmlns + '">' + xml.toXMLString() + "</root>",
+    "application/xml");
+  var imported = document.importNode(doc.documentElement, true);
+  var range = document.createRange();
+  range.selectNodeContents(imported);
+  var fragment = range.extractContents();
+  range.detach();
+  return fragment.childNodes.length > 1 ? fragment : fragment.firstChild; 
+}
+
+function streamListener(msg, raw) {
+  if (msg.text && msg.user) {
+    add(msg, timelineBox);
+    if (msg.in_reply_to_status_id == screenName ||
+        (screenNameReg && screenNameReg.test(msg.text))){
+      add(msg, mentionsBox);
+    }
+  }
+}
+function formatText (str) {
+  str = str.trim();
+  let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
+  XML.ignoreWhitespace = false;
+  let m, i = 0, buf = "", x = <xhtml:p class="twlist-text" xmlns:xhtml={XHTML}/>;
+  while((m=reg.exec(str))){
+    buf = str.substring(i, m.index);
+    if (buf)
+      x.appendChild(buf);
+    let class = "twlist-link", href = "";
+    switch (m[0].charAt(0)){
+      case "@":
+        class += " twlist-user";
+        href = "http://twitter.com/" + m[0].substr(1);
+        break;
+      case "#":
+        class += " twlist-hash";
+        href = "http://twitter.com/search?q=%23" + m[0].substr(1);
+        break;
+      default:
+        class += " twlist-url";
+        href = m[0];
+    }
+    x.appendChild(<xhtml:a class={class} href={href}
+                         onclick={contextPath + ".onClick(event)"} xmlns:xhtml={XHTML}>{m[0]}</xhtml:a>);
+    i=reg.lastIndex;
+  }
+  buf = str.substr(i);
+  if (buf)
+    x.appendChild(buf);
+  return xmlToDom(x, "http://www.w3.org/1999/xhtml");
+}
+function getMedia (uri) {
+  if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path))
+    return ["image", uri.spec];
+  switch (uri.host) {
+    case "twitpic.com":
+      return ["image", "http://twitpic.com/show/thumb" + uri.path + ".jpg"];
+    case "movapic.com":
+      return ["image", "http://image.movapic.com/pic/m_" + uri.path.substr(uri.path.lastIndexOf("/")+1) + ".jpeg"];
+    case "gyazo.com":
+      return ["image", uri.spec];
+    case "twittgoo.com":
+      let elm = util.httpGet(uri.spec + "/?format=atom").responseXML.getElementsByTagName("icon")[0];
+      return ["image", elm.textContent];
+    case "www.flickr.com":
+    case "f.hatena.ne.jp":
+    default:
+      return null;
+  }
+}
+function isShortenURL (uri) {
+  switch (uri.host) {
+    case "bit.ly":
+    case "is.gd":
+    case "j.mp":
+    case "goo.gl":
+    case "htn.to":
+    case "tinyurl.com":
+    case "ff.im":
+    case "youtu.be":
+      return true;
+  }
+  return false;
+}
+function getRedirectedURL (aURI){
+  if ((aURI.schemeIs("http") || aURI.schemeIs("https"))){
+    let x = new XMLHttpRequest;
+    x.open("HEAD", aURI.spec, false);
+    x.send(null);
+    liberator.log(aURI.spec + " -> " + x.channel.URI.spec, 0);
+    return x.channel.URI;
+  }
+  return aURI;
+}
+function onSelect (evt) {
+  let item = evt.target.selectedItem;
+  let links = item.querySelectorAll("a.twlist-url");
+  for (let i=0; i < links.length; i++) {
+    let elm = links[i];
+    let uri = util.newURI(elm.getAttribute("href"));
+    if (isShortenURL(uri)){
+      uri = getRedirectedURL(uri);
+      elm.setAttribute("href", uri.spec);
+      elm.textContent = uri.spec;
+    }
+    let [type, src] = getMedia(uri);
+    if (type && src) {
+      switch (type) {
+        case "image":
+          if (elm.hasAttribute("shown") && elm.getAttribute("shown") == "true")
+            break;
+          let img = document.createElementNS(XHTML, "img");
+          img.setAttribute("src", src);
+          img.setAttribute("class", "twlist-image");
+          img.setAttribute("align", "right");
+          elm.parentNode.appendChild(img);
+          elm.setAttribute("shown", "true");
+          break;
+        default:
+      }
+    }
+  }
+}
+function onClick (evt) {
+  if (evt.button == 2)
+    return;
+  evt.preventDefault();
+  evt.stopPropagation();
+  let where = (evt.ctrlKey || evt.button == 1) ? liberator.NEW_TAB : liberator.CURRENT_TAB;
+  let url = evt.target.getAttribute("href");
+  liberator.open(url, {where: where});
+}
+
+onLoad();
+
+// vim: sw=2 ts=2 et filetype=javascript:
