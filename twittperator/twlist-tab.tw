@@ -3,10 +3,10 @@
 
 == Settings ==
 
-g:twittperator_plugin_twlist = 1
+g:twittperator_plugin_twlist_tab = 1
   $RUNTIMEDIR/plugin/twittperator に入れている場合は設定してください。
 
-g:twlist_screen_name = "<your screen name>"
+g:twittprator_screen_name = "<your screen name>"
   あなたのScreenName、返信された時ににMentionsタブにも入ります
 
 == ScreenShot ==
@@ -124,7 +124,7 @@ function add (msg, target) {
 }
 
 function onLoad () {
-  screenName = liberator.globalVariables.twlist_screen_name || "";
+  screenName = liberator.globalVariables.twittprator_screen_name || "";
   if (screenName)
     screenNameReg = new RegExp("@" + screenName + "\\b");
 

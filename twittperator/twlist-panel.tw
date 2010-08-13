@@ -3,11 +3,10 @@
 
 == Settings ==
 
-g:twittperator_plugin_twlist = 1
+g:twittperator_plugin_twlist_panel = 1
   $RUNTIMEDIR/plugin/twittperator に入れている場合は設定してください。
 
-g:twlist_screen_name = "<your screen name>"
-  あなたのScreenName、返信された時ににMentionsタブにも入ります
+g:twittperator_screen_name = "<your screen name>"
 
 g:twlist_auto_poup = {0 | 1}
   ツイートがあったときに自動でポップアップするか
@@ -171,7 +170,7 @@ function add (msg, target) {
 
 function onLoad () {
   let gv = liberator.globalVariables;
-  screenName = gv.twlist_screen_name || "";
+  screenName = gv.twittperator_screen_name || "";
   autoPopup  = gv.twlist_auto_poup ? !!gv.twlist_auto_popup :  true;
   popupTime = gv.twlist_popup_time || 20;
 
