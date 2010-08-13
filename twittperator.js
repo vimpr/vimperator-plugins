@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1557,26 +1557,31 @@ let PLUGIN_INFO =
         let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
           func(s); // }}}
 
+    function rejectMine(statuses)
+      let (n = setting.screenName)
+        (n ? statuses.filter(function(st) (!st.user || st.user.screen_name !== n)) : statuses);
+
+
     const Completers = { // {{{
       name: function(context, args) {
         context.completions =
-          history.map(rt(function(s) ["@" + s.user.screen_name, s]));
+          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name, s]));
       },
       link: function(context, args) {
         context.completions =
-          history.map(rt(function(s) [s.text, s])).filter(function([t]) /https?:\/\//(t));
+          rejectMine(history).map(rt(function(s) [s.text, s])).filter(function([t]) /https?:\/\//(t));
       },
       text: function(context, args) {
         context.completions =
-          history.map(rt(function(s) [s.text, s]));
+          rejectMine(history).map(rt(function(s) [s.text, s]));
       },
       name_id: function(context, args) {
         context.completions =
-          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
+          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
       },
       name_id_text: function(context, args) {
         context.completions =
-          history.map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
+          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
       }
     }; // }}}
 
@@ -1805,6 +1810,7 @@ let PLUGIN_INFO =
       showTLURLScheme: let (v = gv.twittperator_show_tl_with_https_url) ("http" + (v === false ? "" : "s")),
       proxyHost: gv.twittperator_proxy_host,
       proxyPort: gv.twittperator_proxy_port,
+      screenName: gv.twittperator_screen_name
     });
 
   let statusRefreshTimer;
