@@ -1,11 +1,11 @@
 /*
  * Please write the below line into .vimperatorrc.
  * let g:twittperator_plugin_reply_popup_alert = 1
- * let g:twittperator_plugin_reply_popup_alert_username = "<YOUR_SCREEN_NAME>"
+ * let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"
  */
 
 (function () {
-  let screenName = liberator.globalVariables.twittperator_plugin_reply_popup_alert_username;
+  let screenName = liberator.globalVariables.twittperator_screen_name;
 
   function popupAlert (iconPath, title, text, buttonEnabled, a, b) {
     const ALERT_SVC =
