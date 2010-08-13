@@ -35,6 +35,60 @@ let PLUGIN_INFO =
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twittperator.js</updateURL>
+  <detail><![CDATA[
+    This is the Twitter client plugin with OAuth authentication.
+    == Command ==
+    - Use completion for comfort.
+    :tw[ittperator] -getPIN
+        Opens the page to authorize twittperator and get your PIN from Twitter
+    :tw[ittperator] -setPIN {PINcode}
+        Allows Twittperator to access Twitter by signifying your PIN.
+
+    :tw[ittperator]
+        Shows recent your timeline. ( The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter. )
+    :tw[ittperator]!
+        Gets recent your timeline from Twitter and shows it.
+    :tw[ittperator]!@user
+        Shows mentions to @user or @user's tweets.
+    :tw[ittperator] {TweetText}
+        Tweets {TweetText}.
+    :tw[ittperator] RT @user#id: {refTweet}
+        Does official retweet.
+    :tw[ittperator] {TweetText} RT @user#id: {refTweet}
+        Does classic retweet.
+    :tw[ittperator]!+@user#id
+        Adds the tweet to your favorites.
+    :tw[ittperator]!-@user#id
+        Delete the tweet from your favorites.
+    :tw[ittperator]!?{SearchText}
+        Shows the result of searching {SearchText}.
+    :tw[ittperator]!/{URI}
+        Opens {URI}.
+    == Authentication Setting ==
+    First of all, you have to get your PIN from Twitter and signify it to Twittperator. Type a following command:
+    >||
+        :tw -getPIN
+    ||<
+    and you will get the page to authorize Twittperator to access Twitter in a new tab.
+    If you allow and you will get the PIN ( 7 digits numbers ), then yank it.
+
+    Secondarily, authorize Twittperator with your PIN.
+    >||
+        :tw -setPIN yanked_PIN
+    ||<
+    == FAQ ==
+    - What is this ?
+        The plugin that just tweet with Vimperator.
+    - My timeline is hard to see...?
+        We are making an effort, and welcoming patches.
+    - By the way, is it possible to show timeline automatically?
+        We keep working, and welcoming patches.
+    - It's too much of the bother to show my timeline manually!!
+        We think implementing a wider display method and a mean of word wrapping will solve this issue.
+        Any ideas?
+    - Is there a plan to work together Growl GNTP?
+        Write the plugin.
+  ]]></detail>
   <detail lang="ja"><![CDATA[
     これはOAuth認証を用いたTwitterクライアントプラグインです。
     == Command ==
