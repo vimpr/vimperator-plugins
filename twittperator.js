@@ -1023,7 +1023,7 @@ let PLUGIN_INFO =
       setPin: function(pin) {
         let self = this;
         this.getAccessToken(pin, function() {
-          liberator.echo("Twittperator: getting access token is success.", true);
+          Twittperator.echo("getting access token is success.");
           self.initialize();
         });
       },
@@ -1364,7 +1364,7 @@ let PLUGIN_INFO =
     favorite: function (id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
         let res = Util.fixStatusObject(JSON.parse(text));
-        liberator.echo("[Twittperator] fav: " + res.user.name + " " + res.text, true);
+        Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
     }, // }}}
     getFollowersStatus: function (target, force, onload) { // {{{
@@ -1417,20 +1417,20 @@ let PLUGIN_INFO =
       sendData.source = "Twittperator";
       tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
         let t = Util.fixStatusObject(JSON.parse(text || "{}")).text;
-        liberator.echo("[Twittperator] Your post " + '"' + t + '" (' + t.length + " characters) was sent.", true);
+        Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
       });
     }, // }}}
     reTweet: function (id) { // {{{
       let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
       tw.post(url, null, function(text) {
         let res = Util.fixStatusObject(JSON.parse(text));
-        liberator.echo("[Twittperator] ReTweet: " + res.retweeted_status.text, true);
+        Twittperator.echo("ReTweet: " + res.retweeted_status.text);
       });
     }, // }}}
     unfavorite: function (id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
         let res = Util.fixStatusObject(JSON.parse(text));
-        liberator.echo("[Twittperator] unfav: " + res.user.name + " " + res.text, true);
+        Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
     }, // }}}
   }; // }}}
@@ -1469,6 +1469,9 @@ let PLUGIN_INFO =
     }, // }}}
   }; // }}}
   let Twittperator = { // {{{
+    echo: function (msg) { // {{{
+      liberator.echo("[Twittperator] " + msg);
+    }, // }}}
     loadPlugins: function () { // {{{
       function isEnabled(file)
         let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
@@ -1842,7 +1845,7 @@ let PLUGIN_INFO =
           tw.getRequestToken(function(url) {
             liberator.open(url, { where: liberator.NEW_TAB });
           });
-          liberator.echo("Twittperator", "Please get PIN code and execute\n :tw -setPIN {PINcode}");
+          Twittperator.echo("Please get PIN code and execute\n :tw -setPIN {PINcode}");
         } else if (args["-setPIN"]) {
           tw.setPin(args["-setPIN"]);
         }
