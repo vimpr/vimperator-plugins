@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1589,7 +1589,12 @@ let PLUGIN_INFO =
       }
 
       tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
-        Twittperator.showTL(JSON.parse(text).results.map(Util.fixStatusObject).map(konbuArt));
+        let results = JSON.parse(text).results;
+        if (results.length > 0) {
+          Twittperator.showTL(results.map(Util.fixStatusObject).map(konbuArt));
+        } else {
+          Twittperator.echo("No results found.")
+        }
       });
     }, // }}}
     sourceScriptFile: function (file) { // {{{
