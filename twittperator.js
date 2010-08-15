@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1446,13 +1446,13 @@ let PLUGIN_INFO =
       return str;
     }, // }}}
     fixStatusObject: function (st) { // {{{
-      function unescapeBrakets(str)
-        str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+      function unescapeAmps(str)
+        str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"")
 
       let result = {};
       for (let [n, v] in Iterator(st)) {
         result[n] = v && typeof v === 'object' ? Util.fixStatusObject(v) :
-                    n === 'text'               ? unescapeBrakets(v) :
+                    n === 'text'               ? unescapeAmps(v) :
                     v;
       }
       return result;
