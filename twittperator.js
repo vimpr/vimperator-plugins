@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1017,7 +1017,7 @@ let PLUGIN_INFO =
             }
           },
         };
-        Util.xmlhttpRequest(options);
+        Utils.xmlhttpRequest(options);
 
       },
       setPin: function(pin) {
@@ -1064,7 +1064,7 @@ let PLUGIN_INFO =
           },
         };
 
-        Util.xmlhttpRequest(options); // 送信
+        Utils.xmlhttpRequest(options); // 送信
       },
       // api+?+query にアクセスした結果をcallbackに渡す
       get: function(api, query, callback) {
@@ -1094,7 +1094,7 @@ let PLUGIN_INFO =
             }
           },
         };
-        Util.xmlhttpRequest(options); // 送信
+        Utils.xmlhttpRequest(options); // 送信
       },
       post: function(api, content, callback) {
         var message = {
@@ -1127,7 +1127,7 @@ let PLUGIN_INFO =
             }
           }
         };
-        Util.xmlhttpRequest(options); // 送信
+        Utils.xmlhttpRequest(options); // 送信
       },
       getAuthorizationHeader: function(api) {
         var message = {
@@ -1313,7 +1313,7 @@ let PLUGIN_INFO =
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
                 if (/^\s*\{/(line))
-                  onMsg(Util.fixStatusObject(JSON.parse(line)), line);
+                  onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
@@ -1363,7 +1363,7 @@ let PLUGIN_INFO =
   let Twitter = { // {{{
     favorite: function (id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
-        let res = Util.fixStatusObject(JSON.parse(text));
+        let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
     }, // }}}
@@ -1394,7 +1394,7 @@ let PLUGIN_INFO =
         tw.get(api, query, function(text) {
           setRefresher();
           // TODO 履歴をちゃんと "追記" するようにするようにするべき
-          let result = JSON.parse(text).map(Util.fixStatusObject);
+          let result = JSON.parse(text).map(Utils.fixStatusObject);
           if (!target)
             history = result;
           onload(result);
@@ -1416,32 +1416,32 @@ let PLUGIN_INFO =
       sendData.status = stat;
       sendData.source = "Twittperator";
       tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
-        let t = Util.fixStatusObject(JSON.parse(text || "{}")).text;
+        let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
         Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
       });
     }, // }}}
     reTweet: function (id) { // {{{
       let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
       tw.post(url, null, function(text) {
-        let res = Util.fixStatusObject(JSON.parse(text));
+        let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("ReTweet: " + res.retweeted_status.text);
       });
     }, // }}}
     unfavorite: function (id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
-        let res = Util.fixStatusObject(JSON.parse(text));
+        let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
     }, // }}}
   }; // }}}
-  let Util = { // {{{
+  let Utils = { // {{{
     anchorLink: function (str) { // {{{
       let m = str.match(/https?:\/\/\S+/);
       if (m) {
         let left = str.substr(0, m.index);
         let url = m[0];
         let right = str.substring(m.index + m[0].length);
-        return <>{Util.anchorLink(left)}<a highlight="URL" href={url}> {url} </a>{Util.anchorLink(right)}</>;
+        return <>{Utils.anchorLink(left)}<a highlight="URL" href={url}> {url} </a>{Utils.anchorLink(right)}</>;
       }
       return str;
     }, // }}}
@@ -1451,7 +1451,7 @@ let PLUGIN_INFO =
 
       let result = {};
       for (let [n, v] in Iterator(st)) {
-        result[n] = v && typeof v === 'object' ? Util.fixStatusObject(v) :
+        result[n] = v && typeof v === 'object' ? Utils.fixStatusObject(v) :
                     n === 'text'               ? unescapeAmps(v) :
                     v;
       }
@@ -1549,7 +1549,7 @@ let PLUGIN_INFO =
                     <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
                   </a>
                 </td><td class="twitter entry-content rt">
-                  {Util.anchorLink(rt.text)}
+                  {Utils.anchorLink(rt.text)}
                 </td>
               </tr> :
               <tr>
@@ -1559,7 +1559,7 @@ let PLUGIN_INFO =
                     <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
                   </a>
                 </td><td class="twitter entry-content">
-                  {Util.anchorLink(status.text)}
+                  {Utils.anchorLink(status.text)}
                 </td>
               </tr>
               );
@@ -1572,7 +1572,7 @@ let PLUGIN_INFO =
     }, // }}}
     showTwitterMentions: function (arg) { // {{{
       tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
-        Twittperator.showTL(JSON.parse(text).map(Util.fixStatusObject));
+        Twittperator.showTL(JSON.parse(text).map(Utils.fixStatusObject));
       });
     }, // }}}
     showTwitterSearchResult: function (word) { // {{{
@@ -1591,7 +1591,7 @@ let PLUGIN_INFO =
       tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
         let results = JSON.parse(text).results;
         if (results.length > 0) {
-          Twittperator.showTL(results.map(Util.fixStatusObject).map(konbuArt));
+          Twittperator.showTL(results.map(Utils.fixStatusObject).map(konbuArt));
         } else {
           Twittperator.echo("No results found.")
         }
@@ -1893,6 +1893,7 @@ let PLUGIN_INFO =
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
   __context__.Twittperator = Twittperator;
+  __context__.Utils = Utils;
 
   Twittperator.loadPlugins();
 
