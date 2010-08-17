@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1614,38 +1614,32 @@ let PLUGIN_INFO =
   }; // }}}
 
   function setup() { // {{{
-    function rt(func) // {{{
-      function(status)
-        let (s = ("retweeted_status" in status) ? status.retweeted_status : status)
-          func(s); // }}}
-
-    function rejectMine(statuses)
+    function rejectMine(st)
       let (n = setting.screenName)
-        (n ? statuses.filter(function(st) (!st.user || st.user.screen_name !== n)) : statuses);
+        (n ? (!st.user || st.user.screen_name !== n) : st);
 
+    const Completers = (function() { // {{{
+      function rt(st)
+        ("retweeted_status" in st ? st.retweeted_status : st);
 
-    const Completers = { // {{{
-      name: function(context, args) {
-        context.completions =
-          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name, s]));
-      },
-      link: function(context, args) {
-        context.completions =
-          rejectMine(history).map(rt(function(s) [s.text, s])).filter(function([t]) /https?:\/\//(t));
-      },
-      text: function(context, args) {
-        context.completions =
-          rejectMine(history).map(rt(function(s) [s.text, s]));
-      },
-      name_id: function(context, args) {
-        context.completions =
-          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id, s]));
-      },
-      name_id_text: function(context, args) {
-        context.completions =
-          rejectMine(history).map(rt(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]));
-      }
-    }; // }}}
+      function completer(generator)
+        function(filter)
+          (filter ? function(context, args)
+                      context.completions = history.map(rt).filter(filter).map(generator)
+                  : function(context, args)
+                      context.completions = history.map(rt).map(generator));
+
+      return {
+        name:
+          completer(function(s) ["@" + s.user.screen_name, s]),
+        text:
+          completer(function(s) [s.text, s]),
+        name_id:
+          completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
+        name_id_text:
+          completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]),
+      };
+    })(); // }}}
 
     const SubCommand = function(init) {
       return {
@@ -1673,7 +1667,7 @@ let PLUGIN_INFO =
           if (m)
             Twitter.favorite(m[1]);
         },
-        completer: Completers.name_id_text
+        completer: Completers.name_id_text(rejectMine)
       }),
       SubCommand({
         command: ["-"],
@@ -1683,7 +1677,7 @@ let PLUGIN_INFO =
           if (m)
             Twitter.unfavorite(m[1]);
         },
-        completer: Completers.name_id_text
+        completer: Completers.name_id_text(rejectMine)
       }),
       SubCommand({
         command: ["@"],
@@ -1695,19 +1689,19 @@ let PLUGIN_INFO =
             Twittperator.showTwitterMentions();
           }
         },
-        completer: Completers.name
+        completer: Completers.name()
       }),
       SubCommand({
         command: ["?"],
         description: "Twitter search",
         action: function(arg) Twittperator.showTwitterSearchResult(arg),
-        completer: Completers.text
+        completer: Completers.text()
       }),
       SubCommand({
         command: ["/"],
         description: "Open link",
         action: function(arg) Twittperator.openLink(arg),
-        completer: Completers.link
+        completer: Completers.text(function(s) /https?:\/\//(s.text))
       })
     ]; // }}}
 
@@ -1768,9 +1762,9 @@ let PLUGIN_INFO =
       } else {
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
-          Completers.name_id_text(context, args);
+          Completers.name_id_text(m.index === 0 && rejectMine)(context, args);
         } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, args.literalArg)) {
-          (m.index === 0 ? Completers.name_id : Completers.name)(context, args);
+          (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
         }
 
         if (m)
