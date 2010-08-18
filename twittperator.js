@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.1.6</version>
+  <version>1.2.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1403,22 +1403,33 @@ let PLUGIN_INFO =
     }, // }}}
     say: function (stat) { // {{{
       let sendData = {};
+      let prefix, replyUser, replyID, postfix;
       if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
-        let [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
+        [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
         if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
-          Twitter.reTweet(replyID);
+          Twittperator.withProtectedUserConfirmation(
+            {screenName: replyUser, statusId: replyID},
+            'retweet',
+            function () Twitter.reTweet(replyID)
+          );
           return;
         }
         stat = prefix + "@" + replyUser + postfix;
         if (replyID && !prefix)
           sendData.in_reply_to_status_id = replyID;
       }
-      sendData.status = stat;
-      sendData.source = "Twittperator";
-      tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
-        let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
-        Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
-      });
+      Twittperator.withProtectedUserConfirmation(
+        {screenName: replyUser, statusId: replyID},
+        'reply',
+        function() {
+          sendData.status = stat;
+          sendData.source = "Twittperator";
+          tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
+            let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
+            Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
+          });
+        }
+      );
     }, // }}}
     reTweet: function (id) { // {{{
       let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
@@ -1471,6 +1482,24 @@ let PLUGIN_INFO =
   let Twittperator = { // {{{
     echo: function (msg) { // {{{
       liberator.echo("[Twittperator] " + msg);
+    }, // }}}
+    isProtected: function ({statusId, userId, screenName}) { // {{{
+      function isp(f) {
+        let r;
+        history.some(function(st) f(st) && (r = st));
+        return r && r.user.protected && r.user.screen_name;
+      }
+
+      if (screenName && isp(function(st) st.user && st.user.screen_name == screenName))
+        return true;
+
+      if (statusId && isp(function(st) st.user && st.id == statusId))
+        return true;
+
+      if (userId && find(function(st) st.user && st.user.id == userId))
+        return true;
+
+      return false;
     }, // }}}
     loadPlugins: function () { // {{{
       function isEnabled(file)
@@ -1609,6 +1638,23 @@ let PLUGIN_INFO =
         if (script)
           liberator.plugins[script.NAME] = script;
         file.toString = toString;
+      }
+    }, // }}}
+    withProtectedUserConfirmation: function(check, actionName, action) { // {{{
+      function canceled()
+        Twittperator.echo('Canceled.');
+
+      let protectedUserName = Twittperator.isProtected(check);
+      if (protectedUserName) {
+        commandline.input(
+          protectedUserName + ' is protected user! Do you really want to ' + actionName + '? Input "yes" if you want. => ',
+          function (s) (s === 'yes' ? action : canceled)(),
+          {
+            onCancel: canceled
+          }
+        );
+      } else {
+        action();
       }
     }, // }}}
   }; // }}}
