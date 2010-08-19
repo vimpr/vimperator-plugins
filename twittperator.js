@@ -82,7 +82,8 @@ let PLUGIN_INFO =
     - My timeline is hard to see...?
         We are making an effort, and welcoming patches.
     - By the way, is it possible to show timeline automatically?
-        We keep working, and welcoming patches.
+        Use chirpstream. Write the below line into rc file.
+        let g:twittperator_use_chirp = 1
     - It's too much of the bother to show my timeline manually!!
         We think implementing a wider display method and a mean of word wrapping will solve this issue.
         Any ideas?
@@ -138,7 +139,9 @@ let PLUGIN_INFO =
     - TL表示をもっと工夫しろ
         ごめんなさい。改良してコミットしてくれると嬉しいです。
     - つーか、TLくらい自動取得しろ
-        はい、がんばります。改良してコミットしてくれると嬉しいです。
+        はい、がんばりました。
+        let g:twittperator_use_chirp = 1
+        として、chirpstream を利用してください。
     - ぶっちゃけTL表示とか面倒だよね？
         はい、がんばります・・・
         でかい表示領域と行の折り返し方法が確立できれば、もっと頑張れる気がします。
