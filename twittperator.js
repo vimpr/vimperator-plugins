@@ -1364,13 +1364,13 @@ let PLUGIN_INFO =
     };
   })(); // }}}
   let Twitter = { // {{{
-    favorite: function (id) { // {{{
+    favorite: function(id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
     }, // }}}
-    getFollowersStatus: function (target, force, onload) { // {{{
+    getFollowersStatus: function(target, force, onload) { // {{{
       function setRefresher() {
         expiredStatus = false;
         if (statusRefreshTimer)
@@ -1404,7 +1404,7 @@ let PLUGIN_INFO =
         });
       }
     }, // }}}
-    say: function (stat) { // {{{
+    say: function(stat) { // {{{
       let sendData = {};
       let prefix, replyUser, replyID, postfix;
       if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
@@ -1413,7 +1413,7 @@ let PLUGIN_INFO =
           Twittperator.withProtectedUserConfirmation(
             {screenName: replyUser, statusId: replyID},
             'retweet',
-            function () Twitter.reTweet(replyID)
+            function() Twitter.reTweet(replyID)
           );
           return;
         }
@@ -1434,14 +1434,14 @@ let PLUGIN_INFO =
         }
       );
     }, // }}}
-    reTweet: function (id) { // {{{
+    reTweet: function(id) { // {{{
       let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
       tw.post(url, null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("ReTweet: " + res.retweeted_status.text);
       });
     }, // }}}
-    unfavorite: function (id) { // {{{
+    unfavorite: function(id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
@@ -1449,7 +1449,7 @@ let PLUGIN_INFO =
     }, // }}}
   }; // }}}
   let Utils = { // {{{
-    anchorLink: function (str) { // {{{
+    anchorLink: function(str) { // {{{
       let m = str.match(/https?:\/\/\S+/);
       if (m) {
         let left = str.substr(0, m.index);
@@ -1459,7 +1459,7 @@ let PLUGIN_INFO =
       }
       return str;
     }, // }}}
-    fixStatusObject: function (st) { // {{{
+    fixStatusObject: function(st) { // {{{
       const Amps = {
         lt: "<",
         gt: ">",
@@ -1468,7 +1468,7 @@ let PLUGIN_INFO =
       };
 
       function unescapeAmps(str)
-        str.replace(/&([^;]+);/g, function (m, n) Amps[n] || m);
+        str.replace(/&([^;]+);/g, function(m, n) Amps[n] || m);
 
       let result = {};
       for (let [n, v] in Iterator(st)) {
@@ -1478,7 +1478,7 @@ let PLUGIN_INFO =
       }
       return result;
     }, // }}}
-    xmlhttpRequest: function (options) { // {{{
+    xmlhttpRequest: function(options) { // {{{
       let xhr = new XMLHttpRequest();
       xhr.open(options.method, options.url, true);
       if (typeof options.onload == "function") {
@@ -1490,10 +1490,10 @@ let PLUGIN_INFO =
     }, // }}}
   }; // }}}
   let Twittperator = { // {{{
-    echo: function (msg) { // {{{
+    echo: function(msg) { // {{{
       liberator.echo("[Twittperator] " + msg);
     }, // }}}
-    isProtected: function ({statusId, userId, screenName}) { // {{{
+    isProtected: function({statusId, userId, screenName}) { // {{{
       function isp(f) {
         let r;
         history.some(function(st) f(st) && (r = st));
@@ -1511,7 +1511,7 @@ let PLUGIN_INFO =
 
       return false;
     }, // }}}
-    loadPlugins: function () { // {{{
+    loadPlugins: function() { // {{{
       function isEnabled(file)
         let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
           liberator.globalVariables["twittperator_plugin_" + name];
@@ -1530,7 +1530,7 @@ let PLUGIN_INFO =
       io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
       io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
     }, // }}}
-    openLink: function (text) { // {{{
+    openLink: function(text) { // {{{
       let m = text.match(/.*?(https?:\/\/\S+)/g);
       if (!m)
         return;
@@ -1540,7 +1540,7 @@ let PLUGIN_INFO =
           map(function(ss) (ss.reverse(), ss.map(String.trim)))
       Twittperator.selectAndOpenLink(links);
     }, // }}}
-    selectAndOpenLink: function (links) { // {{{
+    selectAndOpenLink: function(links) { // {{{
       if (!links || !links.length)
         return;
 
@@ -1557,12 +1557,12 @@ let PLUGIN_INFO =
         }
       );
     }, // }}}
-    showFollowersStatus: function (arg, force) { // {{{
+    showFollowersStatus: function(arg, force) { // {{{
       Twitter.getFollowersStatus(arg, force, function(statuses) {
         Twittperator.showTL(statuses);
       });
     }, // }}}
-    showTL: function (s) { // {{{
+    showTL: function(s) { // {{{
       function userURL(screen_name)
         (setting.showTLURLScheme + "://twitter.com/" + screen_name);
 
@@ -1609,12 +1609,12 @@ let PLUGIN_INFO =
       //liberator.log(html);
       liberator.echo(html, true);
     }, // }}}
-    showTwitterMentions: function (arg) { // {{{
+    showTwitterMentions: function(arg) { // {{{
       tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
         Twittperator.showTL(JSON.parse(text).map(Utils.fixStatusObject));
       });
     }, // }}}
-    showTwitterSearchResult: function (word) { // {{{
+    showTwitterSearchResult: function(word) { // {{{
       // フォーマットが違うの変換
       function konbuArt(obj) {
         return {
@@ -1636,7 +1636,7 @@ let PLUGIN_INFO =
         }
       });
     }, // }}}
-    sourceScriptFile: function (file) { // {{{
+    sourceScriptFile: function(file) { // {{{
       // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
       file = file.clone();
       let toString = file.toString;
@@ -1658,7 +1658,7 @@ let PLUGIN_INFO =
       if (protectedUserName) {
         commandline.input(
           protectedUserName + ' is protected user! Do you really want to ' + actionName + '? Input "yes" if you want. => ',
-          function (s) (s === 'yes' ? action : canceled)(),
+          function(s) (s === 'yes' ? action : canceled)(),
           {
             onCancel: canceled
           }
