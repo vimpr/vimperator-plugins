@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -64,6 +64,8 @@ let PLUGIN_INFO =
         Shows the result of searching {SearchText}.
     :tw[ittperator]!/{URI}
         Opens {URI}.
+    :tw[ittperator]!delete {StatusID}
+        Deletes the {StatusID} tweet.
     == Authentication Setting ==
     First of all, you have to get your PIN from Twitter and signify it to Twittperator. Type a following command:
     >||
@@ -119,6 +121,8 @@ let PLUGIN_INFO =
         {SearchText}の検索結果を表示します。
     :tw[ittperator]!/{URI}
         {URI}を開きます。
+    :tw[ittperator]!delete {StatusID}
+        {StatusID}のツイートを削除します。
     == Authentication Setting ==
     最初にPINコードを取得し設定する必要があります。
     >||
@@ -1364,6 +1368,12 @@ let PLUGIN_INFO =
     };
   })(); // }}}
   let Twitter = { // {{{
+    destroy: function(id) { // {{{
+      tw.post("http://api.twitter.com/1/statuses/destroy/" + id + ".json", null, function(text) {
+        let res = Utils.fixStatusObject(JSON.parse(text));
+        Twittperator.echo("delete: " + res.user.name + " " + res.text)
+      });
+    }, // }}}
     favorite: function(id) { // {{{
       tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
@@ -1447,6 +1457,7 @@ let PLUGIN_INFO =
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
     }, // }}}
+
   }; // }}}
   let Utils = { // {{{
     anchorLink: function(str) { // {{{
@@ -1674,6 +1685,9 @@ let PLUGIN_INFO =
       let (n = setting.screenName)
         (n ? (!st.user || st.user.screen_name !== n) : st);
 
+    function seleceMine(st)
+      (!rejectMine(st));
+
     const Completers = (function() { // {{{
       function rt(st)
         ("retweeted_status" in st ? st.retweeted_status : st);
@@ -1690,6 +1704,8 @@ let PLUGIN_INFO =
           completer(function(s) ["@" + s.user.screen_name, s]),
         text:
           completer(function(s) [s.text, s]),
+        id:
+          completer(function(s) [s.id, s]),
         name_id:
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
         name_id_text:
@@ -1758,6 +1774,16 @@ let PLUGIN_INFO =
         description: "Open link",
         action: function(arg) Twittperator.openLink(arg),
         completer: Completers.text(function(s) /https?:\/\//(s.text))
+      }),
+      SubCommand({
+        command: ["delete"],
+        description: "Delete status",
+        action: function(arg) {
+          let m = arg.match(/^\d+/);
+          if (m)
+            Twitter.destroy(m[0]);
+        },
+        completer: Completers.id(seleceMine)
       })
     ]; // }}}
 
@@ -1837,7 +1863,7 @@ let PLUGIN_INFO =
     } // }}}
 
     function subCommandCompleter(context, args) { // {{{
-      if (!args.bang || context.filter.length > 0)
+      if (!args.bang || args.literalArg.match(/^(\W|\S+\s)/))
         return;
       context.title = ["Sub command", "Description"];
       context.completions = SubCommands.map(function({command, description}) [command[0], description]);
@@ -1866,7 +1892,8 @@ let PLUGIN_INFO =
         literal: 0,
         hereDoc: true,
         completer: let (getting) function(context, args) {
-          context.fork("File", 0, context, function(context) subCommandCompleter(context, args));
+          if (args.bang)
+            context.fork("File", 0, context, function(context) subCommandCompleter(context, args));
 
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
 
