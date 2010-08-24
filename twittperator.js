@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.3.0</version>
+  <version>1.4.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1784,6 +1784,28 @@ let PLUGIN_INFO =
             Twitter.destroy(m[0]);
         },
         completer: Completers.id(seleceMine)
+      }),
+      SubCommand({
+        command: ["info"],
+        description: "Display status information",
+        action: function(arg) {
+          function dtdd(obj) {
+            let items = <></>;
+            for (let [n, v] in Iterator(obj)) {
+              let cont = (v && typeof v === "object") ? dtdd(v) : v;
+              items += <><dt>{n}</dt><dd>{cont}</dd></>;
+            }
+
+            return <dl>{items}</dl>;
+          }
+
+          let m = arg.match(/^\d+/);
+          if (!m)
+            return;
+          let id = parseInt(m[0], 10);
+          history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
+        },
+        completer: Completers.id()
       })
     ]; // }}}
 
