@@ -8,7 +8,7 @@ g:twittperator_plugin_twlist_panel = 1
 
 g:twittperator_screen_name = "<your screen name>"
 
-g:twlist_auto_poup = {0 | 1}
+g:twlist_auto_popup = {0 | 1}
   ツイートがあったときに自動でポップアップするか
 
 g:twlist_popup_time = second
@@ -171,7 +171,7 @@ function add (msg, target) {
 function onLoad () {
   let gv = liberator.globalVariables;
   screenName = gv.twittperator_screen_name || "";
-  autoPopup  = gv.twlist_auto_poup ? !!gv.twlist_auto_popup :  true;
+  autoPopup  = gv.twlist_auto_popup ? !!gv.twlist_auto_popup :  true;
   popupTime = gv.twlist_popup_time || 20;
 
   if (screenName)
