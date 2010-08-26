@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1406,11 +1406,20 @@ let PLUGIN_INFO =
 
         tw.get(api, query, function(text) {
           setRefresher();
-          // TODO 履歴をちゃんと "追記" するようにするようにするべき
           let result = JSON.parse(text).map(Utils.fixStatusObject);
-          if (!target)
-            history = result;
-          onload(result);
+          if (!target) {
+            let lastHistory = history[0];
+            if (lastHistory) {
+              let lastDate = Date.parse(lastHistory.created_at);
+              for (let [,msg] in Iterator(result.reverse())) {
+                if (Date.parse(msg.created_at) > lastDate)
+                  history.unshift(msg);
+              }
+            } else {
+              result.forEach(function(msg) history.push(msg));
+            }
+          }
+          onload(history);
         });
       }
     }, // }}}
