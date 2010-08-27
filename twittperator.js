@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1419,7 +1419,9 @@ let PLUGIN_INFO =
               result.forEach(function(msg) history.push(msg));
             }
           }
-          onload(history);
+          // XXX API 的な仕様とは異なる挙動
+          let (name = target || setting.screenName)
+            onload(history.filter(function(it) it.user && it.user.screen_name === name));
         });
       }
     }, // }}}
