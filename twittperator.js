@@ -1221,7 +1221,7 @@ let PLUGIN_INFO =
   // }}}
 
   // Twittperator
-  let ChirpUserStream = (function() { // {{{
+  function Stream({host, path}) { // {{{
     function extractURL(s)
       let (m = s.match(/https?:\/\/\S+/))
         (m && m[0]);
@@ -1366,7 +1366,8 @@ let PLUGIN_INFO =
       removeListener: function(func) (listeners = listeners.filter(function(l) (l != func))),
       clearPluginData: clearPluginData
     };
-  })(); // }}}
+  }; // }}}
+  let ChirpUserStream = Stream({host: "chirpstream.twitter.com", path: "/2b/user.json"});
   let Twitter = { // {{{
     destroy: function(id) { // {{{
       tw.post("http://api.twitter.com/1/statuses/destroy/" + id + ".json", null, function(text) {
@@ -1472,12 +1473,15 @@ let PLUGIN_INFO =
   }; // }}}
   let Utils = { // {{{
     anchorLink: function(str) { // {{{
-      let m = str.match(/https?:\/\/\S+/);
+      let m = str.match(/https?:\/\/\S+|@\S+/);
       if (m) {
         let left = str.substr(0, m.index);
-        let url = m[0];
+        let center = m[0];
+        let [head, tail] = [center[0], center.slice(1)];
         let right = str.substring(m.index + m[0].length);
-        return <>{Utils.anchorLink(left)}<a highlight="URL" href={url}> {url} </a>{Utils.anchorLink(right)}</>;
+        let content = head === "@" ? <a highlight="URL" href={"http://twitter.com/" + tail}> {center} </a>
+                                   : <a highlight="URL" href={center}> {center} </a>
+        return <>{Utils.anchorLink(left)}{content}{Utils.anchorLink(right)}</>;
       }
       return str;
     }, // }}}
