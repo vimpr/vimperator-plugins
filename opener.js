@@ -46,8 +46,11 @@ let INFO =
   function jump (url) {
     let index = 0;
     let url = util.stringToURLArray(url).toString();
+    if (url == buffer.URL){
+      return false;
+    }
     for each ( [,tab] in tabs.browsers ) {
-      if(url == tab.currentURI.spec){
+      if (url == tab.currentURI.spec){
         tabs.select(index);
         return true;
       }
