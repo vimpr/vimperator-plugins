@@ -25,10 +25,10 @@
 
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>twittperator</name>
+  <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.2</version>
+  <version>1.4.2.3.4.5.6.7.8.9.10.11.12.13</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -40,12 +40,12 @@ let PLUGIN_INFO =
     == Command ==
     - Use completion for comfort.
     :tw[ittperator] -getPIN
-        Opens the page to authorize twittperator and get your PIN from Twitter
+        Opens the page to authorize Twittperator and get your PIN from Twitter.
     :tw[ittperator] -setPIN {PINcode}
         Allows Twittperator to access Twitter by signifying your PIN.
 
     :tw[ittperator]
-        Shows recent your timeline. ( The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter. )
+        Shows recent your timeline. (The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter.)
     :tw[ittperator]!
         Gets recent your timeline from Twitter and shows it.
     :tw[ittperator]!@user
@@ -72,7 +72,7 @@ let PLUGIN_INFO =
         :tw -getPIN
     ||<
     and you will get the page to authorize Twittperator to access Twitter in a new tab.
-    If you allow and you will get the PIN ( 7 digits numbers ), then yank it.
+    If you allow and you will get the PIN (7 digit numbers), then yank it.
 
     Secondarily, authorize Twittperator with your PIN.
     >||
@@ -279,7 +279,7 @@ let PLUGIN_INFO =
             }
         }
         return into;
-    }
+    };
 
     OAuth.setProperties(OAuth, // utility functions
     {
@@ -306,8 +306,7 @@ let PLUGIN_INFO =
             s = s.replace(/\(/g, "%28");
             s = s.replace(/\)/g, "%29");
             return s;
-        }
-    ,
+        },
         decodePercent: function decodePercent(s) {
             if (s != null) {
                 // Handle application/x-www-form-urlencoded, which is defined by
@@ -315,8 +314,7 @@ let PLUGIN_INFO =
                 s = s.replace(/\+/g, " ");
             }
             return decodeURIComponent(s);
-        }
-    ,
+        },
         /** Convert the given parameters to an Array of name-value pairs. */
         getParameterList: function getParameterList(parameters) {
             if (parameters == null) {
@@ -333,8 +331,7 @@ let PLUGIN_INFO =
                 list.push([p, parameters[p]]);
             }
             return list;
-        }
-    ,
+        },
         /** Convert the given parameters to a map from name to value. */
         getParameterMap: function getParameterMap(parameters) {
             if (parameters == null) {
@@ -354,8 +351,7 @@ let PLUGIN_INFO =
                 return map;
             }
             return parameters;
-        }
-    ,
+        },
         getParameter: function getParameter(parameters, name) {
             if (!parameters instanceof Array) {
                 return OAuth.getParameterMap(parameters)[name];
@@ -366,8 +362,7 @@ let PLUGIN_INFO =
                 }
             }
             return null;
-        }
-    ,
+        },
         formEncode: function formEncode(parameters) {
             var form = "";
             var list = OAuth.getParameterList(parameters);
@@ -379,8 +374,7 @@ let PLUGIN_INFO =
                   +"="+ OAuth.percentEncode(value);
             }
             return form;
-        }
-    ,
+        },
         decodeForm: function decodeForm(form) {
             var list = [];
             var nvps = form.split("&");
@@ -402,8 +396,7 @@ let PLUGIN_INFO =
                 list.push([name, value]);
             }
             return list;
-        }
-    ,
+        },
         setParameter: function setParameter(message, name, value) {
             var parameters = message.parameters;
             if (parameters instanceof Array) {
@@ -425,19 +418,18 @@ let PLUGIN_INFO =
                 parameters[name] = value;
                 message.parameters = parameters;
             }
-        }
-    ,
+        },
         setParameters: function setParameters(message, parameters) {
             var list = OAuth.getParameterList(parameters);
             for (var i = 0; i < list.length; ++i) {
                 OAuth.setParameter(message, list[i][0], list[i][1]);
             }
-        }
-    ,
+        },
         /** Fill in parameters to help construct a request message.
             This function doesn't fill in every parameter.
             The accessor object should be like:
-            {consumerKey:"foo", consumerSecret:"bar", accessorSecret:"nurn", token:"krelm", tokenSecret:"blah"}
+            { consumerKey: "foo", consumerSecret: "bar", accessorSecret: "nurn",
+              token: "krelm", tokenSecret: "blah" }
             The accessorSecret property is optional.
          */
         completeRequest: function completeRequest(message, accessor) {
@@ -461,13 +453,11 @@ let PLUGIN_INFO =
                 OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
             }
             OAuth.SignatureMethod.sign(message, accessor);
-        }
-    ,
+        },
         setTimestampAndNonce: function setTimestampAndNonce(message) {
             OAuth.setParameter(message, "oauth_timestamp", OAuth.timestamp());
             OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
-        }
-    ,
+        },
         addToURL: function addToURL(url, parameters) {
             newURL = url;
             if (parameters != null) {
@@ -480,8 +470,7 @@ let PLUGIN_INFO =
                 }
             }
             return newURL;
-        }
-    ,
+        },
         /** Construct the value of the Authorization header for an HTTP request. */
         getAuthorizationHeader: function getAuthorizationHeader(realm, parameters) {
             var header = 'OAuth realm="' + OAuth.percentEncode(realm) + '"';
@@ -494,8 +483,7 @@ let PLUGIN_INFO =
                 }
             }
             return header;
-        }
-    ,
+        },
         /** Correct the time using a parameter from the URL from which the last script was loaded. */
         correctTimestampFromSrc: function correctTimestampFromSrc(parameterName) {
             parameterName = parameterName || "oauth_timestamp";
@@ -509,21 +497,17 @@ let PLUGIN_INFO =
             var t = parameters[parameterName];
             if (t == null) return;
             OAuth.correctTimestamp(t);
-        }
-    ,
+        },
         /** Generate timestamps starting with the given value. */
         correctTimestamp: function correctTimestamp(timestamp) {
             OAuth.timeCorrectionMsec = (timestamp * 1000) - (new Date()).getTime();
-        }
-    ,
+        },
         /** The difference between the correct time and my clock. */
-        timeCorrectionMsec: 0
-    ,
+        timeCorrectionMsec: 0,
         timestamp: function timestamp() {
             var t = (new Date()).getTime() + OAuth.timeCorrectionMsec;
             return Math.floor(t / 1000);
-        }
-    ,
+        },
         nonce: function nonce(length) {
             var chars = OAuth.nonce.CHARS;
             var result = "";
@@ -566,8 +550,7 @@ let PLUGIN_INFO =
             var signature = this.getSignature(baseString);
             OAuth.setParameter(message, "oauth_signature", signature);
             return signature; // just in case someone's interested
-        }
-    ,
+        },
         /** Set the key string for signing. */
         initialize: function initialize(name, accessor) {
             var consumerSecret;
@@ -585,7 +568,8 @@ let PLUGIN_INFO =
     });
 
     /* SignatureMethod expects an accessor object to be like this:
-       {tokenSecret: "lakjsdflkj...", consumerSecret: "QOUEWRI..", accessorSecret: "xcmvzc..."}
+         { tokenSecret: "lakjsdflkj...", consumerSecret: "QOUEWRI..",
+           accessorSecret: "xcmvzc..." }
        The accessorSecret property is optional.
      */
     // Class members:
@@ -598,8 +582,7 @@ let PLUGIN_INFO =
                 OAuth.setParameter(message, "oauth_signature_method", name);
             }
             OAuth.SignatureMethod.newMethod(name, accessor).sign(message);
-        }
-    ,
+        },
         /** Instantiate a SignatureMethod for the given method name. */
         newMethod: function newMethod(name, accessor) {
             var impl = OAuth.SignatureMethod.REGISTERED[name];
@@ -616,11 +599,9 @@ let PLUGIN_INFO =
             }
             err.oauth_acceptable_signature_methods = acceptable;
             throw err;
-        }
-    ,
+        },
         /** A map from signature method name to constructor. */
-        REGISTERED : {}
-    ,
+        REGISTERED: {},
         /** Subsequently, the given constructor will be used for the named methods.
             The constructor will be called with no parameters.
             The resulting object should usually implement getSignature(baseString).
@@ -630,8 +611,7 @@ let PLUGIN_INFO =
             for (var n = 0; n < names.length; ++n) {
                 OAuth.SignatureMethod.REGISTERED[names[n]] = classConstructor;
             }
-        }
-    ,
+        },
         /** Create a subclass of OAuth.SignatureMethod, with the given getSignature function. */
         makeSubclass: function makeSubclass(getSignatureFunction) {
             var superClass = OAuth.SignatureMethod;
@@ -644,8 +624,7 @@ let PLUGIN_INFO =
             subClass.prototype.getSignature = getSignatureFunction;
             subClass.prototype.constructor = subClass;
             return subClass;
-        }
-    ,
+        },
         getBaseString: function getBaseString(message) {
             var URL = message.action;
             var q = URL.indexOf("?");
@@ -663,8 +642,7 @@ let PLUGIN_INFO =
             return OAuth.percentEncode(message.method.toUpperCase())
              +"&"+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeUrl(URL))
              +"&"+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeParameters(parameters));
-        }
-    ,
+        },
         normalizeUrl: function normalizeUrl(url) {
             var uri = OAuth.SignatureMethod.parseUri(url);
             var scheme = uri.protocol.toLowerCase();
@@ -672,7 +650,7 @@ let PLUGIN_INFO =
             var dropPort = (scheme == "http" && uri.port == 80)
                         || (scheme == "https" && uri.port == 443);
             if (dropPort) {
-                // find the last : in the authority
+                // find the last ":" in the authority
                 var index = authority.lastIndexOf(":");
                 if (index >= 0) {
                     authority = authority.substring(0, index);
@@ -684,21 +662,23 @@ let PLUGIN_INFO =
             }
             // we know that there is no query and no fragment here.
             return scheme + "://" + authority + path;
-        }
-    ,
+        },
         parseUri: function parseUri(str) {
             /* This function was adapted from parseUri 1.2.1
                http://stevenlevithan.com/demo/parseuri/js/assets/parseuri.js
              */
-            var o = {key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-                     parser: {strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/ }};
+            var o = {
+              key: ["source", "protocol", "authority", "userInfo", "user",
+                    "password", "host", "port", "relative", "path", "directory",
+                    "file", "query", "anchor"],
+              parser: { strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/ }
+            };
             var m = o.parser.strict.exec(str);
             var uri = {};
             var i = 14;
             while (i--) uri[o.key[i]] = m[i] || "";
             return uri;
-        }
-    ,
+        },
         normalizeParameters: function normalizeParameters(parameters) {
             if (parameters == null) {
                 return "";
@@ -710,11 +690,11 @@ let PLUGIN_INFO =
                 if (nvp[0] != "oauth_signature") {
                     sortable.push([ OAuth.percentEncode(nvp[0])
                                   + " " // because it comes before any character that can appear in a percentEncoded string.
-                                  + OAuth.percentEncode(nvp[1])
-                                  , nvp]);
+                                  + OAuth.percentEncode(nvp[1]),
+                                  nvp]);
                 }
             }
-            sortable.sort(function(a,b) {
+            sortable.sort(function(a, b) {
                               if (a[0] < b[0]) return -1;
                               if (a[0] > b[0]) return 1;
                               return 0;
@@ -728,20 +708,14 @@ let PLUGIN_INFO =
     });
 
     OAuth.SignatureMethod.registerMethodClass(["PLAINTEXT", "PLAINTEXT-Accessor"],
-        OAuth.SignatureMethod.makeSubclass(
-            function getSignature(baseString) {
-                return this.key;
-            }
-        ));
+        OAuth.SignatureMethod.makeSubclass(function getSignature(baseString) this.key));
 
     OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
-        OAuth.SignatureMethod.makeSubclass(
-            function getSignature(baseString) {
-                b64pad = "=";
-                var signature = b64_hmac_sha1(this.key, baseString);
-                return signature;
-            }
-        ));
+        OAuth.SignatureMethod.makeSubclass(function getSignature(baseString) {
+            b64pad = "=";
+            var signature = b64_hmac_sha1(this.key, baseString);
+            return signature;
+        }));
 
     // oauth.js 2}}}
     // {{{2 sha1.js
@@ -960,12 +934,12 @@ let PLUGIN_INFO =
         }
       },
       // temp for request
-      request : {
-        token :"",// response oauth_token
+      request: {
+        token :"", // response oauth_token
         tokenSecret: ""// response oauth_token_secret
       },
       // トークンが取得済みかの真偽値を返す
-      isAuthorize : function() {
+      isAuthorize: function() {
         let accessor = this.getAccessor();
         if (accessor.consumerKey && accessor.consumerSecret &&
             accessor.token && accessor.tokenSecret) {
@@ -975,17 +949,17 @@ let PLUGIN_INFO =
       },
       getAccessor: function() {
         return {
-          consumerKey: this.accessor.get("consumerKey",""),
-          consumerSecret: this.accessor.get("consumerSecret",""),
-          token: this.accessor.get("token",""),
-          tokenSecret: this.accessor.get("tokenSecret","")
+          consumerKey: this.accessor.get("consumerKey", ""),
+          consumerSecret: this.accessor.get("consumerSecret", ""),
+          token: this.accessor.get("token", ""),
+          tokenSecret: this.accessor.get("tokenSecret", "")
         };
       },
-      deleteAccessor : function() {
+      deleteAccessor: function() {
         var clientInfo = {
           clientName: this.accessor.get("clientName", ""),
-          consumerKey: this.accessor.get("consumerKey",""),
-          consumerSecret: this.accessor.get("consumerSecret",""),
+          consumerKey: this.accessor.get("consumerKey", ""),
+          consumerSecret: this.accessor.get("consumerSecret", ""),
         };
         this.accessor.clear();
         this.accessor.set("clientName", clientInfo.clientName);
@@ -993,13 +967,13 @@ let PLUGIN_INFO =
         this.accessor.set("consumerSecret", clientInfo.consumerSecret);
       },
       // 認証ページのURLを取得
-      getRequestToken : function(callback) {
+      getRequestToken: function(callback) {
         let message = {
           method: "GET",
           action: "https://twitter.com/oauth/request_token",
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey","")
+            oauth_consumer_key: this.accessor.get("consumerKey", "")
           }
         };
         OAuth.setTimestampAndNonce(message);
@@ -1034,14 +1008,14 @@ let PLUGIN_INFO =
           self.initialize();
         });
       },
-      // pinを元にAccess Tokenを取得して保存、callbackにはaccessorオブジェクトを渡す
+      // PINを元にaccess tokenを取得して保存、callbackにはaccessorオブジェクトを渡す
       getAccessToken: function(pin, callback) {
         var message = {
           method: "GET",
           action: "https://twitter.com/oauth/access_token",
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey",""),
+            oauth_consumer_key: this.accessor.get("consumerKey", ""),
             oauth_token: this.request.token, // Request Token
             oauth_verifier: pin
           }
@@ -1055,7 +1029,7 @@ let PLUGIN_INFO =
           url: target,
           onload: function(d) {
             if (d.status == 200) {
-              /* 返り値からAccess Token/Access Token Secretを取り出す */
+              /* 返り値からaccess token/access token secretを取り出す */
               var res = d.responseText;
               var parameter = self.getParameter(res);
               self.accessor.set("token", parameter["oauth_token"]);
@@ -1075,14 +1049,14 @@ let PLUGIN_INFO =
       },
       // api+?+query にアクセスした結果をcallbackに渡す
       get: function(api, query, callback) {
-        var btquery = (query)? "?"+this.buildQuery(query) : "";
+        var btquery =  query ? "?" + this.buildQuery(query) : "";
         var message = {
           method: "GET",
-          action: api + btquery,
+          action: setting.apiURLBase + api + btquery,
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey",""),// queryの構築
-            oauth_token: this.accessor.get("token","") // Access Token
+            oauth_consumer_key: this.accessor.get("consumerKey", ""), // Queryの構築
+            oauth_token: this.accessor.get("token", "") // Access token
           }
         };
         OAuth.setTimestampAndNonce(message);
@@ -1106,15 +1080,15 @@ let PLUGIN_INFO =
       post: function(api, content, callback) {
         var message = {
           method: "POST",
-          action: api,
+          action: setting.apiURLBase + api,
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey",""),
-            oauth_token: this.accessor.get("token","") // Access Token
+            oauth_consumer_key: this.accessor.get("consumerKey", ""),
+            oauth_token: this.accessor.get("token", "") // Access token
           }
         };
         // 送信するデータをパラメータに追加する
-        for ( var key in content ) {
+        for (var key in content) {
           message.parameters[key] = content[key];
         }
         OAuth.setTimestampAndNonce(message);
@@ -1136,14 +1110,75 @@ let PLUGIN_INFO =
         };
         Utils.xmlhttpRequest(options); // 送信
       },
+      put: function(api, content, callback) {
+        var message = {
+          method: "PUT",
+          action: setting.apiURLBase + api,
+          parameters: {
+            oauth_signature_method: "HMAC-SHA1",
+            oauth_consumer_key: this.accessor.get("consumerKey", ""),
+            oauth_token: this.accessor.get("token", "") // Access token
+          }
+        };
+        // 送信するデータをパラメータに追加する
+        for (var key in content) {
+          message.parameters[key] = content[key];
+        }
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, this.getAccessor());
+        var target = OAuth.addToURL(message.action, message.parameters);
+        var options = {
+          method: message.method,
+          url: target,
+          onload: function(d) {
+            if (d.status == 200) {
+              if (callback) {
+                  callback(d.responseText);
+              }
+            } else {
+              callback(d);
+            }
+          }
+        };
+        Utils.xmlhttpRequest(options); // 送信
+      },
+      delete: function(api, content, callback) {
+        var btquery =  query ? "?" + this.buildQuery(query) : "";
+        var message = {
+          method: "DELETE",
+          action: setting.apiURLBase + api + btquery,
+          parameters: {
+            oauth_signature_method: "HMAC-SHA1",
+            oauth_consumer_key: this.accessor.get("consumerKey", ""), // Queryの構築
+            oauth_token: this.accessor.get("token", "") // Access token
+          }
+        };
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, this.getAccessor());
+        var target = OAuth.addToURL(message.action, message.parameters);
+        var options = {
+          method: message.method,
+          url: target,
+          onload: function(d) {
+            if (d.status == 200) {
+              if (callback) {
+                  callback(d.responseText);
+              }
+            }else{
+              callback(d.statusText);
+            }
+          },
+        };
+        Utils.xmlhttpRequest(options); // 送信
+      },
       getAuthorizationHeader: function(api) {
         var message = {
           method: "GET",
           action: api,
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey",""),// queryの構築
-            oauth_token: this.accessor.get("token",""), // Access Token
+            oauth_consumer_key: this.accessor.get("consumerKey", ""), // Queryの構築
+            oauth_token: this.accessor.get("token", ""), // Access token
             oauth_version: "1.0"
           }
         };
@@ -1151,19 +1186,19 @@ let PLUGIN_INFO =
         OAuth.SignatureMethod.sign(message, this.getAccessor());
         return OAuth.getAuthorizationHeader("Twitter", message.parameters);
       },
-      // utility関数
+      // Utility関数
       // http://kevin.vanzonneveld.net
-      urlEncode : function(str) {
+      urlEncode: function(str) {
         str = (str+"").toString();
         return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28")
                                       .replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
       },
       // オブジェクトからクエリを生成
-      buildQuery : function(formdata, numeric_prefix, arg_separator) {
-        // * example 1: http_build_query({foo: "bar", php: "hypertext processor", baz: "boom", cow: "milk"}, "", "&amp;");
-        // * returns 1: "foo=bar&amp;php=hypertext+processor&amp;baz=boom&amp;cow=milk"
-        // * example 2: http_build_query({"php": "hypertext processor", 0: "foo", 1: "bar", 2: "baz", 3: "boom", "cow": "milk"}, "myvar_");
-        // * returns 2: "php=hypertext+processor&myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk"
+      buildQuery: function(formdata, numeric_prefix, arg_separator) {
+        // * example 1: http_build_query({ foo: "bar", php: "Hypertext Processor", baz: "boom", cow: "milk" }, "", "&amp;");
+        // * returns 1: "foo=bar&amp;php=Hypertext+Processor&amp;baz=boom&amp;cow=milk"
+        // * example 2: http_build_query({ "PHP": "Hypertext Processor", 0: "foo", 1: "bar", 2: "baz", 3: "boom", "cow": "milk" }, "myvar_");
+        // * returns 2: "PHP=Hypertext+Processor&myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk"
         var value, key, tmp = [];
         var self = this;
         var _http_build_query_helper = function(key, val, arg_separator) {
@@ -1200,28 +1235,27 @@ let PLUGIN_INFO =
 
         return tmp.join(arg_separator);
       },
-      // Query String から 連想配列を返す
+      // Query string から 連想配列を返す
       getParameter: function(str) {
-        var dec = decodeURIComponent;
-        var par = {}, itm;
-        if (typeof str == "undefined") return par;
-        if (str.indexOf("?", 0) > -1) str = str.split("?")[1];
-        str = str.split("&");
-        for (var i = 0; str.length > i; i++) {
-          itm = str[i].split("=");
-          if (itm[0] != "") {
-            par[itm[0]] = typeof itm[1] == "undefined" ? true : dec(itm[1]);
+        if (typeof str == "undefined") return {};
+        var itm;
+        if (str.indexOf("?", 0) > -1) str = str.split("?", 2)[1];
+        var regex = str.indexOf("&") > str.indexOf(";") ? /;+/ : /&+/;
+        return str.split(regex).reduce(function(r, v) {
+          var kv = v.split("=", 2);
+          if (kv[0] != "") {
+            r[kv[0]] = typeof kv[1] == "undefined" ? true : decodeURIComponent(kv[1]);
           }
-        }
-        return par;
-     }
-   };
-   return p;
+          return r;
+        }, {});
+      }
+    };
+    return p;
   })();
   // }}}
 
   // Twittperator
-  function Stream({host, path}) { // {{{
+  function Stream({ host, path }) { // {{{
     function extractURL(s)
       let (m = s.match(/https?:\/\/\S+/))
         (m && m[0]);
@@ -1234,9 +1268,9 @@ let PLUGIN_INFO =
       stop();
 
       if (restartCount > 13)
-        return liberator.echoerr('Twittperator: Gave up to connect to ChirpUserStream...');
+        return liberator.echoerr("Twittperator: Gave up to connect to ChirpUserStream...");
 
-      liberator.echoerr('Twittperator: ChirpUserStream will be restared...');
+      liberator.echoerr("Twittperator: ChirpUserStream will be restared...");
 
       // 試行済み回数^2 秒後にリトライ
       setTimeout(start, Math.pow(2, restartCount) * 1000);
@@ -1289,7 +1323,7 @@ let PLUGIN_INFO =
         socketService.createTransport(
           null, 0,
           useProxy ? setting.proxyHost : host,
-          useProxy ? parseInt(setting.proxyPort || '3128', 10) : 80,
+          useProxy ? parseInt(setting.proxyPort || "3128", 10) : 80,
           null);
       let os = transport.openOutputStream(0, 0, 0);
       let is = transport.openInputStream(0, 0, 0);
@@ -1319,7 +1353,7 @@ let PLUGIN_INFO =
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                if (/^\s*\{/(line))
+                if (/^[ \n\r\t]*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
               } catch (e) { liberator.log(e); }
             }
@@ -1327,11 +1361,11 @@ let PLUGIN_INFO =
           } else {
             buf += data;
           }
-        } catch (e if /^(?:NS_ERROR_NET_RESET|NS_BASE_STREAM_CLOSED)$/(e)) {
-          liberator.echoerr('Twittperator: ChirpStream was stopped by ' + e.name + '.');
+        } catch (e if /^NS_(?:ERROR_NET_RESET|BASE_STREAM_CLOSED)$/(e)) {
+          liberator.echoerr("Twittperator: ChirpStream was stopped by " + e.name + ".");
           restart();
         } catch (e) {
-          liberator.echoerr('Twittperator: Unknown error on ChirpStream connection: ' + e.name);
+          liberator.echoerr("Twittperator: Unknown error on ChirpStream connection: " + e.name);
           restart();
         }
       }, 500);
@@ -1367,16 +1401,16 @@ let PLUGIN_INFO =
       clearPluginData: clearPluginData
     };
   }; // }}}
-  let ChirpUserStream = Stream({host: "chirpstream.twitter.com", path: "/2b/user.json"});
+  let ChirpUserStream = Stream({ host: "chirpstream.twitter.com", path: "/2b/user.json" });
   let Twitter = { // {{{
     destroy: function(id) { // {{{
-      tw.post("http://api.twitter.com/1/statuses/destroy/" + id + ".json", null, function(text) {
+      tw.delete("statuses/destroy/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("delete: " + res.user.name + " " + res.text)
       });
     }, // }}}
     favorite: function(id) { // {{{
-      tw.post("http://api.twitter.com/1/favorites/create/" + id + ".json", null, function(text) {
+      tw.post("favorites/create/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
@@ -1392,10 +1426,10 @@ let PLUGIN_INFO =
       if (!force && !expiredStatus && history.length > 0) {
         onload(history);
       } else {
-        let api = "http://api.twitter.com/1/statuses/home_timeline.json", query = {};
+        let api = "statuses/home_timeline.json", query = {};
 
         if (target) {
-          api = "http://api.twitter.com/1/statuses/user_timeline.json";
+          api = "statuses/user_timeline.json";
           query.screen_name = target;
         } else {
           query = null;
@@ -1429,13 +1463,13 @@ let PLUGIN_INFO =
     say: function(stat) { // {{{
       let sendData = {};
       let prefix, replyUser, replyID, postfix;
-      if (stat.match(/^(.*)@([^\s#]+)(?:#(\d+))(.*)$/)) {
+      if (stat.match(/^(.*)@(\w{1,15})#(\d+)(.*)$/)) {
         [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
         if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
           Twittperator.withProtectedUserConfirmation(
-            {screenName: replyUser, statusId: replyID},
-            'retweet',
-            function() Twitter.reTweet(replyID)
+            { screenName: replyUser, statusId: replyID },
+            "retweet",
+            function() Twitter.retweet(replyID)
           );
           return;
         }
@@ -1444,27 +1478,27 @@ let PLUGIN_INFO =
           sendData.in_reply_to_status_id = replyID;
       }
       Twittperator.withProtectedUserConfirmation(
-        {screenName: replyUser, statusId: replyID},
-        'reply',
+        { screenName: replyUser, statusId: replyID },
+        "reply",
         function() {
           sendData.status = stat;
           sendData.source = "Twittperator";
-          tw.post("http://api.twitter.com/1/statuses/update.json", sendData, function(text) {
+          tw.post("statuses/update.json", sendData, function(text) {
             let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
             Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
           });
         }
       );
     }, // }}}
-    reTweet: function(id) { // {{{
-      let url = "http://api.twitter.com/1/statuses/retweet/" + id + ".json";
-      tw.post(url, null, function(text) {
+    retweet: function(id) { // {{{
+      let url = "statuses/retweet/" + id + ".json";
+      tw.put(url, null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
-        Twittperator.echo("ReTweet: " + res.retweeted_status.text);
+        Twittperator.echo("Retweet: " + res.retweeted_status.text);
       });
     }, // }}}
     unfavorite: function(id) { // {{{
-      tw.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json", null, function(text) {
+      tw.delete("favorites/destroy/" + id + ".json", null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
@@ -1479,27 +1513,30 @@ let PLUGIN_INFO =
         let center = m[0];
         let [head, tail] = [center[0], center.slice(1)];
         let right = str.substring(m.index + m[0].length);
-        let content = head === "@" ? <a highlight="URL" href={"http://twitter.com/" + tail}> {center} </a>
-                                   : <a highlight="URL" href={center}> {center} </a>
+        let content = head === "@" ? <a highlight="URL" href={setting.showTLURLScheme + "://twitter.com/" + tail}> {center} </a>
+                                   : <a highlight="URL" href={center}> {center} </a>;
         return <>{Utils.anchorLink(left)}{content}{Utils.anchorLink(right)}</>;
       }
       return str;
     }, // }}}
     fixStatusObject: function(st) { // {{{
-      const Amps = {
+      const ENTITIY_PAIRS = {
         lt: "<",
         gt: ">",
-        quot: "\"",
+        quot: '"'
         hellip: "\u2026",
       };
 
-      function unescapeAmps(str)
-        str.replace(/&([^;]+);/g, function(m, n) Amps[n] || m);
+      function unescapeSpecificEntities(str)
+        str.replace(/&([a-z\d]+);/g, function(m, n) ENTITIY_PAIRS[n] || m);
+
+      function unescapeBrakets(str)
+        str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
       let result = {};
       for (let [n, v] in Iterator(st)) {
-        result[n] = v && typeof v === 'object' ? Utils.fixStatusObject(v) :
-                    n === 'text'               ? unescapeAmps(v) :
+        result[n] = v && typeof v === "object" ? Utils.fixStatusObject(v) :
+                    n === "text"               ? unescapeBrakets(v) :
                     v;
       }
       return result;
@@ -1519,13 +1556,7 @@ let PLUGIN_INFO =
     echo: function(msg) { // {{{
       liberator.echo("[Twittperator] " + msg);
     }, // }}}
-    isProtected: function({statusId, userId, screenName}) { // {{{
-      function isp(f) {
-        let r;
-        history.some(function(st) f(st) && (r = st));
-        return r && r.user.protected && r.user.screen_name;
-      }
-
+    isProtected: function({ statusId, userId, screenName }) { // {{{
       if (screenName && isp(function(st) st.user && st.user.screen_name == screenName))
         return true;
 
@@ -1536,6 +1567,12 @@ let PLUGIN_INFO =
         return true;
 
       return false;
+
+      function isp(f) {
+        let r;
+        history.some(function(st) f(st) && (r = st));
+        return (r && r.user.protected && r.user.screen_name) ? true : false;
+      }
     }, // }}}
     loadPlugins: function() { // {{{
       function isEnabled(file)
@@ -1636,7 +1673,7 @@ let PLUGIN_INFO =
       liberator.echo(html, true);
     }, // }}}
     showTwitterMentions: function(arg) { // {{{
-      tw.get("http://api.twitter.com/1/statuses/mentions.json", null, function(text) {
+      tw.get("statuses/mentions.json", null, function(text) {
         Twittperator.showTL(JSON.parse(text).map(Utils.fixStatusObject));
       });
     }, // }}}
@@ -1678,13 +1715,13 @@ let PLUGIN_INFO =
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
       function canceled()
-        Twittperator.echo('Canceled.');
+        Twittperator.echo("Canceled.");
 
       let protectedUserName = Twittperator.isProtected(check);
       if (protectedUserName) {
         commandline.input(
-          protectedUserName + ' is protected user! Do you really want to ' + actionName + '? Input "yes" if you want. => ',
-          function(s) (s === 'yes' ? action : canceled)(),
+          protectedUserName + " is protected user! Do you really want to " + actionName + '? Input "yes" if you want. => ',
+          function(s) (s === "yes" ? action : canceled)(),
           {
             onCancel: canceled
           }
@@ -1733,15 +1770,15 @@ let PLUGIN_INFO =
         __proto__: init,
         get expr() {
           return RegExp(
-            '^' +
+            "^" +
             this.command.map(function(c)
               let (r = util.escapeRegex(c))
-                (/^\W$/(c) ? r : r + ' ')
-            ).join("|" /* /|/ */)
+                (/^\W$/(c) ? r : r + " ")
+            ).join("|")
           );
         },
         match: function(s) s.match(this.expr),
-        action: function(args) init.action(args.literalArg.replace(this.expr, '').trim())
+        action: function(args) init.action(args.literalArg.replace(this.expr, "").trim())
       };
     };
 
@@ -1770,7 +1807,7 @@ let PLUGIN_INFO =
         command: ["@"],
         description: "Show mentions or follower tweets",
         action: function(arg) {
-          if (arg.match(/^.+/)) {
+          if (arg.length > 0) {
             Twittperator.showFollowersStatus(arg, true);
           } else {
             Twittperator.showTwitterMentions();
@@ -1903,7 +1940,7 @@ let PLUGIN_INFO =
       if (!args.bang || args.literalArg.match(/^(\W|\S+\s)/))
         return;
       context.title = ["Sub command", "Description"];
-      context.completions = SubCommands.map(function({command, description}) [command[0], description]);
+      context.completions = SubCommands.map(function({ command, description }) [command[0], description]);
     } // }}}
 
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command", // {{{
@@ -1986,7 +2023,9 @@ let PLUGIN_INFO =
       showTLURLScheme: let (v = gv.twittperator_show_tl_with_https_url) ("http" + (v === false ? "" : "s")),
       proxyHost: gv.twittperator_proxy_host,
       proxyPort: gv.twittperator_proxy_port,
-      screenName: gv.twittperator_screen_name
+      screenName: gv.twittperator_screen_name,
+      apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
+                  "://api.twitter.com/" + (gv.twittperator_twitter_api_version || 1)  + "/",
     });
 
   let statusRefreshTimer;
