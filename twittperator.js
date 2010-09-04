@@ -1523,8 +1523,8 @@ let PLUGIN_INFO =
       const ENTITIY_PAIRS = {
         lt: "<",
         gt: ">",
-        quot: '"'
-        hellip: "\u2026",
+        quot: '"',
+        hellip: "\u2026"
       };
 
       function unescapeSpecificEntities(str)
