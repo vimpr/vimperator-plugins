@@ -47,11 +47,20 @@ let PLUGIN_INFO =
   <minVersion>2.4</minVersion>
   <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
-    ----
+    == Configuration sample ==
+    >||
+let g:gmail_commando_map_translate = "<Leader>t"
+let g:gmail_commando_map_translate_thread = "<Leader>T"
+let g:gmail_commando_map_fold = "<Leader>f"
+let g:gmail_commando_map_unfold = "<Leader>F"
+let g:gmail_commando_map_important = "<Leader>i"
+let g:gmail_commando_map_unimportant = "<Leader>I"
+let g:gmail_commando_label_shortcut = 1
+    ||<
   ]]></detail>
   <detail lang="ja"><![CDATA[
     Gmail 用の便利なマッピングを提供します。
-    = 設定例 =
+    == 設定例 ==
     >||
 let g:gmail_commando_map_translate = "<Leader>t"
 let g:gmail_commando_map_translate_thread = "<Leader>T"
