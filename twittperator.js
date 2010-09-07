@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.2.3.4.5.6.7.8.9.10.11.12.13</version>
+  <version>1.4.3.8.0.3.8.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1110,38 +1110,6 @@ let PLUGIN_INFO =
         };
         Utils.xmlhttpRequest(options); // 送信
       },
-      put: function(api, content, callback) {
-        var message = {
-          method: "PUT",
-          action: setting.apiURLBase + api,
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.get("consumerKey", ""),
-            oauth_token: this.accessor.get("token", "") // Access token
-          }
-        };
-        // 送信するデータをパラメータに追加する
-        for (var key in content) {
-          message.parameters[key] = content[key];
-        }
-        OAuth.setTimestampAndNonce(message);
-        OAuth.SignatureMethod.sign(message, this.getAccessor());
-        var target = OAuth.addToURL(message.action, message.parameters);
-        var options = {
-          method: message.method,
-          url: target,
-          onload: function(d) {
-            if (d.status == 200) {
-              if (callback) {
-                  callback(d.responseText);
-              }
-            } else {
-              callback(d);
-            }
-          }
-        };
-        Utils.xmlhttpRequest(options); // 送信
-      },
       delete: function(api, content, callback) {
         var btquery =  query ? "?" + this.buildQuery(query) : "";
         var message = {
@@ -1492,7 +1460,7 @@ let PLUGIN_INFO =
     }, // }}}
     retweet: function(id) { // {{{
       let url = "statuses/retweet/" + id + ".json";
-      tw.put(url, null, function(text) {
+      tw.post(url, null, function(text) {
         let res = Utils.fixStatusObject(JSON.parse(text));
         Twittperator.echo("Retweet: " + res.retweeted_status.text);
       });
