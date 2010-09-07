@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.3.7</version>
+  <version>1.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -50,7 +50,17 @@ let PLUGIN_INFO =
     ----
   ]]></detail>
   <detail lang="ja"><![CDATA[
-    ----
+    Gmail 用の便利なマッピングを提供します。
+    = 設定例 =
+    >||
+let g:gmail_commando_map_translate = "<Leader>t"
+let g:gmail_commando_map_translate_thread = "<Leader>T"
+let g:gmail_commando_map_fold = "<Leader>f"
+let g:gmail_commando_map_unfold = "<Leader>F"
+let g:gmail_commando_map_important = "<Leader>i"
+let g:gmail_commando_map_unimportant = "<Leader>I"
+let g:gmail_commando_label_shortcut = 1
+    ||<
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -288,7 +298,12 @@ let INFO =
       buffer.followLink(show());
 
       return A(result);
-    }
+    },
+
+    get importantButton ()
+      Elements.doc.querySelectorAll('.NRYPqe > .J-Zh-I.J-J5-Ji.J-Zh-I.J-Zh-I-Js-Zj.J-Zh-I-KE')[2],
+    get unimportantButton ()
+      Elements.doc.querySelectorAll('.NRYPqe > .J-Zh-I.J-J5-Ji.J-Zh-I.J-Zh-I-Js-Zq')[2]
   };
 
   //'.J-M-JJ > input'
@@ -334,7 +349,9 @@ let INFO =
           buffer.followLink(e);
           liberator.log('pressed: ' + e.textContent);
       });
-    }
+    },
+    important: function () buffer.followLink(Elements.importantButton),
+    unimportant: function () buffer.followLink(Elements.unimportantButton)
   };
 
 
@@ -435,7 +452,7 @@ let INFO =
   );
 
 
-  'translate translateThread fold unfold'.split(/\s/).forEach(function (cmd) {
+  'translate translateThread fold unfold important unimportant'.split(/\s/).forEach(function (cmd) {
     let gv =
       liberator.globalVariables[
         'gmail_commando_map_' +
