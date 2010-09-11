@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.3.8.0.3.8.0</version>
+  <version>1.4.4</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1110,7 +1110,7 @@ let PLUGIN_INFO =
         };
         Utils.xmlhttpRequest(options); // 送信
       },
-      delete: function(api, content, callback) {
+      delete: function(api, query, callback) {
         var btquery =  query ? "?" + this.buildQuery(query) : "";
         var message = {
           method: "DELETE",
