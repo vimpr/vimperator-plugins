@@ -1755,11 +1755,11 @@ let PLUGIN_INFO =
         command: ["+"],
         description: "Fav a tweet",
         action: function(arg) {
-          let m = arg.match(/^.*#(\d+)/);
+          let m = arg.match(/^\d+/);
           if (m)
-            Twitter.favorite(m[1]);
+            Twitter.favorite(m[0]);
         },
-        completer: Completers.name_id_text(rejectMine)
+        completer: Completers.id(rejectMine)
       }),
       SubCommand({
         command: ["-"],
