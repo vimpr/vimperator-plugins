@@ -8,7 +8,7 @@ g:twittperator_plugin_twlist_panel = 1
 
 g:twittperator_screen_name = "<your screen name>"
 
-g:twlist_auto_popup = {0 | 1}
+g:twlist_auto_poup = {0 | 1}
   ツイートがあったときに自動でポップアップするか
 
 g:twlist_popup_time = second
@@ -23,16 +23,19 @@ set [no]showtwlist[!]
 let ID_PANEL    = "twlist-panel",
     ID_TIMELINE = "twlist-timeline",
     ID_MENTION =  "twlist-mentions",
+    ID_DM       = "twlist-dm",
     ID_ROOT =     "twlist-box",
     ID_SPLITTER = "twlist-splitter";
 let rows = 6;
-let timelineBox = null, mentionsBox = null, root = null, panel = null;
-    screenName = null, screenNameReg = null, autoPopup = true, popupTime = 20;
+let timelineBox = null, mentionsBox = null, dmBox = null, panel = null,
+    screenNameReg = null;
 let contextPath = 'liberator.plugins.contexts["'+PATH.replace("\\","\\\\","g")+'"]';
-let baseXML =
+
+let panelXML =
 <panel id="twlist-panel" noautofocus="true" noautohide="true"
        width="500"
        style="background: transparent; border: none;"
+       onpopupshown={contextPath + ".onPopupShown()"}
        xmlns={XUL}>
 <vbox id="twlist-box" flex="1"
       contextmenu="contentAreaContextMenu">
@@ -40,14 +43,17 @@ let baseXML =
     <tabs id="twlist-tabs">
       <tab label="TimeLine"/>
       <tab label="Mentions"/>
+      <tab label="DM"/>
     </tabs>
-    <tabpanels id="twlist-panels" flex="1" style="background: transparent;">
+    <tabpanels id="twlist-panels" flex="1" style="background: transparent;" contextmenu="contentAreaContextMenu">
       <tabpanel flex="1">
-        <richlistbox id={ID_TIMELINE} rows={rows} contextmenu="contentAreaContextMenu"
-                     flex="1" onselect={contextPath + ".onSelect(event)"}/>
+        <richlistbox id={ID_TIMELINE} flex="1" onselect={contextPath + ".onSelect(event)"}/>
       </tabpanel>
       <tabpanel flex="1">
-        <richlistbox id={ID_MENTION} rows={rows} flex="1"/>
+        <richlistbox id={ID_MENTION} flex="1" onselect={contextPath + ".onSelect(event)"}/>
+      </tabpanel>
+      <tabpanel flex="1">
+        <richlistbox id={ID_DM} flex="1" onselect={contextPath + ".onSelect(event)"}/>
       </tabpanel>
     </tabpanels>
   </tabbox>
@@ -59,7 +65,7 @@ function setStyleSheet() {
     TwlistPanel,#twlist-panel,chrome://browser/content/browser.xul {
       -moz-border-radius: 10px;
     }
-    TwlistBox,#twlist-box,chrome://browser/content/browser.xul  max-width: 400px; max-height: 500px;
+    TwlistBox,#twlist-box,chrome://browser/content/browser.xul  max-width: 500px; max-height: 500px;
     TwlistTabs,#twlist-tabs,chrome://browser/content/browser.xul {
       background-color: transparent;
     }
@@ -77,12 +83,16 @@ function setStyleSheet() {
       padding: 0 !important;
     }
     TwlistItemContent,.twlist-item-content,chrome://browser/content/browser.xul {
-      -moz-user-select: -moz-all; border-bottom: solid thin silver;
-      background-color: rgba(240,240,240,0.3);
+      -moz-user-select: -moz-all;
+      padding: 2px;
+      border: solid thin silver;
+      -moz-border-radius: 5px;
+      margin: 0 0 1em 0;
+      background-color: rgba(0,0,0,0.8);
+      color: white;
     }
     TwlistItemContent[selected],.twlist-item-content[selected=true],chrome://browser/content/browser.xul {
-      background-color: #EEE !important;
-      color: -moz-fieldtext !important;
+      background-color: black !important;
     }
     TwlistItemRT,.twlist-item-rt,chrome://browser/content/browser.xul
     TwlistRTMark,.twlist-rt-mark,chrome://browser/content/browser.xul { 
@@ -90,17 +100,19 @@ function setStyleSheet() {
       padding: 2px 5px; margin: 0;
       -moz-border-radius: 4px;
     }
-    TwlistProfileImage,.twlist-profile-iimage,chrome://browser/content/browser.xul
-    TwlistContent,.twlist-content,chrome://browser/content/browser.xul {
-      background-color: rgba(240,240,240,0.9);
+    TwlistProfileImage,.twlist-profile-image,chrome://browser/content/browser.xul {
+      border: thin solid white;
+      -moz-border-radius: 2px;
     }
+    TwlistContent,.twlist-content,chrome://browser/content/browser.xul
     TwlistText,.twlist-text,chrome://browser/content/browser.xul              margin: 2px 1em;
     TwlistTextLabel,.twlist-text>label,chrome://browser/content/browser.xul   margin: 1px 2px 2px 2px !important;
     TwlistMetaInfo,.twlist-metainfo,chrome://browser/content/browser.xul
+    TwlistUserName,.twlist-username,chrome://browser/content/browser.xul
     TwlistScreenName,.twlist-screenname,chrome://browser/content/browser.xul  font-weight: bold;
-    TwlistLink,.twlist-link,chrome://browser/content/browser.xul              color: -moz-hyperlinktext;
+    TwlistLink,.twlist-link,chrome://browser/content/browser.xul              color: cyan;
     TwlistLink:hover,.twlist-link:hover,chrome://browser/content/browser.xul  cursor: pointer !important;
-    TwlistLinkHash,.twlist-hash,chrome://browser/content/browser.xul          color: DarkGreen !important;
+    TwlistLinkHash,.twlist-hash,chrome://browser/content/browser.xul          color: lightgreen !important;
     TwlistLinkUser,.twlist-user,chrome://browser/content/browser.xul
     TwlistLinkURL,.twlist-url,chrome://browser/content/browser.xul
     TwlistImage,.twlist-image,chrome://browser/content/browser.xul            max-height: 300px; border:thin solid 
@@ -116,76 +128,137 @@ function setStyleSheet() {
       -moz-appearance: none !important;
       background-color: transparent !important;
     }
+    .twlist-rt-mark { 
+      color: white; font-weight: bold; background-color: gray;
+      padding: 2px 5px; margin: 0;
+      -moz-border-radius: 4px;
+    }
+    .twlist-reply, .twlist-retweet, .twlist-fav {
+      color: white; font-weight: bold; background-color: gray;
+      padding: 2px; margin:0;
+      -moz-border-radius: 2px;
+    }
+    .twlist-fav {
+      color: yellow;
+    }
   ]]></>.toString());
 }
 
 function add (msg, target) {
   if (!target)
     target = timelineBox;
-  let isRT = ("retweeted_status" in msg);
-  let domContent = formatText(isRT ? msg.retweeted_status.text : msg.text);
+  //let isRT = ("retweeted_status" in msg);
+  //let domContent = formatText(isRT ? msg.retweeted_status.text : msg.text);
   XML.ignoreWhitespace = true;
-  let xml = isRT ?
-  <richlistitem value={msg.id} xmlns={XUL} class="twlist-item-content twlist-item-rt">
-    <vbox class="twlist-profile-image">
-      <image src={msg.retweeted_status.user.profile_image_url} width="32" height="32"/>
-      <spacer flex="1"/>
-    </vbox>
-    <vbox flex="1" class="twlist-content">
-      <hbox>
-        <label value={"\u21BB"} class="twlist-rt-mark"/>
-        <label class="twlist-screenname">{msg.retweeted_status.user.screen_name}</label>
-        <hbox class="twlist-metainfo">
-          <label>{"(" + msg.retweeted_status.user.name + ")"}</label>
-          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
-          <label>{"By " + msg.user.screen_name}</label>
+  let xml;
+  if ("direct_message" in msg) {
+    xml = <richlistitem value={msg.direct_message.id}
+                        searchlabel={msg.direct_message.sender_screen_name}
+                        xmlns={XUL} class="twlist-item-content twlist-item-dm">
+      <vbox class="twlist-profile-image-box">
+        <image src={msg.direct_message.sender.profile_image_url} width="48" height="48" class="twlist-profile-image"/>
+        <spacer flex="1"/>
+      </vbox>
+      <vbox flex="1" class="twlist-content">
+        <hbox>
+          <label class="twlist-screenname">{msg.direct_message.sender.screen_name}</label>
+          <hbox class="twlist-matainfo">
+            <label class="twlist-username">{"(" + msg.direct_message.sender.name + ")"}</label>
+            <label>{(new Date(msg.direct_message.sender.created_at)).toLocaleFormat()}</label>
+          </hbox>
         </hbox>
-      </hbox>
-    </vbox>
-  </richlistitem> :
-  <richlistitem value={msg.id} searchlabel={msg.user.screen_name+"#"+msg.id} xmlns={XUL} class="twlist-item-content">
-    <vbox class="twlist-profile-image">
-      <image src={msg.user.profile_image_url} width="32" height="32"/>
-      <spacer flex="1"/>
-    </vbox>
-    <vbox flex="1" class="twlist-content">
-      <hbox>
-        <label class="twlist-screenname">{msg.user.screen_name}</label>
-        <hbox class="twlist-metainfo">
-          <label>{"(" + msg.user.name + ")"}</label>
-          <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+        {formatText(msg.direct_message.text.replace(/[\01-\10\14\16-\37]/g,""))}
+      </vbox>
+      <vbox>
+        <spacer flex="1"/>
+        <label value={"\u21A9"} class="twlist-reply" onclick={contextPath + ".onReply(this, true)"}/>
+        <spacer flex="1"/>
+      </vbox>
+    </richlistitem>;
+  } else if ("retweeted_status" in msg) {
+    xml =
+    <richlistitem value={msg.retweeted_status.id}
+                  searchlabel={msg.retweeted_status.user.screen_name+"#"+msg.retweeted_status.id}
+                  xmlns={XUL} class="twlist-item-content twlist-item-rt">
+      <vbox class="twlist-profile-image-box">
+        <image src={msg.retweeted_status.user.profile_image_url} width="48" height="48" class="twlist-profile-image"/>
+        <spacer flex="1"/>
+      </vbox>
+      <vbox flex="1" class="twlist-content">
+        <hbox>
+          <label value={"\u21BB"} class="twlist-rt-mark"/>
+          <label class="twlist-screenname">{msg.retweeted_status.user.screen_name}</label>
+          <hbox class="twlist-metainfo">
+            <label class="twlist-username">{"(" + msg.retweeted_status.user.name + ")"}</label>
+            <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+          </hbox>
         </hbox>
-      </hbox>
-    </vbox>
-  </richlistitem>;
+        <label>{"By " + msg.user.screen_name}</label>
+        {formatText(msg.retweeted_status.text.replace(/[\01-\10\14\16-\37]/g,""))}
+      </vbox>
+      <vbox>
+        <spacer flex="1"/>
+        <label value={"\u21A9"} class="twlist-reply" onclick={contextPath + ".onReply(this)"}/>
+        <label value={msg.favorited ? "\u2605" : "\u2606"} class="twlist-fav" onclick={contextPath + ".onFav(this)"}/>
+        <label value={"\u21BB"} class="twlist-retweet" onclick={contextPath + ".onRetweet(this)"}/>
+        <spacer flex="1"/>
+      </vbox>
+    </richlistitem>;
+  } else {
+    xml = 
+    <richlistitem value={msg.id} searchlabel={msg.user.screen_name+"#"+msg.id}
+                  xmlns={XUL} class="twlist-item-content">
+      <vbox class="twlist-profile-image-box">
+        <image src={msg.user.profile_image_url} width="48" height="48" class="twlist-profile-image"/>
+        <spacer flex="1"/>
+      </vbox>
+      <vbox flex="1" class="twlist-content">
+        <hbox>
+          <label class="twlist-screenname">{msg.user.screen_name}</label>
+          <hbox class="twlist-metainfo">
+            <label class="twlist-username">{"(" + msg.user.name + ")"}</label>
+            <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
+          </hbox>
+        </hbox>
+        {formatText(msg.text.replace(/[\01-\10\14\16-\37]/g,""))}
+      </vbox>
+      <vbox>
+        <spacer flex="1"/>
+        <label value={"\u21A9"} class="twlist-reply" onclick={contextPath + ".onReply(this)"}/>
+        <label value={msg.favorited ? "\u2605" : "\u2606"} class="twlist-fav" onclick={contextPath + ".onFav(this)"}/>
+        <label value={"\u21BB"} class="twlist-retweet" onclick={contextPath + ".onRetweet(this)"}/>
+        <spacer flex="1"/>
+      </vbox>
+    </richlistitem>;
+  }
   let dom = xmlToDom(xml, XUL);
-  dom.querySelector(".twlist-content").appendChild(domContent);
+  //dom.querySelector(".twlist-content").appendChild(domContent);
   target.insertBefore(dom, target.firstChild);
   if (target.getRowCount() > 50) {
     target.removeChild(target.lastChild);
   }
-  if (autoPopup)
+  if (autoPopup){
     popup(true);
+  }
 }
 
 function onLoad () {
   let gv = liberator.globalVariables;
-  screenName = gv.twittperator_screen_name || "";
-  autoPopup  = gv.twlist_auto_popup ? !!gv.twlist_auto_popup :  true;
-  popupTime = gv.twlist_popup_time || 20;
-
+  __context__.__defineGetter__("autoPopup", function() ("twlist_auto_popup" in gv) ? !!gv.twlist_auto_poup : true);
+  __context__.__defineGetter__("popupTime", function() gv.twlist_popup_time || 20);
+  __context__.__defineGetter__("screenName", function() gv.twittperator_screen_name || "");
   if (screenName)
     screenNameReg = new RegExp("@" + screenName + "\\b");
 
   setStyleSheet();
 
   let (app  = document.getElementById("liberator-visualbell")) {
-    app.parentNode.appendChild(xmlToDom(baseXML));
+    app.parentNode.appendChild(xmlToDom(panelXML));
   }
   panel = document.getElementById(ID_PANEL);
-  root = document.getElementById(ID_ROOT);
   timelineBox = document.getElementById(ID_TIMELINE);
   mentionsBox = document.getElementById(ID_MENTION);
+  dmBox       = document.getElementById(ID_DM);
   splitter = document.getElementById(ID_SPLITTER);
 
   plugins.twittperator.ChirpUserStream.addListener(streamListener);
@@ -193,10 +266,12 @@ function onLoad () {
   options.add(["showtwpanel"], "popup/hide twittperator panel",
     "boolean", false, {
       setter: function (value) {
-        if (value) 
+        if (value) {
           popup();
-        else
-          panel.hidePopup();
+        } else {
+          //panel.hidePopup();
+          panel.style.opacity = 0;
+        }
         return value;
       },
     });
@@ -207,12 +282,15 @@ function popup(autoHide) {
   if (panel.state != "open") {
     panel.openPopup(document.getElementById("browser-bottombox"), "after_end", 0, 0, false, true);
   }
+  panel.style.opacity = 1;
   if (t) {
     clearTimeout(t);
     t = null;
   }
   if (autoHide && !options["showtwpanel"])
-    t = setTimeout(function() panel.hidePopup(), popupTime * 1000);
+    t = setTimeout(function(){
+      panel.style.opacity = 0;
+    }, popupTime * 1000);
 }
 function onUnload () {
   let elm = document.getElementById(ID_PANEL);
@@ -237,8 +315,7 @@ function xmlToDom(xml, xmlns) {
 function streamListener(msg, raw) {
   if (msg.text && msg.user) {
     add(msg, timelineBox);
-    if (msg.in_reply_to_status_id == screenName ||
-        (screenNameReg && screenNameReg.test(msg.text))){
+    if (screenNameReg && screenNameReg.test(msg.text)){
       add(msg, mentionsBox);
     }
   }
@@ -273,7 +350,8 @@ function formatText (str) {
   buf = str.substr(i);
   if (buf)
     x.appendChild(buf);
-  return xmlToDom(x, "http://www.w3.org/1999/xhtml");
+  //return xmlToDom(x, "http://www.w3.org/1999/xhtml");
+  return x;
 }
 function getMedia (uri) {
   if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path))
@@ -291,7 +369,7 @@ function getMedia (uri) {
     case "www.flickr.com":
     case "f.hatena.ne.jp":
     default:
-      return null;
+      return [];
   }
 }
 function isShortenURL (uri) {
@@ -308,45 +386,62 @@ function isShortenURL (uri) {
   }
   return false;
 }
-function getRedirectedURL (aURI){
-  if ((aURI.schemeIs("http") || aURI.schemeIs("https"))){
+function getRedirectedURL (aURI, aElement, aCallback){
+  if (!aURI.schemeIs("http") && !aURI.schemeIs("https"))
+    return;
+
+  if (isShortenURL(aURI)){
     let x = new XMLHttpRequest;
-    x.open("HEAD", aURI.spec, false);
+    x.open("HEAD", aURI.spec, true);
+    x.onreadystatechange = function(){
+      if (x.readyState == 4){
+        aCallback.call(aElement, x.channel.URI);
+      }
+    };
     x.send(null);
-    liberator.log(aURI.spec + " -> " + x.channel.URI.spec, 0);
-    return x.channel.URI;
+  } else {
+    aCallback.call(aElement, aURI);
   }
-  return aURI;
 }
 function onSelect (evt) {
   let item = evt.target.selectedItem;
   let links = item.querySelectorAll("a.twlist-url");
-  for (let i=0; i < links.length; i++) {
-    let elm = links[i];
-    let uri = util.newURI(elm.getAttribute("href"));
-    if (isShortenURL(uri)){
-      uri = getRedirectedURL(uri);
-      elm.setAttribute("href", uri.spec);
-      elm.textContent = uri.spec;
-    }
+
+  function detectMedia (uri) {
+    this.setAttribute("href", uri.spec);
+    this.textContent = uri.spec;
     let [type, src] = getMedia(uri);
     if (type && src) {
       switch (type) {
         case "image":
-          if (elm.hasAttribute("shown") && elm.getAttribute("shown") == "true")
+          if (this.hasAttribute("shown") && this.getAttribute("shown") == "true")
             break;
           let img = document.createElementNS(XHTML, "img");
           img.setAttribute("src", src);
           img.setAttribute("class", "twlist-image");
           img.setAttribute("align", "right");
-          elm.parentNode.appendChild(img);
-          elm.setAttribute("shown", "true");
+          this.parentNode.appendChild(img);
+          this.setAttribute("shown", "true");
           break;
         default:
       }
     }
   }
+  for (let i=0; i < links.length; i++) {
+    let elm = links[i];
+    let uri = util.newURI(elm.getAttribute("href"));
+    getRedirectedURL(uri, elm, detectMedia);
+  }
 }
+function onPopupShown() {
+  let elm = document.commandDispatcher.focusedElement;
+  if (elm) {
+    elm.focus();
+  } else {
+    liberator.focusContent();
+  }
+}
+
 function onClick (evt) {
   if (evt.button == 2)
     return;
@@ -357,6 +452,35 @@ function onClick (evt) {
   liberator.open(url, {where: where});
 }
 
+function onReply (elm, isDirectMessage) {
+  let item = elm.parentNode.parentNode;
+  let label = item.getAttribute("searchlabel");
+  let cmd = "tw " + (isDirectMessage ? "D @" : "@") + label + " ";
+  commandline.open(":", cmd, modes.EX);
+  window.focus();
+}
+function onRetweet(elm){
+  let id = elm.parentNode.parentNode.value;
+  plugins.twittperator.OAuth.post("http://api.twitter.com/1/statues/retweet/" + id + ".json",
+    null, function(text){
+    });
+}
+function onFav (elm) {
+  let id = elm.parentNode.parentNode.value;
+  let fav = elm.value;
+  if (fav == "\u2605") {
+    plugins.twittperator.OAuth.post("http://api.twitter.com/1/favorites/destroy/" + id + ".json",
+      null, function(text){
+        elm.value = "\u2606";
+      });
+  } else {
+    plugins.twittperator.OAuth.post("http://api.twitter.com/1/favorites/create/" + id + ".json",
+      null, function(text){
+        elm.value = "\u2605";
+      });
+  }
+}
 onLoad();
+
 
 // vim: sw=2 ts=2 et filetype=javascript:
