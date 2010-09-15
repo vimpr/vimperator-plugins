@@ -3,10 +3,10 @@ var PLUGIN_INFO =
   <name>Auto Detect Link</name>
   <description>Find (next|previous) link, and jump.</description>
   <description lang="ja">(次|前)っぽいページへのリンクを探してジャンプ</description>
-  <version>1.8.1</version>
+  <version>1.8.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_detect_link.js</updateURL>
   <license document="http://creativecommons.org/licenses/by-sa/3.0/">
     Creative Commons Attribution-Share Alike 3.0 Unported
@@ -146,11 +146,16 @@ var PLUGIN_INFO =
   }
 
   const APPREF = 'greasemonkey.scriptvals.http://swdyh.yu.to//AutoPagerize.cacheInfo';
-  let ap_cache = eval(Application.prefs.getValue(APPREF, null));
+  let ap_cache;
+  try {
+    ap_cache = eval(Application.prefs.getValue(APPREF, null));
 
-  for each (let cache in ap_cache) {
-    cache.info = cache.info.filter(function (i) 'url' in i);
-    cache.info.sort(function (a, b) b.url.length - a.url.length);
+    for each (let cache in ap_cache) {
+      cache.info = cache.info.filter(function (i) 'url' in i);
+      cache.info.sort(function (a, b) b.url.length - a.url.length);
+    }
+  } catch (e) {
+    liberator.log('ap_cache evaluationg error. no autopagerize?: \n' + e);
   }
 
 
