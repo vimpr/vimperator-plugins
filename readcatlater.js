@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Read Cat Later</name>
   <description>Read it later</description>
   <description lang="ja">後で読む</description>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/readcatlater.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.2pre</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :readcatlater [TAG]:
@@ -77,8 +77,6 @@ let PLUGIN_INFO =
 // }}}
 
 (function () {
-  liberator.log('readcatlater.js loading');
-
   // このプラグインでブックマークしたときに必ずつくタグ
   const RCL_TAG = 'readcatlater';
   // このプラグインが保存するブックマークのフォルダ名
@@ -254,12 +252,20 @@ let PLUGIN_INFO =
   }
 
   function removeItems (uri) {
+    if (typeof uri === 'number') {
+      bookmarks.removeItem(uri);
+      return true;
+    }
+    if (typeof uri === 'object') {
+      bookmarks.removeItem(uri.id);
+      return true;
+    }
     var removed = false;
     for each (let id in bookmarks.getBookmarkIdsForURI(makeURI(uri), {}))
-      if (folderId == bookmarks.getFolderIdForItem(id)) {
+    if (id && (folderId == bookmarks.getFolderIdForItem(id))) {
         removed = true;
         bookmarks.removeItem(id);
-      }
+    }
     return removed;
   }
 
@@ -287,12 +293,11 @@ let PLUGIN_INFO =
     function (arg) {
       let opennum = arg['-number'];
       if (opennum) {
-        liberator.log(typeof opennum)
-        let us = RCL_Bookmarks(arg.literalArg).reverse().splice(0, opennum).map(function (it) it.URI);
-        liberator.open(us, liberator.NEW_BACKGROUND_TAB);
+        let us = RCL_Bookmarks(arg.literalArg).reverse().splice(0, opennum).map(function (it) it);
+        liberator.open(us.map(function (it) it.URI), liberator.NEW_BACKGROUND_TAB);
         if (!arg.bang) {
           us.forEach(removeItems);
-          liberator.echo('[' + us + '] was removed.');
+          liberator.echo(us.length + ' items were removed.');
         }
       } else {
         let uri = arg.string;
@@ -322,7 +327,5 @@ let PLUGIN_INFO =
     },
     true
   );
-
-  liberator.log('readcatlater.js loaded');
 
 })();
