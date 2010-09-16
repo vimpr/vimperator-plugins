@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.4</version>
+  <version>1.4.5</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1712,6 +1712,9 @@ let PLUGIN_INFO =
       function rt(st)
         ("retweeted_status" in st ? st.retweeted_status : st);
 
+      function removeNewLine (text)
+        text.replace(/\r\n|[\r\n]/g, ' ');
+
       function completer(generator)
         function(filter)
           (filter ? function(context, args)
@@ -1723,13 +1726,13 @@ let PLUGIN_INFO =
         name:
           completer(function(s) ["@" + s.user.screen_name, s]),
         text:
-          completer(function(s) [s.text, s]),
+          completer(function(s) [removeNewLine(s.text), s]),
         id:
           completer(function(s) [s.id, s]),
         name_id:
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
         name_id_text:
-          completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + s.text, s]),
+          completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + removeNewLine(s.text), s]),
       };
     })(); // }}}
 
