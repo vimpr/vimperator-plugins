@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.5</version>
+  <version>1.4.6</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1889,7 +1889,8 @@ let PLUGIN_INFO =
       } else {
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
-          Completers.name_id_text(m.index === 0 && rejectMine)(context, args);
+          (m.index === 0 ? Completers.name_id
+                         : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
         } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, args.literalArg)) {
           (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
         }
