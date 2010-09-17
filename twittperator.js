@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.6</version>
+  <version>1.4.777</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1208,12 +1208,10 @@ let PLUGIN_INFO =
         if (typeof str == "undefined") return {};
         var itm;
         if (str.indexOf("?", 0) > -1) str = str.split("?", 2)[1];
-        var regex = str.indexOf("&") > str.indexOf(";") ? /;+/ : /&+/;
-        return str.split(regex).reduce(function(r, v) {
-          var kv = v.split("=", 2);
-          if (kv[0] != "") {
-            r[kv[0]] = typeof kv[1] == "undefined" ? true : decodeURIComponent(kv[1]);
-          }
+        return str.split("&").reduce(function(r, it) {
+          var [key, value] = it.split("=", 2);
+          if (key)
+            r[key] = typeof value == "undefined" || decodeURIComponent(value);
           return r;
         }, {});
       }
