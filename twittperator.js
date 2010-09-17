@@ -1321,7 +1321,7 @@ let PLUGIN_INFO =
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                if (/^[ \n\r\t]*\{/(line))
+                if (/^\s*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
               } catch (e) { liberator.log(e); }
             }
