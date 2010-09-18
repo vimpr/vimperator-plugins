@@ -1833,7 +1833,18 @@ let PLUGIN_INFO =
           history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
         },
         completer: Completers.id()
-      })
+      }),
+      SubCommand({
+        command: ["track"],
+        description: "Track the specified words.",
+        action: function(arg) {
+          TrackingStream.start(arg);
+        },
+        completer: function (context, args) {
+          if (setting.trackWords)
+            context.completions = [setting.trackWords, "from global variable"];
+        }
+      }),
     ]; // }}}
 
     function findSubCommand(s) { // {{{
