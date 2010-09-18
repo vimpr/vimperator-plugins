@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.5.0</version>
+  <version>1.6.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1221,7 +1221,7 @@ let PLUGIN_INFO =
   // }}}
 
   // Twittperator
-  function Stream({ host, path }) { // {{{
+  function Stream({ name, host, path }) { // {{{
     function extractURL(s)
       let (m = s.match(/https?:\/\/\S+/))
         (m && m[0]);
@@ -1234,9 +1234,9 @@ let PLUGIN_INFO =
       stop();
 
       if (restartCount > 13)
-        return liberator.echoerr("Twittperator: Gave up to connect to ChirpUserStream...");
+        return liberator.echoerr("Twittperator: Gave up to connect to " + name + "...");
 
-      liberator.echoerr("Twittperator: ChirpUserStream will be restared...");
+      liberator.echoerr("Twittperator: " + name + " will be restared...");
 
       // 試行済み回数^2 秒後にリトライ
       setTimeout(start, Math.pow(2, restartCount) * 1000);
@@ -1248,7 +1248,7 @@ let PLUGIN_INFO =
       if (!connectionInfo)
         return;
 
-      liberator.log("Twittperator: stop chirp user stream");
+      liberator.log("Twittperator: stop " + name);
 
       clearInterval(connectionInfo.interval);
       connectionInfo.sos.close();
@@ -1257,27 +1257,30 @@ let PLUGIN_INFO =
       connectionInfo = void 0;
     }
 
-    function start() {
-      liberator.log("Twittperator: start chirp user stream");
+    function start(params) {
+      liberator.log("Twittperator: start " + name);
 
       stop();
 
       startTime = new Date();
 
       let useProxy = !!setting.proxyHost;
-      let host = "chirpstream.twitter.com";
-      let path = "/2b/user.json";
+
+      if (params)
+        path += '?' + tw.buildQuery(params);
+
       let authHeader = tw.getAuthorizationHeader("http://" + host + path);
 
       if (useProxy)
         path = "http://" + host + path;
 
       let get = [
-        "GET " + path + " HTTP/1.0",
+        "GET " + path + " HTTP/1.1",
         "Host: " + host,
         "Authorization: " + authHeader,
+        "Content-Type: application/x-www-form-urlencoded",
         "",
-        ""
+        "",
       ].join("\n");
 
       let socketService =
@@ -1328,11 +1331,13 @@ let PLUGIN_INFO =
             buf += data;
           }
         } catch (e if /^NS_(?:ERROR_NET_RESET|BASE_STREAM_CLOSED)$/(e)) {
-          liberator.echoerr("Twittperator: ChirpStream was stopped by " + e.name + ".");
-          restart();
+          liberator.echoerr("Twittperator: " + name + " was stopped by " + e.name + ".");
+          //restart();
+          stop();
         } catch (e) {
-          liberator.echoerr("Twittperator: Unknown error on ChirpStream connection: " + e.name);
-          restart();
+          liberator.echoerr("Twittperator: Unknown error on " + name + " connection: " + e.name);
+          //restart();
+          stop();
         }
       }, 500);
 
@@ -1364,7 +1369,6 @@ let PLUGIN_INFO =
       clearPluginData: clearPluginData
     };
   }; // }}}
-  let ChirpUserStream = Stream({ host: "chirpstream.twitter.com", path: "/2b/user.json" });
   let Twitter = { // {{{
     destroy: function(id) { // {{{
       tw.delete("statuses/destroy/" + id + ".json", null, function(text) {
@@ -1998,6 +2002,7 @@ let PLUGIN_INFO =
       screenName: gv.twittperator_screen_name,
       apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
                   "://api.twitter.com/" + (gv.twittperator_twitter_api_version || 1)  + "/",
+      trackWords: gv.twittperator_track_words,
     });
 
   let statusRefreshTimer;
@@ -2014,9 +2019,14 @@ let PLUGIN_INFO =
 
   let tw = new TwitterOauth(accessor);
 
+  // ストリーム
+  let ChirpUserStream = Stream({ name: 'chirp stream', host: "chirpstream.twitter.com", path: "/2b/user.json" });
+  let TrackingStream = Stream({ name: 'tracking stream', host: "stream.twitter.com", path: "/1/statuses/filter.json" });
+
   // 公開オブジェクト
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
+  __context__.TrackingStream = TrackingStream;
   __context__.Twittperator = Twittperator;
   __context__.Twitter = Twitter;
   __context__.Utils = Utils;
@@ -2026,9 +2036,13 @@ let PLUGIN_INFO =
   if (setting.useChirp)
     ChirpUserStream.start();
 
+  if (setting.trackWords)
+    TrackingStream.start({track: setting.trackWords});
+
   __context__.onUnload = function() {
     accessor.set("history", history);
     ChirpUserStream.stop();
+    TrackingStream.stop();
   };
   // }}}
 
