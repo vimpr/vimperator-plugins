@@ -1366,7 +1366,7 @@ let PLUGIN_INFO =
 
       recentTweets.unshift(hash);
       if (recentTweets.length > 10)
-        recentTweetsistory.splice(10);
+        recentTweets.splice(10);
 
       listeners.forEach(function(listener) liberator.trapErrors(function() listener(msg, raw)));
 
