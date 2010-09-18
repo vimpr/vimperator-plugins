@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.4.777</version>
+  <version>1.5.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1346,11 +1346,8 @@ let PLUGIN_INFO =
     function onMsg(msg, raw) {
       listeners.forEach(function(listener) liberator.trapErrors(function() listener(msg, raw)));
 
-      if (msg.text) {
-        history.unshift(msg);
-        if (history.length > setting.historyLimit)
-          history.splice(setting.historyLimit);
-      }
+      if (msg.text)
+        Twittperator.onMessage(msg);
     }
 
     function clearPluginData() {
@@ -1558,6 +1555,11 @@ let PLUGIN_INFO =
 
       io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
       io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
+    }, // }}}
+    onMessage: function(msg) { // {{{
+      history.unshift(msg);
+      if (history.length > setting.historyLimit)
+        history.splice(setting.historyLimit);
     }, // }}}
     openLink: function(text) { // {{{
       let m = text.match(/.*?(https?:\/\/\S+)/g);
