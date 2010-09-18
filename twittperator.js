@@ -1766,6 +1766,7 @@ let PLUGIN_INFO =
           if (m)
             Twitter.favorite(m[0]);
         },
+        timelineCompleter: true,
         completer: Completers.id(rejectMine)
       }),
       SubCommand({
@@ -1776,6 +1777,7 @@ let PLUGIN_INFO =
           if (m)
             Twitter.unfavorite(m[1]);
         },
+        timelineCompleter: true,
         completer: Completers.name_id_text(rejectMine)
       }),
       SubCommand({
@@ -1788,18 +1790,21 @@ let PLUGIN_INFO =
             Twittperator.showTwitterMentions();
           }
         },
+        timelineCompleter: true,
         completer: Completers.name()
       }),
       SubCommand({
         command: ["?"],
         description: "Twitter search",
         action: function(arg) Twittperator.showTwitterSearchResult(arg),
+        timelineCompleter: true,
         completer: Completers.text()
       }),
       SubCommand({
         command: ["/"],
         description: "Open link",
         action: function(arg) Twittperator.openLink(arg),
+        timelineCompleter: true,
         completer: Completers.text(function(s) /https?:\/\//(s.text))
       }),
       SubCommand({
@@ -1810,6 +1815,7 @@ let PLUGIN_INFO =
           if (m)
             Twitter.destroy(m[0]);
         },
+        timelineCompleter: true,
         completer: Completers.id(seleceMine)
       }),
       SubCommand({
@@ -1832,6 +1838,7 @@ let PLUGIN_INFO =
           let id = parseInt(m[0], 10);
           history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
         },
+        timelineCompleter: true,
         completer: Completers.id()
       }),
       SubCommand({
@@ -1842,7 +1849,7 @@ let PLUGIN_INFO =
         },
         completer: function (context, args) {
           if (setting.trackWords)
-            context.completions = [setting.trackWords, "from global variable"];
+            context.completions = [[setting.trackWords, "Global variable"]];
         }
       }),
     ]; // }}}
@@ -1875,33 +1882,40 @@ let PLUGIN_INFO =
         let (desc = item.description)
           (this.match(desc.user.screen_name) || this.match(desc.text));
 
-      context.createRow = function(item, highlightGroup) {
-        let desc = item[1] || this.process[1].call(this, item, item.description);
+      function setTimelineCompleter() {
+        context.createRow = function(item, highlightGroup) {
+          let desc = item[1] || this.process[1].call(this, item, item.description);
 
-        if (desc && desc.user) {
+          if (desc && desc.user) {
+            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+                <li highlight="CompDesc">
+                  <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
+                  &#160;{desc.user.screen_name}: {desc.text}
+                </li>
+            </div>;
+          }
+
           return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-              <li highlight="CompDesc">
-                <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                &#160;{desc.user.screen_name}: {desc.text}
-              </li>
+              <li highlight="CompDesc">{desc}&#160;</li>
           </div>;
-        }
+        };
 
-        return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-            <li highlight="CompDesc">{desc}&#160;</li>
-        </div>;
-      };
+        context.filters = [statusObjectFilter];
+      }
 
       let len = 0;
 
       if (args.bang) {
         let [subCmd, m] = findSubCommand(args.literalArg) || [];
         if (subCmd) {
+          if (subCmd.timelineCompleter)
+            setTimelineCompleter();
           context.title = ["Hidden", "Entry"];
           subCmd.completer(context, args);
           len = m[0] === "@" ? 0 : m[0].length;
         }
       } else {
+        setTimelineCompleter();
         let m;
         if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
           (m.index === 0 ? Completers.name_id
@@ -1916,7 +1930,6 @@ let PLUGIN_INFO =
 
       context.title = ["Name#ID", "Entry"];
       context.offset += len;
-      context.filters = [statusObjectFilter];
       // XXX 本文でも検索できるように、@ はなかったことにする
       context.filter = context.filter.replace(/^@/, "");
 
