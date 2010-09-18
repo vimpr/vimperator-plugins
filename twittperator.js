@@ -1332,11 +1332,11 @@ let PLUGIN_INFO =
           }
         } catch (e if /^NS_(?:ERROR_NET_RESET|BASE_STREAM_CLOSED)$/(e)) {
           liberator.echoerr("Twittperator: " + name + " was stopped by " + e.name + ".");
-          //restart();
+          restart();
           stop();
         } catch (e) {
           liberator.echoerr("Twittperator: Unknown error on " + name + " connection: " + e.name);
-          //restart();
+          restart();
           stop();
         }
       }, 500);
