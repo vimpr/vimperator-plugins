@@ -1230,6 +1230,16 @@ let PLUGIN_INFO =
     let restartCount = 0;
     let startTime;
 
+    // 極めて適当につくってます。
+    // ステータスに対してユニークな文字列を返せばよい
+    // XXX s.id でも良い？
+    function getStatusHash(s) {
+      let result = '';
+      for (let [k, v] in Iterator(s))
+        result += k + '\t' + (v && typeof v === 'object' ? getStatusHash(v) : v) + '\n';
+      return result;
+    }
+
     function restart() {
       stop();
 
@@ -1318,7 +1328,6 @@ let PLUGIN_INFO =
             restartCount = 0;
 
           let data = sis.read(len);
-          liberator.log(name + ':\n' + data);
           let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length >= 2) {
             lines[0] = buf + lines[0];
@@ -1351,6 +1360,14 @@ let PLUGIN_INFO =
     }
 
     function onMsg(msg, raw) {
+      let hash = getStatusHash(msg)
+      if (recentTweets.some(function (it) it === hash))
+        return false;
+
+      recentTweets.unshift(hash);
+      if (recentTweets.length > 10)
+        recentTweetsistory.splice(10);
+
       listeners.forEach(function(listener) liberator.trapErrors(function() listener(msg, raw)));
 
       if (msg.text)
@@ -2029,6 +2046,7 @@ let PLUGIN_INFO =
       trackWords: gv.twittperator_track_words,
     });
 
+  let recentTweets = []; // 複数の Stream で同じものが出現するのを防ぐもの
   let statusRefreshTimer;
   let expiredStatus = true;
 
