@@ -1265,17 +1265,18 @@ let PLUGIN_INFO =
       startTime = new Date();
 
       let useProxy = !!setting.proxyHost;
+      let requestPath = path;
 
       if (params)
-        path += '?' + tw.buildQuery(params);
+        requestPath += '?' + tw.buildQuery(params);
 
-      let authHeader = tw.getAuthorizationHeader("http://" + host + path);
+      let authHeader = tw.getAuthorizationHeader("http://" + host + requestPath);
 
       if (useProxy)
-        path = "http://" + host + path;
+        requestPath = "http://" + host + requestPath;
 
       let get = [
-        "GET " + path + " HTTP/1.1",
+        "GET " + requestPath + " HTTP/1.1",
         "Host: " + host,
         "Authorization: " + authHeader,
         "Content-Type: application/x-www-form-urlencoded",
@@ -1317,6 +1318,7 @@ let PLUGIN_INFO =
             restartCount = 0;
 
           let data = sis.read(len);
+          liberator.log(name + ':\n' + data);
           let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length >= 2) {
             lines[0] = buf + lines[0];
