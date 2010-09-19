@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.7.1</version>
+  <version>1.7.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1229,6 +1229,7 @@ let PLUGIN_INFO =
     let connectionInfo;
     let restartCount = 0;
     let startTime;
+    let lastParams;
 
     // 極めて適当につくってます。
     // ステータスに対してユニークな文字列を返せばよい
@@ -1249,7 +1250,7 @@ let PLUGIN_INFO =
       liberator.echoerr("Twittperator: " + name + " will be restared...");
 
       // 試行済み回数^2 秒後にリトライ
-      setTimeout(start, Math.pow(2, restartCount) * 1000);
+      setTimeout(function() start(lastParams), Math.pow(2, restartCount) * 1000);
 
       restartCount++;
     }
@@ -1273,6 +1274,7 @@ let PLUGIN_INFO =
       stop();
 
       startTime = new Date();
+      lastParams = params;
 
       let useProxy = !!setting.proxyHost;
       let requestPath = path;
@@ -1356,6 +1358,7 @@ let PLUGIN_INFO =
         sos: sos,
         sis: sis,
         interval: interval,
+        params: params
       };
     }
 
