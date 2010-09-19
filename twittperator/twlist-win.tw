@@ -96,7 +96,196 @@ let winXML =
       tab.label = tab.label.substr(1);
     }
   }
+  function getCurrentListBox(){
+    return tabBox.tabpanels.selectedPanel.firstChild;
+  }
+  function getParent(node, class){
+    let elm = node;
+    while (elm != document.documentElement){
+      if (elm instanceof class)
+        return elm;
+      elm = elm.parentNode;
+    }
+    return null;
+  }
+  var gActions = (function(){
+    function getItemIndex(listbox, arg){
+      let index = 0, currentIndex = listbox.selectedIndex;
+      switch (arg) {
+        case "0":
+          return 0;
+        case "$":
+          return listbox.itemCount - 1;
+        case "+1":
+          if (currentIndex == listbox.itemCount - 1)
+            return null;
+          return currentIndex + 1;
+        case "-1":
+          if (currentIndex == -1)
+            return null;
+          return currentIndex - 1;
+        default:
+          return null;
+      }
+    }
+    function getCopyItem(target){
+      let listbox = getCurrentListBox();
+      let item = listbox.selectedItem;
+      if (!item)
+        return null;
+      switch (target){
+        case "ID":
+          return item.value;
+        case "SCREENNAME":
+          return item.querySelector(".twlist-screenname").textContent;
+        case "TEXT":
+          return item.querySelector(".twlist-text").textContent;
+        case "SELECTION":
+          return window.getSelection().toString();
+        case "URL":
+          let node = document.popupNode;
+          if (node) {
+            let elm = getParent(node, HTMLAnchorElement);
+            if (elm)
+              return elm.getAttribute("href");
+          }
+      }
+      return null;
+    }
+    var self = {
+      copy: function(target){
+        let text = getCopyItem(target);
+        if (text) {
+          liberator.modules.util.copyToClipboard(text, true);
+        }
+      },
+      select: function(arg){
+        let listbox = getCurrentListBox();
+        let index = getItemIndex(listbox, arg);
+        listbox.ensureIndexIsVisible( listbox.selectedIndex = index );
+      },
+      reply: function(){
+        let listbox = getCurrentListBox();
+        let item = listbox.selectedItem;
+        if (!item)
+          return;
+        twlist.onReply(item.querySelector(".twlist-reply"), (listbox == dmBox));
+      },
+      retweet: function(){
+        let listbox = getCurrentListBox();
+        if (listbox == dmBox)
+          return;
+        let item = listbox.selectedItem;
+        if (!item)
+          return;
+        twlist.onRetweet(item.querySelector(".twlist-retweet"));
+      },
+      fav: function(){
+        let listbox = getCurrentListBox();
+        if (listbox == dmBox)
+          return;
+        let item = listbox.selectedItem;
+        if (!item)
+          return;
+        twlist.onFav(item.querySelector(".twlist-fav"));
+      }
+    };
+    return self;
+  })();
+  var gContext = (function(){
+    var popupNode = null, anchor;
+    function showItem (item, show, text){
+      if (show){
+        if (item.hasAttribute("hidden"))
+          item.removeAttribute("hidden");
+        if (text)
+          item.setAttribute("tooltiptext", text);
+      } else {
+        item.setAttribute("hidden", true);
+        if (item.hasAttribute("tooltiptext"))
+          item.removeAttribute("tooltiptext");
+      }
+    }
+    function getSelText(text){
+      if (text.length > 20)
+        return text.substr(20) + "...";
+      return text;
+    }
+    var self = {
+      showing: function gContextShowing(){
+        let listbox = getCurrentListBox();
+        if (!listbox.selectedItem)
+          return false;
+        popupNode = document.popupNode;
+        let openLinkMenu = $("twlist-menuitem-openlink"),
+            openLinkTabMenu = $("twlist-menuitem-openlinktab"),
+            copyURLMenu = $("twlist-menuitem-copy-url"),
+            isAnchor = false,
+            href = null;
+        anchor = getParent(popupNode, HTMLAnchorElement);
+        if (anchor){
+          isAnchor = true;
+          href = anchor.getAttribute("href");
+        }
+        showItem(openLinkMenu, isAnchor, href);
+        showItem(openLinkTabMenu, isAnchor, href);
+        showItem(copyURLMenu, isAnchor, href);
+        let sel = window.getSelection(),
+            selectMenu = $("twlist-menuitem-copy-selection");
+        showItem(selectMenu, (sel.toString() != ""), getSelText(sel.toString()));
+        return true;
+      },
+      hiding: function gContextHiding(){
+        anchor = null;
+      },
+      openLink: function(newTab) {
+        if (popupNode instanceof HTMLAnchorElement) {
+          liberator.open(popupNode.getAttribute("href"),
+                         {where: (newTab ? liberator.NEW_TAB : liberator.CURRENT_TAB) });
+        }
+      }
+    };
+    return self;
+  })();
 ]]></script>
+<commandset id="twlist-commandset">
+  <command id="cmd_select_next" oncommand="gActions.select('+1')"/>
+  <command id="cmd_select_prev" oncommand="gActions.select('-1')"/>
+  <command id="cmd_select_first" oncommand="gActions.select('0')"/>
+  <command id="cmd_select_last" oncommand="gActions.select('$')"/>
+  <command id="cmd_reply" oncommand="gActions.reply()"/>
+  <command id="cmd_retweet" oncommand="gActions.retweet()"/>
+  <command id="cmd_fav" oncommand="gActions.fav()"/>
+</commandset>
+<keyset id="twlist-keyset">
+  <key id="key_select_next" command="cmd_select_next" key="J"/>
+  <key id="key_select_prev" command="cmd_select_prev" key="K"/>
+  <key id="key_select_first" command="cmd_select_first" key="G"/>
+  <key id="key_select_last" command="cmd_select_last" key="G" modifiers="shift"/>
+  <key id="key_reply" command="cmd_reply" key="R"/>
+  <key id="key_retweet" command="cmd_retweet" key="R" modifiers="shift"/>
+  <key id="key_fav" command="cmd_fav" key="F"/>
+</keyset>
+<popupset>
+  <popup id="twlist-context"
+         onpopupshowing="if(event.target!=this) return true; return gContext.showing();"
+         onpopuphiding="if(event.target==this){gContext.hiding();}">
+    <menuitem id="twlist-menuitem-openlink" label="Open" oncommand="gContext.openLink()"/>
+    <menuitem id="twlist-menuitem-openlinktab" label="Open in a new tab" oncommand="gContext.openLink(true)"/>
+    <menu id="twlist-menu-copy" label="Copy" accesskey="C">
+      <menupopup>
+        <menuitem id="twlist-menuitem-copy-text" label="Text" accesskey="T" oncommand="gActions.copy('TEXT')"/>
+        <menuitem id="twlist-menuitem-copy-id" label="ID" accesskey="I" oncommand="gActions.copy('ID')"/>
+        <menuitem id="twlist-menuitem-copy-name" label="ScreenName" accesskey="S" oncommand="gActions.copy('SCREENNAME')"/>
+        <menuitem id="twlist-menuitem-copy-selection" label="Copy Selection" oncommand="gActions.copy('SELECTION')"/>
+        <menuitem id="twlist-menuitem-copy-url" label="URL" accesskey="U" oncommand="gActions.copy('URL')"/>
+      </menupopup>
+    </menu>
+    <menuitem id="twlist-menuitem-rt" label="RT" accesskey="T" oncommand="gActions.retweet()"/>
+    <menuitem id="twlist-menuitem-reply" label="Reply" accesskey="R" oncommand="gActions.reply()"/>
+    <menuitem id="twlist-menuitem-fav" label="Fav" accesskey="F" oncommand="gActions.fav()"/>
+  </popup>
+</popupset>
 <vbox id="twlist-box" flex="1">
   <tabbox id="twlist-tabbox" flex="1">
     <tabs id="twlist-tabs" onselect="onTabSelect(event)">
@@ -104,9 +293,9 @@ let winXML =
       <tab label="Mentions"/>
       <tab label="DM"/>
     </tabs>
-    <tabpanels id="twlist-panels" flex="1" style="background: transparent;">
+    <tabpanels id="twlist-panels" flex="1" style="background: transparent;" contextmenu="twlist-context">
       <tabpanel flex="1">
-        <richlistbox id="twlist-timeline" contextmenu="contentAreaContextMenu"
+        <richlistbox id="twlist-timeline"
                      flex="1" onselect="twlist.onSelect(event)"/>
       </tabpanel>
       <tabpanel flex="1">
@@ -149,15 +338,13 @@ function setStyleSheet() {
       padding: 2px 5px; margin: 0;
       -moz-border-radius: 4px;
     }
-    .twlist-reply, .twlist-retweet {
+    .twlist-reply, .twlist-retweet, .twlist-fav {
       color: white; font-weight: bold; background-color: gray;
       padding: 2px; margin:0;
       -moz-border-radius: 2px;
     }
     .twlist-fav {
-      color: yellow; background-color: #E0E0E0;
-      padding: 2px; margin:0;
-      -moz-border-radius: 2px;
+      color: yellow;
     }
     .twlist-text { margin: 2px 1em; }
     .twlist-text>label { margin: 1px 2px 2px 2px !important; }
@@ -194,7 +381,7 @@ function getItemXML(msg) {
             <label>{(new Date(msg.direct_message.sender.created_at)).toLocaleFormat()}</label>
           </hbox>
         </hbox>
-        {formatText(msg.direct_message.text)}
+        {formatText(msg.direct_message.text.replace(/[\01-\10\14\16-\37]/g,""))}
       </vbox>
       <vbox>
         <spacer flex="1"/>
@@ -221,7 +408,7 @@ function getItemXML(msg) {
             <label>{"By " + msg.user.screen_name}</label>
           </hbox>
         </hbox>
-        {formatText(msg.retweeted_status.text)}
+        {formatText(msg.retweeted_status.text.replace(/[\01-\10\14\16-\37]/g,""))}
       </vbox>
       <vbox>
         <spacer flex="1"/>
@@ -247,7 +434,7 @@ function getItemXML(msg) {
             <label>{(new Date(msg.created_at)).toLocaleFormat()}</label>
           </hbox>
         </hbox>
-        {formatText(msg.text)}
+        {formatText(msg.text.replace(/[\01-\10\14\16-\37]/g,""))}
       </vbox>
       <vbox>
         <spacer flex="1"/>
@@ -354,6 +541,7 @@ function getRedirectedURL (aURI, aElement, aCallback){
 }
 function onSelect (evt) {
   let item = evt.target.selectedItem;
+  if (!item) return;
   let links = item.querySelectorAll("a.twlist-url");
 
   function detectMedia (uri) {
