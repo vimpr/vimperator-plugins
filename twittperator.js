@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.7.0</version>
+  <version>1.7.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1575,6 +1575,7 @@ let PLUGIN_INFO =
       }
 
       ChirpUserStream.clearPluginData();
+      TrackingStream.clearPluginData();
 
       io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
       io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
