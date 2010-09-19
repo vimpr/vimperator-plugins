@@ -1865,7 +1865,13 @@ let PLUGIN_INFO =
       SubCommand({
         command: ["track"],
         description: "Track the specified words.",
-        action: function(arg) TrackingStream.start({track: arg}),
+        action: function(arg) {
+          if (arg.trim().length > 0) {
+            TrackingStream.start({track: arg});
+          } else {
+            TrackingStream.stop();
+          }
+        },
         completer: function (context, args) {
           if (setting.trackWords)
             context.completions = [[setting.trackWords, "Global variable"]];
