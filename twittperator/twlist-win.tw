@@ -37,21 +37,23 @@ g:twlist_max_rows = num
 Todo: コマンド or オプションで追加削除出来るようにしろ！
 
  */
-let win = null;
-let winXML =
+
+XML.ignoreProcessingInstructions = false;
+let winXML = <>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/"?>
 <window id="twlist-window"
-        pack="start"
-        title="Twittperator"
-        width="500"
+        sizemode="normal"
+        title="Twlist - Twittperator"
         height="600"
         onload="init()"
         onunload="twlist.onClose()"
+        windowtype="twittperator:twlist"
         xmlns={XUL}
         xmlns:xhtml={XHTML}>
 <script type="application/javascript; version=1.8"><![CDATA[
   const XUL = new Namespace("xul", "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"),
         XHTML = new Namespace("xhtml", "http://www.w3.org/1999/xhtml");
-  var liberator, twlist, timelineBox, mentionsBox, dmBox, tabBox;
+  var liberator, twlist, timelineBox, mentionsBox, dmBox, tabBox, cmdBox;
   function $(id) document.getElementById(id);
   function init(){
     liberator = window.arguments[0];
@@ -60,6 +62,7 @@ let winXML =
     mentionsBox = $("twlist-mentions");
     dmBox = $("twlist-dm");
     tabBox = $("twlist-tabbox");
+    cmdBox = $("twlist-command");
 
     liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(add);
     if (twlist.trackWords){
@@ -95,8 +98,7 @@ let winXML =
     lastIndex: 0,
     list: [],
     add: function (word){
-      let index = tabBox.tabs.itemCount;
-      let tab = tabBox.tabs.appendItem("Track - " + word);
+      let tab = tabBox.tabs.appendChild(xmlToDom(<tab label={"Track - " + word} crop="end" maxwidth="150"/>,XUL));
       this.lastIndex++;
       let panel = tabBox.tabpanels.appendChild(xmlToDom(
         <tabpanel flex="1" xmlns={XUL}>
@@ -257,7 +259,8 @@ let winXML =
         let item = listbox.selectedItem;
         if (!item)
           return;
-        twlist.onReply(item.querySelector(".twlist-reply"), (listbox == dmBox));
+        cmdBox.value = (listbox == dmBox ? "D @" : "@") + item.getAttribute("searchlabel") + " ";
+        cmdBox.focus();
       },
       retweet: function(){
         let listbox = getCurrentListBox();
@@ -276,6 +279,10 @@ let winXML =
         if (!item)
           return;
         twlist.onFav(item.querySelector(".twlist-fav"));
+      },
+      resetFocus: function(){
+        cmdBox.blur();
+        cmdBox.value = "";
       }
     };
     return self;
@@ -353,6 +360,8 @@ let winXML =
   <key id="key_reply" command="cmd_reply" key="R"/>
   <key id="key_retweet" command="cmd_retweet" key="R" modifiers="shift"/>
   <key id="key_fav" command="cmd_fav" key="F"/>
+  <key id="key_esd" keycode="VK_ESCAPE" oncommand="gActions.resetFocus()"/>
+  <key id="key_command" key=":" oncommand="cmdBox.focus()"/>
 </keyset>
 <popupset>
   <popup id="twlist-context"
@@ -377,9 +386,9 @@ let winXML =
 <vbox id="twlist-box" flex="1">
   <tabbox id="twlist-tabbox" flex="1">
     <tabs id="twlist-tabs" onselect="onTabSelect(event)">
-      <tab label="TimeLine"/>
-      <tab label="Mentions"/>
-      <tab label="DM"/>
+      <tab label="TimeLine" accesskey="T"/>
+      <tab label="Mentions" accesskey="M"/>
+      <tab label="DM" accesskey="D"/>
     </tabs>
     <tabpanels id="twlist-panels" flex="1" style="background: transparent;" contextmenu="twlist-context">
       <tabpanel flex="1">
@@ -398,12 +407,12 @@ let winXML =
   </tabbox>
 </vbox>
 <statusbar id="status-bar">
-  <spacer flex="1"/>
+  <statusbarpanel flex="1">
+    <textbox id="twlist-command" flex="1" emptytext="Tweet" onkeydown="twlist.onKeyDown(event)"/>
+  </statusbarpanel>
 </statusbar>
-</window>.toXMLString();
-
-let URL = "data:application/vnd.mozilla.xul+xml;base64," +
-  btoa('<?xml-stylesheet type="text/css" href="chrome://browser/skin/"?>' + winXML);
+</window>
+</>.toXMLString();
 
 function setStyleSheet() {
   styles.addSheet(true, "twlist-styles", "data:*",
@@ -419,6 +428,7 @@ function setStyleSheet() {
     #twlist-tabs > tab[selected=true] {
       max-width: 300px !important;
     }
+    #twlist-command { background-color: white; }
     .twlist-item-content {
       -moz-user-select: -moz-all;
       border-bottom: solid thin silver;
@@ -568,19 +578,14 @@ let listener = {
     }
   }
 }
-function streamListener(msg, raw) {
-  if (!win)
-    return;
-  if ((msg.text && msg.user) || ("direct_message" in msg)) {
-    win.add(msg);
-  }
-}
+
 function onLoad () {
   let gv = liberator.globalVariables;
   __context__.__defineGetter__("screenName", function() gv.twittperator_screen_name || "");
   __context__.__defineGetter__("maxRows", function() gv.twlist_max_rows || 50);
   __context__.__defineGetter__("trackWords", function() gv.twittperator_track_words || "");
   __context__.__defineGetter__("twlistTrack", function() gv.twlist_track_words);
+  __context__.__defineGetter__("win", function() services.get("windowMediator").getMostRecentWindow("twittperator:twlist"));
 
   setStyleSheet();
 
@@ -603,10 +608,10 @@ function onLoad () {
 }
 
 function open(){
-  win = openDialog(URL, null, "chrome,resizable=yes", liberator, __context__ );
+  let URL = "data:application/vnd.mozilla.xul+xml;base64," + btoa(winXML);
+  openDialog(URL, null, "chrome,resizable=yes", liberator, __context__ );
 }
 function onClose(){
-  win = null;
 }
 
 function onUnload () {
@@ -766,6 +771,19 @@ function onFav (elm) {
       null, function(text){
         elm.value = "\u2605";
       });
+  }
+}
+function onKeyDown(event){
+  switch (event.keyCode){
+    case event.DOM_VK_RETURN:
+    case event.DOM_VK_ENTER:
+      let txt = event.target.value;
+      if (txt){
+        if (/^@\w+#\d+$/.test(txt.trim()))
+          return;
+        liberator.execute('tw ' + txt, null, true);
+      }
+      break;
   }
 }
 
