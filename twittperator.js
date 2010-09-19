@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.6.0</version>
+  <version>1.7.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1756,6 +1756,8 @@ let PLUGIN_INFO =
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
         name_id_text:
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + removeNewLine(s.text), s]),
+        screenName:
+          completer(function(s) [s.user.screen_name, s]),
       };
     })(); // }}}
 
@@ -1868,6 +1870,13 @@ let PLUGIN_INFO =
           if (setting.trackWords)
             context.completions = [[setting.trackWords, "Global variable"]];
         }
+      }),
+      SubCommand({
+        command: ["home"],
+        description: "Open user home.",
+        action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
+        timelineCompleter: true,
+        completer: Completers.screenName(rejectMine)
       }),
     ]; // }}}
 
