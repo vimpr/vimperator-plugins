@@ -15,11 +15,26 @@ g:twittperator_screen_name = "<your screen name>"
 g:twlist_max_rows = num
   表示するアイテム数 (default: 50)
 
+:js liberator.globalVariables.twlist_track_words = [words]
+  通常は g:twittperator_track_words = "words" で OK だが、
+  vimp,vimperator など一つのタブにまとめたい時に、
+  ["vimp,vimperator", "firefox", "javascript"] などとする
+  当然ながら g:twittperator_track_words の値は必須
+
 == Command ==
 
 :showtwin
   ウィンドウの表示/非表示
   ToDo: 表示位置と幅、高さを維持したい
+
+== Tips ==
+
+:js plugins.twlistWin.addTrack (word)
+  新たな word を検索対象にする
+:js plugins.twlistWin.win.TrackTabs.remove(word)
+  word を検索対象としているタブを削除
+
+Todo: コマンド or オプションで追加削除出来るようにしろ！
 
  */
 let win = null;
@@ -47,32 +62,97 @@ let winXML =
     tabBox = $("twlist-tabbox");
 
     liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(add);
+    if (twlist.trackWords){
+      if (twlist.twlistTrack){
+        TrackTabs.init(twlist.twlistTrack);
+      } else {
+        let words = twlist.trackWords.split(",");
+        TrackTabs.init(words);
+      }
+    }
   }
+  function TrackTab (word, index) {
+    this.word = word;
+    this.index = index;
+    this.tab = null;
+    this.panel = null;
+    this.listbox = null;
+    this.matchReg = new RegExp("\\b" + word.split(",").join("\\b|\\b") + "\\b", "i");
+  }
+  TrackTab.prototype = {
+    setTabAndPanel: function(tab, panel){
+      this.tab = tab;
+      this.panel = panel;
+      this.listbox = panel.querySelector("richlistbox");
+    },
+  }
+  var TrackTabs = {
+    init: function(words) {
+      for (let i=0; i < words.length; i++){
+        this.add(words[i]);
+      }
+    },
+    lastIndex: 0,
+    list: [],
+    add: function (word){
+      let index = tabBox.tabs.itemCount;
+      let tab = tabBox.tabs.appendItem("Track - " + word);
+      this.lastIndex++;
+      let panel = tabBox.tabpanels.appendChild(xmlToDom(
+        <tabpanel flex="1" xmlns={XUL}>
+          <richlistbox id={"twlist-track-"+this.lastIndex} flex="1" onselect="twlist.onSelect(event)"/>
+        </tabpanel>, XUL)
+      );
+      let trackTab = new TrackTab(word, this.lastIndex);
+      trackTab.setTabAndPanel(tab, panel);
+      this.list.push(trackTab);
+    },
+    remove: function(word){
+      for (let i=0,t; t = this.list[i]; i++){
+        if (t.word == word){
+          this.list.splice(i, 1);
+          t.panel.parentNode.removeChild(t.panel);
+          t.tab.parentNode.removeChild(t.tab);
+          break;
+        }
+      }
+    }
+  };
   function keepMaxRows(box) {
     if (box.getRowCount() > twlist.maxRows){
       box.removeChild(box.lastChild);
     }
   }
-  function add (msg) {
+  function add (msg, isTrack) {
     let xml = twlist.getItemXML(msg);
     let dom = xmlToDom(xml, XUL);
-    if ("direct_message" in msg){
-      dmBox.insertBefore(dom, dmBox.firstChild);
-      keepMaxRows(dmBox);
-      setNewSymbol(2);
+    function addMsgToTrack(){
+      TrackTabs.list.forEach(function(tab) {
+        if (tab.matchReg.test(msg.text))
+          addMsg(tab.listbox, dom.cloneNode(true), true);
+      });
+    }
+    if (isTrack){
+      addMsgToTrack();
+    } else if ("direct_message" in msg){
+      addMsg(dmBox, dom, true);
     } else {
-      timelineBox.insertBefore(dom, timelineBox.firstChild);
+      addMsg(timelineBox, dom, false);
       if (twlist.screenName && msg.in_reply_to_screen_name == twlist.screenName) {
         let repDom = dom.cloneNode(true);
-        mentionsBox.insertBefore(repDom, mentionsBox.firstChild);
-        keepMaxRows(mentionsBox);
-        setNewSymbol(1);
+        addMsg(mentionsBox, repDom, true);
       }
-      keepMaxRows(timelineBox);
+      addMsgToTrack();
     }
   }
+  function addMsg(box, node, doSetSymbol){
+    box.insertBefore(node, box.firstChild);
+    keepMaxRows(box);
+    if (doSetSymbol)
+      setNewSymbol(box);
+  }
   function xmlToDom(xml, xmlns) {
-    XML.prettyPrinting = true;
+    XML.prettyPrinting = false;
     XML.ignoreWhitespace = true;
     var doc = (new DOMParser).parseFromString(
       '<root xmlns="' + xmlns + '">' + xml.toXMLString() + "</root>",
@@ -84,16 +164,24 @@ let winXML =
     range.detach();
     return fragment.childNodes.length > 1 ? fragment : fragment.firstChild; 
   }
-  function setNewSymbol(index){
+  function setNewSymbol(box){
+    let panels = tabBox.tabpanels.childNodes;
+    let index = 0;
+    for (let i=0; i < panels.length; i++){
+      if (box.parentNode == panels[i]){
+        index = i;
+        break;
+      }
+    }
     let tab = tabBox.tabs.getItemAtIndex(index);
-    if (tab.label.indexOf("*") == -1){
-      tab.label = "*" + tab.label;
+    if (index != tabBox.selectedIndex && tab.label.indexOf("*") != 0){
+      tab.label = "* " + tab.label;
     }
   }
   function onTabSelect(evt){
     let tab = $("twlist-tabbox").tabs.selectedItem;
-    if (tab.label.indexOf("*") == 0){
-      tab.label = tab.label.substr(1);
+    if (tab.label.indexOf("* ") == 0){
+      tab.label = tab.label.substr(2);
     }
   }
   function getCurrentListBox(){
@@ -325,6 +413,12 @@ function setStyleSheet() {
       border: none !important;
       padding: 0 !important;
     }
+    #twlist-tabs > tab {
+      max-width: 150px !important;
+    }
+    #twlist-tabs > tab[selected=true] {
+      max-width: 300px !important;
+    }
     .twlist-item-content {
       -moz-user-select: -moz-all;
       border-bottom: solid thin silver;
@@ -356,11 +450,21 @@ function setStyleSheet() {
   ]]></>.toString());
 }
 
-function TweetItem(msg){ this.init.call(this, msg); }
-TweetItem.prototype = {
-  init: function(msg) {
-  },
-};
+function addTrack(word){
+  if (!win) return;
+  win.TrackTabs.add(word);
+  let words = trackWords.split(","),
+      flag = false;
+  word.split(",").forEach(function(w) {
+    if (words.indexOf(w) == -1){
+      words.push(w);
+      flag = true;
+    }
+  });
+  if (flag) {
+    plugins.twittperator.TrackingStream.start({track: words.join(",")});
+  }
+}
 function getItemXML(msg) {
   XML.prettyPrinting = true;
   XML.ignoreWhitespace = true;
@@ -448,14 +552,41 @@ function getItemXML(msg) {
   return xml;
 }
 
+let listener = {
+  userStream: function userStreamListener(msg, raw) {
+    if (!win)
+      return;
+    if ((msg.text && msg.user) || ("direct_message" in msg)) {
+      win.add(msg);
+    }
+  },
+  trackStream: function trackStreamListener(msg, raw){
+    if (!win)
+      return;
+    if (msg.text && msg.user){
+      win.add(msg, true);
+    }
+  }
+}
+function streamListener(msg, raw) {
+  if (!win)
+    return;
+  if ((msg.text && msg.user) || ("direct_message" in msg)) {
+    win.add(msg);
+  }
+}
 function onLoad () {
   let gv = liberator.globalVariables;
   __context__.__defineGetter__("screenName", function() gv.twittperator_screen_name || "");
   __context__.__defineGetter__("maxRows", function() gv.twlist_max_rows || 50);
+  __context__.__defineGetter__("trackWords", function() gv.twittperator_track_words || "");
+  __context__.__defineGetter__("twlistTrack", function() gv.twlist_track_words);
 
   setStyleSheet();
 
-  plugins.twittperator.ChirpUserStream.addListener(streamListener);
+  plugins.twittperator.ChirpUserStream.addListener(listener.userStream);
+  if (trackWords)
+    plugins.twittperator.TrackingStream.addListener(listener.trackStream);
 
   commands.addUserCommand(["showtwin"], "popup/hide twittperator window",
     function(arg){
@@ -467,10 +598,12 @@ function onLoad () {
     },{
       bang: true
     }, true);
+
+  plugins.twlistWin = __context__;
 }
 
 function open(){
-  win = openDialog(URL, null, "chrome", liberator, __context__ );
+  win = openDialog(URL, null, "chrome,resizable=yes", liberator, __context__ );
 }
 function onClose(){
   win = null;
@@ -479,16 +612,10 @@ function onClose(){
 function onUnload () {
   if (win)
     win.close();
-  plugins.twittperator.ChirpUserStream.removeListener(streamListener);
+  plugins.twittperator.ChirpUserStream.removeListener(listener.userStream);
+  plugins.twittperator.TrackingStream.removeListener(listener.trackStream);
 }
 
-function streamListener(msg, raw) {
-  if (!win)
-    return;
-  if ((msg.text && msg.user) || ("direct_message" in msg)) {
-    win.add(msg);
-  }
-}
 function getMedia (uri) {
   if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path))
     return ["image", uri.spec];
