@@ -64,7 +64,7 @@ let winXML = <>
     tabBox = $("twlist-tabbox");
     cmdBox = $("twlist-command");
 
-    liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(add);
+    liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(function(it) add(it));
     if (twlist.trackWords){
       if (twlist.twlistTrack){
         TrackTabs.init(twlist.twlistTrack);
