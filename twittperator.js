@@ -1230,6 +1230,7 @@ let PLUGIN_INFO =
     let restartCount = 0;
     let startTime;
     let lastParams;
+    let lastReceivedTime;
 
     // 極めて適当につくってます。
     // ステータスに対してユニークな文字列を返せばよい
@@ -1273,7 +1274,7 @@ let PLUGIN_INFO =
 
       stop();
 
-      startTime = new Date();
+      startTime = new Date().getTime();
       lastParams = params;
 
       let useProxy = !!setting.proxyHost;
@@ -1321,14 +1322,22 @@ let PLUGIN_INFO =
       let interval = setInterval(function() {
         try {
           let len = sis.available();
-          if (len <= 0)
+          if (len <= 0) {
+            // 30秒ごとにゴミデータを送ってくる仕様っぽいので、30x2+10秒 まつことにする。
+            if (lastReceivedTime && ((new Date().getTime() - lastReceivedTime) > 70 * 1000)) {
+              lastReceivedTime = 0;
+              liberator.echoerr("Twittperator: " + name + " timed out");
+              restart();
+            }
             return;
+          }
 
           // 5分間接続されていたら、カウントをクリア
           // 何かの事情で即切断されてしまうときに、高頻度でアクセスしないための処置です。
-          if (restartCount && (new Date().getTime() - startTime.getTime()) > (5 * 60 * 1000))
+          if (restartCount && (new Date().getTime() - startTime) > (5 * 60 * 1000))
             restartCount = 0;
 
+          lastReceivedTime = new Date().getTime();
           let data = sis.read(len);
           let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length >= 2) {
