@@ -1222,10 +1222,6 @@ let PLUGIN_INFO =
 
   // Twittperator
   function Stream({ name, host, path }) { // {{{
-    function extractURL(s)
-      let (m = s.match(/https?:\/\/\S+/))
-        (m && m[0]);
-
     let connectionInfo;
     let restartCount = 0;
     let startTime;
