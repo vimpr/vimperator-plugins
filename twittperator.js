@@ -1454,35 +1454,14 @@ let PLUGIN_INFO =
         });
       }
     }, // }}}
-    say: function(stat) { // {{{
-      let sendData = {};
-      let prefix, replyUser, replyID, postfix;
-      if (stat.match(/^(.*)@(\w{1,15})#(\d+)(.*)$/)) {
-        [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
-        if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
-          Twittperator.withProtectedUserConfirmation(
-            { screenName: replyUser, statusId: replyID },
-            "retweet",
-            function() Twitter.retweet(replyID)
-          );
-          return;
-        }
-        stat = prefix + "@" + replyUser + postfix;
-        if (replyID && !prefix)
-          sendData.in_reply_to_status_id = replyID;
-      }
-      Twittperator.withProtectedUserConfirmation(
-        { screenName: replyUser, statusId: replyID },
-        "reply",
-        function() {
-          sendData.status = stat;
-          sendData.source = "Twittperator";
-          tw.post("statuses/update.json", sendData, function(text) {
-            let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
-            Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
-          });
-        }
-      );
+    say: function(status, inReplyToStatusId) { // {{{
+      let sendData = {status: status, source: "Twittperator"};
+      if (inReplyToStatusId)
+        sendData.in_reply_to_status_id = inReplyToStatusId;
+      tw.post("statuses/update.json", sendData, function(text) {
+        let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
+        Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
+      });
     }, // }}}
     retweet: function(id) { // {{{
       let url = "statuses/retweet/" + id + ".json";
@@ -1602,6 +1581,29 @@ let PLUGIN_INFO =
         m.map(function(s) s.match(/^(.*?)(https?:\/\/\S+)/).slice(1)) .
           map(function(ss) (ss.reverse(), ss.map(String.trim)))
       Twittperator.selectAndOpenLink(links);
+    }, // }}}
+    say: function(stat) { // {{{
+      let sendData = {};
+      let prefix, replyUser, replyID, postfix;
+      if (stat.match(/^(.*)@(\w{1,15})#(\d+)(.*)$/)) {
+        [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
+        if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
+          Twittperator.withProtectedUserConfirmation(
+            { screenName: replyUser, statusId: replyID },
+            "retweet",
+            function() Twitter.retweet(replyID)
+          );
+          return;
+        }
+        stat = prefix + "@" + replyUser + postfix;
+        if (replyID && !prefix)
+          sendData.in_reply_to_status_id = replyID;
+      }
+      Twittperator.withProtectedUserConfirmation(
+        { screenName: replyUser, statusId: replyID },
+        "reply",
+        function() Twitter.say(stat, replyID)
+      );
     }, // }}}
     selectAndOpenLink: function(links) { // {{{
       if (!links || !links.length)
@@ -2000,7 +2002,7 @@ let PLUGIN_INFO =
           if (arg.length === 0)
             Twittperator.showFollowersStatus();
           else
-            Twitter.say(arg);
+            Twittperator.say(arg);
         }
       }, {
         bang: true,
