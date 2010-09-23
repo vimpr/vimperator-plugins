@@ -3,10 +3,10 @@ let PLUGIN_INFO =
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
   <description lang="ja">リンク中の URL っぽいテキストにアンカーをつける。</description>
-  <version>0.4.6</version>
+  <version>0.4.7</version>
   <author>SAKAI, Kazuaki</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.4pre</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Commands ==
       :anc:
@@ -36,7 +36,7 @@ let PLUGIN_INFO =
   //   Array.prototype.uniq = function() this.reduceRight( function (a, b) (a[0] === b || a.unshift(b), a), []);
   //   [ 'TITLE', 'STYLE', 'SCRIPT', 'TEXTAREA', 'XMP', 'A', ].join('').split('').sort().uniq().join('');
   const xpathQueryPlainText = '/descendant::*[not(contains(" TITLE STYLE SCRIPT TEXTAREA XMP A ", concat(" ", translate(local-name(), "aceilmprstxy", "ACEILMPRSTXY"), " ")))]/child::text()';
-  const regexpLikeURL = new RegExp("h?(ttps?):/+([a-zA-Z0-9][-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+[-_~*(a-zA-Z0-9;/?@&=+$%#])");
+  const regexpLikeURL = new RegExp("(h?ttps?|ftp):/+([a-zA-Z0-9][-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+[-_~*(a-zA-Z0-9;/?@&=+$%#])");
 
   // process global variable
   if (stringToBoolean(liberator.globalVariables.auto_append_anchor, false)) {
@@ -72,11 +72,13 @@ let PLUGIN_INFO =
             result++;
 
             // build URL
-            let href = 'h' + RegExp.$1 + '://' + RegExp.$2;
+             let scheme = RegExp.$1, host = RegExp.$2, lastMatch = RegExp.lastMatch;
+             if (/^ttps?$/(scheme)) scheme = 'h' + scheme;
+             let href = scheme + '://' + host;
 
             // reset range
             range.setStart(node, start);
-            range.setEnd(node, start + RegExp.lastMatch.length);
+            range.setEnd(node, start + lastMatch.length);
 
             // build anchor element
             let anchor = doc.createElement('a');
