@@ -1266,9 +1266,9 @@ let PLUGIN_INFO =
     }
 
     function start(params) {
-      liberator.log("Twittperator: start " + name);
-
       stop();
+
+      liberator.log("Twittperator: start " + name);
 
       startTime = new Date().getTime();
       lastParams = params;
