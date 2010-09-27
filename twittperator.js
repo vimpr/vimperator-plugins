@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.7.2</version>
+  <version>1.7.3</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1316,6 +1316,8 @@ let PLUGIN_INFO =
       sos.write(get, get.length);
 
       let buf = "";
+      let first = true;
+
       let interval = setInterval(function() {
         try {
           let len = sis.available();
@@ -1341,8 +1343,18 @@ let PLUGIN_INFO =
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
+                if (first) {
+                  first = false;
+                  let [, code] = line.match(/^\S+\s+(\d+)/);
+                  if (code != '200') {
+                    stop();
+                    return liberator.echoerr("Twittperator: " + name + "'s  response code is " + code + ".");
+                  }
+                }
                 if (/^\s*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
+                else
+                  liberator.log(name + ': \n' + line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
