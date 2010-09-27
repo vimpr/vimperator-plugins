@@ -1227,6 +1227,7 @@ let PLUGIN_INFO =
     let startTime;
     let lastParams;
     let lastReceivedTime;
+    let listeners = [];
 
     // 極めて適当につくってます。
     // ステータスに対してユニークな文字列を返せばよい
@@ -1385,8 +1386,6 @@ let PLUGIN_INFO =
     function clearPluginData() {
       listeners = [];
     }
-
-    let listeners = [];
 
     return {
       start: start,
