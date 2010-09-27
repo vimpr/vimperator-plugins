@@ -1371,7 +1371,7 @@ let PLUGIN_INFO =
     function onMsg(msg, raw) {
       let hash = getStatusHash(msg)
       if (recentTweets.some(function (it) it === hash))
-        return false;
+        return;
 
       recentTweets.unshift(hash);
       if (recentTweets.length > 10)
