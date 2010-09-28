@@ -44,6 +44,7 @@ let winXML = <>
 <window id="twlist-window"
         sizemode="normal"
         title="Twlist - Twittperator"
+        width="500"
         height="600"
         onload="init()"
         onunload="twlist.onClose()"
@@ -64,7 +65,7 @@ let winXML = <>
     tabBox = $("twlist-tabbox");
     cmdBox = $("twlist-command");
 
-    liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(function(it) add(it));
+    liberator.plugins.twittperator.Tweets.slice(0,twlist.maxRows).reverse().forEach(add);
     if (twlist.trackWords){
       if (twlist.twlistTrack){
         TrackTabs.init(twlist.twlistTrack);
@@ -621,23 +622,98 @@ function onUnload () {
   plugins.twittperator.TrackingStream.removeListener(listener.trackStream);
 }
 
-function getMedia (uri) {
-  if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path))
-    return ["image", uri.spec];
-  switch (uri.host) {
-    case "twitpic.com":
-      return ["image", "http://twitpic.com/show/thumb" + uri.path + ".jpg"];
-    case "movapic.com":
-      return ["image", "http://image.movapic.com/pic/m_" + uri.path.substr(uri.path.lastIndexOf("/")+1) + ".jpeg"];
-    case "gyazo.com":
-      return ["image", uri.spec];
-    case "twittgoo.com":
-      let elm = util.httpGet(uri.spec + "/?format=atom").responseXML.getElementsByTagName("icon")[0];
-      return ["image", elm.textContent];
-    case "www.flickr.com":
-    case "f.hatena.ne.jp":
-    default:
-      return [];
+function getMedia (uri, elm, callback) {
+  var media = {};
+  if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path)){
+    media = { image: uri.spec, anchor: uri.spec };
+  } else { 
+    switch (uri.host) {
+      case "twitpic.com":
+        media = {
+          image: "http://twitpic.com/show/thumb" + uri.path + ".jpg",
+          anchor: uri.spec
+        };
+        break;
+      case "movapic.com":
+        media = {
+          image: "http://image.movapic.com/pic/m_" + uri.path.substr(uri.path.lastIndexOf("/")+1) + ".jpeg",
+          anchor: uri.spec
+        };
+        break;
+      case "gyazo.com":
+        media = {
+          image: uri.spec,
+          anchor: uri.spec
+        };
+        break;
+      case "twittgoo.com":
+        util.httpGet(uri.spec + "/?format=atom", function(xhr){
+          let elm = xhr.responseXML.getElementsByTagName("icon")[0];
+          callback(elm, { image: elm.textContent, anchor: uri.spec });
+        });
+        return;
+      case "www.youtube.com": {
+        let query = uri.path.substr(1).split("?")[1];
+        if (!query) break;
+        let hash = query.split("&").filter(function(param) param.indexOf("v=")==0)[0];
+        if (!hash) break;
+        media = {
+          image: "http://i.ytimg.com/vi/" + hash + "/1.jpg",
+          anchor: uri.spec
+        };
+        break;
+      }
+      case "f.hatena.ne.jp": {
+        let [, userid, date] = uri.path.split("/");
+        media = {
+          image: ["http://img.f.hatena.ne.jp/images/fotolife/",
+                  userid.charAt(0), "/", userid, "/", date.substr(0, 8),
+                  "/", date, "_m.jpg"].join(""),
+          anchor: uri.spec
+        };
+        break;
+      }
+      case "photomemo.jp": {
+        let [, user, num] = uri.path.split("/");
+        util.httpGet(uri.prePath + "/" + user + "/rss.xml", function(xhr){
+          let items = xhr.responseXML.querySelectorAll("item");
+          for (let i=0, item; item = items[i]; i++){
+            if (item.querySelector("link").textContent == uri.spec) {
+              callback(elm, { image: item.querySelector("content").getAttribute("url"), anchor: uri.spec });
+              return;
+            }
+          }
+        });
+        return;
+      }
+      case "www.flickr.com": {
+        let [,,user, id, id2, setId] = uri.path.split("/");
+        let imgReg;
+        if (id == "sets" && id2) {
+          imgReg = /<img id="primary_photo_img" src="([^"]+)"/;
+        } else if ( (id2 == "in" && setId && setId.indexOf("set-") == 0) || (user && id) ) {
+          imgReg = /<link rel="image_src" href="([^"]+)"/;
+        } else {
+          return;
+        }
+        util.httpGet(uri.spec, function(xhr){
+          let matches = xhr.responseText.match(imgReg);
+          if (matches && matches[1]){
+            let imageURL = matches[1];
+            callback(elm, { image: imageURL, anchor: uri.spec });
+            return;
+          }
+        });
+        return;
+      }
+      default:
+        return;
+    }
+  }
+  if (callback){
+    callback(elm, media);
+  } else {
+    return media;
   }
 }
 function isShortenURL (uri) {
@@ -650,6 +726,9 @@ function isShortenURL (uri) {
     case "tinyurl.com":
     case "ff.im":
     case "youtu.be":
+    case "t.co":
+    case "flic.kr":
+    case "4sq.com":
       return true;
   }
   return false;
@@ -663,12 +742,12 @@ function getRedirectedURL (aURI, aElement, aCallback){
     x.open("HEAD", aURI.spec, true);
     x.onreadystatechange = function(){
       if (x.readyState == 4){
-        aCallback.call(aElement, x.channel.URI);
+        aCallback(aElement, x.channel.URI);
       }
     };
     x.send(null);
   } else {
-    aCallback.call(aElement, aURI);
+    aCallback(aElement, aURI);
   }
 }
 function onSelect (evt) {
@@ -676,25 +755,49 @@ function onSelect (evt) {
   if (!item) return;
   let links = item.querySelectorAll("a.twlist-url");
 
-  function detectMedia (uri) {
-    this.setAttribute("href", uri.spec);
-    this.textContent = uri.spec;
+  function setMedia (elm, media) {
+    if ("image" in media) {
+      if (elm.hasAttribute("shown") && elm.getAttribute("shown") == "true")
+        return;
+      let a = null;
+      let m = document.createElementNS(XHTML, "img");
+      m.setAttribute("src", media.image);
+      m.setAttribute("class", "twlist-image");
+      m.setAttribute("align", "right");
+      if ("anchor" in media){
+        a = document.createElementNS(XHTML, "a");
+        a.setAttribute("href", media.anchor);
+        a.appendChild(m);
+        elm.parentNode.appendChild(a);
+      } else {
+        elm.parentNode.appendChild(m);
+      }
+      elm.setAttribute("shown", "true");
+    }
+
+  }
+  function detectMedia (elm, uri) {
+    elm.setAttribute("href", uri.spec);
+    elm.textContent = uri.spec;
+    getMedia(uri, elm, setMedia);
+    /*
     let [type, src] = getMedia(uri);
     if (type && src) {
       switch (type) {
         case "image":
-          if (this.hasAttribute("shown") && this.getAttribute("shown") == "true")
+          if (elm.hasAttribute("shown") && elm.getAttribute("shown") == "true")
             break;
           let img = document.createElementNS(XHTML, "img");
           img.setAttribute("src", src);
           img.setAttribute("class", "twlist-image");
           img.setAttribute("align", "right");
-          this.parentNode.appendChild(img);
-          this.setAttribute("shown", "true");
+          elm.parentNode.appendChild(img);
+          elm.setAttribute("shown", "true");
           break;
         default:
       }
     }
+    */
   }
   for (let i=0; i < links.length; i++) {
     let elm = links[i];
@@ -705,28 +808,28 @@ function onSelect (evt) {
 
 function formatText (str) {
   str = str.trim();
-  let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
+  let reg = /(?:https?:\/\/[\x21-\x7e]+)|(?:@\w{1,15})|(?:#\S+)/g;
   XML.ignoreWhitespace = false;
   let m, i = 0, buf = "", x = <xhtml:p class="twlist-text" xmlns:xhtml={XHTML}/>;
   while((m=reg.exec(str))){
     buf = str.substring(i, m.index);
     if (buf)
       x.appendChild(buf);
-    let class = "twlist-link", href = "";
+    let classValue = "twlist-link", href = "";
     switch (m[0].charAt(0)){
       case "@":
-        class += " twlist-user";
+        classValue += " twlist-user";
         href = "http://twitter.com/" + m[0].substr(1);
         break;
       case "#":
-        class += " twlist-hash";
+        classValue += " twlist-hash";
         href = "http://twitter.com/search?q=%23" + m[0].substr(1);
         break;
       default:
-        class += " twlist-url";
+        classValue += " twlist-url";
         href = m[0];
     }
-    x.appendChild(<xhtml:a class={class} href={href}
+    x.appendChild(<xhtml:a class={classValue} href={href}
                          onclick="twlist.onClick(event)" xmlns:xhtml={XHTML}>{m[0]}</xhtml:a>);
     i=reg.lastIndex;
   }
@@ -782,6 +885,8 @@ function onKeyDown(event){
         if (/^@\w+#\d+$/.test(txt.trim()))
           return;
         liberator.execute('tw ' + txt, null, true);
+        event.target.value = "";
+        event.target.blur();
       }
       break;
   }
