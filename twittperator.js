@@ -1277,8 +1277,11 @@ let PLUGIN_INFO =
       let useProxy = !!setting.proxyHost;
       let requestPath = path;
 
-      if (params)
-        requestPath += '?' + tw.buildQuery(params);
+      if (params) {
+        // XXX Twitter がなぜか + を許容しない気がする(401 を返す)ので、再変換する
+        let query = tw.buildQuery(params).replace(/\+/g, "%20");
+        requestPath += '?' + query;
+      }
 
       let authHeader = tw.getAuthorizationHeader("http://" + host + requestPath);
 
