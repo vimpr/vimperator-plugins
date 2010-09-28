@@ -623,33 +623,44 @@ function onUnload () {
 }
 
 function getMedia (uri, elm, callback) {
-  var media = {};
+  var media = { anchor: uri.spec };
   if (/\.gif$|\.jpe?g$|\.pi?ng$/.test(uri.path)){
-    media = { image: uri.spec, anchor: uri.spec };
+    media.image = uri.spec;
   } else { 
     switch (uri.host) {
       case "twitpic.com":
-        media = {
-          image: "http://twitpic.com/show/thumb" + uri.path + ".jpg",
-          anchor: uri.spec
-        };
+        media.image = "http://twitpic.com/show/thumb" + uri.path + ".jpg";
         break;
       case "movapic.com":
-        media = {
-          image: "http://image.movapic.com/pic/m_" + uri.path.substr(uri.path.lastIndexOf("/")+1) + ".jpeg",
-          anchor: uri.spec
-        };
+        media.image = "http://image.movapic.com/pic/m_" + uri.path.substr(uri.path.lastIndexOf("/")+1) + ".jpeg";
         break;
       case "gyazo.com":
-        media = {
-          image: uri.spec,
-          anchor: uri.spec
-        };
+        media.image = uri.spec;
+        break;
+      case "tweetphoto.com":
+        media.image = "http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=" + uri.spec;
         break;
       case "twittgoo.com":
         util.httpGet(uri.spec + "/?format=atom", function(xhr){
-          let elm = xhr.responseXML.getElementsByTagName("icon")[0];
-          callback(elm, { image: elm.textContent, anchor: uri.spec });
+          media.image = xhr.responseXML.getElementsByTagName("icon")[0].textContent;
+          callback(elm, media);
+        });
+        return;
+      case "yfrog.com": {
+        let x = new XMLHttpRequest;
+        x.open("HEAD", uri.spec + ".th.jpg", true);
+        x.onreadystatechange = function(){
+          if (x.readyState == 4) {
+            media.image = x.channel.URI.spec;
+            callback(elm, media);
+          }
+        }
+        x.send(null);
+      }
+      case "plixi.com":
+        util.httpGet("http://api.plixi.com/api/tpapi.svc/photos/" + uri.path.substr(uri.path.lastIndexOf("/")+1), function(xhr){
+          media.image = xhr.responseXML.getElementsByTagName("ThumbnailUrl")[0].textContent;
+          callback(elm, media);
         });
         return;
       case "www.youtube.com": {
@@ -657,20 +668,14 @@ function getMedia (uri, elm, callback) {
         if (!query) break;
         let hash = query.split("&").filter(function(param) param.indexOf("v=")==0)[0];
         if (!hash) break;
-        media = {
-          image: "http://i.ytimg.com/vi/" + hash + "/1.jpg",
-          anchor: uri.spec
-        };
+        media.image = "http://i.ytimg.com/vi/" + hash + "/1.jpg";
         break;
       }
       case "f.hatena.ne.jp": {
         let [, userid, date] = uri.path.split("/");
-        media = {
-          image: ["http://img.f.hatena.ne.jp/images/fotolife/",
-                  userid.charAt(0), "/", userid, "/", date.substr(0, 8),
-                  "/", date, "_m.jpg"].join(""),
-          anchor: uri.spec
-        };
+        media.image = ["http://img.f.hatena.ne.jp/images/fotolife/",
+                        userid.charAt(0), "/", userid, "/", date.substr(0, 8),
+                        "/", date, "_m.jpg"].join("");
         break;
       }
       case "photomemo.jp": {
@@ -679,7 +684,8 @@ function getMedia (uri, elm, callback) {
           let items = xhr.responseXML.querySelectorAll("item");
           for (let i=0, item; item = items[i]; i++){
             if (item.querySelector("link").textContent == uri.spec) {
-              callback(elm, { image: item.querySelector("content").getAttribute("url"), anchor: uri.spec });
+              media.image = item.querySelector("content").getAttribute("url");
+              callback(elm, media);
               return;
             }
           }
@@ -699,9 +705,19 @@ function getMedia (uri, elm, callback) {
         util.httpGet(uri.spec, function(xhr){
           let matches = xhr.responseText.match(imgReg);
           if (matches && matches[1]){
-            let imageURL = matches[1];
-            callback(elm, { image: imageURL, anchor: uri.spec });
+            media.image = matches[1];
+            callback(elm, media);
             return;
+          }
+        });
+        return;
+      }
+      case "photozou.jp": {
+        util.httpGet("http://api.photozou.jp/rest/photo_info?photo_id=" + uri.path.substr(uri.path.lastIndexOf("/")+1), function(xhr){
+          let urlElm = xhr.responseXML.getElementsByTagName("thumbnail_image_url")[0];
+          if (urlElm) {
+            media.image = urlElm.textContent;
+            callback(elm, media);
           }
         });
         return;
@@ -719,13 +735,16 @@ function getMedia (uri, elm, callback) {
 function isShortenURL (uri) {
   switch (uri.host) {
     case "bit.ly":
+    case "ow.ly":
     case "is.gd":
     case "j.mp":
     case "goo.gl":
     case "htn.to":
     case "tinyurl.com":
     case "ff.im":
+    case "p.tl":
     case "youtu.be":
+    case "ustre.am":
     case "t.co":
     case "flic.kr":
     case "4sq.com":
