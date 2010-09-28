@@ -225,6 +225,13 @@ let winXML = <>
       if (!item)
         return null;
       switch (target){
+        case "TWEETURL":
+          return [
+            "http://twitter.com",
+            item.querySelector(".twlist-screenname").textContent,
+            "statuse",
+            item.value
+          ].join("/");
         case "ID":
           return item.value;
         case "SCREENNAME":
@@ -372,6 +379,7 @@ let winXML = <>
     <menuitem id="twlist-menuitem-openlinktab" label="Open in a new tab" oncommand="gContext.openLink(true)"/>
     <menu id="twlist-menu-copy" label="Copy" accesskey="C">
       <menupopup>
+        <menuitem id="twlist-menuitem-copy-tweeturl" label="TweetURL" accesskey="W" oncommand="gActions.copy('TWEETURL')"/>
         <menuitem id="twlist-menuitem-copy-text" label="Text" accesskey="T" oncommand="gActions.copy('TEXT')"/>
         <menuitem id="twlist-menuitem-copy-id" label="ID" accesskey="I" oncommand="gActions.copy('ID')"/>
         <menuitem id="twlist-menuitem-copy-name" label="ScreenName" accesskey="S" oncommand="gActions.copy('SCREENNAME')"/>
