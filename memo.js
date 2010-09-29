@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Write a memo to the specified file.</description>
   <description lang="ja">指定のファイルにメモを書く</description>
-  <version>1.0.2</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://coderepos.org/share/export/27234/lang/javascript/vimperator-plugins/trunk/memo.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :memo:
@@ -116,8 +116,11 @@ let PLUGIN_INFO =
     ['memo'],
     'Write memo',
     function (arg) {
-      if (arg.string) {
-        puts(arg.string);
+      if (arg.bang)
+        return util.copyToClipboard(arg.literalArg);
+
+      if (arg.literalArg) {
+        puts(arg.literalArg);
       } else {
         let out = <></>;
         gets().split(/\n/).reverse().forEach(function (l) {
@@ -126,7 +129,37 @@ let PLUGIN_INFO =
         liberator.echo(out);
       }
     },
-    {},
+    {
+      bang: true,
+      literal: 0,
+      completer: function (context, args) {
+        if (!args.bang)
+          return;
+
+        context.createRow = function(item, highlightGroup) {
+          let desc = item[1] || this.process[1].call(this, item, item.description);
+
+          if (item.description && item.description.length) {
+            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+                <li highlight="CompDesc">
+                  {item.description}
+                </li>
+            </div>;
+          }
+
+          return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+              <li highlight="CompDesc">{item[0]}&#160;</li>
+          </div>;
+        };
+        context.filters = [function (item) this.match(item.description)];
+
+        context.completions = [
+          [it.replace(/^[^\t]+\t/, ''), it]
+          for ([, it] in Iterator(gets().split(/\n/).reverse()))
+          if (it.length)
+        ];
+      }
+    },
     true
   );
 
