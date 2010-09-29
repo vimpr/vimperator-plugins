@@ -1384,14 +1384,6 @@ let PLUGIN_INFO =
     }
 
     function onMsg(msg, raw) {
-      let hash = getStatusHash(msg)
-      if (recentTweets.some(function (it) it === hash))
-        return;
-
-      recentTweets.unshift(hash);
-      if (recentTweets.length > 10)
-        recentTweets.splice(10);
-
       listeners.forEach(function(listener) liberator.trapErrors(function() listener(msg, raw)));
 
       if (msg.text)
@@ -2086,7 +2078,6 @@ let PLUGIN_INFO =
       trackWords: gv.twittperator_track_words,
     });
 
-  let recentTweets = []; // 複数の Stream で同じものが出現するのを防ぐもの
   let statusRefreshTimer;
   let expiredStatus = true;
 
