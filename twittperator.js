@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.8.1</version>
+  <version>1.8.1.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1256,7 +1256,7 @@ let PLUGIN_INFO =
 
     cancel: function() {
       if (this.channel){
-        this.channeled = true;
+        this.canceled = true;
         return this.channel.cancel(Cr.NS_ERROR_NOT_AVAILABLE);
       }
     },
@@ -1372,6 +1372,8 @@ let PLUGIN_INFO =
               try {
                 if (/^\s*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
+                else
+                  liberator.log(name + ' : ' + line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
