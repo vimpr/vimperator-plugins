@@ -1881,21 +1881,27 @@ let PLUGIN_INFO =
         timelineCompleter: true,
         completer: Completers.id()
       }),
-      SubCommand({
-        command: ["track"],
-        description: "Track the specified words.",
-        action: function(arg) {
-          if (arg.trim().length > 0) {
-            TrackingStream.start({track: arg});
-          } else {
-            TrackingStream.stop();
+      let (lastTrackedWords)
+        (SubCommand({
+          command: ["track"],
+          description: "Track the specified words.",
+          action: function(arg) {
+            if (arg.trim().length > 0) {
+              lastTrackedWords = arg;
+              TrackingStream.start({track: arg});
+            } else {
+              TrackingStream.stop();
+            }
+          },
+          completer: function(context, args) {
+            let cs = [];
+            if (setting.trackWords)
+              cs.push([setting.trackWords, "Global variable"]);
+            if (lastTrackedWords)
+              cs.push([lastTrackedWords, "Last tracked"]);
+            context.completions = cs;
           }
-        },
-        completer: function(context, args) {
-          if (setting.trackWords)
-            context.completions = [[setting.trackWords, "Global variable"]];
-        }
-      }),
+        })),
       SubCommand({
         command: ["home"],
         description: "Open user home.",
