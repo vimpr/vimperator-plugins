@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.8.0</version>
+  <version>1.8.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1224,6 +1224,7 @@ let PLUGIN_INFO =
   function HTTPConnection(url, options) { // {{{
     const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
+    this.canceled = false;
     this.events = {};
 
     this.channel =
@@ -1254,8 +1255,10 @@ let PLUGIN_INFO =
     },
 
     cancel: function() {
-      if (this.channel)
+      if (this.channel){
+        this.channeled = true;
         return this.channel.cancel(Cr.NS_ERROR_NOT_AVAILABLE);
+      }
     },
 
     // 実装しないと例外になるメソッドとか
@@ -1276,7 +1279,8 @@ let PLUGIN_INFO =
       if (Components.isSuccessCode(status)) {
         this.callEvent("onComplete");
       } else {
-        this.callEvent("onError");
+        if (!this.canceled)
+          this.callEvent("onError");
       }
       delete this.channel;
     },
