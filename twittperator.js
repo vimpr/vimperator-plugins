@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.8.1.1</version>
+  <version>1.9.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1902,16 +1902,32 @@ let PLUGIN_INFO =
         action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
         timelineCompleter: true,
         completer: Completers.screenName(rejectMine)
+      }),
       SubCommand({
         command: ["thread"],
         description: "Show tweets thread.",
         action: function(arg) {
-          function getStatus
-          let id = parseInt(arg);
+          function getStatus(id, next) {
+            let result;
+            if (history.some(function (it) (it.id == id && (result = it))))
+              return next(result);
+            tw.get("statuses/show/" + id + ".json", null, function(text) next(JSON.parse(text)))
+          }
+          function trace(st) {
+            thread.push(st);
+            if (st.in_reply_to_status_id) {
+              getStatus(st.in_reply_to_status_id, trace);
+            } else {
+              Twittperator.showTL(thread);
+            }
+          }
+
+          Twittperator.echo("Start thread tracing..");
+          let thread = [];
+          getStatus(parseInt(arg), trace);
         },
         timelineCompleter: true,
-        completer: Completers.id()
-      }),
+        completer: Completers.id(function (it) it.in_reply_to_status_id)
       }),
     ]; // }}}
 
