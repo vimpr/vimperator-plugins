@@ -228,7 +228,7 @@ let winXML = <>
           return [
             "http://twitter.com",
             item.querySelector(".twlist-screenname").textContent,
-            "statuse",
+            "status",
             item.value
           ].join("/");
         case "ID":
@@ -886,7 +886,7 @@ function onReply (elm, isDirectMessage) {
 }
 function onRetweet(elm){
   let id = elm.parentNode.parentNode.value;
-  plugins.twittperator.OAuth.post("http://api.twitter.com/1/statues/retweet/" + id + ".json",
+  plugins.twittperator.OAuth.post("http://api.twitter.com/1/statuses/retweet/" + id + ".json",
     null, function(text){
     });
 }
