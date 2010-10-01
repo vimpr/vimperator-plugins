@@ -1317,16 +1317,6 @@ let PLUGIN_INFO =
     let lastParams;
     let listeners = [];
 
-    // 極めて適当につくってます。
-    // ステータスに対してユニークな文字列を返せばよい
-    // XXX s.id でも良い？
-    function getStatusHash(s) {
-      let result = '';
-      for (let [k, v] in Iterator(s))
-        result += k + '\t' + (v && typeof v === 'object' ? getStatusHash(v) : v) + '\n';
-      return result;
-    }
-
     function restart() {
       stop();
       if (restartCount > 13)
@@ -1372,8 +1362,6 @@ let PLUGIN_INFO =
               try {
                 if (/^\s*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
-                else
-                  liberator.log(name + ' : ' + line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
@@ -1914,6 +1902,16 @@ let PLUGIN_INFO =
         action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
         timelineCompleter: true,
         completer: Completers.screenName(rejectMine)
+      SubCommand({
+        command: ["thread"],
+        description: "Show tweets thread.",
+        action: function(arg) {
+          function getStatus
+          let id = parseInt(arg);
+        },
+        timelineCompleter: true,
+        completer: Completers.id()
+      }),
       }),
     ]; // }}}
 
