@@ -141,11 +141,10 @@ let winXML = <>
       addMsg(dmBox, dom, true);
     } else {
       addMsg(timelineBox, dom, false);
-      if (twlist.screenName && msg.in_reply_to_screen_name == twlist.screenName) {
+      if (twlist.screenName &&  twlist.screenName.test(msg.text)) {
         let repDom = dom.cloneNode(true);
         addMsg(mentionsBox, repDom, true);
       }
-      addMsgToTrack();
     }
   }
   function addMsg(box, node, doSetSymbol){
@@ -446,6 +445,9 @@ function setStyleSheet() {
       background-color: rgb(240,240,240) !important;
       color: -moz-fieldtext !important;
     }
+    .twlist-item-mentioned {
+      background-color: #F0FFFF;
+    }
     .twlist-rt-mark { 
       color: white; font-weight: bold; background-color: gray;
       padding: 2px 5px; margin: 0;
@@ -544,7 +546,7 @@ function getItemXML(msg) {
   } else {
     xml = 
     <richlistitem value={msg.id} searchlabel={msg.user.screen_name+"#"+msg.id}
-                  xmlns={XUL} class="twlist-item-content">
+                  xmlns={XUL} class={"twlist-item-content" + (screenName.test(msg.text) ? " twlist-item-mentioned" : "")}>
       <vbox class="twlist-profile-image">
         <image src={msg.user.profile_image_url} width="48" height="48"/>
         <spacer flex="1"/>
@@ -590,11 +592,11 @@ let listener = {
 
 function onLoad () {
   let gv = liberator.globalVariables;
-  __context__.__defineGetter__("screenName", function() gv.twittperator_screen_name || "");
   __context__.__defineGetter__("maxRows", function() gv.twlist_max_rows || 50);
   __context__.__defineGetter__("trackWords", function() gv.twittperator_track_words || "");
   __context__.__defineGetter__("twlistTrack", function() gv.twlist_track_words);
   __context__.__defineGetter__("win", function() services.get("windowMediator").getMostRecentWindow("twittperator:twlist"));
+  __context__.screenName =  gv.twittperator_screen_name ? new RegExp("\\b@" + gv.twittperator_screen_name +"\\b") : null;
 
   setStyleSheet();
 
