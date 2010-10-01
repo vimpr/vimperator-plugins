@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.7.3</version>
+  <version>1.8.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1221,12 +1221,96 @@ let PLUGIN_INFO =
   // }}}
 
   // Twittperator
-  function Stream({ name, host, path }) { // {{{
-    let connectionInfo;
+  function HTTPConnection(url, options) { // {{{
+    const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
+    this.events = {};
+
+    this.channel =
+      ioService.newChannelFromURI(ioService.newURI(url, null, null)).QueryInterface(Ci.nsIHttpChannel);
+    this.channel.notificationCallbacks = this;
+
+    if (options) {
+      if ("headers" in options) {
+        for (let [n, v] in Iterator(options.headers))
+          this.channel.setRequestHeader(n, v, true);
+      }
+
+      for (let [n, v] in Iterator(options)) {
+        if (/^on[A-Z]/(n) && (v instanceof Function))
+          this.events[n.toLowerCase()] = v;
+      }
+
+      this.onRecv = options.onReceive;
+    }
+
+    this.channel.asyncOpen(this, null);
+  }
+  HTTPConnection.prototype = {
+    callEvent: function(name) {
+      name = name.toLowerCase();
+      if (name in this.events)
+        return this.events[name].apply(this, Array.slice(arguments, 1));
+    },
+
+    cancel: function() {
+      if (this.channel)
+        return this.channel.cancel(Cr.NS_ERROR_NOT_AVAILABLE);
+    },
+
+    // 実装しないと例外になるメソッドとか
+    onStartRequest: function(request, context) {},
+    onProgress : function(request, context, progress, progressMax) {},
+    onStatus : function(request, context, status, statusArg) {},
+    onRedirect : function(oldChannel, newChannel) {},
+
+    onDataAvailable: function(request, context, stream, sourceOffset, length) {
+      let inputStream =
+        Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+      inputStream.init(stream);
+      let data = inputStream.read(length);
+      this.callEvent("onReceive", data);
+    },
+
+    onStopRequest: function(request, context, status) {
+      if (Components.isSuccessCode(status)) {
+        this.callEvent("onComplete");
+      } else {
+        this.callEvent("onError");
+      }
+      delete this.channel;
+    },
+
+    onChannelRedirect: function(oldChannel, newChannel, flags) {
+      this.channel = newChannel;
+    },
+
+    // nsIInterfaceRequestor
+    getInterface: function(IID) {
+      try {
+        return this.QueryInterface(IID);
+      } catch (e) {
+        throw Components.results.NS_NOINTERFACE;
+      }
+    },
+
+    // XPCOM インターフェイスに見せかけているので、QI を実装する必要がある
+    QueryInterface : function(IID) {
+      if (IID.equals(Ci.nsISupports) ||
+          IID.equals(Ci.nsIInterfaceRequestor) ||
+          IID.equals(Ci.nsIChannelEventSink) ||
+          IID.equals(Ci.nsIProgressEventSink) ||
+          IID.equals(Ci.nsIHttpEventSink) ||
+          IID.equals(Ci.nsIStreamListener))
+        return this;
+
+      throw Components.results.NS_NOINTERFACE;
+    }
+  }; // }}}
+  function Stream({ name, url }) { // {{{
+    let connection;
     let restartCount = 0;
-    let startTime;
     let lastParams;
-    let lastReceivedTime;
     let listeners = [];
 
     // 極めて適当につくってます。
@@ -1241,29 +1325,19 @@ let PLUGIN_INFO =
 
     function restart() {
       stop();
-
       if (restartCount > 13)
         return liberator.echoerr("Twittperator: Gave up to connect to " + name + "...");
-
       liberator.echoerr("Twittperator: " + name + " will be restared...");
-
       // 試行済み回数^2 秒後にリトライ
       setTimeout(function() start(lastParams), Math.pow(2, restartCount) * 1000);
-
       restartCount++;
     }
 
     function stop() {
-      if (!connectionInfo)
+      if (!connection)
         return;
-
+      connection.cancel();
       liberator.log("Twittperator: stop " + name);
-
-      clearInterval(connectionInfo.interval);
-      connectionInfo.sos.close();
-      connectionInfo.sis.close();
-
-      connectionInfo = void 0;
     }
 
     function start(params) {
@@ -1271,116 +1345,50 @@ let PLUGIN_INFO =
 
       liberator.log("Twittperator: start " + name);
 
-      startTime = new Date().getTime();
       lastParams = params;
 
       let useProxy = !!setting.proxyHost;
-      let requestPath = path;
+      let requestUrl = url;
 
       if (params) {
         // XXX Twitter がなぜか + を許容しない気がする(401 を返す)ので、再変換する
         let query = tw.buildQuery(params).replace(/\+/g, "%20");
-        requestPath += '?' + query;
+        requestUrl += '?' + query;
       }
 
-      let authHeader = tw.getAuthorizationHeader("http://" + host + requestPath);
-
-      if (useProxy)
-        requestPath = "http://" + host + requestPath;
-
-      let get = [
-        "GET " + requestPath + " HTTP/1.1",
-        "Host: " + host,
-        "Authorization: " + authHeader,
-        "Content-Type: application/x-www-form-urlencoded",
-        "",
-        "",
-      ].join("\n");
-
-      let socketService =
-        let (stsvc = Cc["@mozilla.org/network/socket-transport-service;1"])
-          let (svc = stsvc.getService())
-            svc.QueryInterface(Ci["nsISocketTransportService"]);
-
-      let transport =
-        socketService.createTransport(
-          null, 0,
-          useProxy ? setting.proxyHost : host,
-          useProxy ? parseInt(setting.proxyPort || "3128", 10) : 80,
-          null);
-      let os = transport.openOutputStream(0, 0, 0);
-      let is = transport.openInputStream(0, 0, 0);
-      let sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
-      let sos = Cc["@mozilla.org/binaryoutputstream;1"].createInstance(Ci.nsIBinaryOutputStream);
-
-      sis.init(is);
-      sos.setOutputStream(os);
-
-      sos.write(get, get.length);
-
+      let authHeader = tw.getAuthorizationHeader(requestUrl);
       let buf = "";
-      let first = true;
 
-      let interval = setInterval(function() {
+      let onReceive = function(data) {
         try {
-          let len = sis.available();
-          if (len <= 0) {
-            // 30秒ごとにゴミデータを送ってくる仕様っぽいので、30x2+10秒 まつことにする。
-            if (lastReceivedTime && ((new Date().getTime() - lastReceivedTime) > 70 * 1000)) {
-              lastReceivedTime = 0;
-              liberator.echoerr("Twittperator: " + name + " timed out");
-              restart();
-            }
-            return;
-          }
-
-          // 5分間接続されていたら、カウントをクリア
-          // 何かの事情で即切断されてしまうときに、高頻度でアクセスしないための処置です。
-          if (restartCount && (new Date().getTime() - startTime) > (5 * 60 * 1000))
-            restartCount = 0;
-
-          lastReceivedTime = new Date().getTime();
-          let data = sis.read(len);
           let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length >= 2) {
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                if (first) {
-                  first = false;
-                  let [, code] = line.match(/^\S+\s+(\d+)/);
-                  if (code != '200') {
-                    stop();
-                    return liberator.echoerr("Twittperator: " + name + "'s  response code is " + code + ".");
-                  }
-                }
                 if (/^\s*\{/(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
-                else
-                  liberator.log(name + ': \n' + line);
               } catch (e) { liberator.log(e); }
             }
             buf = lines.slice(-1)[0];
           } else {
             buf += data;
           }
-        } catch (e if /^NS_(?:ERROR_NET_RESET|BASE_STREAM_CLOSED)$/(e)) {
-          liberator.echoerr("Twittperator: " + name + " was stopped by " + e.name + ".");
-          restart();
-          stop();
         } catch (e) {
           liberator.echoerr("Twittperator: Unknown error on " + name + " connection: " + e.name);
-          restart();
-          stop();
         }
-      }, 500);
-
-      connectionInfo = {
-        sos: sos,
-        sis: sis,
-        interval: interval,
-        params: params
       };
+
+      connection = new HTTPConnection(
+        requestUrl,
+        {
+          headers: {
+            Authorization: authHeader,
+          },
+          onReceive: onReceive,
+          onError: restart
+        }
+      );
     }
 
     function onMsg(msg, raw) {
@@ -1889,7 +1897,7 @@ let PLUGIN_INFO =
             TrackingStream.stop();
           }
         },
-        completer: function (context, args) {
+        completer: function(context, args) {
           if (setting.trackWords)
             context.completions = [[setting.trackWords, "Global variable"]];
         }
@@ -2093,8 +2101,8 @@ let PLUGIN_INFO =
   let tw = new TwitterOauth(accessor);
 
   // ストリーム
-  let ChirpUserStream = Stream({ name: 'chirp stream', host: "chirpstream.twitter.com", path: "/2b/user.json" });
-  let TrackingStream = Stream({ name: 'tracking stream', host: "stream.twitter.com", path: "/1/statuses/filter.json" });
+  let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
+  let TrackingStream = Stream({ name: 'tracking stream', url: "http://stream.twitter.com/1/statuses/filter.json" });
 
   // 公開オブジェクト
   __context__.OAuth = tw;
