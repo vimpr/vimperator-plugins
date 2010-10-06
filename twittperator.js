@@ -1635,9 +1635,14 @@ let PLUGIN_INFO =
         Twittperator.showTL(statuses);
       });
     }, // }}}
+    showStatusMenu: function(status) { // {{{
+    }, // }}}
     showTL: function(s) { // {{{
       function userURL(screen_name)
         (setting.showTLURLScheme + "://twitter.com/" + screen_name);
+
+      function menuEvent(st)
+        ("window.parent.liberator.modules.plugins.twittperator.Twittperator.showStatusMenu(" + parseInt(st.id) + ")");
 
       let html = <style type="text/css"><![CDATA[
           .twitter.user { vertical-align: top; }
@@ -1660,8 +1665,14 @@ let PLUGIN_INFO =
                   <a href={userURL(status.user.screen_name)}>
                     <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
                   </a>
-                </td><td class="twitter entry-content rt">
+                </td>
+                <td class="twitter entry-content rt">
                   {Utils.anchorLink(rt.text)}
+                </td>
+                <td class="twitter menu">
+                  <a href="javascript: void 0" onclick={menuEvent(status)}>
+                   &#1758;
+                  </a>
                 </td>
               </tr> :
               <tr>
@@ -1670,8 +1681,14 @@ let PLUGIN_INFO =
                     <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
                     <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
                   </a>
-                </td><td class="twitter entry-content">
+                </td>
+                <td class="twitter entry-content">
                   {Utils.anchorLink(status.text)}
+                </td>
+                <td class="twitter menu">
+                  <a href="javascript: void 0" onclick={menuEvent(status)}>
+                   &#1758;
+                  </a>
                 </td>
               </tr>
               );
