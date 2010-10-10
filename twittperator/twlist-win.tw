@@ -153,6 +153,9 @@ let winXML = <>
     keepMaxRows(box);
     if (doSetSymbol)
       setNewSymbol(box);
+
+    if (box.selectedIndex >= 0)
+      box.ensureIndexIsVisible(box.selectedIndex);
   }
   function xmlToDom(xml, xmlns) {
     XML.prettyPrinting = false;
