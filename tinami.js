@@ -100,11 +100,47 @@ commands.addUserCommand(
       xhrImg.send(null);
     };
 
+    let getDOMHtmlDocument=function(str){
+      let doc;
+      let range;
+      try{
+        if(document.implementation.createHTMLDocument){
+          doc=document.implementation.createHTMLDocument('');
+          range=doc.createRange();
+          range.selectNodeContents(doc.documentElement);
+          range.deleteContents();
+          doc.documentElement.appendChild(range.createContextualFragment(str));
+        }else{
+          doc=document.implementation.createDocument(null,'html',null);
+          range=document.createRange();
+          range.selectNodeContents(document.documentElement);
+          let content=doc.adoptNode(range.createContextualFragment(str));
+          doc.documentElement.appendChild(content);
+        }
+      }catch(e){
+        doc=null;
+      }
+      return doc;
+    };
+
+    let getImageUrl=function(pageContents){
+      let url;
+      let htmldoc=getDOMHtmlDocument(pageContents);
+      if(htmldoc){
+        if(0<htmldoc.getElementsByTagName('img').length)
+          url=htmldoc.getElementsByTagName('img').item(0).getAttribute('src');
+        else
+          url='';
+      }else{
+        let s=pageContents.indexOf('src="')+5;
+        let e=pageContents.indexOf('"',s);
+        url=pageContents.substr(s,e-s);
+      }
+      return url;
+    };
+
     let trueImgInfo=function(){
-      let con=xhrImgInfo.responseText;
-      let s=con.indexOf('src="')+5;
-      let e=con.indexOf('"',s);
-      imgUrl=con.substr(s,e-s);
+      imgUrl=getImageUrl(xhrImgInfo.responseText);
       if(-1!=imgUrl.search(/http:\/\/img.tinami.com\/illust\/img\//i)){
         saveImag();
       }else{
