@@ -1,24 +1,31 @@
-let PLUGIN_INFO =
-<VimperatorPlugin>
-<name>{NAME}</name>
-<description>DOM Inspector command</description>
-<require type="extension" id="inspector@mozilla.org">DOM Inspector</require>
-<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<version>0.3</version>
-<minVersion>2.3pre</minVersion>
-<maxVersion>2.3pre</maxVersion>
-<detail><![CDATA[
-== Usage ==
-:inspect #{id}:
-  inspect the element of the {id} in browser content
-:inspect! #{id}:
-  inspect the element of the {id} in firefox
-:inspect[!] -f[rame] #{id}:
-  inspect the document in the frame element of the {id}
-:inspect {str}:
-  inspect the return value of evaluated the {str}
-]]></detail>
-</VimperatorPlugin>;
+let INFO =
+<plugin name="Inspector" version="0.3"
+				href="http://github.com/vimpr/vimperator-plugins/raw/master/inspector.js"
+				summary="run DOM Inspector"
+				xmlns="http://vimperator.org/namespaces/liberator">
+	<author email="teramako@gmail.com">teramako</author>
+	<license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
+	<project name="Vimperator" minVersion="2.3"/>
+	<p>
+		run DOM Inspector.
+		Of caorse, needs DOM Inspector.
+	</p>
+	<item>
+		<tags>:inspect</tags>
+		<spec>:inspect<oa>!</oa> #<a>id</a></spec>
+		<description>
+			<p>inspect the element of <a>id</a> in browser content</p>
+			<p>if bang (<a>!</a>) is exists, inspect in firefox instead.</p>
+		</description>
+	</item>
+	<item>
+		<tags>:inspect</tags>
+		<spec>:inpeect <a>expr</a></spec>
+		<description>
+  		<p>inspect the return value of evaluated the <a>expr</a></p>
+		</description>
+	</item>
+</plugin>;
 
 (function(){
 
