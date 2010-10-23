@@ -27,10 +27,18 @@ let INFO =
   </item>
 </plugin>;
 
-(function(){
 
 const inspectorID = "inspector@mozilla.org";
-if (!Application.extensions.has(inspectorID) || !Application.extensions.get(inspectorID).enabled) return;
+if (AddonManager) {
+  AddonManager.getAddonByID(inspectorID, function(ext){
+    if (ext.isActive)
+      init();
+  });
+} else if (Application.extensions.has(inspectorID) && Application.extensions.get(inspectorID).enabled) {
+  init();
+}
+
+function init(){
 
 /* これやるとFirefox終了時に実行されるんだけど...なぜ？ -> Ubiquityが悪さしているみたい
 Object.prototype.inspect = function(){
@@ -96,6 +104,6 @@ commands.addUserCommand(["inspect","dominspect"],"run DOM Inspector",
   }
 );
 
-})();
+}
 
 // vim: sw=2 ts=2 et:
