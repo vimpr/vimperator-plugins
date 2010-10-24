@@ -144,7 +144,8 @@ userContext.$_ = { //{{{
         return null;
     }
 }; // }}}
-const DOMINSPECTOR = Application.extensions.has("inspector@mozilla.org") && Application.extensions.get("inspector@mozilla.org").enabled;
+//const DOMINSPECTOR = Application.extensions.has("inspector@mozilla.org") && Application.extensions.get("inspector@mozilla.org").enabled;
+const DOMINSPECTOR = ("inspectObject" in window);
 
 // -----------------------------------------------------------------------------
 // Core
