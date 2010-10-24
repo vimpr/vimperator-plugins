@@ -223,6 +223,16 @@ createPrototype($s, {
             result.push(node);
         }
         return $(result);
+    },
+    get unescapeHTML() {
+        let suh = Cc["@mozilla.org/feed-unescapehtml;1"].getService(Ci.nsIScriptableUnescapeHTML);
+        let fragment;
+        try {
+            fragment = suh.parseFragment(this.value, false, null, document.documentElement)
+        } catch(e){
+            return null;
+        };
+        return $(fragment);
     }
 });
 // }}}
@@ -401,6 +411,7 @@ createPrototype($xml, {
             return $(found);
         } catch (e){ }
     }, // 2}}}
+    get serializedString() (new XMLSerializer).serializeToString(this.value),
 });
 if (DOMINSPECTOR){
     createPrototype($xml, {
