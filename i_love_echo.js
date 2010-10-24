@@ -61,7 +61,7 @@ function $(arg){ //{{{
         return new $e4x(arg);
     } else if (arg instanceof Array){
         return new $a(arg);
-    } else if (arg instanceof Element || arg instanceof Document){
+    } else if (arg instanceof Element || arg instanceof Document || arg instanceof DocumentFragment){
         return new $xml(arg);
     } else if (typeof arg == "object"){
         return new $o(arg);
