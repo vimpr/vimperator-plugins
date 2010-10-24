@@ -54,7 +54,7 @@ function $(arg){ //{{{
     if (typeof arg == "string"){
         let s = new $s(arg);
         if (/^https?:\/\/./.test(arg)){
-            s.open = function(){ var x = modules.$x(arg); return x.open(); };
+            s.open = function(){ var x = userContext.$x(arg); return x.open(); };
         }
         return s;
     } else if (typeof arg == "xml"){
@@ -67,7 +67,7 @@ function $(arg){ //{{{
         return new $o(arg);
     }
 } //}}}
-modules.$f = (function(){ //{{{
+userContext.$f = (function(){ //{{{
     const pests = [
         '__defineGetter__', '__defineSetter__', 'hasOwnProperty', 'isPrototypeOf',
         '__lookupGetter__', '__lookupSetter__', '__parent__', 'propertyIsEnumerable',
@@ -100,8 +100,8 @@ modules.$f = (function(){ //{{{
 })(); //}}}
 
 
-modules.$ = $;
-modules.$x = function $x(url, method, user, password){ //{{{
+userContext.$ = $;
+userContext.$x = function $x(url, method, user, password){ //{{{
     if (!cacheXHR){
         cacheXHR = new $xhr(url, method, user, password);
     } else if (cacheXHR.success && cacheXHR.url == url){
@@ -114,7 +114,7 @@ modules.$x = function $x(url, method, user, password){ //{{{
     }
     return cacheXHR;
 }; //}}}
-modules.$_ = { //{{{
+userContext.$_ = { //{{{
     cache: {
         get: function(num) $(cache[num]),
         get length() cache.length,
