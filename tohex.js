@@ -13,7 +13,7 @@ var INFO =
     <spec>:tohex</spec>
     <description>
       <p>Convert to hex code from string by this plugin.</p>
-      <p>If you use <link topic="http://github.com/vimpr/vimperator-plugins/blob/master/i_love_echo.js">i_love_echo.js</link>, you should not use tohex plugin.
+      <p>If you use <link topic="http://github.com/vimpr/vimperator-plugins/blob/master/i_love_echo.js">i_love_echo.js</link>, you should not use tohex plugin.</p>
     </description>
   </item>
 </plugin>;
