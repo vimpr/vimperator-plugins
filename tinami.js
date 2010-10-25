@@ -2,7 +2,7 @@
 var INFO = 
 <plugin name="tinami.js" version="0.1"
         summary="tinami.js"
-        href="http://gist.github.com/635799"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/tinami.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
