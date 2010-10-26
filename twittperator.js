@@ -2016,11 +2016,12 @@ let PLUGIN_INFO =
         }
       } else {
         setTimelineCompleter();
+        let arg = args.literalArg.slice(context.caret);
         let m;
-        if (m = args.literalArg.match(/(RT\s+)@.*$/)) {
+        if (m = arg.match(/(RT\s+)@.*$/)) {
           (m.index === 0 ? Completers.name_id
                          : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
-        } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, args.literalArg)) {
+        } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, arg)) {
           (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
         }
 
