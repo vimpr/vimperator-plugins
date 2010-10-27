@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.9.0</version>
+  <version>1.9.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -2016,7 +2016,7 @@ let PLUGIN_INFO =
         }
       } else {
         setTimelineCompleter();
-        let arg = args.literalArg.slice(context.caret);
+        let arg = args.literalArg.slice(0, context.caret);
         let m;
         if (m = arg.match(/(RT\s+)@.*$/)) {
           (m.index === 0 ? Completers.name_id
