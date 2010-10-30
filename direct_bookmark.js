@@ -297,8 +297,8 @@ for Migemo search: require XUL/Migemo Extension
     //
 
     function getNormalizedPermalink(url){
-        var canonical = plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]').href;
-        return canonical ? canonical : url;
+        var canonical = plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]');
+        return canonical ? canonical.href : url;
     }
 
     function getUserAccount(form,post,arg){
