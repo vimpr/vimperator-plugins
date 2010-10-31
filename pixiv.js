@@ -2,6 +2,7 @@
 var INFO = 
 <plugin name="pixiv.js" version="0.1"
         summary="pixiv.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
