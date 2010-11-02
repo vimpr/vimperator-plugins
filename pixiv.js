@@ -1,6 +1,6 @@
 // INFO //
 var INFO = 
-<plugin name="pixiv.js" version="0.1"
+<plugin name="pixiv.js" version="0.2"
         summary="pixiv.js"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -69,9 +69,14 @@ commands.addUserCommand(
           range.deleteContents();
           doc.documentElement.appendChild(range.createContextualFragment(str));
         }else{
-          doc=document.implementation.createDocument(null,'html',null);
-          range=document.createRange();
-          range.selectNodeContents(document.documentElement);
+          let doctype=document.implementation.createDocumentType(
+                      'html',
+                      '-//W3C//DTD HTML 4.01 Transitional//EN',
+                      'http://www.w3.org/TR/html4/loose.dtd'
+          );
+          doc=document.implementation.createDocument(null,'html',doctype);
+          range=doc.createRange();
+          range.selectNodeContents(doc.documentElement);
           let content=doc.adoptNode(range.createContextualFragment(str));
           doc.documentElement.appendChild(content);
         }
