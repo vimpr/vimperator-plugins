@@ -183,7 +183,7 @@ let INFO = <>
   </plugin>
   <plugin name="feedSomeKeys" version="1.8.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
-          summary="Feed some defined key events into the Web content"
+          summary="Web コンテンツに直接キーイベントを送ります。"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
