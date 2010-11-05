@@ -36,18 +36,25 @@ commands.addUserCommand(
 
     let Cc=Components.classes;
     let Ci=Components.interfaces;
-    let baseInfo;
+
     let id;
+    if(-1==contents.URL.search(/\&from_sid=/i)){
+      id=contents.URL.substr(contents.URL.lastIndexOf('=')+1);
+    }else{
+      let st=contents.URL.search(/illust_id=/i)+'illust_id='.length;
+      let end=contents.URL.lastIndexOf('&');
+      id=contents.URL.substr(st,end-st);
+    }
+
+    let baseInfo;
     let scroll;
     let type=contents.getElementsByClassName('works_display').item(0)
               .firstChild.getAttribute('href');
     if(-1!=type.search(/big&illust_id=/i)){
       baseInfo="http://www.pixiv.net/member_illust.php?mode=big&illust_id=";
-      id=contents.URL.substr(contents.URL.lastIndexOf('=')+1);
       scroll='';
     }else if(-1!=type.search(/manga&illust_id=/i)){
       baseInfo="http://www.pixiv.net/member_illust.php?mode=manga&illust_id=";
-      id=contents.URL.substr(contents.URL.lastIndexOf('=')+1);
       scroll='&type=scroll';
     }else{
       liberator.echoerr("This page is not image page and not manga page.");
