@@ -1,7 +1,7 @@
 // INFO //
 var INFO = 
 <plugin name="jweather.js" version="0.1"
-        summary="jweather.js"
+        summary="Get Japanese Weather Report"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/jweather.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
