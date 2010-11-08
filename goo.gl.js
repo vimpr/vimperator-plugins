@@ -1,8 +1,8 @@
 // INFO //
-var INFO = 
+var INFO =
 <plugin name="goo.gl.js" version="0.1"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/goo.gl.js"
-        summary="goo.gl.js"
+        summary="Get shorten URL by goo.gl"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
   <author email="anekos@snca.net">anekos</author>
