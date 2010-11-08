@@ -1,7 +1,7 @@
 // INFO //
 var INFO = 
 <plugin name="gmap.js" version="0.1"
-        summary="gmap.js"
+        summary="Get google maps URL of current machine location."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/gmap.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
