@@ -1,7 +1,7 @@
 // INFO //
 var INFO = 
 <plugin name="togglepixiv.js" version="0.1"
-        summary="togglepixiv.js"
+        summary="Toggle pixiv's login box"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/togglepixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
