@@ -1,7 +1,7 @@
 // INFO //
 var INFO = 
 <plugin name="togglecontextgithub.js" version="0.1"
-        summary="togglecontextgithub.js"
+        summary="Toggle context exchange box on github"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/togglecontextgithub.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
