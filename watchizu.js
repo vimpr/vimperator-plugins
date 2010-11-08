@@ -1,7 +1,7 @@
 // INFO //
 var INFO = 
 <plugin name="watchizu.js" version="0.1"
-        summary="watchizu.js"
+        summary="Get Watchizu URL of current machine location"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/watchizu.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
