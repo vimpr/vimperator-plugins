@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using ChirpStream</description>
   <description lang="ja">OAuth対応Twitterクライアント</description>
-  <version>1.9.1</version>
+  <version>1.9.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1218,6 +1218,32 @@ let PLUGIN_INFO =
     };
     return p;
   })();
+  {
+    'get post delete'.split(' ').forEach(function (name) {
+      let newName =
+        'json' + name.replace(/^(.)(.*)/ , function(_, a, b) (a.toUpperCase() + b));
+      TwitterOauth.prototype[newName] =
+        function (url, query, callback, onError) {
+          return TwitterOauth.prototype[name].call(
+            this,
+            url + '.json',
+            query,
+            function (text) {
+              try {
+                return callback(JSON.parse(text));
+              } catch (e) {
+                (onError
+                 ||
+                 function(e) {
+                   liberator.echoerr('Twitter API Error: ' + url);
+                   throw e;
+                 })(e);
+              }
+            }
+          );
+        };
+    });
+  }
   // }}}
 
   // Twittperator
@@ -1406,14 +1432,14 @@ let PLUGIN_INFO =
   }; // }}}
   let Twitter = { // {{{
     destroy: function(id) { // {{{
-      tw.delete("statuses/destroy/" + id + ".json", null, function(text) {
-        let res = Utils.fixStatusObject(JSON.parse(text));
+      tw.jsonDelete("statuses/destroy/" + id, null, function(res) {
+        res = Utils.fixStatusObject(res);
         Twittperator.echo("delete: " + res.user.name + " " + res.text)
       });
     }, // }}}
     favorite: function(id) { // {{{
-      tw.post("favorites/create/" + id + ".json", null, function(text) {
-        let res = Utils.fixStatusObject(JSON.parse(text));
+      tw.jsonPost("favorites/create/" + id, null, function(res) {
+        res = Utils.fixStatusObject(res);
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
     }, // }}}
@@ -1428,10 +1454,10 @@ let PLUGIN_INFO =
       if (!force && !expiredStatus && history.length > 0) {
         onload(history);
       } else {
-        let api = "statuses/home_timeline.json", query = {};
+        let api = "statuses/home_timeline", query = {};
 
         if (target) {
-          api = "statuses/user_timeline.json";
+          api = "statuses/user_timeline";
           query.screen_name = target;
         } else {
           query = null;
@@ -1441,9 +1467,9 @@ let PLUGIN_INFO =
           }
         }
 
-        tw.get(api, query, function(text) {
+        tw.jsonGet(api, query, function(res) {
           setRefresher();
-          let result = JSON.parse(text).map(Utils.fixStatusObject);
+          let result = res.map(Utils.fixStatusObject);
           if (!target) {
             let lastHistory = history[0];
             if (lastHistory) {
@@ -1466,21 +1492,21 @@ let PLUGIN_INFO =
       let sendData = {status: status, source: "Twittperator"};
       if (inReplyToStatusId)
         sendData.in_reply_to_status_id = inReplyToStatusId;
-      tw.post("statuses/update.json", sendData, function(text) {
-        let t = Utils.fixStatusObject(JSON.parse(text || "{}")).text;
+      tw.jsonPost("statuses/update", sendData, function(res) {
+        let t = Utils.fixStatusObject(res).text;
         Twittperator.echo("Your post " + '"' + t + '" (' + t.length + " characters) was sent.");
       });
     }, // }}}
     retweet: function(id) { // {{{
-      let url = "statuses/retweet/" + id + ".json";
-      tw.post(url, null, function(text) {
-        let res = Utils.fixStatusObject(JSON.parse(text));
+      let url = "statuses/retweet/" + id;
+      tw.jsonPost(url, null, function(res) {
+        res = Utils.fixStatusObject(res);
         Twittperator.echo("Retweet: " + res.retweeted_status.text);
       });
     }, // }}}
     unfavorite: function(id) { // {{{
-      tw.delete("favorites/destroy/" + id + ".json", null, function(text) {
-        let res = Utils.fixStatusObject(JSON.parse(text));
+      tw.jsonDelete("favorites/destroy/" + id, null, function(res) {
+        res = Utils.fixStatusObject(res);
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
     }, // }}}
@@ -1700,8 +1726,8 @@ let PLUGIN_INFO =
       liberator.echo(html, true);
     }, // }}}
     showTwitterMentions: function(arg) { // {{{
-      tw.get("statuses/mentions.json", null, function(text) {
-        Twittperator.showTL(JSON.parse(text).map(Utils.fixStatusObject));
+      tw.jsonGet("statuses/mentions", null, function(text) {
+        Twittperator.showTL(res.map(Utils.fixStatusObject));
       });
     }, // }}}
     showTwitterSearchResult: function(word) { // {{{
@@ -1717,10 +1743,9 @@ let PLUGIN_INFO =
         };
       }
 
-      tw.get("http://search.twitter.com/search.json", { q: word }, function(text) {
-        let results = JSON.parse(text).results;
-        if (results.length > 0) {
-          Twittperator.showTL(results.map(Utils.fixStatusObject).map(konbuArt));
+      tw.jsonGet("http://search.twitter.com/search", { q: word }, function(res) {
+        if (res.results.length > 0) {
+          Twittperator.showTL(res.results.map(Utils.fixStatusObject).map(konbuArt));
         } else {
           Twittperator.echo("No results found.")
         }
@@ -1934,7 +1959,7 @@ let PLUGIN_INFO =
             let result;
             if (history.some(function (it) (it.id == id && (result = it))))
               return next(result);
-            tw.get("statuses/show/" + id + ".json", null, function(text) next(JSON.parse(text)))
+            tw.jsonGet("statuses/show/" + id, null, function(res) next(res))
           }
           function trace(st) {
             thread.push(st);
