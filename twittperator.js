@@ -26,8 +26,8 @@
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Twittperator</name>
-  <description>Twitter Client using ChirpStream</description>
-  <description lang="ja">OAuth対応Twitterクライアント</description>
+  <description>Twitter Client using OAuth and Streaming API</description>
+  <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
   <version>1.9.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
