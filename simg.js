@@ -1,6 +1,6 @@
 // INFO //
-var INFO = 
-<plugin name="simg.js" version="0.1"
+var INFO =
+<plugin name="simg.js" version="0.2"
         summary="Save image on contents area"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/simg.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -51,6 +51,9 @@ commands.addUserCommand(
 
     let trueCurrntImg=function(){
       let fileName=imgURL.substr(imgURL.lastIndexOf('/'));
+      if (-1!=fileName.indexOf('?')){
+        fileName=fileName.substr(0,fileName.indexOf('?'));
+      }
       savePath=savePath+fileName;
       let instream=xhrImg.responseText;
       let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
