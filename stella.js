@@ -2158,7 +2158,6 @@ Thanks:
     // すでにインストール済みの場合は、一度ファイナライズする
     // (デバッグ時に前のパネルが残ってしまうため)
     if (estella) {
-    liberator.echo(1);
       estella.finalize();
       install();
     } else {
