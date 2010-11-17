@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
   <description>for Session Manager Addon</description>
-  <version>1.3.3</version>
+  <version>1.3.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,14 +56,14 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="session-manager" version="1.3.3"
+  <plugin name="session-manager" version="1.3.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.3"/>
+    <project name="Vimperator" minVersion="2.3" maxVersion="2.4" />
     <p>for Session Manager Addon.</p>
     <item>
       <tags>:sm</tags>
@@ -76,14 +76,14 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="session-manager" version="1.3.3"
+  <plugin name="session-manager" version="1.3.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.3"/>
+    <project name="Vimperator" minVersion="2.3" maxVersion="2.4" />
     <p>for Session Manager Addon.</p>
     <item>
       <tags>:sm</tags>
@@ -219,7 +219,7 @@ let INFO =
         context.compare = void 0;
         context.completions = [
           [file.leafName.replace(/\.session$/, ''), new Date(file.lastModifiedTime)]
-          for each ([,file] in io.File(gSessionManager.getSessionDir()).readDirectory())
+          for ([,file] in Iterator(io.File(gSessionManager.getSessionDir()).readDirectory()))
           if (!ignoreAuto || args['-auto'] || !/^(backup(-\d+)?|autosave)\.session$/(file.leafName))
         ].sort(function ([, a], [, b]) (b - a));
       }
