@@ -104,15 +104,14 @@ let INFO =
     liberator.callFunctionInThread(null, io.run, io.expandPath(args.shift()), args, false);
   }
 
-  let dirs = toArray(liberator.globalVariables.plugin_loader_roots || []);
-
+  let dirs = toArray(liberator.globalVariables.plugin_loader_roots || []).map(function (path) io.File(path).path);
 
   // XXX dont remove first space
   ' plugin colors styles style'.split(/\s/).forEach(
     function (name) (dirs = dirs.concat(io.getRuntimeDirectories(name).map(function (file) file.path)))
   );
 
-  dirs = util.Array.compact(dirs).map(io.expandPath);
+  dirs = util.Array.uniq(util.Array.compact(dirs).map(io.expandPath));
 
   let getItems =
     let (lastTime, lastItems)
@@ -130,10 +129,11 @@ let INFO =
 
       };
 
+
   completion.vimperatorFiles =
     function (context, args) {
       context.title = ['Filename', 'Directory'];
-      context.completions = getItems().map(function ([file, dir]) [file, dir]);
+      context.completions = util.Array.uniq(getItems().map(function ([file, dir]) [file, dir]));
     };
 
   commands.addUserCommand(
