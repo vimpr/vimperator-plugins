@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Edit Vimperator File</name>
   <description>Open vimperator files with text-editor.</description>
   <description lang="ja">Vimperator 関連のファイルをエディタで開く</description>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="EditVimperatorFile" version="1.1.1"
+  <plugin name="EditVimperatorFile" version="1.1.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
@@ -73,7 +73,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="EditVimperatorFile" version="1.1.1"
+  <plugin name="EditVimperatorFile" version="1.1.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
@@ -125,7 +125,7 @@ let INFO =
         return lastItems = util.Array.flatten([
           [
             [file.path, dir]
-            for each ([, file] in io.File(dir).readDirectory(false))
+            for ([, file] in Iterator(io.File(dir).readDirectory(false)))
             if (file.isFile() && /^[\._]vimperatorrc|\.(js|vimp|css)$/(file.leafName))
           ]
           for ([, dir] in Iterator(dirs))
