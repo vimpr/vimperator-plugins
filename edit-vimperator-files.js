@@ -135,7 +135,6 @@ let INFO =
 
   completion.vimperatorFiles =
     function (context, args) {
-      liberator.log(getItems());
       context.title = ['Filename', 'Directory'];
       context.completions = getItems().map(function ([file, dir]) [file, dir]);
     };
