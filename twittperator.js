@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.9.3</version>
+  <version>1.9.4</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -2008,6 +2008,7 @@ let PLUGIN_INFO =
           (this.match(desc.user.screen_name) || this.match(desc.text));
 
       function setTimelineCompleter() {
+        context.compare = function () void 0;
         context.createRow = function(item, highlightGroup) {
           let desc = item[1] || this.process[1].call(this, item, item.description);
 
