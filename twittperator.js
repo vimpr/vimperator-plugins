@@ -2007,7 +2007,7 @@ let PLUGIN_INFO =
           (this.match(desc.user.screen_name) || this.match(desc.text));
 
       function setTimelineCompleter() {
-        context.compare = function () void 0;
+        context.compare = void 0;
         context.createRow = function(item, highlightGroup) {
           let desc = item[1] || this.process[1].call(this, item, item.description);
 
