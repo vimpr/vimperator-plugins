@@ -1722,7 +1722,6 @@ let PLUGIN_INFO =
           }, <table/>)
             .toSource().replace(/(?:\r\n|[\r\n])[ \t]*/g, " ");
 
-      //liberator.log(html);
       liberator.echo(html, true);
     }, // }}}
     showTwitterMentions: function(arg) { // {{{
