@@ -106,9 +106,6 @@ let INFO =
 
   let dirs = toArray(liberator.globalVariables.plugin_loader_roots || []);
 
-  'HOME USERPROFILE HOMEDRIVE'.split(/\s/).forEach(
-    function (envName) dirs.push(services.get("environment").get(envName))
-  );
 
   // XXX dont remove first space
   ' plugin colors styles style'.split(/\s/).forEach(
