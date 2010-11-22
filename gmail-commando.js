@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -76,7 +76,7 @@ let g:gmail_commando_label_shortcut = 1
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.1"
+  <plugin name="GMailCommando" version="1.4.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -101,8 +101,8 @@ let INFO =
       <description>
         <p>
           Set the mappings for Gmail page.
-        <p>
         </p>
+        <p>
           Available values for <a>function-name</a>:
           <dl>
             <dt>translate</dt><dd>メール翻訳</dd>
@@ -113,7 +113,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.1"
+  <plugin name="GMailコマンドー" version="1.4.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -138,8 +138,8 @@ let INFO =
       <description>
         <p>
           Gmail のページ内でのみ有効なマッピングを設定します。
-        <p>
         </p>
+        <p>
           <a>function-name</a> は以下の値が有効です。
           <dl>
             <dt>translate</dt><dd>メール翻訳</dd>
