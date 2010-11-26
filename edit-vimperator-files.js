@@ -153,6 +153,13 @@ let INFO =
     true
   );
 
+  // :so コマンドの補完も改良
+  commands.get('so').completer = function (context, args) {
+    context.fork('File', 0, context, completion.file);
+    if (completion.vimperatorFiles)
+      context.fork('VimperatorFile', 0, context, completion.vimperatorFiles);
+  };
+
 
 })();
 
