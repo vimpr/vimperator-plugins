@@ -219,15 +219,10 @@ let INFO =
           let func = api[MapKeys[cmd]];
           if (!func.completer)
             return;
-          func.completer(context, args);
-          return;
+          return func.completer(context, args);
         }
 
-        context.completions =
-          [
-            keyValue
-            for (keyValue in Iterator(MapKeys))
-          ];
+        context.completions = [keyValue for (keyValue in Iterator(MapKeys))];
       }
     },
     true
