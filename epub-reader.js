@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="ePub Reader" version="1.0.0"
+  <plugin name="ePub Reader" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="for ePub Reader addon"
           lang="en-US"
@@ -67,7 +67,7 @@ let INFO =
       </code>
     </p>
   </plugin>
-  <plugin name="ePub Reader" version="1.0.0"
+  <plugin name="ePub Reader" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="for ePub Reader addon"
           lang="ja"
@@ -113,7 +113,8 @@ let INFO =
     nextchapter: 'goNextChapter',
     save: 'save',
     bookmark: 'bookmark',
-    library: 'openLibrary'
+    library: 'openLibrary',
+    jump: 'jump'
   };
 
   const ReaderUrls = /^chrome:\/\/epubreader\/content\/reader.xul/;
@@ -135,6 +136,15 @@ let INFO =
     function (count)
       pressN(query, count);
 
+  function withCompleter (main, completer) {
+    main.completer = completer;
+    return main;
+  }
+
+  function getIndexLinks ()
+    let (frame = content.document.querySelector('#nav_frame').contentDocument)
+      Array.slice(frame.querySelectorAll('.navPoint .childLevel > a'));
+
   let api = __context__.API = {
     bookmark:
       makePress('toolbarbutton#save'),
@@ -150,6 +160,19 @@ let INFO =
       makePress('toolbarbutton#library'),
     save:
       makePress('toolbarbutton#bookmark'),
+    jump:
+      withCompleter(
+        function (index) {
+          buffer.followLink(getIndexLinks()[index]);
+        },
+        function (context, args) {
+          context.compare = void 0;
+          context.completions = [
+            [i + ': ' + link.textContent, link.href.replace(/.*\//g, '').replace(/\.[^.]+$/, '')]
+            for ([i, link] in Iterator(getIndexLinks()))
+          ];
+        }
+      )
   };
 
   for (let keyValue in Iterator(MapKeys)) {
@@ -183,13 +206,20 @@ let INFO =
       let [cmd, num] = args;
       let func = api[MapKeys[cmd]];
       if (!func)
-        return liberator.echoerr('Unknown command: ' + fname);
+        return liberator.echoerr('Unknown command: ' + cmd);
       func(parseInt(num, 10));
     },
     {
+      literal: 1,
       completer: function (context, args) {
-        if (args.length > 1)
+        if (args.length > 1) {
+          let [cmd] = args;
+          let func = api[MapKeys[cmd]];
+          if (!func.completer)
+            return;
+          func.completer(context, args);
           return;
+        }
 
         context.completions =
           [
