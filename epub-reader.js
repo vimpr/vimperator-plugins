@@ -57,6 +57,7 @@ let INFO =
         <dt>prevchapter</dt><dd>Go previous chapter</dd>
         <dt>bookmark</dt><dd>Bookmark in ePub Reader addon</dd>
         <dt>library</dt><dd>Open ePub Reader library</dd>
+        <dt>jump</dt><dd>Jump to the page</dd>
       </dl>
     </p>
     <p>
@@ -89,6 +90,7 @@ let INFO =
         <dt>prevchapter</dt><dd>Go previous chapter</dd>
         <dt>bookmark</dt><dd>Bookmark in ePub Reader addon</dd>
         <dt>library</dt><dd>Open ePub Reader library</dd>
+        <dt>jump</dt><dd>Jump to the page</dd>
       </dl>
     </p>
     <p>
