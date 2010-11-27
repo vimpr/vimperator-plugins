@@ -38,12 +38,12 @@ let PLUGIN_INFO =
   <name>Read Cat Later</name>
   <description>Read it later</description>
   <description lang="ja">後で読む</description>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/readcatlater.js</updateURL>
-  <minVersion>2.0pre</minVersion>
+  <minVersion>2.4</minVersion>
   <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Usage ==
@@ -244,11 +244,13 @@ let PLUGIN_INFO =
   } catch (e) { liberator.log(e); } }
 
   function completer (context, arg) {
+    context.compare = void 'meow';
     context.title = ['URL', 'Title'];
     context.filters = [CompletionContext.Filter.textDescription];
     context.completions = RCL_Bookmarks(context.filter).
                             filter(function (it) it.id).
-                            map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]);
+                            map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]).
+                            reverse();
   }
 
   function removeItems (uri) {
