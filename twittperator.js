@@ -1796,6 +1796,11 @@ let PLUGIN_INFO =
       }
     }, // }}}
   }; // }}}
+  let Store = storage.newMap("twittperator", { store: true }); // {{{
+  Store.set("clientName", "Twittperator");
+  Store.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
+  Store.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
+  // }}}
 
   function setup() { // {{{
     function rejectMine(st)
@@ -2172,11 +2177,6 @@ let PLUGIN_INFO =
   let statusRefreshTimer;
   let expiredStatus = true;
 
-  let accessor = storage.newMap("twittperator", { store: true });
-  accessor.set("clientName", "Twittperator");
-  accessor.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
-  accessor.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
-
   let history = __context__.Tweets;
   if (!history)
     history = __context__.Tweets = accessor.get("history", []);
@@ -2194,6 +2194,7 @@ let PLUGIN_INFO =
   __context__.Twittperator = Twittperator;
   __context__.Twitter = Twitter;
   __context__.Utils = Utils;
+  __context__.Store = Store;
 
   Twittperator.loadPlugins();
 
