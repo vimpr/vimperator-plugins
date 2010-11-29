@@ -1802,6 +1802,25 @@ let PLUGIN_INFO =
   Store.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
   // }}}
 
+  // アクセストークン取得前 {{{
+  function preSetup() {
+    commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
+      function(args) {
+        if (args["-getPIN"]) {
+          tw.getRequestToken(function(url) {
+            liberator.open(url, { where: liberator.NEW_TAB });
+          });
+          Twittperator.echo("Please get PIN code and execute\n :tw -setPIN {PINcode}");
+        } else if (args["-setPIN"]) {
+          tw.setPin(args["-setPIN"]);
+        }
+      }, {
+        options: [
+          [["-getPIN"], commands.OPTION_NOARG],
+          [["-setPIN"], commands.OPTION_STRING, null, null]
+        ],
+      }, true);
+  } // }}}
   // アクセストークン取得後 {{{
   function setup() {
     function rejectMine(st)
@@ -2138,25 +2157,6 @@ let PLUGIN_INFO =
           }
         }
       }, true); // }}}
-  } // }}}
-  // PIN code を取得して AccessToken を得る前 {{{
-  function preSetup() {
-    commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
-      function(args) {
-        if (args["-getPIN"]) {
-          tw.getRequestToken(function(url) {
-            liberator.open(url, { where: liberator.NEW_TAB });
-          });
-          Twittperator.echo("Please get PIN code and execute\n :tw -setPIN {PINcode}");
-        } else if (args["-setPIN"]) {
-          tw.setPin(args["-setPIN"]);
-        }
-      }, {
-        options: [
-          [["-getPIN"], commands.OPTION_NOARG],
-          [["-setPIN"], commands.OPTION_STRING, null, null]
-        ],
-      }, true);
   } // }}}
 
   // Initialization {{{
