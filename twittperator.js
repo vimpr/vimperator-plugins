@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.9.4</version>
+  <version>1.9.5</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1342,6 +1342,18 @@ let PLUGIN_INFO =
     let restartCount = 0;
     let lastParams;
     let listeners = [];
+    let retryTimer;
+
+    function clearRetryTimer() {
+      if (retryTimer)
+        clearTimeout(retryTimer);
+      retryTimer = null;
+    }
+
+    function updateRetryTimer(restartFunc) {
+      clearRetryTimer();
+      retryTimer = setTimeout(restartFunc, 60 * 1000);
+    }
 
     function restart() {
       stop();
@@ -1354,6 +1366,7 @@ let PLUGIN_INFO =
     }
 
     function stop() {
+      clearRetryTimer();
       if (!connection)
         return;
       connection.cancel();
@@ -1381,6 +1394,7 @@ let PLUGIN_INFO =
 
       let onReceive = function(data) {
         try {
+          updateRetryTimer(restart);
           let lines = data.split(/\r\n|[\r\n]/);
           if (lines.length >= 2) {
             lines[0] = buf + lines[0];

@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>3.0</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
@@ -126,7 +126,7 @@ function SBMEntry(id, timestamp, comment, tags, extra){ //{{{
 SBMEntry.prototype = { //{{{
     toHTML: function(format){
         function makeLink(str)
-            XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="#" highlight="URL">$&</a>'));
+            XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="$&" highlight="URL">$&</a>'));
 
         var xml = <tr/>;
         var self = this;
