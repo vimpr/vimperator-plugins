@@ -6,7 +6,7 @@ var PLUGIN_INFO =
     <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.3</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/sbmcommentsviewer.js</updateURL>
     <detail><![CDATA[
 == Usage ==
 >||

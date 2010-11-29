@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.1.1</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/takahashiPresentation.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/takahashiPresentation.js</updateURL>
     <date>2008/12/23 09:20:07</date>
     <detail><![CDATA[
 

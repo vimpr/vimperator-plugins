@@ -42,7 +42,7 @@ let PLUGIN_INFO =
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/auto_source.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/auto_source.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <detail><![CDATA[

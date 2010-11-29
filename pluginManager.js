@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <version>0.6.6</version>
 <minVersion>2.3</minVersion>
 <maxVersion>2.4</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pluginManager.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/pluginManager.js</updateURL>
 <detail lang="ja"><![CDATA[
 これはVimperatorプラグインの詳細情報orヘルプを表示するためのプラグインです。
 == Command ==

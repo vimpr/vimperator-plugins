@@ -31,7 +31,7 @@ let PLUGIN_INFO =
 <version>1.1.1</version>
 <minVersion>2.2</minVersion>
 <maxVersion>2.3</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/xpathBlink.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/xpathBlink.js</updateURL>
 <detail><![CDATA[
 for test xpath
 

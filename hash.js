@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.2.2</version>
     <minVersion>2.3</minVersion>
     <maxVersion>2.3</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hash.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hash.js</updateURL>
     <detail><![CDATA[
 
 == COMMANDS ==

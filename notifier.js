@@ -15,7 +15,7 @@ var PLUGIN_INFO =
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/notifier.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/notifier.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.9)

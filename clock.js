@@ -8,7 +8,7 @@ let PLUGIN_INFO =
 <version>0.15.2</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.2pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/clock.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/clock.js</updateURL>
 <detail><![CDATA[
 == USAGE ==
 you can customize below variable.

@@ -37,7 +37,7 @@ let PLUGIN_INFO =
   <description lang="ja">指定されたサイトのはてブ数を監視、変動があったらお知らせします。</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatebuWatchDog.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hatebuWatchDog.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>1.3.0</version>

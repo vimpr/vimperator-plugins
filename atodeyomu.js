@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.0.1</version>
     <minVersion>2.2</minVersion>
     <maxVersion>2.3</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/atodeyomu.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/atodeyomu.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
 ]]></detail>

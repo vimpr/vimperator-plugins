@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">複数のアカウントを切り替えることができます．</description>
 <minVersion>2.1a1pre</minVersion>
 <maxVersion>2.1a1pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/account_switcher.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/account_switcher.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA</author>
 <version>0.08</version>
 <detail><![CDATA[

@@ -8,7 +8,7 @@ var PLUGIN_INFO =
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.2</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/direct_bookmark.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
     <detail><![CDATA[
 Social Bookmark direct add script for Vimperator 2.2
 for Migemo search: require XUL/Migemo Extension

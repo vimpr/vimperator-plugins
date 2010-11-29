@@ -5,7 +5,7 @@ var PLUGIN_INFO =
   <description lang='ja'>user agent 切り替え</description>
   <version>0.1.1</version>
   <author homepage='http://d.hatena.ne.jp/pekepekesamurai/'>pekepeke</author>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/uaSwitchLite</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/uaSwitchLite</updateURL>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
   <detail lang='ja'><![CDATA[

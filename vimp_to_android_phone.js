@@ -6,7 +6,7 @@ var PLUGIN_INFO =
 	<author mail="hotchpotch@gmail.com">Yuichi Tateno</author>
 	<minVersion>2.3</minVersion>
 	<maxVersion>2.3</maxVersion>
-	<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/vimp_to_android_phone.js</updateURL>
+	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/vimp_to_android_phone.js</updateURL>
 </VimperatorPlugin>;
 
 (function() {

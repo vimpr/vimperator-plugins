@@ -5,7 +5,7 @@ var PLUGIN_INFO =
     <description lang="ja">要素の text/html/attrs をコピーするヒントモードを追加する</description>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.3</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-yank-paste.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hints-yank-paste.js</updateURL>
     <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
     <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
     <version>0.1.1</version>

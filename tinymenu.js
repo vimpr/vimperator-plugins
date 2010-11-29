@@ -4,7 +4,7 @@ var PLUGIN_INFO =
 <description>Tiny Menu for Vimperator</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tinymenu.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/tinymenu.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.2</version>

@@ -76,7 +76,7 @@ var PLUGIN_INFO=
 <version>2.2.3</version>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <minVersion>2.3</minVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_2.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/feedSomeKeys_2.js</updateURL>
 </VimperatorPlugin>;
 
 liberator.plugins.feedKey = (function(){

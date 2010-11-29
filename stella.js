@@ -45,7 +45,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
   <maxVersion>2.4</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stella.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
       :stpl[ay]:

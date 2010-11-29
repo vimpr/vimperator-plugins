@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">UNIX シェルのような、C-rで履歴検索を行うプラグイン</description>
 <minVersion>2.0</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/history-search-backward.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/history-search-backward.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MIT</license>
 <version>0.2</version>

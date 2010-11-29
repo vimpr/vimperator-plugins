@@ -15,7 +15,7 @@ var PLUGIN_INFO =
     <version>0.1.33</version>
     <minVersion>2.3pre</minVersion>
     <maxVersion>2.3</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_libly.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/_libly.js</updateURL>
     <detail><![CDATA[
 == Objects ==
 - liberator.plugins.libly.$U

@@ -6,7 +6,7 @@ var PLUGIN_INFO =
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
     <version>0.0.7</version>
     <minVersion>2.3pre</minVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scenario-actor.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/scenario-actor.js</updateURL>
     <detail><![CDATA[
 == Usage ==
 browser act scenario semi-automatic.

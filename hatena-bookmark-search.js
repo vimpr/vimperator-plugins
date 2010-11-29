@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">はてなブックマークユーザ検索</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena-bookmark-search.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hatena-bookmark-search.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>1.0.2</version>

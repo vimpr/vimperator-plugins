@@ -15,7 +15,7 @@ var PLUGIN_INFO =
   <license>MIT</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0α2</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/resizable_textarea.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/resizable_textarea.js</updateURL>
   <detail><![CDATA[
 == Usage ==
 === NORMAL MODE or VISUAL MODE or CARET MODE ===

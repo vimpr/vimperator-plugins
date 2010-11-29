@@ -14,7 +14,7 @@ var PLUGIN_INFO =
     <license>GPL</license>
     <minVersion>2.2pre</minVersion>
     <maxVersion>2.2pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/marker_reader.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/marker_reader.js</updateURL>
 <detail><![CDATA[
     
 == OPTION ==

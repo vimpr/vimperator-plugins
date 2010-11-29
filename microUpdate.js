@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <description lang="ja">はてなで疑似マイクロWeb日記</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/microUpdate.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/microUpdate.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>0.0.1</version>

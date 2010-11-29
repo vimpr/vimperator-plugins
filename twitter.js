@@ -23,7 +23,7 @@ let PLUGIN_INFO =
 <name>{NAME}</name>
 <description>The script allows you to update Twitter status from Vimperator</description>
 <version>1.2.0</version>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twitter.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/twitter.js</updateURL>
 <author>Trapezoid</author>
 <license>Creative Commons</license>
 <detail><![CDATA[

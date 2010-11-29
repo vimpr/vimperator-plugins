@@ -17,7 +17,7 @@ var PLUGIN_INFO =
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.3</maxVersion>
   <require type="plugin">_libly.js</require>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/subscldr.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/subscldr.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>0.2.2</version>

@@ -34,7 +34,7 @@ let PLUGIN_INFO =
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/twittperator.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js</updateURL>
   <detail><![CDATA[
     This is the Twitter client plugin with OAuth authentication.
     == Command ==

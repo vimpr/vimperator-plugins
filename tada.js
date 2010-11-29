@@ -16,7 +16,7 @@ var PLUGIN_INFO =
   <description lang="ja">コマンドラインバッファからTa-Da list のToDo一覧を参照したり、からToDo項目を追加したりします。</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/tada.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/tada.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>0.10.0</version>

@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">Scala API を検索し、補完します。</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/scalapi.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/scalapi.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://tako3.net/http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.1</version>
