@@ -1802,7 +1802,8 @@ let PLUGIN_INFO =
   Store.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
   // }}}
 
-  function setup() { // {{{
+  // アクセストークン取得後 {{{
+  function setup() {
     function rejectMine(st)
       let (n = setting.screenName)
         (n ? (!st.user || st.user.screen_name !== n) : st);
@@ -1840,7 +1841,7 @@ let PLUGIN_INFO =
       };
     })(); // }}}
 
-    const SubCommand = function(init) {
+    const SubCommand = function(init) { // {{{
       return {
         __proto__: init,
         get expr() {
@@ -1855,7 +1856,7 @@ let PLUGIN_INFO =
         match: function(s) s.match(this.expr),
         action: function(args) init.action(args.literalArg.replace(this.expr, "").trim())
       };
-    };
+    }; // }}}
 
     const SubCommands = [ // {{{
       SubCommand({
@@ -2179,9 +2180,9 @@ let PLUGIN_INFO =
 
   let history = __context__.Tweets;
   if (!history)
-    history = __context__.Tweets = accessor.get("history", []);
+    history = __context__.Tweets = Store.get("history", []);
 
-  let tw = new TwitterOauth(accessor);
+  let tw = new TwitterOauth(Store);
 
   // ストリーム
   let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
@@ -2205,7 +2206,7 @@ let PLUGIN_INFO =
     TrackingStream.start({track: setting.trackWords});
 
   __context__.onUnload = function() {
-    accessor.set("history", history);
+    Store.set("history", history);
     ChirpUserStream.stop();
     TrackingStream.stop();
   };
