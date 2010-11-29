@@ -43,7 +43,7 @@ let PLUGIN_INFO =
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/statstat.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/statstat.js</updateURL>
   <minVersion>2.4</minVersion>
   <maxVersion>2.4</maxVersion>
   <detail><![CDATA[

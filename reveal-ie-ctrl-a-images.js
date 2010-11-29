@@ -42,7 +42,7 @@ let PLUGIN_INFO =
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/reveal-ie-ctrl-a-images.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/reveal-ie-ctrl-a-images.js</updateURL>
   <minVersion>2.3pre</minVersion>
   <maxVersion>2.3pre</maxVersion>
   <detail><![CDATA[

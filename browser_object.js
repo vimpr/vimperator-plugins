@@ -6,7 +6,7 @@ let PLUGIN_INFO =
   <version>0.6.1</version>
   <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
   <license>New BSD License</license>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/browser_object.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/browser_object.js</updateURL>
   <minVersion>2.2pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
   <detail><![CDATA[

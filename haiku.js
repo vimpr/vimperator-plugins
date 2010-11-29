@@ -30,7 +30,7 @@ var PLUGIN_INFO =
   <license>Creative Commons</license>
   <minVersion>2.0a1</minVersion>
   <maxVersion>2.0</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/haiku.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/haiku.js</updateURL>
   <detail><![CDATA[
 The script allows you to update Haiku status from Vimperator.
 

@@ -8,7 +8,7 @@ let PLUGIN_INFO =
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/relatedBlogSearch.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/relatedBlogSearch.js</updateURL>
 <detail lang="ja"><![CDATA[
 現在開いているページへリンクしているブログを探しだし、表示または開くことを目的とするプラグイン
 

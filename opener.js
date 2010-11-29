@@ -8,7 +8,7 @@ let PLUGIN_INFO =
   <version>1.0.0</version>
   <author homepage="http://vimperator.g.hatena.ne.jp/voidy21/">voidy21</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/opener.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/opener.js</updateURL>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[

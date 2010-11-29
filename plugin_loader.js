@@ -45,7 +45,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.3pre</minVersion>
   <maxVersion>2.3pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/plugin_loader.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/plugin_loader.js</updateURL>
   <detail><![CDATA[
     == Usage ==
       >||

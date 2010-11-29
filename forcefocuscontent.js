@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.1.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/forcefocuscontent.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/forcefocuscontent.js</updateURL>
 </VimperatorPlugin>;
 //}}}
 

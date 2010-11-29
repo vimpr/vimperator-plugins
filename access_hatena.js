@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">はてなのサーヴィスに簡単にアクセス出来ます．</description>
 <minVersion>2.1a1pre</minVersion>
 <maxVersion>2.1a1pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/access_hatena.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/access_hatena.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA and id:hitode909</author>
 <version>0.63</version>
 <detail><![CDATA[

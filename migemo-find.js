@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">標準の検索を XUL/Migemo に置き換えます</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/migemo-find.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemo-find.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MIT</license>
 <version>0.1.0</version>

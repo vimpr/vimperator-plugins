@@ -9,7 +9,7 @@ var PLUGIN_INFO =
   <license>GPL</license>
   <minVersion>1.2</minVersion>
   <maxVersion>2.1</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/retweet.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/retweet.js</updateURL>
   <require type="plugin">_libly.js</require>
   <detail><![CDATA[
 

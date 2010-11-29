@@ -45,7 +45,7 @@ let PLUGIN_INFO =
   <description>Spatial Navigation</description>
   <description lang="ja">空間ナビゲーション</description>
   <version>1.0.0</version>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/spatial-navigation.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/spatial-navigation.js</updateURL>
   <minVersion>2.3</minVersion>
   <maxVersion>2.3</maxVersion>
   <detail><![CDATA[

@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 	<version>0.1.3</version>
 	<minVersion>2.3pre</minVersion>
 	<maxVersion>2.3pre</maxVersion>
-	<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatenaStar.js</updateURL>
+	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hatenaStar.js</updateURL>
 </VimperatorPlugin>;
 (function() {
 

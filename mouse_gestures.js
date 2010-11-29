@@ -8,7 +8,7 @@ var PLUGIN_INFO =
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/mouse_gestures.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/mouse_gestures.js</updateURL>
   <detail lang='ja'><![CDATA[
   == .vimperatorrc example ==
   >||

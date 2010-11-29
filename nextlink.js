@@ -16,7 +16,7 @@ var PLUGIN_INFO =
   <license>GPL</license>
   <minVersion>2.2pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/nextlink.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/nextlink.js</updateURL>
   <detail><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.20)

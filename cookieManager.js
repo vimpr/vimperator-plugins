@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/cookieManager.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/cookieManager.js</updateURL>
 <detail lang="ja"><![CDATA[
 Cookie の管理をするプラグイン
 

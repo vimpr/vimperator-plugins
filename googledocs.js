@@ -47,7 +47,7 @@ let PLUGIN_INFO =
     <version>0.20</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/googledocs.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/googledocs.js</updateURL>
     <detail><![CDATA[
 == USAGE ==
 Hit ';d' on top-page of Google Docs ( http://docs.google.com/ ).

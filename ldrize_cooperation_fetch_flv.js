@@ -8,7 +8,7 @@ var PLUGIN_INFO =
     <license>MIT License</license>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/ldrizecooperation_fetch_flv.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/ldrizecooperation_fetch_flv.js</updateURL>
     <detail><![CDATA[
 == Detail ==
 Flv downloader for nicovideo.

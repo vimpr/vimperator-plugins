@@ -7,7 +7,7 @@ var PLUGIN_INFO =
   <author homepage="http://d.hatena.ne.jp/pekepekesamurai/">pekepeke</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/refcontrol.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/refcontrol.js</updateURL>
   <detail><![CDATA[
 == コマンド ==
 :togglerefcontrol:

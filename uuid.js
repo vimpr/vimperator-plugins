@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.1</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/uuid.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/uuid.js</updateURL>
     <detail><![CDATA[
 
 == COMMANDS ==

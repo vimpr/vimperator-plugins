@@ -15,7 +15,7 @@ var PLUGIN_INFO =
   <description lang="ja">IETabに勝手にフォーカスを奪われてそうさ不能になるのを防ぐ</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/prevent_focus_ietab.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/prevent_focus_ietab.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>1.0.1</version>

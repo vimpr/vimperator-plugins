@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.1</version>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/clear_privacy_data.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/clear_privacy_data.js</updateURL>
 <detail lang="ja"><![CDATA[
 == 注意 ==
 このプラグインはFirefox 3.1用です。

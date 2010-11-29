@@ -6,7 +6,7 @@ var PLUGIN_INFO =
   <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
   <version>0.0.1</version>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/autopagerize_controll.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/autopagerize_controll.js</updateURL>
   <detail><![CDATA[
 == Options ==
 enable mapping key like

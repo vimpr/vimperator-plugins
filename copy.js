@@ -121,7 +121,7 @@ var PLUGIN_INFO =
 <description lang="ja">テンプレートから文字列のコピーを可能にします（CopyURL+みたいなもの）</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/copy.js</updateURL>
 <author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
 <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
 <version>0.7.5</version>

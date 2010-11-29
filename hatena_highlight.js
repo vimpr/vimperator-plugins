@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">はてなダイアリーやグループでハイライトを消したり付けたりできます．</description>
 <minVersion>2.1a1pre</minVersion>
 <maxVersion>2.1a1pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hatena_highlight.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hatena_highlight.js</updateURL>
 <author mail="masa138@gmail.com" homepage="http://www.hatena.ne.jp/masa138/">Masayuki KIMURA</author>
 <version>0.1</version>
 <detail><![CDATA[

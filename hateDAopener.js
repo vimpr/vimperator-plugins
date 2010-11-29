@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <description lang="ja">はてなダイアリーのタイトル／カテゴリをインクリメンタルに検索</description>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.2pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hateDAopener.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hateDAopener.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>1.1.1</version>

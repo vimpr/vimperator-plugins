@@ -14,7 +14,7 @@ let PLUGIN_INFO =
 <version>0.6.6</version>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.1pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/commandBookmarklet.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/commandBookmarklet.js</updateURL>
 <detail><![CDATA[
 == SYNOPSIS ==
   This plugin automatically converts bookmarklets to valid commands for Vimperator.

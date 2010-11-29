@@ -45,7 +45,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/garbage_finder.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/garbage_finder.js</updateURL>
   <detail><![CDATA[
     == Commands ==
       :garbages:

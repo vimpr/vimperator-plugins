@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">:set foobarbaz で簡単に user_pref をセットできるプラグイン</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/options-migrate-user-pref.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/options-migrate-user-pref.js</updateURL>
 <author mail="hotchpotch@gmail.com" homepage="http://d.hatena.ne.jp/secondlife/">Yuichi Tateno</author>
 <license>MIT</license>
 <version>0.1</version>

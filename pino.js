@@ -37,7 +37,7 @@ var PLUGIN_INFO =
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/pino.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/pino.js</updateURL>
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>

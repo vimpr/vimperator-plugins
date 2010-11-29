@@ -5,7 +5,7 @@ var PLUGIN_INFO =
 <description lang="ja">テンプレートからURLをOpenします</description>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/exopen.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/exopen.js</updateURL>
 <author homepage="http://vimperator.g.hatena.ne.jp/pekepekesamurai/">pekepekesamurai</author>
 <version>0.10.1</version>
 <detail lang="ja"><![CDATA[

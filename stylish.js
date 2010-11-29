@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.0.1</version>
     <minVersion>2.2pre</minVersion>
     <maxVersion>2.2pre</maxVersion>
-    <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/stylish.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/stylish.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
 ]]></detail>

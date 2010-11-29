@@ -8,7 +8,7 @@ let PLUGIN_INFO =
 <version>0.74</version>
 <minVersion>2.3pre</minVersion>
 <maxVersion>2.3pre</maxVersion>
-<updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/matanico.js</updateURL>
+<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/matanico.js</updateURL>
 <detail><![CDATA[
 == EX-COMMANDS ==
 :matanico [comment]:

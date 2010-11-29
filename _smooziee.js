@@ -16,7 +16,7 @@ var PLUGIN_INFO =
   <description lang="ja">j,kキーでのスクロールをスムースに</description>
   <minVersion>2.3pre</minVersion>
   <maxVersion>2.3</maxVersion>
-  <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/_smooziee.js</updateURL>
+  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/_smooziee.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
   <version>0.10.1</version>
