@@ -3,9 +3,9 @@ var PLUGIN_INFO =
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
-    <version>0.1.1</version>
+    <version>0.2.0</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.3</maxVersion>
+    <maxVersion>3.0</maxVersion>
     <updateURL>http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/sbmcommentsviewer.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -125,6 +125,9 @@ function SBMEntry(id, timestamp, comment, tags, extra){ //{{{
 } //}}}
 SBMEntry.prototype = { //{{{
     toHTML: function(format){
+        function makeLink(str)
+            XMLList(str.replace(/(?:https?:\/\/|mailto:)\S+/g, '<a href="#" highlight="URL">$&</a>'));
+
         var xml = <tr/>;
         var self = this;
         format.forEach(function(colum){
@@ -139,10 +142,10 @@ SBMEntry.prototype = { //{{{
                 case 'tags':
                     xml.* += <td class="liberator-sbmcommentsviewer-tags">{self.tags.join(',')}</td>; break;
                 case 'comment':
-                    xml.* += <td class="liberator-sbmcommentsviewer-comment" style="white-space:normal;">{self.comment}</td>; break;
+                    xml.* += <td class="liberator-sbmcommentsviewer-comment" style="white-space:normal;">{makeLink(self.comment)}</td>; break;
                 case 'tagsAndComment':
                     var tagString = self.tags.length ? '[' + self.tags.join('][') + ']':'';
-                    xml.* += <td class="liberator-sbmcommentsviewer-tagsAndComment" style="white-space:normal;">{tagString + ' '+self.comment}</td>;
+                    xml.* += <td class="liberator-sbmcommentsviewer-tagsAndComment" style="white-space:normal;">{tagString + ' '}{makeLink(self.comment)}</td>;
                     break;
                 default:
                     xml.* += <td>-</td>;
