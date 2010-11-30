@@ -136,6 +136,8 @@ let PLUGIN_INFO =
         if (!args.bang)
           return;
 
+        context.compare = void 0;
+
         context.createRow = function(item, highlightGroup) {
           let desc = item[1] || this.process[1].call(this, item, item.description);
 
