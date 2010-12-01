@@ -1560,6 +1560,10 @@ let PLUGIN_INFO =
                     n === "text"               ? unescapeBrakets(v) :
                     v;
       }
+
+      if (result.hasOwnProperty("id") && result.hasOwnProperty("id_str") && typeof result.id === "number")
+        result.__defineGetter__("id", function () this.id_str);
+
       return result;
     }, // }}}
     xmlhttpRequest: function(options) { // {{{
@@ -1961,27 +1965,26 @@ let PLUGIN_INFO =
         timelineCompleter: true,
         completer: Completers.id()
       }),
-      let (lastTrackedWords)
-        (SubCommand({
-          command: ["track"],
-          description: "Track the specified words.",
-          action: function(arg) {
-            if (arg.trim().length > 0) {
-              lastTrackedWords = arg;
-              TrackingStream.start({track: arg});
-            } else {
-              TrackingStream.stop();
-            }
-          },
-          completer: function(context, args) {
-            let cs = [];
-            if (setting.trackWords)
-              cs.push([setting.trackWords, "Global variable"]);
-            if (lastTrackedWords)
-              cs.push([lastTrackedWords, "Last tracked"]);
-            context.completions = cs;
+      SubCommand({
+        command: ["track"],
+        description: "Track the specified words.",
+        action: function(arg) {
+          if (arg.trim().length > 0) {
+            Store.set("trackWords", arg);
+            TrackingStream.start({track: arg});
+          } else {
+            TrackingStream.stop();
           }
-        })),
+        },
+        completer: function(context, args) {
+          let cs = [];
+          if (setting.trackWords)
+            cs.push([setting.trackWords, "Global variable"]);
+          if (Store.get("trackWords"))
+            cs.push([Store.get("trackWords"), "Current tracking words"]);
+          context.completions = cs;
+        }
+      }),
       SubCommand({
         command: ["home"],
         description: "Open user home.",
@@ -2202,8 +2205,9 @@ let PLUGIN_INFO =
   if (setting.useChirp)
     ChirpUserStream.start();
 
-  if (setting.trackWords)
-    TrackingStream.start({track: setting.trackWords});
+  let trackWords = setting.trackWords || Store.get("trackWords");
+  if (trackWords)
+    TrackingStream.start({track: trackWords});
 
   __context__.onUnload = function() {
     Store.set("history", history);
