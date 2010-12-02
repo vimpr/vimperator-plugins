@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.9.6</version>
+  <version>1.10.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1566,6 +1566,20 @@ let PLUGIN_INFO =
 
       return result;
     }, // }}}
+    parseSayArg: function(arg) { // {{{
+      let m = arg.match(/^(.*)@(\w{1,15})#(\d+)(.*)$/);
+      return m ? {
+        isReply: true,
+        prefix: m[1],
+        replyUser: m[2],
+        replyID: m[3],
+        postfix: m[4],
+        text:  m[1] + '@' + m[2] + m[4]
+      } : {
+        isReply: false,
+        text: arg
+      };
+    }, // }}}
     xmlhttpRequest: function(options) { // {{{
       let xhr = new XMLHttpRequest();
       xhr.open(options.method, options.url, true);
@@ -1636,25 +1650,24 @@ let PLUGIN_INFO =
     }, // }}}
     say: function(stat) { // {{{
       let sendData = {};
-      let prefix, replyUser, replyID, postfix;
-      if (stat.match(/^(.*)@(\w{1,15})#(\d+)(.*)$/)) {
-        [prefix, replyUser, replyID, postfix] = [RegExp.$1, RegExp.$2, RegExp.$3, RegExp.$4];
-        if (stat.indexOf("RT @" + replyUser + "#" + replyID) == 0) {
+      let arg = Utils.parseSayArg(stat);
+      if (arg.isReply) {
+        if (stat.indexOf("RT @" + arg.replyUser + "#" + arg.replyID) == 0) {
           Twittperator.withProtectedUserConfirmation(
-            { screenName: replyUser, statusId: replyID },
+            { screenName: arg.replyUser, statusId: arg.replyID },
             "retweet",
-            function() Twitter.retweet(replyID)
+            function() Twitter.retweet(arg.replyID)
           );
           return;
         }
-        stat = prefix + "@" + replyUser + postfix;
-        if (replyID && !prefix)
-          sendData.in_reply_to_status_id = replyID;
+        stat = arg.text;
+        if (arg.replyID && !arg.prefix)
+          sendData.in_reply_to_status_id = arg.replyID;
       }
       Twittperator.withProtectedUserConfirmation(
-        { screenName: replyUser, statusId: replyID },
+        { screenName: arg.replyUser, statusId: arg.replyID },
         "reply",
-        function() Twitter.say(stat, replyID)
+        function() Twitter.say(stat, arg.replyID)
       );
     }, // }}}
     selectAndOpenLink: function(links) { // {{{
