@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -55,7 +55,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="FoxAge2ch" version="1.0.2"
+  <plugin name="FoxAge2ch" version="1.0.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="for FoxAge2ch addon"
           lang="en-US"
@@ -74,7 +74,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="FoxAge2ch" version="1.0.2"
+  <plugin name="FoxAge2ch" version="1.0.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="FoxAge2ch アドオン用"
           lang="ja"
@@ -165,6 +165,7 @@ let INFO =
           if (typeof v === 'number')
         ]),
         completer: function (context, args) {
+          context.compare = void 0;
           for (let [v, k] in Iterator(Status)) {
             if (typeof v === 'string' && ('-' + v in args))
               args['-status'] = v;
