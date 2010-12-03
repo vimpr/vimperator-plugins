@@ -30,7 +30,7 @@ let PLUGIN_INFO =
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
   <version>1.10.1</version>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.4</maxVersion>
+  <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
