@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.10.0</version>
+  <version>1.10.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>2.4</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1783,16 +1783,23 @@ let PLUGIN_INFO =
     }, // }}}
     sourceScriptFile: function(file) { // {{{
       // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
-      file = file.clone();
-      let toString = file.toString;
       let script = liberator.plugins.contexts[file.path];
-      file.toString = function() this.path.replace(/\.tw$/, ".js");
+
+      let originalPath = file.path;
+      let hackedPath = originalPath.replace(/\.tw$/, ".js");
+
+      let ugly = {
+        __noSuchMethod__: function (name, args) originalPath[name].apply(originalPath, args),
+        toString:
+          function()
+            (parseInt(Error().stack.match(/io.js:(\d+)/)[1], 10) < 100 ? originalPath : hackedPath)
+      };
+
       try {
-        io.source(file, false);
+        io.source(ugly, false);
       } finally {
         if (script)
           liberator.plugins[script.NAME] = script;
-        file.toString = toString;
       }
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
