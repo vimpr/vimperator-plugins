@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すた☆すた</name>
   <description>Show information on statusline.</description>
   <description lang="ja">ステータスラインに情報を表示</description>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -56,7 +56,7 @@ let PLUGIN_INFO =
 // }}}
 // INFO {{{
 let INFO =
-<plugin name="Stat Stat" version="1.0.3"
+<plugin name="Stat Stat" version="1.0.4"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/statstat.js"
         summary="Show information on statusline."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -85,7 +85,9 @@ let INFO =
   let autorun = s2b(liberator.globalVariables.statstat_autorun, false);
 
   function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
-  function e2a (e) function () liberator.eval(e);
+  function e2a (e)
+    (typeof e === 'function' ? function () e()
+                             : function () liberator.eval(e));
 
   // Initialize
   if (stat) {
