@@ -44,8 +44,8 @@ let PLUGIN_INFO =
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/statstat.js</updateURL>
-  <minVersion>2.4</minVersion>
-  <maxVersion>2.4</maxVersion>
+  <minVersion>3.0</minVersion>
+  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     Usage:
       :statstat <JS_EXPRESSION>
@@ -62,7 +62,7 @@ let INFO =
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>
   <license>New BSD License</license>
-  <project name="Vimperator" minVersion="2.0"/>
+  <project name="Vimperator" minVersion="3.0" maxVersion="3.0"/>
   <p>
   </p>
   <item>
