@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.3.0</version>
+  <version>2.3.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.3.0"
+  <plugin name="link-opener" version="2.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.3.0"
+  <plugin name="link-opener" version="2.3.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -232,6 +232,9 @@ let INFO =
     return (str && table[str.charAt(0).toLowerCase()]) || fail;
   }
 
+  function join (str)
+  str.replace(/\n+/g, ' ').replace(/\s+/g, '');
+
   const WHERE_COMPLETIONS = ['f', 't', 'n', 'b', 'c', 'w'];
 
   let (foihandle) {
@@ -274,7 +277,7 @@ let INFO =
           // 本来の補完の絞り込みを抑止
           let filter = context.filter;
           context.filter = "";
-          context.completions = filteredLinks(filter, args['-include-current']).map(function (it) ([it.href, it.textContent]));
+          context.completions = filteredLinks(filter, args['-include-current']).map(function (it) ([it.href, join(it.textContent)]));
         },
       },
       true
@@ -323,7 +326,7 @@ let INFO =
           context.anchored = false;
           context.title = ['URL', 'Text Content'];
           context.keys = {
-            text: function ({elem, index}) (index + ': ' + (elem.textContent || elem.href)),
+            text: function ({elem, index}) (index + ': ' + join((elem.textContent || elem.href))),
             description: function ({elem}) (elem.href),
             thumbnail: function ({elem}) let (img = elem.querySelector('img')) (img && img.src)
           };
