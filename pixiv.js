@@ -128,6 +128,9 @@ commands.addUserCommand(
 
     let truePixivImg=function(){
       let fileName=imgUrl.substr(imgUrl.lastIndexOf('/'));
+      if (-1!=fileName.indexOf('?')){
+        fileName=fileName.substr(0,fileName.indexOf('?'));
+      }
       let tmpPath=savePath+fileName;
       let instream=xhrImg.responseText;
       let aFile=Cc["@mozilla.org/file/local;1"]
