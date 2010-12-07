@@ -47,7 +47,7 @@ let INFO = <>
     <tags>:mkgroup :mkg</tags>
     <spec>:mkg<oa>roup</oa><oa>!</oa> <oa>GroupName</oa></spec>
     <description>
-      <p>Create new tab group named <a>GroupName</a>.</p>
+      <p>Create new tab group named <a>GroupName</a>. And then, switch to the group.</p>
       <p>If specified <a>!</a>, move the current tab to the group.</p>
     </description>
   </item>
@@ -428,14 +428,29 @@ let (cmd = commands.get("buffer")) {
   cmd.completer = function (context) completion.buffer(context, true);
 }
 
+/**
+ * make a group and switch to the group
+ * if add ! (bang), take up the current tab to the group
+ */
 commands.addUserCommand(["mkg[roup]"], "create Group",
   function (args) {
     let groupName = args.literalArg;
     let group = createGroup(groupName);
+    let currentTab = tabs.getTab();
     if (args.bang) {
-      let currentTab = tabs.getTab();
       if (!currentTab.pinned)
         TV.moveTabTo(currentTab, group.id);
+    }
+    let apps = appTabs,
+        child = group.getChild(0);
+    if (child) {
+      tabView.GroupItems.setActiveGroupItem(group);
+      tabView.UI.goToTab(child.tab);
+    } else if (apps.length == 0) {
+      group.newTab();
+    } else {
+      tabView.GroupItems.setActiveGroupItem(group);
+      tabView.UI.goToTab(currentTab.pinned ? currentTab : apps[apps.length - 1]);
     }
   }, {
     argCount: "1",
