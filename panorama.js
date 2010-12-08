@@ -497,6 +497,41 @@ commands.addUserCommand(["stash[togroup]"], "Stash the current tab to other grou
     completer: function (context) completion.tabgroup(context, true),
   }, true);
 
+commands.addUserCommand(["rmg[roup]"], "close all tabs in the group",
+  function (args) {
+    let groupName = args.literalArg;
+    const GI = tabView.GroupItems;
+    let activeGroup = GI.getActiveGroupItem();
+    let group = groupName ? getGroupByName(groupName)[0] : activeGroup;
+    liberator.assert(group, "No such group: " + groupName);
+
+    if (group === activeGroup) {
+      if (gBrowser.visibleTabs.length < gBrowser.tabs.length) {
+        switchToGroup("+1", true);
+      } else {
+        let apps = appTabs;
+        let gb = gBrowser;
+        let vtabs = gb.visibleTabs;
+        if (apps.length == 0) {
+          // 最後尾にabout:blankなタブをフォアグランドに開く
+          gb.loadOenTab("about:blank", { inBackground: false, relatedToCurrent: false });
+        } else {
+          // AppTabがあればそれをとりあえず選択しておく
+          gb.mTabContainer.selectedIndex = apps.length -1;
+        }
+        for (let i = vtabs.length -1, tab; (tab = vtabs[i]) && !tab.pinned; i--) {
+          gb.removeTab(tab);
+        }
+        return;
+      }
+    }
+    group.closeAll();
+  }, {
+    argCount: "?",
+    literalArg: 0,
+    completer: function (context) completion.tabgroup(context, false),
+  });
+
 // }}}
 
 // ============================================================================
