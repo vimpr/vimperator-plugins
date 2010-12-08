@@ -69,6 +69,13 @@ let INFO = <>
       <p>Switch group to <a>GroupName</a></p> 
     </description>
   </item>
+  <item>
+    <tags>:rmgroup :rmg</tags>
+    <spec>:rmg<oa>group</oa><oa>!</oa> <oa>GroupName</oa></spec>
+    <description>
+      <p>remove group. The current group is used if ommited <oa>GroupName</oa></p>
+    </description>
+  </item>
 </plugin>
 </>;
 
@@ -528,9 +535,9 @@ commands.addUserCommand(["rmg[roup]"], "close all tabs in the group",
     group.closeAll();
   }, {
     argCount: "?",
-    literalArg: 0,
+    literal: 0,
     completer: function (context) completion.tabgroup(context, false),
-  });
+  }, true);
 
 // }}}
 
