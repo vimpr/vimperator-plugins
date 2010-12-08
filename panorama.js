@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.1"
+<plugin name="panorama" version="0.5"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -74,6 +74,13 @@ let INFO = <>
     <spec>:rmg<oa>group</oa><oa>!</oa> <oa>GroupName</oa></spec>
     <description>
       <p>remove group. The current group is used if ommited <oa>GroupName</oa></p>
+    </description>
+  </item>
+  <item>
+    <tags>:pullgroup :pull</tags>
+    <spec>:pull<oa>group</oa> <oa>buffer</oa></spec>
+    <description>
+      <p>pull a tab from the other group</p>
     </description>
   </item>
 </plugin>
@@ -538,6 +545,24 @@ commands.addUserCommand(["rmg[roup]"], "close all tabs in the group",
     argCount: "?",
     literal: 0,
     completer: function (context) completion.tabgroup(context, false),
+  }, true);
+
+commands.addUserCommand(["pull[tab]"], "pull a tab from the other group",
+  function (args) {
+    const GI = tabView.GroupItems;
+    let activeGroup = GI.getActiveGroupItem();
+    liberator.assert(activeGroup, "Cannot move to the current");
+    let arg = args.literalArg;
+    if (!arg)
+      return;
+    let tab = searchTab(arg);
+    liberator.assert(tab, "No such tab: " + arg);
+    TV.moveTabTo(tab, activeGroup.id);
+    gBrowser.mTabContainer.selectedItem = tab;
+  }, {
+    argCount: "1",
+    literal: 0,
+    completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
   }, true);
 
 // }}}
