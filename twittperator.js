@@ -1592,6 +1592,18 @@ let PLUGIN_INFO =
     }, // }}}
   }; // }}}
   let Twittperator = { // {{{
+    confirm: function(msg, onYes, onNo, onCancel) {
+      if (!onNo)
+        onNo = function () Twittperator.echo('canceled.');
+
+      commandline.input(
+        msg + " (input 'yes/no'): ",
+        function(s) (s === "yes" ? onYes : onNo)(),
+        {
+          onCancel: onCancel || onNo
+        }
+      );
+    },
     echo: function(msg) { // {{{
       liberator.echo("[Twittperator] " + msg);
     }, // }}}
