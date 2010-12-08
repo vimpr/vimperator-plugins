@@ -2038,6 +2038,20 @@ let PLUGIN_INFO =
         timelineCompleter: true,
         completer: Completers.id(function (it) it.in_reply_to_status_id)
       }),
+      SubCommand({
+        command: ["resetoauth"],
+        description: "Reset OAuth Information",
+        action: function(arg) {
+          Store.remove("consumerKey");
+          Store.remove("consumerSecret");
+          Store.remove("token");
+          Store.remove("tokenSecret");
+          Store.save();
+          Twittperator.echo("OAuth information were reset.");
+        },
+        timelineCompleter: false,
+        completer: Completers.id(function (it) it.in_reply_to_status_id)
+      }),
     ]; // }}}
 
     function findSubCommand(s) { // {{{
