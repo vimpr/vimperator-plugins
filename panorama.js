@@ -414,7 +414,8 @@ mappings.getDefault(modes.NORMAL, "b").action = function (count) {
  */
 let (cmd = commands.get("buffers")) {
   cmd.action = function (args) {
-    completion.listCompleter("buffer", args.literalArg, null, args.bang);
+    completion.listCompleter("buffer", args.literalArg, null,
+      args.bang ? completion.buffer.ALL : completion.buffer.VISIBLE);
   };
   cmd.bang = true;
 }
@@ -432,7 +433,7 @@ let (cmd = commands.get("buffer")) {
     else
       switchTo(arg, args.bang);
   };
-  cmd.completer = function (context) completion.buffer(context, true);
+  cmd.completer = function (context) completion.buffer(context, completion.buffer.ALL);
 }
 
 /**
@@ -640,7 +641,10 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
     }
   }
 
-  completion.buffer = function bufferCompletion (context, all) {
+  completion.buffer = function bufferCompletion (context, flag) {
+    if (!flag)
+      flag = this.buffer.VISIBLE;
+
     context.anchored = false;
     context.keys = { text: "text", description: "url", icon: "icon" };
     context.compare = CompletionContext.Sort.number;
@@ -651,33 +655,43 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
         { process.call(this, item, text) }
       </>
     ];
-    context.title = ["Buffers"];
-    context.completions = [item for (item in generateVisibleTabs())];
-    if (!all)
+    if (flag & this.buffer.VISIBLE) {
+      context.title = ["Buffers"];
+      context.completions = [item for (item in generateVisibleTabs())];
+    }
+    if (!(flag & this.buffer.GROUPS) || !(flag & this.buffer.ORPHANS))
       return;
     let self = this;
     TV._initFrame(function() {
       let groups = TV._window.GroupItems;
-      let activeGroup = groups.getActiveGroupItem();
-      let activeGroupId = activeGroup === null ? null : activeGroup.id;
-      for (let [i, group] in Iterator(groups.groupItems)) {
-        if (group.id != activeGroupId) {
-          let groupName = group.getTitle();
-          context.fork("GROUP_" + group.id, 0, self, function (context) {
-            context.title = [groupName || UNTITLE_LABEL];
-            context.completions = [item for (item in generateGroupList(group, groupName))];
-          });
+      if (flag & self.buffer.GROUPS) {
+        let activeGroup = groups.getActiveGroupItem();
+        let activeGroupId = activeGroup === null ? null : activeGroup.id;
+        for (let [i, group] in Iterator(groups.groupItems)) {
+          if (group.id != activeGroupId) {
+            let groupName = group.getTitle();
+            context.fork("GROUP_" + group.id, 0, self, function (context) {
+              context.title = [groupName || UNTITLE_LABEL];
+              context.completions = [item for (item in generateGroupList(group, groupName))];
+            });
+          }
         }
       }
-      let orphanedTabs = [tabItem for ([, tabItem] in Iterator(groups.getOrphanedTabs())) if (tabItem.tab.hidden)];
-      if (orphanedTabs.length == 0)
-        return;
-      context.fork("__ORPHANED__", 0, self, function (context) {
-        context.title = ["Orphaned"];
-        context.completions = [item for (item in generateOrphanedList(orphanedTabs))];
-      });
+      if (flag & self.buffer.ORPHANS) {
+        let orphanedTabs = [tabItem for ([, tabItem] in Iterator(groups.getOrphanedTabs())) if (tabItem.tab.hidden)];
+        if (orphanedTabs.length == 0)
+          return;
+        context.fork("__ORPHANED__", 0, self, function (context) {
+          context.title = ["Orphaned"];
+          context.completions = [item for (item in generateOrphanedList(orphanedTabs))];
+        });
+      }
     });
   };
+  completion.buffer.ALL = 1 | 2 | 4;
+  completion.buffer.VISIBLE = 1 << 0;
+  completion.buffer.GROUPS  = 1 << 1;
+  completion.buffer.ORPHANS = 1 << 2;
 
 })(window.TabView, window.gBrowser);
 
