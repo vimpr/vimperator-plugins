@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.10.1</version>
+  <version>1.11.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1815,17 +1815,11 @@ let PLUGIN_INFO =
       }
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
-      function canceled()
-        Twittperator.echo("Canceled.");
-
       let protectedUserName = Twittperator.isProtected(check);
       if (protectedUserName) {
-        commandline.input(
-          protectedUserName + " is protected user! Do you really want to " + actionName + '? Input "yes" if you want. => ',
-          function(s) (s === "yes" ? action : canceled)(),
-          {
-            onCancel: canceled
-          }
+        Twittperator.confirm(
+          protectedUserName + " is protected user! Do you really want to " + actionName + '?',
+          action
         );
       } else {
         action();
@@ -2054,12 +2048,17 @@ let PLUGIN_INFO =
         command: ["resetoauth"],
         description: "Reset OAuth Information",
         action: function(arg) {
-          Store.remove("consumerKey");
-          Store.remove("consumerSecret");
-          Store.remove("token");
-          Store.remove("tokenSecret");
-          Store.save();
-          Twittperator.echo("OAuth information were reset.");
+          Twittperator.confirm(
+            'Do you want to reset OAuth information?',
+            function () {
+              Store.remove("consumerKey");
+              Store.remove("consumerSecret");
+              Store.remove("token");
+              Store.remove("tokenSecret");
+              Store.save();
+              Twittperator.echo("OAuth information were reset.");
+            }
+          );
         },
         timelineCompleter: false,
         completer: Completers.id(function (it) it.in_reply_to_status_id)
