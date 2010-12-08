@@ -1892,7 +1892,7 @@ let PLUGIN_INFO =
             "^" +
             this.command.map(function(c)
               let (r = util.escapeRegex(c))
-                (/^\W$/(c) ? r : r + " ")
+                (/^\W$/(c) ? r : r + "( |$)")
             ).join("|")
           );
         },
