@@ -529,7 +529,7 @@ commands.addUserCommand(["rmg[roup]"], "close all tabs in the group",
         let vtabs = gb.visibleTabs;
         if (apps.length == 0) {
           // 最後尾にabout:blankなタブをフォアグランドに開く
-          gb.loadOenTab("about:blank", { inBackground: false, relatedToCurrent: false });
+          gb.loadOneTab("about:blank", { inBackground: false, relatedToCurrent: false });
         } else {
           // AppTabがあればそれをとりあえず選択しておく
           gb.mTabContainer.selectedIndex = apps.length -1;
