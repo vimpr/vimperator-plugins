@@ -342,6 +342,65 @@ function switchToGroup (spec, wrap) {
   groupSwitch(index, wrap);
 } // }}}
 
+/**
+ * removeTab {{{
+ * @param {Element} tab
+ * @param {Number}  count
+ * @param {Boolean} focusLeftTab
+ * @param {Number} quitOnLastTab
+ * @see tabs.remove
+ */
+function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
+  const gb = gBrowser;
+  function remove(tab) {
+    if (gb.tabs.length > 1) {
+      gb.removeTab(tab);
+    } else if (buffer.URL != "about:blank" || gb.webNavigation.sessionHistory.count > 0) {
+      gb.loadURI("about:blank");
+    } else {
+      liberator.beep();
+    }
+  }
+  if (typeof count != "number" || count < 1)
+    count = 1;
+
+  if (quitOnLastTab >= 1 && gb.tabs.length <= count) {
+    if (liberator.windows.length > 1)
+      window.close();
+    else
+      liberator.quit(quitOnLastTab == 2);
+
+    return;
+  }
+  let vTabs = gb.visibleTabs;
+  let index = vTabs.indexOf(tab);
+  liberator.assert(index >= 0, "No such tab(s) in the current tabs");
+
+  let start, end, selIndex;
+  if (focusLeftTab) {
+    end = index;
+    start = index - count + 1;
+    if (start < 0) {
+      start = 0;
+    }
+    selIndex = start - 1;
+    if (selIndex < 0)
+      selIndex = 0;
+  } else {
+    start = index;
+    end = index + count - 1;
+    if (end >= vTabs.length)
+      end = vTabs.length - 1;
+    selIndex = end + 1;
+    if (selIndex >= vTabs.length)
+      selIndex = start > 0 ? start - 1 : 0;
+  }
+  gb.mTabContainer.selectedItem = vTabs[selIndex];
+  for (let i = end; i >= start; i--) {
+    remove(vTabs[i]);
+  }
+} // }}}
+
 // ============================================================================
 // Mappings {{{
 // ============================================================================
@@ -384,6 +443,14 @@ mappings.add([modes.NORMAL], ["<C-S-p>"],
   function (count) { switchToGroup("-" + (count || 1), true); },
   { count: true });
 
+// overwrite 'd'
+mappings.getDefault(modes.NORMAL, "d").action = function(count) {
+  removeTab(tabs.getTab(), count, false, 0);
+};
+// overwrite 'D'
+mappings.getDefault(modes.NORMAL, "D").action = function(count) {
+  removeTab(tabs.getTab(), count, true, 0);
+};
 // overwrite 'g0", 'g^'
 mappings.getDefault(modes.NORMAL, "g0").action = function (count) { selectVisible(0); };
 // overwrite 'g$'
