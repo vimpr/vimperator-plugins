@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.5"
+<plugin name="panorama" version="0.6"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -43,42 +43,53 @@ let INFO = <>
       <p>Switch to previous group.</p>
     </description>
   </item>
+  <h3 tag="panorama-command">Main Command</h3>
   <item>
-    <tags>:mkgroup :mkg</tags>
-    <spec>:mkg<oa>roup</oa><oa>!</oa> <oa>GroupName</oa></spec>
+    <tags>:panorama :tabview :tabcandy</tags>
+    <spec>:panorama <a>SubCommand</a></spec>
+    <spec>:tabview <a>SubCommand</a></spec>
+    <spec>:tabcandy <a>SubCommand</a></spec>
+    <description>
+      <p>See the following SubCommands.</p>
+    </description>
+  </item>
+  <h3 tag="panorama-sub-command">SubCommands</h3>
+  <item>
+    <tags>mkgroup mkg</tags>
+    <spec>mkg<oa>roup</oa><oa>!</oa> <oa>GroupName</oa></spec>
     <description>
       <p>Create new tab group named <a>GroupName</a>. And then, switch to the group.</p>
       <p>If specified <a>!</a>, move the current tab to the group.</p>
     </description>
   </item>
   <item>
-    <tags>:stash :stashtogroup</tags>
-    <spec>:stash<oa>togroup</oa><oa>!</oa> <a>GroupName</a></spec>
+    <tags>stash stashtogroup</tags>
+    <spec>stash<oa>togroup</oa><oa>!</oa> <a>GroupName</a></spec>
     <description>
       <p>Stash the current tab to <a>GroupName</a>.</p>
       <p>Caution: connnot stash AppTab (pinned tab)</p>
     </description>
   </item>
   <item>
-    <tags>:switchgroup :swg</tags>
-    <spec>:switchgroup  <a>GroupName</a></spec>
-    <spec>:swg <a>GroupName</a></spec>
-    <spec>:<oa>count</oa>switchgroup</spec>
-    <spec>:<oa>count</oa>swg</spec>
+    <tags>switchgroup swg</tags>
+    <spec>switchgroup  <a>GroupName</a></spec>
+    <spec>swg <a>GroupName</a></spec>
+    <spec><oa>count</oa>switchgroup</spec>
+    <spec><oa>count</oa>swg</spec>
     <description>
       <p>Switch group to <a>GroupName</a></p> 
     </description>
   </item>
   <item>
-    <tags>:rmgroup :rmg</tags>
-    <spec>:rmg<oa>group</oa><oa>!</oa> <oa>GroupName</oa></spec>
+    <tags>rmgroup rmg</tags>
+    <spec>rmg<oa>group</oa><oa>!</oa> <oa>GroupName</oa></spec>
     <description>
       <p>remove group. The current group is used if ommited <oa>GroupName</oa></p>
     </description>
   </item>
   <item>
-    <tags>:pullgroup :pull</tags>
-    <spec>:pull<oa>group</oa> <oa>buffer</oa></spec>
+    <tags>pullgroup pull</tags>
+    <spec>pull<oa>group</oa> <oa>buffer</oa></spec>
     <description>
       <p>pull a tab from the other group</p>
     </description>
@@ -510,127 +521,217 @@ let (cmd = commands.get("buffer")) {
   cmd.completer = function (context) completion.buffer(context, completion.buffer.ALL);
 }
 
-/**
- * make a group and switch to the group
- * if add ! (bang), take up the current tab to the group
- */
-commands.addUserCommand(["mkg[roup]"], "create Group",
-  function (args) {
-    let groupName = args.literalArg;
-    let group = createGroup(groupName);
-    let currentTab = tabs.getTab();
-    if (args.bang) {
-      if (!currentTab.pinned)
-        TV.moveTabTo(currentTab, group.id);
-    }
-    let apps = appTabs,
-        child = group.getChild(0);
-    if (child) {
-      tabView.GroupItems.setActiveGroupItem(group);
-      tabView.UI.goToTab(child.tab);
-    } else if (apps.length == 0) {
-      group.newTab();
-    } else {
-      tabView.GroupItems.setActiveGroupItem(group);
-      tabView.UI.goToTab(currentTab.pinned ? currentTab : apps[apps.length - 1]);
-    }
-  }, {
-    argCount: "1",
-    bang: true,
-    literal: 0,
-  }, true);
-
-commands.addUserCommand(["switchgruop", "swg"], "Switch Group",
-  function (args) {
-    if (args.count > 0) {
-      switchToGroup("+" + args.count, true);
-    } else {
-      switchToGroup(args.literalArg);
-    }
-  }, {
-    argCount: "?",
-    count: true,
-    literal: 0,
-    completer: function (context) completion.tabgroup(context, true),
-  }, true);
-
-commands.addUserCommand(["stash[togroup]"], "Stash the current tab to other group",
-  function (args) {
-    let currentTab = tabs.getTab();
-    if (currentTab.pinned) {
-      liberator.echoerr("Connot stash an AppTab");
-      return;
-    }
-    let groupName = args.literalArg;
-    let group = getGroupByName(groupName)[0];
-    if (!group) {
+let subCmds = [
+  /**
+   * SubCommand help {{{
+   */
+  new Command(["help"], "Show Help",
+    function (args) {
+      let list = template.genericOutput("Panorama Help",
+        <dl>{ template.map(subCmds, function(cmd) <><dt>{cmd.names.join(", ")}</dt><dd>{cmd.description}</dd></>) }</dl>
+      );
+      commandline.echo(list, commandline.HL_NORMAL);
+    }, {}, true) // }}}
+  ,
+  /**
+   * SubCommad mkgroup {{{
+   * make a group and switch to the group
+   * if bang(!) exists, take up the current tab to the group
+   */
+  new Command(["mkg[roup]"], "create Group",
+    function (args) {
+      let groupName = args.literalArg;
+      let group = createGroup(groupName);
+      let currentTab = tabs.getTab();
       if (args.bang) {
-        group = createGroup(groupName);
+        if (!currentTab.pinned)
+          TV.moveTabTo(currentTab, group.id);
+      }
+      let apps = appTabs,
+          child = group.getChild(0);
+      if (child) {
+        tabView.GroupItems.setActiveGroupItem(group);
+        tabView.UI.goToTab(child.tab);
+      } else if (apps.length == 0) {
+        group.newTab();
       } else {
-        liberator.echoerr("No such group: " + groupName.quote() + ". if want create, add \"!\"");
+        tabView.GroupItems.setActiveGroupItem(group);
+        tabView.UI.goToTab(currentTab.pinned ? currentTab : apps[apps.length - 1]);
+      }
+    }, {
+      argCount: "1",
+      bang: true,
+      literal: 0,
+    }, true) /// }}}
+  ,
+  /**
+   * SubCommand switchgroup {{{
+   * swtich to the {group}
+   * if {count} exists, switch to relative {count}
+   */
+  new Command(["switchgruop", "swg"], "Switch Group",
+    function (args) {
+      if (args.count > 0) {
+        switchToGroup("+" + args.count, true);
+      } else {
+        switchToGroup(args.literalArg);
+      }
+    }, {
+      argCount: "?",
+      count: true,
+      literal: 0,
+      completer: function (context) completion.tabgroup(context, true),
+    }, true) // }}}
+  ,
+  /**
+   * SubCommand stashgroup {{{
+   * stash the current tab to other {group}
+   * if bang(!) exists and {group} doesn't exists,
+   *  create {group} and stash
+   */
+  new Command(["stash[togroup]"], "Stash the current tab to other group",
+    function (args) {
+      let currentTab = tabs.getTab();
+      if (currentTab.pinned) {
+        liberator.echoerr("Connot stash an AppTab");
         return;
       }
+      let groupName = args.literalArg;
+      let group = getGroupByName(groupName)[0];
+      if (!group) {
+        if (args.bang) {
+          group = createGroup(groupName);
+        } else {
+          liberator.echoerr("No such group: " + groupName.quote() + ". if want create, add \"!\"");
+          return;
+        }
+      }
+      TV.moveTabTo(currentTab, group.id);
+    } ,{
+      argCount: "1",
+      bang: true,
+      literal: 0,
+      completer: function (context) completion.tabgroup(context, true),
+    }, true) // }}}
+  ,
+  /**
+   * SubCommand rmgroup {{{
+   * remove {group}
+   * if {group} is ommited, remove the current group
+   */
+  new Command(["rmg[roup]"], "close all tabs in the group",
+    function (args) {
+      let groupName = args.literalArg;
+      const GI = tabView.GroupItems;
+      let activeGroup = GI.getActiveGroupItem();
+      let group = groupName ? getGroupByName(groupName)[0] : activeGroup;
+      liberator.assert(group, "No such group: " + groupName);
+
+      if (group === activeGroup) {
+        if (gBrowser.visibleTabs.length < gBrowser.tabs.length) {
+          switchToGroup("+1", true);
+        } else {
+          let apps = appTabs;
+          let gb = gBrowser;
+          let vtabs = gb.visibleTabs;
+          if (apps.length == 0) {
+            // 最後尾にabout:blankなタブをフォアグランドに開く
+            gb.loadOneTab("about:blank", { inBackground: false, relatedToCurrent: false });
+          } else {
+            // AppTabがあればそれをとりあえず選択しておく
+            gb.mTabContainer.selectedIndex = apps.length -1;
+          }
+          for (let i = vtabs.length -1, tab; (tab = vtabs[i]) && !tab.pinned; i--) {
+            gb.removeTab(tab);
+          }
+          return;
+        }
+      }
+      group.closeAll();
+    }, {
+      argCount: "?",
+      literal: 0,
+      completer: function (context) completion.tabgroup(context, false),
+    }, true) // }}}
+  ,
+  /**
+   * SubCommand pulltab {{{
+   * pull a tab from the other group
+   */
+  new Command(["pull[tab]"], "pull a tab from the other group",
+    function (args) {
+      const GI = tabView.GroupItems;
+      let activeGroup = GI.getActiveGroupItem();
+      liberator.assert(activeGroup, "Cannot move to the current");
+      let arg = args.literalArg;
+      if (!arg)
+        return;
+      let tab = searchTab(arg);
+      liberator.assert(tab, "No such tab: " + arg);
+      TV.moveTabTo(tab, activeGroup.id);
+      gBrowser.mTabContainer.selectedItem = tab;
+    }, {
+      argCount: "1",
+      literal: 0,
+      completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
+    }, true) // }}}
+];
+
+/**
+ * MainCommand panorama {{{
+ */
+commands.addUserCommand(["panorama", "tabview", "tabcandy"], "Parnorama",
+  function (args) {
+    // show help, call SubCommand help
+    if (args.length < 1 || args["-help"]) {
+      subCmds[0].execute();
+      return;
     }
-    TV.moveTabTo(currentTab, group.id);
-  } ,{
-    argCount: "1",
+    // delegate subcommand
+    let [count, subCmdName, bang, subArgs] = commands.parseCommand(args.literalArg);
+    let cmd = subCmds.filter(function(c) c.hasName(subCmdName))[0];
+    liberator.assert(cmd, "No such sub-command: " + subCmdName);
+    cmd.execute(subArgs, bang, count, {});
+  }, {
+    argCount: "*",
     bang: true,
     literal: 0,
-    completer: function (context) completion.tabgroup(context, true),
-  }, true);
-
-commands.addUserCommand(["rmg[roup]"], "close all tabs in the group",
-  function (args) {
-    let groupName = args.literalArg;
-    const GI = tabView.GroupItems;
-    let activeGroup = GI.getActiveGroupItem();
-    let group = groupName ? getGroupByName(groupName)[0] : activeGroup;
-    liberator.assert(group, "No such group: " + groupName);
-
-    if (group === activeGroup) {
-      if (gBrowser.visibleTabs.length < gBrowser.tabs.length) {
-        switchToGroup("+1", true);
-      } else {
-        let apps = appTabs;
-        let gb = gBrowser;
-        let vtabs = gb.visibleTabs;
-        if (apps.length == 0) {
-          // 最後尾にabout:blankなタブをフォアグランドに開く
-          gb.loadOneTab("about:blank", { inBackground: false, relatedToCurrent: false });
-        } else {
-          // AppTabがあればそれをとりあえず選択しておく
-          gb.mTabContainer.selectedIndex = apps.length -1;
-        }
-        for (let i = vtabs.length -1, tab; (tab = vtabs[i]) && !tab.pinned; i--) {
-          gb.removeTab(tab);
-        }
+    options: [
+      [["-help", "-h"], commands.OPTION_NOARG],
+    ],
+    completer: function (context) {
+      let [count, subCmdName, bang, args] = commands.parseCommand(context.filter);
+      let [, prefix, junk] = context.filter.match(/^(:*\d*)\w*(.?)/) || [];
+      context.advance(prefix.length);
+      if (!junk) {
+        context.title = ["Panorama SubCommands"];
+        context.keys = { text: "longNames", description: "description" };
+        context.completions = [k for ([, k] in Iterator(subCmds))];
         return;
       }
-    }
-    group.closeAll();
-  }, {
-    argCount: "?",
-    literal: 0,
-    completer: function (context) completion.tabgroup(context, false),
-  }, true);
 
-commands.addUserCommand(["pull[tab]"], "pull a tab from the other group",
-  function (args) {
-    const GI = tabView.GroupItems;
-    let activeGroup = GI.getActiveGroupItem();
-    liberator.assert(activeGroup, "Cannot move to the current");
-    let arg = args.literalArg;
-    if (!arg)
-      return;
-    let tab = searchTab(arg);
-    liberator.assert(tab, "No such tab: " + arg);
-    TV.moveTabTo(tab, activeGroup.id);
-    gBrowser.mTabContainer.selectedItem = tab;
-  }, {
-    argCount: "1",
-    literal: 0,
-    completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
+      let cmd = subCmds.filter(function(c) c.hasName(subCmdName))[0];
+      if (!cmd) {
+        context.highlight(0, subCmdName.length, "SPELLCHECK");
+        return;
+      }
+      [prefix] = context.filter.match(/^(?:\w*[\s!]|!)\s*/);
+      let cmdContext = context.fork(subCmdName, prefix.length);
+      let argContext = context.fork("args", prefix.length);
+      args = cmd.parseArgs(cmdContext.filter, argContext, { count: count, bang: bang });
+      if (args) {
+        args.count = count;
+        args.bang = bang;
+        if (!args.completeOpt && cmd.completer) {
+          cmdContext.advance(args.completeStart);
+          cmdContext.quote = args.quote;
+          cmdContext.filter = args.completeFilter;
+          cmd.completer.call(cmd, cmdContext, args);
+        }
+      }
+    },
   }, true);
+// }}}
 
 // }}}
 
