@@ -559,7 +559,6 @@ let subCmds = [
         tabView.UI.goToTab(currentTab.pinned ? currentTab : apps[apps.length - 1]);
       }
     }, {
-      argCount: "1",
       bang: true,
       literal: 0,
     }, true) /// }}}
@@ -577,7 +576,6 @@ let subCmds = [
         switchToGroup(args.literalArg);
       }
     }, {
-      argCount: "?",
       count: true,
       literal: 0,
       completer: function (context) completion.tabgroup(context, true),
@@ -608,7 +606,6 @@ let subCmds = [
       }
       TV.moveTabTo(currentTab, group.id);
     } ,{
-      argCount: "1",
       bang: true,
       literal: 0,
       completer: function (context) completion.tabgroup(context, true),
@@ -649,7 +646,6 @@ let subCmds = [
       }
       group.closeAll();
     }, {
-      argCount: "?",
       literal: 0,
       completer: function (context) completion.tabgroup(context, false),
     }, true) // }}}
@@ -671,7 +667,6 @@ let subCmds = [
       TV.moveTabTo(tab, activeGroup.id);
       gBrowser.mTabContainer.selectedItem = tab;
     }, {
-      argCount: "1",
       literal: 0,
       completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
     }, true) // }}}
@@ -693,7 +688,6 @@ commands.addUserCommand(["panorama"], "Parnorama",
     liberator.assert(cmd, "No such sub-command: " + subCmdName);
     cmd.execute(subArgs, bang, count, {});
   }, {
-    argCount: "*",
     bang: true,
     literal: 0,
     options: [
