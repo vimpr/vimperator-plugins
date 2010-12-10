@@ -680,11 +680,11 @@ let subCmds = [
 /**
  * MainCommand panorama {{{
  */
-commands.addUserCommand(["panorama", "tabview", "tabcandy"], "Parnorama",
+commands.addUserCommand(["panorama"], "Parnorama",
   function (args) {
     // show help, call SubCommand help
     if (args.length < 1 || args["-help"]) {
-      subCmds[0].execute();
+      subCmds[0].execute("");
       return;
     }
     // delegate subcommand
