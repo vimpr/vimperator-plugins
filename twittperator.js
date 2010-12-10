@@ -1236,6 +1236,7 @@ let PLUGIN_INFO =
                  ||
                  function(e) {
                    liberator.echoerr('Twitter API Error: ' + url);
+                   liberator.log(text);
                    throw e;
                  })(e);
               }
