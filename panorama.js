@@ -63,7 +63,7 @@ let INFO = <>
     </description>
   </item>
   <item>
-    <tags>stash stashtogroup</tags>
+    <tags>stashtogroup stash</tags>
     <spec>stash<oa>togroup</oa><oa>!</oa> <a>GroupName</a></spec>
     <description>
       <p>Stash the current tab to <a>GroupName</a>.</p>
@@ -88,8 +88,8 @@ let INFO = <>
     </description>
   </item>
   <item>
-    <tags>pullgroup pull</tags>
-    <spec>pull<oa>group</oa> <oa>buffer</oa></spec>
+    <tags>pulltab pull</tags>
+    <spec>pull<oa>tab</oa> <oa>buffer</oa></spec>
     <description>
       <p>pull a tab from the other group</p>
     </description>
@@ -568,7 +568,7 @@ let subCmds = [
    * swtich to the {group}
    * if {count} exists, switch to relative {count}
    */
-  new Command(["switchgruop", "swg"], "Switch Group",
+  new Command(["switchgroup", "swg"], "Switch Group",
     function (args) {
       if (args.count > 0) {
         switchToGroup("+" + args.count, true);
