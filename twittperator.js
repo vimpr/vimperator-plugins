@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.11.0</version>
+  <version>1.11.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1786,11 +1786,16 @@ let PLUGIN_INFO =
         };
       }
 
-      tw.jsonGet("http://search.twitter.com/search", { q: word }, function(res) {
-        if (res.results.length > 0) {
-          Twittperator.showTL(res.results.map(Utils.fixStatusObject).map(konbuArt));
-        } else {
-          Twittperator.echo("No results found.")
+      Utils.xmlhttpRequest({
+        method: 'GET',
+        url: "http://search.twitter.com/search.json?" + tw.buildQuery({ q: word }),
+        onload: function(xhr) {
+          let res = JSON.parse(xhr.responseText);
+          if (res.results.length > 0) {
+            Twittperator.showTL(res.results.map(Utils.fixStatusObject).map(konbuArt));
+          } else {
+            Twittperator.echo("No results found.")
+          }
         }
       });
     }, // }}}
