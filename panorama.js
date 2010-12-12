@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6"
+<plugin name="panorama" version="0.6.1"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -92,6 +92,14 @@ let INFO = <>
     <spec>pull<oa>tab</oa> <oa>buffer</oa></spec>
     <description>
       <p>pull a tab from the other group</p>
+    </description>
+  </item>
+  <item>
+    <tags>settitle</tags>
+    <spec>settitle <a>title</a> <oa>GroupName</oa></spec>
+    <description>
+      <p>update <a>GroupName</a>'s title to <a>title</a>.</p>
+      <p>if omitted <a>GroupName</a>, update the current group.</p>
     </description>
   </item>
 </plugin>
@@ -412,6 +420,23 @@ function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
   }
 } // }}}
 
+/**
+ * setGroupTitile {{{
+ * @param {String} title
+ * @param {GroupItem} group
+ */
+function setGroupTitle (title, group) {
+  let activeGroup = tabView.GroupItems.getActiveGroupItem();
+  if (!group)
+    group = activeGroup;
+  liberator.assert(group, "Missing group");
+  group.setTitle(title);
+  if (title && group.$title.hasClass("defaultName"))
+    group.$title.removeClass("defaultName");
+  if (group === activeGroup)
+    gBrowser.updateTitlebar();
+} // }}}
+
 // ============================================================================
 // Mappings {{{
 // ============================================================================
@@ -669,6 +694,24 @@ let subCmds = [
     }, {
       literal: 0,
       completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
+    }, true) // }}}
+  ,
+  /**
+   * SubCommand settitle {{{
+   */
+  new Command(["settitle"], "set group title",
+    function (args) {
+      let title = args[0],
+          groupName = args.literalArg;
+      let group = getGroupByName(groupName)[0];
+      setGroupTitle(title, group);
+    }, {
+      literal: 1,
+      completer: function (context, args) {
+        if (args.length > 1) {
+          completion.tabgroup(context, false);
+        }
+      },
     }, true) // }}}
 ];
 
