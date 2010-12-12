@@ -295,7 +295,7 @@ let PLUGIN_INFO =
     function (arg) {
       let opennum = arg['-number'];
       if (opennum) {
-        let us = RCL_Bookmarks(arg.literalArg).reverse().splice(0, opennum).map(function (it) it);
+        let us = RCL_Bookmarks(arg.literalArg).splice(0, opennum).map(function (it) it);
         liberator.open(us.map(function (it) it.URI), liberator.NEW_BACKGROUND_TAB);
         if (!arg.bang) {
           us.forEach(removeItems);
