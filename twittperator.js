@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.11.1</version>
+  <version>1.11.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1991,7 +1991,7 @@ let PLUGIN_INFO =
           let m = arg.match(/^\d+/);
           if (!m)
             return;
-          let id = parseInt(m[0], 10);
+          let id = m[0];
           history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
         },
         timelineCompleter: true,
