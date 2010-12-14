@@ -391,6 +391,13 @@ function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
 
     return;
   }
+
+  // delegate selecting a tab to Firefox after the tab removed
+  if (count === 1 && !focusLeftTab && tab.owner) {
+    remove(tab);
+    return;
+  }
+
   let vTabs = gb.visibleTabs;
   let index = vTabs.indexOf(tab);
   liberator.assert(index >= 0, "No such tab(s) in the current tabs");
