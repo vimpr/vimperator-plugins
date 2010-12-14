@@ -371,7 +371,7 @@ function switchToGroup (spec, wrap) {
  */
 function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
   const gb = gBrowser;
-  function remove(tab) {
+  function remove (tab) {
     if (gb.tabs.length > 1) {
       gb.removeTab(tab);
     } else if (buffer.URL != "about:blank" || gb.webNavigation.sessionHistory.count > 0) {
