@@ -452,7 +452,7 @@ mappings.add([modes.NORMAL], ["g@"],
     let apps = appTabs;
     let i = 0;
     if (count != null)
-      i = count;
+      i = count - 1;
     else {
       let currentTab = tabs.getTab();
       if (currentTab.pinned)
