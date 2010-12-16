@@ -95,6 +95,13 @@ let INFO = <>
     </description>
   </item>
   <item>
+    <tags>pintab pin</tags>
+    <spec>pin<oa>tab</oa></spec>
+    <description>
+      <p>pin the current tab, if already pinned, unpin.</p>
+    </description>
+  </item>
+  <item>
     <tags>settitle</tags>
     <spec>settitle <a>title</a> <oa>GroupName</oa></spec>
     <description>
@@ -701,6 +708,19 @@ let subCmds = [
     }, {
       literal: 0,
       completer: function (context) completion.buffer(context, completion.buffer.GROUPS | completion.buffer.ORPHANS),
+    }, true) // }}}
+  ,
+  /**
+   * SubCommand pinTab {{{
+   */
+  new Command(["pin[tab]"], "toggle AppTab the current tab",
+    function (args) {
+      let currentTab = tabs.getTab();
+      if (currentTab.pinned)
+        gBrowser.unpinTab(currentTab);
+      else
+        gBrowser.pinTab(currentTab);
+    }, {
     }, true) // }}}
   ,
   /**
