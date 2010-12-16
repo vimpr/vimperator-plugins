@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.11.2</version>
+  <version>1.11.3</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -48,8 +48,10 @@ let PLUGIN_INFO =
         Shows recent your timeline. (The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter.)
     :tw[ittperator]!
         Gets recent your timeline from Twitter and shows it.
+    :tw[ittperator]!@
+        Shows mentions to you.
     :tw[ittperator]!@user
-        Shows mentions to @user or @user's tweets.
+        Show @user's tweets.
     :tw[ittperator] {TweetText}
         Tweets {TweetText}.
     :tw[ittperator] RT @user#id: {refTweet}
@@ -105,8 +107,10 @@ let PLUGIN_INFO =
         前回取得したタイムラインを表示します。 (キャッシュが90秒以上古い場合は再取得。)
     :tw[ittperator]!
         強制的に取得したタイムラインを表示します。
+    :tw[ittperator]!@
+      あなたへの言及(mentions)表示します。
     :tw[ittperator]!@user
-        @useridへのmentionを表示します。
+        @user のタイムラインを表示します。
     :tw[ittperator] {TweetText}
         {TweetText}をポストします。
     :tw[ittperator] RT @user#id: {refTweet}
