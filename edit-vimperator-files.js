@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>Edit Vimperator File</name>
   <description>Open vimperator files with text-editor.</description>
   <description lang="ja">Vimperator 関連のファイルをエディタで開く</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="EditVimperatorFile" version="1.2.0"
+  <plugin name="EditVimperatorFile" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
@@ -73,7 +73,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="EditVimperatorFile" version="1.2.0"
+  <plugin name="EditVimperatorFile" version="1.2.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
@@ -101,7 +101,7 @@ let INFO =
     let args = commands.parseArgs(options["editor"], [], "*", true);
     liberator.assert(args.length >= 1, "No editor specified");
     args.push(path);
-    liberator.callFunctionInThread(null, io.run, io.expandPath(args.shift()), args, false);
+    io.run(io.expandPath(args.shift()), args);
   }
 
   let dirs = toArray(liberator.globalVariables.plugin_loader_roots || []).map(function (path) io.File(path).path);
