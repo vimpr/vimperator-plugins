@@ -1897,6 +1897,12 @@ let PLUGIN_INFO =
     })(); // }}}
 
     const SubCommand = function(init) { // {{{
+      if (!(init.completer instanceof Array))
+        init.completer = [init.completer];
+
+      if (init.timelineCompleter)
+        init.completer = init.completer.map(makeTimelineCompleter);
+
       return {
         __proto__: init,
         get expr() {
@@ -2094,58 +2100,80 @@ let PLUGIN_INFO =
       return result;
     } // }}}
 
-    function commandCompelter(context, args) { // {{{
+    function setTimelineCompleter(context) { // {{{
       function statusObjectFilter(item)
         let (desc = item.description)
           (this.match(desc.user.screen_name) || this.match(desc.text));
 
-      function setTimelineCompleter() {
-        context.compare = void 0;
-        context.createRow = function(item, highlightGroup) {
-          let desc = item[1] || this.process[1].call(this, item, item.description);
+      context.compare = void 0;
+      context.createRow = function(item, highlightGroup) {
+        let desc = item[1] || this.process[1].call(this, item, item.description);
 
-          if (desc && desc.user) {
-            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-                <li highlight="CompDesc">
-                  <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                  &#160;{desc.user.screen_name}: {desc.text}
-                </li>
-            </div>;
-          }
-
+        if (desc && desc.user) {
           return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-              <li highlight="CompDesc">{desc}&#160;</li>
+              <li highlight="CompDesc">
+                <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
+                &#160;{desc.user.screen_name}: {desc.text}
+              </li>
           </div>;
-        };
+        }
 
-        context.filters = [statusObjectFilter];
+        return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+            <li highlight="CompDesc">{desc}&#160;</li>
+        </div>;
+      };
+
+      context.filters = [statusObjectFilter];
+      context.title = ["Hidden", "Entry"];
+    } // }}}
+
+    function makeTimelineCompleter(completer) { // {{{
+      return function (context, args) {
+        setTimelineCompleter(context);
+        return completer(context, args);
+      }
+    } // }}}
+
+    function subCommandCompleter(context, args) { // {{{
+      if (!args.literalArg.match(/^(\W|\S+\s)/)) {
+        context.title = ["Sub command", "Description"];
+        context.completions = SubCommands.map(function({ command, description }) [command[0], description]);
+        return;
       }
 
+      let [subCmd, m] = findSubCommand(args.literalArg) || [];
+      if (!subCmd)
+        return;
+
+      context.offset += m[0] === "@" ? 0 : m[0].length;
+      let offset = context.offset;
+
+      subCmd.completer.forEach(function (completer, index) {
+        context.fork(
+          "TwittperatorSubCommand" + index, 0, context,
+          function (context) {
+            context.offset = offset;
+            return completer(context, args);
+          }
+        );
+      });
+    } // }}}
+
+    function commandCompelter(context, args) { // {{{
       let len = 0;
 
-      if (args.bang) {
-        let [subCmd, m] = findSubCommand(args.literalArg) || [];
-        if (subCmd) {
-          if (subCmd.timelineCompleter)
-            setTimelineCompleter();
-          context.title = ["Hidden", "Entry"];
-          subCmd.completer(context, args);
-          len = m[0] === "@" ? 0 : m[0].length;
-        }
-      } else {
-        setTimelineCompleter();
-        let arg = args.literalArg.slice(0, context.caret);
-        let m;
-        if (m = arg.match(/(RT\s+)@.*$/)) {
-          (m.index === 0 ? Completers.name_id
-                         : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
-        } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, arg)) {
-          (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
-        }
-
-        if (m)
-          len = m.index + m[1].length;
+      setTimelineCompleter(context);
+      let arg = args.literalArg.slice(0, context.caret);
+      let m;
+      if (m = arg.match(/(RT\s+)@.*$/)) {
+        (m.index === 0 ? Completers.name_id
+                       : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
+      } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, arg)) {
+        (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
       }
+
+      if (m)
+        len = m.index + m[1].length;
 
       context.title = ["Name#ID", "Entry"];
       context.offset += len;
@@ -2153,13 +2181,6 @@ let PLUGIN_INFO =
       context.filter = context.filter.replace(/^@/, "");
 
       context.incomplete = false;
-    } // }}}
-
-    function subCommandCompleter(context, args) { // {{{
-      if (!args.bang || args.literalArg.match(/^(\W|\S+\s)/))
-        return;
-      context.title = ["Sub command", "Description"];
-      context.completions = SubCommands.map(function({ command, description }) [command[0], description]);
     } // }}}
 
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command", // {{{
@@ -2185,14 +2206,11 @@ let PLUGIN_INFO =
         literal: 0,
         hereDoc: true,
         completer: let (getting) function(context, args) {
-          if (args.bang)
-            context.fork("File", 0, context, function(context) subCommandCompleter(context, args));
-
+          let completer = args.bang ? subCommandCompleter : commandCompelter;
           let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
+          let matches = args.bang || args.literalArg.match(/(RT\s+|)@/);
 
-          let matches = args.bang ? args.literalArg.match(/^(\s*[-+?])/)
-                                  : args.literalArg.match(/(RT\s+|)@/);
-          if (!args.bang && !matches)
+          if (!matches)
             return;
 
           context.incomplete = doGet;
@@ -2203,11 +2221,12 @@ let PLUGIN_INFO =
               getting = true;
               Twitter.getFollowersStatus(null, true, function() {
                 getting = false;
-                context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
+                completer(context, args);
+                context.incomplete = false;
               });
             }
           } else {
-            context.fork("Twittperator", 0, context, function(context) commandCompelter(context, args));
+            completer(context, args);
           }
         }
       }, true); // }}}
