@@ -1959,8 +1959,16 @@ let PLUGIN_INFO =
         command: ["?"],
         description: "Twitter search",
         action: function(arg) Twittperator.showTwitterSearchResult(arg),
-        timelineCompleter: true,
-        completer: Completers.text()
+        completer: [
+          function (context, args) {
+            let lst = [[buffer.URL, 'Current Tab']];
+            let w = buffer.getCurrentWord();
+            if (w && w.length)
+              lst.push([w, 'Current word']);
+            context.completions = lst;
+          },
+          makeTimelineCompleter(Completers.text())
+        ]
       }),
       SubCommand({
         command: ["/"],
