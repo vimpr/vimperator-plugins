@@ -10,7 +10,7 @@ var INFO =
   <p>You can check Japanese Weather Report by this plugin.</p>
   <item>
     <tags>'jweather'</tags>
-    <spec>:jw<oa>eather</oa> <a>region</a></spec>
+    <spec>:jw<oa>eather</oa> <a>region</a> <oa>1</oa></spec>
     <description>
       <p>You can check Japanese Weather Report by this plugin.</p>
       <p>See. <link topic="http://www.weathermap.co.jp/hitokuchi_rss/">http://www.weathermap.co.jp/hitokuchi_rss/</link></p>
@@ -22,9 +22,15 @@ commands.addUserCommand(
 	['jw[eather]'],
 	'display japanese weather report',
 	function(args){
-    if(1!=args.length){
+    if(1>args.length){
       liberator.echoerr('argument error');
       return false;
+    }
+    const TODAY=0;
+    const TOMORROW=1;
+    let day=TODAY;
+    if(args.length==2&&args[1]==1){
+      day=TOMORROW;
     }
     let region={
       'hokkaido_souya':'1100',
@@ -180,7 +186,7 @@ commands.addUserCommand(
 		let getProb=function(){
 			let ret="";
 			let non="--";
-			let prob=rssDoc.getElementsByTagName("wm:rainfall").item(0).
+			let prob=rssDoc.getElementsByTagName("wm:rainfall").item(day).
 				getElementsByTagName("wm:prob");
 			let probNo=prob.length;
 			if(probNo<4){
@@ -199,12 +205,12 @@ commands.addUserCommand(
 		let getTemp=function(){
 			let ret;
 			let unit=rssDoc.getElementsByTagName("wm:temperature")
-				.item(0).getAttribute("unit");
+				.item(day).getAttribute("unit");
 			let max=rssDoc.getElementsByTagName("wm:max")
-				.item(0).childNodes.item(0).nodeValue;
+				.item(day).childNodes.item(0).nodeValue;
 			if(max!="--") max=max+unit;
 			let min=rssDoc.getElementsByTagName("wm:min")
-				.item(0).childNodes.item(0).nodeValue;
+				.item(day).childNodes.item(0).nodeValue;
 			if(min!="--") min=min+unit;
 			return max+"/"+min+" ";
 		};
@@ -215,7 +221,7 @@ commands.addUserCommand(
 			let region=rssDoc.getElementsByTagName("wm:region")
 				.item(0).childNodes.item(0).nodeValue;
 			let weather=rssDoc.getElementsByTagName("wm:weather")
-				.item(0).childNodes.item(0).nodeValue;
+				.item(day).childNodes.item(0).nodeValue;
 			liberator.echo(
 				prefecture+
 				"("+region+") "+
