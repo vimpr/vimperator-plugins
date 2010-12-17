@@ -12,7 +12,7 @@ var INFO =
     <tags>'jweather'</tags>
     <spec>:jw<oa>eather</oa> <a>region</a> <oa>1</oa></spec>
     <description>
-      <p>You can check Japanese Weather Report by this plugin.</p>
+      <p>You can check Japanese Weather Report by this plugin. If you add second parameter &quot;1&quot;, can take tomorrow weather report.</p>
       <p>See. <link topic="http://www.weathermap.co.jp/hitokuchi_rss/">http://www.weathermap.co.jp/hitokuchi_rss/</link></p>
     </description>
   </item>
