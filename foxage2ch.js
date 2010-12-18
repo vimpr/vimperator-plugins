@@ -106,7 +106,6 @@ let INFO =
 
   Components.utils.import("resource://foxage2ch/utils.jsm");
 
-  let cmdPrefix = liberator.globalVariables.foxage2ch_command_prefix || 'foxage';
   let svc = FoxAge2chUtils.service;
 
   const Status = {
@@ -126,67 +125,126 @@ let INFO =
   function selType1 (board)
     (board.type === 1);
 
-  let threads =
-    let (last, time = 0) (
-      function () {
-        if (last)
-          return last;
-        last = util.Array.flatten([
-          svc.getChildItems(board.id, {})
-          for ([, board] in Iterator(svc.getChildItems("root", {}).filter(selType1)))
-        ]);
-        return last;
+  const FA = {
+    get threads ()
+      util.Array.flatten([svc.getChildItems(board.id, {})
+        for ([, board] in Iterator(svc.getChildItems("root", {})))
+        if (selType1(board))
+      ]),
+    getThreadById: function (threadId) {
+      for ([, thread] in Iterator(FA.threads)) {
+        if (thread.id === threadId)
+          return thread;
+      }
+      return;
+    }
+  }
+
+  function threadCompleter (context, args) {
+    context.compare = void 0;
+    for (let [v, k] in Iterator(Status)) {
+      if (typeof v === 'string' && ('-' + v in args))
+        args['-status'] = v;
+    }
+    context.filters = [CompletionContext.Filter.textDescription]
+    context.completions = [
+      [
+        thread.id,
+        let (icon = StatusIcon[thread.status])
+        (icon ? icon + ' ' : '') + (idx + 1) + ': ' + thread.title
+      ]
+      for ([idx, thread] in Iterator(FA.threads))
+      if (!('-status' in args) || (thread.status === Status[args['-status']]))
+    ];
+  }
+
+  threadCommandOptions =
+    [
+      [
+        ['-status', '-s'],
+        commands.OPTION_STRING,
+        null,
+        [[v, StatusIcon[k]] for ([v, k] in Iterator(Status)) if (typeof v === 'string')]
+      ]
+    ].concat([
+      [['-' + k, '-' + k.slice(0, 1)], commands.OPTION_NOARG]
+      for ([v, k] in Iterator(Status))
+      if (typeof v === 'number')
+    ]);
+
+  SubCommands = Commands();
+  [true, false].forEach(function (tab) {
+    SubCommands.addUserCommand(
+      (tab ? ['t[open]', 'tabo[pen]'] : ['o[pen]']),
+      'Openthe borard from FoxAge2ch' + (tab ? ' in new tab' : 'in current tab'),
+      function (args) {
+        let thread = FA.getThreadById(args.literalArg.trim());
+        if (thread)
+          FoxAge2chUtils.service.openItem(thread, !tab ^ !args.bang, false);
+      },
+      {
+        literal: 0,
+        options: threadCommandOptions,
+        completer: threadCompleter,
       }
     );
+  });
 
-  function addUserCommand (tab) {
+  SubCommands.addUserCommand(
+    ['openu[pdates]', 'ou[pdates]'],
+    'Open updated threads',
+    function () {
+      svc.openUpdates("root")
+    },
+    {
+    },
+    true
+  );
+
+  SubCommands.addUserCommand(
+    ['c[heckupdates]'],
+    'Check updated threads',
+    function () {
+      svc.checkUpdates("root")
+    },
+    {
+    },
+    true
+  );
+
+  let mainCommand =
     commands.addUserCommand(
-      (tab ? ['t' + cmdPrefix + 'o[pen]', 'tab' + cmdPrefix + 'o[pen]'] : [cmdPrefix + 'o[pen]']),
-      'Open the borard from FoxAge2ch' + (tab ? ' in new tab' : 'in current tab'),
+      'foxage',
+      'Control FoxAge2ch',
       function (args) {
-        let thread = threads()[parseInt(args.literalArg.replace(/^.\s/, ''), 10) - 1];
-        if (!thread)
-          return;
-        FoxAge2chUtils.service.openItem(thread, !tab ^ !args.bang, false);
+        let ([count, name, bang, args] = SubCommands.parseCommand(args.string)) {
+          let cmd = SubCommands.getUserCommand(name);
+          liberator.assert(cmd, 'Unknown sub command: ' + name);
+          cmd.execute(args, bang, count);
+        }
       },
       {
         bang: true,
-        literal: 0,
-        options: [
-          [
-            ['-status', '-s'],
-            commands.OPTION_STRING,
-            null,
-            [[v, StatusIcon[k]] for ([v, k] in Iterator(Status)) if (typeof v === 'string')]
-          ]
-        ].concat([
-          [['-' + k, '-' + k.slice(0, 1)], commands.OPTION_NOARG]
-          for ([v, k] in Iterator(Status))
-          if (typeof v === 'number')
-        ]),
+        literal: 1,
         completer: function (context, args) {
-          context.compare = void 0;
-          for (let [v, k] in Iterator(Status)) {
-            if (typeof v === 'string' && ('-' + v in args))
-              args['-status'] = v;
-          }
-          context.completions = [
-            [
-              let (icon = StatusIcon[thread.status])
-              (icon ? icon + ' ' : '') + (idx + 1) + ': ' + thread.title,
-              thread.id
+          let [_, name, _, _] = SubCommands.parseCommand(args.string);
+          let cmd = SubCommands.getUserCommand(name);
+
+          if (args.length === 2 && cmd) {
+            mainCommand.options = cmd.options;
+            context.offet = args.string.indexOf(name);
+            cmd.completer(context, args);
+          } else {
+            mainCommand.options = [];
+            context.completions = [
+              [cmd.names.filter(function (it) it.length > 1)[0], cmd.description]
+              for (cmd in Iterator(SubCommands))
             ]
-            for ([idx, thread] in Iterator(threads()))
-            if (!('-status' in args) || (thread.status === Status[args['-status']]))
-          ];
+          }
         }
       },
       true
     );
-  }
-
-  addUserCommand(true);
-  addUserCommand(false);
 
 })();
 
