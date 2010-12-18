@@ -1665,7 +1665,7 @@ Thanks:
         vimeo: new VimeoPlayer(this.stella)
       };
 
-      this.noGUI = true;
+      // this.noGUI = true;
       this.createGUI();
       this.__onResize = window.addEventListener('resize', U.bindr(this, this.onResize), false);
       this.progressListener = new WebProgressListener({onLocationChange: U.bindr(this, this.onLocationChange)});
@@ -1916,7 +1916,7 @@ Thanks:
       });
 
       let stbar = document.getElementById('status-bar');
-      stbar.insertBefore(panel, document.getElementById('liberator-statusline').nextSibling);
+      stbar.appendChild(panel);
 
       let relmenu = document.getElementById('anekos-stella-relations-menupopup');
 
