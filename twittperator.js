@@ -1599,7 +1599,7 @@ let PLUGIN_INFO =
     }, // }}}
   }; // }}}
   let Twittperator = { // {{{
-    confirm: function(msg, onYes, onNo, onCancel) {
+    confirm: function(msg, onYes, onNo, onCancel) { // {{{
       if (!onNo)
         onNo = function () Twittperator.echo('canceled.');
 
@@ -1610,7 +1610,7 @@ let PLUGIN_INFO =
           onCancel: onCancel || onNo
         }
       );
-    },
+    }, // }}}
     echo: function(msg) { // {{{
       liberator.echo("[Twittperator] " + msg);
     }, // }}}
