@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.11.3</version>
+  <version>1.12.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1529,7 +1529,9 @@ let PLUGIN_INFO =
         Twittperator.echo("unfav: " + res.user.name + " " + res.text, true);
       });
     }, // }}}
-
+    searchUsers: function(word, callback) { // {{{
+      tw.jsonGet("users/search", { q: word }, callback);
+    } // }}}
   }; // }}}
   let Utils = { // {{{
     anchorLink: function(str) { // {{{
@@ -1629,6 +1631,9 @@ let PLUGIN_INFO =
         history.some(function(st) f(st) && (r = st));
         return (r && r.user.protected && r.user.screen_name) ? true : false;
       }
+    }, // }}}
+    jsonGet: function(api, query, callback) { // {{{
+      tw.jsonGet(api, query, callback);
     }, // }}}
     loadPlugins: function() { // {{{
       function isEnabled(file)
@@ -1800,6 +1805,26 @@ let PLUGIN_INFO =
           } else {
             Twittperator.echo("No results found.")
           }
+        }
+      });
+    }, // }}}
+    showUsersSeachResult: function(word) { // {{{
+      Twitter.searchUsers(word, function(res){
+        // フォーマットが違うので変換
+        function konbuArt(obj) {
+          return {
+            __proto__: obj.status,
+            user: {
+              __proto__: obj,
+            }
+          };
+        }
+
+        // TODO ユーザのリストが返ってきますが、タイムラインとして表示します。
+        if (res.length > 0) {
+          Twittperator.showTL(res.map(Utils.fixStatusObject).map(konbuArt));
+        } else {
+          Twittperator.echo("No results found.")
         }
       });
     }, // }}}
@@ -2086,6 +2111,11 @@ let PLUGIN_INFO =
         },
         timelineCompleter: false,
         completer: Completers.id(function (it) it.in_reply_to_status_id)
+      }),
+      SubCommand({
+        command: ["findpeople"],
+        description: "Find people with the words.",
+        action: function(arg) Twittperator.showUsersSeachResult(arg),
       }),
     ]; // }}}
 
