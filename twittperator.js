@@ -1911,7 +1911,7 @@ let PLUGIN_INFO =
 
       return {
         name:
-          completer(function(s) ["@" + s.user.screen_name, s]),
+          completer(function(s) [s.user.screen_name, s]),
         text:
           completer(function(s) [removeNewLine(s.text), s]),
         id:
@@ -2187,7 +2187,7 @@ let PLUGIN_INFO =
       if (!subCmd)
         return;
 
-      context.offset += m[0] === "@" ? 0 : m[0].length;
+      context.offset += m[0].length;
       let offset = context.offset;
 
       subCmd.completer.forEach(function (completer, index) {
