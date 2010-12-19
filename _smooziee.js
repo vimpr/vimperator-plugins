@@ -19,7 +19,7 @@ var PLUGIN_INFO =
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/_smooziee.js</updateURL>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>0.10.1</version>
+  <version>0.10.2</version>
   <detail><![CDATA[
     == Subject ==
     j,k key scrolling to be smoothly.
@@ -118,7 +118,7 @@ let self = liberator.plugins.smooziee = (function(){
   var PUBLICS = {
     smoothScrollBy: function(moment) {
       win = Buffer.findScrollableWindow();
-      interval = window.eval(liberator.globalVariables.smooziee_scroll_interval) || 20;
+      interval = window.eval(liberator.globalVariables.smooziee_scroll_interval || '20');
       destY = win.scrollY + moment;
       clearTimeout(next);
       smoothScroll(moment);
@@ -132,7 +132,7 @@ let self = liberator.plugins.smooziee = (function(){
   var win;
   var interval;
 
-  function getScrollAmount() window.eval(liberator.globalVariables.smooziee_scroll_amount) || 400;
+  function getScrollAmount() window.eval(liberator.globalVariables.smooziee_scroll_amount || '400');
 
   function smoothScroll(moment) {
     if (moment > 0)
