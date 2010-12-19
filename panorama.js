@@ -387,6 +387,8 @@ function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
       liberator.beep();
     }
   }
+  let vTabs = gb.visibleTabs;
+
   if (typeof count != "number" || count < 1)
     count = 1;
 
@@ -405,7 +407,6 @@ function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
     return;
   }
 
-  let vTabs = gb.visibleTabs;
   let index = vTabs.indexOf(tab);
   liberator.assert(index >= 0, "No such tab(s) in the current tabs");
 
