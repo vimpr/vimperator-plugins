@@ -58,6 +58,11 @@ let INFO =
 
 (function () {
   function getc (url, callback) {
+    function toResult (html) {
+      let [, c] = html.match(/\/\/([^.]+)\.\u8DF3/);
+      return ['http://' + c + '.\u8DF3.jp/', c];
+    }
+
     let req = new plugins.libly.Request(
       'http://xn--vt3a.jp/entry/new',
       {
@@ -65,16 +70,14 @@ let INFO =
         Referer : 'http://xn--vt3a.jp/'
       },
       {
+        asynchronous: !!callback,
         postBody: 'utf8=%E2%9C%93&url=' + encodeURIComponent(url)
       }
     );
     req.addEventListener(
       'onSuccess',
-      function (res) {
-        let html = res.req.transport.responseText;
-        let [, c] = html.match(/\/\/([^.]+)\.\u8DF3/);
-        callback(c);
-      }
+      function (res)
+        callback.apply(null, toResult(res.req.transport.responseText))
     );
     req.addEventListener(
       'onFailure',
@@ -83,6 +86,7 @@ let INFO =
       }
     );
     req.post();
+    return toResult(req.transport.responseText);
   }
 
   let innantoka = atob('aW5zdWxpbixpbmJhZ3MsaW5wYXJhenpvLGlucHVtb25pbixpbnRlbCxpbmNhdGVpa29rdSxpbmZyYXN0cnVjdHVyZSxpbmZsdWVuemEsaW5kb2NoaW5lLGltcHJlc3MsaW5kcmEsaW52ZXJ0ZXIsaW5kaWFuYXBvbGlzLGltcGhhbCxpbnRlcnByZXRlcixpbmRvc2hpbmFoYW5udG91LHlpbmxpbmdvZmpveXRveSxpbXBlZGFuY2UsaW5nZW5tYW1lLGludGVycGhvbmUsaW5kb2xlLGludGVybixpbXBhbGE=').split(',')
@@ -92,8 +96,7 @@ let INFO =
     'Tundere',
     function (args) {
       let arg = args.literalArg.trim();
-      getc(arg.length ? arg : buffer.URL, function (c) {
-        let url = 'http://' + c + '.\u8DF3.jp/';
+      getc(arg.length ? arg : buffer.URL, function (url, c) {
         liberator.echo('Copied: ' + url);
         util.copyToClipboard(url);
       });
@@ -113,6 +116,8 @@ let INFO =
     },
     true
   );
+
+  plugins.haneru = {getc: getc};
 
 })();
 
