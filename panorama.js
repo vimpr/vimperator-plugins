@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6.1"
+<plugin name="panorama" version="0.6.2"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -379,7 +379,7 @@ function switchToGroup (spec, wrap) {
 function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
   const gb = gBrowser;
   function remove (tab) {
-    if (gb.tabs.length > 1) {
+    if (vTabs.length > 1) {
       gb.removeTab(tab);
     } else if (buffer.URL != "about:blank" || gb.webNavigation.sessionHistory.count > 0) {
       gb.loadURI("about:blank");
