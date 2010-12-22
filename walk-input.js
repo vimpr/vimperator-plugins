@@ -20,7 +20,7 @@
 
 // PLUGIN_INFO {{{
 let INFO =
-<plugin name="Walk-Input" version="1.1"
+<plugin name="Walk-Input" version="1.2"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -63,7 +63,25 @@ let INFO =
 
 (function () {
 
-var xpath = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
+var types = [
+  "text",
+  "passsword",
+  "search",
+  "file",
+  "datetime",
+  "datetime-local",
+  "date",
+  "month",
+  "time",
+  "week",
+  "number",
+  "range",
+  "email",
+  "url",
+  "tel",
+  "color",
+].map(function(type) "@type=" + type.quote()).join(" or ");
+var xpath = '//input[' + types + ' or not(@type)] | //textarea';
 
 var walkinput = function (forward) {
     var focused = document.commandDispatcher.focusedElement;
