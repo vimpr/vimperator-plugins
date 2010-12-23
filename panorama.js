@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6.2"
+<plugin name="panorama" version="0.6.3"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -178,7 +178,7 @@ function switchTo (buffer, allowNonUnique, count, reverse) {
     count = 1;
   reverse = !!reverse;
 
-  m = [];
+  let m = [];
   let lowerBuffer = buffer.toLowerCase();
   let first = tabs.index() + (reverse ? 0 : 1);
   let length = config.tabbrowser.browsers.length;
@@ -187,9 +187,9 @@ function switchTo (buffer, allowNonUnique, count, reverse) {
     let browser = config.tabbrowser.browsers[index];
     let url, title;
     if ("__SS_restoreState" in browser) {
-      let entry = browser.__SS_data.entries[0];
+      let entry = browser.__SS_data.entries.slice(-1)[0];
       url = entry.url;
-      title = entry.title;
+      title = entry.title || url;
     } else {
       url = browser.contentDocument.location.href;
       title = browser.contentDocument.title;
@@ -413,18 +413,11 @@ function removeTab (tab, count, focusLeftTab, quitOnLastTab) {
   let start, end, selIndex;
   if (focusLeftTab) {
     end = index;
-    start = index - count + 1;
-    if (start < 0) {
-      start = 0;
-    }
-    selIndex = start - 1;
-    if (selIndex < 0)
-      selIndex = 0;
+    start = Math.max(0, index - count + 1);
+    selIndex = Math.max(0, start - 1);
   } else {
     start = index;
-    end = index + count - 1;
-    if (end >= vTabs.length)
-      end = vTabs.length - 1;
+    end = Math.min(index + count, vTabs.length) - 1;
     selIndex = end + 1;
     if (selIndex >= vTabs.length)
       selIndex = start > 0 ? start - 1 : 0;
@@ -836,23 +829,21 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
       return "#";
     return " ";
   }
-  function getURLFromTab (tab) {
-    if ("__SS_restoreState" in tab.linkedBrowser && "__SS_data" in tab.linkedBrowser)
-      return tab.linkedBrowser.__SS_data.entries[0].url;
-    return tab.linkedBrowser.contentDocument.location.href;
-  }
+  function getURLFromTab (tab)
+    ("__SS_restoreState" in tab.linkedBrowser && "__SS_data" in tab.linkedBrowser) ?
+      tab.linkedBrowser.__SS_data.entries.slice(-1)[0].url :
+      tab.linkedBrowser.contentDocument.location.href;
+
+  function createItem (prefix, label, url, indicator, icon)
+    ({ text: [prefix + label, prefix + url], url: template.highlightURL(url), indicator: indicator, icon: icon || DEFAULT_FAVICON })
+
   function generateVisibleTabs () {
     for (let [i, tab] in Iterator(gBrowser.visibleTabs)) {
-      let indicator = getIndicator(tab),
+      let indicator = getIndicator(tab) + (tab.pinned ? "@" : " "),
           label = tab.label || UNTITLE_LABEL,
           url = getURLFromTab(tab),
           index = (tab._tPos + 1) + ": ";
-      let item = {
-        text: [ index + label, index + url],
-        url: template.highlightURL(url),
-        indicator: indicator + (tab.pinned ? "@" : ""),
-        icon: tab.image || DEFAULT_FAVICON
-      };
+      let item = createItem(index, label, url, indicator, tab.image);
       if (!tab.pinned && tab.tabItem && tab.tabItem.parent) {
         let groupName = tab.tabItem.parent.getTitle();
         if (groupName) {
@@ -865,21 +856,15 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
     }
   }
   function generateGroupList (group, groupName) {
+    let hasName = !!groupName;
     for (let [i, tabItem] in Iterator(group.getChildren())) {
-      let indicator = getIndicator(tabItem.tab);
       let index = (tabItem.tab._tPos + 1) + ": ",
           label = tabItem.tab.label || UNTITLE_LABEL,
           url = getURLFromTab(tabItem.tab);
-      let item = {
-        text: [index + label, index + url],
-        url: template.highlightURL(url),
-        indicator: indicator,
-        icon: tabItem.tab.image || DEFAULT_FAVICON
-      };
-      if (groupName) {
-        index = groupName + " " + (i + 1) + ": ";
-        item.text.push(index + label);
-        item.text.push(index + url);
+      let item = createItem(index, label, url, getIndicator(tabItem.tab), tabItem.tab.image);
+      if (hasName) {
+        let gIndex = groupName + " " + (i + 1) + ": ";
+        item.text.push(gIndex + label, gIndex + url);
       }
       yield item;
     }
@@ -887,15 +872,10 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
   function generateOrphanedList (tabItems) {
     for (let [i, tabItem] in Iterator(tabItems)) {
       let indicator = getIndicator(tabItem.tab),
-          index = (tabItem.tab._tPos + 1) + ": ";
+          index = (tabItem.tab._tPos + 1) + ": ",
           label = tabItem.tab.label || UNTITLE_LABEL,
           url = getURLFromTab(tabItem.tab);
-      yield {
-        text: [index + label, index + url],
-        url: template.highlightURL(url),
-        indicator: indicator,
-        icon: tabItem.tab.image || DEFAULT_FAVICON
-      };
+      yield createItem(index, label, url, getIndicator(tabItem.tab), tabItem.tab.image);
     }
   }
 
@@ -917,7 +897,7 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
       context.title = ["Buffers"];
       context.completions = [item for (item in generateVisibleTabs())];
     }
-    if (!(flag & this.buffer.GROUPS) || !(flag & this.buffer.ORPHANS))
+    if (!(flag & this.buffer.GROUPS | flag & this.buffer.ORPHANS))
       return;
     let self = this;
     TV._initFrame(function() {
