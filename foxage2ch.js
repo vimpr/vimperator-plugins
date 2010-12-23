@@ -158,7 +158,7 @@ let INFO =
     ];
   }
 
-  threadCommandOptions =
+  let threadCommandOptions =
     [
       [
         ['-status', '-s'],
