@@ -58,9 +58,9 @@ let PLUGIN_INFO =
         Does official retweet.
     :tw[ittperator] {TweetText} RT @user#id: {refTweet}
         Does classic retweet.
-    :tw[ittperator]!+@user#id
+    :tw[ittperator]!+status_id
         Adds the tweet to your favorites.
-    :tw[ittperator]!-@user#id
+    :tw[ittperator]!-status_id
         Delete the tweet from your favorites.
     :tw[ittperator]!?{SearchText}
         Shows the result of searching {SearchText}.
@@ -117,9 +117,9 @@ let PLUGIN_INFO =
         公式RTになるはずです。
     :tw[ittperator] {TweetText} RT @user#id: {refTweet}
         非公式RTになるはずです。
-    :tw[ittperator]!+@user#id
+    :tw[ittperator]!+status_id
         tweetをfavoriteします。
-    :tw[ittperator]!-@user#id
+    :tw[ittperator]!-status_id
         tweetをunfavoriteします。
     :tw[ittperator]!?{SearchText}
         {SearchText}の検索結果を表示します。
@@ -1944,12 +1944,12 @@ let PLUGIN_INFO =
         command: ["-"],
         description: "Unfav a tweet",
         action: function(arg) {
-          let m = arg.match(/^.*#(\d+)/);
+          let m = arg.match(/^\d+/);
           if (m)
-            Twitter.unfavorite(m[1]);
+            Twitter.favorite(m[0]);
         },
         timelineCompleter: true,
-        completer: Completers.name_id_text(rejectMine)
+        completer: Completers.id(rejectMine)
       }),
       SubCommand({
         command: ["@"],
