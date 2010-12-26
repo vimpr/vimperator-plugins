@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.12.0</version>
+  <version>1.12.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1912,6 +1912,8 @@ let PLUGIN_INFO =
       return {
         name:
           completer(function(s) [s.user.screen_name, s]),
+        atname:
+          completer(function(s) ['@' + s.user.screen_name, s]),
         text:
           completer(function(s) [removeNewLine(s.text), s]),
         id:
@@ -2211,7 +2213,7 @@ let PLUGIN_INFO =
         (m.index === 0 ? Completers.name_id
                        : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
       } else if (m = tailMatch(/(^|\b|\s)@[^@]*/, arg)) {
-        (m.index === 0 ? Completers.name_id(rejectMine) : Completers.name(rejectMine))(context, args);
+        (m.index === 0 ? Completers.name_id(rejectMine) : Completers.atname(rejectMine))(context, args);
       }
 
       if (m)
