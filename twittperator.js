@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.12.1</version>
+  <version>1.12.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1462,50 +1462,28 @@ let PLUGIN_INFO =
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
     }, // }}}
-    getFollowersStatus: function(target, force, onload) { // {{{
-      function setRefresher() {
-        expiredStatus = false;
-        if (statusRefreshTimer)
-          clearTimeout(statusRefreshTimer);
-        statusRefreshTimer = setTimeout(function() expiredStatus = true, setting.statusValidDuration * 1000);
-      }
+    getUserTimeline: function(target, onload) { // {{{
+      let [api, query] = target ? ["statuses/user_timeline", {screen_name: target}]
+                                : ["statuses/home_timeline", {}];
 
-      if (!force && !expiredStatus && history.length > 0) {
-        onload(history);
-      } else {
-        let api = "statuses/home_timeline", query = {};
-
-        if (target) {
-          api = "statuses/user_timeline";
-          query.screen_name = target;
-        } else {
-          query = null;
-          if (setting.useChirp) {
-            onload(history);
-            return;
-          }
-        }
-
-        tw.jsonGet(api, query, function(res) {
-          setRefresher();
+      tw.jsonGet(
+        api,
+        query,
+        function(res) {
           let result = res.map(Utils.fixStatusObject);
-          if (!target) {
-            let lastHistory = history[0];
-            if (lastHistory) {
-              let lastDate = Date.parse(lastHistory.created_at);
-              for (let [,msg] in Iterator(result.reverse())) {
-                if (Date.parse(msg.created_at) > lastDate)
-                  history.unshift(msg);
-              }
-            } else {
-              result.forEach(function(msg) history.push(msg));
+          let lastHistory = history[0];
+          if (lastHistory) {
+            let lastDate = Date.parse(lastHistory.created_at);
+            for (let [,msg] in Iterator(result.reverse())) {
+              if (Date.parse(msg.created_at) > lastDate)
+                history.unshift(msg);
             }
+          } else {
+            result.forEach(function(msg) history.push(msg));
           }
-          // XXX API 的な仕様とは異なる挙動
-          let (name = target || setting.screenName)
-            onload(history.filter(function(it) it.user && it.user.screen_name === name));
-        });
-      }
+          onload(result);
+        }
+      );
     }, // }}}
     say: function(status, inReplyToStatusId) { // {{{
       let sendData = {status: status, source: "Twittperator"};
@@ -1709,8 +1687,8 @@ let PLUGIN_INFO =
         }
       );
     }, // }}}
-    showFollowersStatus: function(arg, force) { // {{{
-      Twitter.getFollowersStatus(arg, force, function(statuses) {
+    showUserTimeline: function(arg) { // {{{
+      Twitter.getUserTimeline(arg, function(statuses) {
         Twittperator.showTL(statuses);
       });
     }, // }}}
@@ -1978,7 +1956,7 @@ let PLUGIN_INFO =
         description: "Show mentions or follower tweets",
         action: function(arg) {
           if (arg.length > 0) {
-            Twittperator.showFollowersStatus(arg, true);
+            Twittperator.showUserTimeline(arg);
           } else {
             Twittperator.showTwitterMentions();
           }
@@ -2233,7 +2211,7 @@ let PLUGIN_INFO =
         let arg = args.literalArg;
 
         if (!arg)
-          return Twittperator.showFollowersStatus(null, args.bang);
+          return Twittperator.showUserTimeline();
 
         if (args.bang) {
           let [subCmd] = findSubCommand(arg) || [];
@@ -2241,7 +2219,7 @@ let PLUGIN_INFO =
             subCmd.action(args);
         } else {
           if (arg.length === 0)
-            Twittperator.showFollowersStatus();
+            Twittperator.showUserTimeline();
           else
             Twittperator.say(arg);
         }
@@ -2249,9 +2227,14 @@ let PLUGIN_INFO =
         bang: true,
         literal: 0,
         hereDoc: true,
-        completer: let (getting) function(context, args) {
+        completer: let (getting, lastTime) function(context, args) {
+          let now = new Date().getTime();
+          let doGet =
+            setting.autoStatusUpdate &&
+            !getting &&
+            (!lastTime || ((lastTime + setting.statusValidDuration * 1000) < now));
+
           let completer = args.bang ? subCommandCompleter : commandCompelter;
-          let doGet = (expiredStatus || !(history && history.length)) && setting.autoStatusUpdate;
           let matches = args.bang || args.literalArg.match(/(RT\s+|)@/);
 
           if (!matches)
@@ -2261,17 +2244,16 @@ let PLUGIN_INFO =
           context.hasitems = !doGet;
 
           if (doGet) {
-            if (!getting) {
-              getting = true;
-              Twitter.getFollowersStatus(null, true, function() {
-                getting = false;
-                completer(context, args);
-                context.incomplete = false;
-              });
-            }
-          } else {
-            completer(context, args);
+            getting = true;
+            lastTime = now;
+            Twitter.getUserTimeline(null, function() {
+              getting = false;
+              completer(context, args);
+              context.incomplete = false;
+            });
+            return;
           }
+          completer(context, args);
         }
       }, true); // }}}
   } // }}}
@@ -2293,7 +2275,6 @@ let PLUGIN_INFO =
     });
 
   let statusRefreshTimer;
-  let expiredStatus = true;
 
   let history = __context__.Tweets;
   if (!history)
