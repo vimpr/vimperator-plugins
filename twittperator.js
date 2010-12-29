@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.13.0</version>
+  <version>1.13.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1689,7 +1689,7 @@ let PLUGIN_INFO =
     }, // }}}
     showUserTimeline: function(arg) { // {{{
       Twitter.getUserTimeline(arg, function(statuses) {
-        Twittperator.showTL(statuses);
+        Twittperator.showTL(Array.slice(statuses).reverse());
       });
     }, // }}}
     showStatusMenu: function(status) { // {{{
