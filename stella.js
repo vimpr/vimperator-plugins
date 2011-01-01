@@ -106,7 +106,7 @@ function addLocalMappings(buffer, maps) {
 }
 
 addLocalMappings(
-  /^(http:\/\/(es|www).nicovideo.jp\/watch|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
+  /^(http:\/\/(es|www).nicovideo.jp\/(watch|playlist\/mylist)|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
   [
     ['<C-g>', ':pageinfo S',      ],
     ['p',     ':stplay',          ],
@@ -214,7 +214,7 @@ function addLocalMappings(buffer, maps) {
 }
 
 addLocalMappings(
-  /^(http:\/\/(es|www).nicovideo.jp\/watch|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
+  /^(http:\/\/(es|www).nicovideo.jp\/(watch|playlist\/mylist)|http:\/\/(jp|www)\.youtube\.com\/watch|http:\/\/(www\.)?vimeo\.com\/(channels\/(hd)?#)?\d+)/,
   [
     ['<C-g>', ':pageinfo S',      ],
     ['p',     ':stplay',          ],
@@ -706,7 +706,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/watch\//.test(U.currentURL),
+    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//.test(U.currentURL),
 
     get volume () undefined,
     set volume (value) value,
@@ -1150,7 +1150,7 @@ Thanks:
     set fullscreen (value) (this.large = value),
 
     get id ()
-      let (m = U.currentURL.match(/\/watch\/([a-z\d]+)/))
+      let (m = U.currentURL.match(/\/(?:watch|playlist\/mylist)\/([a-z\d]+)/))
         (m && m[1]),
 
     get muted () this.player.ext_isMute(),
@@ -1232,10 +1232,10 @@ Thanks:
           let xpath = self.xpath.comment;
           let comment = U.xpathGet(xpath).innerHTML;
           let links = U.xpathGets(xpath + '//a')
-                       .filter(function (it) /watch\//.test(it.href))
+                       .filter(function (it) /(watch|playlist\/mylist)\//.test(it.href))
                        .map(function(v) v.textContent);
           links.forEach(function (link) {
-            let re = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/watch\\/' + link + '" class="(watch|video)">');
+            let re = RegExp('(?:^|[\u3000\\s\\>])([^\u3000\\s\\>]+)\\s*<a href="http:\\/\\/www\\.nicovideo\\.\\w+\\/(?:watch|playlist\\/mylist)\\/' + link + '" class="(watch|video)">');
             let r = re.exec(comment);
             if (r)
               videos.push(new RelatedID(link, r[1].slice(-20)));
