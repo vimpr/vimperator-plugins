@@ -63,7 +63,7 @@ let PLUGIN_INFO =
     'Auto reload current tab',
     function (args) {
       let tab = gBrowser.mCurrentTab;
-      let storage = tab[this.uuid] || (tab[this.uuid] = {});
+      let storage = tab[uuid] || (tab[uuid] = {});
       let reload;
       let func = reload = function () tabs.reload(tab);
       let time = parseInt(parseFloat(args[0] || 1) * 1000);
