@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6.3"
+<plugin name="panorama" version="0.6.4"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -71,13 +71,15 @@ let INFO = <>
     </description>
   </item>
   <item>
-    <tags>switchgroup swg</tags>
+    <tags>switchgroup swg g</tags>
     <spec>switchgroup  <a>GroupName</a></spec>
     <spec>swg <a>GroupName</a></spec>
+    <spec>g <a>GroupName</a></spec>
     <spec><oa>count</oa>switchgroup</spec>
     <spec><oa>count</oa>swg</spec>
+    <spec><oa>count</oa>g</spec>
     <description>
-      <p>Switch group to <a>GroupName</a></p> 
+      <p>Switch group to <a>GroupName</a></p>
     </description>
   </item>
   <item>
@@ -102,8 +104,8 @@ let INFO = <>
     </description>
   </item>
   <item>
-    <tags>settitle</tags>
-    <spec>settitle <a>title</a> <oa>GroupName</oa></spec>
+    <tags>title</tags>
+    <spec>title <a>title</a> <oa>GroupName</oa></spec>
     <description>
       <p>update <a>GroupName</a>'s title to <a>title</a>.</p>
       <p>if omitted <a>GroupName</a>, update the current group.</p>
@@ -601,7 +603,7 @@ let subCmds = [
    * swtich to the {group}
    * if {count} exists, switch to relative {count}
    */
-  new Command(["switchgroup", "swg"], "Switch Group",
+  new Command(["switchgroup", "swg", "g"], "Switch Group",
     function (args) {
       if (args.count > 0) {
         switchToGroup("+" + args.count, true);
@@ -718,9 +720,9 @@ let subCmds = [
     }, true) // }}}
   ,
   /**
-   * SubCommand settitle {{{
+   * SubCommand title {{{
    */
-  new Command(["settitle"], "set group title",
+  new Command(["title"], "set group title",
     function (args) {
       let title = args[0],
           groupName = args.literalArg;
