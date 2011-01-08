@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -55,7 +55,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="FoxAge2ch" version="1.0.3"
+  <plugin name="FoxAge2ch" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="for FoxAge2ch addon"
           lang="en-US"
@@ -74,7 +74,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="FoxAge2ch" version="1.0.3"
+  <plugin name="FoxAge2ch" version="1.1.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="FoxAge2ch アドオン用"
           lang="ja"
@@ -208,6 +208,26 @@ let INFO =
       svc.checkUpdates("root")
     },
     {
+    },
+    true
+  );
+
+  SubCommands.addUserCommand(
+    ['a[ddthread]'],
+    'Add a threadii',
+    function (args) {
+      let url = FoxAge2chUtils.unwrapURL(args.literalArg || buffer.URL);
+      let addedItem = svc.addFavorite(url);
+      if (addedItem)
+        liberator.echo('Added: ' + url);
+    },
+    {
+      literal: 0,
+      completer: function (context, args) {
+        context.completions = [
+          [FoxAge2chUtils.unwrapURL(buffer.URL), 'Current Buffer']
+        ];
+      }
     },
     true
   );
