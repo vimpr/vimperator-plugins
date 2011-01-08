@@ -104,8 +104,8 @@ let PLUGIN_INFO =
     'string', // type: string, stringlist, charlist, boolean
     'defaultValue',
     {
-      scope: options.OPTION_SCOPE_GLOBAL, // <- default
-                                          // or OPTION_SCOPE_LOCAL, OPTION_SCOPE_BOTH
+      scope: Option.SCOPE_GLOBAL, // <- default
+                                  // or Option.SCOPE_LOCAL, Option.SCOPE_BOTH
       setter: function (value) {
         /* mozo mozo */
         return value;
