@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.25
-// Last Change: 22-Jan-2010. Jan 2008
+// Last Change: 07-Jan-2011. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -164,7 +164,9 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
             LDRizeCooperationPanel.addEventListener("click",function(e){
                     self.isEnable = !self.isEnable;
             },false);
-            document.getElementById("status-bar").insertBefore(LDRizeCooperationPanel,document.getElementById("security-button").nextSibling);
+            var ref = document.getElementById("security-button") ? document.getElementById("security-button").nextSibling
+                                                                 : document.getElementById("status-bar").firstChild;
+            document.getElementById("status-bar").insertBefore(LDRizeCooperationPanel,ref);
 
             return LDRizeCooperationPanel;
         },
@@ -173,8 +175,16 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
             var GreasemonkeyService;
             try{
                 GreasemonkeyService = Cc["@greasemonkey.mozdev.org/greasemonkey-service;1"].getService().wrappedJSObject;
-                this.addAfter(GreasemonkeyService,"evalInSandbox",function(code,codebase,sandbox){
-                    if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
+                this.addAfter(GreasemonkeyService,"evalInSandbox",function(){
+                    var gmVersion = liberator.extensions.filter(function(e)e.name=='Greasemonkey')[0].version;
+                    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
+                        .getService(Ci.nsIVersionComparator);
+                    if (versionChecker.compare(gmVersion, "0.8.*") > 0) {
+                        var [code,sandbox] = arguments;
+                    } else {
+                        var [code,codebase,sandbox] = arguments;
+                    }
+                    if(sandbox.LDRize != undefined && sandbox.Minibuffer != undefined){
                         sandbox.window.addEventListener("focus",function(){
                             self.LDRize = liberator.eval("self",sandbox.LDRize.getSiteinfo);
                             self.Minibuffer = liberator.eval("command",sandbox.Minibuffer.addCommand);
@@ -277,13 +287,13 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
             //Options
             liberator.modules.options.add(["ldrc","ldrizecooperation"],"LDRize cooperation","boolean",this.isEnable,
                 {
-                    setter: function(value){ self.isEnable = value; },
+                    setter: function(value){ return self.isEnable = value; },
                     getter: function() self.isEnable
                 }
             );
             liberator.modules.options.add(["ldrchints"],"mod hinttags for LDRize","boolean",this.isModHints,
                 {
-                    setter: function(value){ self.isModHints = value; },
+                    setter: function(value){ return self.isModHints = value; },
                     getter: function() self.isModHints
                 }
             );
