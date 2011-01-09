@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="跳.jp" version="1.0.0"
+  <plugin name="跳.jp" version="1.0.1"
           href="http://vimpr.github.com/"
           summary="跳ねます"
           lang="ja"
@@ -59,19 +59,17 @@ let INFO =
 (function () {
   function getc (url, callback) {
     function toResult (html) {
-      let [, c] = html.match(/\/\/([^.]+)\.\u8DF3/);
-      return ['http://' + c + '.\u8DF3.jp/', c];
+      return [html, html.match('http://(.+).\u8DF3.jp')[1]];
     }
 
     let req = new plugins.libly.Request(
-      'http://xn--vt3a.jp/entry/new',
+      'http://xn--vt3a.jp/api?url=' + encodeURIComponent(url),
       {
         'X-Requested-With': 'XMLHttpRequest',
         Referer : 'http://xn--vt3a.jp/'
       },
       {
-        asynchronous: !!callback,
-        postBody: 'utf8=%E2%9C%93&url=' + encodeURIComponent(url)
+        asynchronous: !!callback
       }
     );
     req.addEventListener(
