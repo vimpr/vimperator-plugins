@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.13.1</version>
+  <version>1.13.2</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1914,11 +1914,15 @@ let PLUGIN_INFO =
       function removeNewLine (text)
         text.replace(/\r\n|[\r\n]/g, ' ');
 
-      function completer(generator)
-        function(filter)
-          makeTimelineCompleter(
-            filter ? function(context, args) context.completions = history.map(rt).filter(filter).map(generator)
-                   : function(context, args) context.completions = history.map(rt).map(generator));
+      function completer(generator, nort) {
+        let getHistory = nort ? function() history
+                              : function() history.map(rt);
+        return function(filter) {
+          return makeTimelineCompleter(
+            filter ? function(context, args) context.completions = getHistory().filter(filter).map(generator)
+                   : function(context, args) context.completions = getHistory().map(generator));
+        }
+      }
 
       return {
         name:
@@ -1929,6 +1933,8 @@ let PLUGIN_INFO =
           completer(function(s) [removeNewLine(s.text), s]),
         id:
           completer(function(s) [s.id, s]),
+        rawid:
+          completer(function(s) [s.id, s], true),
         name_id:
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
         name_id_text:
@@ -2061,7 +2067,7 @@ let PLUGIN_INFO =
           history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
         },
         timelineCompleter: true,
-        completer: Completers.id()
+        completer: Completers.rawid(function(st) st.id)
       }),
       SubCommand({
         command: ["track"],
