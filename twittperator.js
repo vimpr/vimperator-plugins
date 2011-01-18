@@ -1911,7 +1911,7 @@ let PLUGIN_INFO =
       function rt(st)
         ("retweeted_status" in st ? st.retweeted_status : st);
 
-      function removeNewLine (text)
+      function removeNewLine(text)
         text.replace(/\r\n|[\r\n]/g, ' ');
 
       function completer(generator, nort) {
