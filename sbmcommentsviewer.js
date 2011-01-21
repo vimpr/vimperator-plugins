@@ -32,6 +32,7 @@ viewSBMComments [url] [options]
 - d : Delicious
 - l : livedoor clip
 - z : Buzzurl
+- t : Topsy
 - XXX:今後増やしていきたい
 
 >||
@@ -138,7 +139,8 @@ SBMEntry.prototype = { //{{{
                              </td>;
                     break;
                 case 'timestamp':
-                    xml.* += <td class="liberator-sbmcommentsviewer-timestamp">{self.formatDate()}</td>; break;
+     xml.* += <td class="liberator-sbmcommentsviewer-timestamp">{self.formatDate()}</td>; 
+     break;
                 case 'tags':
                     xml.* += <td class="liberator-sbmcommentsviewer-tags">{self.tags.join(',')}</td>; break;
                 case 'comment':
@@ -338,6 +340,33 @@ var SBM = { //{{{
                 liberator.log('Faild: Buzzurl');
             }
         }
+    }, //}}} 
+    topsy: { //{{{
+        getURL: function(url){
+            var urlPrefix = 'http://otter.topsy.com/trackbacks.json?perpage=50&infonly=0&tracktype=tweet&url=';
+            return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#'));
+        },
+        parser: function(xhr){
+            var json = jsonDecode(xhr.responseText);
+            if (json && json.response){
+                let c = new SBMContainer('t', json.response.trackback_total, {
+                    faviconURL: 'http://topsy.com/favicon.ico',
+                    pageURL:    json.response.topsy_trackback_url
+                });
+                json.response.list.forEach(function(entry){
+                    c.add( entry.author.nick, new Date(entry.date*1000),
+                           entry.content, null,
+                           {
+                            userIcon: entry.author.photo_url,
+                            link: entry.author.topsy_author_url
+                           }
+                    );
+                });
+                return c;
+            } else {
+                liberator.echo('Faild: Topsy');
+            }
+        }
     } //}}}
 }; //}}}
 
@@ -423,7 +452,8 @@ var manager = {
         h: 'hatena',
         d: 'delicious',
         l: 'livedoorclip',
-        z: 'buzzurl'
+        z: 'buzzurl', 
+        t: 'topsy'
     },
     format: {
         id: 'ID',
