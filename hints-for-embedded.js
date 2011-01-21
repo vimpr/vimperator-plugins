@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Hints For Embedded Objects</name>
   <description>Add the hints mode for Embedded objects.</description>
   <description lang="ja">埋め込み(embed)オブジェクト用ヒントモード</description>
-  <version>1.3.1</version>
+  <version>1.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hints-for-embedded.js</updateURL>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     :embhint:
       Show hints for embedded objects.
@@ -176,6 +176,12 @@ let INFO =
       value: /youtube\.com\/v\/([-a-zA-Z0-9_]+)/,
       url: function (id) ('http://www.youtube.com/watch?v=' + id)
     },
+    youtube_image: {
+      site: /ytimg\.com/,
+      name: /^flashvars$/,
+      value: /video_id=([-a-zA-Z0-9_]+)/,
+      url: function (id) ('http://www.youtube.com/watch?v=' + id)
+    },
     vimeo: {
       site: /vimeo/,
       name: /.*/,
@@ -216,8 +222,9 @@ let INFO =
 
     if (site) {
       for each (let [n, v] in info) {
+        if (site.name && !site.name(n))
+          continue;
         let m = n.match(site.value) || v.match(site.value);
-        liberator.log(v);
         if (m)
           return site.url(Array.slice(m, 1));
       }
