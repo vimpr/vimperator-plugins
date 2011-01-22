@@ -156,13 +156,14 @@ NextLink.prototype = {
       $U.bind(this, function(isSuccess, data) {
         if (!isSuccess) return;
         this.siteinfo = data.map(function(item) item.data);
+
+        if (localSiteinfo)
+          this.siteinfo = this.siteinfo.concat(localSiteinfo);
+        this.siteinfo = this.siteinfo.sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
+
+        this.initialized = true;
       })
     );
-    if (localSiteinfo)
-      this.siteinfo = this.siteinfo.concat(localSiteinfo);
-    this.siteinfo = this.siteinfo.sort(function(a, b) b.url.length - a.url.length); // sort url.length desc
-
-    this.initialized = true;
 
     this.customizeMap(this);
   },
