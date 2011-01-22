@@ -218,7 +218,8 @@ let INFO =
       (function () {
         for (let [,site] in Iterator(sites))
           if (info.some(function (nv) nv.some(function (v) site.site.test(v))))
-            return site;})();
+            return site;
+      })();
 
     if (site) {
       for each (let [n, v] in info) {
