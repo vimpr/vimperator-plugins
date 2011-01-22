@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6.4"
+<plugin name="panorama" version="0.6.5"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -105,7 +105,7 @@ let INFO = <>
   </item>
   <item>
     <tags>title</tags>
-    <spec>title <a>title</a> <oa>GroupName</oa></spec>
+    <spec>t<oa>itle</oa> <a>title</a> <oa>GroupName</oa></spec>
     <description>
       <p>update <a>GroupName</a>'s title to <a>title</a>.</p>
       <p>if omitted <a>GroupName</a>, update the current group.</p>
@@ -722,7 +722,7 @@ let subCmds = [
   /**
    * SubCommand title {{{
    */
-  new Command(["title"], "set group title",
+  new Command(["t[itle]"], "set group title",
     function (args) {
       let title = args[0],
           groupName = args.literalArg;
