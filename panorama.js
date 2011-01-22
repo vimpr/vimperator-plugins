@@ -2,7 +2,7 @@
  * Use at your OWN RISK.
  */
 let INFO = <>
-<plugin name="panorama" version="0.6.5"
+<plugin name="panorama" version="0.6.6"
         href="https://github.com/vimpr/vimperator-plugins/blob/master/panorama.js"
         summary="Add supports for Panorama"
         lang="en-US"
@@ -846,8 +846,8 @@ completion.tabgroup = function TabGroupCompleter (context, excludeActiveGroup) {
           url = getURLFromTab(tab),
           index = (tab._tPos + 1) + ": ";
       let item = createItem(index, label, url, indicator, tab.image);
-      if (!tab.pinned && tab.tabItem && tab.tabItem.parent) {
-        let groupName = tab.tabItem.parent.getTitle();
+      if (!tab.pinned && tab._tabViewTabItem && tab._tabViewTabItem.parent) {
+        let groupName = tab._tabViewTabItem.parent.getTitle();
         if (groupName) {
           let prefix = groupName + " " + (i + 1) + ": ";
           item.text.push(prefix + label);
