@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008-2010, anekos.
+Copyright (c) 2008-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.32.4</version>
+  <version>0.32.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -883,10 +883,7 @@ Thanks:
 
     get pageinfo () {
       let doc = content.document;
-      let wd = doc.querySelector('#watch-description > div > span > span.watch-video-date');
-      let desc = wd.nextSibling;
-      while (desc && desc.tagName != 'SPAN')
-        desc = desc.nextSibling;
+      let desc = doc.querySelector('#eow-description');
       return [
         [
           'comment',
@@ -894,7 +891,10 @@ Thanks:
         ],
         [
           'tags',
-          U.toXML(doc.querySelector('#watch-tags > div').innerHTML)
+          XMLList([
+            <span>[<a href={v.href}>{v.textContent}</a>]</span>
+            for ([, v] in Iterator(doc.querySelectorAll('#eow-tags > li > a')))
+          ].join(''))
         ],
         [
           'quality',
