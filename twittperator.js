@@ -1815,9 +1815,16 @@ let PLUGIN_INFO =
 
       let ugly = {
         __noSuchMethod__: function (name, args) originalPath[name].apply(originalPath, args),
-        toString:
-          function()
-            (parseInt(Error().stack.match(/io.js:(\d+)/)[1], 10) < 100 ? originalPath : hackedPath)
+        toString: function() {
+          function isFile (caller) {
+            if (!caller)
+              return false;
+            if (caller === io.File)
+              return true;
+            return isFile(caller.caller);
+          }
+          return isFile(arguments.callee.caller) ? originalPath : hackedPath;
+        }
       };
 
       try {
