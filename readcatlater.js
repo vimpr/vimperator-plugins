@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008-2009, anekos.
+Copyright (c) 2008-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,13 +38,13 @@ let PLUGIN_INFO =
   <name>Read Cat Later</name>
   <description>Read it later</description>
   <description lang="ja">後で読む</description>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readcatlater.js</updateURL>
   <minVersion>2.4</minVersion>
-  <maxVersion>2.4</maxVersion>
+  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     == Usage ==
       :readcatlater [TAG]:
@@ -137,9 +137,6 @@ let PLUGIN_INFO =
   };
 
 
-  const migemo = Cc['@piro.sakura.ne.jp/xmigemo/factory;1'].
-                   getService(Components.interfaces.pIXMigemoFactory).
-                   getService("ja");
   const tagssvc = Cc["@mozilla.org/browser/tagging-service;1"].
                       getService(Ci.nsITaggingService);
   const IOService = Cc["@mozilla.org/network/io-service;1"].
@@ -198,25 +195,9 @@ let PLUGIN_INFO =
     return [it for each (it in str.split(/\s+/)) if (/\w/.test(it))];
   }
 
-  function RCL_Bookmarks (terms) { try {
+  function RCL_Bookmarks () { try {
     let query = history.getNewQuery();
     query.setFolders([folderId], 1);
-
-    let m;
-    if (terms) {
-      let ts = splitBySpaces(terms).map(function (it) {
-        var re = new RegExp(migemo.getRegExp(it), 'i');
-        var f = function (it) re.exec(it);
-        return {s: it, r: f};
-      });
-      m = function (it)
-        ts.some(function (t)
-          (it.URI.indexOf(t.s) >= 0 || it.title.indexOf(t.s) >= 0 ||
-           t.r(it.URI) || t.r(it.title))
-            ? true : false);
-    } else {
-      m = function () true;
-    }
 
     let result = [];
     let qres = history.executeQueries([query], 1, history.getNewQueryOptions());
@@ -232,8 +213,7 @@ let PLUGIN_INFO =
         let it = {id:    node.itemId,
                   title: node.title,
                   URI:   node.uri };
-        if (m(it))
-          result.push(it);
+        result.push(it);
       }
     }
 
@@ -247,7 +227,7 @@ let PLUGIN_INFO =
     context.compare = void 'meow';
     context.title = ['URL', 'Title'];
     context.filters = [CompletionContext.Filter.textDescription];
-    context.completions = RCL_Bookmarks(context.filter).
+    context.completions = RCL_Bookmarks().
                             filter(function (it) it.id).
                             map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]).
                             reverse();
