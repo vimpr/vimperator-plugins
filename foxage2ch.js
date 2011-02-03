@@ -137,6 +137,27 @@ let INFO =
           return thread;
       }
       return;
+    },
+    titleToId: function (title) {
+      for ([, thread] in Iterator(FA.threads)) {
+        if (thread.title === title)
+          return thread;
+      }
+      return;
+    },
+    findThread: function (threadId) {
+      if (!threadId) {
+        let thread = FA.titleToId(buffer.title);
+        if (!thread)
+          return;
+        threadId = thread.id;
+      }
+      window.openDialog(
+        'chrome://foxage2ch/content/findThread.xul',
+        'FoxAge2ch:FindThread',
+        'chrome,centerscreen,modal,all',
+        threadId
+      );
     }
   }
 
