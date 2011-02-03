@@ -160,6 +160,7 @@ let INFO =
       );
     }
   }
+  __context__.utils = FA;
 
   function threadCompleter (context, args) {
     context.compare = void 0;
