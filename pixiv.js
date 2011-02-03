@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.3"
+<plugin name="pixiv.js" version="0.4"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -181,11 +181,16 @@ commands.addUserCommand(
       let i;
       let htmldoc=getDOMHtmlDocument(pageContents);
       if(htmldoc){
-        for(i=0;;i++){
-          tblElm=htmldoc.getElementById('page'+i);
-          if(!tblElm) break;
-          url.push(tblElm.getElementsByTagName('tr').item(1)
-            .getElementsByTagName('img').item(0).getAttribute('src'));
+        let max=htmldoc.getElementsByClassName('image-container').length;
+        let strScript;
+        let st,end;
+        for(i=0;i<max;i++){
+          strScript=htmldoc.getElementsByClassName('image-container').item(i)
+            .getElementsByTagName('script').item(0)
+            .childNodes.item(0).nodeValue;
+          st=strScript.substr(strScript.search(/unshift/i)+'unshift'.length+2);
+          end=st.substr(0,st.indexOf("'"));
+          url.push(end);
         }
       }else{
         url.length=0;
