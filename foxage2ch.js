@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -37,13 +37,13 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/foxage2ch.js</updateURL>
   <minVersion>2.4</minVersion>
-  <maxVersion>2.4</maxVersion>
+  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     for FoxAge2ch
   ]]></detail>
@@ -55,7 +55,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="FoxAge2ch" version="1.1.0"
+  <plugin name="FoxAge2ch" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="for FoxAge2ch addon"
           lang="en-US"
@@ -74,7 +74,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="FoxAge2ch" version="1.1.0"
+  <plugin name="FoxAge2ch" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
           summary="FoxAge2ch アドオン用"
           lang="ja"
@@ -194,9 +194,52 @@ let INFO =
       if (typeof v === 'number')
     ]);
 
-  SubCommands = Commands();
+  SubCommands = [
+    new Command(
+      ['openu[pdates]', 'ou[pdates]'],
+      'Open updated threads',
+      function () {
+        svc.openUpdates("root")
+      },
+      {
+      },
+      true
+    ),
+
+    new Command(
+      ['c[heckupdates]'],
+      'Check updated threads',
+      function () {
+        svc.checkUpdates("root")
+      },
+      {
+      },
+      true
+    ),
+
+    new Command(
+      ['a[ddthread]'],
+      'Add a threadii',
+      function (args) {
+        let url = FoxAge2chUtils.unwrapURL(args.literalArg || buffer.URL);
+        let addedItem = svc.addFavorite(url);
+        if (addedItem)
+          liberator.echo('Added: ' + url);
+      },
+      {
+        literal: 0,
+        completer: function (context, args) {
+          context.completions = [
+            [FoxAge2chUtils.unwrapURL(buffer.URL), 'Current Buffer']
+          ];
+        }
+      },
+      true
+    )
+  ];
+
   [true, false].forEach(function (tab) {
-    SubCommands.addUserCommand(
+    SubCommands.push(new Command(
       (tab ? ['t[open]', 'tabo[pen]'] : ['o[pen]']),
       'Openthe borard from FoxAge2ch' + (tab ? ' in new tab' : 'in current tab'),
       function (args) {
@@ -209,84 +252,20 @@ let INFO =
         options: threadCommandOptions,
         completer: threadCompleter,
       }
-    );
+    ));
   });
 
-  SubCommands.addUserCommand(
-    ['openu[pdates]', 'ou[pdates]'],
-    'Open updated threads',
-    function () {
-      svc.openUpdates("root")
-    },
+  commands.addUserCommand(
+    'foxage',
+    'Control FoxAge2ch',
+    function (args) (0 - 0),
     {
+      bang: true,
+      literal: 1,
+      subCommands: SubCommands,
     },
     true
   );
-
-  SubCommands.addUserCommand(
-    ['c[heckupdates]'],
-    'Check updated threads',
-    function () {
-      svc.checkUpdates("root")
-    },
-    {
-    },
-    true
-  );
-
-  SubCommands.addUserCommand(
-    ['a[ddthread]'],
-    'Add a threadii',
-    function (args) {
-      let url = FoxAge2chUtils.unwrapURL(args.literalArg || buffer.URL);
-      let addedItem = svc.addFavorite(url);
-      if (addedItem)
-        liberator.echo('Added: ' + url);
-    },
-    {
-      literal: 0,
-      completer: function (context, args) {
-        context.completions = [
-          [FoxAge2chUtils.unwrapURL(buffer.URL), 'Current Buffer']
-        ];
-      }
-    },
-    true
-  );
-
-  let mainCommand =
-    commands.addUserCommand(
-      'foxage',
-      'Control FoxAge2ch',
-      function (args) {
-        let ([count, name, bang, args] = SubCommands.parseCommand(args.string)) {
-          let cmd = SubCommands.getUserCommand(name);
-          liberator.assert(cmd, 'Unknown sub command: ' + name);
-          cmd.execute(args, bang, count);
-        }
-      },
-      {
-        bang: true,
-        literal: 1,
-        completer: function (context, args) {
-          let [_, name, _, _] = SubCommands.parseCommand(args.string);
-          let cmd = SubCommands.getUserCommand(name);
-
-          if (args.length === 2 && cmd) {
-            mainCommand.options = cmd.options;
-            context.offet = args.string.indexOf(name);
-            cmd.completer(context, args);
-          } else {
-            mainCommand.options = [];
-            context.completions = [
-              [cmd.names.filter(function (it) it.length > 1)[0], cmd.description]
-              for (cmd in Iterator(SubCommands))
-            ]
-          }
-        }
-      },
-      true
-    );
 
 })();
 
