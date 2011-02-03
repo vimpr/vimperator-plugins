@@ -49,9 +49,9 @@ const PM = Cc["@mozilla.org/permissionmanager;1"].getService(Ci.nsIPermissionMan
 const I_CPM = Ci.nsICookiePermission;
 const PERM_TYPE = "cookie";
 
-function getIterator(enum, interface){
-    while (enum.hasMoreElements()){
-        let obj = enum.getNext().QueryInterface(interface);
+function getIterator(_enum, interface){
+    while (_enum.hasMoreElements()){
+        let obj = _enum.getNext().QueryInterface(interface);
         yield obj;
     }
 }

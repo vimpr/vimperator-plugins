@@ -532,19 +532,19 @@ createPrototype($e4x, {
 });
 // }}}
 
-function createPrototype(class, obj){
+function createPrototype(_class, obj){
     var flag;
     for (let i in obj){
         flag = false;
         if (obj.__lookupGetter__(i)){
-            class.prototype.__defineGetter__(i, obj.__lookupGetter__(i));
+            _class.prototype.__defineGetter__(i, obj.__lookupGetter__(i));
             flag = true;
         }
         if (obj.__lookupSetter__(i)){
-            class..prototype.__defineSetter__(i, obj.__lookupSetter__(i));
+            _class..prototype.__defineSetter__(i, obj.__lookupSetter__(i));
             flag = true;
         }
-        if (!flag) class.prototype[i] = obj[i];
+        if (!flag) _class.prototype[i] = obj[i];
     }
 }
 })();
