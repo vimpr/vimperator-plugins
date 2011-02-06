@@ -16,9 +16,9 @@ enable mapping key like
 ||<
 
 == Commands ==
-autopagerize_next:
+nextpage:
     paging next page
-autopagerize_prev:
+prevpage:
     paging prev page
 
 == TODO ==
