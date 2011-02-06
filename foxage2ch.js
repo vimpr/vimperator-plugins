@@ -37,7 +37,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>FoxAge2ch</name>
   <description>for FoxAge2ch</description>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -146,12 +146,6 @@ let INFO =
       return;
     },
     findThread: function (threadId) {
-      if (!threadId) {
-        let thread = FA.titleToId(buffer.title);
-        if (!thread)
-          return;
-        threadId = thread.id;
-      }
       window.openDialog(
         'chrome://foxage2ch/content/findThread.xul',
         'FoxAge2ch:FindThread',
@@ -233,6 +227,26 @@ let INFO =
             [FoxAge2chUtils.unwrapURL(buffer.URL), 'Current Buffer']
           ];
         }
+      },
+      true
+    ),
+
+    new Command(
+      ['f[indthread]'],
+      'Find thread',
+      function (args) {
+        let threadId = args.literalArg;
+        if (!threadId) {
+          let thread = FA.titleToId(buffer.title);
+          if (!thread)
+            return;
+          threadId = thread.id;
+        }
+        FA.findThread(threadId);
+      },
+      {
+        literal: 0,
+        completer: threadCompleter
       },
       true
     )
