@@ -1,6 +1,6 @@
 let INFO = //{{{
 <plugin name="statusbar panel" version="0.1"
-        href="http://github.com/vimpr/vimperator-plugins/raw/master/click_statusbarpanel.js"
+        href="https://github.com/vimpr/vimperator-plugins/raw/master/statusbar_panel.js"
         summary="Click statusbar panel"
         lang="ja"
         xmlns="http://vimperator.org/namespaces/liberator">
