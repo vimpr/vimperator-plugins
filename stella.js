@@ -1858,13 +1858,13 @@ Thanks:
       let self = this;
 
       function setEvents (name, elem) {
-        ['click', 'popupshowing'].forEach(function (eventName) {
+        ['click', 'command', 'popupshowing'].forEach(function (eventName) {
           let onEvent = self['on' + U.capitalize(name) + U.capitalize(eventName)];
           onEvent && elem.addEventListener(eventName, function (event) {
-            if (eventName != 'click' || event.button == 0) {
-              onEvent.apply(self, arguments);
-              self.update();
-            }
+            if (eventName == 'click' && event.button != 0)
+              return;
+            onEvent.apply(self, arguments);
+            self.update();
           }, false);
         });
       }
@@ -2104,7 +2104,7 @@ Thanks:
                      rel instanceof RelatedTag ? 'Tag: ' :
                      '';
         elem.setAttribute('label', prefix + rel.description);
-        elem.addEventListener('click', clickEvent(rel.command), false);
+        elem.addEventListener('command', clickEvent(rel.command), false);
         relmenu.appendChild(elem);
       }, this);
     },
