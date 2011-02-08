@@ -32,26 +32,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>FoxAge2ch</name>
-  <description>for FoxAge2ch</description>
-  <version>1.3.0</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/foxage2ch.js</updateURL>
-  <minVersion>2.4</minVersion>
-  <maxVersion>3.0</maxVersion>
-  <detail><![CDATA[
-    for FoxAge2ch
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    for FoxAge2ch
-  ]]></detail>
-</VimperatorPlugin>;
-// }}}
 // INFO {{{
 let INFO =
 <>
