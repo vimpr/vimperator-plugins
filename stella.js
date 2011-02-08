@@ -1556,7 +1556,7 @@ Thanks:
     'play',
     'pause',
     'comment',
-    'repeat',
+    'repeating',
     'fullscreen',
     'fetch',
     {
