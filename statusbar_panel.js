@@ -11,8 +11,8 @@ let INFO = //{{{
         ステータスバー（アドオンバー）にあるパネル（アイコン）をクリックするコマンドを提供します。
     </p>
     <item>
-        <tags>:statusbar</tags>
-        <spec>:statusbar <oa>-button=<a>l | m | r</a></oa> <oa>-double-click</oa> <a>panel-id</a></spec>
+        <tags>:statusbarpanel</tags>
+        <spec>:statusbarpanel <oa>-button=<a>l | m | r</a></oa> <oa>-double-click</oa> <a>panel-id</a></spec>
         <description>
             <p>
                 <a>panel-id</a>で指定するID属性を持つステータスバーパネル（アイコン）をクリックします。
@@ -108,7 +108,7 @@ function clickStatusIcon(panel, button, doubleClick) {
     }
 }
 
-commands.addUserCommand(['statusbar'],'click statusbar panel',
+commands.addUserCommand(['statusbarpanel'],'click statusbar panel',
     function(args) {
         var id = args[0];
         var panel = document.getElementById(id);
