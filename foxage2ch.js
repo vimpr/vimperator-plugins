@@ -35,8 +35,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="FoxAge2ch" version="1.2.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
+  <plugin name="FoxAge2ch" version="1.3.1"
+          href="https://github.com/vimpr/vimperator-plugins/blob/master/foxage2ch.js"
           summary="for FoxAge2ch addon"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -54,8 +54,8 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="FoxAge2ch" version="1.2.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/foxage2ch.js"
+  <plugin name="FoxAge2ch" version="1.3.1"
+          href="https://github.com/vimpr/vimperator-plugins/blob/master/foxage2ch.js"
           summary="FoxAge2ch アドオン用"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -118,13 +118,6 @@ let INFO =
       }
       return;
     },
-    titleToId: function (title) {
-      for ([, thread] in Iterator(FA.threads)) {
-        if (thread.title === title)
-          return thread;
-      }
-      return;
-    },
     findThread: function (threadId) {
       window.openDialog(
         'chrome://foxage2ch/content/findThread.xul',
@@ -132,7 +125,11 @@ let INFO =
         'chrome,centerscreen,modal,all',
         threadId
       );
-    }
+    },
+    findThreadByURL: function (url) {
+      let [boardId, threadId] = FoxAge2chUtils.parseFromURL(FoxAge2chUtils.unwrapURL(url));
+      return FA.findThread(threadId);
+    },
   }
   __context__.utils = FA;
 
@@ -216,13 +213,11 @@ let INFO =
       'Find thread',
       function (args) {
         let threadId = args.literalArg;
-        if (!threadId) {
-          let thread = FA.titleToId(buffer.title);
-          if (!thread)
-            return;
-          threadId = thread.id;
+        if (threadId) {
+          FA.findThread(threadId);
+        } else {
+          FA.findThreadByURL(buffer.URL);
         }
-        FA.findThread(threadId);
       },
       {
         literal: 0,
