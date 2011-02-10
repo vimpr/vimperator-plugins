@@ -28,8 +28,8 @@ let INFO =
 </plugin>;
 
 
-const inspectorID = "inspector@mozilla.org";
-if (AddonManager) {
+var inspectorID = "inspector@mozilla.org";
+if (window.AddonManager) {
   AddonManager.getAddonByID(inspectorID, function(ext){
     if (ext.isActive)
       init();
