@@ -2,7 +2,7 @@
  * The MIT License
  *
  * Copyright (c) 2010 teramako
- * Copyright (c) 2010 anekos
+ * Copyright (c) 2010-2011 anekos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.13.2</version>
+  <version>1.13.3</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1513,7 +1513,7 @@ let PLUGIN_INFO =
   }; // }}}
   let Utils = { // {{{
     anchorLink: function(str) { // {{{
-      let m = str.match(/https?:\/\/\S+|@\S+/);
+      let m = str.match(/https?:\/\/\S+|@[a-zA-Z0-9_]+/);
       if (m) {
         let left = str.substr(0, m.index);
         let center = m[0];
