@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">GMail コマンドー</name>
   <description>The handy commands for GMail</description>
   <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.4.2</version>
+  <version>1.4.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -76,7 +76,7 @@ let g:gmail_commando_label_shortcut = 1
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.2"
+  <plugin name="GMailCommando" version="1.4.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -113,7 +113,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.2"
+  <plugin name="GMailコマンドー" version="1.4.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -272,9 +272,10 @@ let INFO =
 
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
 
-    get input() this.doc.getElementById(':rf'),
+    // 入力欄 - input
+    get input() this.doc.getElementById(':rg'),
 
-    get searchButton() this.doc.getElementById(':rj'),
+    get searchButton() this.doc.getElementById(':rk'),
 
     get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
     get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
