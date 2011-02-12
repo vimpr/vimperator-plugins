@@ -32,47 +32,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>GMail Commando</name>
-  <name lang="ja">GMail コマンドー</name>
-  <description>The handy commands for GMail</description>
-  <description lang="ja">便利なGMail用コマンドー</description>
-  <version>1.4.3</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/XXXXX</updateURL>
-  <minVersion>2.4</minVersion>
-  <maxVersion>2.4</maxVersion>
-  <detail><![CDATA[
-    == Configuration sample ==
-    >||
-let g:gmail_commando_map_translate = "<Leader>t"
-let g:gmail_commando_map_translate_thread = "<Leader>T"
-let g:gmail_commando_map_fold = "<Leader>f"
-let g:gmail_commando_map_unfold = "<Leader>F"
-let g:gmail_commando_map_important = "<Leader>i"
-let g:gmail_commando_map_unimportant = "<Leader>I"
-let g:gmail_commando_label_shortcut = 1
-    ||<
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    Gmail 用の便利なマッピングを提供します。
-    == 設定例 ==
-    >||
-let g:gmail_commando_map_translate = "<Leader>t"
-let g:gmail_commando_map_translate_thread = "<Leader>T"
-let g:gmail_commando_map_fold = "<Leader>f"
-let g:gmail_commando_map_unfold = "<Leader>F"
-let g:gmail_commando_map_important = "<Leader>i"
-let g:gmail_commando_map_unimportant = "<Leader>I"
-let g:gmail_commando_label_shortcut = 1
-    ||<
-  ]]></detail>
-</VimperatorPlugin>;
-// }}}
 // INFO {{{
 let INFO =
 <>
