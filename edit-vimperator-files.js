@@ -32,33 +32,10 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Edit Vimperator File</name>
-  <description>Open vimperator files with text-editor.</description>
-  <description lang="ja">Vimperator 関連のファイルをエディタで開く</description>
-  <version>1.2.1</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/edit-vimperator-files.js</updateURL>
-  <minVersion>2.4</minVersion>
-  <maxVersion>2.4</maxVersion>
-  <detail><![CDATA[
-     = commands =
-      :edit <file>
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-     = commands =
-      :edit <file>
-  ]]></detail>
-</VimperatorPlugin>;
-// }}}
 // INFO {{{
 let INFO =
 <>
-  <plugin name="EditVimperatorFile" version="1.2.1"
+  <plugin name="EditVimperatorFile" version="1.2.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
@@ -73,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="EditVimperatorFile" version="1.2.1"
+  <plugin name="EditVimperatorFile" version="1.2.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
@@ -98,7 +75,7 @@ let INFO =
     (obj instanceof Array ? obj : obj.toString().split(/[,| \t\r\n]+/));
 
   function editFileExternally (path) {
-    let args = commands.parseArgs(options["editor"], [], "*", true);
+    let args = commands.parseArgs(options["editor"], [], [], "*", true);
     liberator.assert(args.length >= 1, "No editor specified");
     args.push(path);
     io.run(io.expandPath(args.shift()), args);
