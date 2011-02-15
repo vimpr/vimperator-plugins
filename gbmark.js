@@ -1,6 +1,6 @@
 // INFO //
 var INFO = 
-<plugin name="gbmark.js" version="0.1"
+<plugin name="gbmark.js" version="0.2"
         summary="Add Google Bookmark."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/gbmark.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -28,8 +28,16 @@ var INFO =
       let strEndPoint='http://www.google.com/bookmarks/mark?op=add&bkmk=';
       let strUrl=doc.URL;
       let strTitle=doc.title;
-      let strUri=strEndPoint+encodeURIComponent(strUrl)
-        +'&title='+encodeURIComponent(strTitle)+'&hl=ja';
+      let strSelect=doc.defaultView.getSelection().toString();
+      let strUri;
+      if(1<strSelect.length){
+        strUri=strEndPoint+encodeURIComponent(strUrl)
+          +'&title='+encodeURIComponent(strTitle)
+          +'&annotation='+encodeURIComponent(strSelect)+'&hl=ja';
+      }else{
+        strUri=strEndPoint+encodeURIComponent(strUrl)
+          +'&title='+encodeURIComponent(strTitle)+'&hl=ja';
+      }
       gBrowser.addTab(strUri);
     }
   );
