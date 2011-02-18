@@ -32,11 +32,7 @@ commands.addUserCommand(
         +d.getDate();
       (contents.getElementsByTagName('head')[0]||contents.body).appendChild(s);
     }else if(args[0]=='cancel'){
-      let target=contents
-        .getElementsByClassName('hatena-bookmark-bookmarklet-container')
-        .item(0);
-      let parent=target.parentNode;
-      parent.removeChild(target);
+      contents.location.reload();
     }else{
       liberator.echoerr('Invalid Parameter');
       return false;
