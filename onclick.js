@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="onclick.js" version="0.1"
+<plugin name="onclick.js" version="0.2"
         summary="Emulate onClick event."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/onclick.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -21,7 +21,7 @@ For Exsample,
   js <<EOM
   liberator.globalVariables.onclickTable={
     'github':'//span[@class="toggle"][1]',
-    'pixiv':'//span[@class="trigger"][1]'
+    'pixiv' :'//span[@class="trigger"][1]'
   };
   EOM
       ]]></code>
@@ -29,10 +29,8 @@ For Exsample,
   </item>
 </plugin>;
 
-commands.addUserCommand(
-  ['onclick'],
-  'Emulate onClick event.',
-  function(args){
+(function(){
+  let onclick=function(args){
     if(args.length<1){
       liberator.echoerr('Usage: onclick {xpath_id}');
       return false;
@@ -78,9 +76,40 @@ commands.addUserCommand(
       null //relatedTarget
     ); 
     elms[0].dispatchEvent(evt);
-  },
-  {
-    literal: false
-  },
-  true
-);
+  };
+  let tblSuggest;
+  let comp=function(context, args){
+    context.completions=tblSuggest;
+  };
+  let addSuggestTable=function(){
+    if(liberator.globalVariables.onclickTable==undefined){
+      liberator.echoerr('Not Found XPath Table');
+      return false;
+    }
+    tblSuggest=new Array();
+    let item;
+    let i;
+    for(i in liberator.globalVariables.onclickTable){
+      item=new Array(i,liberator.globalVariables.onclickTable[i]);
+      tblSuggest.push(item);
+    }
+  };
+  let initialize=function(){
+    addSuggestTable();
+    commands.addUserCommand(
+      ['onclick'],
+      'Emulate onClick event.',
+      onclick,
+      {
+        completer : comp,
+        argCount  : 0,
+        hereDoc   : false,
+        bang      : false,
+        count     : false,
+        literal   : false
+      },
+      true
+    );
+  }
+  initialize();
+})();
