@@ -1925,9 +1925,18 @@ let PLUGIN_INFO =
         let getHistory = nort ? function() history
                               : function() history.map(rt);
         return function(filter) {
-          return makeTimelineCompleter(
-            filter ? function(context, args) context.completions = getHistory().filter(filter).map(generator)
-                   : function(context, args) context.completions = getHistory().map(generator));
+          function completer(context, args) {
+            let cs = [];
+            for (let [, it] in Iterator(getHistory())) {
+              if (filter && !filter(it))
+                continue;
+              let item = generator(it);
+              if (item[0])
+                cs.push(item);
+            }
+            context.completions = cs;
+          }
+          return makeTimelineCompleter(completer);
         }
       }
 
