@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.0.0"
+  <plugin name="usi.js" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -667,7 +667,36 @@ let INFO =
       ['t[ask]'],
       'Task control',
       function (args) {
+        Cow.get(
+          {
+            method: 'rtm.tasks.getList',
+            filter: 'status:incomplete'
+          },
+          {
+            cache: 'rtm.tasks.getList?filter=status:incomplete',
+            onComplete: function (result) {
+              let cs = [];
 
+              for (let [, list] in Iterator(result.tasks.list)) {
+                for (let [, taskseries] in Iterator(list.taskseries)) {
+                  for (let [, task] in Iterator(taskseries.task)) {
+                    cs.push([
+                      let (d = Utils.toDate(task.@due))
+                        (d ? d.getTime() : Infinity),
+                      [taskseries.@name, Utils.toSmartDateText(task.@due)]
+                    ]);
+                  }
+                }
+              }
+              let n = new Date().getTime();
+              cs.sort(function ([a], [b]) Math.abs(a - n) - Math.abs(b - n));
+              let contents = <></>;
+              for (let [, [, [a, b]]] in Iterator(cs))
+                contents += <tr><td>{a}</td><td>{b}</td></tr>;
+              liberator.echo(<><table>{contents}</table></>);
+            }
+          }
+        );
       },
       {
         subCommands: TaskSubCommands
