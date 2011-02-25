@@ -336,7 +336,7 @@ let INFO =
       return (base || 'http://api.rememberthemilk.com/services/rest/') + '?' + paramString;
     }, // }}}
 
-    openAuthPage: function () {
+    openAuthPage: function () { // {{{
       Utils.log('openAuthPage');
       Cow.get(
         {
@@ -361,9 +361,9 @@ let INFO =
           }
         }
       );
-    },
+    }, // }}}
 
-    getToken: function (onComplete) {
+    getToken: function (onComplete) { // {{{
       Utils.log('Start to get token');
 
       Cow.get(
@@ -390,9 +390,9 @@ let INFO =
           }
         }
       );
-    },
+    }, // }}}
 
-    checkAuth: function (onAuthorized) {
+    checkAuth: function (onAuthorized) { // {{{
       Cow.get(
         {
           method: 'rtm.auth.checkToken',
@@ -400,7 +400,7 @@ let INFO =
         },
         {}
       )
-    }
+    } //}}}
   }; // }}}
 
   // Command maker {{{
@@ -667,6 +667,7 @@ let INFO =
       ['t[ask]'],
       'Task control',
       function (args) {
+
       },
       {
         subCommands: TaskSubCommands
