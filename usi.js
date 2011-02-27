@@ -735,7 +735,9 @@ let INFO =
     ['usi'],
     'for Remember The Milk',
     function (args) {
-      if (!Save.get('authorized'))
+      if (Save.get('authorized'))
+        liberator.execute('usi task');
+      else
         Cow.openAuthPage();
     },
     {
