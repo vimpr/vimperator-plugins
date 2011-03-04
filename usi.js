@@ -502,7 +502,7 @@ let INFO =
 
           // 現在に近い順に並べます
           Utils.timeArraySort(cs);
-          return cs.map(function ([a, b]) b);;
+          return cs.map(function ([a, b]) b);
         }
       });
   } // }}}
