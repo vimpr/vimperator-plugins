@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.2.0"
+  <plugin name="usi.js" version="1.2.1"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -102,10 +102,16 @@ let INFO =
       },
 
       complete: function (key, context, args, items) {
+        function procOpts (desc, opts) {
+          if (opts && opts.warn)
+            return <span highlight="ErrorMsg">{desc}</span>;
+          else
+            return desc;
+        }
         context.compare = void 0;
         context.completions = [
-          [i + ': ' + name, desc]
-          for ([i, [name, desc, value]] in Iterator(items))
+          [i + ': ' + name, procOpts(desc, opts)]
+          for ([i, [name, desc, value, opts]] in Iterator(items))
         ];
         cache[key] = items.map(function ([,, v]) v);
       }
@@ -488,13 +494,13 @@ let INFO =
         },
         completionList: function (result) {
           let cs = [];
+          let n = new Date().getTime();
           for (let [, list] in Iterator(result.tasks.list)) {
             for (let [, taskseries] in Iterator(list.taskseries)) {
               for (let [, task] in Iterator(taskseries.task)) {
-                cs.push([
-                  let (d = Utils.toDate(task.@due))
-                    (d ? d.getTime() : Infinity),
-                  [taskseries.@name, Utils.toSmartDateText(task.@due), [list, taskseries, task]]
+                cs.push(let (d = Utils.toDate(task.@due)) [
+                  (d ? d.getTime() : Infinity),
+                  [taskseries.@name, Utils.toSmartDateText(task.@due), [list, taskseries, task], {warn: d < n}]
                 ]);
               }
             }
