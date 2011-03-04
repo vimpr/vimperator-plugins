@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.1.0"
+  <plugin name="usi.js" version="1.2.0"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -233,6 +233,19 @@ let INFO =
       }
       //Utils.log([result, dHour, dDay, targetDay, nowDay]);
       return prefix ? prefix + ' - ' + base : base;
+    },
+
+    timeArraySort: function (list) {
+      let n = new Date().getTime();
+      list.sort(function ([a], [b]) {
+        let ad = a - n, bd = b - n;
+        if (ad < bd)
+          return -1;
+        if (ad > bd)
+          return 1;
+        return 0;
+      });
+      return list;
     }
   }; // }}}
 
@@ -488,9 +501,8 @@ let INFO =
           }
 
           // 現在に近い順に並べます
-          let n = new Date().getTime();
-          cs = cs.sort(function ([a], [b]) Math.abs(a - n) - Math.abs(b - n)).map(function ([a, b]) b);
-          return cs;
+          Utils.timeArraySort(cs);
+          return cs.map(function ([a, b]) b);;
         }
       });
   } // }}}
@@ -689,10 +701,13 @@ let INFO =
                 }
               }
               let n = new Date().getTime();
-              cs.sort(function ([a], [b]) Math.abs(a - n) - Math.abs(b - n));
+              Utils.timeArraySort(cs);
               let contents = <></>;
-              for (let [, [, [a, b]]] in Iterator(cs))
-                contents += <tr><td>{a}</td><td>{b}</td></tr>;
+              for (let [, [d, [a, b]]] in Iterator(cs)) {
+                liberator.log(d + ', ' + b);
+                let hl = (n - d) > 0 ? 'ErrorMsg' : '';
+                contents += <tr highlight={hl}><td>{a}</td><td>{b}</td></tr>;
+              }
               liberator.echo(<><table>{contents}</table></>);
             }
           }
