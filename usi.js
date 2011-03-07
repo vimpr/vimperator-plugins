@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.2.1"
+  <plugin name="usi.js" version="1.2.2"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -225,8 +225,8 @@ let INFO =
       let dDay = (targetDay.getTime() - nowDay.getTime()) / Day;
       let dHour = Math.floor((target.getTime() - now.getTime()) / Hour);
 
-      let base = target.getHours() === 0 ? target.toLocaleDateString()
-                                         : target.toLocaleString();
+      let base = target.getHours() === 0 ? target.toLocaleFormat('%Y/%m/%d (%a)')
+                                         : target.toLocaleFormat('%Y/%m/%d (%a) %H:%M');
       let prefix;
       if (dDay == 0){
         prefix = Math.abs(dHour) + ' hours ' + beforeAfter(dHour);
