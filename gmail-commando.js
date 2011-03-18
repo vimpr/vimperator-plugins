@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,14 +35,14 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.3"
+  <plugin name="GMailCommando" version="1.4.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.4"/>
+    <project name="Vimperator" minVersion="3.0"/>
     <p>Search with good completer.</p>
     <item>
       <tags>:gmail</tags>
@@ -72,14 +72,14 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.3"
+  <plugin name="GMailコマンドー" version="1.4.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.4"/>
+    <project name="Vimperator" minVersion="3.0"/>
     <p>ステキ補完で検索</p>
     <item>
       <tags>:gmail</tags>
@@ -232,7 +232,7 @@ let INFO =
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
 
     // 入力欄 - input
-    get input() this.doc.getElementById(':rg'),
+    get input() this.doc.getElementById(':re'),
 
     get searchButton() this.doc.getElementById(':rk'),
 
