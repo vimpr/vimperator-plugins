@@ -64,7 +64,7 @@ let INFO =
 
   // Cache {{{
 
-  CacheAge = 1000 * 60;
+  CacheAge = 10 * 1000 * 60;
 
   const StorageCache = (function () {
     let store = storage.newMap(AppName + '-cache', {store: true});
