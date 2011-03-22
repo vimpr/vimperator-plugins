@@ -482,7 +482,7 @@ for Migemo search: require XUL/Migemo Extension
                 xhr.send(null);
 
                 var mypage_html = parseHTML(xhr.responseText);
-                var tags = getElementsByXPath("id(\"tag_list\")/span",mypage_html);
+                var tags = getElementsByXPath("id(\"tag_list\")/div/span",mypage_html);
 
                 tags.forEach(function(tag){
                     ldc_tags.push(tag.textContent);
