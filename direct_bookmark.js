@@ -376,23 +376,12 @@ for Migemo search: require XUL/Migemo Extension
                 var xhr = new XMLHttpRequest();
                 var hatena_tags = [];
 
-                var getting_tags = function () {
-                    //xhr.open("GET","http://b.hatena.ne.jp/my",false);
-                    xhr.open("GET","http://b.hatena.ne.jp/"+user,false);
-                    xhr.send(null);
+                // http://b.hatena.ne.jp/retlet/20110322#bookmark-34906937
+                xhr.open("GET","http://b.hatena.ne.jp/"+user+"/sidebar?with_tags=1",false);
+                xhr.send(null);
 
-                    var mypage_html = parseHTML(xhr.responseText);
-                    //var tags = getElementsByXPath("//ul[@id=\"taglist\"]/li/a",mypage_html);
-                    return getElementsByXPath('id("tags")/li/a', mypage_html);
-                };
-
-                var tags = getting_tags();
-                if (!tags) {
-                    // activate non-javascript static page
-                    xhr.open("GET", 'http://b.hatena.ne.jp/config.disable_fast?path=/' + user + '/', false);
-                    xhr.send(null);
-                    tags = getting_tags();
-                }
+                var mypage_html = parseHTML(xhr.responseText);
+                var tags = getElementsByXPath('id("tags")/li/a', mypage_html);
 
                 tags.forEach(function(tag){
                     hatena_tags.push(tag.innerHTML);
