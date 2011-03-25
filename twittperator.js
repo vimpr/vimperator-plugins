@@ -54,6 +54,8 @@ let PLUGIN_INFO =
         Show @user's tweets.
     :tw[ittperator] {TweetText}
         Tweets {TweetText}.
+    :tw[ittperator] @user#id {TweetText}
+        Tweets a reply to @user.
     :tw[ittperator] RT @user#id: {refTweet}
         Does official retweet.
     :tw[ittperator] {TweetText} RT @user#id: {refTweet}
@@ -113,6 +115,8 @@ let PLUGIN_INFO =
         @user のタイムラインを表示します。
     :tw[ittperator] {TweetText}
         {TweetText}をポストします。
+    :tw[ittperator] @user#id {TweetText}
+        @user への返信になります。
     :tw[ittperator] RT @user#id: {refTweet}
         公式RTになるはずです。
     :tw[ittperator] {TweetText} RT @user#id: {refTweet}
@@ -1222,7 +1226,7 @@ let PLUGIN_INFO =
     };
     return p;
   })();
-  {
+  {//jsonGet jsonPost jsonDelete の動的定義
     'get post delete'.split(' ').forEach(function (name) {
       let newName =
         'json' + name.replace(/^(.)(.*)/ , function(_, a, b) (a.toUpperCase() + b));
@@ -1364,7 +1368,7 @@ let PLUGIN_INFO =
       stop();
       if (restartCount > 13)
         return liberator.echoerr("Twittperator: Gave up to connect to " + name + "...");
-      liberator.echoerr("Twittperator: " + name + " will be restared...");
+      liberator.echoerr("Twittperator: " + name + " will be restarted...");
       // 試行済み回数^2 秒後にリトライ
       setTimeout(function() start(lastParams), Math.pow(2, restartCount) * 1000);
       restartCount++;
@@ -2299,6 +2303,7 @@ let PLUGIN_INFO =
   let setting =
     let (gv = liberator.globalVariables) ({
       useChirp: !!gv.twittperator_use_chirp,
+      allReplies: !!gv.twittperator_all_replies,
       autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
       statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
       historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
@@ -2334,8 +2339,12 @@ let PLUGIN_INFO =
 
   Twittperator.loadPlugins();
 
-  if (setting.useChirp)
-    ChirpUserStream.start();
+  if (setting.useChirp){
+    if(setting.allReplies)
+      ChirpUserStream.start({"replies":"all"});
+    else 
+      ChirpUserStream.start();
+  }
 
   let trackWords = setting.trackWords || Store.get("trackWords");
   if (trackWords)
