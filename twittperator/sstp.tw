@@ -54,7 +54,7 @@ let INFO =
       let (svc = stsvc.getService())
         svc.QueryInterface(Components.interfaces["nsISocketTransportService"]);
 
-  function talk (msg) {
+  function talk (name, msg) {
     let transport = socketService.createTransport(null, 0, '127.0.0.1', 9801, null);
     let outputStream = transport.openOutputStream(0, 0, 0);
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
@@ -66,7 +66,7 @@ let INFO =
       "SEND SSTP/1.1",
       "Sender: Twittperator",
       "Charset: UTF-8",
-      "Script: \\h\\s0" + msg + "\\e",
+      "Script: \\h\\s0" + name + "\\n\\n" + msg + "\\e",
       "Options: nodescript,notranslate",
       "Charset: UTF-8",
       "",
@@ -78,7 +78,10 @@ let INFO =
     outputStream.close();
   }
 
-  plugins.twittperator.ChirpUserStream.addListener(function (msg, raw) (msg.text && talk(msg.text)));
+  plugins.twittperator.ChirpUserStream.addListener(
+    function (msg, raw)
+      (msg.text && msg.user && msg.user.screen_name && talk(msg.user.screen_name, msg.text))
+  );
 
 })();
 
