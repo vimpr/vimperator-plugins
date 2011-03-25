@@ -50,6 +50,9 @@ function createElement (name, attrs) {
   }
   return elm;
 }
+function customizeDone () {
+  window.BrowserToolboxCustomizeDone(true);
+}
 
 var gToolbox = gNavToolbox;
 var id = "liberator-customize-toolbar";
@@ -113,6 +116,7 @@ function init () {
        t.setAttribute("currentset", newSets.join(","));
        updateSets(this.toolbar, newSets, removeSets);
        document.persist(this.toolbar.id, "currentset");
+       customizeDone();
        return val;
      },
      completer: function (context) {
@@ -124,6 +128,8 @@ function init () {
        return true;
      },
    });
+
+  customizeDone();
 }
 
 function updateSets (toolbar, newSets, removeSets) {
