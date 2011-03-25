@@ -184,18 +184,18 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
                     } else {
                         var [code,codebase,sandbox] = arguments;
                     }
-                    if(sandbox.LDRize != undefined && sandbox.Minibuffer != undefined){
+                    if(sandbox.window.LDRize != undefined && sandbox.window.Minibuffer != undefined){
                         sandbox.window.addEventListener("focus",function(){
-                            self.LDRize = liberator.eval("self",sandbox.LDRize.getSiteinfo);
-                            self.Minibuffer = liberator.eval("command",sandbox.Minibuffer.addCommand);
-                            if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.LDRize;
-                            if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.Minibuffer.command;
+                            self.LDRize = liberator.eval("self",sandbox.window.LDRize.getSiteinfo);
+                            self.Minibuffer = liberator.eval("command",sandbox.window.Minibuffer.addCommand);
+                            if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.window.LDRize;
+                            if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.window.Minibuffer.command;
                         },false);
                         if(window.content.wrappedJSObject == sandbox.unsafeWindow){
-                            self.LDRize = liberator.eval("self",sandbox.LDRize.getSiteinfo);
-                            self.Minibuffer = liberator.eval("command",sandbox.Minibuffer.addCommand);
-                            if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.LDRize;
-                            if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.Minibuffer.command;
+                            self.LDRize = liberator.eval("self",sandbox.window.LDRize.getSiteinfo);
+                            self.Minibuffer = liberator.eval("command",sandbox.window.Minibuffer.addCommand);
+                            if (typeof self.LDRize.getSiteinfo != 'function') self.LDRize = sandbox.window.LDRize;
+                            if (typeof self.Minibuffer.addCommand != 'function') self.Minibuffer = sandbox.window.Minibuffer.command;
                         }
                     }
                 });
