@@ -32,9 +32,6 @@ var INFO =
 </plugin>
 
 var updater = {
-  "noscript-tbb": [
-    function add(id) { noscriptOverlay.initPopups(); },
-  ],
   "star-button": [
     null,
     function rm(elm) {
