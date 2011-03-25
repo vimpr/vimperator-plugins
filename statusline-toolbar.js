@@ -51,6 +51,7 @@ function createElement (name, attrs) {
   return elm;
 }
 
+var gToolbox = gNavToolbox;
 var id = "liberator-customize-toolbar";
 if (!$(id)) {
   init();
@@ -96,7 +97,7 @@ function init () {
            removeSets.splice(i, 1);
            continue;
          }
-         let elm = document.getElementById(id);
+         let elm = $(id);
          if (elm) {
            if (elm.parentNode !== t) {
              t.appendChild(elm);
@@ -104,7 +105,7 @@ function init () {
                updater[id][0](elm);
            }
            newSets.push(id);
-         } else if (gNavToolbox.palette.querySelector("#" + id)) {
+         } else if (gToolbox.palette.querySelector("#" + id)) {
            newSets.push(id);
          }
        }
@@ -115,7 +116,7 @@ function init () {
        return val;
      },
      completer: function (context) {
-       context.completions = [["none","-"]].concat(Array.map(gNavToolbox.palette.children, function(elm) {
+       context.completions = [["none","-"]].concat(Array.map(gToolbox.palette.children, function(elm) {
          return [ elm.id, elm.getAttribute("label") || "-" ];
        }));
      },
@@ -132,7 +133,7 @@ function updateSets (toolbar, newSets, removeSets) {
      }
   }
  for (let [, id] in Iterator(removeSets)) {
-   let elm = document.getElementById(id);
+   let elm = $(id);
    if (!elm)
      continue;
 
