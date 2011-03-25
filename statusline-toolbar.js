@@ -121,8 +121,10 @@ function init () {
          return [ elm.id, elm.getAttribute("label") || "-" ];
        }));
      },
-     validator: function (val) {
-       return true;
+     validator: function (ids) {
+       return ids.every(function(id) {
+         return ($(id) || gToolbox.palette.querySelector("#" + id));
+       });
      },
    });
 
