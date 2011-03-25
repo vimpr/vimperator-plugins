@@ -19,8 +19,8 @@ var INFO =
       </ul>
     </description>
     <item>
-      <tags>'statustoolbars'</tags>
-      <spec>'statustoolbars'</spec>
+      <tags>'slt' 'statustoolbars'</tags>
+      <spec>'statustoolbars' 'slt'</spec>
       <type>stringlist</type>
       <default></default>
       <description>
@@ -77,7 +77,7 @@ function init () {
 
   config.toolbars.statuslinetoolbar = [[id], "Statusline Toolbar"];
 
-  options.add(["statustoolbars"], "Statusline Toolbar Sets",
+  options.add(["statuslinetoolbars", "slt"], "Statusline Toolbar Sets",
    "stringlist", "", {
      toolbar: t,
      getter: function () {
