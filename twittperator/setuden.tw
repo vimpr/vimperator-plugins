@@ -1,0 +1,10 @@
+
+(function () {
+  plugins.libly.$U.around(
+    plugins.twittperator.Twitter,
+    'say',
+    function (next, [status, inReplyTo]) {
+      return next([status.toString().slice(0, 17), inReplyTo]);
+    }
+  );
+})();
