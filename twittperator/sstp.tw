@@ -60,7 +60,7 @@ let INFO =
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
                             createInstance(Ci.nsIConverterOutputStream);
 
-    msg = msg.replace(/\\/g, "\\\\").msg.replace(/[\r\n]+/g, "\\n");
+    msg = msg.replace(/\\/g, "\\\\").replace(/[\r\n]+/g, "\\n");
 
     let buf = [
       "SEND SSTP/1.1",
