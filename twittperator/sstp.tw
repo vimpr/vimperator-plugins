@@ -59,15 +59,18 @@ let INFO =
     let outputStream = transport.openOutputStream(0, 0, 0);
     let conv = Cc['@mozilla.org/intl/converter-output-stream;1'].
                             createInstance(Ci.nsIConverterOutputStream);
+
+    msg = msg.replace(/\\/g, "\\\\").msg.replace(/[\r\n]+/g, "\\n");
+
     let buf = [
-      "SEND SSTP/1.1\r\n",
-      "Sender: Twittperator\r\n",
-      "Charset: UTF-8\r\n",
-      "Script: \\h\\s0" + msg + "\\e\r\n",
-      "Options: nodescript,notranslate\r\n",
-      "Charset: UTF-8\r\n",
-      "\r\n",
-    ].join('');
+      "SEND SSTP/1.1",
+      "Sender: Twittperator",
+      "Charset: UTF-8",
+      "Script: \\h\\s0" + msg + "\\e",
+      "Options: nodescript,notranslate",
+      "Charset: UTF-8",
+      "",
+    ].map(function (it) (it + "\r\n")).join('');
 
     conv.init(outputStream, 'UTF-8', buf.length, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
     conv.writeString(buf);
