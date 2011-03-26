@@ -49,7 +49,19 @@ var css = <css><![CDATA[
   #liberator-customize-toolbar .statusbar-resizerpanel { display: none; }
   #liberator-customize-toolbar toolbarbutton { padding: 0 !important; }
   #status-bar { background-color: transparent !important; }
-]]></css>.trim();
+]]></css>.toString() +
+({
+  WINNT: <css></css>,
+  Linux: <css></css>,
+  Darwin: <css><![CDATA[
+    #liberator-customize-toolbar toolbarbutton {
+      background: transparent !important;
+      border: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  ]]></css>
+})[Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS].toString();
 
 function $(id) document.getElementById(id);
 function createElement (name, attrs) {
