@@ -48,6 +48,7 @@ var css = <css><![CDATA[
   #liberator-customize-toolbar > :-moz-any(image, toolbarbutton) { max-height: 16px; }
   #liberator-customize-toolbar .statusbar-resizerpanel { display: none; }
   #liberator-customize-toolbar toolbarbutton { padding: 0 !important; }
+  #status-bar { background-color: transparent !important; }
 ]]></css>.trim();
 
 function $(id) document.getElementById(id);
