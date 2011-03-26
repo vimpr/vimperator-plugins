@@ -39,6 +39,17 @@ var updater = {
     }
   ],
 };
+var css = <css><![CDATA[
+  #liberator-customize-toolbar {
+    border: none !important;
+    min-width: 5px !important;
+    max-height: 17px;
+  }
+  #liberator-customize-toolbar > :-moz-any(image, toolbarbutton) { max-height: 16px; }
+  #liberator-customize-toolbar .statusbar-resizerpanel { display: none; }
+  #liberator-customize-toolbar toolbarbutton { padding: 0 !important; }
+]]></css>.trim();
+
 function $(id) document.getElementById(id);
 function createElement (name, attrs) {
   var elm = document.createElement("toolbar");
@@ -58,17 +69,7 @@ if (!$(id)) {
 }
 
 function init () {
-  styles.addSheet(true, "customize-toolbar", "chrome://*", <css><![CDATA[
-    #liberator-customize-toolbar {
-      border: none !important;
-      min-width: 5px !important;
-      max-height: 17px;
-    }
-    #liberator-customize-toolbar > :-moz-any(image, toolbarbutton) {
-      max-height: 16px;
-    }
-    #liberator-customize-toolbar .statusbar-resizerpanel { display: none; }
-  ]]></css>.toString(), false);
+  styles.addSheet(true, "customize-toolbar", "chrome://*", css, false);
 
   var t = createToolbar();
   t.appendChild($("status-bar"));
