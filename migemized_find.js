@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.10.0</version>
+  <version>2.10.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -61,8 +61,8 @@ let PLUGIN_INFO =
 
       指定の色の強調表示を消す:
         >||
-         :ml! <色1> <色2> ... <色N>
-         :migelight!  <色1> <色2> ... <色N>
+         :rml <色1> <色2> ... <色N>
+         :removemigelight  <色1> <色2> ... <色N>
         ||<
 
       全ての強調表示を消す:
@@ -602,14 +602,9 @@ let PLUGIN_INFO =
     ['ml', 'migelight'],
     'Migelight matched words',
     function (args) {
-      if (args.bang) {
-        let colors = args.join(' ') + ' ' + (args['-color'] || '');
-        liberator.execute('removemigelight ' + colors);
-      } else {
-        let r = MF.highlightAll(args.join(' '), args['-color']);
-        liberator.echo(r ? r.length + ' words migelighted.'
-                         : 'word not found.');
-      }
+      let r = MF.highlightAll(args.join(' '), args['-color']);
+      liberator.echo(r ? r.length + ' words migelighted.'
+                       : 'word not found.');
     },
     {
       bang: true,
