@@ -244,7 +244,7 @@ let INFO =
           }
         ),
         new Command(
-          ['cursor'],
+          ['move'],
           'Move cursor',
           function (args) {
             let [x, y] = args.map(function (it) parseInt(it));
