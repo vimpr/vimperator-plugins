@@ -39,12 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.9.5</version>
+  <version>2.10.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemized_find.js</updateURL>
-  <minVersion>2.3</minVersion>
+  <minVersion>3.0</minVersion>
   <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     == Usage ==
@@ -76,14 +76,6 @@ let PLUGIN_INFO =
           let g:migemized_find_language = "cat";
         ||<
 
-      インストール設定:
-        Vimperator の "/" などを置き換えるか否かの設定
-        false にすると、置き換えされない。
-        :migelight などのコマンドだけ使いたいときはこれを設定する
-        >||
-          let g:migemized_find_install = "false";
-        ||<
-
     == Link ==
         http://d.hatena.ne.jp/nokturnalmortum/20080805/1217941126
   ]]></detail>
@@ -92,8 +84,6 @@ let PLUGIN_INFO =
 
 
 (function () {
-
-  let do_install = s2b(liberator.globalVariables.migemized_find_install, true);
 
   let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
                      .getService(Components.interfaces.pIXMigemoFactory)
