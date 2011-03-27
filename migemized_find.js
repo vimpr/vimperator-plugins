@@ -39,13 +39,13 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.9.4</version>
+  <version>2.9.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemized_find.js</updateURL>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     == Usage ==
       検索ワードの一文字目が
@@ -294,11 +294,11 @@ let PLUGIN_INFO =
     highlightColor: 'orange',
 
     // 手抜き用プロパティ
-    get document function () content.document,
+    get document () content.document,
 
     // タブ毎に状態を保存するために、変数を用意
     // 初回アクセス時に初期化を行う
-    get storage function () (
+    get storage () (
       gBrowser.mCurrentTab.__migemized_find_storage ||
       (gBrowser.mCurrentTab.__migemized_find_storage = {
         highlightRemovers: {},
@@ -306,7 +306,7 @@ let PLUGIN_INFO =
     ),
 
     // 現在のタブのフレームリスト
-    get currentFrames function () {
+    get currentFrames () {
       let result = [];
       (function (frame) {
         // ボディがない物は検索対象外なので外す
