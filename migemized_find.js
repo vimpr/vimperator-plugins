@@ -629,7 +629,14 @@ let PLUGIN_INFO =
       if (args.string == 'all')
         return [f() for each (f in MF.storage.highlightRemovers)];
       args.string.split(/\s+/).forEach(MF.removeHighlight, MF);
-    }
+    },
+    {
+      completer: function (context, args) {
+        context.title = ['Color', 'Sample'];
+        context.completions = colorsCompltions;
+      }
+    },
+    true
   );
 
   // find コマンド
