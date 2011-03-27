@@ -236,7 +236,6 @@ let INFO =
               API.click(button);
           },
           {
-            bang: true,
             completer: function (context, args) {
               context.title = ['Button'];
               context.completions = [[it, it] for ([, it] in Iterator('left right middle'.split(' ')))];
@@ -255,7 +254,7 @@ let INFO =
             if (args.length == 1)
               y = x;
 
-            API.move(x, y, args['-relative']);
+            API.move(x, y, args['-relative'] || args.bang);
           },
           {
             bang: true,
