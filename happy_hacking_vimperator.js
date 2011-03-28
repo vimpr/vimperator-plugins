@@ -36,10 +36,10 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
-  <version>2.5.0</version>
+  <version>2.5.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <minVersion>3.0</minVersion>
+  <maxVersion>3.1</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/happy_hacking_vimperator.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -3308,8 +3308,8 @@ let PLUGIN_INFO =
   function damn (event)
     !/^(script|embed)$/i.test(event.target.tagName);
 
-  let (opt = options.get('go'))
-    opt.set(opt.get().replace(/[rlb]+/g, ''));
+  let (opt = options.get('gui'))
+    opt.set('nomenu,nonavigation');
 
   around(buffer, 'followLink', function (next) {
     ignore = true;
