@@ -56,7 +56,7 @@ let INFO =
     </item>
     <item>
       <tags>g:win_mouse_map_move_DIR</tags>
-      <spec>g:win_mouse_map_move_(left|right|up|down)=<a>keys</a></spec>
+      <spec>g:win_mouse_map_move_(left|right|up|down) = <a>keys</a></spec>
       <description>
         <p>
           If given this global variable, this plugin map the <a>keys</a> to mouse moving action in all mode.
@@ -65,7 +65,7 @@ let INFO =
     </item>
     <item>
       <tags>g:win_mouse_map_BUTTON_click</tags>
-      <spec>g:win_mouse_map_(left|right|middle)_click=<a>keys</a></spec>
+      <spec>g:win_mouse_map_(left|right|middle)_click = <a>keys</a></spec>
       <description>
         <p>
           If given this global variable, this plugin map the <a>keys</a> to mouse clicking action in all mode.
