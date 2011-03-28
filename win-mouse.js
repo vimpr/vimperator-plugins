@@ -183,6 +183,10 @@ let INFO =
   // }}}
 
   // Define mappings {{{
+  ALL_MODE = [];
+  for (let i = 1; i <= modes.PROMPT; i *= 2)
+    ALL_MODE.push(i);
+
   const D = function (v, p) (v * (p > 0 ? p : 10));
   [
     [['<A-h>'], 'left',  -1,  0],
@@ -191,7 +195,7 @@ let INFO =
     [['<A-j>'], 'down',   0,  1],
   ].forEach(function ([keys, name, dx, dy]) {
     mappings.addUserMap(
-      [modes.NORMAL],
+      ALL_MODE,
       keys,
       'Move cursor to' + name,
       function (count) API.move(D(dx, count), D(dy, count), true),
