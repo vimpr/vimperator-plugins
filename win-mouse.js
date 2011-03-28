@@ -72,6 +72,15 @@ let INFO =
         </p>
       </description>
     </item>
+    <item>
+      <tags>g:win_mouse_auto_blur</tags>
+      <spec>g:win_mouse_auto_blur = <a>msec</a></spec>
+      <description>
+        <p>
+          <a>msec</a> milliseconds after clicking, automatically blur(unfocus) from embed element.
+        </p>
+      </description>
+    </item>
   </plugin>
 </>;
 // }}}
@@ -174,6 +183,8 @@ let INFO =
     }
   }
 
+
+
   const API = __context__.API = {
     get position () {
       let pos = new CursorPosition(0, 0);
@@ -194,8 +205,20 @@ let INFO =
       let vs = buttonNameToClickValues(name || 'left');
       if (!vs)
         throw 'Unknown button name';
+
       [ClickInput[0].flags, ClickInput[1].flags] = vs;
       SendInput(2, ClickInput.address(), MouseInput.size);
+
+      let autoBlur = liberator.globalVariables.win_mouse_auto_blur;
+      if (autoBlur) {
+        setTimeout(
+          function () {
+            if (modes.main === modes.EMBED)
+              liberator.focus.blur();
+          },
+          autoBlur
+        );
+      }
     }
   };
   // }}}
