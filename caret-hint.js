@@ -44,7 +44,7 @@ let PLUGIN_INFO =
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/caret-hint.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <maxVersion>3.1</maxVersion>
   <detail><![CDATA[
     Move caret position by hint.
     == Global Variables ==
@@ -184,6 +184,10 @@ let PLUGIN_INFO =
     s.extend.apply(s, a);
   }
 
+  // Vimperator 3.0 までと 3.1 以降に両対応
+  const [CaretKey, VisualKey] =
+    /caret/(mappings.getDefault(modes.NORMAL, 'i').description) ? ['i', 'v'] : ['c', 'v'];
+
   function moveCaret (elem, head, select) {
     let doc = elem.ownerDocument;
     let win = new XPCNativeWrapper(window.content.window);
@@ -194,15 +198,15 @@ let PLUGIN_INFO =
     r.selectNodeContents(elem);
 
     if (select) {
-      mappings.getDefault(modes.NORMAL, 'i').action();
-      mappings.getDefault(modes.CARET, 'v').action();
+      mappings.getDefault(modes.NORMAL, CaretKey).action();
+      mappings.getDefault(modes.CARET, VisualKey).action();
     } else {
       if (head) {
         r.setEnd(r.startContainer, r.startOffset);
       } else {
         r.setStart(r.endContainer, r.endOffset);
       }
-      mappings.getDefault(modes.NORMAL, 'i').action();
+      mappings.getDefault(modes.NORMAL, CaretKey).action();
     }
 
     if (extendMode) {
