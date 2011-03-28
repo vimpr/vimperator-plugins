@@ -45,8 +45,17 @@ let INFO =
     <project name="Vimperator" minVersion="3.0"/>
     <p></p>
     <item>
-      <tags>:cursor</tags>
-      <spec>:cursor <oa>-relative</oa> <oa>x</oa> <oa>y</oa></spec>
+      <tags>:mouse click</tags>
+      <spec>:mouse click <oa>button</oa></spec>
+      <description>
+        <p>
+          <a>Button</a> click.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>:mouse move</tags>
+      <spec>:mouse move <oa>-relative</oa> <oa>x</oa> <oa>y</oa></spec>
       <description>
         <p>
           Move cursor to specified (x, y) position.
