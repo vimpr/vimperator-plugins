@@ -54,6 +54,24 @@ let INFO =
         </p>
       </description>
     </item>
+    <item>
+      <tags>g:win_mouse_map_move_DIR</tags>
+      <spec>g:win_mouse_map_move_(left|right|up|down)=<a>keys</a></spec>
+      <description>
+        <p>
+          If given this global variable, this plugin map the keys to mouse moving action in all mode.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:win_mouse_map_BUTTON_click</tags>
+      <spec>g:win_mouse_map_(left|right|middle)_click=<a>keys</a></spec>
+      <description>
+        <p>
+          If given this global variable, this plugin map the keys to mouse clicking action in all mode.
+        </p>
+      </description>
+    </item>
   </plugin>
 </>;
 // }}}
@@ -187,35 +205,43 @@ let INFO =
   for (let i = 1; i <= modes.PROMPT; i *= 2)
     ALL_MODE.push(i);
 
-  const D = function (v, p) (v * (p > 0 ? p : 10));
-  [
-    [['<A-h>'], 'left',  -1,  0],
-    [['<A-l>'], 'right',  1,  0],
-    [['<A-k>'], 'up',     0, -1],
-    [['<A-j>'], 'down',   0,  1],
-  ].forEach(function ([keys, name, dx, dy]) {
+  function mapIfGiven (name, description, action, extra) {
+    let keys = liberator.globalVariables[name];
+    if (!keys)
+      return;
+
     mappings.addUserMap(
       ALL_MODE,
-      keys,
+      [keys],
+      description,
+      action,
+      extra
+    );
+  }
+
+  const D = function (v, p) (v * (p > 0 ? p : 10));
+  [
+    ['left',  -1,  0],
+    ['right',  1,  0],
+    ['up',     0, -1],
+    ['down',   0,  1],
+  ].forEach(function ([name, dx, dy]) {
+    mapIfGiven(
+      'win_mouse_map_move_' + name,
       'Move cursor to' + name,
       function (count) API.move(D(dx, count), D(dy, count), true),
       {count: true}
     );
   });
 
-  mappings.addUserMap(
-    [modes.NORMAL],
-    ['<A-n>'],
-    'Click (Left button)',
-    function () API.click('left')
-  );
-
-  mappings.addUserMap(
-    [modes.NORMAL],
-    ['<A-m>'],
-    'Click (Right button)',
-    function () API.click('right')
-  );
+  ['left', 'right', 'middle'].forEach(function (name) {
+    mapIfGiven(
+      'win_mouse_map_' + name + '_click',
+      name + ' click',
+      function () API.click(name),
+      {}
+    );
+  });
   // }}}
 
   // Define commands {{{
