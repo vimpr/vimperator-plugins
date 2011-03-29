@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Win Cursor" version="1.0.0"
+  <plugin name="Win Cursor" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
           lang="en-US"
@@ -44,6 +44,15 @@ let INFO =
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
     <p></p>
+    <item>
+      <tags>:mouse</tags>
+      <spec>:mouse</spec>
+      <description>
+        <p>
+          Display current position and color information (RGB and the name).
+        </p>
+      </description>
+    </item>
     <item>
       <tags>:mouse click</tags>
       <spec>:mouse click <oa>button</oa></spec>
@@ -122,6 +131,151 @@ let INFO =
   const MOUSEEVENTF_ABSOLUTE     = 0x8000; /* absolute move */
   // }}}
 
+  // Color {{{
+  const Colors = {
+    0xffffff: 'white',
+    0xf5f5f5: 'whitesmoke',
+    0xfff8f8: 'ghostwhite',
+    0xfff8f0: 'aliceblue',
+    0xfae6e6: 'lavendar',
+    0xfffff0: 'azure',
+    0xffffe0: 'lightcyan',
+    0xfafff5: 'mintcream',
+    0xf0fff0: 'honeydew',
+    0xf0ffff: 'ivory',
+    0xdcf5f5: 'beige',
+    0xe0ffff: 'lightyellow',
+    0xd2fafa: 'lightgoldenrodyellow',
+    0xcdfaff: 'lemonchiffon',
+    0xf0faff: 'floralwhite',
+    0xe6f5fd: 'oldlace',
+    0xdcf8ff: 'cornsilk',
+    0xd5efff: 'papayawhite',
+    0xcdebff: 'blanchedalmond',
+    0xc4e4ff: 'bisque',
+    0xfafaff: 'snow',
+    0xe6f0fa: 'linen',
+    0xd7ebfa: 'antiquewhite',
+    0xeef5ff: 'seashell',
+    0xf5f0ff: 'lavenderblush',
+    0xe1e4ff: 'mistyrose',
+    0xdcdcdc: 'gainsboro',
+    0xd3d3d3: 'lightgray',
+    0xdec4b0: 'lightsteelblue',
+    0xe6d8ad: 'lightblue',
+    0xface87: 'lightskyblue',
+    0xe6e0b0: 'powderblue',
+    0xeeeeaf: 'paleturquoise',
+    0xebce87: 'skyblue',
+    0xaacd66: 'mediumaquamarine',
+    0xd4ff7f: 'aquamarine',
+    0x98fb98: 'palegreen',
+    0x90ee90: 'lightgreen',
+    0x8ce6f0: 'khaki',
+    0xaae8ee: 'palegoldenrod',
+    0xb5e4ff: 'moccasin',
+    0xaddeff: 'navajowhite',
+    0xb9daff: 'peachpuff',
+    0xb3def5: 'wheat',
+    0xcbc0ff: 'pink',
+    0xc1b6ff: 'lightpink',
+    0xd8bfd8: 'thistle',
+    0xdda0dd: 'plum',
+    0xc0c0c0: 'silver',
+    0xa9a9a9: 'darkgray',
+    0x998877: 'lightslategray',
+    0x908070: 'slategray',
+    0xcd5a6a: 'slateblue',
+    0xb48246: 'steelblue',
+    0xee687b: 'mediumslateblue',
+    0xe16941: 'royalblue',
+    0xff0000: 'blue',
+    0xff901e: 'dodgerblue',
+    0xed9564: 'cornflowerblue',
+    0xffbf00: 'deepskyblue',
+    0xffff00: 'cyan',
+    0xffff00: 'aqua',
+    0xd0e040: 'turquoise',
+    0xccd148: 'mediumturquoise',
+    0xd1ce00: 'darkturquoise',
+    0xaab220: 'lightseagreen',
+    0x9afa00: 'mediumspringgreen',
+    0x7fff00: 'springgreen',
+    0x00ff00: 'lime',
+    0x32cd32: 'limegreen',
+    0x32cd9a: 'yellowgreen',
+    0x00fc7c: 'lawngreen',
+    0x00ff7f: 'chartreuse',
+    0x2fffad: 'greenyellow',
+    0x00ffff: 'yellow',
+    0x00d7ff: 'gold',
+    0x00a5ff: 'orange',
+    0x008cff: 'darkorange',
+    0x20a5da: 'goldenrod',
+    0x87b8de: 'burlywood',
+    0x8cb4d2: 'tan',
+    0x60a4f4: 'sandybrown',
+    0x7a96e9: 'darksalmon',
+    0x8080f0: 'lightcoral',
+    0x7280fa: 'salmon',
+    0x7aa0ff: 'lightsalmon',
+    0x507fff: 'coral',
+    0x4763ff: 'tomato',
+    0x0045ff: 'orangered',
+    0x0000ff: 'red',
+    0x9314ff: 'deeppink',
+    0xb469ff: 'hotpink',
+    0x9370db: 'palevioletred',
+    0xee82ee: 'violet',
+    0xd670da: 'orchid',
+    0xff00ff: 'magenta',
+    0xff00ff: 'fuchsia',
+    0xd355ba: 'mediumorchid',
+    0xcc3299: 'darkorchid',
+    0xd30094: 'darkviolet',
+    0xe22b8a: 'blueviolet',
+    0xdb70931:' mediumpurple',
+    0x808080: 'gray',
+    0xcd0000: 'mediumblue',
+    0x8b8b00: 'darkcyan',
+    0xa09e5f: 'cadetblue',
+    0x8fbc8f: 'darkseagreen',
+    0x71b33c: 'mediumseagreen',
+    0x808000: 'teal',
+    0x228b22: 'forestgreen',
+    0x578b2e: 'seagreen',
+    0x6bb7bd: 'darkkhaki',
+    0x3f85cd: 'peru',
+    0x3c14dc: 'crimsin',
+    0x5c5ccd: 'indianred',
+    0x8f8fbc: 'rosybrown',
+    0x8515c7: 'mediumvioletred',
+    0x696969: 'dimgray',
+    0x000000: 'black',
+    0x701919: 'midnightblue',
+    0x8b3d48: 'darkslateblue',
+    0x8b0000: 'darkblue',
+    0x800000: 'navy',
+    0x4f4f2f: 'darkslategray',
+    0x008000: 'green',
+    0x006400: 'darkgreen',
+    0x2f6b55: 'darkolivegreen',
+    0x238e6b: 'olivedrab',
+    0x008080: 'olive',
+    0x0b86b8: 'darkgoldenrod',
+    0x1e69d2: 'chocolate',
+    0x2d52a0: 'sienna',
+    0x13458b: 'saddlebrown',
+    0x2222b2: 'firebrick',
+    0x2a2aa5: 'brown',
+    0x000080: 'maroon',
+    0x00008b: 'darkred',
+    0x8b008b: 'darkmagenta',
+    0x800080: 'purple',
+    0x82004b: 'indigo',
+  };
+  // }}}
+
   // 構造体 {{{
   const MouseInput =
     new ctypes.StructType(
@@ -149,6 +303,7 @@ let INFO =
 
   // {{{ WinAPI
   const User32 = ctypes.open("user32.dll");
+  const GDI32 = ctypes.open("gdi32.dll");
   const GetCursorPos =
     User32.declare(
       "GetCursorPos",
@@ -172,6 +327,22 @@ let INFO =
       ctypes.uint32_t,
       new ctypes.ArrayType(MouseInput, 2).ptr,
       ctypes.uint32_t
+    );
+  const GetDC =
+    User32.declare(
+      "GetDC",
+      ctypes.winapi_abi,
+      ctypes.uint32_t,
+      ctypes.uint32_t
+    );
+  const GetPixel =
+    GDI32.declare(
+      "GetPixel",
+      ctypes.winapi_abi,
+      ctypes.int32_t,
+      ctypes.uint32_t,
+      ctypes.int32_t,
+      ctypes.int32_t
     );
   // }}}
 
@@ -228,6 +399,20 @@ let INFO =
           autoBlur
         );
       }
+    },
+
+    getPixel: function (x, y) {
+      if (arguments.length == 0) {
+        [x, y] = let (pos = API.position) [pos.x, pos.y];
+      }
+      let col = GetPixel(GetDC(0), x, y);
+      let [r, g, b] = [col & 0x0000ff, (col & 0x00ff00) >> 8, (col & 0xff0000) >> 16];
+      return {
+        r: r,
+        g: g,
+        b: b,
+        name: Colors[col] || '?'
+      };
     }
   };
   // }}}
@@ -279,7 +464,8 @@ let INFO =
   // Define commands {{{
   function displayCurrent () {
     let pos = API.position;
-    return liberator.echo(<>Position: {pos.x}, {pos.y}</>);
+    let col = API.getPixel(pos.x, pos.y);
+    return liberator.echo(<>[Position] {pos.x}, {pos.y} [Color] {col.r}, {col.g}, {col.b} ({col.name})</>);
   }
 
   commands.addUserCommand(
