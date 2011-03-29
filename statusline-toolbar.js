@@ -12,15 +12,15 @@ var INFO =
         <li>Move the status-bar to the toolbar.</li>
         <li>Make the toolbarbuttons in the toolbar palette configurable
           <ul>
-            <li>Can customize by command (ex. <ex>:set statustoolbars=feed-button</ex>)</li>
+            <li>Can customize by command (ex. <ex>:set statuslinetoolbars=feed-button</ex>)</li>
             <li>Also, can drop the toolbarbutton from Customize Toolbar window</li>
           </ul>
         </li>
       </ul>
     </description>
     <item>
-      <tags>'slt' 'statustoolbars'</tags>
-      <spec>'statustoolbars' 'slt'</spec>
+      <tags>'slt' 'statuslinetoolbars'</tags>
+      <spec>'statuslinetoolbars' 'slt'</spec>
       <type>stringlist</type>
       <default></default>
       <description>
