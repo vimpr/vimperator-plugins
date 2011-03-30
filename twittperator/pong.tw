@@ -1,0 +1,37 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_pong = 1
+ * let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"
+ */
+
+(function () {
+  let screenName = liberator.globalVariables.twittperator_screen_name;
+  if (!screenName)
+    return liberator.echoerr('please. let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"');
+
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      if (!(msg.text && msg.user))
+        return;
+
+      if (msg.text.trim() === ('@' + screenName))
+        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name, msg.id_str);
+
+      if (RegExp('^\\s*@' + screenName + '\\s+ping\s*$')(msg.text.trim()))
+        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' pong', msg.id_str);
+
+      if (RegExp('^\\s*@' + screenName + '\\s+pong\s*$')(msg.text.trim()))
+        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' pang', msg.id_str);
+
+      if (RegExp('^\\s*@' + screenName + '\\s+pang\s*$')(msg.text.trim()))
+        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' bang', msg.id_str);
+
+      if (RegExp('^\\s*@' + screenName + '\\s+bang\s*$')(msg.text.trim()))
+        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ( \u25D5 \u203F\u203F \u25D5 )', msg.id_str);
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
+
+
