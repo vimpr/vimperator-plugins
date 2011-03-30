@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009-2010, anekos.
+Copyright (c) 2009-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -32,66 +32,136 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Caret Hint</name>
-  <description>Move caret position by hint</description>
-  <description lang="ja">Hint を使ってキャレット位置を移動</description>
-  <version>1.4.0</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/caret-hint.js</updateURL>
-  <minVersion>3.0</minVersion>
-  <maxVersion>3.1</maxVersion>
-  <detail><![CDATA[
-    Move caret position by hint.
-    == Global Variables ==
-      let g:caret_hint_key = 'c':
+// INFO {{{
+let INFO =
+<>
+  <plugin name="Caret Hint" version="1.4.0"
+          href="http://vimpr.github.com/"
+          summary="Move caret position by hint"
+          lang="en-US"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <p></p>
+    <item>
+      <tags>g:caret_hint_key</tags>
+      <spec>let g:caret_hint_key = <a>key</a></spec>
+      <description><p>
         Hint mode key.
         Move caret position to the head of selected element.
-      let g:caret_hint_tail_key = 'C':
+        (default: 'c')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_tail_key</tags>
+      <spec>let g:caret_hint_tail_key = <a>key</a></spec>
+      <description><p>
         Hint mode key.
         Move caret position to the tail of selected element.
-      let g:caret_hint_select_key = '' (default: disabled):
+        (default: 'C')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_select_key</tags>
+      <spec>let g:caret_hint_select_key = <a>key</a></spec>
+      <description><p>
         Hint mode key.
         Move caret position to the head of selected element, and select.
-      let g:caret_hint_select_tail_key = 'S':
+        (default: disabled)
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_select_tail_key</tags>
+      <spec>let g:caret_hint_select_tail_key = <a>key</a></spec>
+      <description><p>
         Hint mode key.
         Move caret position to the tail of selected element, and select.
-      let g:caret_hint_swap_key = 's':
+        (default: 'S')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_swap_key</tags>
+      <spec>let g:caret_hint_swap_key = <a>key</a></spec>
+      <description><p>
         The key mapping for Visual-mode.
         Swap caret position head to tail.
-      If apply empty string ('') to these variables, these mapping or mode are not enabled.
-    == Global Variables 2 ==
-      let g:caret_hint_xpath = '//*':
+        (default: 's')
+      </p></description>
+    </item>
+    <p>If apply empty string ('') to these variables, these mapping or mode are not enabled.</p>
+    <item>
+      <tags>g:caret_hint_xpath</tags>
+      <spec>let g:caret_hint_xpath = <a>XPath</a></spec>
+      <description><p>
         The XPath for hint-mode selection.
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    Hint を使ってキャレット位置を移動
-    == Global Variables 1 ==
-      let g:caret_hint_key = 'c':
+      </p></description>
+    </item>
+  </plugin>
+  <plugin name="Caret Hint" version="1.0.0"
+          href="http://vimpr.github.com/"
+          summary="Hint を使ってキャレット位置を移動"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <p></p>
+    <item>
+      <tags>g:caret_hint_key</tags>
+      <spec>let g:caret_hint_key = <a>key</a></spec>
+      <description><p>
         Hint モードのキー
         選択した要素の先頭にキャレットを移動する
-      let g:caret_hint_tail_key = 'C':
+        (default: 'c')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_tail_key</tags>
+      <spec>let g:caret_hint_tail_key = <a>key</a></spec>
+      <description><p>
         Hint モードのキー
         選択した要素の後尾にキャレットを移動する
-      let g:caret_hint_select_key = '' (デフォルト: 無効):
+        (default: 'C')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_select_key</tags>
+      <spec>let g:caret_hint_select_key = <a>key</a></spec>
+      <description><p>
         Hint モードのキー
         選択した要素の先頭にキャレットを移動し、要素を選択する
-      let g:caret_hint_select_tail_key = 'S':
+        (default: disabled)
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_select_tail_key</tags>
+      <spec>let g:caret_hint_select_tail_key = <a>key</a></spec>
+      <description><p>
         Hint モードのキー
         選択した要素の後尾にキャレットを移動し、要素を選択する
-      let g:caret_hint_swap_key = 's':
+        (default: 'S')
+      </p></description>
+    </item>
+    <item>
+      <tags>g:caret_hint_swap_key</tags>
+      <spec>let g:caret_hint_swap_key = <a>key</a></spec>
+      <description><p>
         VISUAL モード用のキーマッピング
-        キャレットの位置を交換する(先頭 <=> 後尾)
-      これらの値に空文字列を与えれば、マッピングやモードは有効にされません。
-    == Global Variables 2 ==
-      let g:caret_hint_xpath = '//*':
+        キャレットの位置を交換する(先頭 ⇔ 後尾)
+        (default: 's')
+      </p></description>
+    </item>
+    <p>これらの値に空文字列を与えれば、マッピングやモードは有効にされません。</p>
+    <item>
+      <tags>g:caret_hint_xpath</tags>
+      <spec>let g:caret_hint_xpath = <a>XPath</a></spec>
+      <description><p>
         ヒント対象要素を選択するための XPath
-  ]]></detail>
-</VimperatorPlugin>;
+      </p></description>
+    </item>
+  </plugin>
+</>;
 // }}}
 
 /*       _\|/_
