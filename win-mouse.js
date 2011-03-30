@@ -363,8 +363,6 @@ let INFO =
     }
   }
 
-
-
   const API = __context__.API = {
     get position () {
       let pos = new CursorPosition(0, 0);
