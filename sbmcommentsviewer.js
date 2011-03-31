@@ -140,7 +140,7 @@ SBMEntry.prototype = { //{{{
             return result;
         }
 
-        var xml = <div highlight="Completions" style="margin: 0; padding: 3px 5px; border-bottom: 1px dotted;"/>;
+        var xml = <div highlight="Completions" class="liberator-sbmcommentsviewer-content" style="margin: 0; padding: 3px 5px; border-bottom: 1px dotted;"/>;
         var self = this;
         format.forEach(function(colum){
             switch(colum){
