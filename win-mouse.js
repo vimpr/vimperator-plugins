@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Win Cursor" version="1.1.0"
+  <plugin name="Win Cursor" version="1.2.0"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
           lang="en-US"
@@ -129,6 +129,9 @@ let INFO =
   // #endif /* WINVER >= 0x0600 */
   const MOUSEEVENTF_VIRTUALDESK  = 0x4000; /* map to entire virtual desktop */
   const MOUSEEVENTF_ABSOLUTE     = 0x8000; /* absolute move */
+  const KEYEVENTF_EXTENDEDKEY    = 0x0001;
+  const KEYEVENTF_KEYDOWN        = 0x0000;
+  const KEYEVENTF_KEYUP          = 0x0002;
   // }}}
 
   // Color {{{
@@ -325,7 +328,7 @@ let INFO =
       ctypes.winapi_abi,
       ctypes.uint32_t,
       ctypes.uint32_t,
-      new ctypes.ArrayType(MouseInput, 2).ptr,
+      ctypes.voidptr_t,
       ctypes.uint32_t
     );
   const GetDC =
@@ -347,8 +350,6 @@ let INFO =
   // }}}
 
   // Functions {{{
-  const ClickInput = new new ctypes.ArrayType(MouseInput, 2);
-
   function buttonNameToClickValues (name) {
     if (typeof name != 'string')
       return;
@@ -384,8 +385,44 @@ let INFO =
       if (!vs)
         throw 'Unknown button name';
 
-      [ClickInput[0].flags, ClickInput[1].flags] = vs;
-      SendInput(2, ClickInput.address(), MouseInput.size);
+      let relKeys = [];
+      if (release) {
+        let ev = events.fromString(release).slice(-1)[0];
+        if (ev.shiftKey)
+          relKeys.push(0x10);
+        if (ev.ctrlKey)
+          relKeys.push(0x11);
+        if (ev.altKey)
+          relKeys.push(0x12);
+
+        if (relKeys.length > 0) {
+          setTimeout(
+            function () {
+              let ClickInput = new new ctypes.ArrayType(MouseInput, relKeys.length);
+              for (let [i, relKey] in Iterator(relKeys)) {
+                ClickInput[i].type = 1;
+                ClickInput[i].dx = relKey;
+                ClickInput[i].dy = KEYEVENTF_KEYDOWN;
+              }
+              SendInput(relKeys.length, ClickInput.address(), MouseInput.size)
+            },
+            50
+          );
+        }
+      }
+
+      let inputSize = relKeys.length + 2;
+      let ClickInput = new new ctypes.ArrayType(MouseInput, inputSize);
+      for (let [i, relKey] in Iterator(relKeys)) {
+        ClickInput[i].type = 1;
+        ClickInput[i].dx = relKey;
+        ClickInput[i].dy = KEYEVENTF_KEYUP;
+      }
+
+      ClickInput[relKeys.length + 0].flags = vs[0];
+      ClickInput[relKeys.length + 1].flags = vs[1];
+
+      SendInput(inputSize, ClickInput.address(), MouseInput.size)
 
       let autoBlur = liberator.globalVariables.win_mouse_auto_blur;
       if (autoBlur) {
@@ -420,14 +457,15 @@ let INFO =
   for (let i = 1; i <= modes.PROMPT; i *= 2)
     ALL_MODE.push(i);
 
-  function mapIfGiven (name, description, action, extra) {
-    let keys = liberator.globalVariables[name];
-    if (!keys)
+  function mapIfGiven (name, func) {
+    let key = liberator.globalVariables[name];
+    if (!key)
       return;
 
+    let [description, action, extra]  = func(key);
     mappings.addUserMap(
       ALL_MODE,
-      [keys],
+      [key],
       description,
       action,
       extra
@@ -443,18 +481,26 @@ let INFO =
   ].forEach(function ([name, dx, dy]) {
     mapIfGiven(
       'win_mouse_map_move_' + name,
-      'Move cursor to' + name,
-      function (count) API.move(D(dx, count), D(dy, count), true),
-      {count: true}
+      function (key) {
+        return [
+          'Move cursor to' + name,
+          function (count) API.move(D(dx, count), D(dy, count), true),
+          {count: true}
+        ];
+      }
     );
   });
 
   ['left', 'right', 'middle'].forEach(function (name) {
     mapIfGiven(
       'win_mouse_map_' + name + '_click',
-      name + ' click',
-      function () API.click(name),
-      {}
+      function (key) {
+        return [
+          name + ' click',
+          function () API.click(name, key),
+          {}
+        ];
+      }
     );
   });
   // }}}
