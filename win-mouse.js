@@ -371,7 +371,8 @@ let INFO =
       return pos;
     },
 
-    move: function (x, y, relative) {
+    move: function ({x, y, relative}) {
+      [x, y] = [x, y].map(function (it) parseInt(it));
       if (relative) {
         let pos = API.position;
         SetCursorPos(pos.x + x, pos.y + y);
@@ -380,7 +381,7 @@ let INFO =
       }
     },
 
-    click: function (name) {
+    click: function ({name, x, y, elem, release}) {
       let vs = buttonNameToClickValues(name || 'left');
       if (!vs)
         throw 'Unknown button name';
@@ -421,6 +422,22 @@ let INFO =
 
       ClickInput[relKeys.length + 0].flags = vs[0];
       ClickInput[relKeys.length + 1].flags = vs[1];
+
+      if (elem) {
+        let view = elem.ownerDocument.defaultView;
+        let [sx, sy] = [view.mozInnerScreenX, view.mozInnerScreenY];
+        let rect = elem.getBoundingClientRect();
+        let [bx, by] = [sx + rect.left, sy + rect.top];
+        x  = !x               ? bx + rect.width / 2 :
+             (0 < x && x < 1) ? bx + rect.width * x :
+             bx + x;
+        y  = !y               ? by + rect.height / 2 :
+             (0 < y && y < 1) ? by + rect.height * y :
+             by + y;
+      }
+
+      if (x && y)
+        API.move({x: x, y: y});
 
       SendInput(inputSize, ClickInput.address(), MouseInput.size)
 
@@ -484,7 +501,7 @@ let INFO =
       function (key) {
         return [
           'Move cursor to' + name,
-          function (count) API.move(D(dx, count), D(dy, count), true),
+          function (count) API.move({x: D(dx, count), y: D(dy, count), relative: true}),
           {count: true}
         ];
       }
@@ -497,7 +514,7 @@ let INFO =
       function (key) {
         return [
           name + ' click',
-          function () API.click(name, key),
+          function () API.click({name: name, release: key}),
           {}
         ];
       }
@@ -525,7 +542,7 @@ let INFO =
           'Click',
           function (args) {
             for (let [, button] in Iterator(args))
-              API.click(button);
+              API.click({name: button});
           },
           {
             completer: function (context, args) {
@@ -546,7 +563,7 @@ let INFO =
             if (args.length == 1)
               y = x;
 
-            API.move(x, y, args['-relative'] || args.bang);
+            API.move({x: x, y: y, relative: args['-relative'] || args.bang});
           },
           {
             bang: true,
