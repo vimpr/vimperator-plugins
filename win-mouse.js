@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Win Cursor" version="1.2.0"
+  <plugin name="Win Cursor" version="1.3.0"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
           lang="en-US"
@@ -588,30 +588,42 @@ let INFO =
           }
         ),
         new Command(
-          ['hint'],
-          'Hint',
+          ['e[lement]'],
+          'Do something with the specified element. (use XPath)',
           function (args) {
-            showHint(
-              function (elem) {
-                API.move({
-                  elem: elem,
-                  x: args['-x'],
-                  y: args['-y']
-                });
-                if (args['-click'])
-                  API.click({name: args['-click']});
-              },
-              args.literalArg
-            );
+            function action (elem) {
+              API.move({
+                elem: elem,
+                x: args['-x'],
+                y: args['-y']
+              });
+              if (args['-click'])
+                API.click({name: args['-click']});
+            }
+
+            let xpath = args.literalArg;
+            let index = args['-index'];
+
+            if (index !== undefined) {
+              let elem = [m for (m in util.evaluateXPath(xpath))][index];
+              if (elem)
+                action(elem);
+              else
+                liberator.echoerr('Not found the element: ' + xpath);
+              return
+            }
+
+            showHint(action, args.literalArg);
           },
           {
             literal: 0,
             bang: true,
             options: [
+              [['-index'], commands.OPTION_INT],
               [['-x'], commands.OPTION_INT],
               [['-y'], commands.OPTION_INT],
               [
-                ['-click'],
+                ['-click', '-c'],
                 commands.OPTION_STRING,
                 function (it) (!!buttonNameToClickValues(it)),
                 [[name, name + ' click'] for ([, name] in Iterator('left right middle'.split(' ')))]
