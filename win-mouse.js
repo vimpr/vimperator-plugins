@@ -109,31 +109,6 @@ let INFO =
   Components.utils.import("resource://gre/modules/ctypes.jsm");
   // }}}
 
-  // 定数 {{{
-  const INPUT_MOUSE = 0;
-  const MOUSEEVENTF_MOVE         = 0x0001; /* mouse move */
-  const MOUSEEVENTF_LEFTDOWN     = 0x0002; /* left button down */
-  const MOUSEEVENTF_LEFTUP       = 0x0004; /* left button up */
-  const MOUSEEVENTF_RIGHTDOWN    = 0x0008; /* right button down */
-  const MOUSEEVENTF_RIGHTUP      = 0x0010; /* right button up */
-  const MOUSEEVENTF_MIDDLEDOWN   = 0x0020; /* middle button down */
-  const MOUSEEVENTF_MIDDLEUP     = 0x0040; /* middle button up */
-  const MOUSEEVENTF_XDOWN        = 0x0080; /* x button down */
-  const MOUSEEVENTF_XUP          = 0x0100; /* x button down */
-  const MOUSEEVENTF_WHEEL        = 0x0800; /* wheel button rolled */
-  // #if (_WIN32_WINNT >= 0x0600)
-  // #define MOUSEEVENTF_HWHEEL      0x01000 /* hwheel button rolled */
-  // #endif
-  // #if(WINVER >= 0x0600)
-  // #define MOUSEEVENTF_MOVE_NOCOALESCE 0x2000 /* do not coalesce mouse moves */
-  // #endif /* WINVER >= 0x0600 */
-  const MOUSEEVENTF_VIRTUALDESK  = 0x4000; /* map to entire virtual desktop */
-  const MOUSEEVENTF_ABSOLUTE     = 0x8000; /* absolute move */
-  const KEYEVENTF_EXTENDEDKEY    = 0x0001;
-  const KEYEVENTF_KEYDOWN        = 0x0000;
-  const KEYEVENTF_KEYUP          = 0x0002;
-  // }}}
-
   // Color {{{
   const Colors = {
     0xffffff: 'white',
@@ -305,8 +280,32 @@ let INFO =
   // }}}
 
   // {{{ WinAPI
+  const INPUT_MOUSE = 0;
+  const MOUSEEVENTF_MOVE         = 0x0001; /* mouse move */
+  const MOUSEEVENTF_LEFTDOWN     = 0x0002; /* left button down */
+  const MOUSEEVENTF_LEFTUP       = 0x0004; /* left button up */
+  const MOUSEEVENTF_RIGHTDOWN    = 0x0008; /* right button down */
+  const MOUSEEVENTF_RIGHTUP      = 0x0010; /* right button up */
+  const MOUSEEVENTF_MIDDLEDOWN   = 0x0020; /* middle button down */
+  const MOUSEEVENTF_MIDDLEUP     = 0x0040; /* middle button up */
+  const MOUSEEVENTF_XDOWN        = 0x0080; /* x button down */
+  const MOUSEEVENTF_XUP          = 0x0100; /* x button down */
+  const MOUSEEVENTF_WHEEL        = 0x0800; /* wheel button rolled */
+  // #if (_WIN32_WINNT >= 0x0600)
+  // #define MOUSEEVENTF_HWHEEL      0x01000 /* hwheel button rolled */
+  // #endif
+  // #if(WINVER >= 0x0600)
+  // #define MOUSEEVENTF_MOVE_NOCOALESCE 0x2000 /* do not coalesce mouse moves */
+  // #endif /* WINVER >= 0x0600 */
+  const MOUSEEVENTF_VIRTUALDESK  = 0x4000; /* map to entire virtual desktop */
+  const MOUSEEVENTF_ABSOLUTE     = 0x8000; /* absolute move */
+  const KEYEVENTF_EXTENDEDKEY    = 0x0001;
+  const KEYEVENTF_KEYDOWN        = 0x0000;
+  const KEYEVENTF_KEYUP          = 0x0002;
+
   const User32 = ctypes.open("user32.dll");
   const GDI32 = ctypes.open("gdi32.dll");
+
   const GetCursorPos =
     User32.declare(
       "GetCursorPos",
@@ -349,6 +348,20 @@ let INFO =
     );
   // }}}
 
+  // Hint {{{
+  const DefaultXPath = '//img | //a | //embed | //object';
+  function showHint (action, xpath) {
+    const HINT_ELEM = 'win-mouse-hint-elem';
+    hints.addMode(
+      HINT_ELEM,
+      'Select the element',
+      action,
+      function () (xpath || DefaultXPath)
+    );
+    hints.show(HINT_ELEM);
+  }
+  // }}}
+
   // Functions {{{
   function buttonNameToClickValues (name) {
     if (typeof name != 'string')
@@ -371,8 +384,22 @@ let INFO =
       return pos;
     },
 
-    move: function ({x, y, relative}) {
+    move: function ({x, y, elem, relative}) {
+      if (elem) {
+        let view = elem.ownerDocument.defaultView;
+        let [sx, sy] = [view.mozInnerScreenX, view.mozInnerScreenY];
+        let rect = elem.getBoundingClientRect();
+        let [bx, by] = [sx + rect.left, sy + rect.top];
+        x  = !x               ? bx + rect.width / 2 :
+             (0 < x && x < 1) ? bx + rect.width * x :
+             bx + x;
+        y  = !y               ? by + rect.height / 2 :
+             (0 < y && y < 1) ? by + rect.height * y :
+             by + y;
+      }
+
       [x, y] = [x, y].map(function (it) parseInt(it));
+
       if (relative) {
         let pos = API.position;
         SetCursorPos(pos.x + x, pos.y + y);
@@ -381,10 +408,13 @@ let INFO =
       }
     },
 
-    click: function ({name, x, y, elem, release}) {
+    click: function ({name, release, x, y, elem, relative}) {
       let vs = buttonNameToClickValues(name || 'left');
       if (!vs)
         throw 'Unknown button name';
+
+      if (x || y || elem)
+        API.move({x: x, y: y, elem: elem, relative: relative});
 
       let relKeys = [];
       if (release) {
@@ -423,22 +453,6 @@ let INFO =
       ClickInput[relKeys.length + 0].flags = vs[0];
       ClickInput[relKeys.length + 1].flags = vs[1];
 
-      if (elem) {
-        let view = elem.ownerDocument.defaultView;
-        let [sx, sy] = [view.mozInnerScreenX, view.mozInnerScreenY];
-        let rect = elem.getBoundingClientRect();
-        let [bx, by] = [sx + rect.left, sy + rect.top];
-        x  = !x               ? bx + rect.width / 2 :
-             (0 < x && x < 1) ? bx + rect.width * x :
-             bx + x;
-        y  = !y               ? by + rect.height / 2 :
-             (0 < y && y < 1) ? by + rect.height * y :
-             by + y;
-      }
-
-      if (x && y)
-        API.move({x: x, y: y});
-
       SendInput(inputSize, ClickInput.address(), MouseInput.size)
 
       let autoBlur = liberator.globalVariables.win_mouse_auto_blur;
@@ -453,7 +467,7 @@ let INFO =
       }
     },
 
-    getPixel: function (x, y) {
+    getPixel: function ({x, y}) {
       if (arguments.length == 0) {
         [x, y] = let (pos = API.position) [pos.x, pos.y];
       }
@@ -525,7 +539,7 @@ let INFO =
   // Define commands {{{
   function displayCurrent () {
     let pos = API.position;
-    let col = API.getPixel(pos.x, pos.y);
+    let col = API.getPixel(pos);
     return liberator.echo(<>[Position] {pos.x}, {pos.y} [Color] {col.r}, {col.g}, {col.b} ({col.name})</>);
   }
 
@@ -557,19 +571,52 @@ let INFO =
           function (args) {
             let [x, y] = args.map(function (it) parseInt(it));
 
-            if (args.length <= 0)
-              return displayCurrent();
-
             if (args.length == 1)
               y = x;
+
+            if (args.length <= 0)
+              return displayCurrent();
 
             API.move({x: x, y: y, relative: args['-relative'] || args.bang});
           },
           {
             bang: true,
             options: [
-              [['-relative'], commands.OPTION_NOARG]
+              [['-relative'], commands.OPTION_NOARG],
+              [['-hint'], commands.OPTION_NOARG]
             ],
+          }
+        ),
+        new Command(
+          ['hint'],
+          'Hint',
+          function (args) {
+            showHint(
+              function (elem) {
+                API.move({
+                  elem: elem,
+                  x: args['-x'],
+                  y: args['-y']
+                });
+                if (args['-click'])
+                  API.click({name: args['-click']});
+              },
+              args.literalArg
+            );
+          },
+          {
+            literal: 0,
+            bang: true,
+            options: [
+              [['-x'], commands.OPTION_INT],
+              [['-y'], commands.OPTION_INT],
+              [
+                ['-click'],
+                commands.OPTION_STRING,
+                function (it) (!!buttonNameToClickValues(it)),
+                [[name, name + ' click'] for ([, name] in Iterator('left right middle'.split(' ')))]
+              ]
+            ]
           }
         )
       ]
