@@ -92,10 +92,20 @@ let INFO =
     </item>
     <item>
       <tags>g:win_mouse_auto_blur</tags>
-      <spec>g:win_mouse_auto_blur = <a>msec</a></spec>
+      <spec>g:win_mouse_auto_blur = <a>0 or 1</a></spec>
       <description>
         <p>
-          <a>msec</a> milliseconds after clicking, automatically blur(unfocus) from embed element.
+          For automatic mappings (g:win_mouse_map_).
+          automatically blur(unfocus) from embed element, after clicking.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:win_mouse_blur_delay</tags>
+      <spec>g:win_mouse_blur_delay = <a>msec</a></spec>
+      <description>
+        <p>
+          <a>msec</a> milliseconds after clicking, blur(unfocus) from embed element.
         </p>
       </description>
     </item>
@@ -408,7 +418,7 @@ let INFO =
       }
     },
 
-    click: function ({name, release, x, y, elem, relative}) {
+    click: function ({name, release, blur, x, y, elem, relative}) {
       let vs = buttonNameToClickValues(name || 'left');
       if (!vs)
         throw 'Unknown button name';
@@ -455,14 +465,14 @@ let INFO =
 
       SendInput(inputSize, ClickInput.address(), MouseInput.size)
 
-      let autoBlur = liberator.globalVariables.win_mouse_auto_blur;
-      if (autoBlur) {
+      liberator.log(blur);
+      if (blur) {
         setTimeout(
           function () {
             if (modes.main === modes.EMBED)
               liberator.focus.blur();
           },
-          autoBlur
+          liberator.globalVariables.win_mouse_auto_blur
         );
       }
     },
@@ -528,7 +538,7 @@ let INFO =
       function (key) {
         return [
           name + ' click',
-          function () API.click({name: name, release: key}),
+          function () API.click({name: name, release: key, blur: liberator.globalVariables.win_mouse_auto_blur}),
           {}
         ];
       }
@@ -555,14 +565,17 @@ let INFO =
           ['click'],
           'Click',
           function (args) {
-            for (let [, button] in Iterator(args))
-              API.click({name: button});
+            for (let [i, button] in Iterator(args))
+              API.click({name: button, blur: (i == (args.length - 1)) && args['-blur']});
           },
           {
             completer: function (context, args) {
               context.title = ['Button'];
               context.completions = [[it, it] for ([, it] in Iterator('left right middle'.split(' ')))];
-            }
+            },
+            options: [
+              [['-blur'], commands.OPTION_NOARG],
+            ]
           }
         ),
         new Command(
