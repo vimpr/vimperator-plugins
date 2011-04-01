@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Win Cursor" version="1.3.0"
+  <plugin name="Win Cursor" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
           lang="en-US"
@@ -465,14 +465,13 @@ let INFO =
 
       SendInput(inputSize, ClickInput.address(), MouseInput.size)
 
-      liberator.log(blur);
       if (blur) {
         setTimeout(
           function () {
             if (modes.main === modes.EMBED)
               liberator.focus.blur();
           },
-          liberator.globalVariables.win_mouse_auto_blur
+          liberator.globalVariables.win_mouse_blur_delay || 50
         );
       }
     },
