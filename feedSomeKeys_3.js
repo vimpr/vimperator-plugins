@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.8.3"
+  <plugin name="feedSomeKeys" version="1.8.4"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -508,7 +508,7 @@ let INFO = <>
               let win = document.commandDispatcher.focusedWindow;
               let frames = getFrames();
 
-              let elem = body(win);
+              let elem = liberator.focus || body(win);
 
               if (typeof args['-frame'] !== 'undefined') {
                 frames = [frames[args['-frame']]];
