@@ -530,7 +530,7 @@ let INFO = <>
     function action (multi) {
       return function (args) {
         let prefix = args['-prefix'] || '';
-        let ms = fromModeStrings(args['-modes']);
+        let ms = fromModeStrings(args['-modes'], true);
 
         function add ([lhs, rhs]) {
           if (!lhs)
@@ -623,7 +623,7 @@ let INFO = <>
     ['fmapc'],
     'Clear fmappings',
     function (args) {
-      let ms = fromModeStrings(args['-modes']);
+      let ms = fromModeStrings(args['-modes'], true);
       if (args.bang) {
         unmap({ignoreUrls: true, modes: ms});
         liberator.log('All fmappings were removed.');
@@ -662,7 +662,7 @@ let INFO = <>
         urls: urls,
         ignoreUrls: args['-ignoreurls'],
         result: result,
-        modes: fromModeStrings(args['-modes'])
+        modes: fromModeStrings(args['-modes'], true)
       });
       liberator.echo(result.matched ? 'Some fmappings were removed.' : 'Not found specifed fmappings.');
     },
