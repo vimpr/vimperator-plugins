@@ -520,7 +520,7 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
             let type = types.charAt(i);
             if ( manager.type[type] ){
                 if ( cacheManager.isAvailable(url, type) ){
-                    liberator.log('cache avairable');
+                    liberator.log('cache available');
                     if (openToBrowser)
                         // TODO
                         manager.open(cacheManager.get(url,type).toHTML(format,false), liberator.forceNewTab);
