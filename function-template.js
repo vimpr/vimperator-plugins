@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">関数テンプレート</name>
   <description>function Template</description>
   <description lang="ja">Vimperator の関数のテンプレート</description>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -63,7 +63,7 @@ let PLUGIN_INFO =
 
 
   commands.addUserCommand(
-    ['co[mmand1]'],
+    ['myco[mmand]'],
     'Description',
     function (args) {
       args.literalArg;
