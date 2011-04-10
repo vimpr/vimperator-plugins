@@ -95,7 +95,28 @@ let PLUGIN_INFO =
         context.completions = [
           ['item1', 'desc1'],
         ];
-      }
+      },
+
+      // サブコマンド ( aptitude install ... みたいなもの)
+      // Command のインスタンスの配列を渡します
+      subCommands: [
+        new Command(
+          ['subA'],
+          'Sub command A'
+          function (args) {
+            // addUserCommand のと同じ
+          },
+          {
+            // extra options これまた addUserCommand のと同じ
+          }
+        ),
+        new Command(
+          ['subB'],
+          'Sub command B'
+          function (args) { },
+          {}
+        )
+      ]
     },
     true // replace
   );
