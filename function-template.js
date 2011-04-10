@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,13 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">関数テンプレート</name>
   <description>function Template</description>
   <description lang="ja">Vimperator の関数のテンプレート</description>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/function-template.js</updateURL>
-  <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
+  <minVersion>3.0</minVersion>
   <detail><![CDATA[
     Functions template
     (Fix|Add) me!
@@ -61,6 +60,10 @@ let PLUGIN_INFO =
   // XXX 以下は実行しないよ。
   return;
 
+
+  /********************************************************************************
+   * ユーザコマンド定義
+   ********************************************************************************/
 
   commands.addUserCommand(
     ['myco[mmand]'],
@@ -98,6 +101,10 @@ let PLUGIN_INFO =
   );
 
 
+  /********************************************************************************
+   * オプションの定義
+   ********************************************************************************/
+
   options.add(
     ['names'],
     'description',
@@ -124,6 +131,10 @@ let PLUGIN_INFO =
   );
 
 
+  /********************************************************************************
+   * ヒント定義
+   ********************************************************************************/
+
   hints.addMode(
     'm', // mode char
     'description',
@@ -132,6 +143,10 @@ let PLUGIN_INFO =
     function () '//*'
   );
 
+
+  /********************************************************************************
+   * マッピング定義
+   ********************************************************************************/
 
   mappings.addUserMap(
     [modes.NORMAL, modes.INSERT, modes.COMMAND_LINE, modes.VISUAL],
@@ -151,6 +166,10 @@ let PLUGIN_INFO =
     }
   );
 
+
+  /********************************************************************************
+   * オートコマンド (各イベント発生時に自動的に呼ばれます)
+   ********************************************************************************/
 
   autocommands.add(
     'LocationChange',
