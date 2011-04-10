@@ -45,7 +45,7 @@ var sendToPhone = function(requestURL) {
     }
   });
   req.addEventListener('onFailure', function(res) {
-    liberator.echoerror('Send to phone failed.');
+    liberator.echoerr('Send to phone failed.');
   });
   req.get();
 }
