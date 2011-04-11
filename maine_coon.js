@@ -325,6 +325,7 @@ let elemStyle =
       autoHideCommandLine = hide;
 
       if (hide) {
+        bottomBar.collapsed = true;
         let cs = messageBox.parentNode.childNodes;
         hiddenNodes = [];
         for (let i = 0, l = cs.length, c; i < l; i++) {
@@ -338,6 +339,7 @@ let elemStyle =
           c.collapsed = true;
         }
       } else {
+        bottomBar.collapsed = false;
         hiddenNodes.forEach(function ([c, v, d]) [c.collapsed, c.style.display] = [v, d]);
       }
     }
