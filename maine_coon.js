@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.6.0</version>
+  <version>2.6.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>3.0</minVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/maine_coon.js</updateURL>
@@ -62,8 +62,6 @@ let PLUGIN_INFO =
           m:
             Displays the message to command-line.
             (e.g. "Yanked http://..." "-- CARET --")
-          l:
-            Large mode (Hide status line)
           u:
             Displays the message of current page URL when page is loaded.
         >||
@@ -85,11 +83,6 @@ let PLUGIN_INFO =
         The Style for message output.
         >||
           let g:maine_coon_style = "border: 1px solid pink; padding: 3px; color: pink; background: black; font: 18px/1 sans-serif;"
-        ||<
-    == Example ==
-      === The mapping for large mode (l) ===
-        >||
-          :noremap <silent> s :set mainecoon!=l<CR>
         ||<
     == Thanks ==
       snaka72 (hidechrome part):
@@ -115,8 +108,6 @@ let PLUGIN_INFO =
           m:
             コマンドラインへのメッセージを表示します。
             ("Yanked http://..." "-- CARET --" など)
-          l:
-            ラージモード (Hide status line)
           u:
             ページが読み込まれたときにURLをポップアップ表示する。
         "c" と "f" の併用は意味がありません。
@@ -141,11 +132,6 @@ let PLUGIN_INFO =
         メッセージ表示のスタイル指定です。
         >||
           let g:maine_coon_style = "border: 1px solid pink; padding: 3px; color: pink; background: black; font: 18px/1 sans-serif;"
-        ||<
-    == Example ==
-      === ラージモード(l) 用のマッピング ===
-        >||
-          :noremap <silent> s :set mainecoon!=l<CR>
         ||<
     == Thanks ==
       snaka72 (hidechrome part):
@@ -247,8 +233,6 @@ let elemStyle =
     window.fullScreen = full;
     delay(function () {
       hideTargets(full);
-      document.getElementById('status-bar').setAttribute('moz-collapsed',
-                                                         options.get('mainecoon').has('l'));
       document.getElementById('navigator-toolbox').collapsed = full;
       if (!full)
         window.maximize();
@@ -439,8 +423,6 @@ let elemStyle =
         function has (c)
           (value.indexOf(c) >= 0);
 
-        document.getElementById('status-bar').setAttribute('moz-collapsed', has('l'));
-
         if (has('f')) {
           hideChrome(false);
           delay(function () setFullscreen(true));
@@ -469,7 +451,6 @@ let elemStyle =
           ['a', 'Hide automatically command-line'],
           ['C', 'Hide caption bar (maximize)'],
           ['m', 'Displays the message to command-line'],
-          ['l', 'Large mode. Hide status-line'],
           ['u', 'Displays the message of current page URL when page is loaded.'],
         ];
       },
