@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.13.3</version>
+  <version>1.14.0</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -1961,6 +1961,8 @@ let PLUGIN_INFO =
           completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + removeNewLine(s.text), s]),
         screenName:
           completer(function(s) [s.user.screen_name, s]),
+        statusPage:
+          completer(function(s) [s.user.screen_name + '/status/' + s.id , s]),
         hashtag:
           function(filter) {
             return makeTimelineCompleter(function(context, args){
@@ -2115,6 +2117,13 @@ let PLUGIN_INFO =
         action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
         timelineCompleter: true,
         completer: Completers.screenName(rejectMine)
+      }),
+      SubCommand({
+        command: ["status"],
+        description: "Open status page.",
+        action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
+        timelineCompleter: true,
+        completer: Completers.statusPage(function (s) s.id)
       }),
       SubCommand({
         command: ["thread"],
