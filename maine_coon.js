@@ -391,29 +391,29 @@ let elemStyle =
     let result = next();
     inputting = true;
     return result;
-  });
+  }, true);
 
   U.around(commandline, 'open', function (next, args) {
     bottomBar.collapsed = false;
     return next();
-  });
+  }, true);
 
   U.around(commandline, 'close', function (next, args) {
     if (autoHideCommandLine && !inputting)
       bottomBar.collapsed = true;
     return next();
-  });
+  }, true);
 
   U.around(commandline._callbacks.submit, modes.EX, function (next, args) {
     let r = next();
     if (autoHideCommandLine && !inputting && !(modes.extended & modes.OUTPUT_MULTILINE))
       commandline.close();
     return r;
-  });
+  }, true);
 
   let (callback = function (next) (inputting = false, next())) {
-    U.around(commandline._callbacks.submit, modes.PROMPT, callback);
-    U.around(commandline._callbacks.cancel, modes.PROMPT, callback);
+    U.around(commandline._callbacks.submit, modes.PROMPT, callback, true);
+    U.around(commandline._callbacks.cancel, modes.PROMPT, callback, true);
   }
 
   events.addSessionListener(
