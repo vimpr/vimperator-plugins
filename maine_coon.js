@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.6.1</version>
+  <version>2.6.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>3.0</minVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/maine_coon.js</updateURL>
@@ -374,6 +374,7 @@ let elemStyle =
   }
 
   U.around(commandline, 'input', function (next, args) {
+    bottomBar.collapsed = false;
     let result = next();
     inputting = true;
     return result;
@@ -397,7 +398,14 @@ let elemStyle =
     return r;
   }, true);
 
-  let (callback = function (next) (inputting = false, next())) {
+  let (
+    callback = function (next) {
+      if (autoHideCommandLine)
+        bottomBar.collapsed = true;
+      inputting = false;
+      return next();
+    }
+  ) {
     U.around(commandline._callbacks.submit, modes.PROMPT, callback, true);
     U.around(commandline._callbacks.cancel, modes.PROMPT, callback, true);
   }
