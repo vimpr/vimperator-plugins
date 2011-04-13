@@ -2,14 +2,14 @@
  * readitlater.js
  * read it later apiをたたく
  * API Reffernce : http://readitlaterlist.com/api/docs/
- * 
+ * TODO:sendに対応する
 */
 
 let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>readitlater</name>
   <description lang="ja">read it later の apiをたたく</description>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <minVersion>3.0</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
@@ -40,19 +40,19 @@ let PLUGIN_INFO =
 	:ril get
 		登録されてるページの情報を取得してバッファにechoします。
 		マウスでクリックするもよし、;oするもよし。
-		オプションとして num , readed , tags が指定できます。
+		オプションとして num , read , tags が指定できます。
 			num => 数字を入れるとその数だけリストを取得します。
 			　:ril get num 3
 			とか
 
-			readed => 指定すると既読のものだけ取得します。
-			  :ril get readed
+			read => 指定すると既読のものだけ取得します。
+			  :ril get read
 			みたいな
 
 			tags => 指定するとtagがついているものだけ取得します。
 
 	:ril stats
-		since, list, unread, readed の情報がとれます
+		since, list, unread, read の情報がとれます
 
 
   ]]></detail>
@@ -92,7 +92,7 @@ commands.addUserCommand(['ril','readitlater'],	'read it late plugin',
 		  },{
 			options : [
 			  [["num"],commands.OPTION_INT],
-			  [["readed","-r"],commands.OPTION_NOARG],
+			  [["read","-r"],commands.OPTION_NOARG],
 			  [["tags","-t"],commands.OPTION_NOARG],
 			  //[["myAppOnly"],commands.OPTION_NOARG],
 			],
@@ -174,7 +174,7 @@ let ReadItLater = {
 			password	: encodeURIComponent(logins[0].password),
 			format 		: "json",
 			count 		: (args["num"]? args["num"] : 30 ),
-			state		: (args["readed"]) ? "read" : "unread",  
+			state		: (args["read"]) ? "read" : "unread",  
 			tags		: (args["tags"]) ? 1 : 0,  
 			myAppOnly	: (args["myAppOnly"]) ? 1 : 0,  
 		  }
@@ -288,7 +288,7 @@ let ReadItLater = {
 		  since : {unixtimeToDate(res.user_since)} <br />
 		  list : {res.count_list} <br />
 		  unread : {res.count_unread} <br />
-		  readed : {res.count_read} <br />
+		  read : {res.count_read} <br />
 		</div>
 	  );
 	});
