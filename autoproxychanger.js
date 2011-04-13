@@ -162,8 +162,9 @@ ProxyChanger.prototype = {
     panel.setAttribute('class', 'statusbarpanel-iconic');
     panel.setAttribute('src', self.isEnable ? ENABLE_ICON : DISABLE_ICON);
     panel.addEventListener('click', function(e) { self.isEnable = !self.isEnable; }, false);
-    document.getElementById('status-bar').insertBefore(
-      panel, document.getElementById('security-button').nextSibling);
+    var statusbar = document.getElementById('status-bar');
+    statusbar.insertBefore(
+      panel, statusbar.firstChild);
     return panel;
   },
   get isEnable() _isEnable,
@@ -176,6 +177,8 @@ ProxyChanger.prototype = {
 var manager = new ProxyChanger();
 
 function init() {
+  if(typeof proxy_settings === 'string')
+    proxy_settings=eval(proxy_settings)
   // initialize manager
   proxy_settings.forEach(function(s) {
     if (s.url instanceof RegExp && s.name)
