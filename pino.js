@@ -35,13 +35,12 @@ var PLUGIN_INFO =
   <name>{NAME}</name>
   <description>Open livedoor Reader pinned items</description>
   <description lang="ja">livedoor Reader でピンを立てたページを開く</description>
-  <minVersion>2.3</minVersion>
-  <maxVersion>2.4</maxVersion>
+  <minVersion>3.0</minVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/pino.js</updateURL>
   <require type="plugin">_libly.js</require>
   <author mail="snaka.gml@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/snaka72/">snaka</author>
   <license>MIT style license</license>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
   <detail><![CDATA[
     == Subject ==
     Open livedoor Reader pinned items.
@@ -285,7 +284,7 @@ let self = liberator.plugins.pino = (function() {
           liberator.echoerr("Can't get pinned list. Maybe you should login to livedoor.");
           return;
         }
-        result = liberator.eval(data.responseText);
+        result = unentifyObjectValues(liberator.eval(data.responseText));
       });
       request.addEventListener("onFailure", function(data) {
         liberator.echoerr("Can't get pinned list!!!");
@@ -330,6 +329,29 @@ let self = liberator.plugins.pino = (function() {
 
   function isLoginPage(response)
     response.responseText.substr(0, 5) == '<?xml'
+
+  function unentify(s) {
+    const EntityTable = {amp: '&'};
+    return s.replace(
+      /&([a-z-A-Z]+);/g,
+      function (whole, name) (name in EntityTable ? EntityTable[name] : whole)
+    );
+  };
+
+  function unentifyObjectValues(obj) {
+    let result = Object.create(obj);
+    for (let [n, v] in Iterator(obj)) {
+      switch (typeof v) {
+      case "object":
+        result[n] = unentifyObjectValues(v);
+        break;
+      case "string":
+        result[n] = unentify(v);
+        break;
+      }
+    }
+    return result;
+  }
 
   // }}}
   // API /////////////////////////////////////////////////////////// {{{
