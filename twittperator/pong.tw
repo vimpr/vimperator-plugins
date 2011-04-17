@@ -11,23 +11,25 @@
 
   plugins.twittperator.ChirpUserStream.addListener(
     function onMsg (msg, raw) {
+      function negi (pattern, reply) {
+        if (RegExp('^\\s*@' + screenName + '\\s+' + pattern + '\s*$')(msg.text.trim())) {
+          plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ' + reply, msg.id_str);
+          return true;
+        }
+      }
+
       if (!(msg.text && msg.user))
         return;
 
       if (msg.text.trim() === ('@' + screenName))
         return plugins.twittperator.Twitter.say('@' + msg.user.screen_name, msg.id_str);
 
-      if (RegExp('^\\s*@' + screenName + '\\s+ping\s*$')(msg.text.trim()))
-        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' pong', msg.id_str);
-
-      if (RegExp('^\\s*@' + screenName + '\\s+pong\s*$')(msg.text.trim()))
-        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' pang', msg.id_str);
-
-      if (RegExp('^\\s*@' + screenName + '\\s+pang\s*$')(msg.text.trim()))
-        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' bang', msg.id_str);
-
-      if (RegExp('^\\s*@' + screenName + '\\s+bang\s*$')(msg.text.trim()))
-        return plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ( \u25D5 \u203F\u203F \u25D5 )', msg.id_str);
+      negi('ping', 'pong') ||
+      negi('pong', 'pang') ||
+      negi('pang', 'bang') ||
+      negi('bang', '( \u25D5 \u203F\u203F \u25D5 )') ||
+      negi('\u30C6\u30A3\u30ED', '\u30D5\u30A3\u30CA\u30FC\u30EC') ||
+      true;
     }
   );
 })();
