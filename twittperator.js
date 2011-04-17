@@ -2351,7 +2351,7 @@ let PLUGIN_INFO =
   if (setting.useChirp){
     if(setting.allReplies)
       ChirpUserStream.start({"replies":"all"});
-    else 
+    else
       ChirpUserStream.start();
   }
 
