@@ -2236,7 +2236,12 @@ let PLUGIN_INFO =
 
       let arg = args.literalArg.slice(0, context.caret);
       let m;
-      if (m = arg.match(/(RT\s+)@.*$/)) {
+      if (m = arg.match(/^D\s+/)) {
+        context.title = ["Name#ID", "Entry"];
+        context.advance(m[0].length);
+        Completers.name(rejectMine)(context, args);
+        return;
+      } else if (m = arg.match(/(RT\s+)@.*$/)) {
         (m.index === 0 ? Completers.name_id
                        : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
       } else if (m = tailMatch(/(^|\b|\s)#[^#\s]*$/, arg)) {
