@@ -9,7 +9,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>readitlater</name>
   <description lang="ja">read it later の apiをたたく</description>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <minVersion>3.0</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
@@ -31,25 +31,20 @@ let PLUGIN_INFO =
 
 
     == Command ==
-	:ril 
+	:ril もしくは :ril add
 		今見ているページのurlとtitleを登録します
-	:ril add	
-		rilした時と同じです。
 		オプションとして url , title が選べるので適当に編集して登録もできます。
 	
 	:ril get
-		登録されてるページの情報を取得してバッファにechoします。
-		マウスでクリックするもよし、;oするもよし。
-		オプションとして num , read , tags が指定できます。
-			num => 数字を入れるとその数だけリストを取得します。
-			　:ril get num 3
-			とか
+		登録されてるページの情報を取得してキャッシュしときます。
+		デフォルトは50件ですが
+		let g:readitlater_get_count = 100
+		とかで取得件数を変更できます。
 
-			read => 指定すると既読のものだけ取得します。
-			  :ril get read
-			みたいな
-
-			tags => 指定するとtagがついているものだけ取得します。
+	:ril open
+		openのあと<Space>で補完にreaditlaterのリストが出てくるので、任意のURLを選択(<Space>)して実行すると新しいタブにopenします。
+		open! とbangをつけると既読のみ補完に表示されます。
+		※初回はキャッシュにデータが入っていないと思うので自分で:ril getしてやる必要があります。
 
 	:ril stats
 		since, list, unread, read の情報がとれます
@@ -68,7 +63,6 @@ commands.addUserCommand(['ril','readitlater'],	'read it late plugin',
 
   },
   {
-	options : [],
 	subCommands: [ 
 	  new Command(["add"], "Add a page to a user's list", 
 		  function (args) {
@@ -91,13 +85,40 @@ commands.addUserCommand(['ril','readitlater'],	'read it late plugin',
 			  ReadItLater.get(args);
 		  },{
 			options : [
-			  [["num"],commands.OPTION_INT],
-			  [["read","-r"],commands.OPTION_NOARG],
-			  [["tags","-t"],commands.OPTION_NOARG],
+			  //[["num"],commands.OPTION_INT],
+			  //[["read","-r"],commands.OPTION_NOARG],
+			  //[["tags","-t"],commands.OPTION_NOARG],
 			  //[["myAppOnly"],commands.OPTION_NOARG],
 			],
 		  }
 	  ),
+
+	  new Command(["open"], "Open url in new tab from RIL list.", 
+		  function (args) {
+			  ReadItLater.open(args);
+		  },{
+			  bang: true,
+			  options :[],
+			  completer : function(context,args){
+				let store = storage.newMap("readitlater",{store:true});
+				context.title = ["url","title"]
+				context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
+	  			context.completions = (function(){
+					let links = [];
+					for(let s in store){
+						if(!args["bang"]){
+							if(s[1].state == 0)	links.push([s[1].url,s[1].title]); // 既読のみ
+						}else{
+							if(s[1].state == 1)	links.push([s[1].url,s[1].title]); // 未読のみ
+						}
+					}
+					return links;
+				})();
+			  },
+		  
+		  }
+	  ),
+
 
 	  new Command(["stats"], "Retrieve information about a user's list", 
 		  function (args) {
@@ -162,6 +183,8 @@ let ReadItLater = {
 	let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
 	let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
 
+	let store = storage.newMap("readitlater",{store:true});
+
 	let req = new libly.Request(
 	  "https://readitlaterlist.com/v2/get" , // url
 	  null, // headers
@@ -173,10 +196,10 @@ let ReadItLater = {
 			username	: encodeURIComponent(logins[0].username),
 			password	: encodeURIComponent(logins[0].password),
 			format 		: "json",
-			count 		: (args["num"]? args["num"] : 30 ),
-			state		: (args["read"]) ? "read" : "unread",  
-			tags		: (args["tags"]) ? 1 : 0,  
-			myAppOnly	: (args["myAppOnly"]) ? 1 : 0,  
+			count 		: (liberator.globalVariables.readitlater_get_count? liberator.globalVariables.readitlater_get_count : 50 ),
+			//state		: (args["read"]) ? "read" : "unread",  
+			//tags		: (args["tags"]) ? 1 : 0,  
+			//myAppOnly	: (args["myAppOnly"]) ? 1 : 0,  
 		  }
 		)
 	  }
@@ -185,23 +208,13 @@ let ReadItLater = {
 
 	req.addEventListener("onSuccess",function(data){
 	  let res = libly.$U.evalJson(data.responseText);
-	  liberator.echo(
-		<style type="text/css"><![CDATA[
-			div.result{color:gold;padding-left:1em;line-height:1.5em;}
-			.result a{text-decoration:none;}
-			.result a:hover{text-decoration:underline;}
-		]]></style> +
-		<div>#ReadItLater Your List</div> 
-	  );
+	  let cnt = 0;
 	  for (let key in res.list){
-		liberator.echo(
-		  <div class="result">
-			<a href={res.list[key].url}>
-			  {res.list[key].title} 
-			</a>
-		  </div>
-		);
+		store.set(key,res.list[key]);
+		cnt++;
 	  }
+	  liberator.echo("[ReadItLater] " + cnt + " found.");
+	  store.save();
 	});
 
 	req.addEventListener("onFailure",function(data){
@@ -252,8 +265,9 @@ let ReadItLater = {
   
   }, // }}}
 
-
-
+  open : function(args){ //{{{
+		liberator.open(args, liberator.NEW_TAB);
+  }, // }}}
 
   stats : function(){ // {{{
 
