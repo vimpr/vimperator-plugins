@@ -1439,6 +1439,9 @@ let PLUGIN_INFO =
 
       if (msg.text)
         Twittperator.onMessage(msg);
+
+      if (msg.friends)
+        Twittperator.onFriends(msg);
     }
 
     function clearPluginData() {
@@ -1636,6 +1639,9 @@ let PLUGIN_INFO =
 
       io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
       io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
+    }, // }}}
+    onFriends: function(msg) { // {{{
+      __context__.Friends = friends = msg.friends;
     }, // }}}
     onMessage: function(msg) { // {{{
       history.unshift(msg);
@@ -2280,7 +2286,7 @@ let PLUGIN_INFO =
             (!lastTime || ((lastTime + setting.statusValidDuration * 1000) < now));
 
           let completer = args.bang ? subCommandCompleter : commandCompelter;
-          let matches = args.bang || args.literalArg.match(/(RT\s+|)@|#/);
+          let matches = args.bang || args.literalArg.match(/(RT\s+|)@|#|^D\s+/);
 
           if (!matches)
             return;
@@ -2331,6 +2337,10 @@ let PLUGIN_INFO =
   if (!history)
     history = __context__.Tweets = Store.get("history", []);
 
+  let friends = __context__.Friends;
+  if (!friends)
+    friends = __context__.Friends = Store.get("friends", []);
+
   let tw = new TwitterOauth(Store);
 
   // ストリーム
@@ -2361,6 +2371,7 @@ let PLUGIN_INFO =
 
   __context__.onUnload = function() {
     Store.set("history", history);
+    Store.set("friends", friends);
     ChirpUserStream.stop();
     TrackingStream.stop();
   };
