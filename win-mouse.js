@@ -610,7 +610,7 @@ let INFO =
                 y: args['-y']
               });
               if (args['-click'])
-                API.click({name: args['-click']});
+                API.click({name: args['-click'], blur: args['-blur']});
             }
 
             let xpath = args.literalArg;
@@ -631,6 +631,7 @@ let INFO =
             literal: 0,
             bang: true,
             options: [
+              [['-blur'], commands.OPTION_NOARG],
               [['-index'], commands.OPTION_INT],
               [['-x'], commands.OPTION_INT],
               [['-y'], commands.OPTION_INT],
