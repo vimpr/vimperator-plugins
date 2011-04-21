@@ -2,7 +2,6 @@
  * readitlater.js
  * read it later apiをたたく
  * API Reffernce : http://readitlaterlist.com/api/docs/
- * TODO:補完リストのソートを時系列にしたい
  * TODO:ADDにbufferからのリストを入れられるように
 */
 
@@ -10,7 +9,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>readitlater</name>
   <description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <minVersion>3.0</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
@@ -80,11 +79,15 @@ let PLUGIN_INFO =
 			  },{
 				options : [
 				  [["url","u"],commands.OPTION_STRING,null,
-					  [[ buffer.URL ,"target url"]]
+		  			  (function(){
+						  return [[ buffer.URL ,"target url"]]
+					  })
 				  ],
 
 				  [["title","t"],commands.OPTION_STRING,null,
-					  [[ buffer.title ,"title"]]
+		  			  (function(){
+						  return [[ buffer.title ,"title"]]
+					  })
 				  ],
 				],
 			  }
