@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="EditVimperatorFile" version="1.2.2"
+  <plugin name="EditVimperatorFile" version="1.2.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
@@ -50,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="EditVimperatorFile" version="1.2.2"
+  <plugin name="EditVimperatorFile" version="1.2.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
@@ -110,6 +110,7 @@ let INFO =
   completion.vimperatorFiles =
     function (context, args) {
       context.title = ['Filename', 'Directory'];
+      context.anchored = false;
       context.completions = util.Array.uniq(getItems().map(function ([file, dir]) [file, dir]));
     };
 

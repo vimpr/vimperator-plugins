@@ -429,6 +429,7 @@ let PLUGIN_INFO =
 		context.title = ["url","title"]
 		context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
 		context.compare = void 0; 
+		context.anchored = false;
 		context.completions = (function(){
 			let links = [];
 			for(let i in list){
