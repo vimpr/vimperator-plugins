@@ -9,7 +9,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
   <name>readitlater</name>
   <description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <minVersion>3.0</minVersion>
   <maxVersion>3.0</maxVersion>
   <author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
@@ -67,13 +67,13 @@ let PLUGIN_INFO =
 
 (function(){
 
-	commands.addUserCommand(['ril','readitlater'],	'Read It Late plugin', 
+	commands.addUserCommand(["ril","readitlater"],	"Read It Late plugin", 
 	  function(args){
 		  ReadItLater.add(args);
 	  },
 	  {
 		subCommands: [ 
-		  new Command(["add"], "Add a page to a user's list", 
+		  new Command(["add","a"], "Add a page to a user's list", 
 			  function (args) {
 				  ReadItLater.add(args);
 			  },{
@@ -93,7 +93,7 @@ let PLUGIN_INFO =
 			  }
 		  ),
 
-		  new Command(["get"], "Retrieve a user's reading list", 
+		  new Command(["get","g"], "Retrieve a user's reading list", 
 			  function (args) {
 				  ReadItLater.get(args);
 			  },{
@@ -106,7 +106,7 @@ let PLUGIN_INFO =
 			  }
 		  ),
 
-		  new Command(["open"], "Open url in new tab from RIL list.", 
+		  new Command(["open","o"], "Open url in new tab from RIL list.", 
 			  function (args) {
 				  ReadItLater.open(args);
 			  },{
@@ -115,7 +115,7 @@ let PLUGIN_INFO =
 			  }
 		  ),
 
-		  new Command(["read"], "Mark items as read.", 
+		  new Command(["read","r"], "Mark items as read.", 
 			  function (args) {
 				  ReadItLater.send(args);
 			  },{
@@ -284,7 +284,7 @@ let PLUGIN_INFO =
 		function make_read_list(args){
 			let o = {};
 			for (let i = 0; i < args.length; i++) {
-				o[i] = {"url":args[i]};
+				o[i] = {"url":encodeURIComponent(args[i])};
 			};
 			return JSON.stringify(o);
 		};
