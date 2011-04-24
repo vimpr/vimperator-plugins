@@ -548,7 +548,7 @@ self.init();
 // -----------------------------------------------------
 // Commmand
 // -----------------------------------------------------
-commands.addUserCommand(['sl'],decodeURIComponent(escape('キータイプを矯正します。')),
+commands.addUserCommand(['sl'], 'キータイプを矯正します。',
   function(args){
     let opt = {};
 
