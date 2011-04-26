@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.4"
+<plugin name="pixiv.js" version="0.5"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -176,21 +176,30 @@ commands.addUserCommand(
     };
 
     let getImageUrls=function(pageContents){
-      let url=new Array();
+      const BIG='_big';
+      let url=[];
+      let strScript;
+      let fst,snd;
+      let strFst='';
+      let strSnd='';
       let tblElm;
       let i;
       let htmldoc=getDOMHtmlDocument(pageContents);
       if(htmldoc){
         let max=htmldoc.getElementsByClassName('image-container').length;
-        let strScript;
-        let st,end;
         for(i=0;i<max;i++){
           strScript=htmldoc.getElementsByClassName('image-container').item(i)
             .getElementsByTagName('script').item(0)
             .childNodes.item(0).nodeValue;
-          st=strScript.substr(strScript.search(/unshift/i)+'unshift'.length+2);
-          end=st.substr(0,st.indexOf("'"));
-          url.push(end);
+          fst=strScript.search(/unshift/i)+'unshift'.length+2;
+          snd=strScript.indexOf('_',fst);
+          strFst=strScript.substr(fst,snd-fst);
+
+          fst=snd;
+          snd=strScript.indexOf("'",fst);
+          strSnd=strScript.substr(fst,snd-fst);
+          
+          url.push(strFst+BIG+strSnd);
         }
       }else{
         url.length=0;
