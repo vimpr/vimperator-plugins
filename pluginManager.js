@@ -312,7 +312,7 @@ Plugin.prototype = { // {{{
                 headers: {}
             };
 
-        if (url && /^(http|ftp):\/\//.test(url)){
+        if (url && /^(https?|ftp):\/\//.test(url)){
             let xhr = util.httpGet(url);
             let version = '';
             let source = xhr.responseText || '';
