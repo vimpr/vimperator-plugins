@@ -192,7 +192,7 @@ commands.addUserCommand(
             .getElementsByTagName('script').item(0)
             .childNodes.item(0).nodeValue;
           fst=strScript.search(/unshift/i)+'unshift'.length+2;
-          snd=strScript.indexOf('_',fst);
+          snd=strScript.lastIndexOf('_');
           strFst=strScript.substr(fst,snd-fst);
 
           fst=snd;
