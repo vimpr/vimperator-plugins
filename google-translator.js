@@ -191,6 +191,20 @@ let INFO =
       (liberator.globalVariables.google_translator_actions || 'echo').split(' ')
   };
 
+  function getTexts ()
+    util.Array.uniq(
+      [it.textContent.trim().replace(/\n|\s+/g, ' ') for (it in Iterator(util.evaluateXPath('//text()')))],
+      true
+    );
+
+  function textCompleter (context, args) {
+    context.completions = [
+      [it, '']
+      for ([, it] in Iterator(getTexts()))
+      if (it.length > 3 && !/^\s*</(it))
+    ];
+  }
+
   function guessRequest (text, done) {
     let url =
       'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0' +
@@ -360,6 +374,7 @@ let INFO =
             [['-to', '-t'], commands.OPTION_STRING, null, languages],
             [['-guess', '-g'], commands.OPTION_NOARG]
           ],
+      completer: textCompleter
     },
     true
   );
