@@ -1478,6 +1478,7 @@ Thanks:
 
     functions: {
       currentTime: 'w',
+      fetch: 'x',
       makeURL: 'x',
       muted: 'w',
       pause: 'x',
@@ -1526,6 +1527,25 @@ Thanks:
     // XXX setVolume は実際には存在しない？
     get volume () parseInt(this.player.__stella_volume),
     set volume (value) (this.api_setVolume(value), this.player.__stella_volume = value),
+
+    fetch: function(filepath) {
+      let self = this;
+      let id = U.currentURL.match(/vimeo\.com\/(\d+)/)[1];
+      U.httpRequest(
+        'http://www.vimeo.com/moogaloop/load/clip:' + id,
+        null,
+        function(xhr) {
+          let doc = xhr.responseXML;
+          let signature = U.xpathGet('/xml/request_signature', doc).textContent;
+          let timestamp = U.xpathGet('/xml/timestamp', doc).textContent;
+          let isHD = parseInt(U.xpathGet('/xml/video/isHD', doc).textContent);
+          let url = 'http://www.vimeo.com/moogaloop/play/clip:' + id
+            + '/' + signature + '/' + timestamp
+            + '/?q=' + (isHD ? 'hd' : 'sd');
+          U.download(url, filepath, isHD ? '.mp4' : '.flv', self.title);
+        }
+      );
+    },
 
     makeURL: function (value, type) {
       switch (type) {
