@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name lang="ja">メインクーン</name>
   <description>Make the screen larger</description>
   <description lang="ja">なるべくでかい画面で使えるように</description>
-  <version>2.6.3</version>
+  <version>2.6.5</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>3.0</minVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/maine_coon.js</updateURL>
@@ -330,8 +330,18 @@ let PLUGIN_INFO =
     }
   })();
 
+  function makeTimeoutDelay (f, n) {
+    if (typeof n === 'undefined')
+      n = 1;
+
+    if (n > 1)
+      f = makeTimeoutDelay(f, n - 1);
+
+    return function () setTimeout(f, 10);
+  }
+
   function focusToCommandline ()
-    setTimeout(function () commandlineBox.inputField.focus(), 0);
+    commandlineBox.inputField.focus();
 
 
   let useEcho = false;
@@ -378,16 +388,16 @@ let PLUGIN_INFO =
   }
 
   U.around(commandline, 'input', function (next, args) {
-    bottomBar.collapsed = false;
     let result = next();
     inputting = true;
+    bottomBar.collapsed = false;
     focusToCommandline();
     return result;
   }, true);
 
   U.around(commandline, 'open', function (next, args) {
-    bottomBar.collapsed = false;
     let result = next();
+    bottomBar.collapsed = false;
     focusToCommandline();
     return result;
   }, true);
