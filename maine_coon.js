@@ -141,26 +141,6 @@ let PLUGIN_INFO =
   ]]></detail>
 </VimperatorPlugin>;
 
-let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/);
-let elemStyle =
-  (
-    liberator.globalVariables.maine_coon_style
-    ||
-    libly.$U.toStyleText({
-      height: '1em',
-      margin: 0,
-      padding: '3px',
-      border: '1px solid #b3b3b3',
-      borderLeft: 0,
-      borderBottom: 0,
-      textAlign: 'left',
-      color: '#000',
-      font: '11px/1 sans-serif',
-      background: '#ebebeb'
-    })
-  );
-
-
 (function () {
 
   let U = libly.$U;
@@ -168,6 +148,26 @@ let elemStyle =
   let messageBox = document.getElementById('liberator-message');
   let bottomBar = document.getElementById('liberator-bottombar');
   let commandlineBox = document.getElementById('liberator-commandline-command');
+
+  let tagetIDs = (liberator.globalVariables.maine_coon_targets || '').split(/\s+/);
+  let elemStyle =
+    (
+      liberator.globalVariables.maine_coon_style
+      ||
+      libly.$U.toStyleText({
+        height: '1em',
+        margin: 0,
+        padding: '3px',
+        border: '1px solid #b3b3b3',
+        borderLeft: 0,
+        borderBottom: 0,
+        textAlign: 'left',
+        color: '#000',
+        font: '11px/1 sans-serif',
+        background: '#ebebeb'
+      })
+    );
+
 
   function s2b (s, d) !!((!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s);
 
