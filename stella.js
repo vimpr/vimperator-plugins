@@ -964,35 +964,11 @@ Thanks:
     set volume (value) (this.player.setVolume(value), this.volume),
 
     fetch: function (filepath) {
-      function _fetch (id, t) {
-        let url =
-          "http://youtube.com/get_video?video_id=" + id +
-          "&t=" + decodeURIComponent(t) +
-          (quality ? "&fmt=" + quality : '');
-        U.download(url, filepath, '.flv', self.title);
-      }
-
-      let self = this;
-
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
-      let cargs = content.wrappedJSObject.yt.config_.SWF_CONFIG.args;
-      let quality = cargs.fmt_map.match(/^\d+/);
-      let t = cargs.t;
-      let id = this.id;
-
-      // 時間が経っていると無効化されてしまっている
-      //_fetch(t, id);
-
-      U.httpRequest(
-        U.currentURL,
-        null,
-        function (xhr) {
-          // XXX t が変わるために、キャッシュを利用できない問題アリアリアリアリ
-          let [, t] = xhr.responseText.match(/swfHTML.*&t=([^&]+)/);
-          _fetch(id, t);
-        }
-      );
+      let cargs = content.wrappedJSObject.yt.config_.PLAYER_CONFIG.args;
+      let url = decodeURIComponent(cargs.fmt_url_map.split(',')[0].split('|')[1]);
+      U.download(url, filepath, '.flv', this.title);
     },
 
     makeURL: function (value, type) {
