@@ -33,7 +33,7 @@ let ngWords = liberator.globalVariables.twittperator_plugin_colorful_log_writer_
 let JP = new RegExp("[\\u4e00-\\u9fa0\\u30A1-\\u30F6\\u30FC\\u3042-\\u3093\\u3001\\u3002\\uFF01\\uFF1F]");
 
 //let trackWord = liberator.globalVariables.twittperator_track_words.split(",");
-let trackWord = (liberator.globalVariables.twittperator_plugin_colorful_log_writer_colored_words || '').split(",");
+let trackWord = let (v = liberator.globalVariables.twittperator_plugin_colorful_log_writer_colored_words)(v ? v.split(",") : []);
 for(let i = 0; i < trackWord.length; i++){
   trackWord[i] = trackWord[i].replace(/\|/g, "|#?");
 }
