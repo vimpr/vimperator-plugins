@@ -29,11 +29,11 @@ let timeFormat = "%H:%M";
 let color = { "reset":"\033\[0m", "me":"\033\[0;31m", "reply":"\033\[0;36m", "rt":"\033\[0;32m", "hashtag":"\033\[0;34m", "track":"\033\[0;35m" };
 
 let screenName = liberator.globalVariables.twittperator_screen_name;
-let ngWords = liberator.globalVariables.twittperator_plugin_colorful_log_writer_ng_words;
+let ngWords = liberator.globalVariables.twittperator_plugin_colorful_log_writer_ng_words || '(?!)';
 let JP = new RegExp("[\\u4e00-\\u9fa0\\u30A1-\\u30F6\\u30FC\\u3042-\\u3093\\u3001\\u3002\\uFF01\\uFF1F]");
 
 //let trackWord = liberator.globalVariables.twittperator_track_words.split(",");
-let trackWord = liberator.globalVariables.twittperator_plugin_colorful_log_writer_colored_words.split(",");
+let trackWord = (liberator.globalVariables.twittperator_plugin_colorful_log_writer_colored_words || '').split(",");
 for(let i = 0; i < trackWord.length; i++){
   trackWord[i] = trackWord[i].replace(/\|/g, "|#?");
 }
