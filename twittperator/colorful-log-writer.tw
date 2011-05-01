@@ -1,0 +1,129 @@
+/*
+ * tail -fするとカラフルなTLが流れてくるファイルを書き出すTwittperatorプラグイン
+ *
+ * let g:twittperator_plugin_colorful_log_writer = 1
+ * let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"
+ * let g:twittperator_plugin_colorful_log_writer_colored_words = "COLORED,WORDS"
+ * let g:twittperator_plugin_colorful_log_writer_ng_words = "NG|WORDS"
+ *
+ * twittperatorのChirpUserStreamからのデータをログに書き出す — Gist - https://gist.github.com/510138/
+ * twittperator.js のオレオレプラグイン — Gist - https://gist.github.com/509555
+ */
+
+let usFile = io.File("~/.userstream");
+let tsFile = io.File("~/.trackingstream");
+
+//http://archive.linux.or.jp/JM/html/LDP_man-pages/man3/strftime.3.html
+let timeFormat = "%H:%M";
+
+/*
+0;30 Black
+0;31 Red
+0;32 Green
+0;33 Yellow
+0;34 Blue
+0;35 Magenta
+0;36 Cyan
+0;37 White
+*/
+let color = { "reset":"\033\[0m", "me":"\033\[0;31m", "reply":"\033\[0;36m", "rt":"\033\[0;32m", "hashtag":"\033\[0;34m", "track":"\033\[0;35m" };
+
+let screenName = liberator.globalVariables.twittperator_screen_name;
+let ngWords = liberator.globalVariables.twittperator_plugin_colorful_log_writer_ng_words;
+let JP = new RegExp("[\\u4e00-\\u9fa0\\u30A1-\\u30F6\\u30FC\\u3042-\\u3093\\u3001\\u3002\\uFF01\\uFF1F]");
+
+//let trackWord = liberator.globalVariables.twittperator_track_words.split(",");
+let trackWord = liberator.globalVariables.twittperator_plugin_colorful_log_writer_colored_words.split(",");
+for(let i = 0; i < trackWord.length; i++){
+  trackWord[i] = trackWord[i].replace(/\|/g, "|#?");
+}
+
+plugins.twittperator.ChirpUserStream.addListener(
+  function onMsg (msg, raw) {
+    if (msg.text && msg.user) {
+      if (RegExp(ngWords, 'i').test(msg.text)){ return; }
+
+      //msg内を書き換えたらえらいことになったので
+      let espresso = eval(uneval(msg));
+
+      //ID長を揃えるために15文字になるまでスペースで埋める
+      let spacer = new Array(15 - msg.user.screen_name.length).join(" ");
+      espresso.user.screen_name += spacer;
+
+      //改行をスペースに置換
+      espresso.text = espresso.text.replace(/\x0D\x0A|\x0D|\x0A/g, " ");
+
+      //自分の発言を色付け
+      if(msg.user.screen_name === screenName){ espresso.user.screen_name = espresso.user.screen_name.replace(screenName, color.me + screenName + color.reset); }
+
+      //自分への発言を色付けしたのち、そうじゃないツイートから誰かへの発言だと判別できるものに色付け
+      if(msg.in_reply_to_screen_name === screenName){ espresso.text = espresso.text.replace(/^(@\w{1,15})/, color.me + "$1" + color.reset); }
+      else if(msg.in_reply_to_screen_name){ espresso.text = espresso.text.replace(/^(@\w{1,15})/, color.reply + "$1" + color.reset); }
+
+      //公式RTを見つけたら色付けしたのち、そうじゃないツイートから非公式のそれらしきものも色付け
+      if(msg.retweeted_status){ espresso.text = espresso.text.replace(/^(RT)/, color.rt + "↻ $1" + color.reset); }
+      else espresso.text = espresso.text.replace(/(RT\s)/g, color.rt + "$1" + color.reset);
+
+      //ハッシュタグらしきものがあったら色付け
+      espresso.text = espresso.text.replace(/(#\w+)/g, color.hashtag + "$1" + color.reset);
+
+      //TrackWordに当たるものがあったら色付け ハッシュタグな場合色付け二重になっちゃってる
+      for(let i = 0; i < trackWord.length; i++){
+        let track = new RegExp("(#?" + trackWord[i] + ")", "gi");
+        espresso.text = espresso.text.replace(track, color.track + "$1" + color.reset);
+      }
+
+      usFile.write([
+        espresso.user.screen_name,
+        (new Date(msg.created_at)).toLocaleFormat(timeFormat),
+        espresso.text
+      ].join("\t") + "\n", ">>");
+    }
+  }
+);
+
+plugins.twittperator.TrackingStream.addListener(
+  function onMsg (msg, raw) {
+    if (msg.text && msg.user) {
+      if (!JP.test(msg.text)){ return; }
+      if (RegExp(ngWords, 'i').test(msg.text)){ return; }
+
+      //msg内を書き換えたらえらいことになったので
+      let espresso = eval(uneval(msg));
+
+      //ID長を揃えるために15文字になるまでスペースで埋める
+      let spacer = new Array(15 - msg.user.screen_name.length).join(" ");
+      espresso.user.screen_name += spacer;
+
+      //改行をスペースに置換
+      espresso.text = espresso.text.replace(/\x0D\x0A|\x0D|\x0A/g, " ");
+
+      //自分の発言を色付け
+      if(msg.user.screen_name === screenName){ espresso.user.screen_name = espresso.user.screen_name.replace(screenName, color.me + screenName + color.reset); }
+
+      //自分への発言を色付けしたのち、そうじゃないツイートから誰かへの発言だと判別できるものに色付け
+      if(msg.in_reply_to_screen_name === screenName){ espresso.text = espresso.text.replace(/^(@\w{1,15})/, color.me + "$1" + color.reset); }
+      else if(msg.in_reply_to_screen_name){ espresso.text = espresso.text.replace(/^(@\w{1,15})/, color.reply + "$1" + color.reset); }
+
+      //公式RTを見つけたら色付けしたのち、そうじゃないツイートから非公式のそれらしきものも色付け
+      if(msg.retweeted_status){ espresso.text = espresso.text.replace(/^(RT)/, color.rt + "↻ $1" + color.reset); }
+      else espresso.text = espresso.text.replace(/(RT\s)/g, color.rt + "$1" + color.reset);
+
+      //ハッシュタグらしきものがあったら色付け
+      espresso.text = espresso.text.replace(/(#\w+)/g, color.hashtag + "$1" + color.reset);
+
+      //TrackWordに当たるものがあったら色付け ハッシュタグな場合色付け二重になっちゃってる
+      for(let i = 0; i < trackWord.length; i++){
+        let track = new RegExp("(#?" + trackWord[i] + ")", "gi");
+        espresso.text = espresso.text.replace(track, color.track + "$1" + color.reset);
+      }
+
+      tsFile.write([
+        espresso.user.screen_name,
+        (new Date(msg.created_at)).toLocaleFormat(timeFormat),
+        espresso.text
+      ].join("\t") + "\n", ">>");
+    }
+  }
+);
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
