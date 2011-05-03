@@ -131,6 +131,7 @@ liberator.plugins.subscldr = (function() {
       req.addEventListener("onSuccess", function(res) {
         liberator.log(res.responseText);
         res.getHTMLDocument();
+        if (isLoginForm(res.doc)) throw "Please login to LDR to subscribe the feed.";
         subscribeInfo = getSubscribeInfo(res.doc);
         liberator.log(subscribeInfo.toSource());
       });
@@ -189,6 +190,11 @@ liberator.plugins.subscldr = (function() {
       true  // Use in DEVELOP
     );
 
+  }
+
+  function isLoginForm(htmldoc) {
+    return htmldoc.getElementById('livedoor_id') &&
+           htmldoc.getElementById('password');
   }
 
   function getSubscribeInfo(htmldoc) {
