@@ -131,6 +131,7 @@ liberator.plugins.subscldr = (function() {
       req.addEventListener("onSuccess", function(res) {
         liberator.log(res.responseText);
         res.getHTMLDocument();
+        if (isLoginForm(res.doc)) throw "Please login to LDR to subscribe the feed.";
         subscribeInfo = getSubscribeInfo(res.doc);
         liberator.log(subscribeInfo.toSource());
       });
@@ -191,6 +192,11 @@ liberator.plugins.subscldr = (function() {
 
   }
 
+  function isLoginForm(htmldoc) {
+    return htmldoc.getElementById('livedoor_id') &&
+           htmldoc.getElementById('password');
+  }
+
   function getSubscribeInfo(htmldoc) {
     var subscribeInfo = {
        target_url: null,
@@ -220,7 +226,7 @@ liberator.plugins.subscldr = (function() {
 
   function selectFeed(links, next) {
     liberator.log(links.toSource());
-    liberator.echo("Following feeds were found on this site. Which are you subscribe?");
+    liberator.echo("Following feeds were found on this site. Which do you subscribe?");
     commandline.input("Select or input feed URL ", function(selected) {
       liberator.echo("You select " + selected + ".");
       commandline.close();

@@ -544,13 +544,22 @@ libly.Request.prototype = {
             this.transport = new XMLHttpRequest();
             this.transport.open(method, this.url, this.options.asynchronous, this.options.username, this.options.password);
 
-            this.transport.onreadystatechange = libly.$U.bind(this, this._onStateChange);
+            var stateChangeException;
+            this.transport.onreadystatechange = libly.$U.bind(this, function () {
+                try {
+                    this._onStateChange();
+                } catch (e) {
+                    stateChangeException = e;
+                }
+            });
             this.setRequestHeaders();
             this.transport.overrideMimeType('text/html; charset=' + this.options.encoding);
 
             this.body = this.method == 'POST' ? this.options.postBody : null;
 
             this.transport.send(this.body);
+
+            if (!this.options.asynchronous && stateChangeException) throw stateChangeException;
 
             // Force Firefox to handle ready state 4 for synchronous requests
             if (!this.options.asynchronous && this.transport.overrideMimeType)
