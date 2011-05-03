@@ -223,6 +223,7 @@ let INFO =
 
     if (site) {
       for each (let [n, v] in info) {
+        [n, v] = [String(n), String(v)];
         if (site.name && !site.name(n))
           continue;
         let m = n.match(site.value) || v.match(site.value);
