@@ -112,7 +112,7 @@ let PLUGIN_INFO =
 					if(liberator.globalVariables.readitlater_open_as_read == 1) markAsRead(args);
 				},{
 					bang: true,
-					completer : list_completer,
+					completer : listCompleter,
 				}
 			),
 
@@ -121,7 +121,7 @@ let PLUGIN_INFO =
 					markAsRead(args);
 				},{
 					bang: true,
-					completer : list_completer,
+					completer : listCompleter,
 				}
 			),
 
@@ -452,7 +452,7 @@ let PLUGIN_INFO =
 		liberator.echo("[ReadItLater] " + msg);
 	} // }}}
 
-	function list_completer(context,args){ // {{{
+	function listCompleter(context,args){ // {{{
 
 		function sortDate(store){
 			let ary = [];
@@ -473,7 +473,11 @@ let PLUGIN_INFO =
 			context.completions = [
 				[item.url,item.title]
 				for([, item] in Iterator(data.list))
-				if(!args["bang"] ?  item.state == 0 : item.state == 1)
+				if(
+					!args.some(function (arg) arg == item.url)
+					&&
+					(!args["bang"] ?  item.state == 0 : item.state == 1)
+				)
 			];
 			context.incomplete = false;
 		});
