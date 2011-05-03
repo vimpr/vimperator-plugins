@@ -7,32 +7,32 @@
 
 let PLUGIN_INFO =
 <VimperatorPlugin>
-  <name>readitlater</name>
-  <description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-  <version>0.1.2</version>
-  <minVersion>3.0</minVersion>
-  <maxVersion>3.0</maxVersion>
-  <author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
-  <detail lang="ja"><![CDATA[
+	<name>readitlater</name>
+	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
+	<version>0.1.2</version>
+	<minVersion>3.0</minVersion>
+	<maxVersion>3.0</maxVersion>
+	<author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
+	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
+	<detail lang="ja"><![CDATA[
 
 	Q.これは何？
 	A.Read it Later を快適に使うためのプラグインです
 
 	注意1.
-	  パスワードマネージャに依存してるので、ReadItLaterのID/PWをパスワードマネージャに登録しておく必要があります。
+		パスワードマネージャに依存してるので、ReadItLaterのID/PWをパスワードマネージャに登録しておく必要があります。
 
 	注意2.
-	  API Key を使うので
-	  http://readitlaterlist.com/api/signup/
-	  から自分のAPI Keyを取得して
-	  rcファイルに let g:readitlater_api_key = "api key" と書いておいた方が良いと思います。
-	  デフォルトではあらかじめ私が取得したAPI Key使ってますが、一定時間内のリクエスト数などに制限があるみたいです。
-	  同じキーで1時間に10000回コールするとアレされるそうなので、チームotsuneの方達などは独自で取った方がいいかと思います。
+		API Key を使うので
+		http://readitlaterlist.com/api/signup/
+		から自分のAPI Keyを取得して
+		rcファイルに let g:readitlater_api_key = "api key" と書いておいた方が良いと思います。
+		デフォルトではあらかじめ私が取得したAPI Key使ってますが、一定時間内のリクエスト数などに制限があるみたいです。
+		同じキーで1時間に10000回コールするとアレされるそうなので、チームotsuneの方達などは独自で取った方がいいかと思います。
 
 
-    == Command ==
-	:ril 
+		== Command ==
+	:ril
 	:ril add
 		今見ているページのurlとtitleを登録します
 		オプションとして url , title が選べるので適当に編集して登録もできます。
@@ -53,7 +53,7 @@ let PLUGIN_INFO =
 		としてもらえれば大丈夫です。
 		※初回はキャッシュにデータが入っていないと思うので自分で:ril getしてやる必要があります。
 
-	:ril read 
+	:ril read
 		既読フラグを立てる為のサブコマンドです。
 		openした時に既読にしたくないっていう人はこれを使って既読フラグを立てて下さい。
 
@@ -61,128 +61,126 @@ let PLUGIN_INFO =
 		since, list, unread, read の情報がとれます
 
 
-  ]]></detail>
+	]]></detail>
 </VimperatorPlugin>;
 
 
 (function(){
 
-	commands.addUserCommand(["ril","readitlater"],	"Read It Late plugin", 
-	  function(args){
-		  ReadItLater.add(args);
-	  },
-	  {
-		subCommands: [ 
-		  new Command(["add","a"], "Add a page to a user's list", 
-			  function (args) {
-				  ReadItLater.add(args);
-			  },{
+	commands.addUserCommand(["ril","readitlater"],	"Read It Late plugin",
+		function(args){
+			ReadItLater.add(args);
+		},
+		{
+		subCommands: [
+			new Command(["add","a"], "Add a page to a user's list",
+				function (args) {
+					ReadItLater.add(args);
+				},{
 				options : [
-				  [["url","u"],commands.OPTION_STRING,null,
-		  			  (function(){
-						  return [[ buffer.URL ,"target url"]]
-					  })
-				  ],
+					[["url","u"],commands.OPTION_STRING,null,
+							(function(){
+							return [[ buffer.URL ,"target url"]]
+						})
+					],
 
-				  [["title","t"],commands.OPTION_STRING,null,
-		  			  (function(){
-						  return [[ buffer.title ,"title"]]
-					  })
-				  ],
+					[["title","t"],commands.OPTION_STRING,null,
+							(function(){
+							return [[ buffer.title ,"title"]]
+						})
+					],
 				],
-			  }
-		  ),
+				}
+			),
 
-		  new Command(["get","g"], "Retrieve a user's reading list", 
-			  function (args) {
-				  ReadItLater.get(args);
-			  },{
+			new Command(["get","g"], "Retrieve a user's reading list",
+				function (args) {
+					ReadItLater.get(args);
+				},{
 				options : [
-				  //[["num"],commands.OPTION_INT],
-				  //[["read","-r"],commands.OPTION_NOARG],
-				  //[["tags","-t"],commands.OPTION_NOARG],
-				  //[["myAppOnly"],commands.OPTION_NOARG],
+					//[["num"],commands.OPTION_INT],
+					//[["read","-r"],commands.OPTION_NOARG],
+					//[["tags","-t"],commands.OPTION_NOARG],
+					//[["myAppOnly"],commands.OPTION_NOARG],
 				],
-			  }
-		  ),
+				}
+			),
 
-		  new Command(["open","o"], "Open url in new tab from RIL list.", 
-			  function (args) {
-				  ReadItLater.open(args);
-			  },{
-				  bang: true,
-				  completer : list_completer,
-			  }
-		  ),
+			new Command(["open","o"], "Open url in new tab from RIL list.",
+				function (args) {
+					ReadItLater.open(args);
+				},{
+					bang: true,
+					completer : list_completer,
+				}
+			),
 
-		  new Command(["read","r"], "Mark items as read.", 
-			  function (args) {
-				  ReadItLater.send(args);
-			  },{
-				  bang: true,
-				  completer : list_completer,
-			  }
-		  ),
+			new Command(["read","r"], "Mark items as read.",
+				function (args) {
+					ReadItLater.send(args);
+				},{
+					bang: true,
+					completer : list_completer,
+				}
+			),
 
-		  new Command(["stats"], "Retrieve information about a user's list", 
-			  function (args) {
-				  ReadItLater.stats();
-			  },{}
-		  ),
+			new Command(["stats"], "Retrieve information about a user's list",
+				function (args) {
+					ReadItLater.stats();
+				},{}
+			),
 
-		  /*
-		  new Command(["test"], "Return stats / current rate limit information about your API key", 
-			  function () {
-				  ReadItLater.apiTest();
-			  },{}
-		  ),
-		  */
+			/*
+			new Command(["test"], "Return stats / current rate limit information about your API key",
+				function () {
+					ReadItLater.apiTest();
+				},{}
+			),
+			*/
 		],
 
 
-	  },
-	  true
+		},
+		true
 	);
 
 
 	let ReadItLater = {
-	  api_key : (liberator.globalVariables.readitlater_api_key) ? liberator.globalVariables.readitlater_api_key : "966T6ahYgb081icU10d44byL31p5bF20" ,
+		api_key : (liberator.globalVariables.readitlater_api_key) ? liberator.globalVariables.readitlater_api_key : "966T6ahYgb081icU10d44byL31p5bF20" ,
 
-	  text : function(){ // {{{
+		text : function(){ // {{{
 
 		let req = new libly.Request(
-		  "https://text.readitlaterlist.com/v2/text" , // url
-		  null, // headers
-		  { // options
-			  asynchronous:true,
-			  postBody:getParameterMap(
-				  {
-					  apikey		: this.api_key,
-					  url			: buffer.URL,
-					  mode			: "less",
-					  images		: 0,
-				  }
-			  )
-		  }
-				
+			"https://text.readitlaterlist.com/v2/text" , // url
+			null, // headers
+			{ // options
+			asynchronous:true,
+			postBody:getParameterMap(
+				{
+				apikey   : this.api_key,
+				url      : buffer.URL,
+				mode     : "less",
+				images   : 0,
+				}
+			)
+			}
+
 		);
 
 		req.addEventListener("onSuccess",function(data){
-		  e(data.responseText)
+			e(data.responseText)
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
-	  
-	  }, // }}}
 
+		}, // }}}
 
-
-	  get : function(args,silent){ // {{{
+		get : function(args,silent){ // {{{
 		// document => http://readitlaterlist.com/api/docs#get
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
@@ -190,92 +188,91 @@ let PLUGIN_INFO =
 		let store = storage.newMap("readitlater",{store:true});
 
 		let req = new libly.Request(
-		  "https://readitlaterlist.com/v2/get" , // url
-		  null, // headers
-		  { // options
+			"https://readitlaterlist.com/v2/get" , // url
+			null, // headers
+			{ // options
 			asynchronous:true,
 			postBody:getParameterMap(
-			  {
-				apikey		: this.api_key,
-				username	: encodeURIComponent(logins[0].username),
-				password	: encodeURIComponent(logins[0].password),
-				format 		: "json",
-				count 		: (liberator.globalVariables.readitlater_get_count? liberator.globalVariables.readitlater_get_count : 50 ),
-				//state		: (args["read"]) ? "read" : "unread",  
-				//tags		: (args["tags"]) ? 1 : 0,  
-				//myAppOnly	: (args["myAppOnly"]) ? 1 : 0,  
-			  }
+				{
+				apikey    : this.api_key,
+				username  : encodeURIComponent(logins[0].username),
+				password  : encodeURIComponent(logins[0].password),
+				format    : "json",
+				count     : (liberator.globalVariables.readitlater_get_count? liberator.globalVariables.readitlater_get_count : 50 ),
+				//state   : (args["read"]) ? "read" : "unread",
+				//tags    : (args["tags"]) ? 1 : 0,
+				//myAppOnly: (args["myAppOnly"]) ? 1 : 0,
+				}
 			)
-		  }
-				
+			}
+
 		);
 
 		req.addEventListener("onSuccess",function(data){
-		  let res = libly.$U.evalJson(data.responseText);
-		  let cnt = 0;
-		  for (let key in res.list){
-			store.set(key,res.list[key]);
-			cnt++;
-		  }
-		  if(!silent){liberator.echo("[ReadItLater] " + cnt + " found.")};
-		  store.save();
+			let res = libly.$U.evalJson(data.responseText);
+			let cnt = 0;
+			for (let key in res.list){
+				store.set(key,res.list[key]);
+				cnt++;
+			}
+			if(!silent){liberator.echo("[ReadItLater] " + cnt + " found.")};
+			store.save();
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
-	  
-	  }, // }}}
 
+		}, // }}}
 
-	  add : function(args){ // {{{
+		add : function(args){ // {{{
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
 		let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
 		let req = new libly.Request(
-		  "https://readitlaterlist.com/v2/add" , // url
-		  null, // headers
-		  { // options
+			"https://readitlaterlist.com/v2/add" , // url
+			null, // headers
+			{ // options
 			asynchronous:true,
 			postBody:getParameterMap(
-			  {
-				apikey		: this.api_key,
-				username	: encodeURIComponent(logins[0].username),
-				password	: encodeURIComponent(logins[0].password),
-				url			: encodeURIComponent((args["url"]) ? (args["url"]) : buffer.URL),
-				title		: encodeURIComponent((args["title"]) ? args["title"] : buffer.title),
-			  }
+				{
+				apikey    : this.api_key,
+				username  : encodeURIComponent(logins[0].username),
+				password  : encodeURIComponent(logins[0].password),
+				url       : encodeURIComponent((args["url"]) ? (args["url"]) : buffer.URL),
+				title     : encodeURIComponent((args["title"]) ? args["title"] : buffer.title),
+				}
 			)
-		  }
-				
+			}
+
 		);
 
 		var ref = this;
 		req.addEventListener("onSuccess",function(data){
-		  liberator.echo("[ReadItLater] OK.")
-		  ref.get(null,true);
+			liberator.echo("[ReadItLater] OK.")
+			ref.get(null,true);
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
-	  
-	  }, // }}}
 
-	  open : function(args){ //{{{
+		}, // }}}
+
+		open : function(args){ //{{{
 
 		liberator.open(args, liberator.NEW_BACKGROUND_TAB);
-		if(liberator.globalVariables.readitlater_open_as_read == 1)	this.send(args);
+		if(liberator.globalVariables.readitlater_open_as_read == 1) this.send(args);
 
-	  }, // }}}
+		}, // }}}
 
-	  send : function(args) { //{{{
+		send : function(args) { //{{{
 		// http://readitlaterlist.com/api/docs/#send
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
@@ -290,103 +287,101 @@ let PLUGIN_INFO =
 		};
 
 		let req = new libly.Request(
-		  "https://readitlaterlist.com/v2/send" , // url
-		  null, // headers
-		  { // options
-			asynchronous:true,
-			postBody:getParameterMap(
-			  {
-				apikey		: this.api_key,
-				username	: encodeURIComponent(logins[0].username),
-				password	: encodeURIComponent(logins[0].password),
-				read		: make_read_list(args),
-			  }
-			)
-		  }
+			"https://readitlaterlist.com/v2/send" , // url
+			null, // headers
+			{ // options
+				asynchronous:true,
+				postBody:getParameterMap(
+					{
+					apikey    : this.api_key,
+					username  : encodeURIComponent(logins[0].username),
+					password  : encodeURIComponent(logins[0].password),
+					read      : make_read_list(args),
+					}
+				)
+			}
 		);
-		
+
 		var ref = this;
 		req.addEventListener("onSuccess",function(data){
-		  liberator.echo("[ReadItLater] OK.")
-		  ref.get(null,true);
+			liberator.echo("[ReadItLater] OK.")
+			ref.get(null,true);
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
 
-			 
-	  }, // }}}
 
-	  stats : function(){ // {{{
+		}, // }}}
+
+		stats : function(){ // {{{
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
 		let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
 		let req = new libly.Request(
-		  "https://readitlaterlist.com/v2/stats" , // url
-		  null, // headers
-		  { // options
-			asynchronous:true,
-			postBody:getParameterMap(
-			  {
-				apikey		: this.api_key,
-				username	: encodeURIComponent(logins[0].username),
-				password	: encodeURIComponent(logins[0].password),
-				format		: "json",
-			  }
-			)
-		  }
-				
+			"https://readitlaterlist.com/v2/stats" , // url
+			null, // headers
+			{ // options
+				asynchronous:true,
+				postBody:getParameterMap(
+					{
+					apikey    : this.api_key,
+					username  : encodeURIComponent(logins[0].username),
+					password  : encodeURIComponent(logins[0].password),
+					format    : "json",
+					}
+				)
+			}
+
 		);
 
 		req.addEventListener("onSuccess",function(data){
-		  let res = libly.$U.evalJson(data.responseText);
-		  liberator.echo(
+			let res = libly.$U.evalJson(data.responseText);
+			liberator.echo(
 			<style type="text/css"><![CDATA[
 				div.stats{font-weight:bold;text-decoration:underline;color:gold;padding-left:1em;line-height:1.5em;}
-			]]></style> + 
-			<div>#ReadItLater Stats</div> + 
+			]]></style> +
+			<div>#ReadItLater Stats</div> +
 			<div class="stats">
-			  since : {unixtimeToDate(res.user_since)} <br />
-			  list : {res.count_list} <br />
-			  unread : {res.count_unread} <br />
-			  read : {res.count_read} <br />
+				since : {unixtimeToDate(res.user_since)} <br />
+				list : {res.count_list} <br />
+				unread : {res.count_unread} <br />
+				read : {res.count_read} <br />
 			</div>
-		  );
+			);
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
-	  
-	  }, // }}}
 
+		}, // }}}
 
-
-	  apiTest : function(){ // {{{
+		apiTest : function(){ // {{{
 
 		let req = new libly.Request(
-		  "https://readitlaterlist.com/v2/api" , // url
-		  null, // headers
-		  { // options
+			"https://readitlaterlist.com/v2/api" , // url
+			null, // headers
+			{ // options
 			asynchronous:true,
 			postBody:getParameterMap(
-			  {
-				apikey	: this.api_key,
-			  }
+				{
+				apikey  : this.api_key,
+				}
 			)
-		  }
-				
+			}
+
 		);
 
 		req.addEventListener("onSuccess",function(data){
-		  liberator.echo(
+			liberator.echo(
 			<div>
 				X-Limit-User-Limit : {data.transport.getResponseHeader("X-Limit-User-Limit")} <br />
 				X-Limit-User-Remaining : {data.transport.getResponseHeader("X-Limit-User-Remaining")} <br />
@@ -394,21 +389,19 @@ let PLUGIN_INFO =
 				X-Limit-Key-Limit : {data.transport.getResponseHeader("X-Limit-Key-Limit")} <br />
 				X-Limit-Key-Remaining : {data.transport.getResponseHeader("X-Limit-Key-Remaining")} <br />
 				X-Limit-Key-Reset : {data.transport.getResponseHeader("X-Limit-Key-Reset")} <br />
-			
+
 			</div>
 			);
 		});
 
 		req.addEventListener("onFailure",function(data){
-		  liberator.echoerr(data.statusText);
-		  liberator.echoerr(data.responseText);
+			liberator.echoerr(data.statusText);
+			liberator.echoerr(data.responseText);
 		});
 
 		req.post();
-	  
-	  }, // }}}
 
-
+		}, // }}}
 
 	}
 
@@ -428,7 +421,7 @@ let PLUGIN_INFO =
 
 		context.title = ["url","title"]
 		context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
-		context.compare = void 0; 
+		context.compare = void 0;
 		context.anchored = false;
 		context.completions = (function(){
 			let links = [];
@@ -445,31 +438,26 @@ let PLUGIN_INFO =
 
 	} //}}}
 
+	function unixtimeToDate(ut) { // {{{
+		var t = new Date( ut * 1000 );
+		t.setTime( t.getTime() + (60*60*1000 * 9) ); // +9は日本のタイムゾーン
+		return t;
+	} // }}}
 
+	function getParameterMap(parameters){ // {{{
+		let map = "";
+		for (let key in parameters){
+			if (map) map += "&";
+			map += key + "=" + parameters[key];
+		}
+		return map
+	} // }}}
 
-
-	function unixtimeToDate(ut) { 
-	  var t = new Date( ut * 1000 ); 
-	  t.setTime( t.getTime() + (60*60*1000 * 9) ); // +9は日本のタイムゾーン
-	  return t; 
-	}
-
-	function getParameterMap(parameters){
-	  let map = "";
-	  for (let key in parameters){
-		if (map) map += "&";
-		map += key + "=" + parameters[key];
-	  }
-	  return map
-	}
-
-	// for debug
-	function e(v,c){ 
-	  if(c) util.copyToClipboard(v);
-	  liberator.log(v,-1)
-	} 
+	// for debug {{{
+	function e(v,c){
+		if(c) util.copyToClipboard(v);
+		liberator.log(v,-1)
+	} // }}}
 
 })();
-
-
 
