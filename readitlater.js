@@ -69,13 +69,13 @@ let PLUGIN_INFO =
 
 	commands.addUserCommand(["ril","readitlater"],	"Read It Late plugin",
 		function(args){
-			ReadItLater.add(args);
+			addItemByArgs(args);
 		},
 		{
 		subCommands: [
 			new Command(["add","a"], "Add a page to a user's list",
 				function (args) {
-					ReadItLater.add(args);
+					addItemByArgs(args);
 				},{
 				options : [
 					[["url","u"],commands.OPTION_STRING,null,
@@ -95,7 +95,7 @@ let PLUGIN_INFO =
 
 			new Command(["get","g"], "Retrieve a user's reading list",
 				function (args) {
-					ReadItLater.get(args);
+					ListCache.update(true, function(data) echo([1 for (_ in Iterator(data.list))].length + " found."));
 				},{
 				options : [
 					//[["num"],commands.OPTION_INT],
@@ -108,7 +108,8 @@ let PLUGIN_INFO =
 
 			new Command(["open","o"], "Open url in new tab from RIL list.",
 				function (args) {
-					ReadItLater.open(args);
+					liberator.open(args, liberator.NEW_BACKGROUND_TAB);
+					if(liberator.globalVariables.readitlater_open_as_read == 1) markAsRead(args);
 				},{
 					bang: true,
 					completer : list_completer,
@@ -117,7 +118,7 @@ let PLUGIN_INFO =
 
 			new Command(["read","r"], "Mark items as read.",
 				function (args) {
-					ReadItLater.send(args);
+					markAsRead(args);
 				},{
 					bang: true,
 					completer : list_completer,
@@ -144,6 +145,47 @@ let PLUGIN_INFO =
 		true
 	);
 
+	const CacheStore = storage.newMap("readitlater",{store:true});
+
+	function Cache ({updater, name, limit}) {
+		this.limit = limit || 10 * 1000 * 60;
+		this.name = name;
+		this.updater = updater;
+	}
+
+	Cache.prototype = {
+		get cache() CacheStore.get(name, void 0),
+		set cache(value) CacheStore.set(name, value),
+
+		get: function(callback){ // {{{
+			let self = this;
+
+			if (this.isExpired || !this.cache) {
+				this.lastUpdated = new Date().getTime();
+				this.update(true, callback);
+				return;
+			}
+
+			callback(this.cache);
+		}, // }}}
+
+		update: function(force, callback){ // {{{
+			if (!force && !this.isExpired)
+				return;
+
+			let self = this;
+
+			liberator.log('[ReadItLater] cache updating');
+			this.updater(function(data){
+				self.cache = data;
+				if (callback) callback(data);
+			});
+		}, //}}}
+
+		save: function() CacheStore.save(),
+
+		get isExpired() (!this.lastUpdated || (new Date().getTime() > (this.lastUpdated + this.limit)))
+	};
 
 	let ReadItLater = {
 		api_key : (liberator.globalVariables.readitlater_api_key) ? liberator.globalVariables.readitlater_api_key : "966T6ahYgb081icU10d44byL31p5bF20" ,
@@ -180,12 +222,11 @@ let PLUGIN_INFO =
 
 		}, // }}}
 
-		get : function(args,silent){ // {{{
+		get : function(callback){ // {{{
 		// document => http://readitlaterlist.com/api/docs#get
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
 		let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
-		let store = storage.newMap("readitlater",{store:true});
 
 		let req = new libly.Request(
 			"https://readitlaterlist.com/v2/get" , // url
@@ -208,17 +249,7 @@ let PLUGIN_INFO =
 
 		);
 
-		req.addEventListener("onSuccess",function(data){
-			let res = libly.$U.evalJson(data.responseText);
-			let cnt = 0;
-			for (let key in res.list){
-				store.set(key,res.list[key]);
-				cnt++;
-			}
-			if(!silent){liberator.echo("[ReadItLater] " + cnt + " found.")};
-			store.save();
-		});
-
+		req.addEventListener("onSuccess",function(data) callback(libly.$U.evalJson(data.responseText)));
 		req.addEventListener("onFailure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
@@ -228,7 +259,7 @@ let PLUGIN_INFO =
 
 		}, // }}}
 
-		add : function(args){ // {{{
+		add : function(url,title,callback){ // {{{
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
 		let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
@@ -242,19 +273,15 @@ let PLUGIN_INFO =
 				apikey    : this.api_key,
 				username  : encodeURIComponent(logins[0].username),
 				password  : encodeURIComponent(logins[0].password),
-				url       : encodeURIComponent((args["url"]) ? (args["url"]) : buffer.URL),
-				title     : encodeURIComponent((args["title"]) ? args["title"] : buffer.title),
+				url       : encodeURIComponent(url),
+				title     : encodeURIComponent(title),
 				}
 			)
 			}
 
 		);
 
-		var ref = this;
-		req.addEventListener("onSuccess",function(data){
-			liberator.echo("[ReadItLater] OK.")
-			ref.get(null,true);
-		});
+		req.addEventListener("onSuccess",callback);
 
 		req.addEventListener("onFailure",function(data){
 			liberator.echoerr(data.statusText);
@@ -265,14 +292,7 @@ let PLUGIN_INFO =
 
 		}, // }}}
 
-		open : function(args){ //{{{
-
-		liberator.open(args, liberator.NEW_BACKGROUND_TAB);
-		if(liberator.globalVariables.readitlater_open_as_read == 1) this.send(args);
-
-		}, // }}}
-
-		send : function(args) { //{{{
+		send : function(urls, callback) { //{{{
 		// http://readitlaterlist.com/api/docs/#send
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
@@ -284,7 +304,7 @@ let PLUGIN_INFO =
 				o[i] = {"url":encodeURIComponent(args[i])};
 			};
 			return JSON.stringify(o);
-		};
+		}
 
 		let req = new libly.Request(
 			"https://readitlaterlist.com/v2/send" , // url
@@ -296,23 +316,21 @@ let PLUGIN_INFO =
 					apikey    : this.api_key,
 					username  : encodeURIComponent(logins[0].username),
 					password  : encodeURIComponent(logins[0].password),
-					read      : make_read_list(args),
+					read      : make_read_list(urls),
 					}
 				)
 			}
 		);
 
 		var ref = this;
-		req.addEventListener("onSuccess",function(data){
-			liberator.echo("[ReadItLater] OK.")
-			ref.get(null,true);
-		});
+		req.addEventListener("onSuccess",callback);
 
 		req.addEventListener("onFailure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
 
+	liberator.log(urls)
 		req.post();
 
 
@@ -405,6 +423,35 @@ let PLUGIN_INFO =
 
 	}
 
+	let ListCache = new Cache({name: 'list', updater: ReadItLater.get.bind(ReadItLater)}); // {{{
+	ListCache.remove = function(url){
+		if (!this.cache)
+			return this.udpate(true);
+		let names = [n for ([n, v] in Iterator(this.cache.list)) if (v.url == url)];
+		for (let [, name] in Iterator(names))
+			delete this.cache.list[name];
+		this.save();
+		this.update();
+	}; // }}}
+
+	function markAsRead(urls){ // {{{
+		for (let [, url] in Iterator(urls))
+			ListCache.remove(url);
+		ReadItLater.send(urls, echo.bind(null, "Mark as read: " + urls.length));
+	} // }}}
+
+	function addItemByArgs(args){
+		let url = args["url"] || buffer.URL;
+		ReadItLater.add(url, args["title"] || buffer.title,function(){
+			echo("Added: " + title)
+			ListCache.update(true);
+		});
+	}
+
+	function echo(msg){ // {{{
+		liberator.echo("[ReadItLater] " + msg);
+	} // }}}
+
 	function list_completer(context,args){ // {{{
 
 		function sortDate(store){
@@ -416,25 +463,20 @@ let PLUGIN_INFO =
 			return ary;
 		}
 
-		let store = storage.newMap("readitlater",{store:true});
-		let list = sortDate(store);
-
 		context.title = ["url","title"]
 		context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
 		context.compare = void 0;
 		context.anchored = false;
-		context.completions = (function(){
-			let links = [];
-			for(let i in list){
-				let item = list[i][1];
-				if(!args["bang"]){
-					if(item.state == 0)	links.push([item.url,item.title]); // 既読のみ
-				}else{
-					if(item.state == 1)	links.push([item.url,item.title]); // 未読のみ
-				}
-			}
-			return links;
-		})();
+		context.incomplete = true;
+
+		ListCache.get(function(data){
+			context.completions = [
+				[item.url,item.title]
+				for([, item] in Iterator(data.list))
+				if(!args["bang"] ?  item.state == 0 : item.state == 1)
+			];
+			context.incomplete = false;
+		});
 
 	} //}}}
 
@@ -458,6 +500,11 @@ let PLUGIN_INFO =
 		if(c) util.copyToClipboard(v);
 		liberator.log(v,-1)
 	} // }}}
+
+	// Export {{{
+	__context__.Cache = Cache;
+	__context__.API = ReadItLater;
+	// }}}
 
 })();
 
