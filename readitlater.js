@@ -506,7 +506,7 @@ let PLUGIN_INFO =
 	} // }}}
 
 	// Export {{{
-	__context__.Cache = Cache;
+	__context__.ListCache = ListCache;
 	__context__.API = ReadItLater;
 	// }}}
 
