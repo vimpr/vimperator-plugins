@@ -95,7 +95,7 @@ let PLUGIN_INFO =
 
 			new Command(["get","g"], "Retrieve a user's reading list",
 				function (args) {
-					ListCache.update(true, function(data) echo([1 for (_ in Iterator(data.list))].length + " found."));
+          ListCache.update(true, function(data) echo(countObjectValues(data.list) + " found."));
 				},{
 				options : [
 					//[["num"],commands.OPTION_INT],
@@ -147,6 +147,7 @@ let PLUGIN_INFO =
 
 	const CacheStore = storage.newMap("readitlater",{store:true});
 
+  // Cache {{{
 	function Cache ({updater, name, limit}) {
 		this.limit = limit || 10 * 1000 * 60;
 		this.name = name;
@@ -186,6 +187,7 @@ let PLUGIN_INFO =
 
 		get isExpired() (!this.lastUpdated || (new Date().getTime() > (this.lastUpdated + this.limit)))
 	};
+  // }}}
 
 	let ReadItLater = {
 		api_key : (liberator.globalVariables.readitlater_api_key) ? liberator.globalVariables.readitlater_api_key : "966T6ahYgb081icU10d44byL31p5bF20" ,
@@ -498,6 +500,10 @@ let PLUGIN_INFO =
 		}
 		return map
 	} // }}}
+
+  function countObjectValues(obj){ // {{{
+    return [1 for (_ in Iterator(obj))].length;
+  } // }}}
 
 	// for debug {{{
 	function e(v,c){
