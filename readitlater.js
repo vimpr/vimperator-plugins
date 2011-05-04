@@ -440,13 +440,13 @@ let PLUGIN_INFO =
 		ReadItLater.send(urls, echo.bind(null, "Mark as read: " + urls.length));
 	} // }}}
 
-	function addItemByArgs(args){
+	function addItemByArgs(args){ // {{{
 		let url = args["url"] || buffer.URL;
 		ReadItLater.add(url, args["title"] || buffer.title,function(){
 			echo("Added: " + title)
 			ListCache.update(true);
 		});
-	}
+	} // }}}
 
 	function echo(msg){ // {{{
 		liberator.echo("[ReadItLater] " + msg);
