@@ -28,9 +28,9 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.14.0</version>
+  <version>1.14.1</version>
   <minVersion>2.3</minVersion>
-  <maxVersion>3.0</maxVersion>
+  <maxVersion>3.2</maxVersion>
   <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
@@ -1546,6 +1546,12 @@ let PLUGIN_INFO =
       function unescapeBrakets(str)
         str.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
+      function fixId (obj, name) {
+        let nameStr = name + "_str";
+        if (obj.hasOwnProperty(name) && obj.hasOwnProperty(nameStr) && typeof obj[name] === "number")
+          obj.__defineGetter__(name, function () this[nameStr]);
+      }
+
       let result = {};
       for (let [n, v] in Iterator(st)) {
         result[n] = v && typeof v === "object" ? Utils.fixStatusObject(v) :
@@ -1553,8 +1559,10 @@ let PLUGIN_INFO =
                     v;
       }
 
-      if (result.hasOwnProperty("id") && result.hasOwnProperty("id_str") && typeof result.id === "number")
-        result.__defineGetter__("id", function () this.id_str);
+      for (let [n, v] in Iterator(st)) {
+        if (/(^|_)id$/(n))
+          fixId(result, n);
+      }
 
       return result;
     }, // }}}
