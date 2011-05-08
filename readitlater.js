@@ -125,7 +125,7 @@ let PLUGIN_INFO =
 				}
 			),
 
-			new Command(["stats"], "Retrieve information about a user's list",
+			new Command(["stats","s"], "Retrieve information about a user's list",
 				function (args) {
 					ReadItLater.stats();
 				},{}
