@@ -280,7 +280,7 @@ let INFO =
 
   let actions = {
     echo:
-      liberator.echo,
+      function (text) liberator.echo('<div style="white-space:normal">'+text+'</div>', commandline.FORCE_MULTILINE),
     insert:
       // FIXME 見えない要素相手だとうまくいかない
       function (text) {
