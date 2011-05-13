@@ -97,7 +97,7 @@ const DISABLE_ICON = 'data:image/png;base64,'
 
 var acmanager = [];
 
-const prefkeys = ['ftp','gopher','http','ssl'];
+const prefkeys = ['ftp','gopher','http','ssl', 'socks'];
 var prevSetting = null;
 var _isEnable = false;
 var exec = (function(){
