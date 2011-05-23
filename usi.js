@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.2.2"
+  <plugin name="usi.js" version="1.3.0"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -60,6 +60,29 @@ let INFO =
   const APISecret = '75a925384404568d';
   const Save = storage.newMap(AppName, {store: true});
 
+  // }}}
+
+  // Combo {{{
+  function Combo (block) {
+    return function () {
+      let it;
+      let c = {
+        next: function (result) {
+          setTimeout(function () {
+            if (!it)
+              return;
+            try {
+              c.result = result;
+              it.send(result);
+            } catch (e if e instanceof StopIteration) {}
+          }, 0);
+        },
+        result: void 0
+      };
+      it = block(c, arguments);
+      it.next();
+    };
+  }
   // }}}
 
   // Cache {{{
@@ -140,14 +163,17 @@ let INFO =
   // }}}
 
   const Utils = { // {{{
-    httpGet: function (url, onComplete) {
+    // TODO エラー処理
+    httpGet: function (url, onComplete, synchronize) {
       let xhr = new XMLHttpRequest();
       xhr.open('GET', url, !!onComplete);
       xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status == 200)
+        if (xhr.readyState === 4 && xhr.status == 200 && !synchronize)
           return onComplete(xhr);
       };
       xhr.send();
+      if (synchronize)
+        return onComplete(xhr);
     },
 
     md5: function (str) {
@@ -256,7 +282,7 @@ let INFO =
   }; // }}}
 
   const Cow = { // {{{
-    get: function (_params, {onComplete, onFail, cache, timeline, pre}) { // {{{
+    get: function (_params, {onComplete, onFail, cache, timeline, pre, synchronize}) { // {{{
       function toResult (text)
         (new XMLList(text));
 
@@ -304,6 +330,7 @@ let INFO =
                 method: 'rtm.timelines.create',
               },
               {
+                synchronize: synchronize,
                 onComplete: function (result) {
                   let timeline = result.timeline;
                   Save.set('timeline', timeline);
@@ -319,7 +346,7 @@ let INFO =
 
       let url = Cow.makeURL(params);
       Utils.log('Get from remote: ' + url);
-      Utils.httpGet(
+      return Utils.httpGet(
         url,
         function (xhr) {
           let text = xhr.responseText.replace(/^<\?[^\?]+\?>/, '');
@@ -331,7 +358,8 @@ let INFO =
           } else {
             onFail(result);
           }
-        }
+        },
+        synchronize
       );
     }, // }}}
 
@@ -422,6 +450,35 @@ let INFO =
     } //}}}
   }; // }}}
 
+  const CommandOptions = { // {{{
+    lists: [
+      ['-lists', '-l'],
+      commands.OPTION_LIST,
+      null,
+      function (context, args) {
+        return Cow.get(
+          {
+            method: 'rtm.lists.getList',
+          },
+          {
+            synchronize: true,
+            cache: 'lists.getList',
+            onComplete: function (result) {
+              let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
+              if (prefix)
+                  context.advance(prefix.length);
+              return [
+                [v.@name, v.@id]
+                for ([k, v] in Iterator(result.lists.list))
+              ];
+            }
+          }
+        );
+      }
+    ]
+  };
+  // }}}
+
   // Command maker {{{
 
   function TaskActionOnComplete (text) {
@@ -436,7 +493,7 @@ let INFO =
     }
   }
 
-  function SelectorCommand ({names, cache, description, action, onComplete, timeline, completionMethod, completionList}) { // {{{
+  function SelectorCommand ({names, cache, description, action, onComplete, timeline, completionMethod, completionList, completer}) { // {{{
     let ccKey = names + ':' + Utils.md5(Error().stack);
     return new Command(
       names instanceof Array ? names : [names],
@@ -455,7 +512,7 @@ let INFO =
       },
       {
         literal: 0,
-        completer: function (context, args){
+        completer: completer || function (context, args){
           context.incomplete = true;
           Cow.get(
             completionMethod,
@@ -473,44 +530,93 @@ let INFO =
   } // }}}
 
   function TaskSelectorCommand ({key, method, filter, cache, names, description, onComplete}) { // {{{
-    return SelectorCommand({
-        key: key,
-        names: names,
-        description: description,
-        cache: cache || 'rtm.tasks.getList?filter=status:incomplete',
-        timeline: true,
-        action: function ([list, taskseries, task]) {
-          return {
+    let ccKey = names + ':' + Utils.md5(Error().stack);
+    if (!cache)
+      cache = 'rtm.tasks.getList?filter=status:incomplete';
+    return new Command(
+      names instanceof Array ? names : [names],
+      description,
+      function (args) {
+        Cow.get(
+          let ([list, taskseries, task] = CompletionCache.get(ccKey, args)) ({
             method: 'rtm.' + key,
             list_id: list.@id,
             taskseries_id: taskseries.@id,
             task_id: task.@id
-          };
-        },
-        onComplete: onComplete,
-        completionMethod: {
-          method: 'rtm.tasks.getList',
-          filter: filter || 'status:incomplete'
-        },
-        completionList: function (result) {
-          let cs = [];
-          let n = new Date().getTime();
-          for (let [, list] in Iterator(result.tasks.list)) {
-            for (let [, taskseries] in Iterator(list.taskseries)) {
-              for (let [, task] in Iterator(taskseries.task)) {
-                cs.push(let (d = Utils.toDate(task.@due)) [
-                  (d ? d.getTime() : Infinity),
-                  [taskseries.@name, Utils.toSmartDateText(task.@due), [list, taskseries, task], {warn: d < n}]
-                ]);
+          }),
+          {
+            timeline: true,
+            onComplete: onComplete
+          }
+        );
+        CompletionCache.remove(ccKey);
+        if (typeof cache === 'string')
+          Cache.remove(cache);
+      },
+      {
+        literal: 0,
+        options: [CommandOptions.lists],
+        completer: Combo(function (c, [context, args]) {
+          context.incomplete = false;
+
+          Cow.get(
+            {
+              method: 'rtm.lists.getList',
+            },
+            {
+              cache: 'lists.getList',
+              onComplete: function (result) {
+                let table = {name2id: {}, id2name: {}};
+                for (let [k, v] in Iterator(result.lists.list)) {
+                  table.name2id[v.@name] = v.@id;
+                  table.id2name[v.@id] = v.@name;
+                }
+                c.next(table);
               }
             }
-          }
+          );
 
-          // 現在に近い順に並べます
-          Utils.timeArraySort(cs);
-          return cs.map(function ([a, b]) b);
-        }
-      });
+          let table = yield;
+
+          let lists = args['-lists'] || [];
+
+          context.filter =
+            context.filter.replace(
+              /\s*#(\S+)\s*/g,
+              function (m, name) (table.name2id[name] ? (lists.push(name), '') : m)
+            );
+
+          Cow.get({
+              method: 'rtm.tasks.getList',
+              filter: filter || 'status:incomplete'
+            },
+            {
+              cache: cache,
+              onComplete: function (result) {
+                let cs = [];
+                let n = new Date().getTime();
+                for (let [, list] in Iterator(result.tasks.list)) {
+                  if (lists.length && lists.every(function (name) table.id2name[list.@id] != name))
+                    continue;
+                  for (let [, taskseries] in Iterator(list.taskseries)) {
+                    for (let [, task] in Iterator(taskseries.task)) {
+                      cs.push(let (d = Utils.toDate(task.@due)) [
+                        (d ? d.getTime() : Infinity),
+                        [taskseries.@name, Utils.toSmartDateText(task.@due), [list, taskseries, task], {warn: d < n}]
+                      ]);
+                    }
+                  }
+                }
+
+                // 現在に近い順に並べます
+                Utils.timeArraySort(cs);
+                CompletionCache.complete(ccKey, context, args, cs.map(function ([a, b]) b));
+              }
+            }
+          )
+        })
+      }
+    );
   } // }}}
   // }}}
 
@@ -684,7 +790,24 @@ let INFO =
     new Command(
       ['t[ask]'],
       'Task control',
-      function (args) {
+      Combo(function (c, [args]) {
+        Cow.get(
+          {
+            method: 'rtm.lists.getList',
+          },
+          {
+            cache: 'lists.getList',
+            onComplete: function (result) {
+              let table = {};
+              for (let [k, v] in Iterator(result.lists.list))
+                table[v.@id] = v.@name;
+              c.next(table);
+            }
+          }
+        );
+
+        let table = yield;
+
         Cow.get(
           {
             method: 'rtm.tasks.getList',
@@ -694,8 +817,11 @@ let INFO =
             cache: 'rtm.tasks.getList?filter=status:incomplete',
             onComplete: function (result) {
               let cs = [];
+              let lists = args['-list'];
 
               for (let [, list] in Iterator(result.tasks.list)) {
+                if (lists && lists.every(function (name) table[list.@id] != name))
+                  continue;
                 for (let [, taskseries] in Iterator(list.taskseries)) {
                   for (let [, task] in Iterator(taskseries.task)) {
                     cs.push([
@@ -710,7 +836,6 @@ let INFO =
               Utils.timeArraySort(cs);
               let contents = <></>;
               for (let [, [d, [a, b]]] in Iterator(cs)) {
-                liberator.log(d + ', ' + b);
                 let hl = (n - d) > 0 ? 'ErrorMsg' : '';
                 contents += <tr highlight={hl}><td>{a}</td><td>{b}</td></tr>;
               }
@@ -718,8 +843,9 @@ let INFO =
             }
           }
         );
-      },
+      }),
       {
+        options: [CommandOptions.lists],
         subCommands: TaskSubCommands
       }
     ),
