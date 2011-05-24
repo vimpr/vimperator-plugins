@@ -25,6 +25,7 @@ var Pypi = {
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
             if (req.readyState == 4) {
+                Pypi.packages = [];
                 var lines = req.responseText.split('\n');      
                 for (var i=0; i<lines.length; i++) {
                     var line = lines[i];
