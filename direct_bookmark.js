@@ -1,4 +1,4 @@
-// Last Change: 21-Jan-2010. Jan 2008
+// Last Change: 27-May-2011. Jan 2008
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
@@ -490,7 +490,7 @@ for Migemo search: require XUL/Migemo Extension
             poster:function(user,password,url,title,comment,tags){
                 var request_url = 'http://www.google.com/bookmarks/mark';
                 var params = [
-                    ['bkmk', url], ['title', title], ['labels', tags.join(',')]
+                    ['bkmk', url], ['title', title], ['labels', tags.join(',')], ['annotation', comment]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "post",
