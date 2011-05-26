@@ -145,7 +145,7 @@ function Service(service) //{{{
 
         login();
     };
-    self.logout = function(){
+    self.logout = function(username){
         let content = {};
         let host = service.HOST[0];
         if (service.extraField && !self.setExtraField(content)) return false;
