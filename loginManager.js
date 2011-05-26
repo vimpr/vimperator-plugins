@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>3.1</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
@@ -239,7 +239,7 @@ commands.addUserCommand(["login"], "Login",
         completer: function(context, args){
             if (args.completeArg == 0){
                 context.title = ["service"];
-                context.completions = [[s,""] for(s in services)];
+                context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
             } else if (args.completeArg == 1){
                 let service = services[args[0]];
                 if (!service) return false;
@@ -258,7 +258,7 @@ commands.addUserCommand(["logout"], "Logout",
     }, {
         completer: function(context, args){
             context.title = ["service"];
-            context.completions = [[s,""] for(s in services)];
+            context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
         },
     }, true);
 // }}}
