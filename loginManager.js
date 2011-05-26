@@ -217,23 +217,29 @@ function tokenGetter(pattern) //{{{
             return RegExp.$1;
         }
     };
+}
+function getServiceAndUsernameFromArgs(args, logout)
+{
+    let [servicename, username] = args;
+    let service = services[servicename];
+    if (!service) return;
+    if (!username) {
+        let names = service.getUsernames();
+        if (names.length === 1)
+            username = names[0];
+    }
+    return [service, username];
 } //}}}
 
 // Commands
 // {{{
 commands.addUserCommand(["login"], "Login",
     function(args){
-        let [servicename, username] = args;
-        let service = services[servicename];
-        if (!service) return liberator.echoerr("Argument required. Please supply service name.");
-        if (!username) {
-            let names = service.getUsernames();
-            if (names.length === 1) {
-                username = names[0];
-            } else {
-                return liberator.echoerr("Argument required. Please supply user name.");
-            }
-        }
+        let [service, username] = getServiceAndUsernameFromArgs(args);
+        if (!service)
+            return liberator.echoerr("Argument required. Please supply service name.");
+        if (!username)
+            return liberator.echoerr("Argument required. Please supply user name.");
         service.login(username);
     }, {
         completer: function(context, args){
@@ -251,9 +257,9 @@ commands.addUserCommand(["login"], "Login",
     }, true);
 commands.addUserCommand(["logout"], "Logout",
     function(args){
-        let [servicename, username] = args;
-        let service = services[servicename];
-        if (!service) return false;
+        let [service, username] = getServiceAndUsernameFromArgs(args);
+        if (!service)
+            return liberator.echoerr("Argument required. Please supply service name.");
         service.logout(username);
     }, {
         completer: function(context, args){
