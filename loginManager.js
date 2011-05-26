@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.2pre</maxVersion>
+    <maxVersion>3.1</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
@@ -225,7 +225,15 @@ commands.addUserCommand(["login"], "Login",
     function(args){
         let [servicename, username] = args;
         let service = services[servicename];
-        if (!service) return false;
+        if (!service) return liberator.echoerr("Argument required. Please supply service name.");
+        if (!username) {
+            let names = service.getUsernames();
+            if (names.length === 1) {
+                username = names[0];
+            } else {
+                return liberator.echoerr("Argument required. Please supply user name.");
+            }
+        }
         service.login(username);
     }, {
         completer: function(context, args){
@@ -240,7 +248,7 @@ commands.addUserCommand(["login"], "Login",
             }
         },
         literal: 1,
-    });
+    }, true);
 commands.addUserCommand(["logout"], "Logout",
     function(args){
         let [servicename, username] = args;
@@ -252,7 +260,7 @@ commands.addUserCommand(["logout"], "Logout",
             context.title = ["service"];
             context.completions = [[s,""] for(s in services)];
         },
-    });
+    }, true);
 // }}}
 
 })();
