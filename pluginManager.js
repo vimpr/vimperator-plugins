@@ -303,7 +303,7 @@ Plugin.prototype = { // {{{
         return template.table(this.name, data);
     }, // }}}
     getResourceInfo: function(){
-        var store = storage.newMap('plugins-pluginManager', true);
+        var store = storage.newMap('plugins-pluginManager', {store: true});
         var url = this.info.updateURL;
         var localResource = store.get(this.name) || {};
         var serverResource = {

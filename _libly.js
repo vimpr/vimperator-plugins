@@ -682,7 +682,7 @@ libly.Wedata.prototype = {
 
         var logger = this.logger;
         var STORE_KEY = 'plugins-libly-wedata-' + this.dbname + '-items';
-        var store = storage.newMap(STORE_KEY, true);
+        var store = storage.newMap(STORE_KEY, {store: true});
         var cache = store && store.get('data');
 
         if (store && cache && new Date(store.get('expire')) > new Date()) {

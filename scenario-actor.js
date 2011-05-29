@@ -93,7 +93,7 @@ var $U = libly.$U;
 var logger = $U.getLogger('scenario-actor');
 
 function ScenarioActor () { //{{{
-    let variables = storage.newMap('scenarioactor', true);
+    let variables = storage.newMap('scenarioactor', {store: true});
 
     function ScenarioContext(event) { //{{{
         let triggeredEvent = event;

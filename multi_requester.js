@@ -123,7 +123,7 @@ var libly = liberator.plugins.libly;
 var $U = libly.$U;
 var logger = $U.getLogger("multi_requester");
 var mergedSiteinfo = {};
-var store = storage.newMap('plugins-multi_requester', true);
+var store = storage.newMap('plugins-multi_requester', {store: true});
 //}}}
 
 // Vimperator plugin command register {{{
