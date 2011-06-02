@@ -47,9 +47,9 @@ commands.addUserCommand(
       null //relatedTarget
     ); 
     let btnPlay=contents.getElementById('play0');
-    if(null==btnPlay.getAttribute('style')){ // for twaud.io's bug
-      contents.location.reload();
-    }else if('display: block;'==btnPlay.getAttribute('style')){
+    let btnPause=contents.getElementById('pause0');
+    if(('display: block;'==btnPlay.getAttribute('style'))
+      ||(null==btnPlay.getAttribute('style'))){
       btnPlay.dispatchEvent(evt);
     }else{
       let btnPause=contents.getElementById('pause0');
