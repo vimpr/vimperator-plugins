@@ -39,12 +39,11 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.32.7</version>
+  <version>0.32.8</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
-  <maxVersion>3.0</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -923,11 +922,12 @@ Thanks:
         let url = item.querySelector('a').href;
         if (!YouTubePlayer.isVideoURL(url))
           continue;
+        let id = YouTubePlayer.getIDfromURL(url);
         result.push(
           new RelatedID(
-            YouTubePlayer.getIDfromURL(url),
+            id,
             item.querySelector('span.title').textContent,
-            item.querySelector('img').src
+            'http://img.youtube.com/vi/' + id + '/1.jpg'
           )
         );
       }
