@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.6</version>
+    <version>0.0.7</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>3.1</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
@@ -107,6 +107,29 @@ var services = {
         passwordField: "login_pw",
         extraField: {
             CSRFPROTECT: tokenGetter(/CSRFPROTECT.+value="(.+?)"/),
+        },
+    },
+    delicious: {
+        HOST: ["https://secure.delicious.com"],
+        LOGIN: "/login",
+        LOGOUT: "/logout",
+        usernameField: "username",
+        passwordField: "password",
+        extraField: {
+            rememberme: "1",
+        },
+    },
+    evernote: {
+        HOST: ["https://www.evernote.com"],
+        LOGIN: "/Login.action",
+        LOGOUT: "/Logout.action",
+        usernameField: "username",
+        passwordField: "password",
+        extraField: {
+            rememberMe: "true",
+            _sourcePage: tokenGetterLoginURL(/_sourcePage.+value="(.+?)"/),
+            __fp: tokenGetterLoginURL(/__fp.+value="(.+?)"/),
+            login: "Sign In",
         },
     },
 };
@@ -213,6 +236,15 @@ function tokenGetter(pattern) //{{{
 {
     return function(service){
         let res = util.httpGet(service.HOST[0]);
+        if (pattern.test(res.responseText)){
+            return RegExp.$1;
+        }
+    };
+}
+function tokenGetterLoginURL(pattern) //{{{
+{
+    return function(service){
+        let res = util.httpGet(service.HOST[0]+service.LOGIN);
         if (pattern.test(res.responseText)){
             return RegExp.$1;
         }
