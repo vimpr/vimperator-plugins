@@ -65,7 +65,7 @@ let INFO =
 
 var types = [
   "text",
-  "passsword",
+  "password",
   "search",
   "file",
   "datetime",
