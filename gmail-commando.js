@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.6"
+  <plugin name="GMailCommando" version="1.4.7"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.6"
+  <plugin name="GMailコマンドー" version="1.4.7"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -229,12 +229,14 @@ let INFO =
   const Elements = {
     get doc() content.frames[3].document,
 
+    get hasBuzz () !!this.doc.querySelector('input#\\:re'),
+
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
 
-    // 入力欄 - input
-    get input() this.doc.getElementById(':rf'),
+    // 入力欄 と 検索ボタンは Buzz の有効無効によって ID が変わる
+    get input() this.doc.querySelector('input#\\:' + (this.hasBuzz ? 're' : 'rf')),
 
-    get searchButton() this.doc.getElementById(':rj'),
+    get searchButton() this.doc.querySelector('div#\\:' + (this.hasBuzz ? 'ri' : 'rj')),
 
     get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
     get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
