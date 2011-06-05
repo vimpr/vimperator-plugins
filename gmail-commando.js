@@ -277,13 +277,6 @@ let INFO =
       Elements.doc.querySelectorAll('.NRYPqe > .J-Zh-I.J-J5-Ji.J-Zh-I.J-Zh-I-Js-Zq')[2]
   };
 
-  //'.J-M-JJ > input'
-  //let (e = Elements.doc.querySelector('.J-LC-Jz')) {
-  //  liberator.log(e);
-  //  buffer.followLink(e);
-  //  //plugins.feedSomeKeys_3.API.feed('<Cr>', ['keydown'], e)
-  //}
-
   const Commando = {
     get inGmail () {
       try {
