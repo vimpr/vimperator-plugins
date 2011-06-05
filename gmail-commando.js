@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.5"
+  <plugin name="GMailCommando" version="1.4.6"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.5"
+  <plugin name="GMailコマンドー" version="1.4.6"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -232,9 +232,9 @@ let INFO =
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
 
     // 入力欄 - input
-    get input() this.doc.getElementById(':re'),
+    get input() this.doc.getElementById(':rf'),
 
-    get searchButton() this.doc.getElementById(':ri'),
+    get searchButton() this.doc.getElementById(':rj'),
 
     get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
     get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
