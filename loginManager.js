@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>3.1</maxVersion>
+    <maxVersion>3.2</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
@@ -131,6 +131,13 @@ var services = {
             __fp: tokenGetterLoginURL(/__fp.+value="(.+?)"/),
             login: "Sign In",
         },
+    },
+    readitlater: {
+        HOST: ["http://readitlaterlist.com"],
+        LOGIN: "/login_process/",
+        LOGOUT: "/lo",
+        usernameField: "feed_id",
+        passwordField: "password",
     },
 };
 for (name in services){
