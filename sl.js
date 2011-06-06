@@ -255,22 +255,6 @@ SL.prototype = { // {{{
 
 let luckyStar = (function(){
 
-function extend(class, obj){
-  var flag;
-  for (let i in obj){
-    flag = false;
-    if (obj.__lookupGetter__(i)){
-      class.prototype.__defineGetter__(i, obj.__lookupGetter__(i));
-      flag = true;
-    }
-    if (obj.__lookupSetter__(i)){
-      class..prototype.__defineSetter__(i, obj.__lookupSetter__(i));
-      flag = true;
-    }
-    if (!flag) class.prototype[i] = obj[i];
-  }
-}
-
 let colors = [
   ["rgba(255,215,0,alpha)", "rgba(255,255,0,alpha)"], //gold, yellow
   ["rgba(255,20,147,alpha)","rgba(255,0,255, alpha)"], // deeppink, magenta
