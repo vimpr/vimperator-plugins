@@ -176,7 +176,7 @@ let SITE_INFO = [
 
       // 連番かもしれない id は無視する
       let id = elem.getAttribute('id');
-      if (id && !/\d/(id))
+      if (id && !/\d/.test(id))
         return 'id("' + id + '")';
 
       return getXPath(elem.parentNode) + '/' + elem.tagName.toLowerCase();
@@ -205,7 +205,7 @@ let SITE_INFO = [
     return result;
   }
   function extensionValidator(vs)
-    vs && vs.every(function (v) /^[\da-zA-Z]+$/(v));
+    vs && vs.every(function (v) /^[\da-zA-Z]+$/.test(v));
 
   let self = {
     downloadZip: function(path, urls, comment, isAppend){

@@ -325,10 +325,10 @@ Plugin.prototype = { // {{{
                     }
                 });
             } catch (e){}
-            let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
+            let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/.exec(source);
             if (m){
                 m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
-                m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
+                m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/.exec(m);
                 if (m){
                     version = m[1];
                 }

@@ -231,7 +231,7 @@ let INFO =
 
     get hasBuzz () !!this.doc.querySelector('input#\\:re'),
 
-    get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
+    get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/.test(it.href))),
 
     // 入力欄 と 検索ボタンは Buzz の有効無効によって ID が変わる
     get input() this.doc.querySelector('input#\\:' + (this.hasBuzz ? 're' : 'rf')),
@@ -280,7 +280,7 @@ let INFO =
   const Commando = {
     get inGmail () {
       try {
-        var result = /^mail\.google\.com$/(Elements.doc.location.hostname)
+        var result = /^mail\.google\.com$/.test(Elements.doc.location.hostname)
       } catch (e) {}
       return result;
     },
@@ -388,7 +388,7 @@ let INFO =
           let input = args.string.slice(0, context.caret);
           let m;
 
-          if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/(input)) {
+          if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/.exec(input)) {
             if (m[2]) {
               context.advance(input.length - m[2].length);
             } else {
@@ -397,7 +397,7 @@ let INFO =
             }
             let key = m[1];
             KeywordValueCompleter[key](context, args);
-          } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/(input)) {
+          } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/.exec(input)) {
             context.advance(input.length - m[1].length);
             context.completions = [
               [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))

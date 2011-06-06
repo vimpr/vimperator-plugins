@@ -700,7 +700,7 @@ let INFO =
 
           // FIXME http が補完できない
           let left = args.string.slice(0, context.caret);
-          let m = /(?:^|\s)([#!@=*^]|http)([^#!@=*^]*)$/(left);
+          let m = /(?:^|\s)([#!@=*^]|http)([^#!@=*^]*)$/.exec(left);
           if (m) {
             let completer = SmartAddCompleter[m[1]];
             if (completer) {

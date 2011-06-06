@@ -380,11 +380,11 @@ Thanks:
     // 上手い具合に秒数に直すよ
     fromTimeCode: function (code, max) {
       var m;
-      if (max && (m = /^(-?\d+(?:\.\d)?)%/(code)))
+      if (max && (m = /^(-?\d+(?:\.\d)?)%/.exec(code)))
         return Math.round(max * (parseFloat(m[1]) / 100));
-      if (m = /^(([-+]?)\d+):(\d+)$/(code))
+      if (m = /^(([-+]?)\d+):(\d+)$/.exec(code))
         return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
-      if (m = /^([-+]?\d+\.\d+)$/(code))
+      if (m = /^([-+]?\d+\.\d+)$/.exec(code))
         return Math.round(parseFloat(m[1]) * 60);
       return parseInt(code, 10);
     },
@@ -834,7 +834,7 @@ Thanks:
   }
 
   YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
-  YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
+  YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,

@@ -99,7 +99,7 @@ let INFO =
           [
             [file.path, dir]
             for ([, file] in Iterator(io.File(dir).readDirectory(false)))
-            if (file.isFile() && /^[\._]vimperatorrc|\.(js|vimp|css)$/(file.leafName))
+            if (file.isFile() && /^[\._]vimperatorrc|\.(js|vimp|css)$/.test(file.leafName))
           ]
           for ([, dir] in Iterator(dirs))
         ]);

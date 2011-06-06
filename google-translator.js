@@ -201,7 +201,7 @@ let INFO =
     context.completions = [
       [it, '']
       for ([, it] in Iterator(getTexts()))
-      if (it.length > 3 && !/^\s*</(it))
+      if (it.length > 3 && !/^\s*</.test(it))
     ];
   }
 

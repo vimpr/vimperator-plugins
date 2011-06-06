@@ -220,7 +220,7 @@ let INFO =
         context.completions = [
           [file.leafName.replace(/\.session$/, ''), new Date(file.lastModifiedTime)]
           for ([,file] in Iterator(io.File(gSessionManager.getSessionDir()).readDirectory()))
-          if (!ignoreAuto || args['-auto'] || !/^(backup(-\d+)?|autosave)\.session$/(file.leafName))
+          if (!ignoreAuto || args['-auto'] || !/^(backup(-\d+)?|autosave)\.session$/.test(file.leafName))
         ].sort(function ([, a], [, b]) (b - a));
       }
     },
