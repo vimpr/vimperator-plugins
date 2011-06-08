@@ -39,13 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.10.1</version>
+  <version>2.10.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemized_find.js</updateURL>
   <minVersion>3.0</minVersion>
-  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     == Usage ==
       検索ワードの一文字目が
@@ -579,9 +578,7 @@ let PLUGIN_INFO =
     },
 
     onChange: function (str) {
-      liberator.log('onChange');
       if (typeof str == 'string') {
-        liberator.log('findFirst');
         _findFirst(str, _backwards);
       } else if (str === false)
         MF.findAgain();
