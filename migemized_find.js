@@ -578,8 +578,8 @@ let PLUGIN_INFO =
       MF.cancel();
     },
 
-    onKeyPress: function (str) {
-      liberator.log('onKeyPress');
+    onChange: function (str) {
+      liberator.log('onChange');
       if (typeof str == 'string') {
         liberator.log('findFirst');
         _findFirst(str, _backwards);
@@ -588,14 +588,20 @@ let PLUGIN_INFO =
     },
   };
 
-  commandline.registerCallback("change", modes.SEARCH_FORWARD, migemized.onKeyPress);
-  commandline.registerCallback("submit", modes.SEARCH_FORWARD, migemized.onSubmit);
-  commandline.registerCallback("cancel", modes.SEARCH_FORWARD, migemized.onCancel);
-  commandline.registerCallback("change", modes.SEARCH_BACKWARD, migemized.onKeyPress);
-  commandline.registerCallback("submit", modes.SEARCH_BACKWARD, migemized.onSubmit);
-  commandline.registerCallback("cancel", modes.SEARCH_BACKWARD, migemized.onCancel);
-
   finder.findAgain = migemized.findAgain;
+
+  plugins.libly.$U.around(
+    finder,
+    'openPrompt',
+    function (next, [mode]) {
+      let res = next();
+      plugins.libly.$U.around(commandline._input, 'change', function (next, [str]) migemized.onChange(str));
+      plugins.libly.$U.around(commandline._input, 'submit', function (next, [str]) migemized.onSubmit(str));
+      plugins.libly.$U.around(commandline._input, 'cancel', function (next, [str]) migemized.onCancel());
+      return res;
+    },
+    true
+  );
 
   // highlight コマンド
   commands.addUserCommand(
@@ -611,7 +617,8 @@ let PLUGIN_INFO =
       options: [
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
       ]
-    }
+    },
+    true
   );
 
   // remove highlight コマンド
@@ -647,7 +654,8 @@ let PLUGIN_INFO =
         [['-backward', '-b'], commands.OPTION_NOARG],
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
       ]
-    }
+    },
+    true
   );
 
   // 外から使えるように
