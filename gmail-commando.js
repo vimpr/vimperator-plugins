@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.7"
+  <plugin name="GMailCommando" version="1.4.8"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.7"
+  <plugin name="GMailコマンドー" version="1.4.8"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -117,6 +117,9 @@ let INFO =
 
   function A (list)
     Array.slice(list);
+
+  function click (elem)
+    buffer.followLink(elem, liberator.CURRENT_TAB);
 
   const Conf = (function () {
     let gv = liberator.globalVariables;
@@ -264,9 +267,9 @@ let INFO =
       if (result)
         return A(result);
 
-      buffer.followLink(show());
+      click(show());
       result = labels();
-      buffer.followLink(show());
+      click(show());
 
       return A(result);
     },
@@ -290,7 +293,7 @@ let INFO =
 
       if (this.inGmail && !newtab) {
         Elements.input.value = args;
-        buffer.followLink(Elements.searchButton);
+        click(Elements.searchButton);
       } else {
         liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
       }
@@ -302,20 +305,20 @@ let INFO =
   const Commands = {
     translate: function () {
       let button = Elements.translateButton || Elements.translateButtons[0];
-      buffer.followLink(button);
+      click(button);
     },
-    translateThread: function () buffer.followLink(Elements.translateThreadButton),
-    fold: function () buffer.followLink(Elements.foldButton),
-    unfold: function () buffer.followLink(Elements.unfoldButton),
+    translateThread: function () click(Elements.translateThreadButton),
+    fold: function () click(Elements.foldButton),
+    unfold: function () click(Elements.unfoldButton),
     label: function (names) {
       Elements.labelButtons.forEach(function (e) {
         if (names.some(function (v) (v == e.textContent)))
-          buffer.followLink(e);
+          click(e);
           liberator.log('pressed: ' + e.textContent);
       });
     },
-    important: function () buffer.followLink(Elements.importantButton),
-    unimportant: function () buffer.followLink(Elements.unimportantButton)
+    important: function () click(Elements.importantButton),
+    unimportant: function () click(Elements.unimportantButton)
   };
 
 
