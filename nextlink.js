@@ -112,7 +112,7 @@ var actpattern = liberator.globalVariables.nextlink_nositeinfo_act || "e";
 var nositeinfoAct = nositeinfoActions[actpattern];
 
 
-var localSiteinfo = storage.newMap("nextlink-local-siteinfo", false);
+var localSiteinfo = storage.newMap("nextlink-local-siteinfo", {store: false});
 if (localSiteinfo)
   localSiteinfo = [ info for ([ i, info ] in localSiteinfo) ];
 

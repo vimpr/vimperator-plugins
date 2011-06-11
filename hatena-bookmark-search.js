@@ -245,7 +245,7 @@ HatenaBookmark.Cache = {
     get store() {
         if (!this._store) {
             let key = 'plugins-hatena-bookmark-search-data';
-            this._store = storage.newMap(key, true);
+            this._store = storage.newMap(key, {store: true});
         }
         return this._store;
     },
