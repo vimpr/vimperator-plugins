@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.8</version>
+    <version>0.0.9</version>
     <minVersion>2.0pre</minVersion>
     <maxVersion>3.2</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
@@ -138,6 +138,15 @@ var services = {
         LOGOUT: "/lo",
         usernameField: "feed_id",
         passwordField: "password",
+    },
+    nicovideo: {
+        HOST: ["https://secure.nicovideo.jp"],
+        LOGIN: "/secure/login",
+        usernameField: "mail",
+        passwordField: "password",
+        extraField: {
+            site: "niconico"
+        }
     },
 };
 for (name in services){
