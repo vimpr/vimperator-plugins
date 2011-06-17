@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="跳.jp" version="1.0.1"
+  <plugin name="跳.jp" version="1.0.2"
           href="http://vimpr.github.com/"
           summary="跳ねます"
           lang="ja"
@@ -84,7 +84,7 @@ let INFO =
       }
     );
     req.post();
-    return toResult(req.transport.responseText);
+    return !callback && toResult(req.transport.responseText);
   }
 
   let innantoka = atob('aW5zdWxpbixpbmJhZ3MsaW5wYXJhenpvLGlucHVtb25pbixpbnRlbCxpbmNhdGVpa29rdSxpbmZyYXN0cnVjdHVyZSxpbmZsdWVuemEsaW5kb2NoaW5lLGltcHJlc3MsaW5kcmEsaW52ZXJ0ZXIsaW5kaWFuYXBvbGlzLGltcGhhbCxpbnRlcnByZXRlcixpbmRvc2hpbmFoYW5udG91LHlpbmxpbmdvZmpveXRveSxpbXBlZGFuY2UsaW5nZW5tYW1lLGludGVycGhvbmUsaW5kb2xlLGludGVybixpbXBhbGE=').split(',')
