@@ -276,7 +276,7 @@ libly.$U = {//{{{
                 let self = this, args = arguments;
                 return func.call(self, function (_args) original.apply(self, _args || args), args);
             };
-            libly.$U.extend(current, {original: original && original.original, restore: restore});
+            libly.$U.extend(current, {original: original && original.original || original, restore: restore});
             return libly.$U.extend({
                 original: original,
                 current: current,
