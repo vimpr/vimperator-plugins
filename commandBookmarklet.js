@@ -75,8 +75,11 @@ if (!items.length) {
 }
 
 items.forEach(function (item) {
+  let name = toValidCommandName(item.title);
+  if (commands.get(name))
+    return;
   commands.addUserCommand(
-    [toValidCommandName(item.title)],
+    [name],
     'bookmarklet : ' + item.title,
     function () evalScript(item.url),
     { shortHelp: 'Bookmarklet' },
