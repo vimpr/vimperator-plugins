@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.7.0"
+<plugin name="zip-de-download" version="0.7.1"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -232,7 +232,7 @@ let SITE_INFO = [
         try {
           let stream = ch.open();
           let entryName = ("000" + ++i).slice(-3) + "-" + getEntryName(ch.URI, ch.contentType);
-          liberator.echomsg("zip: " + url + " to " + entryName, 3);
+          liberator.echomsg("zip: " + url + " to " + entryName, commandline.FORCE_SINGLELINE);
           zipW.addEntryStream(entryName, Date.now() * 1000, Ci.nsIZipWriter.COMPRESSION_DEFAULT, stream, false);
         } catch (e) {
           // XXX エラー分を通知すべき？
