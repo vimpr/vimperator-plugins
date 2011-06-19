@@ -218,7 +218,8 @@ map ; :accesshatena
                 } else if (args.length == 2) {
                     var host = args[0].toString();
                     context.title = ["ID", "Page"];
-                    context.completions = [[ids[i], title.get(host, ids[i])] for (i in ids) if (ids.hasOwnProperty(i))];
+                    var _completions = [[ids[i], title.get(host, ids[i])] for (i in ids) if (ids.hasOwnProperty(i))];
+                    context.completions = host != 'd' ? _completions.filter(function(i){ return !/\+/.test(i[0]) }) : _completions;
                 }
             }
         }
