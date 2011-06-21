@@ -210,7 +210,7 @@ let SITE_INFO = [
   let self = {
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
-      let urls = [url for each(url in urls)];
+      urls = [url for each(url in urls)];
       liberator.assert(urls.length > 0, "None of URLs");
 
       if (!(/\.zip$/i).test(path)){
