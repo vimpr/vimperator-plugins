@@ -7,7 +7,7 @@ var INFO =
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
   <project name="Vimperator" minVersion="2.3"/>
-  <p>Toggle login box of <link topic="http://www.pixiv.net/">pixiv</link> by this plugin. </p>
+  <p>Add contents to Hatena Bookmarks. </p>
   <item>
     <tags>'addhatebu'</tags>
     <spec>:addhatebu</spec>
