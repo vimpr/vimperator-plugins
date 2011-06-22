@@ -193,10 +193,10 @@ let winXML = <>
   function getCurrentListBox(){
     return tabBox.tabpanels.selectedPanel.firstChild;
   }
-  function getParent(node, class){
+  function getParent(node, klass){
     let elm = node;
     while (elm != document.documentElement){
-      if (elm instanceof class)
+      if (elm instanceof klass)
         return elm;
       elm = elm.parentNode;
     }
