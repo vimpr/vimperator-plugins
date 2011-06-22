@@ -999,7 +999,7 @@ Thanks:
   }
 
   YouTubeUserChannelPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/\/([^\/]+)($|[\?]+)/)) r;
-  YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
+  YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubeUserChannelPlayer.prototype = {
     __proto__: YouTubePlayer.prototype,
@@ -1798,7 +1798,7 @@ Thanks:
               return U.raiseNotSupportedPage();
 
             let arg = args.literalArg;
-            let index = (/^\d+:/)(arg) && parseInt(arg, 10);
+            let index = /^\d+:/.test(arg) && parseInt(arg, 10);
             if (index > 0)
               arg = lastCompletions[index - 1].command;
             let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;

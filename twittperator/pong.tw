@@ -12,7 +12,7 @@
   plugins.twittperator.ChirpUserStream.addListener(
     function onMsg (msg, raw) {
       function negi (pattern, reply) {
-        if (RegExp('^\\s*@' + screenName + '\\s+' + pattern + '\s*$')(msg.text.trim())) {
+        if (RegExp('^\\s*@' + screenName + '\\s+' + pattern + '\s*$').test(msg.text.trim())) {
           plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ' + reply, msg.id_str);
           return true;
         }

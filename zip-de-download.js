@@ -186,7 +186,7 @@ let SITE_INFO = [
 
     let links =
       Array.slice( content.document.querySelectorAll('a')).filter(
-        function (link) (link.href && extPattern(link.href)));
+        function (link) (link.href && extPattern.test(link.href)));
 
     let xs = {};
     for each(let link in links){
