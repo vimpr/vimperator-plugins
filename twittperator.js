@@ -1237,8 +1237,9 @@ let PLUGIN_INFO =
             url + '.json',
             query,
             function (text) {
+              let json;
               try {
-                return callback(JSON.parse(text));
+                json = JSON.parse(text);
               } catch (e) {
                 (onError
                  ||
@@ -1248,6 +1249,7 @@ let PLUGIN_INFO =
                    throw e;
                  })(e);
               }
+              return callback(json);
             }
           );
         };
