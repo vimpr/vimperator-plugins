@@ -1855,10 +1855,9 @@ let PLUGIN_INFO =
       }
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
-      let protectedUserName = Twittperator.isProtected(check);
-      if (protectedUserName) {
+      if (Twittperator.isProtected(check)) {
         Twittperator.confirm(
-          protectedUserName + " is protected user! Do you really want to " + actionName + '?',
+          check.screenName + " is protected user! Do you really want to " + actionName + '?',
           action
         );
       } else {
