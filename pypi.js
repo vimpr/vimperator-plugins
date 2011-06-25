@@ -37,7 +37,7 @@ var Pypi = {
         }
         req.open("GET", "http://pypi.python.org/simple/", false);
         req.send(null);
-        setTimeout(Pypi.init_packages, 600000);
+        setTimeout(Pypi.init_packages, 1000*60*60*24);
     }
 }
 
