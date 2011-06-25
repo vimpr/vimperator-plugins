@@ -1237,8 +1237,9 @@ let PLUGIN_INFO =
             url + '.json',
             query,
             function (text) {
+              let json;
               try {
-                return callback(JSON.parse(text));
+                json = JSON.parse(text);
               } catch (e) {
                 (onError
                  ||
@@ -1248,6 +1249,7 @@ let PLUGIN_INFO =
                    throw e;
                  })(e);
               }
+              return callback(json);
             }
           );
         };
@@ -1273,7 +1275,7 @@ let PLUGIN_INFO =
       }
 
       for (let [n, v] in Iterator(options)) {
-        if (/^on[A-Z]/(n) && (v instanceof Function))
+        if (/^on[A-Z]/.test(n) && (v instanceof Function))
           this.events[n.toLowerCase()] = v;
       }
 
@@ -1409,7 +1411,7 @@ let PLUGIN_INFO =
             lines[0] = buf + lines[0];
             for (let [, line] in Iterator(lines.slice(0, -1))) {
               try {
-                if (/^\s*\{/(line))
+                if (/^\s*\{/.test(line))
                   onMsg(Utils.fixStatusObject(JSON.parse(line)), line);
               } catch (e) { liberator.log(e); }
             }
@@ -1560,7 +1562,7 @@ let PLUGIN_INFO =
       }
 
       for (let [n, v] in Iterator(st)) {
-        if (/(^|_)id$/(n))
+        if (/(^|_)id$/.test(n))
           fixId(result, n);
       }
 
@@ -1636,7 +1638,7 @@ let PLUGIN_INFO =
       function loadPluginFromDir(checkGV) {
         return function(dir) {
           dir.readDirectory().forEach(function(file) {
-            if (/\.tw$/(file.path) && (!checkGV || isEnabled(file)))
+            if (/\.tw$/.test(file.path) && (!checkGV || isEnabled(file)))
               Twittperator.sourceScriptFile(file);
           });
         }
@@ -1853,10 +1855,9 @@ let PLUGIN_INFO =
       }
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
-      let protectedUserName = Twittperator.isProtected(check);
-      if (protectedUserName) {
+      if (Twittperator.isProtected(check)) {
         Twittperator.confirm(
-          protectedUserName + " is protected user! Do you really want to " + actionName + '?',
+          check.screenName + " is protected user! Do you really want to " + actionName + '?',
           action
         );
       } else {
@@ -2004,7 +2005,7 @@ let PLUGIN_INFO =
             "^" +
             this.command.map(function(c)
               let (r = util.escapeRegex(c))
-                (/^\W$/(c) ? r : r + "( |$)")
+                (/^\W$/.test(c) ? r : r + "( |$)")
             ).join("|")
           );
         },
@@ -2069,7 +2070,7 @@ let PLUGIN_INFO =
         description: "Open link",
         action: function(arg) Twittperator.openLink(arg),
         timelineCompleter: true,
-        completer: Completers.text(function(s) /https?:\/\//(s.text))
+        completer: Completers.text(function(s) /https?:\/\//.test(s.text))
       }),
       SubCommand({
         command: ["delete"],

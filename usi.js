@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.3.0"
+  <plugin name="usi.js" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -700,7 +700,7 @@ let INFO =
 
           // FIXME http が補完できない
           let left = args.string.slice(0, context.caret);
-          let m = /(?:^|\s)([#!@=*^]|http)([^#!@=*^]*)$/(left);
+          let m = /(?:^|\s)([#!@=*^]|http)([^#!@=*^]*)$/.exec(left);
           if (m) {
             let completer = SmartAddCompleter[m[1]];
             if (completer) {
@@ -817,7 +817,7 @@ let INFO =
             cache: 'rtm.tasks.getList?filter=status:incomplete',
             onComplete: function (result) {
               let cs = [];
-              let lists = args['-list'];
+              let lists = args['-lists'];
 
               for (let [, list] in Iterator(result.tasks.list)) {
                 if (lists && lists.every(function (name) table[list.@id] != name))

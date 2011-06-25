@@ -135,7 +135,7 @@ let INFO =
 
   function source (filepath) {
     io.source(filepath);
-    if (/\.js$/(filepath)) {
+    if (/\.js$/.test(filepath)) {
       let ctx = liberator.plugins.contexts[filepath];
       if (ctx) {
         if (typeof liberator.plugins[ctx.NAME] === 'undefined')

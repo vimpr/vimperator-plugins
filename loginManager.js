@@ -4,9 +4,9 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.4</version>
+    <version>0.0.9</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.2pre</maxVersion>
+    <maxVersion>3.2</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
@@ -109,6 +109,45 @@ var services = {
             CSRFPROTECT: tokenGetter(/CSRFPROTECT.+value="(.+?)"/),
         },
     },
+    delicious: {
+        HOST: ["https://secure.delicious.com"],
+        LOGIN: "/login",
+        LOGOUT: "/logout",
+        usernameField: "username",
+        passwordField: "password",
+        extraField: {
+            rememberme: "1",
+        },
+    },
+    evernote: {
+        HOST: ["https://www.evernote.com"],
+        LOGIN: "/Login.action",
+        LOGOUT: "/Logout.action",
+        usernameField: "username",
+        passwordField: "password",
+        extraField: {
+            rememberMe: "true",
+            _sourcePage: tokenGetterLoginURL(/_sourcePage.+value="(.+?)"/),
+            __fp: tokenGetterLoginURL(/__fp.+value="(.+?)"/),
+            login: "Sign In",
+        },
+    },
+    readitlater: {
+        HOST: ["http://readitlaterlist.com"],
+        LOGIN: "/login_process/",
+        LOGOUT: "/lo",
+        usernameField: "feed_id",
+        passwordField: "password",
+    },
+    nicovideo: {
+        HOST: ["https://secure.nicovideo.jp"],
+        LOGIN: "/secure/login",
+        usernameField: "mail",
+        passwordField: "password",
+        extraField: {
+            site: "niconico"
+        }
+    },
 };
 for (name in services){
     services[name] = new Service(services[name]);
@@ -145,7 +184,7 @@ function Service(service) //{{{
 
         login();
     };
-    self.logout = function(){
+    self.logout = function(username){
         let content = {};
         let host = service.HOST[0];
         if (service.extraField && !self.setExtraField(content)) return false;
@@ -217,21 +256,44 @@ function tokenGetter(pattern) //{{{
             return RegExp.$1;
         }
     };
+}
+function tokenGetterLoginURL(pattern) //{{{
+{
+    return function(service){
+        let res = util.httpGet(service.HOST[0]+service.LOGIN);
+        if (pattern.test(res.responseText)){
+            return RegExp.$1;
+        }
+    };
+}
+function getServiceAndUsernameFromArgs(args, logout)
+{
+    let [servicename, username] = args;
+    let service = services[servicename];
+    if (!service) return;
+    if (!username) {
+        let names = service.getUsernames();
+        if (names.length === 1)
+            username = names[0];
+    }
+    return [service, username];
 } //}}}
 
 // Commands
 // {{{
 commands.addUserCommand(["login"], "Login",
     function(args){
-        let [servicename, username] = args;
-        let service = services[servicename];
-        if (!service) return false;
+        let [service, username] = getServiceAndUsernameFromArgs(args);
+        if (!service)
+            return liberator.echoerr("Argument required. Please supply service name.");
+        if (!username)
+            return liberator.echoerr("Argument required. Please supply user name.");
         service.login(username);
     }, {
         completer: function(context, args){
             if (args.completeArg == 0){
                 context.title = ["service"];
-                context.completions = [[s,""] for(s in services)];
+                context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
             } else if (args.completeArg == 1){
                 let service = services[args[0]];
                 if (!service) return false;
@@ -240,19 +302,19 @@ commands.addUserCommand(["login"], "Login",
             }
         },
         literal: 1,
-    });
+    }, true);
 commands.addUserCommand(["logout"], "Logout",
     function(args){
-        let [servicename, username] = args;
-        let service = services[servicename];
-        if (!service) return false;
+        let [service, username] = getServiceAndUsernameFromArgs(args);
+        if (!service)
+            return liberator.echoerr("Argument required. Please supply service name.");
         service.logout(username);
     }, {
         completer: function(context, args){
             context.title = ["service"];
-            context.completions = [[s,""] for(s in services)];
+            context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
         },
-    });
+    }, true);
 // }}}
 
 })();

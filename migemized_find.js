@@ -39,13 +39,12 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.10.1</version>
+  <version>2.10.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemized_find.js</updateURL>
   <minVersion>3.0</minVersion>
-  <maxVersion>3.0</maxVersion>
   <detail><![CDATA[
     == Usage ==
       検索ワードの一文字目が
@@ -578,24 +577,28 @@ let PLUGIN_INFO =
       MF.cancel();
     },
 
-    onKeyPress: function (str) {
-      liberator.log('onKeyPress');
+    onChange: function (str) {
       if (typeof str == 'string') {
-        liberator.log('findFirst');
         _findFirst(str, _backwards);
       } else if (str === false)
         MF.findAgain();
     },
   };
 
-  commandline.registerCallback("change", modes.SEARCH_FORWARD, migemized.onKeyPress);
-  commandline.registerCallback("submit", modes.SEARCH_FORWARD, migemized.onSubmit);
-  commandline.registerCallback("cancel", modes.SEARCH_FORWARD, migemized.onCancel);
-  commandline.registerCallback("change", modes.SEARCH_BACKWARD, migemized.onKeyPress);
-  commandline.registerCallback("submit", modes.SEARCH_BACKWARD, migemized.onSubmit);
-  commandline.registerCallback("cancel", modes.SEARCH_BACKWARD, migemized.onCancel);
-
   finder.findAgain = migemized.findAgain;
+
+  plugins.libly.$U.around(
+    finder,
+    'openPrompt',
+    function (next, [mode]) {
+      let res = next();
+      plugins.libly.$U.around(commandline._input, 'change', function (next, [str]) migemized.onChange(str));
+      plugins.libly.$U.around(commandline._input, 'submit', function (next, [str]) migemized.onSubmit(str));
+      plugins.libly.$U.around(commandline._input, 'cancel', function (next, [str]) migemized.onCancel());
+      return res;
+    },
+    true
+  );
 
   // highlight コマンド
   commands.addUserCommand(
@@ -611,7 +614,8 @@ let PLUGIN_INFO =
       options: [
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
       ]
-    }
+    },
+    true
   );
 
   // remove highlight コマンド
@@ -647,7 +651,8 @@ let PLUGIN_INFO =
         [['-backward', '-b'], commands.OPTION_NOARG],
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
       ]
-    }
+    },
+    true
   );
 
   // 外から使えるように

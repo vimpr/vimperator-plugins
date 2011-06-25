@@ -520,7 +520,7 @@ let INFO = <>
   const ModeStringsCompleter = [
     [name, disp + ' mode' + (char ? ' (alias: ' + char + ')' : '')]
     for ([n, {name, char, disp, extended}] in Iterator(modes._modeMap))
-    if (!extended && /^\D+$/(n))
+    if (!extended && /^\D+$/.test(n))
   ];
 
 

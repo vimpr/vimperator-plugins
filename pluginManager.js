@@ -303,7 +303,7 @@ Plugin.prototype = { // {{{
         return template.table(this.name, data);
     }, // }}}
     getResourceInfo: function(){
-        var store = storage.newMap('plugins-pluginManager', true);
+        var store = storage.newMap('plugins-pluginManager', {store: true});
         var url = this.info.updateURL;
         var localResource = store.get(this.name) || {};
         var serverResource = {
@@ -325,10 +325,10 @@ Plugin.prototype = { // {{{
                     }
                 });
             } catch (e){}
-            let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/(source);
+            let m = /\bPLUGIN_INFO[ \t\r\n]*=[ \t\r\n]*<VimperatorPlugin(?:[ \t\r\n][^>]*)?>([\s\S]+?)<\/VimperatorPlugin[ \t\r\n]*>/.exec(source);
             if (m){
                 m = m[1].replace(/(?:<!(?:\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]|--(?:[^-]|-(?!-))*--)>)+/g, '');
-                m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/(m);
+                m = /^[\w\W]*?<version(?:[ \t\r\n][^>]*)?>([^<]+)<\/version[ \t\r\n]*>/.exec(m);
                 if (m){
                     version = m[1];
                 }

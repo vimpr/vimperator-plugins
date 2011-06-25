@@ -3,10 +3,9 @@ var PLUGIN_INFO =
   <name>Auto Detect Link</name>
   <description>Find (next|previous) link, and jump.</description>
   <description lang="ja">(次|前)っぽいページへのリンクを探してジャンプ</description>
-  <version>1.8.2</version>
+  <version>1.8.3</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.4</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/auto_detect_link.js</updateURL>
   <license document="http://creativecommons.org/licenses/by-sa/3.0/">
     Creative Commons Attribution-Share Alike 3.0 Unported
@@ -182,7 +181,7 @@ var PLUGIN_INFO =
 
   // 要素をクリックする
   function clickElement (elem)
-    buffer.followLink(elem);
+    buffer.followLink(elem, liberator.CURRENT_TAB);
 
 
   // 開いたURIなどの表示

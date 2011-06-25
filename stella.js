@@ -39,12 +39,11 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.32.7</version>
+  <version>0.32.8</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <minVersion>2.0</minVersion>
-  <maxVersion>3.0</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/stella.js</updateURL>
   <detail><![CDATA[
     == Commands ==
@@ -381,11 +380,11 @@ Thanks:
     // 上手い具合に秒数に直すよ
     fromTimeCode: function (code, max) {
       var m;
-      if (max && (m = /^(-?\d+(?:\.\d)?)%/(code)))
+      if (max && (m = /^(-?\d+(?:\.\d)?)%/.exec(code)))
         return Math.round(max * (parseFloat(m[1]) / 100));
-      if (m = /^(([-+]?)\d+):(\d+)$/(code))
+      if (m = /^(([-+]?)\d+):(\d+)$/.exec(code))
         return parseInt(m[1], 10) * 60 + (m[2] == '-' ? -1 : 1) * parseInt(m[3], 10);
-      if (m = /^([-+]?\d+\.\d+)$/(code))
+      if (m = /^([-+]?\d+\.\d+)$/.exec(code))
         return Math.round(parseFloat(m[1]) * 60);
       return parseInt(code, 10);
     },
@@ -835,7 +834,7 @@ Thanks:
   }
 
   YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
-  YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
+  YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubePlayer.prototype = {
     __proto__: Player.prototype,
@@ -923,11 +922,12 @@ Thanks:
         let url = item.querySelector('a').href;
         if (!YouTubePlayer.isVideoURL(url))
           continue;
+        let id = YouTubePlayer.getIDfromURL(url);
         result.push(
           new RelatedID(
-            YouTubePlayer.getIDfromURL(url),
+            id,
             item.querySelector('span.title').textContent,
-            item.querySelector('img').src
+            'http://img.youtube.com/vi/' + id + '/1.jpg'
           )
         );
       }
@@ -999,7 +999,7 @@ Thanks:
   }
 
   YouTubeUserChannelPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/\/([^\/]+)($|[\?]+)/)) r;
-  YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/(url);
+  YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubeUserChannelPlayer.prototype = {
     __proto__: YouTubePlayer.prototype,
@@ -1798,7 +1798,7 @@ Thanks:
               return U.raiseNotSupportedPage();
 
             let arg = args.literalArg;
-            let index = (/^\d+:/)(arg) && parseInt(arg, 10);
+            let index = /^\d+:/.test(arg) && parseInt(arg, 10);
             if (index > 0)
               arg = lastCompletions[index - 1].command;
             let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;

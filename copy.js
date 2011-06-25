@@ -265,7 +265,7 @@ function wedataRegister(item){
 
             return function(value, value2){
                 var STORE_KEY = 'plugins-copy-ok-func';
-                var store = storage.newMap(STORE_KEY, true);
+                var store = storage.newMap(STORE_KEY, {store: true});
                 var check = store.get(item.label);
                 var ans;
 

@@ -133,7 +133,7 @@ map ; :accesshatena
         root.containerOpen = true;
         for (var i = 0, length = root.childCount; i < length; i++) {
             var page = root.getChild(i);
-            page.uri.match('^https?://([a-zA-Z0-9.]+)\\.hatena\\.ne\\.jp/([a-zA-Z][a-zA-Z0-9_-]{1,30}[a-zA-Z0-9]/?)?');
+            page.uri.match('^https?://([a-zA-Z0-9.]+)\\.hatena\\.ne\\.jp/([a-zA-Z][a-zA-Z0-9_-]{1,30}[a-zA-Z0-9](?:\\+[a-zA-Z0-9_-]{1,30})?/?)?');
             var host = RegExp.$1;
             var id   = RegExp.$2;
             var _recent_hosts_length = recentHosts.length;
@@ -218,7 +218,8 @@ map ; :accesshatena
                 } else if (args.length == 2) {
                     var host = args[0].toString();
                     context.title = ["ID", "Page"];
-                    context.completions = [[ids[i], title.get(host, ids[i])] for (i in ids) if (ids.hasOwnProperty(i))];
+                    var _completions = [[ids[i], title.get(host, ids[i])] for (i in ids) if (ids.hasOwnProperty(i))];
+                    context.completions = host != 'd' ? _completions.filter(function(i){ return !/\+/.test(i[0]) }) : _completions;
                 }
             }
         }

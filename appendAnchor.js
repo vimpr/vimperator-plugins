@@ -73,7 +73,7 @@ let PLUGIN_INFO =
 
             // build URL
              let scheme = RegExp.$1, host = RegExp.$2, lastMatch = RegExp.lastMatch;
-             if (/^ttps?$/(scheme)) scheme = 'h' + scheme;
+             if (/^ttps?$/.test(scheme)) scheme = 'h' + scheme;
              let href = scheme + '://' + host;
 
             // reset range

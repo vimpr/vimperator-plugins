@@ -1,4 +1,4 @@
-// Last Change: 21-Jan-2010. Jan 2008
+// Last Change: 27-May-2011. Jan 2008
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
@@ -28,6 +28,7 @@ for Migemo search: require XUL/Migemo Extension
           'h': Hatena Bookmark
           'd': del.icio.us
           'l': livedoor clip
+          'g': Google Bookmarks
           'p': Places (Firefox bookmarks)
       Usage: let g:direct_sbm_use_services_by_tag = "hdl"
 ||<
@@ -490,7 +491,7 @@ for Migemo search: require XUL/Migemo Extension
             poster:function(user,password,url,title,comment,tags){
                 var request_url = 'http://www.google.com/bookmarks/mark';
                 var params = [
-                    ['bkmk', url], ['title', title], ['labels', tags.join(',')]
+                    ['bkmk', url], ['title', title], ['labels', tags.join(',')], ['annotation', comment]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "post",
@@ -503,7 +504,23 @@ for Migemo search: require XUL/Migemo Extension
                     if(xhr.status != 200) throw "Google Bookmarks: failed";
                 });
             },
-            tags:function(user,password) [],
+            tags:function(user,password){
+                var returnValue = [];
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "https://www.google.com/bookmarks", false, user, password);
+                xhr.send(null);
+
+                var html = parseHTML(xhr.responseText);
+                var tags = getElementsByXPath('//a[contains(@id,"lbl_m_")]/text()',html);
+
+                tags.forEach(function(tag){
+                    var text = tag.textContent;
+                    if(text.match(/\S/)) {
+                        returnValue.push(text);
+                    }
+                });
+                return returnValue;
+            },
         },
         'f': {
             description:'foves',

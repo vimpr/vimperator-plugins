@@ -185,7 +185,7 @@ let INFO =
     if (elem.tagName === 'IMG' && elem.src) {
       if (openParent) {
         let p = elem.parentNode;
-        if (p.tagName === 'A' && /(gif|png|jpe?g)$/i(p.href))
+        if (p.tagName === 'A' && /(gif|png|jpe?g)$/i.test(p.href))
           return liberator.open(p.href, liberator.NEW_TAB);
       }
       return liberator.open(elem.src, liberator.NEW_TAB);
@@ -201,7 +201,7 @@ let INFO =
     if (site) {
       for each (let [n, v] in info) {
         [n, v] = [String(n), String(v)];
-        if (site.name && !site.name(n))
+        if (site.name && !site.name.test(n))
           continue;
         let m = n.match(site.value) || v.match(site.value);
         if (m)
@@ -209,7 +209,7 @@ let INFO =
       }
     }
 
-    let urls = info.filter(function ([n, v]) /^https?:\/\//(v));
+    let urls = info.filter(function ([n, v]) /^https?:\/\//.test(v));
     if (!urls.length)
       return liberator.echoerr('Could not found URL');
 

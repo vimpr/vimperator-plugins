@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.5"
+  <plugin name="GMailCommando" version="1.4.8"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -72,7 +72,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="GMailコマンドー" version="1.4.5"
+  <plugin name="GMailコマンドー" version="1.4.8"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
@@ -117,6 +117,9 @@ let INFO =
 
   function A (list)
     Array.slice(list);
+
+  function click (elem)
+    buffer.followLink(elem, liberator.CURRENT_TAB);
 
   const Conf = (function () {
     let gv = liberator.globalVariables;
@@ -229,12 +232,14 @@ let INFO =
   const Elements = {
     get doc() content.frames[3].document,
 
-    get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/(it.href))),
+    get hasBuzz () !!this.doc.querySelector('input#\\:re'),
 
-    // 入力欄 - input
-    get input() this.doc.getElementById(':re'),
+    get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/.test(it.href))),
 
-    get searchButton() this.doc.getElementById(':ri'),
+    // 入力欄 と 検索ボタンは Buzz の有効無効によって ID が変わる
+    get input() this.doc.querySelector('input#\\:' + (this.hasBuzz ? 're' : 'rf')),
+
+    get searchButton() this.doc.querySelector('div#\\:' + (this.hasBuzz ? 'ri' : 'rj')),
 
     get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
     get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
@@ -262,9 +267,9 @@ let INFO =
       if (result)
         return A(result);
 
-      buffer.followLink(show());
+      click(show());
       result = labels();
-      buffer.followLink(show());
+      click(show());
 
       return A(result);
     },
@@ -275,17 +280,10 @@ let INFO =
       Elements.doc.querySelectorAll('.NRYPqe > .J-Zh-I.J-J5-Ji.J-Zh-I.J-Zh-I-Js-Zq')[2]
   };
 
-  //'.J-M-JJ > input'
-  //let (e = Elements.doc.querySelector('.J-LC-Jz')) {
-  //  liberator.log(e);
-  //  buffer.followLink(e);
-  //  //plugins.feedSomeKeys_3.API.feed('<Cr>', ['keydown'], e)
-  //}
-
   const Commando = {
     get inGmail () {
       try {
-        var result = /^mail\.google\.com$/(Elements.doc.location.hostname)
+        var result = /^mail\.google\.com$/.test(Elements.doc.location.hostname)
       } catch (e) {}
       return result;
     },
@@ -295,7 +293,7 @@ let INFO =
 
       if (this.inGmail && !newtab) {
         Elements.input.value = args;
-        buffer.followLink(Elements.searchButton);
+        click(Elements.searchButton);
       } else {
         liberator.open(URL + encodeURIComponent(args), liberator.NEW_TAB);
       }
@@ -307,20 +305,20 @@ let INFO =
   const Commands = {
     translate: function () {
       let button = Elements.translateButton || Elements.translateButtons[0];
-      buffer.followLink(button);
+      click(button);
     },
-    translateThread: function () buffer.followLink(Elements.translateThreadButton),
-    fold: function () buffer.followLink(Elements.foldButton),
-    unfold: function () buffer.followLink(Elements.unfoldButton),
+    translateThread: function () click(Elements.translateThreadButton),
+    fold: function () click(Elements.foldButton),
+    unfold: function () click(Elements.unfoldButton),
     label: function (names) {
       Elements.labelButtons.forEach(function (e) {
         if (names.some(function (v) (v == e.textContent)))
-          buffer.followLink(e);
+          click(e);
           liberator.log('pressed: ' + e.textContent);
       });
     },
-    important: function () buffer.followLink(Elements.importantButton),
-    unimportant: function () buffer.followLink(Elements.unimportantButton)
+    important: function () click(Elements.importantButton),
+    unimportant: function () click(Elements.unimportantButton)
   };
 
 
@@ -393,7 +391,7 @@ let INFO =
           let input = args.string.slice(0, context.caret);
           let m;
 
-          if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/(input)) {
+          if (m = /([a-z]+):(?:([^\s\(\)\{\}]*)|[\(\{]([^\(\)\{\}]*))$/.exec(input)) {
             if (m[2]) {
               context.advance(input.length - m[2].length);
             } else {
@@ -402,7 +400,7 @@ let INFO =
             }
             let key = m[1];
             KeywordValueCompleter[key](context, args);
-          } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/(input)) {
+          } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/.exec(input)) {
             context.advance(input.length - m[1].length);
             context.completions = [
               [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))

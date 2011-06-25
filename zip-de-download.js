@@ -1,5 +1,5 @@
 let INFO =
-<plugin name="zip-de-download" version="0.7.0"
+<plugin name="zip-de-download" version="0.7.1"
         href=""
         summary="ZIPでダウンロードするお"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -176,7 +176,7 @@ let SITE_INFO = [
 
       // 連番かもしれない id は無視する
       let id = elem.getAttribute('id');
-      if (id && !/\d/(id))
+      if (id && !/\d/.test(id))
         return 'id("' + id + '")';
 
       return getXPath(elem.parentNode) + '/' + elem.tagName.toLowerCase();
@@ -186,7 +186,7 @@ let SITE_INFO = [
 
     let links =
       Array.slice( content.document.querySelectorAll('a')).filter(
-        function (link) (link.href && extPattern(link.href)));
+        function (link) (link.href && extPattern.test(link.href)));
 
     let xs = {};
     for each(let link in links){
@@ -205,12 +205,12 @@ let SITE_INFO = [
     return result;
   }
   function extensionValidator(vs)
-    vs && vs.every(function (v) /^[\da-zA-Z]+$/(v));
+    vs && vs.every(function (v) /^[\da-zA-Z]+$/.test(v));
 
   let self = {
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
-      let urls = [url for each(url in urls)];
+      urls = [url for each(url in urls)];
       liberator.assert(urls.length > 0, "None of URLs");
 
       if (!(/\.zip$/i).test(path)){
@@ -232,7 +232,7 @@ let SITE_INFO = [
         try {
           let stream = ch.open();
           let entryName = ("000" + ++i).slice(-3) + "-" + getEntryName(ch.URI, ch.contentType);
-          liberator.echomsg("zip: " + url + " to " + entryName, 3);
+          liberator.echomsg("zip: " + url + " to " + entryName, commandline.FORCE_SINGLELINE);
           zipW.addEntryStream(entryName, Date.now() * 1000, Ci.nsIZipWriter.COMPRESSION_DEFAULT, stream, false);
         } catch (e) {
           // XXX エラー分を通知すべき？
