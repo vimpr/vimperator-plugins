@@ -1,8 +1,8 @@
 // Vimperator plugin: 'Walk Input'
-// Last Change: 2009-01-25
 // License: BSD
-// Version: 1.1
+// Version: 1.2.1
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
+//             anekos <anekos@snca.net>
 
 // ------------------------------------------------------------
 // The focus walks <input> & <textarea> elements.
@@ -20,11 +20,12 @@
 
 // PLUGIN_INFO {{{
 let INFO =
-<plugin name="Walk-Input" version="1.2"
+<plugin name="Walk-Input" version="1.2.1"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
     <author email="tekezo@pqrs.org">Takayama Fumihiko</author>
+    <author email="anekos@snca.net">anekos</author>
     <license>BSD</license>
     <project name="Vimperator" minVersion="2.2"/>
     <p>
@@ -83,6 +84,15 @@ var types = [
 ].map(function(type) "@type=" + type.quote()).join(" or ");
 var xpath = '//input[' + types + ' or not(@type)] | //textarea';
 
+function isVisible (elem) {
+  while (elem && !(elem instanceof HTMLDocument)) {
+    if (/^none$/i.test(getComputedStyle(elem, '').display))
+      return false;
+    elem  = elem.parentNode;
+  }
+  return true;
+}
+
 var walkinput = function (forward) {
     var focused = document.commandDispatcher.focusedElement;
     var current = null;
@@ -96,7 +106,7 @@ var walkinput = function (forward) {
         let r = doc.evaluate(xpath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = 0, l = r.snapshotLength; i < l; ++i) {
             let e = r.snapshotItem(i);
-            if (/^none$/i.test(getComputedStyle(e, '').display))
+            if (!isVisible(e))
               continue;
             let ef = {element: e, frame: frame};
             list.push(ef);
