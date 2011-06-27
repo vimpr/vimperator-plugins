@@ -129,7 +129,6 @@ var walkinput = function (forward) {
     var elem = forward ? (next || list[0])
                        : (prev || list[list.length - 1]);
 
-    liberator.log(elem.element);
     if (!current || current.frame != elem.frame)
       elem.frame.focus();
     elem.element.focus();
