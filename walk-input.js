@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Walk Input'
 // License: BSD
-// Version: 1.2.1
+// Version: 1.2.2
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
 //             anekos <anekos@snca.net>
 
@@ -20,7 +20,7 @@
 
 // PLUGIN_INFO {{{
 let INFO =
-<plugin name="Walk-Input" version="1.2.1"
+<plugin name="Walk-Input" version="1.2.2"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -82,7 +82,7 @@ var types = [
   "tel",
   "color",
 ].map(function(type) "@type=" + type.quote()).join(" or ");
-var xpath = '//input[' + types + ' or not(@type)] | //textarea';
+var xpath = '//input[(' + types + ' or not(@type)) and not(@disabled="disabled")] | //textarea';
 
 function isVisible (elem) {
   while (elem && !(elem instanceof HTMLDocument)) {
@@ -129,6 +129,7 @@ var walkinput = function (forward) {
     var elem = forward ? (next || list[0])
                        : (prev || list[list.length - 1]);
 
+    liberator.log(elem.element);
     if (!current || current.frame != elem.frame)
       elem.frame.focus();
     elem.element.focus();
