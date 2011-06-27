@@ -82,7 +82,7 @@ var types = [
   "tel",
   "color",
 ].map(function(type) "@type=" + type.quote()).join(" or ");
-var xpath = '//input[(' + types + ' or not(@type)) and not(@disabled="disabled")] | //textarea';
+var xpath = '//input[(' + types + ' or not(@type)) and not(@disabled)] | //textarea';
 
 function isVisible (elem) {
   while (elem && !(elem instanceof HTMLDocument)) {
