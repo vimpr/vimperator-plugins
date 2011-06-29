@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.5"
+<plugin name="pixiv.js" version="0.6"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -77,8 +77,8 @@ commands.addUserCommand(
       }
       return path;
     };
-    let savePath=directoryPicker();
-    if(savePath.length<1) return;
+    let saveDirectory=directoryPicker();
+    if(saveDirectory.length<1) return;
 
     let getDOMHtmlDocument=function(str){
       let doc;
@@ -131,11 +131,20 @@ commands.addUserCommand(
       if (-1!=fileName.indexOf('?')){
         fileName=fileName.substr(0,fileName.indexOf('?'));
       }
-      let tmpPath=savePath+fileName;
+      let tmpPath=saveDirectory+fileName;
       let instream=xhrImg.responseText;
       let aFile=Cc["@mozilla.org/file/local;1"]
         .createInstance(Ci.nsILocalFile);
       aFile.initWithPath(tmpPath);
+      if(true===aFile.exists()){
+        let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
+        if(null===value){
+          return false;
+        }
+        fileName='/'+value;
+        tmpPath=saveDirectory+fileName;
+        aFile.initWithPath(tmpPath);
+      }
       let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
         .createInstance(Ci.nsIFileOutputStream);
       outstream.init(aFile,0x02|0x08|0x20,0664,0);
