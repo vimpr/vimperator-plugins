@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="simg.js" version="0.2"
+<plugin name="simg.js" version="0.3"
         summary="Save image on contents area"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/simg.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -45,19 +45,29 @@ commands.addUserCommand(
       return path;
     };
 
-    let savePath=directoryPicker();
-    if(savePath.length<1) return;
+    let saveDirectory=directoryPicker();
+    if(saveDirectory.length<1) return;
     let imgURL=contents.URL;
+    let savePath;
 
     let trueCurrntImg=function(){
       let fileName=imgURL.substr(imgURL.lastIndexOf('/'));
       if (-1!=fileName.indexOf('?')){
         fileName=fileName.substr(0,fileName.indexOf('?'));
       }
-      savePath=savePath+fileName;
+      savePath=saveDirectory+fileName;
       let instream=xhrImg.responseText;
       let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
       aFile.initWithPath(savePath);
+      if(true===aFile.exists()){
+        let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
+        if(null===value){
+          return false;
+        }
+        fileName='/'+value;
+        savePath=saveDirectory+fileName;
+        aFile.initWithPath(savePath);
+      }
       let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
         .createInstance(Ci.nsIFileOutputStream);
       outstream.init(aFile,0x02|0x08|0x20,0664,0);
