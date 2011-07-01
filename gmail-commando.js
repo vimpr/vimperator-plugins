@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.8"
+  <plugin name="GMailCommando" version="1.4.9"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -395,7 +395,7 @@ let INFO =
             if (m[2]) {
               context.advance(input.length - m[2].length);
             } else {
-              let tail = /[^\s]*$/(m[3]);
+              let tail = /[^\s]*$/.exec(m[3]);
               context.advance(input.length - tail[0].length);
             }
             let key = m[1];
