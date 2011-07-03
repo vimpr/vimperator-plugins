@@ -51,7 +51,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
           continue;
         for (let [, u] in Iterator(t.entities.urls)) {
           if (u.expanded_url)
-            cs.push([u.expanded_url, t.text]);
+            cs.push([u.expanded_url || u.url, t.text]);
         }
       }
       context.completions = cs;
