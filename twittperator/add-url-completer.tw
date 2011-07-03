@@ -50,8 +50,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
         if (!(t.entities && t.entities.urls))
           continue;
         for (let [, u] in Iterator(t.entities.urls)) {
-          if (u.expanded_url)
-            cs.push([u.expanded_url || u.url, t.text]);
+          let url = u.expanded_url || u.url;
+          if (url)
+            cs.push([url, t.text]);
         }
       }
       context.completions = cs;
