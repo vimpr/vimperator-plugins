@@ -44,6 +44,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
     'T',
     'Open the urls in tweets',
     function (context, args) {
+      context.title = ['Tweeted URL', 'Tweeted text'];
       context.filters = [CompletionContext.Filter.textAndDescription];
       let cs = [];
       for (let [, t] in Iterator(plugins.twittperator.Tweets)) {
