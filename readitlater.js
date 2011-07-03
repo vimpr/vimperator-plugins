@@ -36,6 +36,8 @@ let PLUGIN_INFO =
 	:ril add
 		今見ているページのurlとtitleを登録します
 		オプションとして url , title が選べるので適当に編集して登録もできます。
+		また、URL の補完も効きます。
+		URL補完は let g:readitlater_complete = "slf" のようにして使用する補完を選択できます。
 
 	:ril get
 		登録されてるページの情報を取得してキャッシュしときます。
@@ -91,7 +93,7 @@ let PLUGIN_INFO =
 						})
 					],
 				],
-				completer: function (context, args) completion.url(context)
+				completer: function (context, args) completion.url(context, liberator.globalVariables.readitlater_complete)
 				}
 			),
 
