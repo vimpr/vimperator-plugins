@@ -9,9 +9,9 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-	<version>0.2.1</version>
+	<version>0.3.0</version>
 	<minVersion>3.0</minVersion>
-	<maxVersion>3.2</maxVersion>
+	<maxVersion>3.3</maxVersion>
 	<author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
 	<detail lang="ja"><![CDATA[
@@ -77,6 +77,7 @@ let PLUGIN_INFO =
 				function (args) {
 					addItemByArgs(args);
 				},{
+				literal: 0,
 				options : [
 					[["url","u"],commands.OPTION_STRING,null,
 							(function(){
@@ -90,6 +91,7 @@ let PLUGIN_INFO =
 						})
 					],
 				],
+				completer: function (context, args) completion.url(context)
 				}
 			),
 
@@ -238,8 +240,8 @@ let PLUGIN_INFO =
 			postBody:getParameterMap(
 				{
 				apikey    : this.api_key,
-				username  : encodeURIComponent(logins[0].username),
-				password  : encodeURIComponent(logins[0].password),
+				username  : logins[0].username,
+				password  : logins[0].password,
 				format    : "json",
 				count     : (liberator.globalVariables.readitlater_get_count? liberator.globalVariables.readitlater_get_count : 50 ),
 				//state   : (args["read"]) ? "read" : "unread",
@@ -273,16 +275,15 @@ let PLUGIN_INFO =
 			postBody:getParameterMap(
 				{
 				apikey    : this.api_key,
-				username  : encodeURIComponent(logins[0].username),
-				password  : encodeURIComponent(logins[0].password),
-				url       : encodeURIComponent(url),
-				title     : encodeURIComponent(title),
+				username  : logins[0].username,
+				password  : logins[0].password,
+				url       : url,
+				title     : title,
 				}
 			)
 			}
 
 		);
-
 		req.addEventListener("onSuccess",callback);
 
 		req.addEventListener("onFailure",function(data){
@@ -303,7 +304,7 @@ let PLUGIN_INFO =
 		function make_read_list(args){
 			let o = {};
 			for (let i = 0; i < args.length; i++) {
-				o[i] = {"url":encodeURIComponent(args[i])};
+				o[i] = {"url":args[i]};
 			};
 			return JSON.stringify(o);
 		}
@@ -316,8 +317,8 @@ let PLUGIN_INFO =
 				postBody:getParameterMap(
 					{
 					apikey    : this.api_key,
-					username  : encodeURIComponent(logins[0].username),
-					password  : encodeURIComponent(logins[0].password),
+					username  : logins[0].username,
+					password  : logins[0].password,
 					read      : make_read_list(urls),
 					}
 				)
@@ -332,7 +333,6 @@ let PLUGIN_INFO =
 			liberator.echoerr(data.responseText);
 		});
 
-	liberator.log(urls)
 		req.post();
 
 
@@ -350,8 +350,8 @@ let PLUGIN_INFO =
 				postBody:getParameterMap(
 					{
 					apikey    : this.api_key,
-					username  : encodeURIComponent(logins[0].username),
-					password  : encodeURIComponent(logins[0].password),
+					username  : logins[0].username,
+					password  : logins[0].password,
 					format    : "json",
 					}
 				)
@@ -443,10 +443,12 @@ let PLUGIN_INFO =
 	} // }}}
 
 	function addItemByArgs(args){ // {{{
-		let url = args["url"] || buffer.URL;
-		let title = args["title"] || buffer.title;
-		ReadItLater.add(url, title,function(){
-			echo("Added: " + title)
+		let url = args["url"] || args.literalArg;
+		let title = args["title"] || (url ? undefined : buffer.title);
+		if (!url)
+			url = buffer.URL;
+		ReadItLater.add(url, title, function(){
+			echo("Added: " + (title || url));
 			ListCache.update(true);
 		});
 	} // }}}
@@ -494,12 +496,11 @@ let PLUGIN_INFO =
 	} // }}}
 
 	function getParameterMap(parameters){ // {{{
-		let map = "";
-		for (let key in parameters){
-			if (map) map += "&";
-			map += key + "=" + parameters[key];
-		}
-		return map
+		return [
+			key + "=" + encodeURIComponent(value)
+			for ([key, value] in Iterator(parameters))
+			if (value)
+		].join("&");
 	} // }}}
 
   function countObjectValues(obj){ // {{{
@@ -519,3 +520,4 @@ let PLUGIN_INFO =
 
 })();
 
+// vim: set noet :
