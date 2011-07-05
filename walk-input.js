@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Walk Input'
 // License: BSD
-// Version: 1.2.2
+// Version: 1.2.3
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
 //             anekos <anekos@snca.net>
 
@@ -20,7 +20,7 @@
 
 // PLUGIN_INFO {{{
 let INFO =
-<plugin name="Walk-Input" version="1.2.2"
+<plugin name="Walk-Input" version="1.2.3"
         href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -68,7 +68,6 @@ var types = [
   "text",
   "password",
   "search",
-  "file",
   "datetime",
   "datetime-local",
   "date",
