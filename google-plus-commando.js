@@ -44,7 +44,7 @@ let INFO =
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
     <p>Mappings for Google+</p>
-    <p>require: feedSomeKeys_3.js</p>
+    <p>require: feedSomeKeys_3.js and x-hint.js</p>
   </plugin>
 </>;
 // }}}
