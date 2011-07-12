@@ -106,7 +106,8 @@ let INFO =
       get commentEditor () let (e = root.querySelector('.editable')) (e && e.parentNode),
       get comment() (self.commentEditor || self.commentButton),
       get plusone () root.querySelector('[g\\:type="plusone"]'),
-      get share () self.buttons[3]
+      get share () self.buttons[3],
+      get menu () root.querySelector('[role="menu"]')
     };
     return self;
   }
@@ -115,8 +116,22 @@ let INFO =
   };
 
   const Commands = {
-    next: function () plugins.feedSomeKeys_3.API.feed('j', ['vkeypress'], Elements.doc),
-    prev: function () plugins.feedSomeKeys_3.API.feed('k', ['vkeypress'], Elements.doc),
+    next: function () {
+      let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
+      plugins.feedSomeKeys_3.API.feed.apply(
+        null,
+        menus.length === 1 ? ['<Down>', ['keypress'], menus[0]]
+                           : ['j', ['vkeypress'], Elements.doc]
+      );
+    },
+    prev: function () {
+      let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
+      plugins.feedSomeKeys_3.API.feed.apply(
+        null,
+        menus.length === 1 ? ['<Up>', ['keypress'], menus[0]]
+                           : ['k', ['vkeypress'], Elements.doc]
+      );
+    },
     comment: function() Elements.currentEntry.click('comment'),
     plusone: function() Elements.currentEntry.click('plusone'),
     share: function() Elements.currentEntry.click('share'),
