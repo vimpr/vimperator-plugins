@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.1.0"
+  <plugin name="GooglePlusCommando" version="1.1.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -57,6 +57,15 @@ let INFO =
 
   function click (elem)
     buffer.followLink(elem, liberator.CURRENT_TAB);
+
+  function withCount (command) {
+    return function (count) {
+      if (count < 1)
+        count = 1;
+      for (let i = 0; i < count; i++)
+        command();
+    };
+  }
 
   const Conf = (function () {
     let gv = liberator.globalVariables;
@@ -116,22 +125,22 @@ let INFO =
   };
 
   const Commands = {
-    next: function () {
+    next: withCount(function () {
       let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
       plugins.feedSomeKeys_3.API.feed.apply(
         null,
         menus.length === 1 ? ['<Down>', ['keypress'], menus[0]]
                            : ['j', ['vkeypress'], Elements.doc]
       );
-    },
-    prev: function () {
+    }),
+    prev: withCount(function () {
       let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
       plugins.feedSomeKeys_3.API.feed.apply(
         null,
         menus.length === 1 ? ['<Up>', ['keypress'], menus[0]]
                            : ['k', ['vkeypress'], Elements.doc]
       );
-    },
+    }),
     comment: function() Elements.currentEntry.click('comment'),
     plusone: function() Elements.currentEntry.click('plusone'),
     share: function() Elements.currentEntry.click('share'),
@@ -160,14 +169,16 @@ let INFO =
       ];
     if (!gv)
       return;
+    let func = Commands[cmd];
     mappings.addUserMap(
       [modes.NORMAL],
       gv.split(/\s+/),
       cmd + ' - Google plus Commando',
-      function () {
-        Commands[cmd]();
+      function (count) {
+        func(count);
       },
       {
+        count: func.length === 1,
         matchingUrls: RegExp('^https://plus\\.google\\.com/*')
       }
     );
