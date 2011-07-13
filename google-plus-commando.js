@@ -261,7 +261,9 @@ let INFO =
         const ext = [
           'span[@role="button"]',
           'div[@role="button"]',
-          'div[@data-content-type]'
+          'div[@data-content-type]',
+          'img[contains(@class,"ea-g-Vc-pa")]',
+          'div[contains(@class,"a-z-nb-A")]'
         ];
 
         let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
