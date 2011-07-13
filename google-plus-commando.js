@@ -115,12 +115,12 @@ let INFO =
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
         if (!e.getAttribute('oid'))
       ][0],
-      get buttons () A(root.querySelectorAll('[role="button"]')),
-      get commentButton () self.buttons[2],
+      get buttons () A(self.plusone.parentNode.querySelectorAll('[role="button"]')),
+      get commentButton () self.buttons[0],
       get commentEditor () let (e = root.querySelector('.editable')) (e && e.parentNode),
       get comment() (self.commentEditor || self.commentButton),
       get plusone () root.querySelector('[g\\:type="plusone"]'),
-      get share () self.buttons[3],
+      get share () self.buttons[1],
       get menu () root.querySelector('[role="menu"]')
     };
     return self;
