@@ -126,6 +126,7 @@ let INFO =
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
         if (!e.getAttribute('oid'))
       ][0],
+      get unfold () root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]'),
       get buttons () A(self.plusone.parentNode.querySelectorAll('[role="button"]')),
       get commentButton () self.buttons[0],
       get commentEditor () let (e = root.querySelector('.editable')) (e && e.parentNode),
@@ -212,11 +213,14 @@ let INFO =
         if (e && e.submit)
           return click(e.submit);
       }
+    },
+    unfold: function () {
+      click(Elements.currentEntry.unfold);
     }
   };
 
 
-  'comment plusone share next prev post yank notification cancel submit'.split(/\s/).forEach(function (cmd) {
+  'comment plusone share next prev post yank notification cancel submit unfold'.split(/\s/).forEach(function (cmd) {
     let gv =
       liberator.globalVariables[
         'gplus_commando_map_' +
