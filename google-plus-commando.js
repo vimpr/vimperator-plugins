@@ -157,7 +157,7 @@ let INFO =
       if (bs.length === 2)
         return bs[n];
     }
-    let self = root && {
+    let self = {
       get cancel () root.querySelector('.' + Names.closeButton)
     };
     return self;
