@@ -82,8 +82,9 @@ let INFO =
 
 
   const Names = {
-    screen: 'zg',
+    viewer: 'zg',
     dialog: 'va-Q',
+    closeButton: 'CH'
   };
 
   const Elements = {
@@ -98,18 +99,12 @@ let INFO =
     ),
     get submitButton () Elements.postForm.querySelector('[role="button"]'),
     get notification () Elements.doc.querySelector('#gbi1'),
-    get screen () Elements.doc.querySelector('.' + Names.screen),
-    get dialog () Elements.doc.querySelector('.' + Names.dialog)
+    get viewer () Viewer(Elements.doc.querySelector('.' + Names.viewer)),
+    get dialog () Dialog(Elements.doc.querySelector('.' + Names.dialog))
   };
 
   function Entry (root) {
-    let self = {
-      click: function (name) {
-        if (!root)
-          return;
-        click(self[name]);
-      },
-
+    let self = root && {
       get permlink () [
         e
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
@@ -122,6 +117,32 @@ let INFO =
       get plusone () root.querySelector('[g\\:type="plusone"]'),
       get share () self.buttons[1],
       get menu () root.querySelector('[role="menu"]')
+    };
+    return self;
+  }
+
+  function Dialog (root) {
+    function nButton (n) {
+      let bs = self.buttons;
+      if (bs.length === 2)
+        return bs[n];
+    }
+    let self = root && {
+      get buttons () A(root.querySelectorAll('[role="button"]')),
+      get submit () nButton(0),
+      get cancel () nButton(1)
+    };
+    return self;
+  }
+
+  function Viewer (root) {
+    function nButton (n) {
+      let bs = self.buttons;
+      if (bs.length === 2)
+        return bs[n];
+    }
+    let self = root && {
+      get cancel () root.querySelector('.' + Names.closeButton)
     };
     return self;
   }
@@ -144,9 +165,9 @@ let INFO =
                            : ['k', ['vkeypress'], Elements.doc]
       );
     }),
-    comment: function() Elements.currentEntry.click('comment'),
-    plusone: function() Elements.currentEntry.click('plusone'),
-    share: function() Elements.currentEntry.click('share'),
+    comment: function() click(Elements.currentEntry.comment),
+    plusone: function() click(Elements.currentEntry.plusone),
+    share: function() click(Elements.currentEntry.share),
     post: function() {
       buffer.scrollTop();
       click(Elements.postEditor);
@@ -160,11 +181,26 @@ let INFO =
     },
     notification: function () {
       click(Elements.notification);
+    },
+    cancel: function () {
+      for (let [, n] in Iterator(['dialog', 'viewer'])) {
+        let e = Elements[n];
+        if (e && e.cancel)
+          return click(e.cancel);
+      }
+      click(Elements.doc.body);
+    },
+    submit: function () {
+      for (let [, n] in Iterator(['dialog', 'viewer'])) {
+        let e = Elements[n];
+        if (e && e.submit)
+          return click(e.submit);
+      }
     }
   };
 
 
-  'comment plusone share next prev post yank notification'.split(/\s/).forEach(function (cmd) {
+  'comment plusone share next prev post yank notification cancel submit'.split(/\s/).forEach(function (cmd) {
     let gv =
       liberator.globalVariables[
         'gplus_commando_map_' +
@@ -211,10 +247,10 @@ let INFO =
         let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
 
 
-        for (let [, name] in Iterator(['screen', 'dialog'])) {
+        for (let [, name] in Iterator(['viewer', 'dialog'])) {
           if (!Elements[name])
             continue;
-          xpath.push('div[contains(@class, "CH")]');
+          xpath.push(String(<>div[contains(@class, "{Names.closeButton}")]</>));
           xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
           break;
         }
