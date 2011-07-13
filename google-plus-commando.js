@@ -81,6 +81,11 @@ let INFO =
   })();
 
 
+  const Names = {
+    screen: 'zg',
+    dialog: 'va-Q',
+  };
+
   const Elements = {
     get doc() content.document,
     get currentEntry () Entry(Elements.doc.querySelector('.a-f-oi-Ai')),
@@ -93,7 +98,8 @@ let INFO =
     ),
     get submitButton () Elements.postForm.querySelector('[role="button"]'),
     get notification () Elements.doc.querySelector('#gbi1'),
-    get screen () Elements.doc.querySelector('.zg')
+    get screen () Elements.doc.querySelector('.' + Names.screen),
+    get dialog () Elements.doc.querySelector('.' + Names.dialog)
   };
 
   function Entry (root) {
@@ -204,9 +210,13 @@ let INFO =
 
         let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
 
-        if (Elements.screen) {
+
+        for (let [, name] in Iterator(['screen', 'dialog'])) {
+          if (!Elements[name])
+            continue;
           xpath.push('div[contains(@class, "CH")]');
-          xpath = xpath.map(function (it) '*[@class="zg"]//' + it)
+          xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
+          break;
         }
 
         return xpath.map(function (it) '//' + it).join(' | ');
