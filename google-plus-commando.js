@@ -55,8 +55,11 @@ let INFO =
   function A (list)
     Array.slice(list);
 
-  function click (elem)
+  function click (elem) {
+    if (!elem)
+      throw GPCError('elem is undefined');
     buffer.followLink(elem, liberator.CURRENT_TAB);
+  }
 
   function withCount (command) {
     return function (count) {
@@ -65,6 +68,14 @@ let INFO =
       for (let i = 0; i < count; i++)
         command();
     };
+  }
+
+  function GPCError (msg) {
+    if (this instanceof GPCError) {
+      this.toString = function () String(msg);
+    } else {
+      return new GPCError(msg);
+    }
   }
 
 
@@ -89,7 +100,7 @@ let INFO =
 
   const Elements = {
     get doc() content.document,
-    get currentEntry () Entry(Elements.doc.querySelector('.a-f-oi-Ai')),
+    get currentEntry () MakeElement(Entry, Elements.doc.querySelector('.a-f-oi-Ai')),
     get postForm () Elements.doc.querySelector('#contentPane > div > div').nextSibling,
     //get postEditor () Elements.postForm.querySelector('.editable').parentNode,
     get postEditor () (
@@ -99,12 +110,17 @@ let INFO =
     ),
     get submitButton () Elements.postForm.querySelector('[role="button"]'),
     get notification () Elements.doc.querySelector('#gbi1'),
-    get viewer () Viewer(Elements.doc.querySelector('.' + Names.viewer)),
-    get dialog () Dialog(Elements.doc.querySelector('.' + Names.dialog))
+    get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
+    get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog))
   };
 
+  function MakeElement (constructor, root) {
+    if (root)
+      return constructor(root);
+  }
+
   function Entry (root) {
-    let self = root && {
+    let self = {
       get permlink () [
         e
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
@@ -127,7 +143,7 @@ let INFO =
       if (bs.length === 2)
         return bs[n];
     }
-    let self = root && {
+    let self = {
       get buttons () A(root.querySelectorAll('[role="button"]')),
       get submit () nButton(0),
       get cancel () nButton(1)
@@ -214,7 +230,11 @@ let INFO =
       gv.split(/\s+/),
       cmd + ' - Google plus Commando',
       function (count) {
-        func(count);
+        try {
+          func(count);
+        } catch (e if (e instanceof GPCError)) {
+          /* DO NOTHING */
+        }
       },
       {
         count: func.length === 1,
