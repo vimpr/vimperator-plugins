@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.4.0"
+  <plugin name="GooglePlusCommando" version="1.4.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -126,7 +126,11 @@ let INFO =
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
         if (!e.getAttribute('oid'))
       ][0],
-      get unfold () root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]'),
+      get unfold () (
+        root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]') // 発言の省略
+        ||
+        root.querySelector('.a-b-f-i-p-gc-h[role="button"]') // 投稿の省略
+      ),
       get buttons () A(self.plusone.parentNode.querySelectorAll('[role="button"]')),
       get commentButton () self.buttons[0],
       get commentEditor () let (e = root.querySelector('.editable')) (e && e.parentNode),
