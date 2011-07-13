@@ -79,13 +79,10 @@ let INFO =
     return conf;
   })();
 
-  const Names = {
-    currentEntry: 'a-f-oi-Ai'
-  };
 
   const Elements = {
     get doc() content.document,
-    get currentEntry () Entry(Elements.doc.querySelector('.' + Names.currentEntry)),
+    get currentEntry () Entry(Elements.doc.querySelector('.a-f-oi-Ai')),
     get postForm () Elements.doc.querySelector('#contentPane > div > div').nextSibling,
     //get postEditor () Elements.postForm.querySelector('.editable').parentNode,
     get postEditor () (
@@ -121,8 +118,6 @@ let INFO =
     return self;
   }
 
-  const Commando = {
-  };
 
   const Commands = {
     next: withCount(function () {
