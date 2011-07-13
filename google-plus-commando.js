@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.3.0"
+  <plugin name="GooglePlusCommando" version="1.4.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -159,7 +159,9 @@ let INFO =
         return bs[n];
     }
     let self = {
-      get cancel () root.querySelector('.' + Names.closeButton)
+      get cancel () root.querySelector('.' + Names.closeButton),
+      get prev () root.querySelector('.vn.GE.AH'),
+      get next () root.querySelector('.vn.GE.BH'),
     };
     return self;
   }
@@ -167,6 +169,8 @@ let INFO =
 
   const Commands = {
     next: withCount(function () {
+      if (Elements.viewer)
+        return click(Elements.viewer.next);
       let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
       plugins.feedSomeKeys_3.API.feed.apply(
         null,
@@ -175,6 +179,8 @@ let INFO =
       );
     }),
     prev: withCount(function () {
+      if (Elements.viewer)
+        return click(Elements.viewer.prev);
       let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
       plugins.feedSomeKeys_3.API.feed.apply(
         null,
