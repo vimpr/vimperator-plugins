@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.1.1"
+  <plugin name="GooglePlusCommando" version="1.2.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -67,6 +67,7 @@ let INFO =
     };
   }
 
+
   const Conf = (function () {
     let gv = liberator.globalVariables;
     let conf = {};
@@ -91,7 +92,8 @@ let INFO =
       Elements.postForm.querySelector('.editable').parentNode
     ),
     get submitButton () Elements.postForm.querySelector('[role="button"]'),
-    get notification () Elements.doc.querySelector('#gbi1')
+    get notification () Elements.doc.querySelector('#gbi1'),
+    get screen () Elements.doc.querySelector('.zg')
   };
 
   function Entry (root) {
@@ -179,19 +181,48 @@ let INFO =
     );
   });
 
-  if (plugins.xHint) {
+
+  [
+    ['o', 'f', function (e) click(e)],
+    ['t', 'F', function (e) buffer.followLink(e, liberator.NEW_TAB)],
+  ].forEach(function ([modeChar, mapKey, action]) {
+    let modeName = 'google-plus-comando-hint-' + modeChar;
+
+    hints.addMode(
+      modeName,
+      hints._hintModes[modeChar].prompt,
+      action,
+      function () {
+        function removeRoot (s)
+          s.replace(/^\s*\/\//, '');
+
+        const ext = [
+          'span[@role="button"]',
+          'div[@role="button"]',
+          'div[@data-content-type]'
+        ];
+
+        let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
+
+        if (Elements.screen) {
+          xpath.push('div[contains(@class, "CH")]');
+          xpath = xpath.map(function (it) '*[@class="zg"]//' + it)
+        }
+
+        return xpath.map(function (it) '//' + it).join(' | ');
+      }
+    );
+
     mappings.addUserMap(
       [modes.NORMAL],
-      ['f'],
+      [liberator.globalVariables['gplus_commando_map_hint_' + modeChar] || mapKey],
       'Hit a hint - Google plus Commando',
-      function () {
-        plugins.xHint.show('o', options['hinttags'] + ' | //span[@role="button"] | //div[@role="button"]');
-      },
+      function () hints.show(modeName),
       {
         matchingUrls: RegExp('^https://plus\\.google\\.com/*')
       }
     );
-  }
+  });
 
   __context__.command  = Commands;
   __context__.element  = Elements;
