@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.6.0"
+  <plugin name="GooglePlusCommando" version="1.7.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -84,7 +84,7 @@ let INFO =
   // State {{{
 
   const State = {
-    cancel: null
+    form: null
   };
 
   // }}}
@@ -100,15 +100,16 @@ let INFO =
   const Elements = {
     get doc() content.document,
     get currentEntry () MakeElement(Entry, Elements.doc.querySelector('.a-f-oi-Ai')),
-    get postForm () Elements.doc.querySelector('#contentPane > div > div').nextSibling,
-    //get postEditor () Elements.postForm.querySelector('.editable').parentNode,
-    get postEditor () (
-      Elements.doc.querySelector('.n-Ob')
-      ||
-      Elements.postForm.querySelector('.editable').parentNode
-    ),
-    get cancelPost () Elements.postEditor.querySelector('div.om[id$=".c"]'),
-    get submitButton () Elements.postForm.querySelector('[role="button"]'),
+    post: {
+      //get editor () Elements.postForm.querySelector('.editable').parentNode,
+      get editor () (
+        Elements.doc.querySelector('.n-Ob')
+        ||
+        Elements.postForm.querySelector('.editable').parentNode
+      ),
+      get cancel () Elements.post.editor.querySelector('div.om[id$=".c"]'),
+      get submit () Elements.doc.querySelector('[role="button"].d-s-r.tk3N6e-e.tk3N6e-e-qc.n-Ja-xg')
+    },
     get notification () Elements.doc.querySelector('#gbi1'),
     get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
     get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog))
@@ -141,7 +142,8 @@ let INFO =
       get plusone () root.querySelector('[g\\:type="plusone"]'),
       get share () self.buttons[1],
       get menu () root.querySelector('[role="menu"]'),
-      get cancel () root.querySelector('[role="button"][id$=".cancel"]')
+      get cancel () root.querySelector('[role="button"][id$=".cancel"]'),
+      get submit () root.querySelector('[role="button"][id$=".post"]')
     };
     return self;
   }
@@ -202,14 +204,20 @@ let INFO =
     comment: function() {
       let entry = Elements.currentEntry;
       click(entry.comment);
-      State.cancel = function () click(entry.cancel);
+      State.form = {
+        cancel: function () click(entry.cancel),
+        submit: function () click(entry.submit)
+      };
     },
     plusone: function() click(Elements.currentEntry.plusone),
     share: function() click(Elements.currentEntry.share),
     post: function() {
       buffer.scrollTop();
-      click(Elements.postEditor);
-      State.cancel = function () click(Elements.cancelPost);
+      click(Elements.post.editor);
+      State.form = {
+        cancel: function () click(Elements.post.cancel),
+        submit: function () click(Elements.post.submit)
+      };
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
@@ -230,11 +238,10 @@ let INFO =
       click(Elements.doc.body);
     },
     submit: function () {
-      for (let [, n] in Iterator(['dialog', 'viewer'])) {
-        let e = Elements[n];
-        if (e && e.submit)
-          return click(e.submit);
-      }
+      if (liberator.focus || !State.form)
+        return;
+      State.form.submit();
+      State.form = null;
     },
     unfold: function () {
       click(Elements.currentEntry.unfold);
@@ -248,7 +255,7 @@ let INFO =
   const MatchingUrls = RegExp('^https://plus\\.google\\.com/*');
   const MappingDescriptionSuffix = ' - Google plus Commando';
 
-  'comment plusone share next prev post yank notification cancel submit unfold'.split(/\s/).forEach(function (cmd) {
+  function defineMapping (mode, cmd) {
     let gv =
       liberator.globalVariables[
         'gplus_commando_map_' +
@@ -258,7 +265,7 @@ let INFO =
       return;
     let func = Commands[cmd];
     mappings.addUserMap(
-      [modes.NORMAL],
+      [mode],
       gv.split(/\s+/),
       cmd + MappingDescriptionSuffix,
       function (count) {
@@ -273,16 +280,19 @@ let INFO =
         matchingUrls: MatchingUrls
       }
     );
-  });
+  }
+
+  'comment plusone share next prev post yank notification cancel unfold'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
+  'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
 
   mappings.addUserMap(
     [modes.INSERT],
     ['<Esc>'],
     'Escape from input area',
     function () {
-      if (!liberator.focus && State.cancel) {
-        State.cancel();
-        State.cancel = null;
+      if (!liberator.focus && State.form) {
+        State.form.cancel();
+        State.form = null;
         modes.reset();
         return;
       }
