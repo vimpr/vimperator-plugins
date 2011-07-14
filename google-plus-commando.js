@@ -320,7 +320,7 @@ let INFO =
       'Hit a hint - Google plus Commando',
       function () hints.show(modeName),
       {
-        matchingUrls: RegExp('^https://plus\\.google\\.com/*')
+        matchingUrls: RegExp('^https://plus\\.google\\.com/.*')
       }
     );
   });
