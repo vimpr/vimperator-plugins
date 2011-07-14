@@ -82,18 +82,6 @@ let INFO =
 
   // }}}
 
-  const Conf = (function () {
-    let gv = liberator.globalVariables;
-    let conf = {};
-    'label_shortcut'.split(/\s/).forEach(function (n) {
-      conf.__defineGetter__(
-        n.replace(/_./g, function (m) m.slice(1).toUpperCase()),
-        function () gv['gmail_commando_' + n]
-      );
-    });
-    return conf;
-  })();
-
   // Elements {{{
 
   const Names = {
