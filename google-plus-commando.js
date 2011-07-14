@@ -52,6 +52,8 @@ let INFO =
 
 (function () {
 
+  // Utils {{{
+
   function A (list)
     Array.slice(list);
 
@@ -78,6 +80,7 @@ let INFO =
     }
   }
 
+  // }}}
 
   const Conf = (function () {
     let gv = liberator.globalVariables;
@@ -91,6 +94,7 @@ let INFO =
     return conf;
   })();
 
+  // Elements {{{
 
   const Names = {
     viewer: 'zg',
@@ -172,6 +176,9 @@ let INFO =
     return self;
   }
 
+  // }}}
+
+  // Commands {{{
 
   const Commands = {
     next: withCount(function () {
@@ -231,6 +238,9 @@ let INFO =
     }
   };
 
+  // }}}
+
+  // Define mappiings {{{
 
   'comment plusone share next prev post yank notification cancel submit unfold'.split(/\s/).forEach(function (cmd) {
     let gv =
@@ -259,6 +269,9 @@ let INFO =
     );
   });
 
+  // }}}
+
+  // Define hints {{{
 
   [
     ['o', 'f', function (e) click(e)],
@@ -308,8 +321,14 @@ let INFO =
     );
   });
 
+  // }}}
+
+  // Export {{{
+
   __context__.command  = Commands;
   __context__.element  = Elements;
+
+  // }}}
 
 })();
 
