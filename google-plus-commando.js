@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.4.2"
+  <plugin name="GooglePlusCommando" version="1.5.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -261,6 +261,8 @@ let INFO =
 
   // Define hints {{{
 
+  const HintStyleName = 'google-plus-commando-hint';
+
   [
     ['o', 'f', function (e) click(e)],
     ['t', 'F', function (e) buffer.followLink(e, liberator.NEW_TAB)],
@@ -270,7 +272,20 @@ let INFO =
     hints.addMode(
       modeName,
       hints._hintModes[modeChar].prompt,
-      action,
+      function (elem, count) {
+        function mouseEvent (name) {
+          let evt = elem.ownerDocument.createEvent('MouseEvents');
+          evt.initMouseEvent(name, true, true, elem.ownerDocument.defaultView, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          elem.dispatchEvent(evt);
+        }
+
+        let plusone = elem.getAttribute('g:type') === 'plusone';
+        if (plusone)
+          mouseEvent('mouseover');
+        action(elem, count);
+        if (plusone)
+          mouseEvent('mouseout');
+      },
       function () {
         function removeRoot (s)
           s.replace(/^\s*\/\//, '');
@@ -285,7 +300,6 @@ let INFO =
 
         let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
 
-
         for (let [, name] in Iterator(['viewer', 'dialog'])) {
           if (!Elements[name])
             continue;
@@ -293,6 +307,8 @@ let INFO =
           xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
           break;
         }
+
+        styles.addSheet(false, HintStyleName, "plus\\.google\\.com", '.a-b-f-W-Tj.a-f-W-Tj { display: inline  !important }');
 
         return xpath.map(function (it) '//' + it).join(' | ');
       }
@@ -308,6 +324,16 @@ let INFO =
       }
     );
   });
+
+  plugins.libly.$U.around(
+    hints,
+    'hide',
+    function (next) {
+      setTimeout(function () styles.removeSheet(false, HintStyleName, 'plus\\.google\\.com'), 0);
+      return next();
+    },
+    true
+  );
 
   // }}}
 
