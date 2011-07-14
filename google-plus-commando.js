@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.4.1"
+  <plugin name="GooglePlusCommando" version="1.4.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -127,7 +127,9 @@ let INFO =
         if (!e.getAttribute('oid'))
       ][0],
       get unfold () (
-        root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]') // 発言の省略
+        root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]') // 発言の省略 (以前)
+        ||
+        root.querySelector('.a-b-f-i-gc-Sb-Xb-h[role="button"]') // 発言の省略 (以降)
         ||
         root.querySelector('.a-b-f-i-p-gc-h[role="button"]') // 投稿の省略
       ),
