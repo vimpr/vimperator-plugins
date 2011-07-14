@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.5.0"
+  <plugin name="GooglePlusCommando" version="1.6.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -48,7 +48,6 @@ let INFO =
   </plugin>
 </>;
 // }}}
-
 
 (function () {
 
@@ -82,6 +81,14 @@ let INFO =
 
   // }}}
 
+  // State {{{
+
+  const State = {
+    cancel: null
+  };
+
+  // }}}
+
   // Elements {{{
 
   const Names = {
@@ -100,6 +107,7 @@ let INFO =
       ||
       Elements.postForm.querySelector('.editable').parentNode
     ),
+    get cancelPost () Elements.postEditor.querySelector('div.om[id$=".c"]'),
     get submitButton () Elements.postForm.querySelector('[role="button"]'),
     get notification () Elements.doc.querySelector('#gbi1'),
     get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
@@ -113,6 +121,7 @@ let INFO =
 
   function Entry (root) {
     let self = {
+      get root () root,
       get permlink () [
         e
         for ([, e] in Iterator(A(root.querySelectorAll('a'))))
@@ -131,7 +140,8 @@ let INFO =
       get comment() (self.commentEditor || self.commentButton),
       get plusone () root.querySelector('[g\\:type="plusone"]'),
       get share () self.buttons[1],
-      get menu () root.querySelector('[role="menu"]')
+      get menu () root.querySelector('[role="menu"]'),
+      get cancel () root.querySelector('[role="button"][id$=".cancel"]')
     };
     return self;
   }
@@ -189,12 +199,17 @@ let INFO =
                            : ['k', ['vkeypress'], Elements.doc]
       );
     }),
-    comment: function() click(Elements.currentEntry.comment),
+    comment: function() {
+      let entry = Elements.currentEntry;
+      click(entry.comment);
+      State.cancel = function () click(entry.cancel);
+    },
     plusone: function() click(Elements.currentEntry.plusone),
     share: function() click(Elements.currentEntry.share),
     post: function() {
       buffer.scrollTop();
       click(Elements.postEditor);
+      State.cancel = function () click(Elements.cancelPost);
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
@@ -230,6 +245,9 @@ let INFO =
 
   // Define mappiings {{{
 
+  const MatchingUrls = RegExp('^https://plus\\.google\\.com/*');
+  const MappingDescriptionSuffix = ' - Google plus Commando';
+
   'comment plusone share next prev post yank notification cancel submit unfold'.split(/\s/).forEach(function (cmd) {
     let gv =
       liberator.globalVariables[
@@ -242,7 +260,7 @@ let INFO =
     mappings.addUserMap(
       [modes.NORMAL],
       gv.split(/\s+/),
-      cmd + ' - Google plus Commando',
+      cmd + MappingDescriptionSuffix,
       function (count) {
         try {
           func(count);
@@ -252,10 +270,29 @@ let INFO =
       },
       {
         count: func.length === 1,
-        matchingUrls: RegExp('^https://plus\\.google\\.com/*')
+        matchingUrls: MatchingUrls
       }
     );
   });
+
+  mappings.addUserMap(
+    [modes.INSERT],
+    ['<Esc>'],
+    'Escape from input area',
+    function () {
+      if (!liberator.focus && State.cancel) {
+        State.cancel();
+        State.cancel = null;
+        modes.reset();
+        return;
+      }
+      let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
+      esc.action.apply(esc, arguments);
+    },
+    {
+      matchingUrls: MatchingUrls
+    }
+  );
 
   // }}}
 
