@@ -327,6 +327,7 @@ let INFO =
     post: function() {
       buffer.scrollTop();
       click(Elements.post.open);
+      PostHelp.show();
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
