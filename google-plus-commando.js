@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.7.2"
+  <plugin name="GooglePlusCommando" version="1.8.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -93,26 +93,27 @@ let INFO =
     get doc() content.document,
     get currentEntry () MakeElement(Entry, Elements.doc.querySelector('.a-f-oi-Ai')),
     post: {
-      //get editor () Elements.postForm.querySelector('.editable').parentNode,
-      get editor () (
-        Elements.doc.querySelector('.n-Ob')
-        ||
-        Elements.postForm.querySelector('.editable').parentNode
-      ),
-      get cancel () Elements.post.editor.querySelector('div.om[id$=".c"]'),
+      // get editor () Elements.postForm.querySelector('.editable').parentNode,
+      // Elements.postForm.querySelector('.editable').parentNode
+      get root () Elements.doc.querySelector('.n-Ob'),
+      get open () Elements.doc.querySelector('.n-Nd'),
+      get cancel () Elements.post.root.querySelector('div.om[id$=".c"]'),
       get submit () Elements.doc.querySelector('[role="button"].d-s-r.tk3N6e-e.tk3N6e-e-qc.n-Ja-xg')
     },
     get notification () Elements.doc.querySelector('#gbi1'),
     get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
     get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog)),
 
-    getFocusedEditorButton: function (type) {
+    get focusedEditor () {
       function hasIFrame (elem) {
         let iframe = elem.querySelector('iframe');
         return iframe && iframe.contentWindow === win;
       }
 
       function get1 () {
+        function button (editor, name)
+          editor.parentNode.querySelector(String(<>[role="button"][id$=".{name}"]</>));
+
         const names = {submit: 'post', cancel: 'cancel'};
 
         let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
@@ -121,24 +122,39 @@ let INFO =
         if (editors.length > 1)
           throw 'Two and more editors were found.';
 
-        return editors[0].parentNode.querySelector(String(<>[role="button"][id$=".{names[type]}"]</>));;
+        return {
+          editor: #1=(editors[0]),
+          button: {
+            submit: button(#1#, 'post'),
+            cancel: button(#1#, 'cancel')
+          }
+        };
       }
 
       function get2 () {
+        function button (editor, index) {
+          let result = editor.querySelectorAll('td > [role="button"]')[index];
+          if (result)
+            return result;
+          if (index === 1)
+            return editor.querySelector('.om[id$=".c"]');
+        }
+
         const indexes = {submit: 0, cancel: 1};
 
-      let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
+        let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
         if (editors.length === 0)
           return;
         if (editors.length > 1)
           throw 'Two and more editors were found.';
 
-        let result =  editors[0].querySelectorAll('td > [role="button"]')[indexes[type]];
-        if (result)
-          return result;
-
-        if (type === 'cancel')
-          return editors[0].querySelector('.om[id$=".c"]');
+        return {
+          editor: #1=(editors[0]),
+          button: {
+            submit: button(#1#, 0),
+            cancel: button(#1#, 1)
+          }
+        };
       }
 
       let doc = content.document;
@@ -211,6 +227,73 @@ let INFO =
 
   // }}}
 
+  // {{{
+
+  const PostHelp = {
+    PanelID: 'google-plus-commando-help-panel',
+
+    get panel () Elements.doc.querySelector('#' + PostHelp.PanelID),
+
+    show: function () {
+      function move (panel) {
+        let contentHeight = document.getElementById('content').boxObject.height;
+        let rect = Elements.focusedEditor.editor.getClientRects()[0];
+        if (rect.top < contentHeight) {
+          panel.style.top = '';
+          panel.style.bottom = '10px';
+        } else {
+          panel.style.top = '10px';
+          panel.style.bottom = '';
+        }
+      }
+
+      let doc = Elements.doc;
+      let parent = doc.body;
+
+      let exists = PostHelp.panel;
+      if (exists) {
+        move(exists);
+        exists.style.display = 'block';
+        return;
+      }
+
+      let panel  = doc.createElement('div');
+      panel.setAttribute('id', PostHelp.PanelID);
+      let (ps = panel.style) {
+        ps.position = 'fixed';
+        ps.left = '10px';
+        ps.zIndex = 1000;
+        ps.backgroundColor = 'white';
+        ps.border = 'solid 1px grey';
+      }
+      panel.innerHTML = <>
+        <table>
+          <tr><th>入力</th>           <th>効果</th>                   <th>解説</th>                                 </tr>
+          <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>                                                          </tr>
+          <tr><td>_TEXT</td>          <td><i>TEXT</i></td>                                                          </tr>
+          <tr><td>-TEXT-</td>         <td><s>TEXT</s></td>                                                          </tr>
+          <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>打消は内側に</td>                         </tr>
+          <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語はダメ</td>                         </tr>
+          <tr><td>-ね こ-</td>        <td><s>ね こ</s></td>           <td>英数字や半角スペースを入れたらOK</td>     </tr>
+          <tr><td>-Aねこす-</td>      <td><s>Aあねこす</s></td>       <td>英数字を前後に入れても良い</td>           </tr>
+        </table>
+      </>;
+
+      move(panel);
+      parent.appendChild(panel);
+
+      return;
+    },
+
+    hide: function () {
+      let exists = PostHelp.panel;
+      if (exists)
+        exists.style.display = 'none';
+    }
+  };
+
+  // }}}
+
   // Commands {{{
 
   const Commands = {
@@ -237,12 +320,13 @@ let INFO =
     comment: function() {
       let entry = Elements.currentEntry;
       click(entry.comment);
+      PostHelp.show();
     },
     plusone: function() click(Elements.currentEntry.plusone),
     share: function() click(Elements.currentEntry.share),
     post: function() {
       buffer.scrollTop();
-      click(Elements.post.editor);
+      click(Elements.post.open);
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
@@ -265,7 +349,7 @@ let INFO =
     submit: function () {
       if (liberator.focus)
         return;
-      click(Elements.getFocusedEditorButton('submit'));
+      click(Elements.focusedEditor.button.submit);
     },
     unfold: function () {
       click(Elements.currentEntry.unfold);
@@ -318,8 +402,9 @@ let INFO =
         let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
         esc.action.apply(esc, arguments);
       } else {
-        click(Elements.getFocusedEditorButton('cancel'));
+        click(Elements.focusedEditor.button.cancel);
         modes.reset();
+        PostHelp.hide();
       }
     },
     {
