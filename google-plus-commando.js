@@ -403,6 +403,8 @@ let INFO =
         esc.action.apply(esc, arguments);
       } else {
         click(Elements.focusedEditor.button.cancel);
+        // FIXME
+        window.document.commandDispatcher.advanceFocus();
         modes.reset();
         PostHelp.hide();
       }
