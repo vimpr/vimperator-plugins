@@ -350,6 +350,7 @@ let INFO =
     submit: function () {
       if (liberator.focus)
         return;
+      PostHelp.hide();
       click(Elements.focusedEditor.button.submit);
     },
     unfold: function () {
