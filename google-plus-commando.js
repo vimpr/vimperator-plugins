@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.8.1"
+  <plugin name="GooglePlusCommando" version="1.9.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -191,6 +191,7 @@ let INFO =
       get plusone () root.querySelector('[g\\:type="plusone"]'),
       get share () self.buttons[1],
       get menu () root.querySelector('[role="menu"]'),
+      get menuButton () root.querySelector('[role="button"].d-h.a-f-i-Ia-D-h.a-b-f-i-Ia-D-h'),
       get cancel () root.querySelector('[role="button"][id$=".cancel"]'),
       get submit () root.querySelector('[role="button"][id$=".post"]')
     };
@@ -355,6 +356,9 @@ let INFO =
     },
     unfold: function () {
       click(Elements.currentEntry.unfold);
+    },
+    menu: function () {
+      click(Elements.currentEntry.menuButton);
     }
   };
 
@@ -392,7 +396,7 @@ let INFO =
     );
   }
 
-  'comment plusone share next prev post yank notification cancel unfold'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
+  'comment plusone share next prev post yank notification cancel unfold menu'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
   'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
 
   mappings.addUserMap(
