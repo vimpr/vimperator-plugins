@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.7.0"
+  <plugin name="GooglePlusCommando" version="1.7.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -81,14 +81,6 @@ let INFO =
 
   // }}}
 
-  // State {{{
-
-  const State = {
-    form: null
-  };
-
-  // }}}
-
   // Elements {{{
 
   const Names = {
@@ -112,7 +104,43 @@ let INFO =
     },
     get notification () Elements.doc.querySelector('#gbi1'),
     get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
-    get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog))
+    get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog)),
+
+    getFocusedEditorButton: function (type) {
+      function get1 () {
+        const names = {submit: 'post', cancel: 'cancel'};
+
+        let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(function(it) it.querySelector('iframe').contentWindow === win);
+        if (editors.length === 0)
+          return;
+        if (editors.length > 1)
+          throw 'Two and more editors were found.';
+
+        return editors[0].parentNode.querySelector(String(<>[role="button"][id$=".{names[type]}"]</>));;
+      }
+
+      function get2 () {
+        const indexes = {submit: 0, cancel: 1};
+
+        let editors = A(doc.querySelectorAll('.n')).filter(function(it) it.querySelector('iframe').contentWindow === win);
+        if (editors.length === 0)
+          return;
+        if (editors.length > 1)
+          throw 'Two and more editors were found.';
+
+        let result =  editors[0].querySelectorAll('td > [role="button"]')[indexes[type]];
+        if (result)
+          return result;
+
+        if (type === 'cancel')
+          return editors[0].querySelector('.om[id$=".c"]');
+      }
+
+      let doc = content.document;
+      let win = document.commandDispatcher.focusedWindow;
+
+      return get1() || get2();
+    }
   };
 
   function MakeElement (constructor, root) {
@@ -204,20 +232,12 @@ let INFO =
     comment: function() {
       let entry = Elements.currentEntry;
       click(entry.comment);
-      State.form = {
-        cancel: function () click(entry.cancel),
-        submit: function () click(entry.submit)
-      };
     },
     plusone: function() click(Elements.currentEntry.plusone),
     share: function() click(Elements.currentEntry.share),
     post: function() {
       buffer.scrollTop();
       click(Elements.post.editor);
-      State.form = {
-        cancel: function () click(Elements.post.cancel),
-        submit: function () click(Elements.post.submit)
-      };
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
@@ -238,10 +258,9 @@ let INFO =
       click(Elements.doc.body);
     },
     submit: function () {
-      if (liberator.focus || !State.form)
+      if (liberator.focus)
         return;
-      State.form.submit();
-      State.form = null;
+      click(Elements.getFocusedEditorButton('submit'));
     },
     unfold: function () {
       click(Elements.currentEntry.unfold);
@@ -290,14 +309,13 @@ let INFO =
     ['<Esc>'],
     'Escape from input area',
     function () {
-      if (!liberator.focus && State.form) {
-        State.form.cancel();
-        State.form = null;
+      if (liberator.focus) {
+        let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
+        esc.action.apply(esc, arguments);
+      } else {
+        click(Elements.getFocusedEditorButton('cancel'));
         modes.reset();
-        return;
       }
-      let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
-      esc.action.apply(esc, arguments);
     },
     {
       matchingUrls: MatchingUrls
