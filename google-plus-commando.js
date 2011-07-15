@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.8.0"
+  <plugin name="GooglePlusCommando" version="1.8.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -238,7 +238,7 @@ let INFO =
       function move (panel) {
         let contentHeight = document.getElementById('content').boxObject.height;
         let rect = Elements.focusedEditor.editor.getClientRects()[0];
-        if (rect.top < contentHeight) {
+        if (rect.top < (contentHeight / 2)) {
           panel.style.top = '';
           panel.style.bottom = '10px';
         } else {
