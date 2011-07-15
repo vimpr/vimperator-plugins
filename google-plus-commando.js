@@ -269,11 +269,11 @@ let INFO =
       panel.innerHTML = <>
         <table>
           <tr><th>入力</th>           <th>効果</th>                   <th>解説</th>                                 </tr>
-          <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>                                                          </tr>
-          <tr><td>_TEXT</td>          <td><i>TEXT</i></td>                                                          </tr>
-          <tr><td>-TEXT-</td>         <td><s>TEXT</s></td>                                                          </tr>
-          <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>打消は内側に</td>                         </tr>
-          <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語はダメ</td>                         </tr>
+          <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>            <td>太字</td>                                 </tr>
+          <tr><td>_TEXT</td>          <td><i>TEXT</i></td>            <td>斜体</td>                                 </tr>
+          <tr><td>-TEXT-</td>         <td><s>TEXT</s></td>            <td>打ち消し線</td>                           </tr>
+          <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>太字/打消。打消(-)は内側に書く</td>       </tr>
+          <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語の打消はダメ</td>                   </tr>
           <tr><td>-ね こ-</td>        <td><s>ね こ</s></td>           <td>英数字や半角スペースを入れたらOK</td>     </tr>
           <tr><td>-Aねこす-</td>      <td><s>Aあねこす</s></td>       <td>英数字を前後に入れても良い</td>           </tr>
         </table>
