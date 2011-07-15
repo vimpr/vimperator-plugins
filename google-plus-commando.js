@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.7.1"
+  <plugin name="GooglePlusCommando" version="1.7.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -107,10 +107,15 @@ let INFO =
     get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog)),
 
     getFocusedEditorButton: function (type) {
+      function hasIFrame (elem) {
+        let iframe = elem.querySelector('iframe');
+        return iframe && iframe.contentWindow === win;
+      }
+
       function get1 () {
         const names = {submit: 'post', cancel: 'cancel'};
 
-        let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(function(it) it.querySelector('iframe').contentWindow === win);
+        let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
         if (editors.length === 0)
           return;
         if (editors.length > 1)
@@ -122,7 +127,7 @@ let INFO =
       function get2 () {
         const indexes = {submit: 0, cancel: 1};
 
-        let editors = A(doc.querySelectorAll('.n')).filter(function(it) it.querySelector('iframe').contentWindow === win);
+      let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
         if (editors.length === 0)
           return;
         if (editors.length > 1)
