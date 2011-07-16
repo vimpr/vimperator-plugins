@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.9.0"
+  <plugin name="GooglePlusCommando" version="1.9.1"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -165,7 +165,7 @@ let INFO =
   };
 
   function MakeElement (constructor, root) {
-    if (root)
+    if (root && !/none/.test(util.computedStyle(root).display))
       return constructor(root);
   }
 
