@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.9.1"
+  <plugin name="GooglePlusCommando" version="1.9.2"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -103,6 +103,10 @@ let INFO =
     get notification () Elements.doc.querySelector('#gbi1'),
     get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
     get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog)),
+
+    frames: {
+      get notifications () MakeElement(Notifications, Elements.doc.querySelector('iframe[src*="/_/notifications/"]'))
+    },
 
     get focusedEditor () {
       function hasIFrame (elem) {
@@ -221,6 +225,14 @@ let INFO =
     return self;
   }
 
+  function Notifications (root) {
+    let self = {
+      get root () root,
+      get visible () (parseInt(root.style.height, 10) > 0)
+    };
+    return self;
+  }
+
   // }}}
 
   // Post Help {{{
@@ -293,26 +305,27 @@ let INFO =
   // Commands {{{
 
   const Commands = {
-    next: withCount(function () {
+    moveEntry: function (arrow, vim) {
       if (Elements.viewer)
         return click(Elements.viewer.next);
-      let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
+
+      let arrowTarget = (function () {
+        let notifications = Elements.frames.notifications;
+        if (notifications && notifications.visible)
+          return notifications.root.contentDocument.body;
+
+        let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
+        if (menus.length === 1)
+          return menus[0];
+      })();
+
       plugins.feedSomeKeys_3.API.feed.apply(
         null,
-        menus.length === 1 ? ['<Down>', ['keypress'], menus[0]]
-                           : ['j', ['vkeypress'], Elements.doc]
+        arrowTarget ? [arrow, ['keypress'], arrowTarget] : [vim, ['vkeypress'], Elements.doc]
       );
-    }),
-    prev: withCount(function () {
-      if (Elements.viewer)
-        return click(Elements.viewer.prev);
-      let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
-      plugins.feedSomeKeys_3.API.feed.apply(
-        null,
-        menus.length === 1 ? ['<Up>', ['keypress'], menus[0]]
-                           : ['k', ['vkeypress'], Elements.doc]
-      );
-    }),
+    },
+    next: withCount(function () Commands.moveEntry('<Down>', 'j')),
+    prev: withCount(function () Commands.moveEntry('<Up>', 'k')),
     comment: function() {
       let entry = Elements.currentEntry;
       click(entry.comment);
@@ -341,6 +354,10 @@ let INFO =
         if (e && e.cancel)
           return click(e.cancel);
       }
+
+      if (Elements.frames.notifications.visible)
+        return click(Elements.notification);
+
       click(Elements.doc.body);
     },
     submit: function () {
