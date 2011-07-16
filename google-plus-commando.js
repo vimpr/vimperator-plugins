@@ -1,7 +1,8 @@
 /* NEW BSD LICENSE {{{
 Copyright (c) 2011, anekos.
+Copyright (c) 2011, teramako.
 All rights reserved.
-
+>
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
@@ -35,16 +36,100 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.9.0"
+  <plugin name="GooglePlusCommando" version="2.0.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
+    <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
-    <p>Mappings for Google+</p>
+    <p>Many Mappings and  Post command for Google+</p>
     <p>require: feedSomeKeys_3.js and x-hint.js and _libly.js</p>
+    <item>
+      <tags>:googleplus-setup</tags>
+      <spec>:googleplus -setup</spec>
+      <spec>:gp -setup</spec>
+      <description>
+        <p>Should setup at first</p>
+        <ol>
+          <li>Login to <a href="htts://plus.google.com/">Google+</a></li>
+          <li>Execute <ex>:googleplus -setup</ex></li>
+        </ol>
+      </description>
+    </item>
+    <item>
+      <tags>:googleplus-nonargs</tags>
+      <spec>:googleplus</spec>
+      <spec>:gp</spec>
+      <description>
+        <p>when argument is none, select the Google+ tab or open in new tab</p>
+      </description>
+    </item>
+    <item>
+      <tags>:googleplus :gp</tags>
+      <spec>:googleplus <oa>-l[link]</oa> <oa>-i[mage] <a>imageURL</a></oa> <oa>-t[o] <a>to</a></oa> <a>message</a></spec>
+      <spec>:gp <oa>-l[ink]</oa> <oa>-i[mage] <a>imageURL</a></oa> <oa>-t[o]> <a>to</a></oa> <a>message</a></spec>
+      <description>
+        <p>Post <a>message</a></p>
+        <dl>
+          <dt>-link</dt>
+          <dd>
+            Add the current URL. If the selections are available, add the selections as relataed page.
+            And when <a>-image</a> option is not specified and image elements is contained in the selections,
+            add the URL of the largest image.
+          </dd>
+          <dt>-image</dt>
+          <dd>
+            Specify image URL
+          </dd>
+          <dt>-to</dt>
+          <dd>
+            Specify the circles. Can set multiple. (Default: Anyone)
+          </dd>
+        </dl>
+      </description>
+    </item>
+    <item>
+      <tags>g:gplus_commando_map_</tags>
+      <spec>let g:gplus_commando_map_<a>command</a> = <a>map-keys</a></spec>
+      <description>
+        <p>
+          Map <a>map-keys</a> for <a>command</a>.
+          The possible <a>command</a>s.
+          <dl>
+            <dt>next</dt>           <dd>Go to next entry.</dd>
+            <dt>prev</dt>           <dd>Back to previous entry.</dd>
+            <dt>share</dt>          <dd>Shate current entry.</dd>
+            <dt>plusone</dt>        <dd>+1</dd>
+            <dt>comment</dt>        <dd>Comment to current entry.</dd>
+            <dt>post</dt>           <dd>Post new entry.</dd>
+            <dt>yank</dt>           <dd>Copy the permlink of current entry to clipboard.</dd>
+            <dt>notification</dt>   <dd>Open notification box.</dd>
+            <dt>cancel</dt>         <dd>Cancel current something.</dd>
+            <dt>submit</dt>         <dd>Submit current editing post.</dd>
+            <dt>unfold</dt>         <dd>Unfold something on current entry.</dd>
+            <dt>menu</dt>           <dd>Open the menu of current entry.</dd>
+          </dl>
+        </p>
+        <p>rc file example</p>
+        <code>
+let g:gplus_commando_map_next            = "j"
+let g:gplus_commando_map_prev            = "k"
+let g:gplus_commando_map_share           = "s"
+let g:gplus_commando_map_plusone         = "p"
+let g:gplus_commando_map_comment         = "c"
+let g:gplus_commando_map_post            = "C"
+let g:gplus_commando_map_yank            = "y"
+let g:gplus_commando_map_notification    = "n"
+let g:gplus_commando_map_submit          = "&lt;C-CR&gt;"
+let g:gplus_commando_map_cancel          = "&lt;Esc&gt;"
+let g:gplus_commando_map_unfold          = "e"
+let g:gplus_commando_map_menu            = "m"
+        </code>
+      </description>
+    </item>
   </plugin>
 </>;
 // }}}
@@ -503,6 +588,549 @@ let INFO =
       },
       true
     );
+
+  })();
+
+  // }}}
+
+  // Post Command {{{
+
+  (function () {
+    const HOME_URL = 'https://plus.google.com/',
+          POST_URL_BASE = 'https://plus.google.com/u/0/_/sharebox/post/';
+
+    /**
+     * ${RUNTIMEPATH}/info/{profileName}/googlePlus のデータ取得/保存
+     * @type {Object}
+     */
+    let store = storage.newMap('googlePlus', {store: true});
+
+    commands.addUserCommand(
+      ['gp', 'googleplus'],
+      'Post to Google+',
+      function (args) {
+        // ----------------------
+        // -setup オプション
+        // ----------------------
+        if ('-setup' in args) {
+          setupGooglePlus();
+          return;
+        }
+
+        let message = args[0] || '',
+            page = {},
+            acls = null,
+            useContents = false;
+
+        // ----------------------
+        // -list オプション
+        // ----------------------
+        if ('-l' in args) {
+          let sel = content.getSelection();
+          page.selection = sel.isCollapsed ? null : sel;
+          page.title     = buffer.title;
+          page.url       = buffer.URI;
+          useContents = true;
+        }
+        // ----------------------
+        // -imageURL オプション
+        // ----------------------
+        if ('-i' in args) {
+          page.image = args['-i'];
+          useContents = true;
+        }
+
+        // ----------------------
+        // -to オプション
+        // ----------------------
+        if ('-t' in args && args['-t'].indexOf('anyone') == -1)
+          acls = store.get('CIRCLES', []).filter(function(c) this.indexOf(c[0]) != -1, args['-t']);
+
+        // 引数が何も無い場合は、Google+のページへ
+        if (!message && !useContents) {
+          let tab = getGooglePlusTab();
+          if (tab) {
+            gBrowser.mTabContainer.selectedItem = tab;
+          } else {
+            liberator.open(HOME_URL, {where: liberator.NEW_TAB});
+          }
+          return;
+        }
+
+        postGooglePlus(new PostData(message, useContents ? page : null, acls));
+      },
+      {
+        literal: 0,
+        options: [
+          [['-l', '-link'], commands.OPTION_NOARG],
+          [['-i', '-imageURL'], commands.OPTION_STRING],
+          [['-t', '-to'], commands.OPTION_LIST, null,
+            function (context, args) {
+              let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
+              if (prefix)
+                context.advance(prefix.length);
+
+              return [['anyone', 'to public']].concat(Array.slice(store.get('CIRCLES', [])))
+            }],
+          [['-setup'], commands.OPTION_NOARG],
+        ],
+      },
+      true
+    );
+
+    /**
+     * Google+のページから必要データを保存する
+     * @return {Boolean}
+     */
+    function setupGooglePlus () {
+      function onSuccess () {
+        liberator.echomsg('Initialized: googleplus');
+      }
+
+      function onFail () {
+        liberator.echoerr('Faild: initialize googleplus');
+      }
+
+      function getFromWindow (win) {
+        let data = win.OZ_initData;
+        if (!data)
+          return false;
+        // XXX 全てのデータが揃っていないケースがあるようなので、検査する
+        try {
+          store.set('UID', data[2][0]);
+          store.set('AT', data[1][15]);
+          let circles = data[12][0];
+          // CIRCLES[]: [[Name, Description, ID], ...]
+          store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
+          onSuccess();
+          return true;
+        } catch (e) {
+          liberator.log(e);
+          return false;
+        }
+      }
+
+      // XXX ブラチラ大作戦
+      function getFromMakedBrowser () {
+        let browser = document.createElementNS(XUL, 'browser');
+        browser.setAttribute('type', 'content');
+        browser.setAttribute('src', 'https://plus.google.com/');
+        document.getElementById('main-window').appendChild(browser);
+
+        browser.addEventListener(
+          'DOMContentLoaded',
+          function (e) {
+            if (e.target !== browser.contentWindow.document)
+              return;
+            browser.removeEventListener('DOMContentLoaded', arguments.callee, false);
+            getFromWindow(browser.contentWindow.wrappedJSObject);
+            browser.parentNode.removeChild(browser);
+          },
+          false
+        );
+      }
+
+      let found = false;
+
+      let tab = getGooglePlusTab();
+      if (tab)
+        found = getFromWindow(tab.linkedBrowser.contentWindow.wrappedJSObject);
+
+      if (!found)
+        getFromMakedBrowser();
+    }
+
+    /**
+     * Google+のタブを取ってくる
+     * @return {Element|null}
+     */
+    function getGooglePlusTab () {
+      let tabs = gBrowser.tabs;
+      for (let i = 0, tab; tab = tabs[i]; ++i) {
+        if (tab.linkedBrowser.currentURI.spec.indexOf(HOME_URL) == 0) {
+          return tab;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * Post to Google+
+     * @param {PostData} aPostData
+     */
+    function postGooglePlus (aPostData) {
+      let data = aPostData.getPostData();
+      let queries = [];
+      for (let key in data)
+        queries.push(key + '=' + encodeURIComponent(data[key]));
+
+      let xhr = new XMLHttpRequest();
+      xhr.mozBackgroundRequest = true;
+      xhr.open('POST', aPostData.POST_URL, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+      xhr.setRequestHeader('Origin', HOME_URL);
+      xhr.onreadystatechange = postGooglePlus.readyStateChange;
+      xhr.send(queries.join('&'));
+    }
+    /**
+     * Google+への送信状況を表示する
+     * @param {Event} aEvent
+     *                aEvent.target は XMLHttpRequestオブジェクト
+     */
+    postGooglePlus.readyStateChange = function GooglePlus_readyStateChange (aEvent) {
+      let xhr = aEvent.target,
+          msg = 'Google+: ',
+          XBW = window.XULBrowserWindow;
+      if (xhr.readyState == 4) {
+        msg += (xhr.status == 200) ? 'Posted' : 'Post faild (' + xhr.statusText + ')';
+        window.setTimeout(function(XBW, msg){
+          if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
+            XBW.setJSDefaultStatus('');
+        }, 2000, XBW, msg);
+      } else {
+        msg += 'sending...';
+      }
+      liberator.log(msg, 0);
+      XBW.setJSDefaultStatus(msg);
+    };
+
+    XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
+
+    /**
+     * Google+への送信データ生成
+     * @Constructor
+     * @param {String}    aMessage
+     * @param {Object}    aPage             現ページのコンテンツ情報
+     * @param {Selection} [aPage.selection] 選択オブジェクト
+     * @param {String}    [apage.title]     現ページのタイトル
+     * @param {String}    [aPage.url]       現ページURL
+     * @param {String}    [aPage.image]     表示させたい画像URL
+     * @param {Array}     aACLs             ACL[]
+     */
+    function PostData () {
+      this.init.apply(this, arguments);
+    }
+    PostData.sequence = 0;
+    PostData.prototype = {
+      init: function PD_init (aMessage, aPage, aACLs) {
+        this.message = aMessage;
+        this.page = aPage || null;
+
+        this.UID = store.get('UID', null);
+        liberator.assert(this.UID, 'Google+ Error: UID is not set. Please login and `:googleplus -setup\'');
+        this.AT = store.get('AT', null);
+        liberator.assert(this.AT, 'Google+ Error: AT is not set. Please login and `:googleplus -setup\'');
+
+        this.setACLEnties(aACLs);
+      },
+      get token () {
+        let t = 'oz:' + this.UID + '.' + this.date.getTime().toString(16) + '.' + this.sequence.toString(16);
+        Object.defineProperty(this, 'token', {value: t});
+        return t;
+      },
+      get date () {
+        let d = new Date;
+        Object.defineProperty(this, 'date', {value: d});
+        return d;
+      },
+      get sequence () {
+        let s = PostData.sequence++;
+        Object.defineProperty(this, 'sequence', {value: s});
+        return s;
+      },
+      get reqid () {
+        let r = this.date.getHours() + 3600 + this.date.getMinutes() + 60 + this.date.getSeconds() + this.sequence * 100000;
+        Object.defineProperty(this, 'reqid', {value: r});
+        return r;
+      },
+      get POST_URL () {
+        let url = POST_URL_BASE + '?_reqid=' + this.reqid + '&rt=j';
+        Object.defineProperty(this, 'POST_URL', {value: url});
+        return url
+      },
+      aclEntries: [{
+        scope: {
+          scopeType: 'anyone',
+          name: 'Anyone',
+          id: 'anyone',
+          me: true,
+          requiresKey: false
+        },
+        role: 20,
+      }, {
+        scope: {
+          scopeType: 'anyone',
+          name: 'Anyone',
+          id: 'anyone',
+          me: true,
+          requiresKey: false,
+        },
+        role: 60
+      }],
+      setACLEnties: function PD_setACLEnties (aACLs) {
+        if (!aACLs || aACLs.length == 0)
+          return this.aclEntries = Object.getPrototypeOf(this).aclEntries;
+
+        let entries = [];
+        for (let i = 0, len = aACLs.length; i < len; ++i) {
+          let acl = aACLs[i];
+          let scope = {
+            scopeType: 'focusGroup',
+            name: acl[0],
+            id: this.UID + '.' + acl[2],
+            me: false,
+            requiresKey: false,
+            groupType: 'p'
+          };
+          entries.push({scope: scope, role: 60});
+          entries.push({scope: scope, role: 20});
+        }
+        return this.aclEntries = entries;
+      },
+      getPostData: function PD_getPostData () {
+        let spar = [v for each(v in this.generateSpar())];
+        return {
+          spar: JSON.stringify(spar),
+          at  : this.AT
+        };
+      },
+      generateSpar: function PD_generateSpar() {
+        for (let i = 0, len = 17; i < len; ++i) {
+          switch (i) {
+          case 0:
+            yield this.message;
+            break;
+          case 1:
+            yield this.token;
+            break;
+          case 6:
+            if (this.page) {
+              let link = [v for each(v in this.generateLink())],
+                  photo = [];
+              if (link.length > 0) {
+                photo = [v for each(v in this.generateImage())];
+                yield JSON.stringify([JSON.stringify(link), JSON.stringify(photo)]);
+              } else {
+                yield JSON.stringify([JSON.stringify(link)]);
+              }
+            } else {
+              yield null;
+            }
+
+            break;
+          case 8:
+            yield JSON.stringify({aclEntries: this.aclEntries});
+            break;
+          case 9:
+          case 11:
+          case 12:
+            yield true;
+            break;
+          case 15:
+          case 16:
+            yield false;
+            break;
+          case 10:
+          case 14:
+            yield [];
+            break;
+          default:
+            yield null;
+            break;
+          }
+        }
+      },
+      generateLink: function PD_generateLink () {
+        if (!this.page.url || !this.page.title) {
+          yield null;
+          throw StopIteration;
+        }
+        let url = this.page.url;
+        let youtubeReg = /http:\/\/(?:.*\.)?youtube.com\/watch\?v=([a-zA-Z0-9_-]+)[-_.!~*'()a-zA-Z0-9;\/?:@&=+\$,%#]*/;
+        let m = url.match(youtubeReg);
+        for (let i = 0, len = 48; i < len; ++i) {
+          switch(i) {
+          case 3:
+            yield this.page.title;
+            break;
+          case 5:
+            yield m ? [null, 'http://www.youtube.com/v/' + m[1] + '&hl=en&fs=1&autoplay=1', 385, 640] : null;
+            break;
+          case 9:
+            yield m ? [[null, content.wrappedJSObject.yt.config_.VIDEO_USERNAME, 'uploader']] : [];
+            break;
+          case 21:
+            if (this.page.selection) {
+              let sels = [];
+              let image = ('image' in this.page), imgElms = [];
+              for (let k = 0, count = this.page.selection.rangeCount; k < count; ++k) {
+                let r = this.page.selection.getRangeAt(k),
+                    fragment = r.cloneContents();
+                sels.push(node2txt(fragment, r.commonAncestorContainer.localName));
+                if (!image) {
+                  imgElms.push.apply(imgElms, Array.slice(fragment.querySelectorAll('img')));
+                }
+              }
+              if (imgElms.length > 0)
+                this.page.image = imgElms.reduce(function(p, c) (p.width * p.height < c.width * c.height) ? c : p).src;
+
+              yield sels.join('<br/>(snip)<br/>');
+            } else {
+              yield this.page.title + '<br/>' + this.page.url;
+            }
+            break;
+          case 24:
+            yield m ?
+                  [null, url, null, 'application/x-shockwave-flash', 'video'] :
+                  [null, url, null, 'text/html', 'document'];
+            break;
+          case 41:
+            let imageURL = m ?
+                'http://ytimg.googleusercontent.com/vi/' + m[1] + '/default.jpg' :
+                '//s2.googleusercontent.com/s2/favicons?domain=' + util.createURI(url).host;
+            yield [[null, imageURL, null, null], [null, imageURL, null, null]];
+            break;
+          case 47:
+            yield [[null, (m ? 'youtube' : ''), 'http://google.com/profiles/media/provider']];
+            break;
+          default:
+            yield null;
+          }
+        }
+      },
+      generateImage: function PD_generateImage() {
+        if (this.page.image) {
+          let uri = util.createURI(this.page.image);
+          let reg = /https?:\/\/[^\s]+\.(jpe?g|png|gif)/i;
+          let mime = '';
+          try {
+            mime = MIME.getTypeFromURI(uri);
+          } catch(e) {
+            if (url.host == 'gazo.com') {
+              mime = 'image/png';
+            } else {
+              yield null;
+              throw StopIteration;
+            }
+          }
+          for (let i = 0, len = 48; i < len; ++i) {
+            switch(i) {
+            case 5:
+              yield [null, uri.spec];
+              break;
+            case 9:
+              yield [];
+              break;
+            case 24:
+              yield [null, uri.spec, null, mime, 'photo', null,null,null,null,null,null,null,null,null];
+              break;
+            case 41:
+              yield [[null, uri.spec, null, null], [null, uri.spec, null, null]];
+              break;
+            case 47:
+              yield [[null,'images','http://google.com/profiles/media/provider']];
+              break;
+            default:
+              yield null;
+            }
+          }
+        } else {
+          yield null;
+        }
+      },
+    };
+
+    /**
+     * ノードをHTMLテキストに変換
+     * @param {Node} aNode
+     * @param {String} [aParentTag] 親ノードのタグ名
+     * @param {String} [aIndent]    インデント文字列
+     * @param {Number} [aIndex]     ノード番号(ol>li 時のみ使用)
+     * @return {String}
+     */
+    function node2txt (aNode, aParentTag, aIndent, aIndex) {
+      let txt = '';
+      switch (aNode.nodeType) {
+      case Node.DOCUMENT_NODE: // 9
+      case Node.DOCUMENT_FRAGMENT_NODE: // 11
+        switch (aParentTag) {
+        case 'ol':
+        case 'ul':
+        case 'dl':
+          aIndent = '&nbsp;&nbsp;';
+          break;
+        default:
+          aIndent = '';
+        }
+        txt = nodelist2txt(aNode.childNodes, aParentTag, aIndent).join('');
+        break;
+      case Node.TEXT_NODE: // 3
+        txt = aNode.nodeValue;
+        break;
+      case Node.ELEMENT_NODE: // 1
+        let localName = aNode.localName,
+            children = aNode.childNodes;
+        switch (localName) {
+        case 'ul':
+        case 'ol':
+        case 'dl':
+          txt = nodelist2txt(children, localName, aIndent + '&nbsp;&nbsp;').join('');
+          break;
+        case 'li':
+          txt = aIndent + (aParentTag == 'ol' ? ('  ' + (aIndex+1)).slice(-2) + '. ' : ' * ').replace(' ', '&nbsp;', 'g') +
+                nodelist2txt(children, 'li', aIndent).join('') +
+                '<br/>\n';
+          break;
+        case 'dt':
+          txt = aIndent + '<b>' + nodelist2txt(children, localName, aIndent) + '</b>:<br/>\n';
+          break;
+        case 'dd':
+          txt = aIndent + '&nbsp;&nbsp;' + nodelist2txt(children, localName, aIndent) + '<br/>\n';
+          break;
+        case 'br':
+          txt = '<br/>\n';
+          break;
+        case 'img':
+          txt = '<img src=' + aNode.src.quote() + ' width="' + aNode.width + '" height="' + aNode.height + '"/>';
+          break;
+        case 'p':
+          txt = nodelist2txt(children, 'p', '').join('') + '<br/>\n';
+          break;
+        case 'a':
+          if (aNode.hasAttribute('href') && aNode.href.indexOf('http') == 0) {
+            txt = '<a href=' + aNode.href.quote() + (aNode.title ? ' title=' + aNode.title.quote() : '') + '>' +
+                  nodelist2txt(children, 'a', '').join('') +
+                  '</a>';
+            break;
+          }
+        default:
+          txt = '<' + localName + '>' +
+                nodelist2txt(children, localName, aIndent).join('') +
+                '</' + localName + '>';
+        }
+        break;
+      }
+      return txt;
+    }
+
+    /**
+     * NodeListの子をテキストにして配列で返す
+     * @param {NodeList} aChildNoes
+     * @param {String} aParentTag
+     * @param {String} aIndent
+     * @return {String[]}
+     */
+    function nodelist2txt (aChildNodes, aParentTag, aIndent) {
+      let a = [], index = 0;
+      for (let i = 0, len = aChildNodes.length, child; child = aChildNodes[i]; ++i){
+        let txt = node2txt(child, aParentTag, aIndent, index);
+        if (txt) {
+          a.push(txt);
+          ++index;
+        }
+      }
+      return a;
+    }
 
   })();
 
