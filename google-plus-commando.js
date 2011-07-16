@@ -1006,7 +1006,7 @@ let g:gplus_commando_map_menu            = "m"
           try {
             mime = MIME.getTypeFromURI(uri);
           } catch(e) {
-            if (url.host == 'gazo.com') {
+            if (url.host == 'gyazo.com') {
               mime = 'image/png';
             } else {
               yield null;
