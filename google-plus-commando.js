@@ -228,7 +228,7 @@ let INFO =
 
   // }}}
 
-  // {{{
+  // Post Help {{{
 
   const PostHelp = {
     PanelID: 'google-plus-commando-help-panel',
@@ -271,7 +271,7 @@ let INFO =
         <table>
           <tr><th>入力</th>           <th>効果</th>                   <th>解説</th>                                 </tr>
           <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>            <td>太字</td>                                 </tr>
-          <tr><td>_TEXT_</td>          <td><i>TEXT</i></td>            <td>斜体</td>                                 </tr>
+          <tr><td>_TEXT_</td>         <td><i>TEXT</i></td>            <td>斜体</td>                                 </tr>
           <tr><td>-TEXT-</td>         <td><s>TEXT</s></td>            <td>打ち消し線</td>                           </tr>
           <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>太字/打消。打消(-)は内側に書く</td>       </tr>
           <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語の打消はダメ</td>                   </tr>
@@ -366,137 +366,145 @@ let INFO =
 
   // Define mappiings {{{
 
-  const MatchingUrls = RegExp('^https://plus\\.google\\.com/*');
-  const MappingDescriptionSuffix = ' - Google plus Commando';
+  (function () {
 
-  function defineMapping (mode, cmd) {
-    let gv =
-      liberator.globalVariables[
-        'gplus_commando_map_' +
-        cmd.replace(/[A-Z]/g, function (m) ('_' + m.toLowerCase()))
-      ];
-    if (!gv)
-      return;
-    let func = Commands[cmd];
+    const MatchingUrls = RegExp('^https://plus\\.google\\.com/*');
+    const MappingDescriptionSuffix = ' - Google plus Commando';
+
+    function defineMapping (mode, cmd) {
+      let gv =
+        liberator.globalVariables[
+          'gplus_commando_map_' +
+          cmd.replace(/[A-Z]/g, function (m) ('_' + m.toLowerCase()))
+        ];
+      if (!gv)
+        return;
+      let func = Commands[cmd];
+      mappings.addUserMap(
+        [mode],
+        gv.split(/\s+/),
+        cmd + MappingDescriptionSuffix,
+        function (count) {
+          try {
+            func(count);
+          } catch (e if (e instanceof GPCError)) {
+            /* DO NOTHING */
+          }
+        },
+        {
+          count: func.length === 1,
+          matchingUrls: MatchingUrls
+        }
+      );
+    }
+
+    'comment plusone share next prev post yank notification cancel unfold menu'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
+    'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
+
     mappings.addUserMap(
-      [mode],
-      gv.split(/\s+/),
-      cmd + MappingDescriptionSuffix,
-      function (count) {
-        try {
-          func(count);
-        } catch (e if (e instanceof GPCError)) {
-          /* DO NOTHING */
+      [modes.INSERT],
+      ['<Esc>'],
+      'Escape from input area',
+      function () {
+        if (liberator.focus) {
+          let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
+          esc.action.apply(esc, arguments);
+        } else {
+          click(Elements.focusedEditor.button.cancel);
+          // FIXME
+          window.document.commandDispatcher.advanceFocus();
+          modes.reset();
+          PostHelp.hide();
         }
       },
       {
-        count: func.length === 1,
         matchingUrls: MatchingUrls
       }
     );
-  }
 
-  'comment plusone share next prev post yank notification cancel unfold menu'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
-  'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
-
-  mappings.addUserMap(
-    [modes.INSERT],
-    ['<Esc>'],
-    'Escape from input area',
-    function () {
-      if (liberator.focus) {
-        let esc = mappings.getDefault(modes.NORMAL, '<Esc>');
-        esc.action.apply(esc, arguments);
-      } else {
-        click(Elements.focusedEditor.button.cancel);
-        // FIXME
-        window.document.commandDispatcher.advanceFocus();
-        modes.reset();
-        PostHelp.hide();
-      }
-    },
-    {
-      matchingUrls: MatchingUrls
-    }
-  );
+  })();
 
   // }}}
 
   // Define hints {{{
 
-  const HintStyleName = 'google-plus-commando-hint';
+  (function () {
 
-  [
-    ['o', 'f', function (e) click(e)],
-    ['t', 'F', function (e) buffer.followLink(e, liberator.NEW_TAB)],
-  ].forEach(function ([modeChar, mapKey, action]) {
-    let modeName = 'google-plus-comando-hint-' + modeChar;
+    const HintStyleName = 'google-plus-commando-hint';
 
-    hints.addMode(
-      modeName,
-      hints._hintModes[modeChar].prompt,
-      function (elem, count) {
-        function mouseEvent (name) {
-          let evt = elem.ownerDocument.createEvent('MouseEvents');
-          evt.initMouseEvent(name, true, true, elem.ownerDocument.defaultView, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-          elem.dispatchEvent(evt);
+    [
+      ['o', 'f', function (e) click(e)],
+      ['t', 'F', function (e) buffer.followLink(e, liberator.NEW_TAB)],
+    ].forEach(function ([modeChar, mapKey, action]) {
+      let modeName = 'google-plus-comando-hint-' + modeChar;
+
+      hints.addMode(
+        modeName,
+        hints._hintModes[modeChar].prompt,
+        function (elem, count) {
+          function mouseEvent (name) {
+            let evt = elem.ownerDocument.createEvent('MouseEvents');
+            evt.initMouseEvent(name, true, true, elem.ownerDocument.defaultView, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            elem.dispatchEvent(evt);
+          }
+
+          let plusone = elem.getAttribute('g:type') === 'plusone';
+          if (plusone)
+            mouseEvent('mouseover');
+          action(elem, count);
+          if (plusone)
+            mouseEvent('mouseout');
+        },
+        function () {
+          function removeRoot (s)
+            s.replace(/^\s*\/\//, '');
+
+          const ext = [
+            'span[@role="button"]',
+            'div[@role="button"]',
+            'div[@data-content-type]',
+            'img[contains(@class,"ea-g-Vc-pa")]',
+            'div[contains(@class,"a-z-nb-A")]'
+          ];
+
+          let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
+
+          for (let [, name] in Iterator(['viewer', 'dialog'])) {
+            if (!Elements[name])
+              continue;
+            xpath.push(String(<>div[contains(@class, "{Names.closeButton}")]</>));
+            xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
+            break;
+          }
+
+          styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', '.a-b-f-W-Tj.a-f-W-Tj { display: inline  !important }');
+
+          return xpath.map(function (it) '//' + it).join(' | ');
         }
+      );
 
-        let plusone = elem.getAttribute('g:type') === 'plusone';
-        if (plusone)
-          mouseEvent('mouseover');
-        action(elem, count);
-        if (plusone)
-          mouseEvent('mouseout');
+      mappings.addUserMap(
+        [modes.NORMAL],
+        [liberator.globalVariables['gplus_commando_map_hint_' + modeChar] || mapKey],
+        'Hit a hint - Google plus Commando',
+        function () hints.show(modeName),
+        {
+          matchingUrls: RegExp('^https://plus\\.google\\.com/.*')
+        }
+      );
+    });
+
+    plugins.libly.$U.around(
+      hints,
+      'hide',
+      function (next) {
+        setTimeout(function () styles.removeSheet(false, HintStyleName, 'plus\\.google\\.com'), 0);
+        return next();
       },
-      function () {
-        function removeRoot (s)
-          s.replace(/^\s*\/\//, '');
-
-        const ext = [
-          'span[@role="button"]',
-          'div[@role="button"]',
-          'div[@data-content-type]',
-          'img[contains(@class,"ea-g-Vc-pa")]',
-          'div[contains(@class,"a-z-nb-A")]'
-        ];
-
-        let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
-
-        for (let [, name] in Iterator(['viewer', 'dialog'])) {
-          if (!Elements[name])
-            continue;
-          xpath.push(String(<>div[contains(@class, "{Names.closeButton}")]</>));
-          xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
-          break;
-        }
-
-        styles.addSheet(false, HintStyleName, "plus\\.google\\.com", '.a-b-f-W-Tj.a-f-W-Tj { display: inline  !important }');
-
-        return xpath.map(function (it) '//' + it).join(' | ');
-      }
+      true
     );
 
-    mappings.addUserMap(
-      [modes.NORMAL],
-      [liberator.globalVariables['gplus_commando_map_hint_' + modeChar] || mapKey],
-      'Hit a hint - Google plus Commando',
-      function () hints.show(modeName),
-      {
-        matchingUrls: RegExp('^https://plus\\.google\\.com/.*')
-      }
-    );
-  });
-
-  plugins.libly.$U.around(
-    hints,
-    'hide',
-    function (next) {
-      setTimeout(function () styles.removeSheet(false, HintStyleName, 'plus\\.google\\.com'), 0);
-      return next();
-    },
-    true
-  );
+  })();
 
   // }}}
 
