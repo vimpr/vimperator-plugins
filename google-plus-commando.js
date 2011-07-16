@@ -213,11 +213,6 @@ let INFO =
   }
 
   function Viewer (root) {
-    function nButton (n) {
-      let bs = self.buttons;
-      if (bs.length === 2)
-        return bs[n];
-    }
     let self = {
       get cancel () root.querySelector('.' + Names.closeButton),
       get prev () root.querySelector('.vn.GE.AH'),
