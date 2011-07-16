@@ -31,8 +31,8 @@ let PLUGIN_INFO =
   <version>1.14.1</version>
   <minVersion>2.3</minVersion>
   <maxVersion>3.2</maxVersion>
-  <author mail="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+  <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
+  <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js</updateURL>
   <detail><![CDATA[
