@@ -271,7 +271,7 @@ let INFO =
         <table>
           <tr><th>入力</th>           <th>効果</th>                   <th>解説</th>                                 </tr>
           <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>            <td>太字</td>                                 </tr>
-          <tr><td>_TEXT</td>          <td><i>TEXT</i></td>            <td>斜体</td>                                 </tr>
+          <tr><td>_TEXT_</td>          <td><i>TEXT</i></td>            <td>斜体</td>                                 </tr>
           <tr><td>-TEXT-</td>         <td><s>TEXT</s></td>            <td>打ち消し線</td>                           </tr>
           <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>太字/打消。打消(-)は内側に書く</td>       </tr>
           <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語の打消はダメ</td>                   </tr>
