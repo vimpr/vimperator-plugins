@@ -81,157 +81,202 @@ let INFO =
 
   // }}}
 
+  // Selector {{{
+
+  const S = (function () {
+
+    return {
+      role: role,
+      typePlusone: '[g\\:type="plusone"]',
+      editable: '.editable',
+
+      currentEntry: {
+        root: '.a-f-oi-Ai',
+        unfold: [
+          role('button', '.a-b-f-i-gc-cf-Xb-h'),                // 発言の省略 (以前)
+          role('button', '.a-b-f-i-gc-Sb-Xb-h'), // 発言の省略 (以降)
+          role('button', '.a-b-f-i-p-gc-h')      // 投稿の省略
+        ],
+        menuButton: role('button', '.d-h.a-f-i-Ia-D-h.a-b-f-i-Ia-D-h'),
+        cancel: role('button', '[id$=".cancel"]'),
+        submit: role('button', '[id$=".post"]'),
+      },
+      post: {
+        root: '.n-Ob',
+        open: '.n-Nd',
+        cancel: 'div.om[id$=".c"]',
+        submit: role('button', '.d-s-r.tk3N6e-e.tk3N6e-e-qc.n-Ja-xg')
+      },
+      notification: '#gbi1',
+      viewer: {
+        root: '.zg',
+        prev: '.vn.GE.AH',
+        next: '.vn.GE.BH'
+      },
+      dialog: {
+        root: '.va-Q',
+      },
+      frames: {
+        notifications: 'iframe[src*="/_/notifications/"]'
+      },
+      closeButton: '.CH'
+    };
+
+    function role (name, prefix)
+      ((prefix || '') + '[role="' + name + '"]');
+
+  })();
+
+  // }}}
+
   // Elements {{{
 
-  const Names = {
-    viewer: 'zg',
-    dialog: 'va-Q',
-    closeButton: 'CH'
-  };
+  const Elements = (function () {
 
-  const Elements = {
-    get doc() content.document,
-    get currentEntry () MakeElement(Entry, Elements.doc.querySelector('.a-f-oi-Ai')),
-    post: {
-      // get editor () Elements.postForm.querySelector('.editable').parentNode,
-      // Elements.postForm.querySelector('.editable').parentNode
-      get root () Elements.doc.querySelector('.n-Ob'),
-      get open () Elements.doc.querySelector('.n-Nd'),
-      get cancel () Elements.post.root.querySelector('div.om[id$=".c"]'),
-      get submit () Elements.doc.querySelector('[role="button"].d-s-r.tk3N6e-e.tk3N6e-e-qc.n-Ja-xg')
-    },
-    get notification () Elements.doc.querySelector('#gbi1'),
-    get viewer () MakeElement(Viewer, Elements.doc.querySelector('.' + Names.viewer)),
-    get dialog () MakeElement(Dialog, Elements.doc.querySelector('.' + Names.dialog)),
+    return {
+      get doc() content.document,
+      get currentEntry () MakeElement(Entry, Elements.doc.querySelector(S.currentEntry.root)),
+      post: {
+        // get editor () Elements.postForm.querySelector('.editable').parentNode,
+        // Elements.postForm.querySelector('.editable').parentNode
+        get root () Elements.doc.querySelector(S.post.root),
+        get open () Elements.doc.querySelector(S.post.open),
+        get cancel () Elements.post.root.querySelector(S.post.cancel),
+        get submit () Elements.doc.querySelector(S.post.submit)
+      },
+      get notification () Elements.doc.querySelector(S.notification),
+      get viewer () MakeElement(Viewer, Elements.doc.querySelector(S.viewer.root)),
+      get dialog () MakeElement(Dialog, Elements.doc.querySelector(S.dialog.root)),
 
-    frames: {
-      get notifications () MakeElement(Notifications, Elements.doc.querySelector('iframe[src*="/_/notifications/"]'))
-    },
+      frames: {
+        get notifications () MakeElement(Notifications, Elements.doc.querySelector(S.frames.notifications))
+      },
 
-    get focusedEditor () {
-      function hasIFrame (elem) {
-        let iframe = elem.querySelector('iframe');
-        return iframe && iframe.contentWindow === win;
-      }
-
-      function get1 () {
-        function button (editor, name)
-          editor.parentNode.querySelector(String(<>[role="button"][id$=".{name}"]</>));
-
-        const names = {submit: 'post', cancel: 'cancel'};
-
-        let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
-        if (editors.length === 0)
-          return;
-        if (editors.length > 1)
-          throw 'Two and more editors were found.';
-
-        return {
-          editor: #1=(editors[0]),
-          button: {
-            submit: button(#1#, 'post'),
-            cancel: button(#1#, 'cancel')
-          }
-        };
-      }
-
-      function get2 () {
-        function button (editor, index) {
-          let result = editor.querySelectorAll('td > [role="button"]')[index];
-          if (result)
-            return result;
-          if (index === 1)
-            return editor.querySelector('.om[id$=".c"]');
+      get focusedEditor () {
+        function hasIFrame (elem) {
+          let iframe = elem.querySelector('iframe');
+          return iframe && iframe.contentWindow === win;
         }
 
-        const indexes = {submit: 0, cancel: 1};
+        function get1 () {
+          function button (editor, name)
+            editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
 
-        let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
-        if (editors.length === 0)
-          return;
-        if (editors.length > 1)
-          throw 'Two and more editors were found.';
+          let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
+          if (editors.length === 0)
+            return;
+          if (editors.length > 1)
+            throw 'Two and more editors were found.';
 
-        return {
-          editor: #1=(editors[0]),
-          button: {
-            submit: button(#1#, 0),
-            cancel: button(#1#, 1)
+          return {
+            editor: #1=(editors[0]),
+            button: {
+              submit: button(#1#, 'post'),
+              cancel: button(#1#, 'cancel')
+            }
+          };
+        }
+
+        function get2 () {
+          function button (editor, index) {
+            let result = editor.querySelectorAll('td > ' + S.role('button'))[index];
+            if (result)
+              return result;
+            if (index === 1)
+              return editor.querySelector('.om[id$=".c"]');
           }
-        };
+
+          const indexes = {submit: 0, cancel: 1};
+
+          let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
+          if (editors.length === 0)
+            return;
+          if (editors.length > 1)
+            throw 'Two and more editors were found.';
+
+          return {
+            editor: #1=(editors[0]),
+            button: {
+              submit: button(#1#, 0),
+              cancel: button(#1#, 1)
+            }
+          };
+        }
+
+        let doc = content.document;
+        let win = document.commandDispatcher.focusedWindow;
+
+        return get1() || get2();
       }
+    };
 
-      let doc = content.document;
-      let win = document.commandDispatcher.focusedWindow;
-
-      return get1() || get2();
+    function MakeElement (constructor, root) {
+      if (root && !/none/.test(util.computedStyle(root).display))
+        return constructor(root);
     }
-  };
 
-  function MakeElement (constructor, root) {
-    if (root && !/none/.test(util.computedStyle(root).display))
-      return constructor(root);
-  }
-
-  function Entry (root) {
-    let self = {
-      get root () root,
-      get permlink () [
-        e
-        for ([, e] in Iterator(A(root.querySelectorAll('a'))))
-        if (!e.getAttribute('oid'))
-      ][0],
-      get unfold () (
-        root.querySelector('.a-b-f-i-gc-cf-Xb-h[role="button"]') // 発言の省略 (以前)
-        ||
-        root.querySelector('.a-b-f-i-gc-Sb-Xb-h[role="button"]') // 発言の省略 (以降)
-        ||
-        root.querySelector('.a-b-f-i-p-gc-h[role="button"]') // 投稿の省略
-      ),
-      get buttons () A(self.plusone.parentNode.querySelectorAll('[role="button"]')),
-      get commentButton () self.buttons[0],
-      get commentEditor () let (e = root.querySelector('.editable')) (e && e.parentNode),
-      get comment() (self.commentEditor || self.commentButton),
-      get plusone () root.querySelector('[g\\:type="plusone"]'),
-      get share () self.buttons[1],
-      get menu () root.querySelector('[role="menu"]'),
-      get menuButton () root.querySelector('[role="button"].d-h.a-f-i-Ia-D-h.a-b-f-i-Ia-D-h'),
-      get cancel () root.querySelector('[role="button"][id$=".cancel"]'),
-      get submit () root.querySelector('[role="button"][id$=".post"]')
-    };
-    return self;
-  }
-
-  function Dialog (root) {
-    function nButton (n) {
-      let bs = self.buttons;
-      if (bs.length === 2)
-        return bs[n];
+    function Entry (root) {
+      let self = {
+        get root () root,
+        get permlink () [
+          e
+          for ([, e] in Iterator(A(root.querySelectorAll('a'))))
+          if (!e.getAttribute('oid'))
+        ][0],
+        get unfold () {
+          for (let [, sel] in Iterator(S.currentEntry.unfold)) {
+            let result = root.querySelector(sel);
+            if (result)
+              return result;
+          }
+        },
+        get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
+        get commentButton () self.buttons[0],
+        get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
+        get comment() (self.commentEditor || self.commentButton),
+        get plusone () root.querySelector(S.typePlusone),
+        get share () self.buttons[1],
+        get menu () root.querySelector(S.role('menu')),
+        get menuButton () root.querySelector(S.currentEntry.menuButton),
+        get cancel () root.querySelector(S.currentEntry.cancel),
+        get submit () root.querySelector(S.currentEntry.submit)
+      };
+      return self;
     }
-    let self = {
-      get buttons () A(root.querySelectorAll('[role="button"]')),
-      get submit () nButton(0),
-      get cancel () nButton(1)
-    };
-    return self;
-  }
 
-  function Viewer (root) {
-    let self = {
-      get cancel () root.querySelector('.' + Names.closeButton),
-      get prev () root.querySelector('.vn.GE.AH'),
-      get next () root.querySelector('.vn.GE.BH'),
-    };
-    return self;
-  }
+    function Dialog (root) {
+      function nButton (n) {
+        let bs = self.buttons;
+        if (bs.length === 2)
+          return bs[n];
+      }
+      let self = {
+        get buttons () A(root.querySelectorAll(S.role('button'))),
+        get submit () nButton(0),
+        get cancel () nButton(1)
+      };
+      return self;
+    }
 
-  function Notifications (root) {
-    let self = {
-      get root () root,
-      get visible () (parseInt(root.style.height, 10) > 0)
-    };
-    return self;
-  }
+    function Viewer (root) {
+      let self = {
+        get cancel () root.querySelector(S.closeButton),
+        get prev () root.querySelector(S.viewer.prev),
+        get next () root.querySelector(S.viewer.next)
+      };
+      return self;
+    }
+
+    function Notifications (root) {
+      let self = {
+        get root () root,
+        get visible () (parseInt(root.style.height, 10) > 0)
+      };
+      return self;
+    }
+
+    return [S, Elements];
+  })();
 
   // }}}
 
@@ -314,7 +359,7 @@ let INFO =
         if (notifications && notifications.visible)
           return notifications.root.contentDocument.body;
 
-        let menus = A(Elements.doc.querySelectorAll('[tabindex="0"][role="menu"]'));
+        let menus = A(Elements.doc.querySelectorAll(S.role('menu', '[tabindex="0"]')));
         if (menus.length === 1)
           return menus[0];
       })();
@@ -484,8 +529,8 @@ let INFO =
           for (let [, name] in Iterator(['viewer', 'dialog'])) {
             if (!Elements[name])
               continue;
-            xpath.push(String(<>div[contains(@class, "{Names.closeButton}")]</>));
-            xpath = xpath.map(function (it) String(<>*[contains(@class, "{Names[name]}")]//{it}</>))
+            xpath.push(String(<>div[contains(@class, "{C.closeButton}")]</>));
+            xpath = xpath.map(function (it) String(<>*[contains(@class, "{C[name].root}")]//{it}</>))
             break;
           }
 
