@@ -489,6 +489,9 @@ let INFO =
 
     const HintStyleName = 'google-plus-commando-hint';
 
+    function s2x (s)
+      s.replace(/^\./, '');
+
     [
       ['o', 'f', function (e) click(e)],
       ['t', 'F', function (e) buffer.followLink(e, liberator.NEW_TAB)],
@@ -529,8 +532,8 @@ let INFO =
           for (let [, name] in Iterator(['viewer', 'dialog'])) {
             if (!Elements[name])
               continue;
-            xpath.push(String(<>div[contains(@class, "{C.closeButton}")]</>));
-            xpath = xpath.map(function (it) String(<>*[contains(@class, "{C[name].root}")]//{it}</>))
+            xpath.push(String(<>div[contains(@class, "{s2x(S.closeButton)}")]</>));
+            xpath = xpath.map(function (it) String(<>*[contains(@class, "{s2x(S[name].root)}")]//{it}</>))
             break;
           }
 
