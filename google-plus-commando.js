@@ -305,9 +305,11 @@ let INFO =
   // Commands {{{
 
   const Commands = {
-    moveEntry: function (arrow, vim) {
+    moveEntry: function (next) {
+      let [arrow, vim, dir] = next ? ['<Down>', 'j', 'next'] : ['<Up>', 'k', 'prev'];
+
       if (Elements.viewer)
-        return click(Elements.viewer.next);
+        return click(Elements.viewer[dir]);
 
       let arrowTarget = (function () {
         let notifications = Elements.frames.notifications;
@@ -324,8 +326,8 @@ let INFO =
         arrowTarget ? [arrow, ['keypress'], arrowTarget] : [vim, ['vkeypress'], Elements.doc]
       );
     },
-    next: withCount(function () Commands.moveEntry('<Down>', 'j')),
-    prev: withCount(function () Commands.moveEntry('<Up>', 'k')),
+    next: withCount(function () Commands.moveEntry(true)),
+    prev: withCount(function () Commands.moveEntry(false)),
     comment: function() {
       let entry = Elements.currentEntry;
       click(entry.comment);
