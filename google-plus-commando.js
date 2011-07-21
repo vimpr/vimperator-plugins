@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.9.2"
+  <plugin name="GooglePlusCommando" version="1.10.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -97,6 +97,9 @@ let INFO =
           role('button', '.a-b-f-i-gc-Sb-Xb-h'), // 発言の省略 (以降)
           role('button', '.a-b-f-i-p-gc-h')      // 投稿の省略
         ],
+        menu: {
+          mute: '.a-b-f-i-Fb-C.a-f-i-Ia-Fb-C'
+        },
         menuButton: role('button', '.d-h.a-f-i-Ia-D-h.a-b-f-i-Ia-D-h'),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
@@ -236,7 +239,16 @@ let INFO =
         get comment() (self.commentEditor || self.commentButton),
         get plusone () root.querySelector(S.typePlusone),
         get share () self.buttons[1],
-        get menu () root.querySelector(S.role('menu')),
+        menu: {
+          get root () root.querySelector(S.role('menu')),
+          get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
+          get mute () {
+            let item1 = self.menu.items.slice(-2)[0];
+            let item2 = self.menu.root.querySelector(S.role('menuitem', S.currentEntry.menu.mute));
+            if (item1 === item2)
+              return item1;
+          }
+        },
         get menuButton () root.querySelector(S.currentEntry.menuButton),
         get cancel () root.querySelector(S.currentEntry.cancel),
         get submit () root.querySelector(S.currentEntry.submit)
@@ -424,6 +436,9 @@ let INFO =
     },
     menu: function () {
       click(Elements.currentEntry.menuButton);
+    },
+    mute: function () {
+      click(Elements.currentEntry.menu.mute);
     }
   };
 
@@ -463,7 +478,7 @@ let INFO =
       );
     }
 
-    'comment plusone share next prev post yank notification cancel unfold menu'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
+    'comment plusone share next prev post yank notification cancel unfold menu mute'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
     'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
 
     mappings.addUserMap(
