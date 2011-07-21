@@ -696,302 +696,306 @@ let INFO =
 
   // Define Google+ post command {{{
 
-  let HOME_URL = 'https://plus.google.com/',
-      POST_URL_BASE = 'https://plus.google.com/u/0/_/sharebox/post/';
+  (function () {
 
-  /**
-   * ${RUNTIMEPATH}/info/{profileName}/googlePlus のデータ取得/保存
-   * @type {Object}
-   */
-  let store = storage.newMap('googlePlus', {store: true});
+    let HOME_URL = 'https://plus.google.com/',
+        POST_URL_BASE = 'https://plus.google.com/u/0/_/sharebox/post/';
 
-  commands.addUserCommand(
-    ['gp', 'googleplus'],
-    'Google+',
-    function (args) {
-      // ----------------------
-      // -setup オプション
-      // ----------------------
-      if ('-setup' in args) {
-        setupGooglePlus();
-        return;
-      }
+    /**
+     * ${RUNTIMEPATH}/info/{profileName}/googlePlus のデータ取得/保存
+     * @type {Object}
+     */
+    let store = storage.newMap('googlePlus', {store: true});
 
-      let message = args[0] || '',
-          acls = null;
+    commands.addUserCommand(
+      ['gp', 'googleplus'],
+      'Google+',
+      function (args) {
+        // ----------------------
+        // -setup オプション
+        // ----------------------
+        if ('-setup' in args) {
+          setupGooglePlus();
+          return;
+        }
 
-      // ----------------------
-      // -link オプション
-      // ----------------------
-      let win = null;
-      if ('-link' in args) {
-        win = content;
-      }
-      // ----------------------
-      // -imageURL オプション
-      // ----------------------
-      let image = null;
-      if ('-imageURL' in args) {
-        image = args['-imageURL'];
-      }
+        let message = args[0] || '',
+            acls = null;
 
-      // ----------------------
-      // -to オプション
-      // ----------------------
-      if ('-to' in args && args['-to'].indexOf('anyone') == -1)
-        acls = [acl for ([,acl] in Iterator(store.get('CIRCLES', []))) if (args['-to'].indexOf(acl[0]) != -1)];
+        // ----------------------
+        // -link オプション
+        // ----------------------
+        let win = null;
+        if ('-link' in args) {
+          win = content;
+        }
+        // ----------------------
+        // -imageURL オプション
+        // ----------------------
+        let image = null;
+        if ('-imageURL' in args) {
+          image = args['-imageURL'];
+        }
 
-      // 引数が何も無い場合は、Google+のページへ
-      if (!message && !win && !image) {
-        let tab = getGooglePlusTab();
-        if (tab)
-          gBrowser.mTabContainer.selectedItem = tab;
-        else
-          liberator.open(HOME_URL, {where: liberator.NEW_TAB});
+        // ----------------------
+        // -to オプション
+        // ----------------------
+        if ('-to' in args && args['-to'].indexOf('anyone') == -1)
+          acls = [acl for ([,acl] in Iterator(store.get('CIRCLES', []))) if (args['-to'].indexOf(acl[0]) != -1)];
 
-        return;
-      }
-      window.setTimeout(function () {
-        let pd = new PostData(message, win, image, acls);
-        postGooglePlus(pd);
-      }, 0);
-    }, {
-      literal: 0,
-      options: [
-        [['-link', '-l'], commands.OPTION_NOARG],
-        [['-imageURL', '-i'], commands.OPTION_STRING],
-        [['-to', '-t'], commands.OPTION_LIST, null,
-          function (context, args) {
-            let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
-            if (prefix)
-              context.advance(prefix.length);
+        // 引数が何も無い場合は、Google+のページへ
+        if (!message && !win && !image) {
+          let tab = getGooglePlusTab();
+          if (tab)
+            gBrowser.mTabContainer.selectedItem = tab;
+          else
+            liberator.open(HOME_URL, {where: liberator.NEW_TAB});
 
-            return [['anyone', 'to public']].concat([v for ([,v] in Iterator(store.get('CIRCLES', [])))]);
-          }],
-        [['-setup'], commands.OPTION_NOARG],
-      ],
-  },true);
+          return;
+        }
+        window.setTimeout(function () {
+          let pd = new PostData(message, win, image, acls);
+          postGooglePlus(pd);
+        }, 0);
+      }, {
+        literal: 0,
+        options: [
+          [['-link', '-l'], commands.OPTION_NOARG],
+          [['-imageURL', '-i'], commands.OPTION_STRING],
+          [['-to', '-t'], commands.OPTION_LIST, null,
+            function (context, args) {
+              let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
+              if (prefix)
+                context.advance(prefix.length);
 
-  /**
-   * Google+のページから必要データを保存する
-   * @return {Boolean}
-   */
-  function setupGooglePlus () {
-    let tab = getGooglePlusTab();
-    if (tab) {
-      let data = tab.linkedBrowser.contentWindow.wrappedJSObject.OZ_initData;
-      if (data) {
-        store.set('UID', data[2][0]);
-        store.set('AT', data[1][15]);
-        let circles = data[12][0];
-        // CIRCLES[]: [[Name, Description, ID], ...]
-        store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
-        liberator.echomsg('Initialized: googleplus');
-        return true;
-      }
-    }
-    liberator.echoerr('Faild: initialize googleplus');
-    return false;
-  }
+              return [['anyone', 'to public']].concat([v for ([,v] in Iterator(store.get('CIRCLES', [])))]);
+            }],
+          [['-setup'], commands.OPTION_NOARG],
+        ],
+    },true);
 
-  /**
-   * Google+のタブを取ってくる
-   * @return {Element|null}
-   */
-  function getGooglePlusTab () {
-    let tabs = gBrowser.tabs;
-    for (let i = 0, tab; tab = tabs[i]; ++i) {
-      if (tab.linkedBrowser.currentURI.spec.indexOf(HOME_URL) == 0) {
-        return tab;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Post to Google+
-   * @param {PostData} aPostData
-   */
-  function postGooglePlus (aPostData) {
-    let data = aPostData.getPostData();
-    let queries = [];
-    for (let key in data)
-      queries.push(key + '=' + encodeURIComponent(data[key]));
-
-    let xhr = new XMLHttpRequest();
-    xhr.mozBackgroundRequest = true;
-    xhr.open('POST', aPostData.POST_URL, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    xhr.setRequestHeader('Origin', HOME_URL);
-    xhr.onreadystatechange = postGooglePlus.readyStateChange;
-    xhr.send(queries.join('&'));
-  }
-  /**
-   * Google+への送信状況を表示する
-   * @param {Event} aEvent
-   *                aEvent.target は XMLHttpRequestオブジェクト
-   */
-  postGooglePlus.readyStateChange = function GooglePlus_readyStateChange (aEvent) {
-    let xhr = aEvent.target,
-        msg = 'Google+: ',
-        XBW = window.XULBrowserWindow;
-    if (xhr.readyState == 4) {
-      msg += (xhr.status == 200) ? 'Posted' : 'Post faild (' + xhr.statusText + ')';
-      window.setTimeout(function (XBW, msg) {
-        if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
-          XBW.setJSDefaultStatus('');
-      }, 2000, XBW, msg);
-    } else {
-      msg += 'sending...';
-    }
-    liberator.log(msg, 0);
-    XBW.setJSDefaultStatus(msg);
-  };
-
-  XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
-
-  /**
-   * Google+への送信データ生成
-   * @Constructor
-   * @param {String}    aMessage
-   * @param {Object}    aPage             現ページのコンテンツ情報
-   * @param {Selection} [aPage.selection] 選択オブジェクト
-   * @param {String}    [apage.title]     現ページのタイトル
-   * @param {String}    [aPage.url]       現ページURL
-   * @param {String}    [aPage.image]     表示させたい画像URL
-   * @param {Array}     aACLs             ACL[]
-   */
-  function PostData () { this.init.apply(this, arguments); }
-  PostData.sequence = 0;
-  PostData.prototype = {
-    init: function PD_init (aMessage, aWindow, aImageURL, aACLs) {
-      this.message = aMessage;
-      this.window = aWindow;
-      this.imageURL = aImageURL;
-
-      this.UID = store.get('UID', null);
-      liberator.assert(this.UID, 'Google+ Error: UID is not set. Please login and `:googleplus -setup\'');
-      this.AT = store.get('AT', null);
-      liberator.assert(this.AT, 'Google+ Error: AT is not set. Please login and `:googleplus -setup\'');
-
-      this.setACLEnties(aACLs);
-    },
-    get token () {
-      let t = 'oz:' + this.UID + '.' + this.date.getTime().toString(16) + '.' + this.sequence.toString(16);
-      Object.defineProperty(this, 'token', {value: t});
-      return t;
-    },
-    get date () {
-      let d = new Date;
-      Object.defineProperty(this, 'date', {value: d});
-      return d;
-    },
-    get sequence () {
-      let s = PostData.sequence++;
-      Object.defineProperty(this, 'sequence', {value: s});
-      return s;
-    },
-    get reqid () {
-      let r = this.date.getHours() + 3600 + this.date.getMinutes() + 60 + this.date.getSeconds() + this.sequence * 100000;
-      Object.defineProperty(this, 'reqid', {value: r});
-      return r;
-    },
-    get POST_URL () {
-      let url = POST_URL_BASE + '?_reqid=' + this.reqid + '&rt=j';
-      Object.defineProperty(this, 'POST_URL', {value: url});
-      return url
-    },
-    aclEntries: [{
-      scope: {
-        scopeType: 'anyone',
-        name: 'Anyone',
-        id: 'anyone',
-        me: true,
-        requiresKey: false
-      },
-      role: 20,
-    }, {
-      scope: {
-        scopeType: 'anyone',
-        name: 'Anyone',
-        id: 'anyone',
-        me: true,
-        requiresKey: false,
-      },
-      role: 60
-    }],
-    setACLEnties: function PD_setACLEnties (aACLs) {
-      if (!aACLs || aACLs.length == 0)
-        return this.aclEntries = Object.getPrototypeOf(this).aclEntries;
-
-      let entries = [];
-      for (let i = 0, len = aACLs.length; i < len; ++i) {
-        let acl = aACLs[i];
-        let scope = {
-          scopeType: 'focusGroup',
-          name: acl[0],
-          id: this.UID + '.' + acl[2],
-          me: false,
-          requiresKey: false,
-          groupType: 'p'
-        };
-        entries.push({scope: scope, role: 60});
-        entries.push({scope: scope, role: 20});
-      }
-      return this.aclEntries = entries;
-    },
-    getPostData: function PD_getPostData () {
-      let spar = [v for each(v in this.generateSpar())];
-      return {
-        spar: JSON.stringify(spar),
-        at  : this.AT
-      };
-    },
-    generateSpar: function PD_generateSpar() {
-      for (let i = 0, len = 17; i < len; ++i) {
-        switch (i) {
-        case 0:
-          yield this.message;
-          break;
-        case 1:
-          yield this.token;
-          break;
-        case 6:
-          if (!this.window && !this.imageURL) {
-            yield null;
-          } else {
-            let media = LinkDetector.get(this.window, this.imageURL);
-            let data = [JSON.stringify(media.generateData())];
-            if (media.hasPhoto) {
-              data.push(JSON.stringify(media.generateData(true)));
-            }
-            yield JSON.stringify(data);
-          }
-
-          break;
-        case 8:
-          yield JSON.stringify({aclEntries: this.aclEntries});
-          break;
-        case 9:
-        case 11:
-        case 12:
-          yield true;
-          break;
-        case 15:
-        case 16:
-          yield false;
-          break;
-        case 10:
-        case 14:
-          yield [];
-          break;
-        default:
-          yield null;
-          break;
+    /**
+     * Google+のページから必要データを保存する
+     * @return {Boolean}
+     */
+    function setupGooglePlus () {
+      let tab = getGooglePlusTab();
+      if (tab) {
+        let data = tab.linkedBrowser.contentWindow.wrappedJSObject.OZ_initData;
+        if (data) {
+          store.set('UID', data[2][0]);
+          store.set('AT', data[1][15]);
+          let circles = data[12][0];
+          // CIRCLES[]: [[Name, Description, ID], ...]
+          store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
+          liberator.echomsg('Initialized: googleplus');
+          return true;
         }
       }
-    },
-  };
+      liberator.echoerr('Faild: initialize googleplus');
+      return false;
+    }
+
+    /**
+     * Google+のタブを取ってくる
+     * @return {Element|null}
+     */
+    function getGooglePlusTab () {
+      let tabs = gBrowser.tabs;
+      for (let i = 0, tab; tab = tabs[i]; ++i) {
+        if (tab.linkedBrowser.currentURI.spec.indexOf(HOME_URL) == 0) {
+          return tab;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * Post to Google+
+     * @param {PostData} aPostData
+     */
+    function postGooglePlus (aPostData) {
+      let data = aPostData.getPostData();
+      let queries = [];
+      for (let key in data)
+        queries.push(key + '=' + encodeURIComponent(data[key]));
+
+      let xhr = new XMLHttpRequest();
+      xhr.mozBackgroundRequest = true;
+      xhr.open('POST', aPostData.POST_URL, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+      xhr.setRequestHeader('Origin', HOME_URL);
+      xhr.onreadystatechange = postGooglePlus.readyStateChange;
+      xhr.send(queries.join('&'));
+    }
+    /**
+     * Google+への送信状況を表示する
+     * @param {Event} aEvent
+     *                aEvent.target は XMLHttpRequestオブジェクト
+     */
+    postGooglePlus.readyStateChange = function GooglePlus_readyStateChange (aEvent) {
+      let xhr = aEvent.target,
+          msg = 'Google+: ',
+          XBW = window.XULBrowserWindow;
+      if (xhr.readyState == 4) {
+        msg += (xhr.status == 200) ? 'Posted' : 'Post faild (' + xhr.statusText + ')';
+        window.setTimeout(function (XBW, msg) {
+          if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
+            XBW.setJSDefaultStatus('');
+        }, 2000, XBW, msg);
+      } else {
+        msg += 'sending...';
+      }
+      liberator.log(msg, 0);
+      XBW.setJSDefaultStatus(msg);
+    };
+
+    XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
+
+    /**
+     * Google+への送信データ生成
+     * @Constructor
+     * @param {String}    aMessage
+     * @param {Object}    aPage             現ページのコンテンツ情報
+     * @param {Selection} [aPage.selection] 選択オブジェクト
+     * @param {String}    [apage.title]     現ページのタイトル
+     * @param {String}    [aPage.url]       現ページURL
+     * @param {String}    [aPage.image]     表示させたい画像URL
+     * @param {Array}     aACLs             ACL[]
+     */
+    function PostData () { this.init.apply(this, arguments); }
+    PostData.sequence = 0;
+    PostData.prototype = {
+      init: function PD_init (aMessage, aWindow, aImageURL, aACLs) {
+        this.message = aMessage;
+        this.window = aWindow;
+        this.imageURL = aImageURL;
+
+        this.UID = store.get('UID', null);
+        liberator.assert(this.UID, 'Google+ Error: UID is not set. Please login and `:googleplus -setup\'');
+        this.AT = store.get('AT', null);
+        liberator.assert(this.AT, 'Google+ Error: AT is not set. Please login and `:googleplus -setup\'');
+
+        this.setACLEnties(aACLs);
+      },
+      get token () {
+        let t = 'oz:' + this.UID + '.' + this.date.getTime().toString(16) + '.' + this.sequence.toString(16);
+        Object.defineProperty(this, 'token', {value: t});
+        return t;
+      },
+      get date () {
+        let d = new Date;
+        Object.defineProperty(this, 'date', {value: d});
+        return d;
+      },
+      get sequence () {
+        let s = PostData.sequence++;
+        Object.defineProperty(this, 'sequence', {value: s});
+        return s;
+      },
+      get reqid () {
+        let r = this.date.getHours() + 3600 + this.date.getMinutes() + 60 + this.date.getSeconds() + this.sequence * 100000;
+        Object.defineProperty(this, 'reqid', {value: r});
+        return r;
+      },
+      get POST_URL () {
+        let url = POST_URL_BASE + '?_reqid=' + this.reqid + '&rt=j';
+        Object.defineProperty(this, 'POST_URL', {value: url});
+        return url
+      },
+      aclEntries: [{
+        scope: {
+          scopeType: 'anyone',
+          name: 'Anyone',
+          id: 'anyone',
+          me: true,
+          requiresKey: false
+        },
+        role: 20,
+      }, {
+        scope: {
+          scopeType: 'anyone',
+          name: 'Anyone',
+          id: 'anyone',
+          me: true,
+          requiresKey: false,
+        },
+        role: 60
+      }],
+      setACLEnties: function PD_setACLEnties (aACLs) {
+        if (!aACLs || aACLs.length == 0)
+          return this.aclEntries = Object.getPrototypeOf(this).aclEntries;
+
+        let entries = [];
+        for (let i = 0, len = aACLs.length; i < len; ++i) {
+          let acl = aACLs[i];
+          let scope = {
+            scopeType: 'focusGroup',
+            name: acl[0],
+            id: this.UID + '.' + acl[2],
+            me: false,
+            requiresKey: false,
+            groupType: 'p'
+          };
+          entries.push({scope: scope, role: 60});
+          entries.push({scope: scope, role: 20});
+        }
+        return this.aclEntries = entries;
+      },
+      getPostData: function PD_getPostData () {
+        let spar = [v for each(v in this.generateSpar())];
+        return {
+          spar: JSON.stringify(spar),
+          at  : this.AT
+        };
+      },
+      generateSpar: function PD_generateSpar() {
+        for (let i = 0, len = 17; i < len; ++i) {
+          switch (i) {
+          case 0:
+            yield this.message;
+            break;
+          case 1:
+            yield this.token;
+            break;
+          case 6:
+            if (!this.window && !this.imageURL) {
+              yield null;
+            } else {
+              let media = LinkDetector.get(this.window, this.imageURL);
+              let data = [JSON.stringify(media.generateData())];
+              if (media.hasPhoto) {
+                data.push(JSON.stringify(media.generateData(true)));
+              }
+              yield JSON.stringify(data);
+            }
+
+            break;
+          case 8:
+            yield JSON.stringify({aclEntries: this.aclEntries});
+            break;
+          case 9:
+          case 11:
+          case 12:
+            yield true;
+            break;
+          case 15:
+          case 16:
+            yield false;
+            break;
+          case 10:
+          case 14:
+            yield [];
+            break;
+          default:
+            yield null;
+            break;
+          }
+        }
+      },
+    };
+
+  })();
 
   const LinkDetector = (function () {
     let commonProto = {
