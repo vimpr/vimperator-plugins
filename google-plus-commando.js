@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="1.10.0"
+  <plugin name="GooglePlusCommando" version="1.11.0"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -376,7 +376,7 @@ let INFO =
      */
     function nodelist2txt (aChildNodes, aParentTag, aIndent) {
       var a = [], index = 0;
-      for (let i = 0, len = aChildNodes.length, child; child = aChildNodes[i]; ++i){
+      for (let i = 0, len = aChildNodes.length, child; child = aChildNodes[i]; ++i) {
         let txt = Elements.node2txt(child, aParentTag, aIndent, index);
         if (txt) {
           a.push(txt);
@@ -484,14 +484,14 @@ let INFO =
     },
     next: withCount(function () Commands.moveEntry(true)),
     prev: withCount(function () Commands.moveEntry(false)),
-    comment: function() {
+    comment: function () {
       let entry = Elements.currentEntry;
       click(entry.comment);
       PostHelp.show();
     },
-    plusone: function() click(Elements.currentEntry.plusone),
-    share: function() click(Elements.currentEntry.share),
-    post: function() {
+    plusone: function () click(Elements.currentEntry.plusone),
+    share: function () click(Elements.currentEntry.share),
+    post: function () {
       buffer.scrollTop();
       click(Elements.post.open);
       PostHelp.show();
@@ -680,14 +680,15 @@ let INFO =
       true
     );
 
-    hints.addMode("G", "Google+ Post",
-      function action(elm) {
+    hints.addMode(
+      'G',
+      'Google+ Post',
+      function action (elm) {
         var src = elm.src;
-        commandline.open("", "googleplus -i " + src + " ", modes.EX);
+        commandline.open('', 'googleplus -i ' + src + ' ', modes.EX);
       },
-      function getPath() {
-        return util.makeXPath(["img"]);
-      });
+      function getPath () util.makeXPath(['img'])
+    );
 
   })();
 
@@ -695,48 +696,50 @@ let INFO =
 
   // Define Google+ post command {{{
 
-  var HOME_URL = "https://plus.google.com/",
-      POST_URL_BASE = "https://plus.google.com/u/0/_/sharebox/post/";
+  let HOME_URL = 'https://plus.google.com/',
+      POST_URL_BASE = 'https://plus.google.com/u/0/_/sharebox/post/';
 
   /**
    * ${RUNTIMEPATH}/info/{profileName}/googlePlus のデータ取得/保存
    * @type {Object}
    */
-  var store = storage.newMap("googlePlus", { store: true });
+  let store = storage.newMap('googlePlus', {store: true});
 
-  commands.addUserCommand(["gp", "googleplus"], "Google+",
+  commands.addUserCommand(
+    ['gp', 'googleplus'],
+    'Google+',
     function (args) {
       // ----------------------
       // -setup オプション
       // ----------------------
-      if ("-setup" in args) {
+      if ('-setup' in args) {
         setupGooglePlus();
         return;
       }
 
-      var message = args[0] || "",
+      let message = args[0] || '',
           acls = null;
 
       // ----------------------
       // -link オプション
       // ----------------------
-      var win = null;
-      if ("-link" in args) {
+      let win = null;
+      if ('-link' in args) {
         win = content;
       }
       // ----------------------
       // -imageURL オプション
       // ----------------------
-      var image = null;
-      if ("-imageURL" in args) {
-        image = args["-imageURL"];
+      let image = null;
+      if ('-imageURL' in args) {
+        image = args['-imageURL'];
       }
 
       // ----------------------
       // -to オプション
       // ----------------------
-      if ("-to" in args && args["-to"].indexOf("anyone") == -1)
-        acls = [acl for ([,acl] in Iterator(store.get("CIRCLES", []))) if (args["-to"].indexOf(acl[0]) != -1)];
+      if ('-to' in args && args['-to'].indexOf('anyone') == -1)
+        acls = [acl for ([,acl] in Iterator(store.get('CIRCLES', []))) if (args['-to'].indexOf(acl[0]) != -1)];
 
       // 引数が何も無い場合は、Google+のページへ
       if (!message && !win && !image) {
@@ -744,28 +747,28 @@ let INFO =
         if (tab)
           gBrowser.mTabContainer.selectedItem = tab;
         else
-          liberator.open(HOME_URL, { where: liberator.NEW_TAB });
+          liberator.open(HOME_URL, {where: liberator.NEW_TAB});
 
         return;
       }
-      window.setTimeout(function() {
-        var pd = new PostData(message, win, image, acls);
+      window.setTimeout(function () {
+        let pd = new PostData(message, win, image, acls);
         postGooglePlus(pd);
       }, 0);
     }, {
       literal: 0,
       options: [
-        [["-link", "-l"], commands.OPTION_NOARG],
-        [["-imageURL", "-i"], commands.OPTION_STRING],
-        [["-to", "-t"], commands.OPTION_LIST, null,
+        [['-link', '-l'], commands.OPTION_NOARG],
+        [['-imageURL', '-i'], commands.OPTION_STRING],
+        [['-to', '-t'], commands.OPTION_LIST, null,
           function (context, args) {
             let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
             if (prefix)
               context.advance(prefix.length);
 
-            return [["anyone", "to public"]].concat([v for ([,v] in Iterator(store.get("CIRCLES", [])))]);
+            return [['anyone', 'to public']].concat([v for ([,v] in Iterator(store.get('CIRCLES', [])))]);
           }],
-        [["-setup"], commands.OPTION_NOARG],
+        [['-setup'], commands.OPTION_NOARG],
       ],
   },true);
 
@@ -774,20 +777,20 @@ let INFO =
    * @return {Boolean}
    */
   function setupGooglePlus () {
-    var tab = getGooglePlusTab();
+    let tab = getGooglePlusTab();
     if (tab) {
       let data = tab.linkedBrowser.contentWindow.wrappedJSObject.OZ_initData;
       if (data) {
-        store.set("UID", data[2][0]);
-        store.set("AT", data[1][15]);
+        store.set('UID', data[2][0]);
+        store.set('AT', data[1][15]);
         let circles = data[12][0];
         // CIRCLES[]: [[Name, Description, ID], ...]
-        store.set("CIRCLES", circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
-        liberator.echomsg("Initialized: googleplus");
+        store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
+        liberator.echomsg('Initialized: googleplus');
         return true;
       }
     }
-    liberator.echoerr("Faild: initialize googleplus");
+    liberator.echoerr('Faild: initialize googleplus');
     return false;
   }
 
@@ -796,7 +799,7 @@ let INFO =
    * @return {Element|null}
    */
   function getGooglePlusTab () {
-    var tabs = gBrowser.tabs;
+    let tabs = gBrowser.tabs;
     for (let i = 0, tab; tab = tabs[i]; ++i) {
       if (tab.linkedBrowser.currentURI.spec.indexOf(HOME_URL) == 0) {
         return tab;
@@ -810,18 +813,18 @@ let INFO =
    * @param {PostData} aPostData
    */
   function postGooglePlus (aPostData) {
-    var data = aPostData.getPostData();
-    var queries = [];
+    let data = aPostData.getPostData();
+    let queries = [];
     for (let key in data)
-      queries.push(key + "=" + encodeURIComponent(data[key]));
+      queries.push(key + '=' + encodeURIComponent(data[key]));
 
-    var xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
     xhr.mozBackgroundRequest = true;
-    xhr.open("POST", aPostData.POST_URL, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-    xhr.setRequestHeader("Origin", HOME_URL);
+    xhr.open('POST', aPostData.POST_URL, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    xhr.setRequestHeader('Origin', HOME_URL);
     xhr.onreadystatechange = postGooglePlus.readyStateChange;
-    xhr.send(queries.join("&"));
+    xhr.send(queries.join('&'));
   }
   /**
    * Google+への送信状況を表示する
@@ -829,23 +832,23 @@ let INFO =
    *                aEvent.target は XMLHttpRequestオブジェクト
    */
   postGooglePlus.readyStateChange = function GooglePlus_readyStateChange (aEvent) {
-    var xhr = aEvent.target,
-        msg = "Google+: ",
+    let xhr = aEvent.target,
+        msg = 'Google+: ',
         XBW = window.XULBrowserWindow;
     if (xhr.readyState == 4) {
-      msg += (xhr.status == 200) ? "Posted" : "Post faild (" + xhr.statusText + ")";
-      window.setTimeout(function(XBW, msg){
-        if (XBW.jsDefaultStatus.indexOf("Google+:") == 0)
-          XBW.setJSDefaultStatus("");
+      msg += (xhr.status == 200) ? 'Posted' : 'Post faild (' + xhr.statusText + ')';
+      window.setTimeout(function (XBW, msg) {
+        if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
+          XBW.setJSDefaultStatus('');
       }, 2000, XBW, msg);
     } else {
-      msg += "sending...";
+      msg += 'sending...';
     }
     liberator.log(msg, 0);
     XBW.setJSDefaultStatus(msg);
   };
 
-  XPCOMUtils.defineLazyServiceGetter(this, "MIME", "@mozilla.org/mime;1", "nsIMIMEService");
+  XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
 
   /**
    * Google+への送信データ生成
@@ -866,52 +869,52 @@ let INFO =
       this.window = aWindow;
       this.imageURL = aImageURL;
 
-      this.UID = store.get("UID", null);
-      liberator.assert(this.UID, "Google+ Error: UID is not set. Please login and `:googleplus -init'");
-      this.AT = store.get("AT", null);
-      liberator.assert(this.AT, "Google+ Error: AT is not set. Please login and `:googleplus -init'");
+      this.UID = store.get('UID', null);
+      liberator.assert(this.UID, 'Google+ Error: UID is not set. Please login and `:googleplus -setup\'');
+      this.AT = store.get('AT', null);
+      liberator.assert(this.AT, 'Google+ Error: AT is not set. Please login and `:googleplus -setup\'');
 
       this.setACLEnties(aACLs);
     },
     get token () {
-      var t = "oz:" + this.UID + "." + this.date.getTime().toString(16) + "." + this.sequence.toString(16);
-      Object.defineProperty(this, "token", { value: t, });
+      let t = 'oz:' + this.UID + '.' + this.date.getTime().toString(16) + '.' + this.sequence.toString(16);
+      Object.defineProperty(this, 'token', {value: t});
       return t;
     },
     get date () {
-      var d = new Date;
-      Object.defineProperty(this, "date", { value: d, });
+      let d = new Date;
+      Object.defineProperty(this, 'date', {value: d});
       return d;
     },
     get sequence () {
-      var s = PostData.sequence++;
-      Object.defineProperty(this, "sequence", { value: s });
+      let s = PostData.sequence++;
+      Object.defineProperty(this, 'sequence', {value: s});
       return s;
     },
     get reqid () {
-      var r = this.date.getHours() + 3600 + this.date.getMinutes() + 60 + this.date.getSeconds() + this.sequence * 100000;
-      Object.defineProperty(this, "reqid", { value: r });
+      let r = this.date.getHours() + 3600 + this.date.getMinutes() + 60 + this.date.getSeconds() + this.sequence * 100000;
+      Object.defineProperty(this, 'reqid', {value: r});
       return r;
     },
     get POST_URL () {
-      var url = POST_URL_BASE + "?_reqid=" + this.reqid + "&rt=j";
-      Object.defineProperty(this, "POST_URL", { value: url });
+      let url = POST_URL_BASE + '?_reqid=' + this.reqid + '&rt=j';
+      Object.defineProperty(this, 'POST_URL', {value: url});
       return url
     },
     aclEntries: [{
       scope: {
-        scopeType: "anyone",
-        name: "Anyone",
-        id: "anyone",
+        scopeType: 'anyone',
+        name: 'Anyone',
+        id: 'anyone',
         me: true,
         requiresKey: false
       },
       role: 20,
     }, {
       scope: {
-        scopeType: "anyone",
-        name: "Anyone",
-        id: "anyone",
+        scopeType: 'anyone',
+        name: 'Anyone',
+        id: 'anyone',
         me: true,
         requiresKey: false,
       },
@@ -921,24 +924,24 @@ let INFO =
       if (!aACLs || aACLs.length == 0)
         return this.aclEntries = Object.getPrototypeOf(this).aclEntries;
 
-      var entries = [];
+      let entries = [];
       for (let i = 0, len = aACLs.length; i < len; ++i) {
         let acl = aACLs[i];
         let scope = {
-          scopeType: "focusGroup",
+          scopeType: 'focusGroup',
           name: acl[0],
-          id: this.UID + "." + acl[2],
+          id: this.UID + '.' + acl[2],
           me: false,
           requiresKey: false,
-          groupType: "p"
+          groupType: 'p'
         };
-        entries.push({ scope: scope, role: 60 });
-        entries.push({ scope: scope, role: 20 });
+        entries.push({scope: scope, role: 60});
+        entries.push({scope: scope, role: 20});
       }
       return this.aclEntries = entries;
     },
     getPostData: function PD_getPostData () {
-      var spar = [v for each(v in this.generateSpar())];
+      let spar = [v for each(v in this.generateSpar())];
       return {
         spar: JSON.stringify(spar),
         at  : this.AT
@@ -957,8 +960,8 @@ let INFO =
           if (!this.window && !this.imageURL) {
             yield null;
           } else {
-            var media = LinkDetector.get(this.window, this.imageURL);
-            var data = [JSON.stringify(media.generateData())];
+            let media = LinkDetector.get(this.window, this.imageURL);
+            let data = [JSON.stringify(media.generateData())];
             if (media.hasPhoto) {
               data.push(JSON.stringify(media.generateData(true)));
             }
@@ -967,7 +970,7 @@ let INFO =
 
           break;
         case 8:
-          yield JSON.stringify({ aclEntries: this.aclEntries });
+          yield JSON.stringify({aclEntries: this.aclEntries});
           break;
         case 9:
         case 11:
@@ -989,8 +992,9 @@ let INFO =
       }
     },
   };
-  const LinkDetector = (function() {
-    var commonProto = {
+
+  const LinkDetector = (function () {
+    let commonProto = {
       init: function (win, imageURL) {
         this.window = win;
         this.imageURL = imageURL;
@@ -1011,7 +1015,7 @@ let INFO =
         PROVIDER: 47,
       },
       generateData: function (isPhoto) {
-        var data = new Array(48);
+        let data = new Array(48);
         data[this.type.TITLE] = this.getTitle(isPhoto);
         data[this.type.MEDIA_LINK] = this.getMediaLink(isPhoto);
         data[this.type.UPLOADER] = this.getUploader(isPhoto);
@@ -1047,24 +1051,24 @@ let INFO =
         if (!this.window || isPhoto)
           return null;
 
-        var sel = this.window.getSelection();
+        let sel = this.window.getSelection();
         if (sel.isCollapsed)
-          return "";
+          return '';
 
-        var sels = [];
+        let sels = [];
         for (let i = 0, count = sel.rangeCount; i < count; ++i) {
           let r = sel.getRangeAt(i),
               fragment = r.cloneContents();
           sels.push(Elements.node2txt(fragment, r.commonAncestorContainer.localName));
         }
-        return sels.join("<br/>(snip)<br/>");
+        return sels.join('<br/>(snip)<br/>');
       },
-      getUploader: function () { return []; },
+      getUploader: function () [],
       getMediaLink: function (isPhoto) {
         if (this.window && !isPhoto)
           return [null, this.window.location.href];
 
-        var data = [null, this.imageURL];
+        let data = [null, this.imageURL];
         if (this.imageElement)
           data.push(this.imageElement.height, this.imageElement.width);
 
@@ -1072,8 +1076,8 @@ let INFO =
       },
       getMediaType: function (isPhoto) {
         if (isPhoto) {
-          var type = this.getMimeType(this.imageURL, "image/jpeg");
-          var data = [null, this.imageURL, null, type, "photo", null,null,null,null,null,null,null];
+          let type = this.getMimeType(this.imageURL, 'image/jpeg');
+          let data = [null, this.imageURL, null, type, 'photo', null,null,null,null,null,null,null];
           if (this.imageElement)
             data.push(this.imageElement.width, this.imageElement.height);
           else
@@ -1083,26 +1087,26 @@ let INFO =
         }
         if (this.window && !isPhoto) {
           type = this.window.document.contentType;
-          switch (type.split("/")[0]) {
-          case "image":
-            return [null, this.window.location.href, null, type, "image"];
-          case "text":
+          switch (type.split('/')[0]) {
+          case 'image':
+            return [null, this.window.location.href, null, type, 'image'];
+          case 'text':
           default:
-            return [null, this.window.location.href, null, "text/html", "document"];
+            return [null, this.window.location.href, null, 'text/html', 'document'];
           }
         } else if (this.imageURL) {
-          type = this.getMimeType(this.imageURL, "image/jpeg");
-          return [null, this.imageURL, null, type, "image"];
+          type = this.getMimeType(this.imageURL, 'image/jpeg');
+          return [null, this.imageURL, null, type, 'image'];
         }
         return null
       },
       getMediaImage: function (isPhoto) {
-        var url;
+        let url;
         if (this.window && !isPhoto) {
-          let type = this.window.document.contentType.split("/");
-          if (type[0] != "image") {
+          let type = this.window.document.contentType.split('/');
+          if (type[0] != 'image') {
             let host = this.window.location.host;
-            url = "//s2.googleusercontent.com/s2/favicons?domain=" + host;
+            url = '//s2.googleusercontent.com/s2/favicons?domain=' + host;
             return [ [null, url, null, null], [null, url, null, null] ];
           } else {
             url = this.window.location.href;
@@ -1121,17 +1125,17 @@ let INFO =
         return [ data, data ];
       },
       getProvider: function (isPhoto) {
-        return [ [null, (isPhoto ? "images" : ""), "http://google.com/profiles/media/provider"] ];
+        return [ [null, (isPhoto ? 'images' : ''), 'http://google.com/profiles/media/provider'] ];
       }
     };
-    var classes = {}, checker = {};
+    let classes = {}, checker = {};
     function MediaLink() { this.init.apply(this, arguments); };
     MediaLink.prototype = commonProto;
 
-    var self = {
+    let self = {
       addType: function (name, checkFunc, proto) {
         checker[name] = checkFunc;
-        var func = function () { this.init.apply(this, arguments); };
+        let func = function () { this.init.apply(this, arguments); };
         proto.__super__ = proto.__proto__ = commonProto;
         func.prototype = proto;
         classes[name] = func;
@@ -1146,42 +1150,42 @@ let INFO =
       }
     };
 
-    (function() {
+    (function () {
       // -------------------------------------------------------------------------
       // YouTube
       // ----------------------------------------------------------------------{{{
-      self.addType("youtube",
+      self.addType('youtube',
         function (win) {
           if (!win) return false;
 
           return /^https?:\/\/(?:.*\.)?youtube.com\/watch/.test(win.location.href);
         }, {
           get VIDEO_ID () {
-            var id = this.window.wrappedJSObject.yt.config_.VIDEO_ID;
-            Object.defineProperty(this, "VIDEO_ID", { value: id });
+            let id = this.window.wrappedJSObject.yt.config_.VIDEO_ID;
+            Object.defineProperty(this, 'VIDEO_ID', {value: id});
             return id;
           },
-          getMediaLink: function () [null, "http://www.youtube.com/v/" + this.VIDEO_ID + "&hl=en&fs=1&autoplay=1"],
-          getContentsText: function () this.window.document.querySelector("meta[name=description]").content,
-          getMediaType: function () [null, this.window.location.href, null, "application/x-shockwave-flash", "video"],
+          getMediaLink: function () [null, 'http://www.youtube.com/v/' + this.VIDEO_ID + '&hl=en&fs=1&autoplay=1'],
+          getContentsText: function () this.window.document.querySelector('meta[name=description]').content,
+          getMediaType: function () [null, this.window.location.href, null, 'application/x-shockwave-flash', 'video'],
           getMediaImage: function () {
-            var url = "https://ytimg.googleusercontent.com/vi/" + this.VIDEO_ID + "/hqdefault.jpg";
+            let url = 'https://ytimg.googleusercontent.com/vi/' + this.VIDEO_ID + '/hqdefault.jpg';
             return [ [null, url, 120, 160], [null, url, 120, 160] ];
           },
-          getProvider: function () [ [null, "youtube", "http://google.com/profiles/media/provider"] ],
+          getProvider: function () [ [null, 'youtube', 'http://google.com/profiles/media/provider'] ],
         }); // }}}
       // -------------------------------------------------------------------------
       // Gyazo
       // ----------------------------------------------------------------------{{{
-      self.addType("gyazo",
+      self.addType('gyazo',
         function (win, image) {
-          var reg = /^http:\/\/gyazo\.com\/\w+(\.png)?/;
+          let reg = /^http:\/\/gyazo\.com\/\w+(\.png)?/;
           return reg.test(image);
         }, {
           init: function (win, imageURL) {
             this.window = win;
-            if (imageURL.lastIndexOf(".png") != imageURL.length - 4)
-              imageURL += ".png";
+            if (imageURL.lastIndexOf('.png') != imageURL.length - 4)
+              imageURL += '.png';
 
             this.imageURL = imageURL;
             this.hasPhoto = true;
