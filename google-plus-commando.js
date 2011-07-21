@@ -228,7 +228,13 @@ let INFO =
   function Notifications (root) {
     let self = {
       get root () root,
-      get visible () (parseInt(root.style.height, 10) > 0)
+      get visible () {
+        let h = parseInt(root.style.height, 10) > 0;
+        if (!h)
+          return false;
+        let nwc =  plugins.googlePlusCommando.element.frames.notifications.root.contentDocument.querySelector('#nw-content');
+        return parseInt(util.computedStyle(nwc).height, 10) > 100;
+      }
     };
     return self;
   }
