@@ -316,6 +316,7 @@ let INFO =
           get root () root.querySelector(S.role('menu')),
           get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
           get mute () {
+            // XXX 誤爆いやなので、チェックを入れる
             let item1 = self.menu.items.slice(-2)[0];
             let item2 = self.menu.root.querySelector(S.role('menuitem', S.currentEntry.menu.mute));
             if (item1 === item2)
