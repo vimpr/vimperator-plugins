@@ -679,6 +679,15 @@ let INFO =
       true
     );
 
+    hints.addMode("G", "Google+ Post",
+      function action(elm) {
+        var src = elm.src;
+        commandline.open("", "googleplus -i " + src + " ", modes.EX);
+      },
+      function getPath() {
+        return util.makeXPath(["img"]);
+      });
+
   })();
 
   // }}}
