@@ -779,21 +779,61 @@ let INFO =
      * @return {Boolean}
      */
     function setupGooglePlus () {
-      let tab = getGooglePlusTab();
-      if (tab) {
-        let data = tab.linkedBrowser.contentWindow.wrappedJSObject.OZ_initData;
-        if (data) {
+      function onSuccess () {
+        liberator.echomsg('Initialized: googleplus');
+      }
+
+      function onFail () {
+        liberator.echoerr('Faild: initialize googleplus');
+      }
+
+      function getFromWindow (win) {
+        let data = win.OZ_initData;
+        if (!data)
+          return false;
+        // XXX 全てのデータが揃っていないケースがあるようなので、検査する
+        try {
           store.set('UID', data[2][0]);
           store.set('AT', data[1][15]);
           let circles = data[12][0];
           // CIRCLES[]: [[Name, Description, ID], ...]
           store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
-          liberator.echomsg('Initialized: googleplus');
+          onSuccess();
           return true;
+        } catch (e) {
+          liberator.log(e);
+          return false;
         }
       }
-      liberator.echoerr('Faild: initialize googleplus');
-      return false;
+
+      // XXX ブラチラ大作戦
+      function getFromMakedBrowser () {
+        let browser = document.createElementNS(XUL, 'browser');
+        browser.setAttribute('type', 'content');
+        browser.setAttribute('src', 'https://plus.google.com/');
+        document.getElementById('main-window').appendChild(browser);
+
+        browser.addEventListener(
+          'DOMContentLoaded',
+          function (e) {
+            if (e.target !== browser.contentWindow.document)
+              return;
+            browser.removeEventListener('DOMContentLoaded', arguments.callee, false);
+            getFromWindow(browser.contentWindow.wrappedJSObject);
+            browser.parentNode.removeChild(browser);
+          },
+          false
+        );
+      }
+
+      let found = false;
+
+      let tab = getGooglePlusTab();
+      if (tab)
+        found = getFromWindow(tab.linkedBrowser.contentWindow.wrappedJSObject);
+
+      if (!found)
+        getFromMakedBrowser();
     }
 
     /**
