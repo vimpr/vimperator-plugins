@@ -618,36 +618,31 @@ let g:gplus_commando_map_menu            = "m"
         }
 
         let message = args[0] || '',
-            page = {},
-            acls = null,
-            useContents = false;
+            acls = null;
 
         // ----------------------
-        // -list オプション
+        // -link オプション
         // ----------------------
-        if ('-l' in args) {
-          let sel = content.getSelection();
-          page.selection = sel.isCollapsed ? null : sel;
-          page.title     = buffer.title;
-          page.url       = buffer.URI;
-          useContents = true;
+        var win = null;
+        if ('-link' in args) {
+          win = content;
         }
         // ----------------------
         // -imageURL オプション
         // ----------------------
-        if ('-i' in args) {
-          page.image = args['-i'];
-          useContents = true;
+        var image = null;
+        if ('-imageURL' in args) {
+          image = args['-imageURL'];
         }
 
         // ----------------------
         // -to オプション
         // ----------------------
-        if ('-t' in args && args['-t'].indexOf('anyone') == -1)
-          acls = store.get('CIRCLES', []).filter(function(c) this.indexOf(c[0]) != -1, args['-t']);
+        if ('-to' in args && args['-to'].indexOf('anyone') == -1)
+          acls = [acl for ([,acl] in Iterator(store.get('CIRCLES', []))) if (args['-to'].indexOf(acl[0]) != -1)];
 
         // 引数が何も無い場合は、Google+のページへ
-        if (!message && !useContents) {
+        if (!message && !win && !image) {
           let tab = getGooglePlusTab();
           if (tab) {
             gBrowser.mTabContainer.selectedItem = tab;
@@ -657,20 +652,23 @@ let g:gplus_commando_map_menu            = "m"
           return;
         }
 
-        postGooglePlus(new PostData(message, useContents ? page : null, acls));
+        window.setTimeout(function() {
+          var pd = new PostData(message, win, image, acls);
+          postGooglePlus(pd);
+        }, 0);
       },
       {
         literal: 0,
         options: [
-          [['-l', '-link'], commands.OPTION_NOARG],
-          [['-i', '-imageURL'], commands.OPTION_STRING],
-          [['-t', '-to'], commands.OPTION_LIST, null,
+          [['-link', '-l'], commands.OPTION_NOARG],
+          [['-imageURL', '-i'], commands.OPTION_STRING],
+          [['-to', '-t'], commands.OPTION_LIST, null,
             function (context, args) {
               let [, prefix] = context.filter.match(/^(.*,)[^,]*$/) || [];
               if (prefix)
                 context.advance(prefix.length);
 
-              return [['anyone', 'to public']].concat(Array.slice(store.get('CIRCLES', [])))
+              return [["anyone", "to public"]].concat([v for ([,v] in Iterator(store.get("CIRCLES", [])))]);
             }],
           [['-setup'], commands.OPTION_NOARG],
         ],
@@ -794,27 +792,25 @@ let g:gplus_commando_map_menu            = "m"
       XBW.setJSDefaultStatus(msg);
     };
 
-    XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
+    XPCOMUtils.defineLazyServiceGetter(__context__, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
 
     /**
      * Google+への送信データ生成
      * @Constructor
      * @param {String}    aMessage
-     * @param {Object}    aPage             現ページのコンテンツ情報
-     * @param {Selection} [aPage.selection] 選択オブジェクト
-     * @param {String}    [apage.title]     現ページのタイトル
-     * @param {String}    [aPage.url]       現ページURL
-     * @param {String}    [aPage.image]     表示させたい画像URL
-     * @param {Array}     aACLs             ACL[]
+     * @param {Window}    [aWindow]   現ページのWindowオブジェクト
+     * @param {String}    [aImageURL] 表示させたい画像URL
+     * @param {Array}     [aACLs]     ACL[]
      */
     function PostData () {
       this.init.apply(this, arguments);
     }
     PostData.sequence = 0;
     PostData.prototype = {
-      init: function PD_init (aMessage, aPage, aACLs) {
+      init: function PD_init (aMessage, aWindow, aImageURL, aACLs) {
         this.message = aMessage;
-        this.page = aPage || null;
+        this.window = aWindow;
+        this.imageURL = aImageURL;
 
         this.UID = store.get('UID', null);
         liberator.assert(this.UID, 'Google+ Error: UID is not set. Please login and `:googleplus -setup\'');
@@ -904,17 +900,15 @@ let g:gplus_commando_map_menu            = "m"
             yield this.token;
             break;
           case 6:
-            if (this.page) {
-              let link = [v for each(v in this.generateLink())],
-                  photo = [];
-              if (link.length > 0) {
-                photo = [v for each(v in this.generateImage())];
-                yield JSON.stringify([JSON.stringify(link), JSON.stringify(photo)]);
-              } else {
-                yield JSON.stringify([JSON.stringify(link)]);
-              }
-            } else {
+            if (!this.window && !this.imageURL) {
               yield null;
+            } else {
+              var media = LinkDetector.get(this.window, this.imageURL);
+              var data = [JSON.stringify(media.generateData())];
+              if (media.hasPhoto) {
+                data.push(JSON.stringify(media.generateData(true)));
+              }
+              yield JSON.stringify(data);
             }
 
             break;
@@ -940,105 +934,209 @@ let g:gplus_commando_map_menu            = "m"
           }
         }
       },
-      generateLink: function PD_generateLink () {
-        if (!this.page.url || !this.page.title) {
-          yield null;
-          throw StopIteration;
-        }
-        let url = this.page.url;
-        let youtubeReg = /http:\/\/(?:.*\.)?youtube.com\/watch\?v=([a-zA-Z0-9_-]+)[-_.!~*'()a-zA-Z0-9;\/?:@&=+\$,%#]*/;
-        let m = url.match(youtubeReg);
-        for (let i = 0, len = 48; i < len; ++i) {
-          switch(i) {
-          case 3:
-            yield this.page.title;
-            break;
-          case 5:
-            yield m ? [null, 'http://www.youtube.com/v/' + m[1] + '&hl=en&fs=1&autoplay=1', 385, 640] : null;
-            break;
-          case 9:
-            yield m ? [[null, content.wrappedJSObject.yt.config_.VIDEO_USERNAME, 'uploader']] : [];
-            break;
-          case 21:
-            if (this.page.selection) {
-              let sels = [];
-              let image = ('image' in this.page), imgElms = [];
-              for (let k = 0, count = this.page.selection.rangeCount; k < count; ++k) {
-                let r = this.page.selection.getRangeAt(k),
-                    fragment = r.cloneContents();
-                sels.push(node2txt(fragment, r.commonAncestorContainer.localName));
-                if (!image) {
-                  imgElms.push.apply(imgElms, Array.slice(fragment.querySelectorAll('img')));
-                }
-              }
-              if (imgElms.length > 0)
-                this.page.image = imgElms.reduce(function(p, c) (p.width * p.height < c.width * c.height) ? c : p).src;
-
-              yield sels.join('<br/>(snip)<br/>');
-            } else {
-              yield this.page.title + '<br/>' + this.page.url;
-            }
-            break;
-          case 24:
-            yield m ?
-                  [null, url, null, 'application/x-shockwave-flash', 'video'] :
-                  [null, url, null, 'text/html', 'document'];
-            break;
-          case 41:
-            let imageURL = m ?
-                'http://ytimg.googleusercontent.com/vi/' + m[1] + '/default.jpg' :
-                '//s2.googleusercontent.com/s2/favicons?domain=' + util.createURI(url).host;
-            yield [[null, imageURL, null, null], [null, imageURL, null, null]];
-            break;
-          case 47:
-            yield [[null, (m ? 'youtube' : ''), 'http://google.com/profiles/media/provider']];
-            break;
-          default:
-            yield null;
-          }
-        }
-      },
-      generateImage: function PD_generateImage() {
-        if (this.page.image) {
-          let uri = util.createURI(this.page.image);
-          let reg = /https?:\/\/[^\s]+\.(jpe?g|png|gif)/i;
-          let mime = '';
-          try {
-            mime = MIME.getTypeFromURI(uri);
-          } catch(e) {
-            if (url.host == 'gyazo.com') {
-              mime = 'image/png';
-            } else {
-              yield null;
-              throw StopIteration;
-            }
-          }
-          for (let i = 0, len = 48; i < len; ++i) {
-            switch(i) {
-            case 5:
-              yield [null, uri.spec];
-              break;
-            case 9:
-              yield [];
-              break;
-            case 24:
-              yield [null, uri.spec, null, mime, 'photo', null,null,null,null,null,null,null,null,null];
-              break;
-            case 41:
-              yield [[null, uri.spec, null, null], [null, uri.spec, null, null]];
-              break;
-            case 47:
-              yield [[null,'images','http://google.com/profiles/media/provider']];
-              break;
-            default:
-              yield null;
-            }
-          }
-        } else {
-          yield null;
-        }
-      },
     };
+
+    const LinkDetector = (function() {
+      var commonProto = {
+        init: function (win, imageURL) {
+          this.window = win;
+          this.imageURL = imageURL;
+          if (imageURL) {
+            if (win)
+              this.hasPhoto = true;
+
+            this.setupImage();
+          }
+        },
+        type: {
+          TITLE: 3,
+          MEDIA_LINK: 5,
+          UPLOADER: 9,
+          TEXT: 21,
+          TYPE: 24,
+          IMAGE: 41,
+          PROVIDER: 47,
+        },
+        generateData: function (isPhoto) {
+          var data = new Array(48);
+          data[this.type.TITLE] = this.getTitle(isPhoto);
+          data[this.type.MEDIA_LINK] = this.getMediaLink(isPhoto);
+          data[this.type.UPLOADER] = this.getUploader(isPhoto);
+          data[this.type.TEXT] = this.getContentsText(isPhoto);
+          data[this.type.TYPE] = this.getMediaType(isPhoto);
+          data[this.type.IMAGE] = this.getMediaImage(isPhoto);
+          data[this.type.PROVIDER] = this.getProvider(isPhoto);
+          return data;
+        },
+        hasPhoto: false,
+        imageElement: null,
+        setupImage: function () {
+          let imgs = content.document.images;
+          for (let i = 0, len = imgs.length, img; img = imgs[i]; ++i) {
+            if (img.src == this.imageURL) {
+              this.imageElement = img;
+            }
+          }
+        },
+        getMimeType: function (uri, defaultType) {
+          if (!(uri instanceof Ci.nsIURI))
+            uri = util.createURI(uri);
+
+          try {
+            return MIME.getTypeFromURI(uri);
+          } catch (e) {}
+          return defaultType;
+        },
+        getTitle: function (isPhoto) {
+          return (isPhoto || !this.window) ? null : this.window.document.title;
+        },
+        getContentsText: function (isPhoto) {
+          if (!this.window || isPhoto)
+            return null;
+
+          var sel = this.window.getSelection();
+          if (sel.isCollapsed)
+            return "";
+
+          var sels = [];
+          for (let i = 0, count = sel.rangeCount; i < count; ++i) {
+            let r = sel.getRangeAt(i),
+                fragment = r.cloneContents();
+            sels.push(Elements.node2txt(fragment, r.commonAncestorContainer.localName));
+          }
+          return sels.join("<br/>(snip)<br/>");
+        },
+        getUploader: function () { return []; },
+        getMediaLink: function (isPhoto) {
+          if (this.window && !isPhoto)
+            return [null, this.window.location.href];
+
+          var data = [null, this.imageURL];
+          if (this.imageElement)
+            data.push(this.imageElement.height, this.imageElement.width);
+
+          return data;
+        },
+        getMediaType: function (isPhoto) {
+          if (isPhoto) {
+            var type = this.getMimeType(this.imageURL, "image/jpeg");
+            var data = [null, this.imageURL, null, type, "photo", null,null,null,null,null,null,null];
+            if (this.imageElement)
+              data.push(this.imageElement.width, this.imageElement.height);
+            else
+              data.push(null,null);
+
+            return data;
+          }
+          if (this.window && !isPhoto) {
+            type = this.window.document.contentType;
+            switch (type.split("/")[0]) {
+            case "image":
+              return [null, this.window.location.href, null, type, "image"];
+            case "text":
+            default:
+              return [null, this.window.location.href, null, "text/html", "document"];
+            }
+          } else if (this.imageURL) {
+            type = this.getMimeType(this.imageURL, "image/jpeg");
+            return [null, this.imageURL, null, type, "image"];
+          }
+          return null
+        },
+        getMediaImage: function (isPhoto) {
+          var url;
+          if (this.window && !isPhoto) {
+            let type = this.window.document.contentType.split("/");
+            if (type[0] != "image") {
+              let host = this.window.location.host;
+              url = "//s2.googleusercontent.com/s2/favicons?domain=" + host;
+              return [ [null, url, null, null], [null, url, null, null] ];
+            } else {
+              url = this.window.location.href;
+              return [ [null, url, null, null], [null, url, null, null] ];
+            }
+          }
+
+          let data = [null, this.imageURL];
+          let w = null, h = null;
+          if (this.imageElement) {
+            w = this.imageElement.width, h = this.imageElement.height;
+            w = w / h * 120;
+            h = 120;
+          }
+          data.push(h, w);
+          return [ data, data ];
+        },
+        getProvider: function (isPhoto) {
+          return [ [null, (isPhoto ? "images" : ""), "http://google.com/profiles/media/provider"] ];
+        }
+      };
+      var classes = {}, checker = {};
+      function MediaLink() { this.init.apply(this, arguments); };
+      MediaLink.prototype = commonProto;
+
+      var self = {
+        addType: function (name, checkFunc, proto) {
+          checker[name] = checkFunc;
+          var func = function () { this.init.apply(this, arguments); };
+          proto.__super__ = proto.__proto__ = commonProto;
+          func.prototype = proto;
+          classes[name] = func;
+        },
+        get: function (aWindow, aImageURL) {
+          for (let [key, checkFunc] in Iterator(checker)) {
+            if (checkFunc(aWindow, aImageURL)) {
+              return new classes[key](aWindow, aImageURL);
+            }
+          }
+          return new MediaLink(aWindow, aImageURL);
+        }
+      };
+      (function() {
+        // -------------------------------------------------------------------------
+        // YouTube
+        // ----------------------------------------------------------------------{{{
+        self.addType("youtube",
+          function (win) {
+            if (!win) return false;
+
+            return /^https?:\/\/(?:.*\.)?youtube.com\/watch/.test(win.location.href);
+          }, {
+            get VIDEO_ID () {
+              var id = this.window.wrappedJSObject.yt.config_.VIDEO_ID;
+              Object.defineProperty(this, "VIDEO_ID", { value: id });
+              return id;
+            },
+            getMediaLink: function () [null, "http://www.youtube.com/v/" + this.VIDEO_ID + "&hl=en&fs=1&autoplay=1"],
+            getContentsText: function () this.window.document.querySelector("meta[name=description]").content,
+            getMediaType: function () [null, this.window.location.href, null, "application/x-shockwave-flash", "video"],
+            getMediaImage: function () {
+              var url = "https://ytimg.googleusercontent.com/vi/" + this.VIDEO_ID + "/hqdefault.jpg";
+              return [ [null, url, 120, 160], [null, url, 120, 160] ];
+            },
+            getProvider: function () [ [null, "youtube", "http://google.com/profiles/media/provider"] ],
+          }); // }}}
+        // -------------------------------------------------------------------------
+        // Gyazo
+        // ----------------------------------------------------------------------{{{
+        self.addType("gyazo",
+          function (win, image) {
+            var reg = /^http:\/\/gyazo\.com\/\w+(\.png)?/;
+            return reg.test(image);
+          }, {
+            init: function (win, imageURL) {
+              this.window = win;
+              if (imageURL.lastIndexOf(".png") != imageURL.length - 4)
+                imageURL += ".png";
+
+              this.imageURL = imageURL;
+              this.hasPhoto = true;
+            },
+          });
+        // }}}
+      })();
+      return self;
+    })();
 
     /**
      * ノードをHTMLテキストに変換
@@ -1074,7 +1172,7 @@ let g:gplus_commando_map_menu            = "m"
         case 'ul':
         case 'ol':
         case 'dl':
-          txt = nodelist2txt(children, localName, aIndent + '&nbsp;&nbsp;').join('');
+          txt = '<br/>\n' + nodelist2txt(children, localName, aIndent + '&nbsp;&nbsp;').join('') + '<br/>\n';
           break;
         case 'li':
           txt = aIndent + (aParentTag == 'ol' ? ('  ' + (aIndex+1)).slice(-2) + '. ' : ' * ').replace(' ', '&nbsp;', 'g') +
@@ -1132,6 +1230,8 @@ let g:gplus_commando_map_menu            = "m"
       return a;
     }
 
+    __context__.linkDetector = LinkDetector;
+    __context__.store = store;
   })();
 
   // }}}
