@@ -708,7 +708,10 @@ let g:gplus_commando_map_menu            = "m"
           store.set('AT', data[1][15]);
           let circles = data[12][0];
           // CIRCLES[]: [[Name, Description, ID], ...]
-          store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
+          store.set('CIRCLES', [
+            ["circles", "Everyone in your circles", "1c"],
+            ["excircles", "Everyone in your circles, plus all the people in their circles", "1f"],
+          ].concat([[c[1][0],c[1][2],c[0][0]] for each(c in circles.slice(0, circles.length / 2))]));
           onSuccess();
           return true;
         } catch (e) {
