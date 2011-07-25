@@ -676,6 +676,15 @@ let g:gplus_commando_map_menu            = "m"
       true
     );
 
+    hints.addMode("G", "Google+ Post",
+      function action(elm) {
+        var src = elm.src;
+        commandline.open("", "googleplus -i " + src + " ", modes.EX);
+      },
+      function getXPath() {
+        return util.makeXPath(["img"]);
+      });
+
     /**
      * Google+のページから必要データを保存する
      * @return {Boolean}
