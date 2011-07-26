@@ -731,19 +731,25 @@ let g:gplus_commando_map_menu            = "m"
             'div[contains(@class,"a-z-nb-A")]'
           ];
 
+          const roots = [
+            {get visible () !!Elements.viewer, selector: ('div[contains(@class, "' + s2x(S.viewer.root) + '")]')},
+            {get visible () !!Elements.dialog, selector: ('div[contains(@class, "' + s2x(S.dialog.root) + '")]')},
+            {get visible () !!Elements.frames.notifications.visible, selector: 'id("nw-content")'}
+          ];
+
           let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
 
-          for (let [, name] in Iterator(['viewer', 'dialog'])) {
-            if (!Elements[name])
+          for (let [, root] in Iterator(roots)) {
+            if (!root.visible)
               continue;
             xpath.push(String(<>div[contains(@class, "{s2x(S.closeButton)}")]</>));
-            xpath = xpath.map(function (it) String(<>*[contains(@class, "{s2x(S[name].root)}")]//{it}</>))
+            xpath = xpath.map(function (it) (root.selector + '//' + it));
             break;
           }
 
           styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', '.a-b-f-W-Tj.a-f-W-Tj { display: inline  !important }');
 
-          return xpath.map(function (it) '//' + it).join(' | ');
+          return xpath.map(function (it) (/^id\(/.test(it) ? it : '//' + it)).join(' | ');
         }
       );
 
