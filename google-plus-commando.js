@@ -246,11 +246,14 @@ let g:gplus_commando_map_menu            = "m"
           return iframe && iframe.contentWindow === win;
         }
 
-        function get1 () {
+        function get1 (root) {
           function button (editor, name)
             editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
 
-          let editors = A(doc.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
+          if (!root)
+            return;
+
+          let editors = A(root.querySelectorAll('div[id$=".editor"]')).filter(hasIFrame);
           if (editors.length === 0)
             return;
           if (editors.length > 1)
@@ -294,7 +297,7 @@ let g:gplus_commando_map_menu            = "m"
         let doc = content.document;
         let win = document.commandDispatcher.focusedWindow;
 
-        return get1() || get2();
+        return get1(doc) || get2() || get1(Elements.frames.notifications.root.contentDocument);
       },
 
       /**
