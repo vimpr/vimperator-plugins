@@ -59,7 +59,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="X-Hint" version="1.1.2"
+  <plugin name="X-Hint" version="1.1.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="en-US"
@@ -91,7 +91,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="X-Hint" version="1.1.2"
+  <plugin name="X-Hint" version="1.1.3"
           href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
           summary="Show the hints with given XPath."
           lang="ja"
@@ -135,6 +135,12 @@ let INFO =
   function xpath ()
     (last.xpath || '//a')
 
+  function restore () {
+    if (last.hintMode)
+      last.hintMode.tags = last.hintTags;
+    last = {};
+  }
+
   plugins.libly.$U.around(
     hints,
     'show',
@@ -146,7 +152,13 @@ let INFO =
         // override
         last.hintMode.tags = xpath;
       }
-      return next();
+      try {
+        return next();
+      } catch (e) {
+        restore();
+        liberator.log('x-hint: restore tags for error');
+        liberator.log(e);
+      }
     },
     true
   );
@@ -155,9 +167,7 @@ let INFO =
     hints,
     'hide',
     function (next, [minor, filter, win]) {
-      if (last.hintMode)
-        last.hintMode.tags = last.hintTags;
-      last = {};
+      restore();
       return next();
     },
     true
