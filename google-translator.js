@@ -52,7 +52,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <plugin name="Google Translator" version="1.0.0"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-translator.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/google-translator.js"
         summary="Translate with Google AJAX Language API"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>

@@ -60,7 +60,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <plugin name="AmebaNow" version="1.0.4"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/amebanow.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/amebanow.js"
         summary="AmebaNau"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>

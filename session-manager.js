@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="session-manager" version="1.3.4"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/session-manager"
           summary="for Session Manager Addon"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -77,7 +77,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="session-manager" version="1.3.4"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/session-manager"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/session-manager"
           summary="for Session Manager Addon"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

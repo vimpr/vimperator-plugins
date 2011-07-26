@@ -62,7 +62,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="extension-manager" version="1.1.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/extension-manager.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/extension-manager.js"
           summary="extension manager"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -90,7 +90,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="extension-manager" version="1.1.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/extension-manager.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/extension-manager.js"
           summary="extension manager"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

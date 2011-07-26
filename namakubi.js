@@ -65,7 +65,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <plugin name="生首" version="1.0.0"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/namakubi.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/namakubi.js"
         summary="Wonderful Namakubi Talker"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>

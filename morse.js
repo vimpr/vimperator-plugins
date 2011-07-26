@@ -59,7 +59,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <plugin name="Morse" version="1.2.1"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/morse.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/morse.js"
         summary="Morse code"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>

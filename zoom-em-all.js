@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="ZoomEmAll" version="1.1.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/zoom-em-all.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/zoom-em-all.js"
           summary="Zoom or pan for whole firefox."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -77,7 +77,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="ZoomEmAll" version="1.1.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/zoom-em-all.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/zoom-em-all.js"
           summary="ブラウザ全体をズーム"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

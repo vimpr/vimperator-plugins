@@ -57,7 +57,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <plugin name="Stat Stat" version="1.0.4"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/statstat.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/statstat.js"
         summary="Show information on statusline."
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="anekos@snca.net">anekos</author>

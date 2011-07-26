@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let INFO =
 <>
   <plugin name="GMailCommando" version="1.4.10"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -73,7 +73,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="GMailコマンドー" version="1.4.10"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/gmail-commando.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/gmail-commando.js"
           summary="便利なGMail用コマンドー"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

@@ -60,7 +60,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="X-Hint" version="1.1.3"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/x-hint.js"
           summary="Show the hints with given XPath."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -92,7 +92,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="X-Hint" version="1.1.3"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/x-hint.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/x-hint.js"
           summary="Show the hints with given XPath."
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

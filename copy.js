@@ -1,6 +1,6 @@
 var INFO =
 <plugin name="copy" version="0.7.6"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/copy.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/copy.js"
         summary="copy strings from the template (like CopyURL+)"
         xmlns="http://vimperator.org/namespaces/liberator">
     <author email="teramako@gmail.com">teramako</author>

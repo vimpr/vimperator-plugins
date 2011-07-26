@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO = <>
   <plugin name="feedSomeKeys" version="1.9.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -141,7 +141,7 @@ let INFO = <>
     </ex></code>
   </plugin>
   <plugin name="feedSomeKeys" version="1.9.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/feedSomeKeys_3.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Web コンテンツに直接キーイベントを送ります。"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

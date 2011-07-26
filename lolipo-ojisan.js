@@ -64,7 +64,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="lolipo-ojisan" version="1.0.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lolipo-ojisan.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/lolipo-ojisan.js"
           summary="Chat with lolipo-ojisan."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -82,7 +82,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="lolipo-ojisan" version="1.0.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lolipo-ojisan.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/lolipo-ojisan.js"
           summary="ロリポおじさんとチャットしよう"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

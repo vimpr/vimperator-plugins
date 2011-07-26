@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="VideoController" version="1.0.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/video-controller.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/video-controller.js"
           summary="Control HTML5 Videos"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -75,7 +75,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="VideoController" version="1.0.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/video-controller.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/video-controller.js"
           summary="Control HTML5 Videos"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

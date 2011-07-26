@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let INFO =
 <>
   <plugin name="EditVimperatorFile" version="1.2.3"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -51,7 +51,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="EditVimperatorFile" version="1.2.3"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/edit-vimperator-files.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

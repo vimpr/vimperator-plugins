@@ -37,7 +37,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let INFO =
 <>
   <plugin name="GooglePlusCommando" version="2.0.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/google-plus-commando.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">

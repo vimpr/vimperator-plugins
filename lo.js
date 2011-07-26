@@ -55,7 +55,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="link-opener" version="2.3.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -104,7 +104,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="link-opener" version="2.3.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/lo.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

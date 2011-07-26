@@ -21,7 +21,7 @@
 // PLUGIN_INFO {{{
 let INFO =
 <plugin name="Walk-Input" version="1.2.3"
-        href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/walk-input.js"
+        href="http://github.com/vimpr/vimperator-plugins/blob/master/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
     <author email="tekezo@pqrs.org">Takayama Fumihiko</author>

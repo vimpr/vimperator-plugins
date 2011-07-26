@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 let INFO =
 <>
   <plugin name="HintsForEmbeded" version="1.4.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -80,7 +80,7 @@ let INFO =
     </item>
   </plugin>
   <plugin name="HintsForEmbeded" version="1.4.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/hints-for-embedded.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="埋め込み(embed)オブジェクト用ヒントモード"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">

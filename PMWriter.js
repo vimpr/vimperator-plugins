@@ -67,7 +67,7 @@
     const DOCUMENT_TITLE = 'Vimperator Plugins in CodeRepos';
     const CodeRepos = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/';
     const CodeReposBranch = 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/branches/';
-    const CodeReposFile = 'http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/';
+    const CodeReposFile = 'http://github.com/vimpr/vimperator-plugins/blob/master/';
 
     function Context (file) {
       this.NAME = file.leafName.replace(/\..*/, '')

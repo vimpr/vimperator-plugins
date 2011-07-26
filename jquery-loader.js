@@ -58,7 +58,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="jQueryLoader" version="1.0.1"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/jquery-loader.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/jquery-loader.js"
           summary="jQuery Loader"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">

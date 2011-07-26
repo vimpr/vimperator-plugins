@@ -60,7 +60,7 @@ let PLUGIN_INFO =
 let INFO =
 <>
   <plugin name="alias" version="1.0.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/alias.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/alias.js"
           summary="Define the alias for a command."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
@@ -84,7 +84,7 @@ let INFO =
     </ex></code>
   </plugin>
   <plugin name="alias" version="1.0.0"
-          href="http://svn.coderepos.org/share/lang/javascript/vimperator-plugins/trunk/alias.js"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/alias.js"
           summary="コマンドに別名(エイリアス|alias)をつける。"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
