@@ -7,7 +7,7 @@ var PLUGIN_INFO =
     <version>0.3.2</version>
     <minVersion>2.3pre 2010/01/26</minVersion>
     <maxVersion>2.4pre</maxVersion>
-    <updateURL>http://github.com/vimpr/vimperator-plugins/row/master/char-hints-mod2.js</updateURL>
+    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/char-hints-mod2.js</updateURL>
     <detail><![CDATA[
 == Usage ==
 In default setting,
