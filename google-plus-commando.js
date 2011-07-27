@@ -334,7 +334,7 @@ let g:gplus_commando_map_menu            = "m"
           case "ul":
           case "ol":
           case "dl":
-            txt = "<br/>\n" + nodelist2txt(children, localName, aIndent + "&nbsp;&nbsp;").join("");
+            txt = "<br/>\n" + nodelist2txt(children, localName, aIndent + "&nbsp;&nbsp;").join("") + "<br/>\n";
             break;
           case "li":
             txt = aIndent + (aParentTag == "ol" ? ("  " + (aIndex+1)).slice(-2) + ". " : " * ").replace(" ", "&nbsp;", "g") +
@@ -862,7 +862,7 @@ let g:gplus_commando_map_menu            = "m"
               if (prefix)
                 context.advance(prefix.length);
 
-              return [['anyone', 'to public']].concat([[v[0], ''] for ([, v] in Iterator(store.get('CIRCLES', [])))]);
+              return [['anyone', 'to public']].concat([v for ([, v] in Iterator(store.get('CIRCLES', [])))]);
             }],
           [['-setup'], commands.OPTION_NOARG],
         ],
@@ -891,7 +891,10 @@ let g:gplus_commando_map_menu            = "m"
           store.set('AT', data[1][15]);
           let circles = data[12][0];
           // CIRCLES[]: [[Name, Description, ID], ...]
-          store.set('CIRCLES', circles.slice(0, circles.length / 2).map(function (c) [c[1][0], c[1][2], c[0][0]]));
+          store.set('CIRCLES', [
+            ['circles', 'Everyone in your circles', '1c'],
+            ['excircles', 'Everyone in your circles, plus all the people in their circles', '1f'],
+          ].concat([[c[1][0],c[1][2],c[0][0]] for each(c in circles.slice(0, circles.length / 2))]));
           onSuccess();
           return true;
         } catch (e) {
@@ -984,18 +987,15 @@ let g:gplus_commando_map_menu            = "m"
       XBW.setJSDefaultStatus(msg);
     };
 
-    XPCOMUtils.defineLazyServiceGetter(this, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
+    XPCOMUtils.defineLazyServiceGetter(__context__, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
 
     /**
      * Google+への送信データ生成
      * @Constructor
      * @param {String}    aMessage
-     * @param {Object}    aPage             現ページのコンテンツ情報
-     * @param {Selection} [aPage.selection] 選択オブジェクト
-     * @param {String}    [apage.title]     現ページのタイトル
-     * @param {String}    [aPage.url]       現ページURL
-     * @param {String}    [aPage.image]     表示させたい画像URL
-     * @param {Array}     aACLs             ACL[]
+     * @param {Window}    [aWindow]   現ページのWindowオブジェクト
+     * @param {String}    [aImageURL] 表示させたい画像URL
+     * @param {Array}     [aACLs]     ACL[]
      */
     function PostData () { this.init.apply(this, arguments); }
     PostData.sequence = 0;
