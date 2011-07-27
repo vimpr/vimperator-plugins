@@ -38,13 +38,12 @@ let PLUGIN_INFO =
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/bitly.js</updateURL>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.4</maxVersion>
   <detail><![CDATA[
     == Commands ==
       :bitly [<URL>]
@@ -96,13 +95,16 @@ let PLUGIN_INFO =
   }
 
   function shorten (url, domain, command, callback) {
+    function fixResponseText (s)
+      s.trim();
+
     function get () {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
         if (req.readyState != 4)
           return;
         if (req.status == 200)
-          return callback && callback(req.responseText, req);
+          return callback && callback(fixResponseText(req.responseText), req);
         else
           return liberator.echoerr(req.statusText);
       };
@@ -115,7 +117,7 @@ let PLUGIN_INFO =
         'format=txt';
       req.open('GET', requestUri, callback);
       req.send(null);
-      return !callback && req.responseText.trim();
+      return !callback && fixResponseText(req.responseText);
     }
 
     if (!url)
