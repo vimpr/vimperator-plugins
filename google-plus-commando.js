@@ -862,7 +862,7 @@ let g:gplus_commando_map_menu            = "m"
               if (prefix)
                 context.advance(prefix.length);
 
-              return [['anyone', 'to public']].concat([v for ([,v] in Iterator(store.get('CIRCLES', [])))]);
+              return [['anyone', 'to public']].concat([[v[0], ''] for ([, v] in Iterator(store.get('CIRCLES', [])))]);
             }],
           [['-setup'], commands.OPTION_NOARG],
         ],
