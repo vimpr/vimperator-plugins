@@ -770,9 +770,7 @@ let g:gplus_commando_map_menu            = "m"
      */
     function postGooglePlus (aPostData) {
       let data = aPostData.getPostData();
-      let queries = [];
-      for (let key in data)
-        queries.push(key + '=' + encodeURIComponent(data[key]));
+      let queries = [key + '=' + encodeURIComponent(value) for ([key,value] in Iterator(data))].join('&');
 
       let xhr = new XMLHttpRequest();
       xhr.mozBackgroundRequest = true;
@@ -780,7 +778,7 @@ let g:gplus_commando_map_menu            = "m"
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
       xhr.setRequestHeader('Origin', HOME_URL);
       xhr.onreadystatechange = postGooglePlus.readyStateChange;
-      xhr.send(queries.join('&'));
+      xhr.send(queries);
     }
     /**
      * Google+への送信状況を表示する
