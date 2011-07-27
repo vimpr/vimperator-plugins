@@ -1,6 +1,6 @@
 // INFO //
 var INFO = 
-<plugin name="tinami.js" version="0.2"
+<plugin name="tinami.js" version="0.3"
         summary="Download image from tinami"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/tinami.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -168,7 +168,7 @@ commands.addUserCommand(
       return false;
     };
 
-    if(0<contents.getElementsByClassName('bigger').length){
+//    if(0<contents.getElementsByClassName('bigger').length){
       xhrImgInfo=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
       xhrImgInfo.QueryInterface(Ci.nsIDOMEventTarget);
       xhrImgInfo.addEventListener("load",trueImgInfo,false);
@@ -178,10 +178,12 @@ commands.addUserCommand(
       xhrImgInfo.setRequestHeader('Referer',contents.URL);
       xhrImgInfo.setRequestHeader('Cookie',cookie);
       xhrImgInfo.send(null);
+/*
     }else{
       imgUrl=contents.getElementsByClassName('draggable_img').item(0)
               .firstChild.getAttribute('src');
       saveImag();
     }
+*/
   }
 );
