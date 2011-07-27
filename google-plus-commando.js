@@ -659,6 +659,7 @@ let g:gplus_commando_map_menu            = "m"
       },
       {
         literal: 0,
+        hereDoc: true,
         options: [
           [['-link', '-l'], commands.OPTION_NOARG],
           [['-imageURL', '-i'], commands.OPTION_STRING],
