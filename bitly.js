@@ -38,7 +38,7 @@ let PLUGIN_INFO =
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
   <description lang="ja">bit.ly や j.mp で短縮URLを得る</description>
-  <version>2.1.1</version>
+  <version>2.1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -87,7 +87,10 @@ let PLUGIN_INFO =
           function (apiKey) {
             let login = LoginInfo(HostName, null, Realm, username, apiKey, '', '');
             PasswordManager.addLogin(login);
-            callback(login);
+            callback();
+          },
+          {
+            default: let (e = content.document.querySelector('#bitly_api_key')) (e ? e.value : '')
           }
         );
       }
@@ -98,6 +101,7 @@ let PLUGIN_INFO =
     function fixResponseText (s)
       s.trim();
 
+    liberator.log(arguments);
     function get () {
       let req = new XMLHttpRequest();
       req.onreadystatechange = function () {
@@ -129,7 +133,8 @@ let PLUGIN_INFO =
       return get();
 
     if (callback) {
-      setupAuth(get);
+      let args = Array.slice(arguments);
+      setupAuth(function () shorten.apply(this, args));
     } else {
       liberator.echoerr('Not found API Key!! Try :bitly command, before use.');
     }
