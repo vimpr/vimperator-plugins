@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.1"
+  <plugin name="GooglePlusCommando" version="2.0.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -206,7 +206,15 @@ let g:gplus_commando_map_menu            = "m"
         root: '.va-Q',
       },
       frames: {
-        notifications: 'iframe[src*="/_/notifications/"]'
+        notifications: {
+          root: 'iframe[src*="/_/notifications/"]',
+          summary: {
+            root: '#summary-view',
+            prev: '.a-b-l-fa-wi.d-h',
+            next: '.a-b-l-fa-vi.d-h',
+            back: '.a-b-l-fa-Zj.d-h.fAAdub'
+          }
+        }
       },
       closeButton: '.CH'
     };
@@ -238,7 +246,7 @@ let g:gplus_commando_map_menu            = "m"
       get dialog () MakeElement(Dialog, Elements.doc.querySelector(S.dialog.root)),
 
       frames: {
-        get notifications () MakeElement(Notifications, Elements.doc.querySelector(S.frames.notifications))
+        get notifications () MakeElement(Notifications, Elements.doc.querySelector(S.frames.notifications.root))
       },
 
       get focusedEditor () {
@@ -451,6 +459,17 @@ let g:gplus_commando_map_menu            = "m"
             return false;
           let nwc =  plugins.googlePlusCommando.element.frames.notifications.root.contentDocument.querySelector('#nw-content');
           return parseInt(util.computedStyle(nwc).height, 10) > 100;
+        },
+        summary: {
+          get root () root.contentDocument.querySelector(S.frames.notifications.summary.root),
+          get visible () (!/none/.test(util.computedStyle(self.summary.root).display))
+        },
+        entry: {
+          get root () self.summary.root.nextSibling,
+          get visible () (!/none/.test(util.computedStyle(self.entry.root).display)),
+          get prev () root.contentDocument.querySelector(S.frames.notifications.summary.prev),
+          get next () root.contentDocument.querySelector(S.frames.notifications.summary.next),
+          get back () root.contentDocument.querySelector(S.frames.notifications.summary.back)
         }
       };
       return self;
@@ -556,8 +575,12 @@ let g:gplus_commando_map_menu            = "m"
       if (Elements.viewer)
         return click(Elements.viewer[dir]);
 
+      let notifications = Elements.frames.notifications;
+
+      if (notifications.visible && notifications.entry.visible)
+        return click(Elements.frames.notifications.entry[dir]);
+
       let arrowTarget = (function () {
-        let notifications = Elements.frames.notifications;
         if (notifications && notifications.visible)
           return notifications.root.contentDocument.body;
 
@@ -596,6 +619,10 @@ let g:gplus_commando_map_menu            = "m"
       click(Elements.notification);
     },
     cancel: function () {
+      let notifications = Elements.frames.notifications;
+      if (notifications && notifications.visible && notifications.entry.visible)
+        return click(notifications.entry.back);
+
       for (let [, n] in Iterator(['dialog', 'viewer'])) {
         let e = Elements[n];
         if (e && e.cancel)
