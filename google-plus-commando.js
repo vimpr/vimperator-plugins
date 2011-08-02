@@ -152,7 +152,7 @@ let g:gplus_commando_map_menu            = "m"
   }
 
   function isDisplayed (elem)
-    (!/none/.test(util.computedStyle(elem).display));
+    (elem && !/none/.test(util.computedStyle(elem).display));
 
   function withCount (command) {
     return function (count) {
@@ -394,7 +394,7 @@ let g:gplus_commando_map_menu            = "m"
     };
 
     function MakeElement (constructor, root) {
-      if (root && !/none/.test(util.computedStyle(root).display))
+      if (root && isDisplayed(root))
         return constructor(root);
     }
 
@@ -466,13 +466,13 @@ let g:gplus_commando_map_menu            = "m"
         },
         summary: {
           get root () root.contentDocument.querySelector(S.frames.notifications.summary.root),
-          get visible () (!/none/.test(util.computedStyle(self.summary.root).display))
+          get visible () isDisplayed(self.summary.root),
         },
         entry: {
           get root () self.summary.root.nextSibling,
           get entries () A(root.contentDocument.querySelectorAll(S.frames.notifications.entry.entries)),
           get current () self.entry.entries.filter(isDisplayed)[0],
-          get visible () (!/none/.test(util.computedStyle(self.entry.root).display)),
+          get visible () isDisplayed(self.entry.root),
           get prev () root.contentDocument.querySelector(S.frames.notifications.summary.prev),
           get next () root.contentDocument.querySelector(S.frames.notifications.summary.next),
           get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
