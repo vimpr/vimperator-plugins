@@ -142,11 +142,17 @@ let g:gplus_commando_map_menu            = "m"
   function A (list)
     Array.slice(list);
 
+  function IA (list)
+    Iterator(A(list));
+
   function click (elem) {
     if (!elem)
       throw GPCError('elem is undefined');
     buffer.followLink(elem, liberator.CURRENT_TAB);
   }
+
+  function isDisplayed (elem)
+    (!/none/.test(util.computedStyle(elem).display));
 
   function withCount (command) {
     return function (count) {
@@ -215,8 +221,9 @@ let g:gplus_commando_map_menu            = "m"
             back: '.a-b-l-fa-Zj.d-h.fAAdub'
           },
           entry: {
+            entries: '.JEfY2c.a-b-l-fa-xf-df[id^=":2."]',
             comment: role('button', '.a-b-f-i-W-O.a-f-i-W-O')
-          }
+          },
         }
       },
       closeButton: '.CH'
@@ -463,11 +470,13 @@ let g:gplus_commando_map_menu            = "m"
         },
         entry: {
           get root () self.summary.root.nextSibling,
+          get entries () A(root.contentDocument.querySelectorAll(S.frames.notifications.entry.entries)),
+          get current () self.entry.entries.filter(isDisplayed)[0],
           get visible () (!/none/.test(util.computedStyle(self.entry.root).display)),
           get prev () root.contentDocument.querySelector(S.frames.notifications.summary.prev),
           get next () root.contentDocument.querySelector(S.frames.notifications.summary.next),
           get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
-          get comment () root.contentDocument.querySelector(S.frames.notifications.entry.comment),
+          get comment () self.entry.current.querySelector(S.frames.notifications.entry.comment),
           get unfold () root.contentDocument.querySelector(S.currentEntry.unfold.join(', '))
         }
       };
@@ -598,6 +607,8 @@ let g:gplus_commando_map_menu            = "m"
     comment: function () {
       let notifications = Elements.frames.notifications;
       if (notifications && notifications.visible && notifications.entry.visible) {
+        let e = notifications.entry.current;
+        e.scrollTop = e.scrollHeight;
         click(notifications.entry.comment);
       } else {
         let entry = Elements.currentEntry;
