@@ -111,6 +111,7 @@ let INFO =
             <dt>submit</dt>         <dd>Submit current editing post.</dd>
             <dt>unfold</dt>         <dd>Unfold something on current entry.</dd>
             <dt>menu</dt>           <dd>Open the menu of current entry.</dd>
+            <dt>mute</dt>           <dd>Mute current entry.</dd>
           </dl>
         </p>
         <p>rc file example</p>
