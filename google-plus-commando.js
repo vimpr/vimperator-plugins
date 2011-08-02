@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.3"
+  <plugin name="GooglePlusCommando" version="2.0.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -222,7 +222,8 @@ let g:gplus_commando_map_menu            = "m"
           },
           entry: {
             entries: '.JEfY2c.a-b-l-fa-xf-df[id^=":2."]',
-            comment: role('button', '.a-b-f-i-W-O.a-f-i-W-O')
+            comment: role('button', '.a-b-f-i-W-O.a-f-i-W-O'),
+            mute: role('button', '.a-b-l-fa-Fb.OeDM2c.uOW2Oe.d-h')
           },
         }
       },
@@ -477,6 +478,7 @@ let g:gplus_commando_map_menu            = "m"
           get next () root.contentDocument.querySelector(S.frames.notifications.summary.next),
           get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
           get comment () self.entry.current.querySelector(S.frames.notifications.entry.comment),
+          get mute () self.entry.current.querySelector(S.frames.notifications.entry.mute),
           get unfold () root.contentDocument.querySelector(S.currentEntry.unfold.join(', '))
         }
       };
@@ -666,6 +668,9 @@ let g:gplus_commando_map_menu            = "m"
       click(Elements.currentEntry.menuButton);
     },
     mute: function () {
+      let notifications = Elements.frames.notifications;
+      if (notifications && notifications.visible && notifications.entry.visible)
+        return click(notifications.entry.mute);
       click(Elements.currentEntry.menu.mute);
     }
   };
