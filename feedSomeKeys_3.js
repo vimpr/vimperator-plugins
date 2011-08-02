@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.9.0"
+  <plugin name="feedSomeKeys" version="1.9.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -559,6 +559,10 @@ let INFO = <>
                 elem = or(frames, function (f) fromXPath(f.document, args['-xpath'])) || elem;
               }
 
+              if (args['-selector']) {
+                elem = or(frames, function (f) f.document.querySelector(args['-selector'])) || elem;
+              }
+
               feed(rhs, args['-events'] || ['keypress'], elem);
             },
             {
@@ -602,6 +606,7 @@ let INFO = <>
           [['-desc', '-description', '-d'], commands.OPTION_STRING],
           [['-frame', '-f'], commands.OPTION_INT, null, frameCompleter],
           [['-xpath', '-x'], commands.OPTION_STRING, xpathValidator],
+          [['-selector', '-s'], commands.OPTION_STRING],
           [['-prefix', '-p'], commands.OPTION_STRING],
           [
             ['-events', '-e'],
