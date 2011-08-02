@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.2"
+  <plugin name="GooglePlusCommando" version="2.0.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -213,6 +213,9 @@ let g:gplus_commando_map_menu            = "m"
             prev: '.a-b-l-fa-wi.d-h',
             next: '.a-b-l-fa-vi.d-h',
             back: '.a-b-l-fa-Zj.d-h.fAAdub'
+          },
+          entry: {
+            comment: role('button', '.a-b-f-i-W-O.a-f-i-W-O')
           }
         }
       },
@@ -396,13 +399,7 @@ let g:gplus_commando_map_menu            = "m"
           for ([, e] in Iterator(A(root.querySelectorAll('a'))))
           if (!e.getAttribute('oid'))
         ][0],
-        get unfold () {
-          for (let [, sel] in Iterator(S.currentEntry.unfold)) {
-            let result = root.querySelector(sel);
-            if (result)
-              return result;
-          }
-        },
+        get unfold () root.querySelector(S.currentEntry.unfold.join(', ')),
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
@@ -469,7 +466,9 @@ let g:gplus_commando_map_menu            = "m"
           get visible () (!/none/.test(util.computedStyle(self.entry.root).display)),
           get prev () root.contentDocument.querySelector(S.frames.notifications.summary.prev),
           get next () root.contentDocument.querySelector(S.frames.notifications.summary.next),
-          get back () root.contentDocument.querySelector(S.frames.notifications.summary.back)
+          get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
+          get comment () root.contentDocument.querySelector(S.frames.notifications.entry.comment),
+          get unfold () root.contentDocument.querySelector(S.currentEntry.unfold.join(', '))
         }
       };
       return self;
@@ -597,8 +596,13 @@ let g:gplus_commando_map_menu            = "m"
     next: withCount(function () Commands.moveEntry(true)),
     prev: withCount(function () Commands.moveEntry(false)),
     comment: function () {
-      let entry = Elements.currentEntry;
-      click(entry.comment);
+      let notifications = Elements.frames.notifications;
+      if (notifications && notifications.visible && notifications.entry.visible) {
+        click(notifications.entry.comment);
+      } else {
+        let entry = Elements.currentEntry;
+        click(entry.comment);
+      }
       PostHelp.show();
     },
     plusone: function () click(Elements.currentEntry.plusone),
@@ -641,6 +645,10 @@ let g:gplus_commando_map_menu            = "m"
       click(Elements.focusedEditor.button.submit);
     },
     unfold: function () {
+      let notifications = Elements.frames.notifications;
+      if (notifications && notifications.visible && notifications.entry.visible)
+        return click(notifications.entry.unfold);
+
       click(Elements.currentEntry.unfold);
     },
     menu: function () {
