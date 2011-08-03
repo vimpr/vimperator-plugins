@@ -698,6 +698,9 @@ let g:gplus_commando_map_menu            = "m"
             func(count);
           } catch (e if (e instanceof GPCError)) {
             /* DO NOTHING */
+          } catch (e) {
+            liberator.log(e);
+            throw e;
           }
         },
         {
