@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.5"
+  <plugin name="GooglePlusCommando" version="2.0.6"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -183,30 +183,29 @@ let g:gplus_commando_map_menu            = "m"
       editable: '.editable',
 
       currentEntry: {
-        root: '.a-f-oi-Ai',
+        root: '.Of.al.kk',
         unfold: [
-          role('button', '.a-b-f-i-gc-cf-Xb-h'),                // 発言の省略 (以前)
-          role('button', '.a-b-f-i-gc-Sb-Xb-h'), // 発言の省略 (以降)
-          role('button', '.a-b-f-i-p-gc-h')      // 投稿の省略
+          role('button', '.d-k.Zk'),  // 発言の省略 (以前)
+          role('button', '.d-k.Yk'),  // 発言の省略 (以降)
+          role('button', '.d-k.sl')   // 投稿の省略 ("このコメントを展開 »")
         ],
         menu: {
-          mute: '.a-b-f-i-Fb-C.a-f-i-Ia-Fb-C'
+          mute: '.a-da-k.d-Z.a-da-k-Qe.im'
         },
-        menuButton: role('button', '.d-h.a-f-i-Ia-D-h.a-b-f-i-Ia-D-h'),
+        menuButton: role('button', '.d-k.Pt.pj'),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: '.n-Ob',
-        open: '.n-Nd',
-        cancel: 'div.om[id$=".c"]',
-        submit: role('button', '.d-s-r.tk3N6e-e.tk3N6e-e-qc.n-Ja-xg')
+        root: '.h-Hf',                // this.className += ' h-mb'
+        open: '.h-Ae',                // 最近の出来事を共有しましょう... */
+        cancel: 'div.um[id$=".c"]',   // :6w.c
       },
       notification: '#gbi1',
       viewer: {
-        root: '.zg',
-        prev: '.vn.GE.AH',
-        next: '.vn.GE.BH'
+        root: '.Xr',
+        prev: '.Xr.FO.xS',
+        next: '.Xr.FO.yS'
       },
       dialog: {
         root: '.va-Q',
@@ -216,18 +215,18 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.a-b-l-fa-wi.d-h',
-            next: '.a-b-l-fa-vi.d-h',
-            back: '.a-b-l-fa-Zj.d-h.fAAdub'
+            prev: '.d-k.a-b-C-rb-vh',   // @title = 前のお知らせ
+            next: '.d-k.a-b-C-rb-Dg',   // @title = 次のお知らせ
+            back: '.d-k.a-b-C-rb-ep.eB' // @title = お知らせに戻る
           },
           entry: {
-            entries: '.JEfY2c.a-b-l-fa-xf-df[id^=":2."]',
-            comment: role('button', '.a-b-f-i-W-O.a-f-i-W-O'),
-            mute: role('button', '.a-b-l-fa-Fb.OeDM2c.uOW2Oe.d-h')
+            entries: '.jB.a-b-C-rb-ci-Kf[id^=":2."]',             // :2.diz13l....
+            comment: role('button', '.ql.Sy'),
+            mute: role('button', '.d-k.a-b-C-rb-dh.jm.an')
           },
         }
       },
-      closeButton: '.CH'
+      closeButton: '.Nl.zS'
     };
 
     function role (name, prefix)
@@ -245,12 +244,7 @@ let g:gplus_commando_map_menu            = "m"
       get doc() content.document,
       get currentEntry () MakeElement(Entry, Elements.doc.querySelector(S.currentEntry.root)),
       post: {
-        // get editor () Elements.postForm.querySelector('.editable').parentNode,
-        // Elements.postForm.querySelector('.editable').parentNode
-        get root () Elements.doc.querySelector(S.post.root),
         get open () Elements.doc.querySelector(S.post.open),
-        get cancel () Elements.post.root.querySelector(S.post.cancel),
-        get submit () Elements.doc.querySelector(S.post.submit)
       },
       get notification () Elements.doc.querySelector(S.notification),
       get viewer () MakeElement(Viewer, Elements.doc.querySelector(S.viewer.root)),
@@ -266,6 +260,7 @@ let g:gplus_commando_map_menu            = "m"
           return iframe && iframe.contentWindow === win;
         }
 
+        // エントリにコメント
         function get1 (root) {
           function button (editor, name)
             editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
@@ -288,18 +283,19 @@ let g:gplus_commando_map_menu            = "m"
           };
         }
 
+        // 新しく投稿
         function get2 () {
           function button (editor, index) {
             let result = editor.querySelectorAll('td > ' + S.role('button'))[index];
             if (result)
               return result;
             if (index === 1)
-              return editor.querySelector('.om[id$=".c"]');
+              return editor.querySelector(S.post.cancel);
           }
 
           const indexes = {submit: 0, cancel: 1};
 
-          let editors = A(doc.querySelectorAll('.n')).filter(hasIFrame);
+          let editors = A(doc.querySelectorAll(S.post.root)).filter(hasIFrame);
           if (editors.length === 0)
             return;
           if (editors.length > 1)
@@ -779,8 +775,8 @@ let g:gplus_commando_map_menu            = "m"
             'span[@role="button"]',
             'div[@role="button"]',
             'div[@data-content-type]',
-            'img[contains(@class,"ea-g-Vc-pa")]',
-            'div[contains(@class,"a-z-nb-A")]'
+            'img[contains(@class,"P-g-ie-ma")]',  // /photos の写真
+            //FIXME 'div[contains(@class,"a-z-nb-A")]'
           ];
 
           const roots = [
