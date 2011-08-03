@@ -583,7 +583,7 @@ let g:gplus_commando_map_menu            = "m"
 
       let notifications = Elements.frames.notifications;
 
-      if (notifications.visible && notifications.entry.visible)
+      if (notifications && notifications.visible && notifications.entry.visible)
         return click(Elements.frames.notifications.entry[dir]);
 
       let arrowTarget = (function () {
