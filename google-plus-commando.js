@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.0"
+  <plugin name="GooglePlusCommando" version="2.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -683,17 +683,48 @@ let g:gplus_commando_map_menu            = "m"
       click(Elements.currentEntry.menu.mute);
     },
     open: function () {
+      function clicks (links) {
+        if (links.length === 1)
+          return click(links[0]);
+
+        let t = {};
+        A(links).forEach(function (link) (t[link.textContent] = link));
+
+        commandline.input(
+          'Selector a link',
+          function (url) {
+            let link = t[url];
+            if (link) {
+              click(link);
+            } else {
+              liberator.open(url, liberator.NEW_TAB);
+            }
+          },
+          {
+            completer: function (context) {
+              context.completions = [
+                [link.href, link.textContent]
+                for ([, link] in IA(links))
+              ];
+            }
+          }
+        );
+      }
+
       let ce = Elements.currentEntry;
       if (!ce)
         return;
+
       let dct = ce.root.querySelector('div[data-content-type]');
-      let links = dct.parentNode.querySelectorAll('a');
-      if (links.length < 1) {
-        click(dct);
-        return;
+      if (dct) {
+        let links = dct.parentNode.querySelectorAll('a');
+        if (links.length < 1)
+          return click(dct);
+        return clicks(links);
       }
-      if (links.length === 1)
-        click(links[0]);
+
+      let links = ce.root.querySelectorAll('a.ot-anchor');
+      clicks(links);
     }
   };
 
