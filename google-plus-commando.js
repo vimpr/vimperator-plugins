@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.1"
+  <plugin name="GooglePlusCommando" version="2.1.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -717,10 +717,11 @@ let g:gplus_commando_map_menu            = "m"
 
       let dct = ce.root.querySelector('div[data-content-type]');
       if (dct) {
-        let links = dct.parentNode.querySelectorAll('a');
-        if (links.length < 1)
+        if (!/application\/x-shockwave-flash/.test(dct.getAttribute('data-content-type')))
           return click(dct);
-        return clicks(links);
+
+        let links = dct.parentNode.querySelectorAll('a');
+          return clicks(links);
       }
 
       let links = ce.root.querySelectorAll('a.ot-anchor');
