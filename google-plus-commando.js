@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.6"
+  <plugin name="GooglePlusCommando" version="2.0.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -183,29 +183,29 @@ let g:gplus_commando_map_menu            = "m"
       editable: '.editable',
 
       currentEntry: {
-        root: '.Of.al.kk',
+        root: '.tf.Ek.Om.Lj',
         unfold: [
-          role('button', '.d-k.Zk'),  // 発言の省略 (以前)
-          role('button', '.d-k.Yk'),  // 発言の省略 (以降)
-          role('button', '.d-k.sl')   // 投稿の省略 ("このコメントを展開 »")
+          role('button', '.d-k.Dk'),  // 発言の省略 (以前)
+          role('button', '.d-k.Yk'),  // 発言の省略 (以降) FIXME
+          role('button', '.d-k.sl')   // 投稿の省略 ("このコメントを展開 »") FIXME
         ],
         menu: {
-          mute: '.a-da-k.d-Z.a-da-k-Qe.im'
+          mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
         },
-        menuButton: role('button', '.d-k.Pt.pj'),
+        menuButton: role('button', '.d-k.Jt.Oi'),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: '.h-Hf',                // this.className += ' h-mb'
-        open: '.h-Ae',                // 最近の出来事を共有しましょう... */
-        cancel: 'div.um[id$=".c"]',   // :6w.c
+        root: '.h.h-nf',              // this.className += ' h-mb'
+        open: '.h-je',                // 最近の出来事を共有しましょう... */
+        cancel: 'div.fm[id$=".c"]',   // :6w.c
       },
       notification: '#gbi1',
       viewer: {
-        root: '.Xr',
-        prev: '.Xr.FO.xS',
-        next: '.Xr.FO.yS'
+        root: '.Pr',
+        prev: '.Pr.kS.fW',
+        next: '.Pr.kS.gW'
       },
       dialog: {
         root: '.va-Q',
@@ -215,18 +215,18 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.d-k.a-b-C-rb-vh',   // @title = 前のお知らせ
-            next: '.d-k.a-b-C-rb-Dg',   // @title = 次のお知らせ
-            back: '.d-k.a-b-C-rb-ep.eB' // @title = お知らせに戻る
+            prev: '.a-c-A-lb-bh',         // @title = 前のお知らせ
+            next: '.a-c-A-lb-jg',         // @title = 次のお知らせ
+            back: '.a-c-A-lb-Yo.d-k.TA'   // @title = お知らせに戻る
           },
           entry: {
-            entries: '.jB.a-b-C-rb-ci-Kf[id^=":2."]',             // :2.diz13l....
-            comment: role('button', '.ql.Sy'),
-            mute: role('button', '.d-k.a-b-C-rb-dh.jm.an')
+            entries: 'div[id^=":2."]',   // :2.diz13l....
+            comment: role('button', '.Py.Uk'),
+            mute: role('button', '.a-c-A-lb-Jg.d-k.Jm.Tl')
           },
         }
       },
-      closeButton: '.Nl.zS'
+      closeButton: '.rl.hW'  // Viewer 等
     };
 
     function role (name, prefix)
@@ -1391,6 +1391,7 @@ let g:gplus_commando_map_menu            = "m"
 
   __context__.command  = Commands;
   __context__.element  = Elements;
+  __context__.selector  = S;
   __context__.linkDetector = LinkDetector;
 
   // }}}
