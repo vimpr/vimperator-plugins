@@ -175,9 +175,9 @@ let g:gplus_commando_map_menu            = "m"
 
   // Selector {{{
 
-  const S = (function () {
+  const [S, X] = (function () {
 
-    return {
+    let selector = {
       role: role,
       typePlusone: '[g\\:type="plusone"]',
       editable: '.editable',
@@ -228,6 +228,18 @@ let g:gplus_commando_map_menu            = "m"
       },
       closeButton: '.rl.hW'  // Viewer 等
     };
+
+    let xpath = {
+      hints: [
+        'span[@role="button"]',
+        'div[@role="button"]',
+        'div[@data-content-type]',
+        'img[contains(@class,"O-g-Sd-la")]',  // /photos の写真
+        //FIXME 'div[contains(@class,"a-z-nb-A")]'
+      ]
+    };
+
+    return [selector, xpath];
 
     function role (name, prefix)
       ((prefix || '') + '[role="' + name + '"]');
@@ -774,21 +786,13 @@ let g:gplus_commando_map_menu            = "m"
           function removeRoot (s)
             s.replace(/^\s*\/\//, '');
 
-          const ext = [
-            'span[@role="button"]',
-            'div[@role="button"]',
-            'div[@data-content-type]',
-            'img[contains(@class,"P-g-ie-ma")]',  // /photos の写真
-            //FIXME 'div[contains(@class,"a-z-nb-A")]'
-          ];
-
           const roots = [
             {get visible () !!Elements.viewer, selector: ('div[contains(@class, "' + s2x(S.viewer.root) + '")]')},
             {get visible () !!Elements.dialog, selector: ('div[contains(@class, "' + s2x(S.dialog.root) + '")]')},
             {get visible () !!Elements.frames.notifications.visible, selector: 'id("nw-content")'}
           ];
 
-          let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(ext);
+          let xpath = options['hinttags'].split(/\s*\|\s*/).map(removeRoot).concat(X.hints);
 
           for (let [, root] in Iterator(roots)) {
             if (!root.visible)
