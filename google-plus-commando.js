@@ -186,8 +186,8 @@ let g:gplus_commando_map_menu            = "m"
         root: '.tf.Ek.Lj',
         unfold: [
           role('button', '.d-k.Dk'),  // 発言の省略 (以前)
-          role('button', '.d-k.Yk'),  // 発言の省略 (以降) FIXME
-          role('button', '.d-k.sl')   // 投稿の省略 ("このコメントを展開 »") FIXME
+          role('button', '.d-k.Ck'),  // 発言の省略 (以降)
+          role('button', '.d-k.Wk')   // 投稿の省略 ("このコメントを展開 »")
         ],
         menu: {
           mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
