@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.0.7"
+  <plugin name="GooglePlusCommando" version="2.1.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -112,6 +112,7 @@ let INFO =
             <dt>unfold</dt>         <dd>Unfold something on current entry.</dd>
             <dt>menu</dt>           <dd>Open the menu of current entry.</dd>
             <dt>mute</dt>           <dd>Mute current entry.</dd>
+            <dt>open</dt>           <dd>Open something on current entry.</dd>
           </dl>
         </p>
         <p>rc file example</p>
@@ -680,6 +681,19 @@ let g:gplus_commando_map_menu            = "m"
       if (notifications && notifications.visible && notifications.entry.visible)
         return click(notifications.entry.mute);
       click(Elements.currentEntry.menu.mute);
+    },
+    open: function () {
+      let ce = Elements.currentEntry;
+      if (!ce)
+        return;
+      let dct = ce.root.querySelector('div[data-content-type]');
+      let links = dct.parentNode.querySelectorAll('a');
+      if (links.length < 1) {
+        click(dct);
+        return;
+      }
+      if (links.length === 1)
+        click(links[0]);
     }
   };
 
@@ -722,7 +736,7 @@ let g:gplus_commando_map_menu            = "m"
       );
     }
 
-    'comment plusone share next prev post yank notification cancel unfold menu mute'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
+    'comment plusone share next prev post yank notification cancel unfold menu mute open'.split(/\s/).forEach(defineMapping.bind(null, modes.NORMAL));
     'submit'.split(/\s/).forEach(defineMapping.bind(null, modes.INSERT));
 
     mappings.addUserMap(
