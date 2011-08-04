@@ -183,7 +183,7 @@ let g:gplus_commando_map_menu            = "m"
       editable: '.editable',
 
       currentEntry: {
-        root: '.tf.Ek.Om.Lj',
+        root: '.tf.Ek.Lj',
         unfold: [
           role('button', '.d-k.Dk'),  // 発言の省略 (以前)
           role('button', '.d-k.Yk'),  // 発言の省略 (以降) FIXME
