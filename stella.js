@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.32.8</version>
+  <version>0.32.9</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -967,8 +967,12 @@ Thanks:
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
       let cargs = content.wrappedJSObject.yt.config_.PLAYER_CONFIG.args;
-      let url = decodeURIComponent(cargs.fmt_url_map.split(',')[0].split('|')[1]);
-      U.download(url, filepath, '.flv', this.title);
+      cargs.url_encoded_fmt_stream_map.split(',')[0].split('&').forEach(function(x) {
+        let [key, val] = x.split('=');
+        if (key == 'url') {
+          U.download(decodeURIComponent(val), filepath, '.flv', this.title);
+        }
+      }, this);
     },
 
     makeURL: function (value, type) {
