@@ -326,7 +326,7 @@ Thanks:
           file.appendRelativePath(U.fixFilename(title) + ext);
 
       if (file.exists())
-        return U.echoerr('The file already exists! -> ' + file.path);
+        return U.echoError('The file already exists! -> ' + file.path);
 
       file = makeFileURI(file);
 
