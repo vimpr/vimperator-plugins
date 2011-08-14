@@ -284,7 +284,7 @@ let self = {
 };
 self.init();
 liberator.registerObserver("shutdown", self.close);
-config.guioptions['D'] = ['Delicious Toolbar',['ybToolbar']];
+config.toolbars.delicious = [['ybToolbar'], 'Delicious Toolbar'];
 completion.addUrlCompleter("D", "Delicious Bookmarks", self.urlCompleter);
 return self;
 })();
