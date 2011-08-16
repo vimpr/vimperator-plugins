@@ -180,15 +180,17 @@ let g:gplus_commando_map_menu            = "m"
 
     let selector = {
       role: role,
-      typePlusone: '[g\\:type="plusone"]',
+      typePlusone: '[g\\:entity^="buzz:"]',
       editable: '.editable',
+
+      plusoneSpan: '.Rk.yE',
 
       currentEntry: {
         root: '.tf.Ek.Lj',
         unfold: [
-          role('button', '.d-k.Dk'),  // 発言の省略 (以前)
-          role('button', '.d-k.Ck'),  // 発言の省略 (以降)
-          role('button', '.d-k.Wk')   // 投稿の省略 ("このコメントを展開 »")
+          role('button', '.d-k.Dk'),      // 発言の省略 (以前)
+          role('button', '.d-k.Ck'),      // 発言の省略 (以降)
+          role('button', '.d-k.Kq.Sy'),   // 投稿の省略 ("このコメントを展開 »")
         ],
         menu: {
           mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
@@ -216,9 +218,9 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.a-c-A-lb-bh',         // @title = 前のお知らせ
-            next: '.a-c-A-lb-jg',         // @title = 次のお知らせ
-            back: '.a-c-A-lb-Yo.d-k.TA'   // @title = お知らせに戻る
+            prev: '.d-k.dKMHhf',         // @title = 前のお知らせ
+            next: '.d-k.THfuvd',         // @title = 次のお知らせ
+            back: '.d-k.ZzNjme.TA'       // @title = お知らせに戻る
           },
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
@@ -821,7 +823,7 @@ let g:gplus_commando_map_menu            = "m"
             elem.dispatchEvent(evt);
           }
 
-          let plusone = elem.getAttribute('g:type') === 'plusone';
+          let plusone = elem.getAttribute('g:entity').indexOf('buzz:') === 0;
           if (plusone)
             mouseEvent('mouseover');
           action(elem, count);
@@ -848,7 +850,8 @@ let g:gplus_commando_map_menu            = "m"
             break;
           }
 
-          styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', '.a-b-f-W-Tj.a-f-W-Tj { display: inline  !important }');
+          styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', S.plusoneSpan + '{ display: inline  !important }');
+          liberator.log('hoge')
 
           return xpath.map(function (it) (/^id\(/.test(it) ? it : '//' + it)).join(' | ');
         }
