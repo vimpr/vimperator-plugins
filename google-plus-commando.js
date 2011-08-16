@@ -829,7 +829,7 @@ let g:gplus_commando_map_menu            = "m"
             elem.dispatchEvent(evt);
           }
 
-          let plusone = elem.getAttribute('g:entity').indexOf('buzz:') === 0;
+          let plusone = (elem.getAttribute('g:entity') || '').indexOf('buzz:') === 0;
           if (plusone)
             mouseEvent('mouseover');
           action(elem, count);
