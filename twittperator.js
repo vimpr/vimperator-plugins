@@ -28,9 +28,8 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.14.1</version>
+  <version>1.14.2</version>
   <minVersion>2.3</minVersion>
-  <maxVersion>3.2</maxVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>MIT License</license>
@@ -1726,7 +1725,7 @@ let PLUGIN_INFO =
           .twitter.entry-content { white-space: normal !important; }
           .twitter.entry-content a { text-decoration: none; }
           .twitter.entry-content.rt:before { content: "RT "; color: silver; }
-          img.twitter.photo { border: 0px; width: 16px; height: 16px; vertical-align: baseline; margin: 1px; }
+          img.twitter.photo { border: 0px; width: 24px; height: 24px; vertical-align: baseline; margin: 1px; }
       ]]></style>.toSource()
                  .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
           s.reduce(function(table, status) {
