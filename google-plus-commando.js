@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.2"
+  <plugin name="GooglePlusCommando" version="2.1.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -152,6 +152,10 @@ let g:gplus_commando_map_menu            = "m"
     buffer.followLink(elem, liberator.CURRENT_TAB);
   }
 
+  function clicks (elems) {
+    elems.forEach(click);
+  }
+
   function isDisplayed (elem)
     (elem && !/none/.test(util.computedStyle(elem).display));
 
@@ -188,6 +192,7 @@ let g:gplus_commando_map_menu            = "m"
       currentEntry: {
         root: '.tf.Ek.Lj',
         unfold: [
+          '.tvogXd.zK2ipf',               // 折りたたみボタン
           role('button', '.d-k.Dk'),      // 発言の省略 (以前)
           role('button', '.d-k.Ck'),      // 発言の省略 (以降)
           role('button', '.d-k.Kq.Sy'),   // 投稿の省略 ("このコメントを展開 »")
@@ -419,6 +424,7 @@ let g:gplus_commando_map_menu            = "m"
           if (!e.getAttribute('oid'))
         ][0],
         get unfold () root.querySelector(S.currentEntry.unfold.join(', ')),
+        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold.join(', '))),
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
@@ -673,7 +679,7 @@ let g:gplus_commando_map_menu            = "m"
       if (notifications && notifications.visible && notifications.entry.visible)
         return click(notifications.entry.unfold);
 
-      click(Elements.currentEntry.unfold);
+      clicks(Elements.currentEntry.unfolds);
     },
     menu: function () {
       click(Elements.currentEntry.menuButton);
