@@ -190,7 +190,7 @@ let g:gplus_commando_map_menu            = "m"
       plusoneSpan: '.Rk.yE',
 
       currentEntry: {
-        root: '.Be.ij.ql.zj',
+        root: '.Be.ij.zj',
         unfold: [
           '.fx.Wu',
         ],
