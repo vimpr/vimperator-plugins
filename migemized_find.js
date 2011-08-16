@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.10.2</version>
+  <version>2.11.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -264,6 +264,9 @@ let PLUGIN_INFO =
     MODE_NORMAL: 0,
     MODE_REGEXP: 1,
     MODE_MIGEMO: 2,
+
+    // 検索履歴
+    history: [],
 
     // 全体で共有する変数
     lastSearchText: null,
@@ -493,6 +496,17 @@ let PLUGIN_INFO =
     },
 
     submit: function () {
+      let exists = false, newHistory = [];
+      for (let [i, h] in Iterator(this.history)) {
+        if (h === this.currentSearchText) {
+          exists = true;
+        } else {
+          newHistory.push(h);
+        }
+      }
+      newHistory.push(this.currentSearchText);
+      this.history = newHistory;
+
       this.lastSearchText = this.currentSearchText;
       this.lastSearchExpr = this.currentSearchExpr;
       this.lastColor = this.currentColor;
@@ -569,6 +583,8 @@ let PLUGIN_INFO =
         clearTimeout(delayCallTimer);
         delayedFunc();
       }
+      if (MF.currentSearchText !== command)
+        MF.findFirst(command, forcedBackward);
       if (!MF.submit())
         liberator.echoerr('not found: ' + MF.currentSearchText);
     },
@@ -583,6 +599,13 @@ let PLUGIN_INFO =
       } else if (str === false)
         MF.findAgain();
     },
+
+    completer: function (context, args) {
+      context.completions = [
+        [v, v]
+        for ([, v] in Iterator(MF.history))
+      ];
+    }
   };
 
   finder.findAgain = migemized.findAgain;
@@ -595,6 +618,7 @@ let PLUGIN_INFO =
       plugins.libly.$U.around(commandline._input, 'change', function (next, [str]) migemized.onChange(str));
       plugins.libly.$U.around(commandline._input, 'submit', function (next, [str]) migemized.onSubmit(str));
       plugins.libly.$U.around(commandline._input, 'cancel', function (next, [str]) migemized.onCancel());
+      commandline._input.complete = migemized.completer;
       return res;
     },
     true
