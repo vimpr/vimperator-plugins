@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.3"
+  <plugin name="GooglePlusCommando" version="2.1.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -190,12 +190,9 @@ let g:gplus_commando_map_menu            = "m"
       plusoneSpan: '.Rk.yE',
 
       currentEntry: {
-        root: '.tf.Ek.Lj',
+        root: '.Be.ij.ql.zj',
         unfold: [
-          '.tvogXd.zK2ipf',               // 折りたたみボタン
-          role('button', '.d-k.Dk'),      // 発言の省略 (以前)
-          role('button', '.d-k.Ck'),      // 発言の省略 (以降)
-          role('button', '.d-k.Kq.Sy'),   // 投稿の省略 ("このコメントを展開 »")
+          '.fx.Wu',
         ],
         menu: {
           mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
@@ -205,9 +202,9 @@ let g:gplus_commando_map_menu            = "m"
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: '.h.h-nf',              // this.className += ' h-mb'
-        open: '.h-je',                // 最近の出来事を共有しましょう... */
-        cancel: 'div.fm[id$=".c"]',   // :6w.c
+        root: '.h.h-He',              // this.className += ' h-mb'
+        open: '.h-Qe',                // 最近の出来事を共有しましょう... */
+        cancel: 'div.Al[id$=".c"]',   // :6w.c
       },
       notification: '#gbi1',
       viewer: {
@@ -230,7 +227,7 @@ let g:gplus_commando_map_menu            = "m"
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
             comment: role('button', '.Py.Uk'),
-            mute: role('button', '.a-c-A-lb-Jg.d-k.Jm.Tl')
+            mute: role('button', '.d-k.d3Krme.Tl.Jm')
           },
         }
       },
