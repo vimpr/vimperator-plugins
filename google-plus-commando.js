@@ -208,9 +208,9 @@ let g:gplus_commando_map_menu            = "m"
       },
       notification: '#gbi1',
       viewer: {
-        root: '.Pr',
-        prev: '.Pr.kS.fW',
-        next: '.Pr.kS.gW'
+        root: '.Wr',
+        prev: '.Wr.PW.S1',
+        next: '.Wr.PW.T1'
       },
       dialog: {
         root: '.va-Q',
@@ -220,9 +220,9 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.d-k.dKMHhf',         // @title = 前のお知らせ
-            next: '.d-k.THfuvd',         // @title = 次のお知らせ
-            back: '.d-k.ZzNjme.TA'       // @title = お知らせに戻る
+            prev: '.b-j.om',         // @title = 前のお知らせ
+            next: '.b-j.nm',         // @title = 次のお知らせ
+            back: '.b-j.gr.ND'           // @title = お知らせに戻る
           },
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
@@ -231,7 +231,7 @@ let g:gplus_commando_map_menu            = "m"
           },
         }
       },
-      closeButton: '.rl.hW'  // Viewer 等
+      closeButton: '.Nk.U1'  // Viewer 等
     };
 
     let xpath = {
