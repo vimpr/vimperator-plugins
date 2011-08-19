@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.2.1"
+  <plugin name="GooglePlusCommando" version="2.2.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -304,8 +304,7 @@ let g:gplus_commando_map_menu            = "m"
             function (e) /this\.className/.test(e.getAttribute('onclick'))
           );
         },
-        open: function () {
-        },
+        open: cssRules.finder(/opacity 0.125s ease 0.125s/),
         cancel: 'div[id$=".c"]',   // :6w.c
       },
       notification: '#gbi1',
@@ -366,7 +365,7 @@ let g:gplus_commando_map_menu            = "m"
       get currentEntry () MakeElement(Entry, Elements.doc.querySelector(S.currentEntry.root)),
       post: {
         get cancel () Elements.doc.querySelector(S.post.cancel),
-        get open () Elements.post.cancel.parentNode.parentNode.nextSibling.nextSibling
+        get open () Elements.doc.querySelector(S.post.open)
       },
       get notification () Elements.doc.querySelector(S.notification),
       get viewer () MakeElement(Viewer, Elements.doc.querySelector(S.viewer.root)),
