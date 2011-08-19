@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.5"
+  <plugin name="GooglePlusCommando" version="2.2.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -173,6 +173,7 @@ let g:gplus_commando_map_menu            = "m"
 
   function GPCError (msg) {
     if (this instanceof GPCError) {
+      liberator.log('GPCError: ' + msg);
       this.toString = function () String(msg);
     } else {
       return new GPCError(msg);
@@ -209,6 +210,73 @@ let g:gplus_commando_map_menu            = "m"
 
   const [S, X] = (function () {
 
+    function role (name, prefix)
+      ((prefix || '') + '[role="' + name + '"]');
+
+    function once (obj, name, fail) {
+      let func = obj[name];
+      Object.defineProperty(
+        obj,
+        name,
+        {
+          get: let (result) function () (result || (result = func()) || fail)
+        }
+      );
+    }
+
+    function onceAll (obj, fail) {
+      for (let [n, v] in I(obj)) {
+        if (n === 'role')
+          continue;
+        if (typeof v === 'function')
+          once(obj, n, fail);
+        if (typeof v === 'object') {
+          onceAll(v, fail);
+        }
+      }
+    }
+
+    let cssRules = {
+      items: function () {
+        if (content.location.host != 'plus.google.com')
+          return;
+
+        let result = [];
+        for (let [, sheet] in IA(content.document.styleSheets)) {
+          for (let [, rule] in IA(sheet.cssRules)) {
+            result.push(rule);
+          }
+        }
+        return result;
+      },
+
+      find: function (re) {
+        let result = [];
+        for (let [, rule] in I(this.items)) {
+          if (re.test(rule.cssText)) {
+            result.push(rule);
+          }
+        }
+
+        if (result.length < 1)
+          throw GPCError('Not fount css rule: ' + re);
+
+        if (result.length == 1)
+          return result[0].selectorText;
+
+        for (let [, rule] in I(result)) {
+          liberator.log(rule.cssText);
+        }
+
+        throw GPCError('Two and more rules are found');
+      },
+
+      finder: function (re) {
+        let self = this;
+        return function () self.find(re);
+      }
+    };
+
     let selector = {
       role: role,
       typePlusone: '[g\\:entity^="buzz:"]',
@@ -226,13 +294,11 @@ let g:gplus_commando_map_menu            = "m"
           }
           return res;
         },
-        unfold: [
-          '.ns.yx',
-        ],
+        unfold: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
         menu: {
-          mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
+          mute: '----'
         },
-        menuButton: role('button', '.d-k.Jt.Oi'),
+        menuButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/options_default\.png"\).*margin-right: -44/),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
       },
@@ -250,12 +316,15 @@ let g:gplus_commando_map_menu            = "m"
       },
       notification: '#gbi1',
       viewer: {
-        root: '.AY',
-        prev: '.Hq.DY.m4',
-        next: '.Hq.DY.n4'
+        root: function () {
+          let n = Elements.doc.querySelector(S.viewer.next);
+          return n && getSelector(n.parentNode.parentNode);
+        },
+        prev: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/left-arrow2\.png"\)/),
+        next: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/right-arrow2\.png"\)/)
       },
       dialog: {
-        root: '.va-Q',
+        root: cssRules.finder(/0pt 4px 16px rgba\(0, 0, 0, 0.2\).*z-index: 1101/)
       },
       frames: {
         notifications: {
@@ -268,12 +337,12 @@ let g:gplus_commando_map_menu            = "m"
           },
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
-            comment: role('button', '.jp.wx'),
-            mute: role('button', '.c-j.Em.il.tm')
+            comment: cssRules.finder(/rgb\(221, 221, 221\).*rgb\(153, 153, 153\)/),
+            mute: 'div[id^=":2."] > div > div:nth-child(2) > div > div > ' + role('button', 'span') // FIXME
           },
         }
       },
-      closeButton: '.Fk.o4'  // Viewer 等
+      closeButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/lightbox-sprite2.gif"\).*0%.*0%/)
     };
 
     let xpath = {
@@ -286,36 +355,10 @@ let g:gplus_commando_map_menu            = "m"
       ]
     };
 
-
-    function once (obj) {
-      function _once (obj, name, func) {
-        Object.defineProperty(
-          obj,
-          name,
-          {
-            get: let (result) function () (result || (result = func()))
-          }
-        );
-      }
-
-      for (let [n, v] in I(obj)) {
-        if (n === 'role')
-          continue;
-        if (typeof v === 'function')
-          _once(obj, n, v);
-        if (typeof v === 'object')
-          once(v);
-      }
-    }
-
-    once(selector);
-
+    onceAll(selector, '.MEOW_MEOW_MEOW');
+    once(cssRules, 'items');
 
     return [selector, xpath];
-
-    function role (name, prefix)
-      ((prefix || '') + '[role="' + name + '"]');
-
   })();
 
   // }}}
@@ -488,8 +531,8 @@ let g:gplus_commando_map_menu            = "m"
           for ([, e] in Iterator(A(root.querySelectorAll('a'))))
           if (!e.getAttribute('oid'))
         ][0],
-        get unfold () root.querySelector(S.currentEntry.unfold.join(', ')),
-        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold.join(', '))),
+        get unfold () root.querySelector(S.currentEntry.unfold),
+        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold)),
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
@@ -499,13 +542,7 @@ let g:gplus_commando_map_menu            = "m"
         menu: {
           get root () root.querySelector(S.role('menu')),
           get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
-          get mute () {
-            // XXX 誤爆いやなので、チェックを入れる
-            let item1 = self.menu.items.slice(-2)[0];
-            let item2 = self.menu.root.querySelector(S.role('menuitem', S.currentEntry.menu.mute));
-            if (item1 === item2)
-              return item1;
-          }
+          get mute () self.menu.items.slice(-2)[0]
         },
         get menuButton () root.querySelector(S.currentEntry.menuButton),
         get cancel () root.querySelector(S.currentEntry.cancel),
@@ -561,7 +598,7 @@ let g:gplus_commando_map_menu            = "m"
           get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
           get comment () self.entry.current.querySelector(S.frames.notifications.entry.comment),
           get mute () self.entry.current.querySelector(S.frames.notifications.entry.mute),
-          get unfold () root.contentDocument.querySelector(S.currentEntry.unfold.join(', '))
+          get unfold () root.contentDocument.querySelector(S.currentEntry.unfold)
         }
       };
       return self;
