@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.2.0"
+  <plugin name="GooglePlusCommando" version="2.2.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -250,10 +250,12 @@ let g:gplus_commando_map_menu            = "m"
         return result;
       },
 
-      find: function (re) {
+      find: function (re, notre) {
         let result = [];
         for (let [, rule] in I(this.items)) {
           if (re.test(rule.cssText)) {
+            if (notre && notre.test(rule.cssText))
+              continue;
             result.push(rule);
           }
         }
@@ -271,9 +273,9 @@ let g:gplus_commando_map_menu            = "m"
         throw GPCError('Two and more rules are found');
       },
 
-      finder: function (re) {
+      finder: function (re, notre) {
         let self = this;
-        return function () self.find(re);
+        return function () self.find(re, notre);
       }
     };
 
@@ -285,15 +287,7 @@ let g:gplus_commando_map_menu            = "m"
       plusone: 'button[id^="po-"]',
 
       currentEntry: {
-        root: function () {
-          let res, len = 0;
-          for (let [, v] in IA(Elements.doc.querySelectorAll('div[id^="update-"][aria-live="polite"]'))) {
-            let s = getSelector(v);
-            if (s.length > len)
-              [len, res] = [s.length, s];
-          }
-          return res;
-        },
+        root: cssRules.finder(/border-left: 1px solid rgb\(77, 144, 240\);/, /border-top/),
         unfold: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
         menu: {
           mute: '----'
