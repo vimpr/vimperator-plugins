@@ -143,6 +143,9 @@ let g:gplus_commando_map_menu            = "m"
   function A (list)
     Array.slice(list);
 
+  function I (list)
+    Iterator(list);
+
   function IA (list)
     Iterator(A(list));
 
@@ -176,6 +179,30 @@ let g:gplus_commando_map_menu            = "m"
     }
   }
 
+  function selectFind (doc, selector, func) {
+    if (!doc)
+      return;
+    if (!func)
+      func = function () true;
+    for (let [n, v] in IA(doc.querySelectorAll(selector))) {
+      let res = func(v, n);
+      if (res)
+        return v;
+    }
+  }
+
+  function getSelector (elem) {
+    if (!elem)
+      return;
+    let cs = elem.getAttribute('class').trim().split(/\s+/);
+    cs.sort(function (a, b) a.localeCompare(b));
+    return '.' + cs.join('.');
+  }
+
+  function getSelectorFind (doc, sel, func) {
+    return getSelector(selectFind(doc, sel, func));
+  }
+
   // }}}
 
   // Selector {{{
@@ -187,10 +214,18 @@ let g:gplus_commando_map_menu            = "m"
       typePlusone: '[g\\:entity^="buzz:"]',
       editable: '.editable',
 
-      plusoneSpan: '.esw',
+      plusone: 'button[id^="po-"]',
 
       currentEntry: {
-        root: '.ze.sj.aj',
+        root: function () {
+          let res, len = 0;
+          for (let [, v] in IA(Elements.doc.querySelectorAll('div[id^="update-"][aria-live="polite"]'))) {
+            let s = getSelector(v);
+            if (s.length > len)
+              [len, res] = [s.length, s];
+          }
+          return res;
+        },
         unfold: [
           '.ns.yx',
         ],
@@ -202,9 +237,16 @@ let g:gplus_commando_map_menu            = "m"
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: '.h.h-He',              // this.className += ' h-mb'
-        open: '.h-Qe',                // 最近の出来事を共有しましょう... */
-        cancel: 'div.Al[id$=".c"]',   // :6w.c
+        root: function () {
+          return getSelectorFind(
+            Elements.doc,
+            'div[decorated="true"]',
+            function (e) /this\.className/.test(e.getAttribute('onclick'))
+          );
+        },
+        open: function () {
+        },
+        cancel: 'div[id$=".c"]',   // :6w.c
       },
       notification: '#gbi1',
       viewer: {
@@ -220,9 +262,9 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.c-j.Il',        // @title = 前のお知らせ
-            next: '.c-j.Hl',          // @title = 次のお知らせ
-            back: '.c-j.kE.qq'        // @title = お知らせに戻る
+            prev: '#summary-view + div > div > div > span',
+            next: '#summary-view + div > div > div > span:last-child',
+            back: '#summary-view + div > div > span',
           },
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
@@ -244,6 +286,31 @@ let g:gplus_commando_map_menu            = "m"
       ]
     };
 
+
+    function once (obj) {
+      function _once (obj, name, func) {
+        Object.defineProperty(
+          obj,
+          name,
+          {
+            get: let (result) function () (result || (result = func()))
+          }
+        );
+      }
+
+      for (let [n, v] in I(obj)) {
+        if (n === 'role')
+          continue;
+        if (typeof v === 'function')
+          _once(obj, n, v);
+        if (typeof v === 'object')
+          once(v);
+      }
+    }
+
+    once(selector);
+
+
     return [selector, xpath];
 
     function role (name, prefix)
@@ -261,7 +328,8 @@ let g:gplus_commando_map_menu            = "m"
       get doc() content.document,
       get currentEntry () MakeElement(Entry, Elements.doc.querySelector(S.currentEntry.root)),
       post: {
-        get open () Elements.doc.querySelector(S.post.open),
+        get cancel () Elements.doc.querySelector(S.post.cancel),
+        get open () Elements.post.cancel.parentNode.parentNode.nextSibling.nextSibling
       },
       get notification () Elements.doc.querySelector(S.notification),
       get viewer () MakeElement(Viewer, Elements.doc.querySelector(S.viewer.root)),
@@ -853,7 +921,7 @@ let g:gplus_commando_map_menu            = "m"
             break;
           }
 
-          styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', S.plusoneSpan + '{ display: inline  !important }');
+          styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', S.plusone + '{ display: inline  !important }');
 
           return xpath.map(function (it) (/^id\(/.test(it) ? it : '//' + it)).join(' | ');
         }
