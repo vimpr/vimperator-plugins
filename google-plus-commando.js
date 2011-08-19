@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.1.4"
+  <plugin name="GooglePlusCommando" version="2.1.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -187,12 +187,12 @@ let g:gplus_commando_map_menu            = "m"
       typePlusone: '[g\\:entity^="buzz:"]',
       editable: '.editable',
 
-      plusoneSpan: '.Rk.yE',
+      plusoneSpan: '.esw',
 
       currentEntry: {
-        root: '.Be.ij.zj',
+        root: '.ze.sj.aj',
         unfold: [
-          '.fx.Wu',
+          '.ns.yx',
         ],
         menu: {
           mute: '.a-Y-k.a-Y-k-ye.d-V.Ki.Sl'
@@ -208,9 +208,9 @@ let g:gplus_commando_map_menu            = "m"
       },
       notification: '#gbi1',
       viewer: {
-        root: '.Wr',
-        prev: '.Wr.PW.S1',
-        next: '.Wr.PW.T1'
+        root: '.AY',
+        prev: '.Hq.DY.m4',
+        next: '.Hq.DY.n4'
       },
       dialog: {
         root: '.va-Q',
@@ -220,18 +220,18 @@ let g:gplus_commando_map_menu            = "m"
           root: 'iframe[src*="/_/notifications/"]',
           summary: {
             root: '#summary-view',
-            prev: '.b-j.om',         // @title = 前のお知らせ
-            next: '.b-j.nm',         // @title = 次のお知らせ
-            back: '.b-j.gr.ND'           // @title = お知らせに戻る
+            prev: '.c-j.Il',        // @title = 前のお知らせ
+            next: '.c-j.Hl',          // @title = 次のお知らせ
+            back: '.c-j.kE.qq'        // @title = お知らせに戻る
           },
           entry: {
             entries: 'div[id^=":2."]',   // :2.diz13l....
-            comment: role('button', '.Py.Uk'),
-            mute: role('button', '.d-k.d3Krme.Tl.Jm')
+            comment: role('button', '.jp.wx'),
+            mute: role('button', '.c-j.Em.il.tm')
           },
         }
       },
-      closeButton: '.Nk.U1'  // Viewer 等
+      closeButton: '.Fk.o4'  // Viewer 等
     };
 
     let xpath = {
@@ -854,7 +854,6 @@ let g:gplus_commando_map_menu            = "m"
           }
 
           styles.addSheet(false, HintStyleName, 'plus\\.google\\.com', S.plusoneSpan + '{ display: inline  !important }');
-          liberator.log('hoge')
 
           return xpath.map(function (it) (/^id\(/.test(it) ? it : '//' + it)).join(' | ');
         }
