@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.2.2"
+  <plugin name="GooglePlusCommando" version="2.2.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -524,8 +524,8 @@ let g:gplus_commando_map_menu            = "m"
           for ([, e] in Iterator(A(root.querySelectorAll('a'))))
           if (!e.getAttribute('oid'))
         ][0],
-        get unfold () root.querySelector(S.currentEntry.unfold),
-        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold)),
+        get unfold () self.unfolds[0],
+        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold)).filter(isDisplayed),
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
