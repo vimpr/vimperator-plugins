@@ -63,6 +63,9 @@ let INFO =
 
 (function () {
 
+  if (!plugins.libly)
+    return liberator.echoerr(__context__.NAME + ': Please install _libly.js.');
+
   let scheduled = [];
 
   plugins.libly.$U.around(
