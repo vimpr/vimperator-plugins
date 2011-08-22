@@ -237,22 +237,21 @@ let g:gplus_commando_map_menu            = "m"
     }
 
     let cssRules = {
-      items: function () {
+      __iterator__: function (nameOnly) {
         if (content.location.host != 'plus.google.com')
           return;
 
         let result = [];
         for (let [, sheet] in IA(content.document.styleSheets)) {
-          for (let [, rule] in IA(sheet.cssRules)) {
-            result.push(rule);
+          for (let [n, rule] in IA(sheet.cssRules)) {
+            yield nameOnly ? n : [n, rule];
           }
         }
-        return result;
       },
 
       find: function (re, notre) {
         let result = [];
-        for (let [, rule] in I(this.items)) {
+        for (let [, rule] in I(this)) {
           if (re.test(rule.cssText)) {
             if (notre && notre.test(rule.cssText))
               continue;
@@ -349,7 +348,6 @@ let g:gplus_commando_map_menu            = "m"
     };
 
     onceAll(selector, '.MEOW_MEOW_MEOW');
-    once(cssRules, 'items');
 
     return [selector, xpath];
   })();
