@@ -862,6 +862,7 @@ let g:gplus_commando_map_menu            = "m"
             /* DO NOTHING */
           } catch (e) {
             liberator.log(e);
+            liberator.log(e.stack);
             throw e;
           }
         },
