@@ -795,7 +795,7 @@ let g:gplus_commando_map_menu            = "m"
         A(links).forEach(function (link) (t[link.textContent] = link));
 
         commandline.input(
-          'Selector a link',
+          'Select a link',
           function (url) {
             let link = t[url];
             if (link) {
