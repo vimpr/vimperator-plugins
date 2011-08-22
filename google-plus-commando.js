@@ -785,6 +785,9 @@ let g:gplus_commando_map_menu            = "m"
     },
     open: function () {
       function clicks (links) {
+        if (links.length < 1)
+          throw GPCError('No link.');
+
         if (links.length === 1)
           return click(links[0]);
 
