@@ -14,7 +14,7 @@
       if (goji) {
         liberator.echoerr('The tweet has some gojis! DON NOT ' + name.toUpperCase() + '!!');
       } else {
-        return next;
+        return next();
       }
     }
   );
