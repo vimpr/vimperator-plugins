@@ -1,0 +1,21 @@
+
+/*
+ * 誤字のあるツイートを Fav / RT してツイートした人を切ない気分にさせないためのプラグインです。
+ * 誤字のあるツイートに Fav / RT すると、エラーを出して中止してくれます。
+ * (誤字のあるツイートには必ず、＃誤字有り とハッシュタグをつけるように周知徹底してください。
+ */
+
+'favorite retweet'.split(/\s+/).forEach(function (name) {
+  plugins.libly.$U.around(
+    plugins.twittperator.Twitter,
+    name,
+    function (next, [id]) {
+      let goji = plugins.twittperator.Tweets.some(function (it) ((it.id == id) && /[#＃]誤字[アあ有][りリ]?/.test(it.text)));
+      if (goji) {
+        liberator.echoerr('The tweet has some gojis! DON NOT ' + name.toUpperCase() + '!!');
+      } else {
+        return next;
+      }
+    }
+  );
+});
