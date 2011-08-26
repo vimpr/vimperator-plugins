@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.2.3"
+  <plugin name="GooglePlusCommando" version="2.3.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -1548,6 +1548,30 @@ let g:gplus_commando_map_menu            = "m"
   __context__.element  = Elements;
   __context__.selector  = S;
   __context__.linkDetector = LinkDetector;
+
+  // }}}
+
+  // DOMLoad Event {{{
+
+  // リロードしたら、ページ構成変わってるやん！！！みたいなの対応
+  events.addSessionListener(
+    document.getElementById('appcontent'),
+    'DOMContentLoaded',
+    function (event) {
+      let doc = event.originalTarget;
+      // XXX G+ 内の他のページへ跳ぶときは、plus.google.com を経由するが、それは除外する
+      if (
+        doc instanceof HTMLDocument &&
+        !doc.defaultView.frameElement &&
+        doc.location.host === 'plus.google.com' &&
+        doc.body &&
+        doc.body.children.length
+      ) {
+        __context__.selector._clearCache();
+      }
+    },
+    true
+  );
 
   // }}}
 
