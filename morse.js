@@ -120,7 +120,7 @@ let INFO =
     9: '----.',
     0: '-----',
     '.': '.-.-.-',
-    '': '--..--',
+    ',': '--..--',
     '?': '..--..',
     ' ': '-...-',
     '-': '-....-',
@@ -199,9 +199,24 @@ let INFO =
     '\u30BB': '.---.',
     '\u30B9': '---.-',
     '\u30F3': '.-.-.',
+    '゛': '..',
+    '゜': '..--.'
   };
 
-  let [short, long, interval] = [100, 400, 200];
+  let codeTableIAlphabet = {};
+  let codeTableIKana = {};
+
+  for (let [n, v] in Iterator(codeTable)) {
+    if (/[\w.,? \-\/@]/.test(n))
+      codeTableIAlphabet[v] = n;
+  }
+
+  for (let [n, v] in Iterator(codeTable)) {
+    if (/[^a-z]/.test(n))
+      codeTableIKana[v] = n;
+  }
+
+  let [defaultShort, defaultLong, defaultInterval] = [100, 400, 200];
 
   let keybd_event =
     (function () {
@@ -251,6 +266,18 @@ let INFO =
   function toCode (text)
     Array.slice(text).map(function (c) codeTable[c.toLowerCase()] || '').join(' ');
 
+  function fromCode (text, kana, char) {
+    if (char) {
+      let re = new RegExp(util.escapeRegex(char[0]) + '|' + util.escapeRegex(char[1]), 'g');
+      text = text.replace(re, function (m) (m === char[0] ? '.' : '-'));
+    }
+
+    let table = kana ? codeTableIKana : codeTableIAlphabet;
+    let result = '';
+    text.split(/\s+/).forEach(function (c) (result += table[c]));
+    return result;
+  }
+
   commands.addUserCommand(
     ['morse'],
     'Mooooooooooooorse',
@@ -260,11 +287,11 @@ let INFO =
       args['-clipboard'] && util.copyToClipboard(code);
       args['-echo'] && liberator.echo(code);
 
-      [short, long, interval] =
+      let [short, long, interval] =
         [
-          args['-short'] || short,
-          args['-long'] || long,
-          args['-interval'] || interval
+          args['-short'] || defaultShort,
+          args['-long'] || defaultLong,
+          args['-interval'] || defaultInterval
         ];
 
       Morse(short, long, interval)(code);
@@ -277,12 +304,12 @@ let INFO =
         [['-short', '-s'], commands.OPTION_INT],
         [['-long', '-l'], commands.OPTION_INT],
         [['-interval', '-i'], commands.OPTION_INT],
+        [['-char', '-char'], commands.OPTION_STRING],
         [['-raw', '-r'], commands.OPTION_NOARG]
       ],
     },
     true
   );
-
 
 })();
 
