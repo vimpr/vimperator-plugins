@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.3.0"
+  <plugin name="GooglePlusCommando" version="2.3.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -316,7 +316,10 @@ let g:gplus_commando_map_menu            = "m"
         next: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/right-arrow2\.png"\)/)
       },
       dialog: {
-        root: cssRules.finder(/0pt 4px 16px rgba\(0, 0, 0, 0.2\).*z-index: 1101/)
+        root: role('dialog', 'body > '),
+        //cssRules.find(/0pt 4px 16px rgba\(0, 0, 0, 0.2\).*-moz-border-right-color.*z-index: 1101/));
+        submit: 'td[valign="top"] > div[role="button"]:nth-child(1)',
+        cancel: 'td[valign="top"] > div[role="button"]:nth-child(2)'
       },
       frames: {
         notifications: {
@@ -429,10 +432,37 @@ let g:gplus_commando_map_menu            = "m"
           };
         }
 
+        function get3 (root) {
+          function button (editor, name)
+            editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
+
+          if (!root)
+            return;
+
+          let editors = A(root.querySelectorAll('div.editable')).filter(hasIFrame);
+          if (editors.length === 0)
+            return;
+          if (editors.length > 1)
+            throw 'Two and more editors were found.';
+
+          return {
+            editor: #1=(editors[0]),
+            button: {
+              submit: root.querySelector(S.dialog.submit),
+              cancel: root.querySelector(S.dialog.cancel),
+            }
+          };
+        }
+
         let doc = content.document;
         let win = document.commandDispatcher.focusedWindow;
 
-        return get1(doc) || get2() || get1(Elements.frames.notifications.root.contentDocument);
+        return (
+          get1(doc) ||
+          get2() ||
+          get1(Elements.frames.notifications.root.contentDocument) ||
+          (Elements.dialog.root && get3(Elements.dialog.root))
+        );
       },
 
       /**
@@ -549,6 +579,7 @@ let g:gplus_commando_map_menu            = "m"
           return bs[n];
       }
       let self = {
+        get root () root,
         get buttons () A(root.querySelectorAll(S.role('button'))),
         get submit () nButton(0),
         get cancel () nButton(1)
