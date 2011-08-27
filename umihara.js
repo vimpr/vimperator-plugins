@@ -138,7 +138,6 @@ let PLUGIN_INFO =
     liberator.echo(<pre>{msg}</pre>);
   }
 
-
   function kawase (value, clipboard, from, to) {
     let resultBuffer = '';
 
@@ -170,6 +169,11 @@ let PLUGIN_INFO =
       }
     };
     req.send(null);
+  }
+
+  function evalValue (value) {
+    let sandbox = new Cu.Sandbox('about:blank');
+    return Cu.evalInSandbox(value, sandbox);
   }
 
   let extra = {
@@ -204,7 +208,7 @@ let PLUGIN_INFO =
 
       for (let i = 1, l = args.length - 1; i < l; i++) {
         let [value, from, to] = [args[0], args[i], l == i ? '-' : args[l]];
-        value = eval(value);
+        value = evalValue(value);
         kawase(value, args['-clipboard'] || args.bang, from, to);
       }
     },
