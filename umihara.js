@@ -204,11 +204,6 @@ let PLUGIN_INFO =
 
       for (let i = 1, l = args.length - 1; i < l; i++) {
         let [value, from, to] = [args[0], args[i], l == i ? '-' : args[l]];
-        liberator.log({
-          value: value,
-          from: from,
-          to: to
-        })
         value = eval(value);
         kawase(value, args['-clipboard'] || args.bang, from, to);
       }
