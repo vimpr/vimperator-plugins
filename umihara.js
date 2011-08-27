@@ -1,5 +1,5 @@
 /* {{{
-Copyright (c) 2008, anekos.
+Copyright (c) 2008-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -138,9 +138,10 @@ let PLUGIN_INFO =
     liberator.echo(<pre>{msg}</pre>);
   }
 
-  let resultBuffer = '';
 
   function kawase (value, clipboard, from, to) {
+    let resultBuffer = '';
+
     [from, to] = [from || defaultSource, to || defaultTarget].map(function (it) it.toUpperCase());
     if (from == '-')
       from = defaultSource;
@@ -174,6 +175,9 @@ let PLUGIN_INFO =
   let extra = {
     argCount: '+',
     bang: true,
+    options: [
+      [['-clipboard', '-c'], commands.OPTION_NOARG],
+    ],
     completer: function (context, args) {
       if (args.length == 1) {
         // TODO - history
@@ -190,22 +194,23 @@ let PLUGIN_INFO =
     ['kawase'],
     'Umihara Kawase Meow',
     function (args) {
-      let as = args;
-      resultBuffer = '';
       liberator.echo('<<Results>>\n')
-      if (as.length == 0)
-        as.push('1');
-      while (as.length < 3)
-        as.push('-');
-      for (let i = 1, l = as.length - 1; i < l; i++) {
-        let [value, from, to] = [as[0], as[i], l == i ? '-' : as[l]];
+
+      if (args.length == 0)
+        args.push('1');
+
+      while (args.length < 3)
+        args.push('-');
+
+      for (let i = 1, l = args.length - 1; i < l; i++) {
+        let [value, from, to] = [args[0], args[i], l == i ? '-' : args[l]];
         liberator.log({
           value: value,
           from: from,
           to: to
         })
         value = eval(value);
-        kawase(value, args.bang, from, to);
+        kawase(value, args['-clipboard'] || args.bang, from, to);
       }
     },
     extra,
