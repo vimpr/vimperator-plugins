@@ -4,9 +4,8 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>3.2</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
@@ -146,6 +145,15 @@ var services = {
         passwordField: "password",
         extraField: {
             site: "niconico"
+        }
+    },
+    slashdotjp: {
+        HOST: ["http://slashdot.jp"],
+        LOGIN: "/login.pl",
+        usernameField: "unickname",
+        passwordField: "upasswd",
+        extraField: {
+            op: "userlogin",
         }
     },
 };
