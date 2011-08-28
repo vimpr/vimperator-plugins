@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.0.10</version>
+    <version>0.1.0</version>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
@@ -53,6 +53,8 @@ var services = {
         },
     },
     hatena: {
+        NAME: "はてな",
+        URL: /^https?:\/\/\w+\.hatena\.ne.\jp/,
         HOST: ["https://www.hatena.ne.jp", "http://www.hatena.ne.jp"],
         LOGIN: "/login",
         LOGOUT: "/logout",
@@ -61,6 +63,7 @@ var services = {
         logoutBeforeLogin: true,
     },
     hatelabo: {
+        NAME: "はてラボ",
         HOST: ["https://www.hatelabo.jp", "http://www.hatelabo.jp"],
         LOGIN: "/login",
         LOGOUT: "/logout",
@@ -139,6 +142,7 @@ var services = {
         passwordField: "password",
     },
     nicovideo: {
+        NAME: "ニコニコ動画",
         HOST: ["https://secure.nicovideo.jp"],
         LOGIN: "/secure/login",
         usernameField: "mail",
@@ -148,6 +152,7 @@ var services = {
         }
     },
     slashdotjp: {
+        NAME: "スラッシュドットジャパン",
         HOST: ["http://slashdot.jp"],
         LOGIN: "/login.pl",
         usernameField: "unickname",
@@ -157,8 +162,10 @@ var services = {
         }
     },
 };
-for (name in services){
-    services[name] = new Service(services[name]);
+for (let [name, service] in Iterator(services)){
+    if (!service.NAME)
+        service.NAME = name;
+    services[name] = new Service(service);
 }
 if (liberator.globalVariables.userLoginServices) {
     let userServices = liberator.globalVariables.userLoginServices;
@@ -166,6 +173,33 @@ if (liberator.globalVariables.userLoginServices) {
         services[name] = new Service(userServices[name]);
     }
 }
+for (let [name, service] in Iterator(services)){
+    if (!service.NAME)
+        service.NAME = name;
+}
+
+Object.defineProperty(
+    services,
+    "auto",
+    {
+        enumerable: true,
+        get: function(){
+            let currentURI = makeURI(buffer.URL);
+            for (let n in Iterator(this, true)){
+                if (n === "auto") continue;
+                let s = this[n];
+                if (s.URL && s.URL.test(buffer.URL))
+                    return s;
+                for (let [, h] in Iterator(s.HOST)){
+                    let sURI = makeURI(h);
+                    if (sURI.host === currentURI.host) return s;
+                }
+            }
+            // XXX (補完に|エラーを)出さないためのダミー
+            return {getUsernames: function() ([])};
+        }
+    }
+)
 
 // Library
 function Service(service) //{{{
@@ -301,12 +335,12 @@ commands.addUserCommand(["login"], "Login",
         completer: function(context, args){
             if (args.completeArg == 0){
                 context.title = ["service"];
-                context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
+                context.completions = [[n,s.NAME] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
             } else if (args.completeArg == 1){
                 let service = services[args[0]];
                 if (!service) return false;
                 context.title = ["username"];
-                context.completions = [[u,""] for each(u in service.getUsernames())];
+                context.completions = [[u,] for each(u in service.getUsernames())];
             }
         },
         literal: 1,
@@ -320,7 +354,7 @@ commands.addUserCommand(["logout"], "Logout",
     }, {
         completer: function(context, args){
             context.title = ["service"];
-            context.completions = [[n,""] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
+            context.completions = [[n,s.NAME] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
         },
     }, true);
 // }}}
