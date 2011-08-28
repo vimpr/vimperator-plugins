@@ -1047,7 +1047,7 @@ let PLUGIN_INFO =
                 callback(self.accessor);
               }
             }else{
-              alert(d.statusText);
+              window.alert(d.statusText);
             }
           },
         };
