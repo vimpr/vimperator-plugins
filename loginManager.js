@@ -142,6 +142,7 @@ var services = {
         passwordField: "password",
     },
     nicovideo: {
+        URL: /^https?:\/\/\w+\.nicovideo.\jp/,
         NAME: "ニコニコ動画",
         HOST: ["https://secure.nicovideo.jp"],
         LOGIN: "/secure/login",
