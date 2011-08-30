@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.3.1"
+  <plugin name="GooglePlusCommando" version="2.3.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -1084,9 +1084,10 @@ let g:gplus_commando_map_menu            = "m"
 
           return;
         }
+
         window.setTimeout(function () {
           let pd = new PostData(message, win, image, acls);
-          postGooglePlus(pd);
+          postGooglePlus(pd, true);
         }, 0);
       }, {
         literal: 0,
@@ -1107,10 +1108,13 @@ let g:gplus_commando_map_menu            = "m"
 
     /**
      * Google+のページから必要データを保存する
+     * @param {function} onComplete
      * @return {Boolean}
      */
-    function setupGooglePlus () {
+    function setupGooglePlus (onComplete) {
       function onSuccess () {
+        if (onComplete)
+          onComplete();
         liberator.echomsg('Initialized: googleplus');
       }
 
@@ -1187,8 +1191,9 @@ let g:gplus_commando_map_menu            = "m"
     /**
      * Post to Google+
      * @param {PostData} aPostData
+     * @param {boolean} resetup
      */
-    function postGooglePlus (aPostData) {
+    function postGooglePlus (aPostData, aRetry) {
       let data = aPostData.getPostData();
       let queries = [];
       for (let key in data)
@@ -1199,30 +1204,31 @@ let g:gplus_commando_map_menu            = "m"
       xhr.open('POST', aPostData.POST_URL, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
       xhr.setRequestHeader('Origin', HOME_URL);
-      xhr.onreadystatechange = postGooglePlus.readyStateChange;
+
+      xhr.onreadystatechange = function () {
+        let xhr = aEvent.target,
+            msg = 'Google+: ',
+            XBW = window.XULBrowserWindow;
+        if (xhr.readyState == 4) {
+          let ok = xhr.status == 200;
+          msg += ok ? 'Posted' : 'Post failed (' + xhr.statusText + ')';
+          if (!ok && retry) {
+            msg += ' ... Retry';
+            setupGooglePlus(postGooglePlus.bind(null, aPostData, false));
+          }
+          window.setTimeout(function (XBW, msg) {
+            if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
+              XBW.setJSDefaultStatus('');
+          }, 2000, XBW, msg);
+        } else {
+          msg += 'sending...';
+        }
+        liberator.log(msg, 0);
+        XBW.setJSDefaultStatus(msg);
+      };
+
       xhr.send(queries.join('&'));
     }
-    /**
-     * Google+への送信状況を表示する
-     * @param {Event} aEvent
-     *                aEvent.target は XMLHttpRequestオブジェクト
-     */
-    postGooglePlus.readyStateChange = function GooglePlus_readyStateChange (aEvent) {
-      let xhr = aEvent.target,
-          msg = 'Google+: ',
-          XBW = window.XULBrowserWindow;
-      if (xhr.readyState == 4) {
-        msg += (xhr.status == 200) ? 'Posted' : 'Post faild (' + xhr.statusText + ')';
-        window.setTimeout(function (XBW, msg) {
-          if (XBW.jsDefaultStatus.indexOf('Google+:') == 0)
-            XBW.setJSDefaultStatus('');
-        }, 2000, XBW, msg);
-      } else {
-        msg += 'sending...';
-      }
-      liberator.log(msg, 0);
-      XBW.setJSDefaultStatus(msg);
-    };
 
     XPCOMUtils.defineLazyServiceGetter(__context__, 'MIME', '@mozilla.org/mime;1', 'nsIMIMEService');
 
