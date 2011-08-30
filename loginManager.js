@@ -4,11 +4,15 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
     <detail><![CDATA[
+        Default login user setting:
+        >||
+            let g:login_manager_default_user='nicovideo=mymail@addre.ss, slashdotjp=hogelogger'
+        ||<
 
 === TODO ===
 
@@ -168,15 +172,28 @@ for (let [name, service] in Iterator(services)){
         service.NAME = name;
     services[name] = new Service(service);
 }
-if (liberator.globalVariables.userLoginServices) {
-    let userServices = liberator.globalVariables.userLoginServices;
-    for (name in userServices){
-        services[name] = new Service(userServices[name]);
+let (gv = liberator.globalVariables.userLoginServices || liberator.globalVariables.login_manager_services) {
+    if (gv) {
+        let userServices = gv;
+        for (name in userServices){
+            services[name] = new Service(userServices[name]);
+        }
     }
 }
 for (let [name, service] in Iterator(services)){
     if (!service.NAME)
         service.NAME = name;
+}
+let (gv = liberator.globalVariables.userLoginDefaults || liberator.globalVariables.login_manager_default_user) {
+    if (typeof gv === 'string') {
+        for (let [, sn] in Iterator(gv.split(','))) {
+            let [s, v] = sn.split('=');
+            services[s.trim()].DEFAULT_USER = v.trim();
+        }
+    } else if (typeof gv === 'object') {
+        for (let [n, v] in Iterator(gv))
+            services[n].DEFAULT_USER = v;
+    }
 }
 
 Object.defineProperty(
@@ -316,8 +333,11 @@ function getServiceAndUsernameFromArgs(args, logout)
     if (!service) return;
     if (!username) {
         let names = service.getUsernames();
-        if (names.length === 1)
+        if (names.length === 1) {
             username = names[0];
+        } else {
+            username = service.DEFAULT_USER;
+        }
     }
     return [service, username];
 } //}}}
