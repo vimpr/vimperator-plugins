@@ -433,6 +433,7 @@ let g:gplus_commando_map_menu            = "m"
           };
         }
 
+        // ダイアログ
         function get3 (root) {
           function button (editor, name)
             editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
