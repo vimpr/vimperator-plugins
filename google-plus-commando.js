@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.3.2"
+  <plugin name="GooglePlusCommando" version="2.3.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -461,7 +461,7 @@ let g:gplus_commando_map_menu            = "m"
           get1(doc) ||
           get2() ||
           get1(Elements.frames.notifications.root.contentDocument) ||
-          (Elements.dialog.root && get3(Elements.dialog.root))
+          (Elements.dialog && Elements.dialog.root && get3(Elements.dialog.root))
         );
       },
 
