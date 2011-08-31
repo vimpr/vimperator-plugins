@@ -132,6 +132,13 @@ let g:gplus_commando_map_menu            = "m"
         </code>
       </description>
     </item>
+    <p>
+      Other Special Mappings:
+      <dl>
+        <dt>&lt;C-CR&gt;</dt>   <dd>Submit current editing post.</dd>
+        <dt>&lt;Esc&gt;</dt>    <dd>Cancel and close current editing post form.</dd>
+      </dl>
+    </p>
   </plugin>
 </>;
 // }}}
