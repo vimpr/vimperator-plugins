@@ -132,13 +132,103 @@ let g:gplus_commando_map_menu            = "m"
         </code>
       </description>
     </item>
-    <p>
-      Other Special Mappings:
-      <dl>
-        <dt>&lt;C-CR&gt;</dt>   <dd>Submit current editing post.</dd>
-        <dt>&lt;Esc&gt;</dt>    <dd>Cancel and close current editing post form.</dd>
-      </dl>
-    </p>
+  </plugin>
+  <plugin name="GooglePlusCommando" version="2.3.3"
+          href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
+          summary="The handy commands for Google+"
+          lang="ja-JP"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <p>Many Mappings and  Post command for Google+</p>
+    <p>require: feedSomeKeys_3.js and x-hint.js and _libly.js</p>
+    <item>
+      <tags>:googleplus-setup</tags>
+      <spec>:googleplus -setup</spec>
+      <spec>:gp -setup</spec>
+      <description>
+        <p>Should setup at first</p>
+        <ol>
+          <li>Login to <a href="htts://plus.google.com/">Google+</a></li>
+          <li>Execute <ex>:googleplus -setup</ex></li>
+        </ol>
+      </description>
+    </item>
+    <item>
+      <tags>:googleplus-nonargs</tags>
+      <spec>:googleplus</spec>
+      <spec>:gp</spec>
+      <description>
+        <p>when argument is none, select the Google+ tab or open in new tab</p>
+      </description>
+    </item>
+    <item>
+      <tags>:googleplus :gp</tags>
+      <spec>:googleplus <oa>-l[link]</oa> <oa>-i[mage] <a>imageURL</a></oa> <oa>-t[o] <a>to</a></oa> <a>message</a></spec>
+      <spec>:gp <oa>-l[ink]</oa> <oa>-i[mage] <a>imageURL</a></oa> <oa>-t[o]> <a>to</a></oa> <a>message</a></spec>
+      <description>
+        <p>Post <a>message</a></p>
+        <dl>
+          <dt>-link</dt>
+          <dd>
+            Add the current URL. If the selections are available, add the selections as relataed page.
+            And when <a>-image</a> option is not specified and image elements is contained in the selections,
+            add the URL of the largest image.
+          </dd>
+          <dt>-image</dt>
+          <dd>
+            Specify image URL
+          </dd>
+          <dt>-to</dt>
+          <dd>
+            Specify the circles. Can set multiple. (Default: Anyone)
+          </dd>
+        </dl>
+      </description>
+    </item>
+    <item>
+      <tags>g:gplus_commando_map_</tags>
+      <spec>let g:gplus_commando_map_<a>command</a> = <a>map-keys</a></spec>
+      <description>
+        <p>
+          <a>map-keys</a> に <a>command</a> をマップします。
+          使える <a>command</a> は以下の通りです。
+          <dl>
+            <dt>next</dt>           <dd>次のエントリに移動</dd>
+            <dt>prev</dt>           <dd>前のエントリに移動</dd>
+            <dt>share</dt>          <dd>現在のエントリを共有</dd>
+            <dt>plusone</dt>        <dd>+1</dd>
+            <dt>comment</dt>        <dd>現在のエントリにコメントする</dd>
+            <dt>post</dt>           <dd>新しく投稿(共有)する</dd>
+            <dt>yank</dt>           <dd>現在のエントリの Permlink をクリップボードにコピーする</dd>
+            <dt>notification</dt>   <dd>通知欄を開く</dd>
+            <dt>cancel</dt>         <dd>編集中のフォームをキャンセルして閉じる</dd>
+            <dt>submit</dt>         <dd>編集中のフォームから投稿する</dd>
+            <dt>unfold</dt>         <dd>現在のエントリ内の折りたたみを解除する</dd>
+            <dt>menu</dt>           <dd>現在のエントリのメニューを開く</dd>
+            <dt>mute</dt>           <dd>現在のエントリをミュートする</dd>
+            <dt>open</dt>           <dd>現在のエントリの画像やリンクなどを開く</dd>
+          </dl>
+        </p>
+        <p>rc file example</p>
+        <code>
+let g:gplus_commando_map_next            = "j"
+let g:gplus_commando_map_prev            = "k"
+let g:gplus_commando_map_share           = "s"
+let g:gplus_commando_map_plusone         = "p"
+let g:gplus_commando_map_comment         = "c"
+let g:gplus_commando_map_post            = "C"
+let g:gplus_commando_map_yank            = "y"
+let g:gplus_commando_map_notification    = "n"
+let g:gplus_commando_map_submit          = "&lt;C-CR&gt;"
+let g:gplus_commando_map_cancel          = "&lt;Esc&gt;"
+let g:gplus_commando_map_unfold          = "e"
+let g:gplus_commando_map_menu            = "m"
+        </code>
+      </description>
+    </item>
   </plugin>
 </>;
 // }}}
