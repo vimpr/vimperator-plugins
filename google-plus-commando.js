@@ -296,13 +296,14 @@ let g:gplus_commando_map_menu            = "m"
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: function () {
+        root: '#contentPane > div > div > div[decorated="true"]',
+        /*function () {
           return getSelectorFind(
             Elements.doc,
-            'div[decorated="true"]',
+            'div',
             function (e) /this\.className/.test(e.getAttribute('onclick'))
           );
-        },
+        },*/
         open: cssRules.finder(/opacity 0.125s ease 0.125s/),
         cancel: 'div[id$=".c"]',   // :6w.c
       },
