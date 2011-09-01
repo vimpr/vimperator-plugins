@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.11.0</version>
+  <version>2.11.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -497,6 +497,7 @@ let PLUGIN_INFO =
 
     submit: function () {
       let exists = false, newHistory = [];
+      newHistory.push(this.currentSearchText);
       for (let [i, h] in Iterator(this.history)) {
         if (h === this.currentSearchText) {
           exists = true;
@@ -504,7 +505,6 @@ let PLUGIN_INFO =
           newHistory.push(h);
         }
       }
-      newHistory.push(this.currentSearchText);
       this.history = newHistory;
 
       this.lastSearchText = this.currentSearchText;
@@ -601,6 +601,7 @@ let PLUGIN_INFO =
     },
 
     completer: function (context, args) {
+      context.compare = CompletionContext.Sort.unsorted;
       context.completions = [
         [v, v]
         for ([, v] in Iterator(MF.history))
