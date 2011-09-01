@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Migemized Find</name>
   <description>Migemize default page search.</description>
   <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.11.1</version>
+  <version>2.11.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -236,6 +236,8 @@ let PLUGIN_INFO =
     for each ([name, value] in Iterator(colors))
   ];
 
+  let store = storage.newMap(__context__.NAME, {store: true});
+
   function s2b (s, d) (!/^(\d+|false)$/i.test(s)|parseInt(s)|!!d*2)&1<<!s;
 
   function getPosition (elem) {
@@ -266,7 +268,7 @@ let PLUGIN_INFO =
     MODE_MIGEMO: 2,
 
     // 検索履歴
-    history: [],
+    history: store.get('history', []),
 
     // 全体で共有する変数
     lastSearchText: null,
@@ -682,5 +684,10 @@ let PLUGIN_INFO =
 
   // 外から使えるように
   liberator.plugins.migemizedFind = MF;
+
+  // 履歴の保存
+  __context__.onUnload = function () {
+    store.set('history', MF.history.slice(0, 100));
+  };
 
 })();
