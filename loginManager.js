@@ -339,7 +339,10 @@ function getServiceAndUsernameFromArgs(args, logout)
 {
     let [servicename, username] = args;
     let service = services[servicename];
-    if (!service) return;
+    if (!service)
+        service = services.auto;
+    if (!service)
+        return;
     if (!username) {
         let names = service.getUsernames();
         if (names.length === 1) {
