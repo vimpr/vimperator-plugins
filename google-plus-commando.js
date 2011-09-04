@@ -797,7 +797,7 @@ let g:gplus_commando_map_menu            = "m"
           <tr><td>*-TEXT-*</td>       <td><b><s>TEXT</s></b></td>     <td>太字/打消。打消(-)は内側に書く</td>       </tr>
           <tr><td>-ねこ-</td>         <td>☓</td>                      <td>日本語の打消はダメ</td>                   </tr>
           <tr><td>-ね こ-</td>        <td><s>ね こ</s></td>           <td>英数字や半角スペースを入れたらOK</td>     </tr>
-          <tr><td>-Aねこす-</td>      <td><s>Aあねこす</s></td>       <td>英数字を前後に入れても良い</td>           </tr>
+          <tr><td>-Aねこす-</td>      <td><s>Aねこす</s></td>         <td>英数字を前後に入れても良い</td>           </tr>
         </table>
       </>;
 
