@@ -166,6 +166,15 @@ var services = {
             op: "userlogin",
         }
     },
+    tumblr: {
+        NAME: "tumblr",
+        HOST: ["https://www.tumblr.com"],
+        URL: /^https?:\/\/(?:\w+\.)?tumblr\.com\//,
+        LOGIN: "/login",
+        LOGOUT: "/logout",
+        usernameField: "email",
+        passwordField: "password",
+    },
 };
 for (let [name, service] in Iterator(services)){
     if (!service.NAME)
