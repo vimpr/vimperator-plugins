@@ -304,7 +304,8 @@ let PLUGIN_INFO =
       let result = [];
       (function (frame) {
         // ボディがない物は検索対象外なので外す
-        if (frame.document.body.localName.toLowerCase() == 'body')
+        let body = frame.document.querySelector('body');
+        if (body && body.localName.toLowerCase() == 'body')
           result.push(frame);
         for (let i = 0; i < frame.frames.length; i++)
           arguments.callee(frame.frames[i]);
@@ -315,7 +316,7 @@ let PLUGIN_INFO =
     // ボディを範囲とした Range を作る
     makeBodyRange: function (frame) {
       let range = frame.document.createRange();
-      range.selectNodeContents(frame.document.body);
+      range.selectNodeContents(frame.document.querySelector('body'));
       return range;
     },
 
@@ -448,6 +449,7 @@ let PLUGIN_INFO =
     findAgain: function (reverse) {
       let backwards = !!(!this.lastDirection ^ !reverse);
       let last = this.storage.lastResult;
+
       let frames = this.currentFrames;
 
       // 前回の結果がない場合、(初め|最後)のフレームを対象にする
