@@ -198,11 +198,16 @@ let INFO =
     );
 
   function textCompleter (context, args) {
-    context.completions = [
-      [it, '']
-      for ([, it] in Iterator(getTexts()))
+    if (!liberator.globalVariables.google_translator_text_completer)
+      return;
+    let i = 0, cs = [];
+    for (let [, it] in Iterator(getTexts())) {
+      if (++i > 100)
+        break;
       if (it.length > 3 && !/^\s*</.test(it))
-    ];
+        cs.push([it, '']);
+    }
+    context.completions = cs;
   }
 
   function guessRequest (text, done) {
