@@ -1311,7 +1311,7 @@ let g:gplus_commando_map_menu            = "m"
         if (xhr.readyState == 4) {
           let ok = xhr.status == 200;
           msg += ok ? 'Posted' : 'Post failed (' + xhr.statusText + ')';
-          if (!ok && retry) {
+          if (!ok && aRetry) {
             msg += ' ... Retry';
             setupGooglePlus(postGooglePlus.bind(null, aPostData, false));
           }
