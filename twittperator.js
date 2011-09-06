@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.14.2</version>
+  <version>1.14.3</version>
   <minVersion>2.3</minVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -2080,7 +2080,7 @@ let PLUGIN_INFO =
             Twitter.destroy(m[0]);
         },
         timelineCompleter: true,
-        completer: Completers.id(seleceMine)
+        completer: Completers.rawid(seleceMine)
       }),
       SubCommand({
         command: ["info"],
