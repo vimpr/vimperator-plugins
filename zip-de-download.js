@@ -332,8 +332,10 @@ let SITE_INFO = [
         return;
       }
       liberator.echo("Started DownloadZip");
-      let zipFile = self.download(arg[0], false, option);
-      liberator.echo("Completed DownloadZip: " + zipFile.path);
+      setTimeout(function () {
+        let zipFile = self.download(arg[0], false, option);
+        liberator.echo("Completed DownloadZip: " + zipFile.path);
+      }, 0);
     }, {
       argCount: "?",
       literal: true,
