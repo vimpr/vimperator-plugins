@@ -1304,7 +1304,7 @@ let g:gplus_commando_map_menu            = "m"
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
       xhr.setRequestHeader('Origin', HOME_URL);
 
-      xhr.onreadystatechange = function () {
+      xhr.onreadystatechange = function (aEvent) {
         let xhr = aEvent.target,
             msg = 'Google+: ',
             XBW = window.XULBrowserWindow;
