@@ -415,7 +415,7 @@ let g:gplus_commando_map_menu            = "m"
       },
       post: {
         root: function () {
-          let div = cssRules.find(/\{ margin-left: 21px; margin-right: 21px; margin-top: 10px; width: 532px; \}/);
+          let div = cssRules.find(/\{ margin-left: \d+px; margin-right: \d+px; margin-top: \d+px; width: \d+px; \}/);
           return '#contentPane ' + 'div[decorated="true"]' + div;
           // onclick の this.className += ' f-Sa' は初めは存在しないっぽい
         },
