@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.3.3"
+  <plugin name="GooglePlusCommando" version="2.4.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -372,6 +372,20 @@ let g:gplus_commando_map_menu            = "m"
       finder: function (re, notre) {
         let self = this;
         return function () self.find(re, notre);
+      },
+
+      get: function (klass, returnCssText) {
+        let reKlass = new RegExp('(^|,)\s*.' + klass + '\s*(,|$)');
+        let result = [];
+        for (let [, rule] in I(this)) {
+          if (reKlass.test(rule.selectorText))
+            result.push(rule);
+        }
+        if (returnCssText) {
+          return result.map(function (it) it.cssText);
+        } else {
+          return result;
+        }
       }
     };
 
@@ -384,7 +398,14 @@ let g:gplus_commando_map_menu            = "m"
 
       currentEntry: {
         root: cssRules.finder(/border-left: 1px solid rgb\(77, 144, 240\);/, /border-top/),
-        unfold: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
+        unfold: {
+          comment: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
+          content: function () {
+            let content = cssRules.find(/\{ overflow: hidden; padding-bottom: \d+px; padding-top: \d+px; text-overflow: ellipsis ellipsis; \}/);
+            let buttons = cssRules.find(/^[^,]+\,[^,]+\{\s*color:\s*rgb\(51, 102, 204\);\s*cursor:\s*pointer;\s*\}$/);
+            return buttons.split(/,/).map(function (b) (content + ' > div > ' +  b)).join(', ');
+          }
+        },
         menu: {
           mute: '----'
         },
@@ -651,8 +672,10 @@ let g:gplus_commando_map_menu            = "m"
           for ([, e] in Iterator(A(root.querySelectorAll('a'))))
           if (!e.getAttribute('oid'))
         ][0],
-        get unfold () self.unfolds[0],
-        get unfolds () A(root.querySelectorAll(S.currentEntry.unfold)).filter(isDisplayed),
+        unfold: {
+          comment: root.querySelector(S.currentEntry.unfold.comment),
+          content: root.querySelector(S.currentEntry.unfold.content)
+        },
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
@@ -902,7 +925,8 @@ let g:gplus_commando_map_menu            = "m"
       if (notifications && notifications.visible && notifications.entry.visible)
         return click(notifications.entry.unfold);
 
-      clicks(Elements.currentEntry.unfolds);
+      click(Elements.currentEntry.unfold.comment);
+      click(Elements.currentEntry.unfold.content);
     },
     menu: function () {
       click(Elements.currentEntry.menuButton);
