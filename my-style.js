@@ -129,14 +129,14 @@ EOM
   const StyleNamePrefix = 'my-style-';
 
   const DefaultDefinedStyle = {
-    blackboard: <><![CDATA[
+    BLACKBOARD: <><![CDATA[
       * {
         color: white !important;
         background-color: #004040 !important;
         background-image: none !important;
       }
     ]]></>,
-    nekome: <><![CDATA[
+    NEKOME: <><![CDATA[
       body {
         background-image: url(http://snca.net/images/redeye.jpg) !important;
       }
@@ -145,7 +145,7 @@ EOM
         color: white !important;
       }
     ]]></>,
-    vimpmask: <><![CDATA[
+    VIMPMASK: <><![CDATA[
       body {
         background-image: url(http://snca.net/images/ildjarn.png) !important;
         background-repeat: no-repeat !important;
