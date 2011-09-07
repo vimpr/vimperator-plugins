@@ -305,7 +305,7 @@ let g:gplus_commando_map_menu            = "m"
 
   // Selector {{{
 
-  const [S, X] = (function () {
+  const [S, X, R] = (function () {
 
     function role (name, prefix)
       ((prefix || '') + '[role="' + name + '"]');
@@ -471,7 +471,7 @@ let g:gplus_commando_map_menu            = "m"
 
     onceAll(selector, '.MEOW_MEOW_MEOW');
 
-    return [selector, xpath];
+    return [selector, xpath, cssRules];
   })();
 
   // }}}
@@ -1707,6 +1707,7 @@ let g:gplus_commando_map_menu            = "m"
   __context__.command = Commands;
   __context__.element = Elements;
   __context__.selector = S;
+  __context__.rule = R;
   __context__.linkDetector = LinkDetector;
 
   // }}}
