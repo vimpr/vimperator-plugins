@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.4.0"
+  <plugin name="GooglePlusCommando" version="2.4.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -414,14 +414,11 @@ let g:gplus_commando_map_menu            = "m"
         submit: role('button', '[id$=".post"]'),
       },
       post: {
-        root: '#contentPane > div > div > div[decorated="true"]',
-        /*function () {
-          return getSelectorFind(
-            Elements.doc,
-            'div',
-            function (e) /this\.className/.test(e.getAttribute('onclick'))
-          );
-        },*/
+        root: function () {
+          let div = cssRules.find(/\{ margin-left: 21px; margin-right: 21px; margin-top: 10px; width: 532px; \}/);
+          return '#contentPane ' + 'div[decorated="true"]' + div;
+          // onclick の this.className += ' f-Sa' は初めは存在しないっぽい
+        },
         open: cssRules.finder(/opacity 0.125s ease 0.125s/),
         cancel: 'div[id$=".c"]',   // :6w.c
       },
@@ -484,6 +481,7 @@ let g:gplus_commando_map_menu            = "m"
       get doc() content.document,
       get currentEntry () MakeElement(Entry, Elements.doc.querySelector(S.currentEntry.root)),
       post: {
+        get root () Elements.doc.querySelector(S.post.root),
         get cancel () Elements.doc.querySelector(S.post.cancel),
         get open () Elements.doc.querySelector(S.post.open)
       },
