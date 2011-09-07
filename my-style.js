@@ -277,7 +277,7 @@ EOM
       },
       {
         bang: true,
-        literal: 1,
+        literal: 0,
         completer: styleNameCompleter
       }
     ),
@@ -303,8 +303,6 @@ EOM
       /* TODO list */
     },
     {
-      bang: true,
-      literal: 1,
       subCommands: SubCommands
     },
     true
