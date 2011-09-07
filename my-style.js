@@ -240,6 +240,13 @@ EOM
     styles.addSheet(false, StyleNamePrefix + url, url, expand(css));
   }
 
+  function unset (url, name) {
+    if (name)
+      url = url.slice(StyleNamePrefix.length);
+    delete Currents[url];
+    styles.removeSheet(false, StyleNamePrefix + url);
+  }
+
   const SubCommands = [
     new Command(
       ['s[et]'],
@@ -260,17 +267,17 @@ EOM
       'Unset style',
       function (args) {
         let m = args[0];
-        delete Currents[m];
         if (m) {
-          styles.removeSheet(false, StyleNamePrefix + m);
+          unset(m);
         } else {
           for (let [, style] in Iterator(styles)) {
             if (style.name.indexOf(StyleNamePrefix) === 0)
-              styles.removeSheet(false, style.name);
+              unset(style.name, true);
           }
         }
       },
       {
+        bang: true,
         literal: 1,
         completer: styleNameCompleter
       }
