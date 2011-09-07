@@ -229,9 +229,8 @@ EOM
 
   function styleNameCompleter (context) {
     context.completions = [
-      [style.name.slice(StyleNamePrefix.length), '']
-      for ([, style] in Iterator(styles))
-      if (style.name.indexOf(StyleNamePrefix) === 0)
+      [url, css]
+      for ([url, css] in Iterator(Currents))
     ];
   }
 
