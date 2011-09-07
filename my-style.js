@@ -155,13 +155,15 @@ EOM
     ]]></>
   };
 
-  Object.defineProperty(
-    __context__,
-    'DefinedStyles',
-    {
-      get: function () (liberator.globalVariables.my_style_define || DefaultDefinedStyle)
-    }
-  );
+  if (!__context__.DefinedStyles) {
+    Object.defineProperty(
+      __context__,
+      'DefinedStyles',
+      {
+        get: function () (liberator.globalVariables.my_style_define || DefaultDefinedStyle)
+      }
+    );
+  }
 
   const Currents = {};
 
