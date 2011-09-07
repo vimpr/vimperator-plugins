@@ -189,6 +189,19 @@ EOM
 
     context.compare = null;
     context.completions = cs;
+
+    context.fork(
+      'CURRENT',
+      0,
+      context,
+      function (context, args) {
+        context.title = ['Style set URL'];
+        context.completions = [
+          [url, css]
+          for ([url, css] in Iterator(Currents))
+        ];
+      }
+    );
   }
 
   function styleCompleter (context, args) {
