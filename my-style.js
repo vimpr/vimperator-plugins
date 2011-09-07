@@ -165,7 +165,9 @@ EOM
     );
   }
 
-  const Currents = {};
+  let Currents = {};
+
+  const store = storage.newMap(__context__.NAME, {store: true});
 
   function expand (css)
     css.replace(/\w+/g, function (n) (DefinedStyles.hasOwnProperty(n) ? DefinedStyles[n] : n));
@@ -220,15 +222,17 @@ EOM
     ];
   }
 
+  function set (url, css) {
+    Currents[url] = css;
+    styles.addSheet(false, StyleNamePrefix + url, url, expand(css));
+  }
 
   const SubCommands = [
     new Command(
       ['s[et]'],
       'Set style',
       function (args) {
-        let m = args[0];
-        Currents[m] = args.literalArg;
-        styles.addSheet(false, StyleNamePrefix + m, m, expand(args.literalArg));
+        set(args[0], args.literalArg);
       },
       {
         literal: 1,
@@ -257,6 +261,19 @@ EOM
         literal: 1,
         completer: styleNameCompleter
       }
+    ),
+
+    new Command(
+      ['p[ermanent]'],
+      'Permanent current styles',
+      function (args) {
+        store.set('permanent', Currents);
+        store.save();
+        liberator.echo('Permanent current styles');
+      },
+      {
+        argCount: '0',
+      }
     )
   ];
 
@@ -273,6 +290,11 @@ EOM
     },
     true
   );
+
+  Currents = store.get('permanent', {});
+  for (let [url, css] in Iterator(Currents)) {
+    set(url, css);
+  }
 
 })();
 
