@@ -1704,9 +1704,9 @@ let g:gplus_commando_map_menu            = "m"
 
   // Export {{{
 
-  __context__.command  = Commands;
-  __context__.element  = Elements;
-  __context__.selector  = S;
+  __context__.command = Commands;
+  __context__.element = Elements;
+  __context__.selector = S;
   __context__.linkDetector = LinkDetector;
 
   // }}}
