@@ -129,7 +129,7 @@ EOM
   const StyleNamePrefix = 'my-style-';
 
   const DefaultDefinedStyle = {
-    main: <><![CDATA[
+    blackboard: <><![CDATA[
       * {
         color: white !important;
         background-color: #004040 !important;
