@@ -740,7 +740,7 @@ let g:gplus_commando_map_menu            = "m"
           get back () root.contentDocument.querySelector(S.frames.notifications.summary.back),
           get comment () self.entry.current.querySelector(S.frames.notifications.entry.comment),
           get mute () self.entry.current.querySelector(S.frames.notifications.entry.mute),
-          get unfold () root.contentDocument.querySelector(S.currentEntry.unfold)
+          get unfold () root.contentDocument.querySelector(S.currentEntry.unfold.comment)
         }
       };
       return self;
