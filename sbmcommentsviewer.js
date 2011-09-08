@@ -3,9 +3,8 @@ var PLUGIN_INFO =
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
-    <version>0.2.4</version>
+    <version>0.2.5</version>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>3.0</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/sbmcommentsviewer.js</updateURL>
     <detail><![CDATA[
 == Usage ==
@@ -203,9 +202,9 @@ function openSBM(url, type, format, countOnly, openToBrowser){
                 if (openToBrowser)
                     manager.open(sbmContainer.toHTML(format,false));
                 else
-                    liberator.echo(sbmContainer.toHTML(format,countOnly), true);
+                    liberator.echo(sbmContainer.toHTML(format,countOnly));
             } else {
-                liberator.echoerr(sbmURL + ' ' + xhr.status, true);
+                liberator.echoerr(sbmURL + ' ' + xhr.status);
             }
         }
     };
@@ -247,7 +246,7 @@ var SBM = { //{{{
         parser: function(xhr){
             var rss = xhr.responseXML;
             if (!rss){
-                liberator.echoerr('Delicious feed is none',true);
+                liberator.echoerr('Delicious feed is none');
                 return;
             }
             var pageURL, items;
@@ -525,7 +524,7 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
                         // TODO
                         manager.open(cacheManager.get(url,type).toHTML(format,false), liberator.forceNewTab);
                     else
-                        liberator.echo(cacheManager.get(url, type).toHTML(format,countOnly), true);
+                        liberator.echo(cacheManager.get(url, type).toHTML(format,countOnly));
                 } else {
                     try {
                         openSBM(url, type, format, countOnly, openToBrowser);
