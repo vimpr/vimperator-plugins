@@ -47,8 +47,7 @@ let INFO =
 		context.compare = void 0;
 		context.anchored = false;
 		context.incomplete = true;
-		context.completions = Atnd.get_event2(context,args);
-		context.incomplete = false;
+		Atnd.get_event2(context,args);
 
 	} //}}}
 
@@ -137,6 +136,7 @@ let INFO =
 					let r = res_events[i];
 					event_data.push([r.event_url,r.title + " " + r.started_at + " " + r.catch + " " + r.address]);
 				};
+				context.incomplete = false;
 				context.completions = event_data;
 
 				function isEnded(elements,index,array){
@@ -145,6 +145,7 @@ let INFO =
 			});
 
 			req.addEventListener("onFailure",function(data){
+				context.incomplete = false;
 				liberator.echoerr(data.statusText);
 			});
 			req.get();
