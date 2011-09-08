@@ -15,7 +15,7 @@ let INFO =
       <description>
         <p>search on atnd</p>
 		<p>:atnd keyword で補完リストにkeywordで取得したイベントを補完します。<br />
-		補完リストを使わず、:atnd keyword &lt;Enter&rt; するとMOWに表示します
+		補完リストを使わず、:atnd keyword &lt;Enter&gt; するとMOWに表示します
 		</p>
       </description>
     </item>
