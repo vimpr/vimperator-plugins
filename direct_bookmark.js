@@ -511,13 +511,10 @@ for Migemo search: require XUL/Migemo Extension
                 xhr.send(null);
 
                 var html = parseHTML(xhr.responseText);
-                var tags = getElementsByXPath('//a[contains(@id,"lbl_m_")]/text()',html);
+                var tags = getElementsByXPath('id("sidenav")/div/ul/li/a[count(*)=1]/text()',html);
 
                 tags.forEach(function(tag){
-                    var text = tag.textContent;
-                    if(text.match(/\S/)) {
-                        returnValue.push(text);
-                    }
+                    returnValue.push(tag.textContent.match(/\S+/));
                 });
                 return returnValue;
             },
