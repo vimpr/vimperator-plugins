@@ -203,6 +203,7 @@ createPrototype($s, {
         var s = [i < hash.length ? toHexString(hash.charCodeAt(i)) : "" for (i in hash)].join("");
         return $(s);
     },
+    get escpateRegex() $(util.escapeRegex(this.value)),
     s: function(from, to) $(this.value.replace(from, to)),
     split: function(reg) $(this.value.split(reg)),
     get toJSON(){
