@@ -264,9 +264,9 @@ Autopager.prototype = {
       return true;
     }
 
-    req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
-    req.addEventListener("onFailure", $U.bind(this, this.onFailure));
-    req.addEventListener("onException", $U.bind(this, this.onFailure));
+    req.addEventListener("success", $U.bind(this, this.onSuccess));
+    req.addEventListener("failure", $U.bind(this, this.onFailure));
+    req.addEventListener("exception", $U.bind(this, this.onFailure));
     req.get();
   },
   onSuccess: function(res) {

@@ -128,7 +128,7 @@ liberator.plugins.subscldr = (function() {
       var uri = target || endpoint + buffer.URL;
 
       var req = new libly.Request(uri, null, {asynchronous: false});
-      req.addEventListener("onSuccess", function(res) {
+      req.addEventListener("success", function(res) {
         liberator.log(res.responseText);
         res.getHTMLDocument();
         if (isLoginForm(res.doc)) throw "Please login to LDR to subscribe the feed.";
@@ -160,11 +160,11 @@ liberator.plugins.subscldr = (function() {
           postBody: postBody
         }
       );
-      req.addEventListener("onSuccess", function(data) {
+      req.addEventListener("success", function(data) {
         liberator.log("Post status: " + data.responseText);
         liberator.echo("Subscribe feed succeed.");
       });
-      req.addEventListener("onFailure", function(data) {
+      req.addEventListener("failure", function(data) {
         liberator.log("POST FAILURE: " + data.responseText);
         liberator.echoerr("POST FAILURE: " + data.statusText);
       });

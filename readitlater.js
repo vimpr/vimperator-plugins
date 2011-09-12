@@ -215,11 +215,11 @@ let PLUGIN_INFO =
 
 		);
 
-		req.addEventListener("onSuccess",function(data){
+		req.addEventListener("success",function(data){
 			e(data.responseText)
 		});
 
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
@@ -255,8 +255,8 @@ let PLUGIN_INFO =
 
 		);
 
-		req.addEventListener("onSuccess",function(data) callback(libly.$U.evalJson(data.responseText)));
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("success",function(data) callback(libly.$U.evalJson(data.responseText)));
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
@@ -286,9 +286,9 @@ let PLUGIN_INFO =
 			}
 
 		);
-		req.addEventListener("onSuccess",callback);
+		req.addEventListener("success",callback);
 
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
@@ -328,9 +328,9 @@ let PLUGIN_INFO =
 		);
 
 		var ref = this;
-		req.addEventListener("onSuccess",callback);
+		req.addEventListener("success",callback);
 
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
@@ -361,7 +361,7 @@ let PLUGIN_INFO =
 
 		);
 
-		req.addEventListener("onSuccess",function(data){
+		req.addEventListener("success",function(data){
 			let res = libly.$U.evalJson(data.responseText);
 			liberator.echo(
 			<style type="text/css"><![CDATA[
@@ -377,7 +377,7 @@ let PLUGIN_INFO =
 			);
 		});
 
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});
@@ -402,7 +402,7 @@ let PLUGIN_INFO =
 
 		);
 
-		req.addEventListener("onSuccess",function(data){
+		req.addEventListener("success",function(data){
 			liberator.echo(
 			<div>
 				X-Limit-User-Limit : {data.transport.getResponseHeader("X-Limit-User-Limit")} <br />
@@ -416,7 +416,7 @@ let PLUGIN_INFO =
 			);
 		});
 
-		req.addEventListener("onFailure",function(data){
+		req.addEventListener("failure",function(data){
 			liberator.echoerr(data.statusText);
 			liberator.echoerr(data.responseText);
 		});

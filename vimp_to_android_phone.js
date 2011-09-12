@@ -32,7 +32,7 @@ var sendToPhone = function(requestURL) {
     'Content-Type': 'application/x-www-form-urlencoded',
     'X-Extension': 'true'
   });
-  req.addEventListener('onSuccess', function(res) {
+  req.addEventListener('success', function(res) {
     var body = res.responseText;
     if (body.substring(0, 2) == 'OK') {
       liberator.echo('Send to phone successed.');
@@ -44,7 +44,7 @@ var sendToPhone = function(requestURL) {
       liberator.open(signOutURL, liberator.NEW_TAB);
     }
   });
-  req.addEventListener('onFailure', function(res) {
+  req.addEventListener('failure', function(res) {
     liberator.echoerr('Send to phone failed.');
   });
   req.get();

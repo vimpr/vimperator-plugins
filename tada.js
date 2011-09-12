@@ -260,7 +260,7 @@ liberator.plugins.tada = (function(){
     let result = [];
     var req = new libly.Request(getURI(), null, {asynchronous: false});
 
-    req.addEventListener('onSuccess', function(data) {
+    req.addEventListener('success', function(data) {
       liberator.log("success");
       data.getHTMLDocument("//div[@id='Container']/div[2]/div/div/ul/li/a").forEach(function(item){
         var left = $LX("../span/strong[text()]", item);
@@ -291,7 +291,7 @@ liberator.plugins.tada = (function(){
     let result = [];
     var req = new libly.Request(getURI() + listId.toString(), null, {asynchronous: false});
 
-    req.addEventListener('onSuccess', function(res) {
+    req.addEventListener('success', function(res) {
       liberator.log("success");
       res.getHTMLDocument("//ul[@id='incomplete_items']/li/form").forEach(function(item) {
         result.push({
@@ -315,12 +315,12 @@ liberator.plugins.tada = (function(){
       }
     );
 
-    req.addEventListener('onSuccess', function(data) {
+    req.addEventListener('success', function(data) {
       liberator.echo("Posted[" + listName + "]:" + content);
       liberator.plugins.posted = data;
     });
 
-    req.addEventListener('onFailure', function(data) {
+    req.addEventListener('failure', function(data) {
       liberator.echoerr("POST FAILURE: " + content);
     });
 
@@ -332,10 +332,10 @@ liberator.plugins.tada = (function(){
     liberator.log("endpoint:" + endpoint);
 
     var req = new libly.Request(endpoint, null, {postBody: "dummy=hoge"});
-    req.addEventListener('onSuccess', function(data) {
+    req.addEventListener('success', function(data) {
       liberator.echo("Send Ta-Da list '" + listName + "' to your email address.");
     });
-    req.addEventListener('onFailure', function(data) {
+    req.addEventListener('failure', function(data) {
       liberator.echoerr("EMAIL SENDING ERROR.");
       liberator.log(data.responseText);
     });
@@ -354,10 +354,10 @@ liberator.plugins.tada = (function(){
           })
         }
     );
-    req.addEventListener('onSuccess', function(data) {
+    req.addEventListener('success', function(data) {
       liberator.echo("Done: " + itemId);
     });
-    req.addEventListener('onFailure', function(data) {
+    req.addEventListener('failure', function(data) {
       liberator.echoerr("Done item failed.");
       liberator.log(data.responseText);
     });

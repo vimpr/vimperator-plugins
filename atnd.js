@@ -68,7 +68,7 @@ let INFO =
 				}
 			);
 
-			req.addEventListener("onSuccess",function(data){
+			req.addEventListener("success",function(data){
 				let res = libly.$U.evalJson(data.responseText);
 				if(res.results_returned == 0){
 					liberator.echo("keyword: " + keyword + " was no result");
@@ -104,7 +104,7 @@ let INFO =
 				}
 			});
 
-			req.addEventListener("onFailure",function(data){
+			req.addEventListener("failure",function(data){
 				liberator.echoerr(data.statusText);
 			});
 			
@@ -124,7 +124,7 @@ let INFO =
 					asynchronous:true,
 				}
 			);
-			req.addEventListener("onSuccess",function(data){
+			req.addEventListener("success",function(data){
 				let res = libly.$U.evalJson(data.responseText);
 				if(res.results_returned == 0){
 					return ;
@@ -144,7 +144,7 @@ let INFO =
 				}
 			});
 
-			req.addEventListener("onFailure",function(data){
+			req.addEventListener("failure",function(data){
 				context.incomplete = false;
 				liberator.echoerr(data.statusText);
 			});

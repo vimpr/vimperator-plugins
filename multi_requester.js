@@ -332,9 +332,9 @@ var MultiRequester = {
             count: count
           }
         });
-        req.addEventListener("onException", $U.bind(this, this.onException));
-        req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
-        req.addEventListener("onFailure", $U.bind(this, this.onFailure));
+        req.addEventListener("exception", $U.bind(this, this.onException));
+        req.addEventListener("success", $U.bind(this, this.onSuccess));
+        req.addEventListener("failure", $U.bind(this, this.onFailure));
         req.get();
         MultiRequester.requestCount++;
       }
@@ -394,9 +394,9 @@ var MultiRequester = {
     if (!el) throw "extract link failed.: extractLink -> " + extractLink;
     var url = $U.pathToURL(el[0], res.req.url);
     var req = new libly.Request(url, null, $U.extend(res.req.options, { extractLink: true }));
-    req.addEventListener("onException", $U.bind(this, this.onException));
-    req.addEventListener("onSuccess", $U.bind(this, this.onSuccess));
-    req.addEventListener("onFailure", $U.bind(this, this.onFailure));
+    req.addEventListener("exception", $U.bind(this, this.onException));
+    req.addEventListener("success", $U.bind(this, this.onSuccess));
+    req.addEventListener("failure", $U.bind(this, this.onFailure));
     req.get();
     MultiRequester.requestCount++;
     MultiRequester.doProcess = true;
