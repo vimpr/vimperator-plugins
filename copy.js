@@ -390,7 +390,7 @@ if (liberator.globalVariables.copy_use_wedata){
         copy_templates.forEach(function(item) excludeLabelsMap[item.label] = item.value);
         if (liberator.globalVariables.copy_wedata_exclude_labels)
             liberator.globalVariables.copy_wedata_exclude_labels.forEach(function(item) excludeLabelsMap[item] = 1);
-        var wedata = new libly.Wedata("vimp%20copy");
+        var wedata = new libly.Wedata("vimp copy");
         wedata.getItems(24 * 60 * 60 * 1000, wedataRegister);
     }
     loadWedata();

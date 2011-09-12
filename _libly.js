@@ -14,7 +14,7 @@ var PLUGIN_INFO =
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <author mail="anekos@snca.net" homepage="http://snca.net/">anekos</author>
     <license>MIT</license>
-    <version>0.1.36</version>
+    <version>0.1.37</version>
     <minVersion>2.3pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/_libly.js</updateURL>
     <detail><![CDATA[
@@ -690,7 +690,7 @@ libly.Wedata.prototype = {
     getItems: function(expire, itemCallback, finalCallback) {
 
         var logger = this.logger;
-        var STORE_KEY = 'plugins-libly-wedata-' + this.dbname + '-items';
+        var STORE_KEY = 'plugins-libly-wedata-' + encodeURIComponent(this.dbname) + '-items';
         var store = storage.newMap(STORE_KEY, {store: true});
         var cache = store && store.get('data');
 
@@ -717,7 +717,7 @@ libly.Wedata.prototype = {
             }
         }
 
-        var req = new libly.Request(this.HOST_NAME + 'databases/' + this.dbname + '/items.json');
+        var req = new libly.Request(this.HOST_NAME + 'databases/' + encodeURIComponent(this.dbname) + '/items.json');
         req.addEventListener('success', libly.$U.bind(this, function(res) {
             var text = res.responseText;
             if (!text) {

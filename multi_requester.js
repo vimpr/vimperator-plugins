@@ -242,7 +242,7 @@ var DataAccess = {
 
     if (useWedata) {
       logger.log("use wedata");
-      var wedata = new libly.Wedata("Multi%20Requester");
+      var wedata = new libly.Wedata("Multi Requester");
       wedata.getItems(24 * 60 * 60 * 1000,
         function(item) {
           var site = item.data;
