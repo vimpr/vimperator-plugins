@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.4.1"
+  <plugin name="GooglePlusCommando" version="2.4.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -133,7 +133,7 @@ let g:gplus_commando_map_menu            = "m"
       </description>
     </item>
   </plugin>
-  <plugin name="GooglePlusCommando" version="2.3.3"
+  <plugin name="GooglePlusCommando" version="2.4.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="ja-JP"
@@ -1710,7 +1710,7 @@ let g:gplus_commando_map_menu            = "m"
 
   // }}}
 
-  // DOMLoad Event {{{
+  // Event {{{
 
   // リロードしたら、ページ構成変わってるやん！！！みたいなの対応
   events.addSessionListener(
@@ -1730,6 +1730,22 @@ let g:gplus_commando_map_menu            = "m"
       }
     },
     true
+  );
+
+  // 謎のキーが効かなくなるバグへの対応
+  autocommands.add(
+    'LocationChange',
+    /https:\/\/plus\.google\.com\//,
+    function () {
+      if (!(window.content.document instanceof HTMLDocument))
+        return;
+
+      (function findFrames(frame) {
+        if (frame.document.body instanceof HTMLBodyElement)
+          frame.focus();
+        Array.forEach(frame.frames, findFrames);
+      }(window.content));
+    }
   );
 
   // }}}
