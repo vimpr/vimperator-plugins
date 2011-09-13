@@ -1,5 +1,5 @@
-/* {{{
-Copyright (c) 2008-2009, anekos.
+/* NEW BSD LICENSE {{{
+Copyright (c) 2008-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -32,55 +32,65 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Migemized Find</name>
-  <name lang="ja">Migemized Find</name>
-  <description>Migemize default page search.</description>
-  <description lang="ja">デフォルトのドキュメント内検索をミゲマイズする。</description>
-  <version>2.11.2</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/migemized_find.js</updateURL>
-  <minVersion>3.0</minVersion>
-  <detail><![CDATA[
-    == Usage ==
-      検索ワードの一文字目が
-         '/'  => 正規表現検索
-         '?'  => Migemo検索
-         以外 => Migemo検索
-
-      検索ワードを指定色で強調表示する:
-        >||
-          :ml <検索ワード> [-c <色>]
-          :migelight <検索ワード> [-c <色>]
-        ||<
-
-      指定の色の強調表示を消す:
-        >||
-         :rml <色1> <色2> ... <色N>
-         :removemigelight  <色1> <色2> ... <色N>
-        ||<
-
-      全ての強調表示を消す:
-        >||
-          :ml! all
-          :migelight! all
-        ||<
-
-      ミ言語設定:
-        >||
-          let g:migemized_find_language = "cat";
-        ||<
-
-    == Link ==
-        http://d.hatena.ne.jp/nokturnalmortum/20080805/1217941126
-  ]]></detail>
-</VimperatorPlugin>;
+// INFO {{{
+let INFO =
+<>
+  <plugin name="MigemizedFind" version="2.11.2"
+          href="http://vimpr.github.com/"
+          summary="Search and Highlight with Migemo."
+          lang="en-US"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+  </plugin>
+  <plugin name="MigemizedFind" version="2.11.2"
+          href="http://vimpr.github.com/"
+          summary="Migemo で検索 &amp; ハイライト"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="anekos@snca.net">anekos</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <item>
+      <tags>migemized_find_search_word_spec</tags>
+      <description><p>First letter of search word:
+        <dl>
+          <dt>/</dt><dd>Regexp search</dd>
+          <dt>?</dt><dd>Migemo search</dd>
+          <dt>otherwise</dt><dd>Migemo search</dd>
+          </dl>
+      </p></description>
+    </item>
+    <item>
+      <tags>:migelight</tags>
+      <tags>:ml</tags>
+      <spec>:migelight <oa>-color=<a>color</a></oa> <a>word</a></spec>
+      <spec>:ml <oa>-color=<a>color</a></oa> <a>word</a></spec>
+      <description><p>
+        <a>word</a> をハイライトする。
+      </p></description>
+    </item>
+    <item>
+      <tags>:removemigelight</tags>
+      <tags>:rml</tags>
+      <spec>:removemigelight <a>color1</a> <oa>color2</oa> <oa>color3</oa> ...</spec>
+      <spec>:rml <a>color1</a> <oa>color2</oa> <oa>color3</oa> ...</spec>
+      <description><p>
+        <a>color</a> のハイライトを削除する。
+        <a>color</a> に "all" を指定すると全て削除される。
+      </p></description>
+    </item>
+    <item>
+      <tags>g:migemized_find_language</tags>
+      <spec>let g:migemized_find_language = <a>lang</a></spec>
+      <description><p>
+        検索対象言語の設定
+      </p></description>
+    </item>
+  </plugin>
+</>;
 // }}}
-
 
 (function () {
 
