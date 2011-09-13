@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="MigemizedFind" version="2.11.2"
+  <plugin name="MigemizedFind" version="2.11.3"
           href="http://vimpr.github.com/"
           summary="Search and Highlight with Migemo."
           lang="en-US"
@@ -44,7 +44,7 @@ let INFO =
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
   </plugin>
-  <plugin name="MigemizedFind" version="2.11.2"
+  <plugin name="MigemizedFind" version="2.11.3"
           href="http://vimpr.github.com/"
           summary="Migemo で検索 &amp; ハイライト"
           lang="ja"
@@ -86,6 +86,13 @@ let INFO =
       <spec>let g:migemized_find_language = <a>lang</a></spec>
       <description><p>
         検索対象言語の設定
+      </p></description>
+    </item>
+    <item>
+      <tags>g:migemized_find_history_limit</tags>
+      <spec>let g:migemized_history_limit = <a>number</a></spec>
+      <description><p>
+        検索履歴の保存される最大数 (デフォルト: 100)
       </p></description>
     </item>
   </plugin>
@@ -698,7 +705,8 @@ let INFO =
 
   // 履歴の保存
   __context__.onUnload = function () {
-    store.set('history', MF.history.slice(0, 100));
+    let limit = parseInt(liberator.globalVariables.migemized_find_history_limit || 100, 10);
+    store.set('history', MF.history.slice(0, limit));
   };
 
 })();
