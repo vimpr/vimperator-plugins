@@ -639,7 +639,6 @@ let PLUGIN_INFO =
                        : 'word not found.');
     },
     {
-      bang: true,
       options: [
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
       ]
