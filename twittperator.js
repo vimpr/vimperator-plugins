@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.14.3</version>
+  <version>1.15.0</version>
   <minVersion>2.3</minVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -1471,8 +1471,8 @@ let PLUGIN_INFO =
       });
     }, // }}}
     getUserTimeline: function(target, onload) { // {{{
-      let [api, query] = target ? ["statuses/user_timeline", {screen_name: target}]
-                                : ["statuses/home_timeline", {}];
+      let [api, query] = target ? ["statuses/user_timeline", {screen_name: target, count: setting.count}]
+                                : ["statuses/home_timeline", {count: setting.count}];
 
       tw.jsonGet(
         api,
@@ -1794,7 +1794,7 @@ let PLUGIN_INFO =
 
       Utils.xmlhttpRequest({
         method: 'GET',
-        url: "http://search.twitter.com/search.json?" + tw.buildQuery({ q: word }),
+        url: "http://search.twitter.com/search.json?" + tw.buildQuery({ q: word, rpp: setting.count, lang: setting.lang }),
         onload: function(xhr) {
           let res = JSON.parse(xhr.responseText);
           if (res.results.length > 0) {
@@ -2342,6 +2342,8 @@ let PLUGIN_INFO =
       apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
                   "://api.twitter.com/" + (gv.twittperator_twitter_api_version || 1)  + "/",
       trackWords: gv.twittperator_track_words,
+      count: (gv.twittperator_count || 20),
+      lang: (gv.twittperator_lang || ''),
     });
 
   let statusRefreshTimer;
