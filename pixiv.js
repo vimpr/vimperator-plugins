@@ -1,12 +1,12 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.6"
+<plugin name="pixiv.js" version="0.7"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="mitsugu.oyama@gmail.com">Mitsugu Oyama</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
-  <project name="Vimperator" minVersion="2.3"/>
+  <project name="Vimperator" minVersion="3.2"/>
   <p>
     You can save image from pixiv by this plugin.
   </p>
@@ -15,6 +15,7 @@ var INFO =
     <spec>:pixiv</spec>
     <description>
       <p>You can save image from <link topic="http://www.pixiv.net/">pixiv</link> by this plugin.</p>
+      <p>You need libDLImage.js under of plugin/modules.</p>
       <p>You must login pixiv.</p>
     </description>
   </item>
@@ -34,8 +35,55 @@ commands.addUserCommand(
       return false;
     }
 
-    let Cc=Components.classes;
-    let Ci=Components.interfaces;
+    const Cc=Components.classes;
+    const Ci=Components.interfaces;
+
+    let createWorker=function(fileName){
+      let ret;
+      const resourceName="vimp-plugin";
+      const ioService=Cc["@mozilla.org/network/io-service;1"]
+                        .getService(Ci.nsIIOService); 
+      const resProt=ioService.getProtocolHandler("resource")  
+                      .QueryInterface(Ci.nsIResProtocolHandler);
+      let pluginDirs=io.getRuntimeDirectories("plugin");
+      if (pluginDirs.length === 0){
+        return null;
+      }
+      resProt.setSubstitution(resourceName,ioService.newFileURI(pluginDirs[0]));
+      try {
+        worker=new ChromeWorker("resource://"+resourceName+"/modules/"+fileName);
+      }catch(e){
+        return null;
+      }
+      return worker;
+    };
+    let worker=createWorker('libDLImage.js');
+    if(worker==null){
+      liberator.echoerr('plugin directory is not found');
+      return false;
+    }
+    worker.addEventListener('message',function(event){  
+      if(event.data.status=='error'){
+        liberator.echoerr(event.data.message);
+        return false;
+      };
+      let instream=event.data.message;
+      let savePath=event.data.savePath;
+      let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+      aFile.initWithPath(savePath);
+      let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
+        .createInstance(Ci.nsIFileOutputStream);
+      outstream.init(aFile,0x02|0x08|0x20,0664,0);
+      outstream.write(instream,instream.length);
+      if (outstream instanceof Ci.nsISafeOutputStream) {
+        outstream.finish();
+      }else{
+        outstream.close();
+      }
+    },false);
+    worker.addEventListener('error',function(event){  
+      liberator.echoerr(event.data.status);
+    },false);
 
     let id;
     if(-1==contents.URL.search(/\&from_sid=/i)){
@@ -125,59 +173,48 @@ commands.addUserCommand(
     };
 
     let imgUrl;
-
-    let truePixivImg=function(){
-      let fileName=imgUrl.substr(imgUrl.lastIndexOf('/'));
-      if (-1!=fileName.indexOf('?')){
-        fileName=fileName.substr(0,fileName.indexOf('?'));
-      }
-      let tmpPath=saveDirectory+fileName;
-      let instream=xhrImg.responseText;
-      let aFile=Cc["@mozilla.org/file/local;1"]
-        .createInstance(Ci.nsILocalFile);
-      aFile.initWithPath(tmpPath);
-      if(true===aFile.exists()){
-        let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
-        if(null===value){
-          return false;
-        }
-        fileName='/'+value;
-        tmpPath=saveDirectory+fileName;
-        aFile.initWithPath(tmpPath);
-      }
-      let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
-        .createInstance(Ci.nsIFileOutputStream);
-      outstream.init(aFile,0x02|0x08|0x20,0664,0);
-      outstream.write(instream,instream.length);
-      if (outstream instanceof Ci.nsISafeOutputStream) {
-        outstream.finish();
-      }else{
-        outstream.close();
-      }
-    };
-
-    let falsePixivImg=function(){
-      liberator.echoerr("Image file accept error.");
-      return false;
-    };
+    let destPath;
 
     let saveImage=function(){
-      xhrImg=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-        .createInstance();
-      xhrImg.QueryInterface(Ci.nsIDOMEventTarget);
-      xhrImg.addEventListener("load",truePixivImg,false);
-      xhrImg.addEventListener("error",falsePixivImg,false);
-      xhrImg.QueryInterface(Ci.nsIXMLHttpRequest);
-      xhrImg.open("GET",imgUrl,false);
-      xhrImg.overrideMimeType('text/plain;charset=x-user-defined');
-      xhrImg.setRequestHeader('Referer',contents.URL);
-      xhrImg.setRequestHeader('Cookie',cookie);
-      xhrImg.send(null);
+      let objMessage={
+        imageUrl  :'',
+        savePath  :'',
+        refererUrl:'',
+        cookie    :''
+      };
+      objMessage.imageUrl=imgUrl;
+      objMessage.savePath=destPath;
+      objMessage.refererUrl=contents.URL;
+      objMessage.cookie=cookie;
+      let JSONmessage=JSON.stringify(objMessage);
+      worker.postMessage(JSONmessage);
+    };
+
+    let getDestPath=function(url){
+      let fname=url.substr(url.lastIndexOf('/')+1);
+      let path=saveDirectory+'/'+fname;
+      let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+      let newPath=path;
+      aFile.initWithPath(path);
+      if(true===aFile.exists()){
+        let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fname);
+        if(null===value){
+          return "";
+        };
+        if(fname!=value){
+          newPath=saveDirectory+'/'+value;
+        }
+      }
+      return newPath;
     };
 
     let saveImageFile=function(){
       imgUrl=getImageUrl(xhrImgInfo.responseText);
       if(0<imgUrl.length){
+        destPath=getDestPath(imgUrl);
+        if(destPath.length<=0){
+          return false;
+        };
         saveImage();
       }else{
         liberator.echoerr("You should login pixiv :<");
@@ -228,6 +265,10 @@ commands.addUserCommand(
           if(-1!=pnt){
             imgUrl=imgUrl.substr(0,pnt);
           }
+          destPath=getDestPath(imgUrl);
+          if(destPath.length<=0){
+            continue;
+          };
           saveImage();
         }
       }else{
@@ -261,6 +302,5 @@ commands.addUserCommand(
     xhrImgInfo.setRequestHeader('Referer',contents.URL);
     xhrImgInfo.setRequestHeader('Cookie',cookie);
     xhrImgInfo.send(null);
-
   }
 );
