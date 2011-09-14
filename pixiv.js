@@ -122,34 +122,35 @@ commands.addUserCommand(
       return url;
     };
 
-    let imgUrl;
-
-    let truePixivImg=function(){
-      let fileName=imgUrl.substr(imgUrl.lastIndexOf('/') + 1);
-      if (-1!=fileName.indexOf('?')){
-        fileName=fileName.substr(0,fileName.indexOf('?'));
-      }
-      let tmpPath=saveDirectory.clone();
-      tmpPath.append(fileName);
-      let instream=xhrImg.responseText;
-      if(true===tmpPath.exists()){
-        let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
-        if(null===value){
-          return false;
+    let truePixivImg=function(imgUrl,rest){
+      return function (){
+        let fileName=imgUrl.substr(imgUrl.lastIndexOf('/') + 1);
+        if (-1!=fileName.indexOf('?')){
+          fileName=fileName.substr(0,fileName.indexOf('?'));
         }
-        fileName='/'+value;
-        tmpPath=saveDirectory.clone();
+        let tmpPath=saveDirectory.clone();
         tmpPath.append(fileName);
-      }
-      let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
-        .createInstance(Ci.nsIFileOutputStream);
-      outstream.init(tmpPath,0x02|0x08|0x20,0664,0);
-      outstream.write(instream,instream.length);
-      if (outstream instanceof Ci.nsISafeOutputStream) {
-        outstream.finish();
-      }else{
-        outstream.close();
-      }
+        let instream=xhrImg.responseText;
+        if(true===tmpPath.exists()){
+          let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
+          if(null===value){
+            return false;
+          }
+          fileName='/'+value;
+          tmpPath=saveDirectory.clone();
+          tmpPath.append(fileName);
+        }
+        let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
+          .createInstance(Ci.nsIFileOutputStream);
+        outstream.init(tmpPath,0x02|0x08|0x20,0664,0);
+        outstream.write(instream,instream.length);
+        if (outstream instanceof Ci.nsISafeOutputStream) {
+          outstream.finish();
+        }else{
+          outstream.close();
+        }
+        saveImages(rest);
+      };
     };
 
     let falsePixivImg=function(){
@@ -157,14 +158,16 @@ commands.addUserCommand(
       return false;
     };
 
-    let saveImage=function(){
+    let saveImages=function(imgUrls){
+      let iter=Iterator(imgUrls);
+      let [,imgUrl]=iter.next();
       xhrImg=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
         .createInstance();
       xhrImg.QueryInterface(Ci.nsIDOMEventTarget);
-      xhrImg.addEventListener("load",truePixivImg,false);
+      xhrImg.addEventListener("load",truePixivImg(imgUrl,iter),false);
       xhrImg.addEventListener("error",falsePixivImg,false);
       xhrImg.QueryInterface(Ci.nsIXMLHttpRequest);
-      xhrImg.open("GET",imgUrl,false);
+      xhrImg.open("GET",imgUrl,true);
       xhrImg.overrideMimeType('text/plain;charset=x-user-defined');
       xhrImg.setRequestHeader('Referer',contents.URL);
       xhrImg.setRequestHeader('Cookie',cookie);
@@ -172,9 +175,9 @@ commands.addUserCommand(
     };
 
     let saveImageFile=function(){
-      imgUrl=getImageUrl(xhrImgInfo.responseText);
+      let imgUrl=getImageUrl(xhrImgInfo.responseText);
       if(0<imgUrl.length){
-        saveImage();
+        saveImages([imgUrl]);
       }else{
         liberator.echoerr("You should login pixiv :<");
       }
@@ -212,20 +215,21 @@ commands.addUserCommand(
       return url;
     };
 
-    let imgUrls;
     let saveMangaFiles=function(){
-      imgUrls=getImageUrls(xhrImgInfo.responseText);
+      let imgUrls=getImageUrls(xhrImgInfo.responseText);
       if(0<imgUrls.length){
         let i;
         let max=imgUrls.length;
+        let mangaUrls=[];
         for(i=0;i<max;i++){
-          imgUrl=imgUrls[i];
-          pnt=imgUrl.lastIndexOf('?');
+          url=imgUrls[i];
+          pnt=url.lastIndexOf('?');
           if(-1!=pnt){
-            imgUrl=imgUrl.substr(0,pnt);
+            url=url.substr(0,pnt);
           }
-          saveImage();
+          mangaUrls.push(url);
         }
+        saveImages(mangaUrls);
       }else{
         liberator.echoerr("Not found image data on the manga page.");
       }
