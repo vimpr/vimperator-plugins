@@ -262,5 +262,7 @@ commands.addUserCommand(
     xhrImgInfo.setRequestHeader('Cookie',cookie);
     xhrImgInfo.send(null);
 
-  }
+  },
+  {},
+  true
 );
