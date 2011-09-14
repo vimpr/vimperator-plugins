@@ -69,16 +69,14 @@ commands.addUserCommand(
       let result=fp.show();
       switch(result){
         case Ci.nsIFilePicker.returnOK:
-          path=fp.file.path;
-          break;
+          return fp.file;
         default:
         case Ci.nsIFilePicker.returnCancel:
-          return '';
+          return;
       }
-      return path;
     };
     let saveDirectory=directoryPicker();
-    if(saveDirectory.length<1) return;
+    if(!saveDirectory) return;
 
     let getDOMHtmlDocument=function(str){
       let doc;
@@ -127,27 +125,25 @@ commands.addUserCommand(
     let imgUrl;
 
     let truePixivImg=function(){
-      let fileName=imgUrl.substr(imgUrl.lastIndexOf('/'));
+      let fileName=imgUrl.substr(imgUrl.lastIndexOf('/') + 1);
       if (-1!=fileName.indexOf('?')){
         fileName=fileName.substr(0,fileName.indexOf('?'));
       }
-      let tmpPath=saveDirectory+fileName;
+      let tmpPath=saveDirectory.clone();
+      tmpPath.append(fileName);
       let instream=xhrImg.responseText;
-      let aFile=Cc["@mozilla.org/file/local;1"]
-        .createInstance(Ci.nsILocalFile);
-      aFile.initWithPath(tmpPath);
-      if(true===aFile.exists()){
+      if(true===tmpPath.exists()){
         let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
         if(null===value){
           return false;
         }
         fileName='/'+value;
-        tmpPath=saveDirectory+fileName;
-        aFile.initWithPath(tmpPath);
+        tmpPath=saveDirectory.clone();
+        tmpPath.append(fileName);
       }
       let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
         .createInstance(Ci.nsIFileOutputStream);
-      outstream.init(aFile,0x02|0x08|0x20,0664,0);
+      outstream.init(tmpPath,0x02|0x08|0x20,0664,0);
       outstream.write(instream,instream.length);
       if (outstream instanceof Ci.nsISafeOutputStream) {
         outstream.finish();
