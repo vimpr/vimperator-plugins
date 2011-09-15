@@ -463,9 +463,9 @@ let g:gplus_commando_map_menu            = "m"
             back: '#summary-view + div > div > span',
           },
           entry: {
-            entries: 'div[id^=":2."]',   // :2.diz13l....
+            entries: 'div[id^=":"][style*="max-height"]',   // :2.diz13l....
             comment: cssRules.finder(/rgb\(221, 221, 221\).*rgb\(153, 153, 153\)/),
-            mute: 'div[id^=":2."] > div > div:nth-child(2) > div > div > ' + role('button', 'span') // FIXME
+            mute: 'div[id^=":"][style*="max-height"] > div > div:nth-child(2) > div > div > ' + role('button', 'span') // FIXME
           },
         }
       },
