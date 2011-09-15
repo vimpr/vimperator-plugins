@@ -899,8 +899,7 @@ let g:gplus_commando_map_menu            = "m"
     share: function () click(Elements.currentEntry.share),
     post: function () {
       buffer.scrollTop();
-      click(Elements.post.open);
-      PostHelp.show();
+      click(Elements.post.open, PostHelp.show);
     },
     yank: function () {
       let e = Elements.currentEntry.permlink;
