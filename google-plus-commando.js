@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.4.4"
+  <plugin name="GooglePlusCommando" version="2.4.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -246,14 +246,30 @@ let g:gplus_commando_map_menu            = "m"
   function IA (list)
     Iterator(A(list));
 
-  function click (elem) {
+  function click (elem, after) {
+    click
     if (!elem)
       throw GPCError('elem is undefined');
-    buffer.followLink(elem, liberator.CURRENT_TAB);
+    setTimeout(
+      function () {
+        buffer.followLink(elem, liberator.CURRENT_TAB);
+        setTimeout(after, 1);
+      },
+      1
+    );
   }
 
-  function clicks (elems) {
-    elems.forEach(click);
+  function clicks (elems, after) {
+    if (!(elems && elems.length))
+      return;
+
+    setTimeout(
+      function () {
+        click(elems[0], elems.length === 1 && after);
+        clicks(elems.slice(1));
+      },
+      1
+    );
   }
 
   function isDisplayed (elem)
@@ -868,16 +884,16 @@ let g:gplus_commando_map_menu            = "m"
     next: withCount(function () Commands.moveEntry(true)),
     prev: withCount(function () Commands.moveEntry(false)),
     comment: function () {
+      let after = PostHelp.show;
       let notifications = Elements.frames.notifications;
       if (notifications && notifications.visible && notifications.entry.visible) {
         let e = notifications.entry.current;
         e.scrollTop = e.scrollHeight;
-        click(notifications.entry.comment);
+        click(notifications.entry.comment, after);
       } else {
         let entry = Elements.currentEntry;
-        click(entry.comment);
+        click(entry.comment, after);
       }
-      PostHelp.show();
     },
     plusone: function () click(Elements.currentEntry.plusone),
     share: function () click(Elements.currentEntry.share),
