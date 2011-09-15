@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.4.3"
+  <plugin name="GooglePlusCommando" version="2.4.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -133,7 +133,7 @@ let g:gplus_commando_map_menu            = "m"
       </description>
     </item>
   </plugin>
-  <plugin name="GooglePlusCommando" version="2.4.3"
+  <plugin name="GooglePlusCommando" version="2.4.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="ja-JP"
@@ -397,7 +397,7 @@ let g:gplus_commando_map_menu            = "m"
       plusone: 'button[id^="po-"]',
 
       currentEntry: {
-        root: cssRules.finder(/border-left: 1px solid rgb\(77, 144, 240\);/, /border-top/),
+        root: cssRules.finder(/border-left: 1px solid rgb\(77, 144, 240\);\s*\}/),
         unfold: {
           comment: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
           content: function () {
@@ -671,8 +671,8 @@ let g:gplus_commando_map_menu            = "m"
           if (!e.getAttribute('oid'))
         ][0],
         unfold: {
-          comment: root.querySelector(S.currentEntry.unfold.comment),
-          content: root.querySelector(S.currentEntry.unfold.content)
+          get comment () root.querySelector(S.currentEntry.unfold.comment),
+          get content () root.querySelector(S.currentEntry.unfold.content)
         },
         get buttons () A(self.plusone.parentNode.querySelectorAll(S.role('button'))),
         get commentButton () self.buttons[0],
