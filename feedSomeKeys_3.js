@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.9.1"
+  <plugin name="feedSomeKeys" version="1.9.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -140,7 +140,7 @@ let INFO = <>
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.9.0"
+  <plugin name="feedSomeKeys" version="1.9.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Web コンテンツに直接キーイベントを送ります。"
           lang="ja"
@@ -504,7 +504,8 @@ let INFO = <>
       ];
       if (currentURL) {
         result.unshift(['^' + util.escapeRegex(buffer.URL), 'Current URL']);
-        result.unshift([util.escapeRegex(content.document.domain), 'Current domain']);
+        if (content.document.domain)
+          result.unshift([util.escapeRegex(content.document.domain), 'Current domain']);
       }
       return result;
     };
