@@ -187,6 +187,9 @@ commands.addUserCommand(
 
     let getDestPath=function(url){
       let fname=url.substr(url.lastIndexOf('/')+1);
+      if(fname.lastIndexOf('?')!=-1){
+        fname=fname.substr(0,fname.lastIndexOf('?'));
+      }
       let path=saveDirectory.clone();
       path.append(fname);
       let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
