@@ -299,5 +299,7 @@ commands.addUserCommand(
     xhrImgInfo.setRequestHeader('Referer',contents.URL);
     xhrImgInfo.setRequestHeader('Cookie',cookie);
     xhrImgInfo.send(null);
-  }
+  },
+  {},
+  true
 );
