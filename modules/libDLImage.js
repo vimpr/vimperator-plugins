@@ -1,3 +1,35 @@
+//
+// libDLImage.js
+//
+//   libDLImage.js is code for download image data.
+//   libDLImage.js is ran on ChromeWorker thread.
+//
+//
+//   accept message:
+//     {
+//       'imageUrl'  :string,
+//       'savePath'  :string,
+//       'refererUrl':string,
+//       'cookie'    :string
+//     }
+//
+//     imageUrl   : remote image URL
+//     savePath   : full path on local strage
+//     refererUrl : referer string (optional)
+//     cookie     : cookie string (optional)
+//
+//
+//   send message:
+//     {
+//       'status'  :string,
+//       'message' :JSObject,
+//       'savePath':string
+//     }
+//
+//     status   : 'normarl' or 'error'
+//     message  : error message (string) or image data (binary)
+//     savePath : full path on local strage ( only success )
+//
 var JSONMessage;
 var xhrImg;
 
