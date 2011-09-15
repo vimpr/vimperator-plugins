@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="ePub Reader" version="1.1.0"
+  <plugin name="ePub Reader" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="for ePub Reader addon"
           lang="en-US"
@@ -68,7 +68,7 @@ let INFO =
       </code>
     </p>
   </plugin>
-  <plugin name="ePub Reader" version="1.1.0"
+  <plugin name="ePub Reader" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="for ePub Reader addon"
           lang="ja"
@@ -165,7 +165,7 @@ let INFO =
     jump:
       withCompleter(
         function (index) {
-          buffer.followLink(getIndexLinks()[index]);
+          buffer.followLink(getIndexLinks()[index], liberator.CURRENT_TAB);
         },
         function (context, args) {
           context.compare = void 0;
@@ -202,7 +202,7 @@ let INFO =
     ['epubreader'],
     'ePub Reader addon controler',
     function (args) {
-      if (!ReaderUrls(buffer.URL))
+      if (!ReaderUrls.test(buffer.URL))
         return liberator.echoerr('Not in ePub Reader');
 
       let [cmd, num] = args;
