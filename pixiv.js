@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.7"
+<plugin name="pixiv.js" version="0.7.1"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -115,18 +115,13 @@ commands.addUserCommand(
       let fp=Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
       fp.init(window,'Select Directory',Ci.nsIFilePicker.modeGetFolder);
       let result=fp.show();
-      switch(result){
-        case Ci.nsIFilePicker.returnOK:
-          path=fp.file.path;
-          break;
-        default:
-        case Ci.nsIFilePicker.returnCancel:
-          return '';
+      if(result==Ci.nsIFilePicker.returnOK){
+        return fp.file;
       }
-      return path;
+      return null;
     };
     let saveDirectory=directoryPicker();
-    if(saveDirectory.length<1) return;
+    if(saveDirectory==null) return false;
 
     let getDOMHtmlDocument=function(str){
       let doc;
@@ -183,7 +178,7 @@ commands.addUserCommand(
         cookie    :''
       };
       objMessage.imageUrl=imgUrl;
-      objMessage.savePath=destPath;
+      objMessage.savePath=destPath.path;
       objMessage.refererUrl=contents.URL;
       objMessage.cookie=cookie;
       let JSONmessage=JSON.stringify(objMessage);
@@ -192,17 +187,19 @@ commands.addUserCommand(
 
     let getDestPath=function(url){
       let fname=url.substr(url.lastIndexOf('/')+1);
-      let path=saveDirectory+'/'+fname;
+      let path=saveDirectory.clone();
+      path.append(fname);
       let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-      let newPath=path;
-      aFile.initWithPath(path);
+      let newPath=path.clone();
+      aFile.initWithFile(path);
       if(true===aFile.exists()){
         let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fname);
         if(null===value){
-          return "";
+          return null;
         };
         if(fname!=value){
-          newPath=saveDirectory+'/'+value;
+          newPath=saveDirectory.clone();
+          newPath.append(value);
         }
       }
       return newPath;
@@ -212,13 +209,13 @@ commands.addUserCommand(
       imgUrl=getImageUrl(xhrImgInfo.responseText);
       if(0<imgUrl.length){
         destPath=getDestPath(imgUrl);
-        if(destPath.length<=0){
+        if(destPath==null){
           return false;
         };
         saveImage();
       }else{
         liberator.echoerr("You should login pixiv :<");
-      }
+      };
     };
 
     let getImageUrls=function(pageContents){
@@ -266,9 +263,9 @@ commands.addUserCommand(
             imgUrl=imgUrl.substr(0,pnt);
           }
           destPath=getDestPath(imgUrl);
-          if(destPath.length<=0){
+          if(destPath==null){
             continue;
-          };
+          }
           saveImage();
         }
       }else{
