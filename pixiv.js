@@ -136,7 +136,7 @@ commands.addUserCommand(
           if(null===value){
             return false;
           }
-          fileName='/'+value;
+          fileName=value;
           tmpPath=saveDirectory.clone();
           tmpPath.append(fileName);
         }
