@@ -293,7 +293,6 @@ commands.addUserCommand(
       return false;
     };
 
-alert(baseInfo+id+scroll);
     let xhrImgInfo;
     xhrImgInfo=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
     xhrImgInfo.QueryInterface(Ci.nsIDOMEventTarget);
