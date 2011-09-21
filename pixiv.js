@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.7.1"
+<plugin name="pixiv.js" version="0.7.2"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -30,7 +30,8 @@ commands.addUserCommand(
       liberator.echoerr('This page is not pixiv.');
       return false;
     }
-    if(contents.URL.search(/medium&illust_id=/i)==-1){
+    if((contents.URL.search(/illust_id=/i)==-1)||
+       (contents.URL.search(/mode=medium/i)==-1)){
       liberator.echoerr("This page is not pixiv's image page.");
       return false;
     }
@@ -86,12 +87,12 @@ commands.addUserCommand(
     },false);
 
     let id;
-    if(-1==contents.URL.search(/\&from_sid=/i)){
-      id=contents.URL.substr(contents.URL.lastIndexOf('=')+1);
+    let idTmp=contents.URL.match(/illust_id=(\d+)/i);
+    if(idTmp===null){
+      liberator.echoerr("This page is not image page and not manga page.");
+      return false;
     }else{
-      let st=contents.URL.search(/illust_id=/i)+'illust_id='.length;
-      let end=contents.URL.lastIndexOf('&');
-      id=contents.URL.substr(st,end-st);
+      id=idTmp[1];
     }
 
     let baseInfo;
@@ -292,6 +293,7 @@ commands.addUserCommand(
       return false;
     };
 
+alert(baseInfo+id+scroll);
     let xhrImgInfo;
     xhrImgInfo=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
     xhrImgInfo.QueryInterface(Ci.nsIDOMEventTarget);
