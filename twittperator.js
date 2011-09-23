@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.15.0</version>
+  <version>1.16.0</version>
   <minVersion>2.3</minVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -1493,6 +1493,9 @@ let PLUGIN_INFO =
         }
       );
     }, // }}}
+    lookupUser: function({screenNames, ids}, callback) { // {{{
+      tw.jsonGet("users/lookup", { user_id: String(ids || []), screen_name: String(screenNames || []) }, callback);
+    }, // }}}
     say: function(status, inReplyToStatusId) { // {{{
       let sendData = {status: status, source: "Twittperator"};
       if (inReplyToStatusId)
@@ -1648,6 +1651,58 @@ let PLUGIN_INFO =
 
       io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
       io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
+    }, // }}}
+    lookupUser: function(users) { // {{{
+      function showUsersInfo(json) { // {{{
+        let xml = modules.template.map(json, function(user) {
+          return <>
+            <tr>
+              <td class="twittperator lookup-user photo">
+                <img src={user.profile_image_url} />
+              </td>
+              <td class="twittperator lookup-user screen-name">
+                <a href={"https://twitter.com/#!/" + user.screen_name}>
+                  {user.name}
+                </a>
+              </td>
+              <td class="twittperator lookup-user attributes">
+                {user.location} -
+                id {user.id_str} -
+                {user.following ? '' : 'not'} following -
+                {user.friends_count}/{user.followers_count} ee/er -
+                {user.statuses_count} tweets -
+                {user.favourites_count} favs -
+                {user.listed_count} listed -
+                from {new Date(user.created_at).toLocaleString()}
+              </td>
+            </tr>
+            <tr>
+              <td class="twittperator lookup-user description" colspan="3">
+                {user.description}
+              </td>
+            </tr>
+          </>;
+        });
+        liberator.echo(
+          <>
+            <style type="text/css"><![CDATA[
+              .twittperator.lookup-user.photo { vertical-align: top; width: 28px; }
+              .twittperator.lookup-user.photo img { border: 0px; width: 24px; height: 24px; vertical-align: baseline; margin: 1px; }
+              .twittperator.lookup-user.attributes { white-space: normal !important; }
+              .twittperator.lookup-user.description { white-space: normal !important; }
+              .twittperator.lookup-user.description a { text-decoration: none; }
+            ]]></style>
+            <table>{xml}</table>
+          </>
+        );
+      } // }}}
+
+      let ids = [], screenNames = [];
+      for (let [, v] in Iterator(users))
+        (/^\d+$/.test(v) ? ids : screenNames).push(v);
+      Twitter.lookupUser({ids: ids, screenNames: screenNames}, function(json) {
+        showUsersInfo(json);
+      });
     }, // }}}
     onFriends: function(msg) { // {{{
       __context__.Friends = friends = msg.friends;
@@ -2104,6 +2159,15 @@ let PLUGIN_INFO =
         },
         timelineCompleter: true,
         completer: Completers.rawid(function(st) st.id)
+      }),
+      SubCommand({
+        command: ["lookupuser"],
+        description: "Lookup users",
+        action: function(arg) {
+          Twittperator.lookupUser(arg.split(/\s+/));
+        },
+        timelineCompleter: true,
+        completer: Completers.screenName()
       }),
       SubCommand({
         command: ["track"],
