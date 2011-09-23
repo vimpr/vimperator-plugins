@@ -1960,24 +1960,31 @@ let PLUGIN_INFO =
 
       context.compare = void 0;
       context.createRow = function(item, highlightGroup) {
-        let desc = item[1] || this.process[1].call(this, item, item.description);
-
-        if (desc && desc.user) {
-          return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-              <li highlight="CompDesc">
-                <img src={desc.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
-                &#160;{desc.user.screen_name}: {desc.text}
-              </li>
+        if (highlightGroup === "CompTitle") {
+          return <div highlight="CompTitle" style="white-space: nowrap">
+              <li highlight="CompDesc">{item}&#160;</li>
           </div>;
         }
 
-        return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-            <li highlight="CompDesc">{desc}&#160;</li>
-        </div>;
+        let [value, st] = item.item;
+        if (st.user) {
+          return <div highlight="CompItem" style="white-space: nowrap">
+              <li highlight="CompDesc">
+                <img src={st.user.profile_image_url} style="max-width: 24px; max-height: 24px"/>
+                &#160;{st.user.screen_name}: {st.text}
+              </li>
+          </div>;
+        } else {
+          return <div highlight="CompItem" style="white-space: nowrap">
+              <li highlight="CompDesc">
+                {st.text}
+              </li>
+          </div>;
+        }
       };
 
       context.filters = [statusObjectFilter];
-      context.title = ["Hidden", "Entry"];
+      context.title = "Entry";
     } // }}}
 
     function makeTimelineCompleter(completer) { // {{{
@@ -2280,7 +2287,7 @@ let PLUGIN_INFO =
 
     function subCommandCompleter(context, args) { // {{{
       if (!args.literalArg.match(/^(\W|\S+\s)/)) {
-        context.title = ["Sub command", "Description"];
+        context.title = "Description";
         context.completions = SubCommands.map(function({ command, description }) [command[0], description]);
         return;
       }
@@ -2309,7 +2316,7 @@ let PLUGIN_INFO =
       let arg = args.literalArg.slice(0, context.caret);
       let m;
       if (m = arg.match(/^D\s+/)) {
-        context.title = ["Name#ID", "Entry"];
+        context.title = "Entry";
         context.advance(m[0].length);
         Completers.name(rejectMine)(context, args);
         return;
@@ -2325,7 +2332,7 @@ let PLUGIN_INFO =
       if (m)
         len = m.index + m[1].length;
 
-      context.title = ["Name#ID", "Entry"];
+      context.title = "Entry";
       context.offset += len;
       // XXX 本文でも検索できるように、@ はなかったことにする
       context.filter = context.filter.replace(/^[@#]/, "");
