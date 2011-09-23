@@ -2287,7 +2287,7 @@ let PLUGIN_INFO =
 
     function subCommandCompleter(context, args) { // {{{
       if (!args.literalArg.match(/^(\W|\S+\s)/)) {
-        context.title = "Description";
+        context.title = ["Sub Command", "Description"];
         context.completions = SubCommands.map(function({ command, description }) [command[0], description]);
         return;
       }
