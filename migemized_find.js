@@ -52,6 +52,9 @@ let INFO =
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
+    <p>
+      このプラグインは _libly.js が必要です。
+    </p>
     <item>
       <tags>migemized_find_search_word_spec</tags>
       <description><p>First letter of search word:
