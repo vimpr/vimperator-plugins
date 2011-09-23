@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2011, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -33,38 +33,17 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>VideoController</name>
-  <name lang="ja">VideoController</name>
-  <description>Add :videocontrol command for HTML5 video.</description>
-  <description lang="ja">HTML5 Video のために :videocontrol コマンドを追加する。</description>
-  <version>1.1.0</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/video-controller.js</updateURL>
-  <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
-  <detail><![CDATA[
-    ----
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    ----
-  ]]></detail>
-</VimperatorPlugin>;
-// }}}
 // INFO {{{
 let INFO =
 <>
-  <plugin name="VideoController" version="1.0.0"
+  <plugin name="VideoController" version="1.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/video-controller.js"
           summary="Control HTML5 Videos"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.3"/>
+    <project name="Vimperator" minVersion="3.0"/>
     <item>
       <tags>:videocontrol</tags>
       <spec>:videocontrol <a>command</a> <oa>arguments...</oa></spec>
@@ -74,14 +53,14 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="VideoController" version="1.0.0"
+  <plugin name="VideoController" version="1.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/video-controller.js"
           summary="Control HTML5 Videos"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
-    <project name="Vimperator" minVersion="2.3"/>
+    <project name="Vimperator" minVersion="3.0"/>
     <item>
       <tags>:videocontrol</tags>
       <spec>:videocontrol <a>command</a> <oa>arguments...</oa></spec>
@@ -105,6 +84,7 @@ let INFO =
   }
 
   let lastArgs = null;
+  let lastCommand = null;
   let controlls = {
     __proto__: null,
     play: function (elem) {
@@ -126,7 +106,7 @@ let INFO =
     HintName,
     'Select video',
     function (elem) {
-      controlls[lastArgs[0]].apply(null, [elem].concat(lastArgs.slice(1)));
+      controlls[lastCommand].apply(null, [elem].concat(lastArgs));
     },
     function () '//video'
   );
@@ -135,15 +115,23 @@ let INFO =
     ['videocontrol'],
     'Control HTML5 Videos',
     function (args) {
-      lastArgs = args;
-      hints.show(HintName);
     },
     {
-      completer: function (context, args) {
-        const completions = [[n, n] for (n in controlls)];
-        context.title = ['Command', ''];
-        context.completions = completions;
-      }
+      subCommands: [
+        let (o = o) new Command(
+          [o[0] + '[' + o.slice(1) + ']'],
+          o + ' <video>',
+          function (args) {
+            lastCommand = o;
+            lastArgs = args;
+            hints.show(HintName);
+          },
+          {
+            literal: 0
+          }
+        )
+        for (o in controlls)
+      ],
     },
     true
   );
