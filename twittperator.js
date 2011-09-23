@@ -1721,11 +1721,11 @@ let PLUGIN_INFO =
         ("window.parent.liberator.modules.plugins.twittperator.Twittperator.showStatusMenu(" + parseInt(st.id) + ")");
 
       let html = <style type="text/css"><![CDATA[
-          .twitter.user { vertical-align: top; }
-          .twitter.entry-content { white-space: normal !important; }
-          .twitter.entry-content a { text-decoration: none; }
-          .twitter.entry-content.rt:before { content: "RT "; color: silver; }
-          img.twitter.photo { border: 0px; width: 24px; height: 24px; vertical-align: baseline; margin: 1px; }
+          .twittperator.timeline.user { vertical-align: top; }
+          .twittperator.timeline.entry-content { white-space: normal !important; }
+          .twittperator.timeline.entry-content a { text-decoration: none; }
+          .twittperator.timeline.entry-content.rt:before { content: "RT "; color: silver; }
+          img.twittperator.timeline.photo { border: 0px; width: 24px; height: 24px; vertical-align: baseline; margin: 1px; }
       ]]></style>.toSource()
                  .replace(/(?:\r\n|[\r\n])[ \t]*/g, " ") +
           s.reduce(function(table, status) {
@@ -1733,35 +1733,35 @@ let PLUGIN_INFO =
               ("retweeted_status" in status) ?
               let (rt = status.retweeted_status)
               <tr>
-                <td class="twitter user">
+                <td class="twittperator timeline user">
                   <a href={userURL(rt.user.screen_name)}>
-                    <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twitter photo"/>
+                    <img src={rt.user.profile_image_url} alt={rt.user.screen_name} class="twittperator timeline photo"/>
                     <strong>{rt.user.screen_name}&#x202C;</strong>
                   </a>
                   <a href={userURL(status.user.screen_name)}>
-                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twittperator timeline photo"/>
                   </a>
                 </td>
-                <td class="twitter entry-content rt">
+                <td class="twittperator timeline entry-content rt">
                   {Utils.anchorLink(rt.text)}
                 </td>
-                <td class="twitter menu">
+                <td class="twittperator timeline menu">
                   <a href="javascript: void 0" onclick={menuEvent(status)}>
                    &#1758;
                   </a>
                 </td>
               </tr> :
               <tr>
-                <td class="twitter user">
+                <td class="twittperator timeline user">
                   <a href={userURL(status.user.screen_name)}>
-                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twitter photo"/>
+                    <img src={status.user.profile_image_url} alt={status.user.screen_name} class="twittperator timeline photo"/>
                     <strong title={status.user.name}>{status.user.screen_name}&#x202C;</strong>
                   </a>
                 </td>
-                <td class="twitter entry-content">
+                <td class="twittperator timeline entry-content">
                   {Utils.anchorLink(status.text)}
                 </td>
-                <td class="twitter menu">
+                <td class="twittperator timeline menu">
                   <a href="javascript: void 0" onclick={menuEvent(status)}>
                    &#1758;
                   </a>
