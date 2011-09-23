@@ -65,6 +65,7 @@ let INFO =
 (function () {
   const Chaika = {};
   Components.utils.import("resource://chaika-modules/ChaikaThread.js", Chaika);
+  Components.utils.import("resource://chaika-modules/Chaika2chViewer.js", Chaika);
 
   function deleteCurrentThreadLog () {
     let currentURI = getBrowser().currentURI.QueryInterface(Ci.nsIURL);
@@ -105,6 +106,16 @@ let INFO =
             } catch (ex) {
               liberator.echoerr(ex);
             }
+          }
+        ),
+        new Command(
+          ['auth'],
+          'Maru auth(?)',
+          function (args) {
+            Chaika.Chaika2chViewer.auth();
+          },
+          {
+            argCount: '0'
           }
         )
       ]
