@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.0"
+  <plugin name="facebook" version="0.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -169,7 +169,7 @@ function setup(){ // access_token取得後 {{{
 					function (args) {
 						FB.comment(args);
 					},{
-						literal:0,
+						literal:1,
 						completer:function(context){
 							feed_completer(context);
 							context.completions = feed_complations();
