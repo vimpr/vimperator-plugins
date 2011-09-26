@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.1"
+  <plugin name="facebook" version="0.1.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -52,7 +52,7 @@ let INFO =
 		<spec>:fa<oa>cebook</oa> text <a>-link</a> url</spec>
 		<description>
 			<p>:fa hogehoge とするとfacebookへ「hogehoge」と投稿します。
-			-link オプションの後にURLを入れるとリンクとしてポストします。
+			-link オプションを選ぶと補完リストに開いているURLが出てくるので選択して投稿できます。
 			</p>
 		</description>
     </item>
@@ -146,7 +146,7 @@ function setup(){ // access_token取得後 {{{
 		},
 		{
 			options:[
-				[["-link","-l"],commands.OPTION_STRING],
+				[["-link","-l"],commands.OPTION_STRING,null,tablist],
 			],
 			subCommands: [
 				new Command(["get"], "get walldata from facebook to MOW",
@@ -288,6 +288,13 @@ function setup(){ // access_token取得後 {{{
 	
 	}
 
+	function tablist(){
+		let tablist = [];
+		for each([i,tab] in tabs.browsers){
+			tablist.push([tab.currentURI.spec,tabs.getTab(i).label]);
+		}
+		return tablist;
+	}
 
 } // }}}
 
