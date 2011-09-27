@@ -416,7 +416,7 @@ function setup(){ // access_token取得後 {{{
 							buff += <div>unknown post : {d["type"]}</div>
 						}
 
-					liberator.echo(buff,true)
+					liberator.echo(buff);
 
 					}
 
@@ -482,12 +482,12 @@ function setup(){ // access_token取得後 {{{
 
 			req.addEventListener("failure",function(data){
 				e(data.responseText)
-				liberator.echoerr(data.responseText,true);
+				liberator.echoerr(data.responseText);
 			});
 
 			req.addEventListener("exception",function(data){
 				e(data.responseText)
-				liberator.echoerr(data.responseText,true);
+				liberator.echoerr(data.responseText);
 			});
 			   
 			!type ? req.get() : req.post();
