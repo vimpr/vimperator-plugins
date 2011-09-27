@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.2"
+  <plugin name="facebook" version="0.1.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -49,10 +49,11 @@ let INFO =
 	<h3 tag="facebook-post-command">Post(投稿)</h3>
     <item>
 		<tags>:facebook </tags>
-		<spec>:fa<oa>cebook</oa> text <a>-link</a> url</spec>
+		<spec>:fa<oa>cebook</oa> text <a>-link</a> url <a>-group</a> id</spec>
 		<description>
 			<p>:fa hogehoge とするとfacebookへ「hogehoge」と投稿します。
 			-link オプションを選ぶと補完リストに開いているURLが出てくるので選択して投稿できます。
+			-group オプションを選ぶと補完リストにグループidが出てくるので選択して投稿するとそのグループにのみ投稿ができます。
 			</p>
 		</description>
     </item>
@@ -138,6 +139,7 @@ function presetup(){ // access_token取得前 {{{
 function setup(){ // access_token取得後 {{{
 
 	FB.set_friends();
+	FB.set_groups();
 
 	commands.addUserCommand(["facebook","fa"],	"facebook util",
 		function(args){
@@ -146,6 +148,7 @@ function setup(){ // access_token取得後 {{{
 		{
 			options:[
 				[["-link","-l"],commands.OPTION_STRING,null,tablist],
+				[["-group","-g"],commands.OPTION_STRING,null,grouplist],
 			],
 			subCommands: [
 				new Command(["get"], "get walldata from facebook to MOW",
@@ -295,6 +298,16 @@ function setup(){ // access_token取得後 {{{
 		return tablist;
 	}
 
+	function grouplist(){
+		let store = storage.newMap("facebook",{store:true}).get("groups");
+		let grouplist = [];
+		for each(let d in store){
+			grouplist.push([d["id"],d["name"]])
+		}
+		return grouplist;
+	}
+
+
 } // }}}
 
 	let FB = { /// {{{
@@ -344,7 +357,8 @@ function setup(){ // access_token取得後 {{{
 
 		post_to_wall : function(data) { // post {{{
 
-			let url = this.graph + "/me/feed";
+			let url = this.graph + (data["-group"] || "me") + "/feed";
+			e(url)
 
 			let post_data = getParameterMap({
 				access_token : this.access_token,
@@ -428,30 +442,29 @@ function setup(){ // access_token取得後 {{{
 
 		set_friends : function(data) { // store friends data {{{ 
 
-			let req = new libly.Request(
-				this.graph + "/me/friends?access_token=" + this.access_token , //url
-				null, //headers
-				{ // options
-					asynchronous:true,
-				}
-			);
+			let url = this.graph + "/me/friends?access_token=" + this.access_token;
 
-			req.addEventListener("success",function(data){
+			FB.request(url,function(data){
 				res = libly.$U.evalJson(data.responseText)
 				let store = storage.newMap("facebook",{store:true});
 				store.set('friends',res["data"]);
 				store.save();
-			});
-
-			req.addEventListener("failure",function(data){
-				liberator.echoerr(data.responseText,true);
-				e(data.responseText)
-			});
-			   
-			req.get();
+			})
 
 		}, // }}}
 
+		set_groups : function(data) { // store groups data {{{ 
+
+			let url = this.graph + "/me/groups?access_token=" + this.access_token;
+
+			FB.request(url,function(data){
+				res = libly.$U.evalJson(data.responseText)
+				let store = storage.newMap("facebook",{store:true});
+				store.set('groups',res["data"]);
+				store.save();
+			})
+
+		}, // }}}
 		request : function(url,callback,type,post_data){ // get or post requester. def:get {{{
 
 			let req = new libly.Request(
