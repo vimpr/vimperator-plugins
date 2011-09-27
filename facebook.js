@@ -141,8 +141,7 @@ function setup(){ // access_token取得後 {{{
 
 	commands.addUserCommand(["facebook","fa"],	"facebook util",
 		function(args){
-			if(args[0])FB.post_to_wall(args);
-
+			if(args[0] || args["-link"])FB.post_to_wall(args);
 		},
 		{
 			options:[
