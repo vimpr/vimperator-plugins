@@ -348,7 +348,7 @@ function setup(){ // access_token取得後 {{{
 
 			let post_data = getParameterMap({
 				access_token : this.access_token,
-				message : data[0],
+				message : data[0] || '',
 				link : data["-link"] || '',
 				//privacy:'{"value":' + '"CUSTOM"' + ',"networks":' + '["xxx"]' + '}', 
 			});
