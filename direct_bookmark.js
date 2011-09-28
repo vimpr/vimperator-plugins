@@ -583,7 +583,7 @@ for Migemo search: require XUL/Migemo Extension
             });
         });
         d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort()})
-         .error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e)});
+         .error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
         return first;
     }
     function getTags(arg){
