@@ -398,7 +398,7 @@ for Migemo search: require XUL/Migemo Extension
             entryPage:'http://del.icio.us/url/%URL::MD5%',
             poster:function(user,password,url,title,comment,tags){
                 var request_url = 'https://api.del.icio.us/v1/posts/add?' + [
-                    ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')]
+                    ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(',')]
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "get",
