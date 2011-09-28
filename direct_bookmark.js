@@ -1,4 +1,3 @@
-// Last Change: 27-May-2011. Jan 2008
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>{NAME}</name>
@@ -7,7 +6,6 @@ var PLUGIN_INFO =
     <version>0.15</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
-    <maxVersion>2.2</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
     <detail><![CDATA[
 Social Bookmark direct add script for Vimperator 2.2
@@ -412,16 +410,15 @@ for Migemo search: require XUL/Migemo Extension
                 });
             },
             tags:function(user,password){
-                const feed_url = 'http://feeds.delicious.com/feeds/json/tags/';
-                var returnValue = [];
+                const url = 'https://api.del.icio.us/v1/tags/get?';
                 var xhr = new XMLHttpRequest();
-                xhr.open("GET", feed_url + user + "?raw", false, user, password);
+                xhr.open("GET", url, false, user, password);
                 xhr.send(null);
 
-                var tags = evalFunc("(" + xhr.responseText + ")");
-                for(var tag in tags)
-                    returnValue.push(tag);
-                return returnValue;
+                return [
+                    e.getAttribute("tag")
+                    for ([, e] in Iterator(Array.slice(xhr.responseXML.querySelectorAll('tag'))))
+                ];
             },
             icon:function(url){
                 var url = liberator.modules.buffer.URL;
