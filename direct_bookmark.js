@@ -597,7 +597,7 @@ for Migemo search: require XUL/Migemo Extension
         liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort();
     }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
-        function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {});
+        function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
         function(args){
             var service = args.string || useServicesByPost.split(/\s*/)[0];
@@ -630,7 +630,8 @@ for Migemo search: require XUL/Migemo Extension
         },{
             completer: function(filter)
                 [0, useServicesByPost.split(/\s*/).map(function(p) [p, services[p].description])]
-        }
+        },
+        true
     );
     liberator.modules.commands.addUserCommand(['bicon'],"Show Bookmark Count as Icon",
         function(arg){
@@ -641,7 +642,7 @@ for Migemo search: require XUL/Migemo Extension
                         (currentService.description + ': ' + currentService.icon(url)) : null;
             }).join('<br />');
             liberator.echo(html, true);
-        }, {});
+        }, {}, true);
     liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
             var comment = "";
@@ -707,7 +708,8 @@ for Migemo search: require XUL/Migemo Extension
             options: [
                 [['-s','-service'], liberator.modules.commands.OPTION_STRING],
             ]
-        }
+        },
+        true
     );
 })();
 // vim:sw=4 ts=4 et:
