@@ -28,7 +28,8 @@
 //
 //     status   : 'normarl' or 'error'
 //     message  : error message (string) or image data (binary)
-//     savePath : full path on local strage ( only success )
+//     savePath : full path on local strage
+//                ( only success and same savePath on the accept message )
 //
 var JSONMessage;
 var xhrImg;
