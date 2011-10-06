@@ -333,6 +333,20 @@ let INFO =
       return result;
     },
 
+    // 履歴にアイテム追加
+    pushHistory: function (s) {
+      let exists = false, newHistory = [];
+      newHistory.push(s);
+      for (let [i, h] in Iterator(this.history)) {
+        if (h === s) {
+          exists = true;
+        } else {
+          newHistory.push(h);
+        }
+      }
+      this.history = newHistory;
+    },
+
     // ボディを範囲とした Range を作る
     makeBodyRange: function (frame) {
       let range = frame.document.createRange();
@@ -520,16 +534,7 @@ let INFO =
     },
 
     submit: function () {
-      let exists = false, newHistory = [];
-      newHistory.push(this.currentSearchText);
-      for (let [i, h] in Iterator(this.history)) {
-        if (h === this.currentSearchText) {
-          exists = true;
-        } else {
-          newHistory.push(h);
-        }
-      }
-      this.history = newHistory;
+      this.pushHistory(this.currentSearchText);
 
       this.lastSearchText = this.currentSearchText;
       this.lastSearchExpr = this.currentSearchExpr;
@@ -654,14 +659,24 @@ let INFO =
     ['ml', 'migelight'],
     'Migelight matched words',
     function (args) {
-      let r = MF.highlightAll(args.join(' '), args['-color']);
+      let w = args.literalArg;
+      MF.pushHistory(w);
+      let r = MF.highlightAll(w, args['-color']);
       liberator.echo(r ? r.length + ' words migelighted.'
                        : 'word not found.');
     },
     {
+      literal: 0,
       options: [
         [['-color', '-c'], commands.OPTION_STRING, null, colorsCompltions],
-      ]
+      ],
+      completer: function (context, args) {
+        context.compare = void 0;
+        context.completions = [
+          [v, 'History']
+          for ([, v] in Iterator(MF.history))
+        ];
+      }
     },
     true
   );
