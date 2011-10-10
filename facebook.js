@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.4"
+  <plugin name="facebook" version="0.1.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -242,7 +242,7 @@ function setup(){ // access_token取得後 {{{
 	function feed_completer(context){ 
 
 		context.title = ["feed"];
-		//context.filters = [CompletionContext.Filter.textDescription]; 
+		context.filters = [statusObjectFilter]; 
 		context.compare = void 0;
 		context.anchored = false;
 		context.createRow = function(item, highlightGroup){
@@ -266,6 +266,10 @@ function setup(){ // access_token取得後 {{{
 		};
 
 		context.incomplete = false;
+
+		function statusObjectFilter(item)
+			let (desc = item.description)
+			(this.match(desc.name) || this.match(desc.message) || this.match(desc.link));
 
 	}
 
