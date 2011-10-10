@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.5"
+  <plugin name="facebook" version="0.1.6"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -257,7 +257,10 @@ function setup(){ // access_token取得後 {{{
 			let [value, info] = item.item;
 			return <div highlight="CompItem" style="white-space: nowrap">
 				<li highlight="CompDesc">
-					<img src={info.icon} style="height:24px;"/> {info.name} : {info.message} {info.link} 
+					<img src={info.user_icon} style="height:24px;"/>
+					<img src={info.icon}/>
+					{info.user_name} 
+					: {info.name} {info.story} {info.message} <u>{info.link}</u> {info.description}
 					<span style="color:red;">{info.likes}</span>
 					<span style="color:yellow;">{info.comments}</span>
 				</li>
@@ -269,7 +272,7 @@ function setup(){ // access_token取得後 {{{
 
 		function statusObjectFilter(item)
 			let (desc = item.description)
-			(this.match(desc.name) || this.match(desc.message) || this.match(desc.link));
+			(this.match(desc.user_name) || this.match(desc.message) || this.match(desc.link) || this.match(desc.description));
 
 	}
 
@@ -281,12 +284,16 @@ function setup(){ // access_token取得後 {{{
 				(command === "open") ? (d["link"] || (d["actions"] ? d["actions"][0]["link"] : FB.www)) : d["id"] ,
 				{
 					type:d["type"],
-					name:d["from"]["name"],
-					message:d["message"] ? d["message"] : '',
-					icon:FB.graph + d["from"]["id"] + "/picture/" ,
-					link:d["link"] ? d["link"] : '',
+					icon:d["icon"],
+					user_name:d["from"]["name"],
+					message:(d["message"] || ''),
+					user_icon:FB.graph + d["from"]["id"] + "/picture/" ,
+					link:(d["link"] || ''),
 					likes:d["likes"] ? d["likes"]["count"] + ' likes' : '' ,
 					comments:(d["comments"]["count"] > 0) ? d["comments"]["count"] + ' comments' : '' ,
+					name:(d["name"] || ''),
+					story:(d["story"] || ''),
+					description:(d["description"] || ''),
 				}
 			]);
 		}
