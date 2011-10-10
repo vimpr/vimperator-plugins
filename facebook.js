@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.3"
+  <plugin name="facebook" version="0.1.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -163,7 +163,7 @@ function setup(){ // access_token取得後 {{{
 					function (args) {
 						FB.check_in(args);
 					},{
-						literal:1,
+						literal:0,
 						completer:checkins_completer,
 					}
 				),
@@ -171,7 +171,7 @@ function setup(){ // access_token取得後 {{{
 					function (args) {
 						FB.comment(args);
 					},{
-						literal:1,
+						literal:0,
 						completer:function(context){
 							feed_completer(context);
 							context.completions = feed_complations();
@@ -274,12 +274,12 @@ function setup(){ // access_token取得後 {{{
 		let feeds = [];
 		for each(let d in store){
 			feeds.push([
-				(command === "open") ? (d["link"] || d["actions"][0]["link"]) : d["id"] ,
+				(command === "open") ? (d["link"] || (d["actions"] ? d["actions"][0]["link"] : FB.www)) : d["id"] ,
 				{
 					type:d["type"],
 					name:d["from"]["name"],
 					message:d["message"] ? d["message"] : '',
-					icon:FB.graph + d["from"]["id"] + "/picture/",
+					icon:FB.graph + d["from"]["id"] + "/picture/" ,
 					link:d["link"] ? d["link"] : '',
 					likes:d["likes"] ? d["likes"]["count"] + ' likes' : '' ,
 					comments:(d["comments"]["count"] > 0) ? d["comments"]["count"] + ' comments' : '' ,
@@ -358,13 +358,11 @@ function setup(){ // access_token取得後 {{{
 		post_to_wall : function(data) { // post {{{
 
 			let url = this.graph + (data["-group"] || "me") + "/feed";
-			e(url)
 
 			let post_data = getParameterMap({
 				access_token : this.access_token,
-				message : data[0] || '',
+				message : data.join(' ') || '',
 				link : data["-link"] || '',
-				//privacy:'{"value":' + '"CUSTOM"' + ',"networks":' + '["xxx"]' + '}', 
 			});
 
 			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
@@ -500,11 +498,11 @@ function setup(){ // access_token取得後 {{{
 
 			let url = this.graph + "me/checkins";
 
-			let p = data[0].split(',');
+			let p = data[0].split(' ')[0].split(',');
 			let place_id = p[0];
 			let latitude = p[1];
 			let longitude = p[2];
-			let message = data[1];
+			let message = data[0].split(' ').slice(1,undefined).join(' ');
 
 			let post_data = getParameterMap({
 				access_token : this.access_token,
@@ -522,10 +520,13 @@ function setup(){ // access_token取得後 {{{
 
 			if(!data[0]) return;
 
+			let target = data[0].split(' ')[0];
+			let message = data[0].split(' ').slice(1,undefined).join(' ');
+
 			let url = this.graph + data[0] + "/comments";
 			let post_data = getParameterMap({
 				access_token : this.access_token,
-				message : data[1]
+				message : data
 			});
 
 			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
