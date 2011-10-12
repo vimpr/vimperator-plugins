@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.16.0</version>
+  <version>1.16.1</version>
   <minVersion>2.3</minVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -2431,7 +2431,7 @@ let PLUGIN_INFO =
 
   // ストリーム
   let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
-  let TrackingStream = Stream({ name: 'tracking stream', url: "http://stream.twitter.com/1/statuses/filter.json" });
+  let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1/statuses/filter.json" });
 
   // 公開オブジェクト
   __context__.OAuth = tw;
