@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Slideshare" version="1.0.0"
+  <plugin name="Slideshare" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="Controll slideshare's slide."
           lang="en-US"
@@ -53,6 +53,11 @@ let INFO =
       <tags>:slideshare-prev</tags>
       <spec>:Slideshare prev</spec>
       <description><p>Go previous page.</p></description>
+    </item>
+    <item>
+      <tags>:slideshare-fullscreen</tags>
+      <spec>:Slideshare fullscreen</spec>
+      <description><p>Toggle fullscreen.</p></description>
     </item>
   </plugin>
   <plugin name="Slideshare" version="1.0.0"
@@ -74,6 +79,11 @@ let INFO =
       <spec>:Slideshare prev</spec>
       <description><p>前のページに移動</p></description>
     </item>
+    <item>
+      <tags>:slideshare-fullscreen</tags>
+      <spec>:Slideshare fullscreen</spec>
+      <description><p>フルスクリーン切り換え</p></description>
+    </item>
   </plugin>
 </>;
 // }}}
@@ -81,80 +91,106 @@ let INFO =
 
 (function () {
 
+  function makeStyleToggler (myStyle, e) {
+    let originalStyle = e.getAttribute('style') || '';
+    return function () {
+      if (e.__anekos_style_override) {
+        e.setAttribute('style', originalStyle);
+        delete e.__anekos_style_override;
+      } else {
+        e.setAttribute('style', originalStyle + myStyle.toString());
+        e.__anekos_style_override = true;
+      }
+    }
+  }
+
+  function makeFullscreenToggler (doc, main) {
+    const hiddenStyle = 'display: none !important';
+
+    let styleTogglers = Array.slice(doc.querySelectorAll('object')).map(makeStyleToggler.bind(null, hiddenStyle));
+
+    return function (callback) {
+      main();
+      styleTogglers.forEach(function (f) f());
+      setTimeout(function () {
+        if (callback)
+          callback();
+      }, 1000);
+    };
+  }
+
   function HTML5Slideshare (doc, callback) {
     let win = doc.defaultView;
     let player = win.player;
 
-    doc.querySelector('.btnFullScreen').click();
+    let toggleFullscreen =
+      makeFullscreenToggler(
+        doc,
+        let (isFullscreen = false)
+          function () {
+            doc.querySelector(isFullscreen ? '.btnLeaveFullScreen' : '.btnFullScreen').click();
+            isFullscreen ^= true;
+          }
+      );
 
-    callback({
-      next: function () {
-        player.play(this.current + 1);
-      },
+    toggleFullscreen(
+      function () {
+        callback({
+          next: function () {
+            player.play(this.current + 1);
+          },
 
-      previous: function () {
-        if (this.current > 1)
-          player.play(this.current - 1);
-      },
+          previous: function () {
+            if (this.current > 1)
+              player.play(this.current - 1);
+          },
 
-      get current () player.controller.currentPosition
-    });
+          toggleFullscreen: function () {
+            toggleFullscreen();
+          },
+
+          get current () player.controller.currentPosition
+        });
+      }
+    );
   }
 
   function FlashSlideshare (doc, callback) {
     let player = doc.querySelector('#player');
 
-    let include = doc.querySelector('#h-flashplayer-inclusions').textContent;
-    let pp = player.parentNode;
-    doc.body.appendChild(pp);
+    const fullScreenStyle = <><![CDATA[
+      position : fixed !important;
+      top : 0px !important;
+      left : 0px !important;
+      z-index : 1000 !important;
+      width : 100% !important;
+      height : 100% !important;
+    ]]></>;
 
-    let cs = doc.body.children;
-    for (var i = cs.length - 1; i >=0; i--)
-      if (cs[i] !== pp)
-        cs[i].style.display = 'none';
+    styleTogglers.push();
 
-    doc.defaultView.eval(include);
+    let toggleFullscreen = makeFullscreenToggler(doc, makeStyleToggler(fullScreenStyle, player));
 
-    setTimeout(
+    toggleFullscreen(
       function () {
-        player = doc.querySelector('#player');
-        player.setAttribute(
-          'style',
-          player.getAttribute('style') + <><![CDATA[
-            position: fixed !important;
-            top: 0px !important;
-            left: 0px !important;
-            z-index: 1000;
-            width: 100% !important;
-            height: 100% !important;
-          ]]></>
-        );
-
-        pp.setAttribute(
-          'style',
-          pp.getAttribute('style') + <><![CDATA[
-            position: fixed !important;
-            top: 0px !important;
-            left: 0px !important;
-            z-index: 1000;
-            width: 100% !important;
-            height: 100% !important;
-          ]]></>
-        );
-
         callback({
           next: function () {
-            player.next();
+            this.player.next();
           },
 
           previous: function () {
-            player.previous();
+            this.player.previous();
           },
+
+          toggleFullscreen: function () {
+            toggleFullscreen();
+          },
+
+          get player () doc.querySelector('#player'),
 
           get current () player.controller.currentPosition
         });
-      },
-      100
+      }
     );
   }
 
@@ -186,6 +222,7 @@ let INFO =
       subCommands: [
         new Command(['n[ext]'], 'Go next page', function () Slideshare(function () this.next())),
         new Command(['p[rev]'], 'Go previous page', function () Slideshare(function () this.previous())),
+        new Command(['f[ullscreen]'], 'Toggle fullscrenn', function () Slideshare(function () this.toggleFullscreen())),
       ]
     },
     true
