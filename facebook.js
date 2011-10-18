@@ -1,7 +1,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.6"
+  <plugin name="facebook" version="0.1.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
@@ -534,10 +534,10 @@ function setup(){ // access_token取得後 {{{
 			let target = data[0].split(' ')[0];
 			let message = data[0].split(' ').slice(1,undefined).join(' ');
 
-			let url = this.graph + data[0] + "/comments";
+			let url = this.graph + target + "/comments";
 			let post_data = getParameterMap({
 				access_token : this.access_token,
-				message : data
+				message : message
 			});
 
 			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
