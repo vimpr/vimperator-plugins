@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.32.9</version>
+  <version>0.33.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -826,6 +826,71 @@ Thanks:
   // }}}
 
   /*********************************************************************************
+  * VideoPlayer                                                                  {{{
+  *********************************************************************************/
+
+  function VideoPlayer () {
+    Player.apply(this, arguments);
+  }
+
+  VideoPlayer.prototype = {
+    __proto__: Player.prototype,
+
+    functions: {
+      currentTime: 'rw',
+      fetch: '',
+      fileURL: '',
+      makeURL: '',
+      muted: 'rw',
+      pageinfo: '',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
+      relations: '',
+      title: '',
+      totalTime: 'r',
+      volume: 'rw',
+      quality: '',
+      qualities: ''
+    },
+
+    icon: 'TODO',
+
+    get currentTime () parseInt(this.player.currentTime),
+    set currentTime (value) (this.player.currentTime = value),
+
+    get muted () this.player.muted,
+    set muted (value) (this.player.muted = value),
+
+    get player ()
+      content.document.querySelector('video'),
+
+    get ready () !!this.player,
+
+    get state () {
+      if (this.player.ended)
+        return Player.ST_ENDED;
+      if (this.player.paused)
+        return Player.ST_PAUSED;
+      return Player.ST_PLAYING;
+    },
+
+    get totalTime () parseInt(this.player.duration),
+
+    get isValid () false,
+
+    get volume () parseInt(this.player.volume * 100),
+    set volume (value) (this.player.volume = value / 100),
+
+    play: function () this.player.play(),
+
+    pause: function () this.player.pause()
+  };
+
+  // }}}
+
+  /*********************************************************************************
   * YouTubePlayer                                                                {{{
   *********************************************************************************/
 
@@ -958,7 +1023,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.getDuration()),
 
-    get isValid () U.currentURL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/),
+    get isValid () (this.player && U.currentURL.match(/^http:\/\/(?:[^.]+\.)?youtube\.com\/watch/)),
 
     get volume () parseInt(this.player.getVolume()),
     set volume (value) (this.player.setVolume(value), this.volume),
@@ -991,6 +1056,141 @@ Thanks:
 
     pause: function () this.player.pauseVideo()
   };
+
+  // }}}
+
+  /*********************************************************************************
+  * YouTubePlayer5                                                               {{{
+  *********************************************************************************/
+
+  function YouTubePlayer5 (stella) {
+    Player.apply(this, arguments);
+    this._player = new VideoPlayer(stella);
+  }
+
+  YouTubePlayer5.prototype = {
+    __proto__: YouTubePlayer.prototype,
+
+    functions: {
+      currentTime: 'rw',
+      fetch: 'x',
+      fileURL: 'r',
+      makeURL: 'x',
+      muted: 'rwt',
+      pageinfo: 'r',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
+      relations: 'r',
+      title: 'r',
+      totalTime: 'r',
+      volume: 'rw',
+      quality: 'rw',
+      qualities: 'r'
+    },
+
+    icon: 'http://www.youtube.com/favicon.ico#hoge',
+
+    get fileExtension () '.mp4',
+
+    get fileURL ()
+      let (as = content.document.defaultView.wrappedJSObject.swfArgs)
+        ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
+
+    get id ()
+      YouTubePlayer.getIDfromURL(U.currentURL),
+
+    get pageinfo () {
+      let doc = content.document;
+      let desc = doc.querySelector('#eow-description');
+      return [
+        [
+          'comment',
+          desc ? desc.textContent.trim() : ''
+        ],
+        [
+          'tags',
+          XMLList([
+            <span>[<a href={v.href}>{v.textContent}</a>]</span>
+            for ([, v] in Iterator(doc.querySelectorAll('#eow-tags > li > a')))
+          ].join(''))
+        ],
+        [
+          'quality',
+          this.quality
+        ]
+      ];
+    },
+
+    get player () this._player,
+
+    get quality () this.player.getPlaybackQuality(),
+    set quality (value) this.player.setPlaybackQuality(value),
+
+    get qualities () this.player.getAvailableQualityLevels(),
+
+    get ready () !!this.player,
+
+    get relations () {
+      let result = [];
+      let doc = content.document;
+      for each (let item in Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
+        result.push(new RelatedTag(item.textContent));
+      }
+      for each (let item in Array.slice(doc.querySelectorAll('.video-list-item'))) {
+        let url = item.querySelector('a').href;
+        if (!YouTubePlayer.isVideoURL(url))
+          continue;
+        let id = YouTubePlayer.getIDfromURL(url);
+        result.push(
+          new RelatedID(
+            id,
+            item.querySelector('span.title').textContent,
+            'http://img.youtube.com/vi/' + id + '/1.jpg'
+          )
+        );
+      }
+      return result;
+    },
+
+    get title ()
+      content.document.title.replace(/^YouTube - /, ''),
+
+    fetch: function (filepath) {
+      // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
+      // FIXME 一番初めが最高画質だと期待
+      let cargs = content.wrappedJSObject.yt.config_.PLAYER_CONFIG.args;
+      cargs.url_encoded_fmt_stream_map.split(',')[0].split('&').forEach(function(x) {
+        let [key, val] = x.split('=');
+        if (key == 'url') {
+          U.download(decodeURIComponent(val), filepath, '.flv', this.title);
+        }
+      }, this);
+    },
+
+    makeURL: function (value, type) {
+      switch (type) {
+        case Player.URL_ID:
+          return 'http://www.youtube.com/watch?v=' + value;
+        case Player.URL_TAG:
+          return 'http://www.youtube.com/results?search=tag&search_query=' + encodeURIComponent(value);
+        case Player.URL_SEARCH:
+          return 'http://www.youtube.com/results?search_query=' + encodeURIComponent(value);
+      }
+      return value;
+    },
+  };
+
+  'play pause currentTime muted state totalTime volume'.split(/\s+/).forEach(function (name) {
+    let getter = VideoPlayer.prototype.__lookupGetter__(name);
+    let setter = VideoPlayer.prototype.__lookupSetter__(name);
+    let value = !(getter || setter);
+    if (getter || value)
+      YouTubePlayer5.prototype.__defineGetter__(name, function () this.player[name]);
+    if (setter || value)
+      YouTubePlayer5.prototype.__defineSetter__(name, function (value) (this.player[name] = value));
+  });
 
   // }}}
 
@@ -1661,6 +1861,7 @@ Thanks:
       this.players = {
         niconico: new NicoPlayer(this.stella),
         youtube: new YouTubePlayer(this.stella),
+        youtube5: new YouTubePlayer5(this.stella),
         youtubeuc: new YouTubeUserChannelPlayer(this.stella),
         vimeo: new VimeoPlayer(this.stella)
       };
