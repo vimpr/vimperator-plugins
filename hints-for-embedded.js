@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="HintsForEmbeded" version="1.4.1"
+  <plugin name="HintsForEmbeded" version="1.5.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
           lang="en-US"
@@ -79,7 +79,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="HintsForEmbeded" version="1.4.1"
+  <plugin name="HintsForEmbeded" version="1.5.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="埋め込み(embed)オブジェクト用ヒントモード"
           lang="ja"
@@ -146,6 +146,12 @@ let INFO =
       name: /.*/,
       value: /(?:v|wv_id)=([a-z]{2}\d{1,10})/,
       url: function (id) ('http://www.nicovideo.jp/watch/' + id)
+    },
+    youtube_iframe: {
+      site: /youtube/,
+      name: /^src$/,
+      value: /http:\/\/www\.youtube\.com\/embed\/(.+)/,
+      url: function (id) ('http://www.youtube.com/watch?v=' + id)
     },
     youtube: {
       site: /youtube/,
@@ -233,7 +239,7 @@ let INFO =
     function (elem) {
       liberator.open(open(elem), where);
     },
-    function () '//embed | //object | //img'
+    function () '//embed | //object | //img | //iframe'
   );
 
   commands.addUserCommand(
