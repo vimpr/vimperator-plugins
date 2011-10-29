@@ -28,7 +28,7 @@ let PLUGIN_INFO =
   <name>Twittperator</name>
   <description>Twitter Client using OAuth and Streaming API</description>
   <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.16.1</version>
+  <version>1.16.2</version>
   <minVersion>2.3</minVersion>
   <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
   <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
@@ -2214,18 +2214,23 @@ let PLUGIN_INFO =
         command: ["thread"],
         description: "Show tweets thread.",
         action: function(arg) {
+          function showThread () {
+            Twittperator.showTL(thread);
+          }
           function getStatus(id, next) {
             let result;
-            if (history.some(function (it) (it.id == id && (result = it))))
+            if (history.some(function (it) (it.id == id && (result = it)))) {
               return next(result);
-            tw.jsonGet("statuses/show/" + id, null, function(res) next(res))
+            }
+            // XXX エラーの時はなにか表示しておくべき？
+            tw.jsonGet("statuses/show/" + id, null, function(res) next(res), showThread);
           }
           function trace(st) {
             thread.push(st);
             if (st.in_reply_to_status_id) {
               getStatus(st.in_reply_to_status_id, trace);
             } else {
-              Twittperator.showTL(thread);
+              showThread();
             }
           }
 
