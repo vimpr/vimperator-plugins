@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="HintsForEmbeded" version="1.5.0"
+  <plugin name="HintsForEmbeded" version="1.5.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
           lang="en-US"
@@ -150,7 +150,7 @@ let INFO =
     youtube_iframe: {
       site: /youtube/,
       name: /^src$/,
-      value: /http:\/\/www\.youtube\.com\/embed\/(.+)/,
+      value: /http:\/\/www\.youtube\.com\/(?:embed|v)\/([-a-zA-Z0-9_]+)/,
       url: function (id) ('http://www.youtube.com/watch?v=' + id)
     },
     youtube: {
