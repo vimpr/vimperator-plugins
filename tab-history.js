@@ -72,7 +72,7 @@ var tabHistory = (function(){
           currentTab = history[i];
 
       if (prevTab === currentTab) {
-        history.splice(i, 1);
+        history.splice(i--, 1);
         if (i <= index)
           --index;
       }
