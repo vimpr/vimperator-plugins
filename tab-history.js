@@ -66,6 +66,17 @@ var tabHistory = (function(){
       if (i <= index)
         --index;
     }
+
+    for (let i = 1; i < history.length; ++i) {
+      let prevTab = history[i - 1],
+          currentTab = history[i];
+
+      if (prevTab === currentTab) {
+        history.splice(i, 1);
+        if (i <= index)
+          --index;
+      }
+    }
   }
 
   function addHistory (aTab) {
