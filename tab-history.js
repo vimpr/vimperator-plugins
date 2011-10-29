@@ -2,7 +2,7 @@ var INFO =
 <plugin name="TabHistory"
         version="0.1"
         summary="Go back/forward the tab selection history"
-        xmlns="http://vimperator.org/namespace/liberator">
+        xmlns="http://vimperator.org/namespaces/liberator">
   <author email="teramako@gmail.com">teramako</author>
   <license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
   <project name="Vimperator" minVerion="3.1"/>
