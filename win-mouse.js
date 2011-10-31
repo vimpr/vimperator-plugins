@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Win Cursor" version="1.3.1"
+  <plugin name="Win Cursor" version="1.3.2"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
           lang="en-US"
@@ -106,6 +106,15 @@ let INFO =
       <description>
         <p>
           <a>msec</a> milliseconds after clicking, blur(unfocus) from embed element.
+        </p>
+      </description>
+    </item>
+    <item>
+      <tags>g:win_mouse_release_delay</tags>
+      <spec>g:win_mouse_release_delay = <a>msec</a></spec>
+      <description>
+        <p>
+          <a>msec</a> milliseconds after clicking, release modifier keys.
         </p>
       </description>
     </item>
@@ -447,7 +456,7 @@ let INFO =
               }
               SendInput(relKeys.length, ClickInput.address(), MouseInput.size)
             },
-            50
+            liberator.globalVariables.win_mouse_release_delay || 5
           );
         }
       }
