@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>twsidebar@snca.net</em:id>
+    <em:name>Twitter Sidebar</em:name>
+    <em:version>1.0</em:version>
+    <em:creator>anekos</em:creator>
+    <em:description>Twitter Sidebar for Twittperator Plugin</em:description>
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
+        <em:minVersion>3.6</em:minVersion>
+        <em:maxVersion>10.0a1</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>

@@ -1,0 +1,524 @@
+liberator.modules.TWAnekoSB = ANekoSB = (function () {
+
+  /*********************************************************************************
+   * Config
+   *********************************************************************************/
+
+  let Config = liberator.globalVariables.twittperator_sidebar_config || {
+    // for Keyword タグ
+    keyword: /neko|vimp|cat|猫/i,
+
+    // ツイート内に含まれると、表示上抹殺される (reply とか除く
+    vanish: /うぎぃいいい/i,
+
+    // 自分のスクリーンネーム
+    screenName: 'anekos',
+
+    // 自分のその他の名前
+    myNames: /anekos|悪魔猫将軍/i,
+
+    // ログファイル てけとーなフォーマットで保存されます
+    //logFile: io.File('~/.chirpstream'),
+    //myLogFile: io.File('~/.mychirpstream'),
+
+    // 各イベント時に音がなる
+    sound: {
+      meow: makeAudio('file:///home/anekos/sound/my/meow.wav'),
+      fanfare: makeAudio('file://C:/sound-data/fanfare.wav', 0.5),
+      retweet: makeAudio('file:///home/anekos/sound/my/meow.wav', 0.8),
+      favorite: makeAudio('file:///home/anekos/sound/my/meow.wav', 0.6),
+      reply: makeAudio('file:///home/anekos/sound/my/meow.wav', 1.0),
+      debug: makeAudio('file:///home/anekos/sound/my/meow.wav', 1.0),
+      filter: makeAudio('file:///home/anekos/sound/my/meow.wav', 1.0),
+    },
+
+    // 文字のサイズ
+    fontSize: 15,
+
+    // リストの最大保持数
+    listMax: 100,
+
+    // 日本語だけ for filter stream
+    jpOnly: true,
+
+    // 地震ツイートの本文に場所をくっつける
+    earthquake: true,
+  };
+
+  // 日本語判定
+  JP = new RegExp("[\\u4e00-\\u9fa0\\u30A1-\\u30F6\\u30FC\\u3042-\\u3093\\u3001\\u3002\\uFF01\\uFF1F]");
+
+  /*********************************************************************************
+   * Main
+   *********************************************************************************/
+
+  // util {{{
+
+  function className (n)
+    ('tw-anekos-sb-plugin-' + n);
+
+  function px (n)
+    parseInt(n, 10) + 'px';
+
+  // }}}
+
+  function formatText (str) { // {{{
+    str = str.trim();
+    let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
+    XML.ignoreWhitespace = false;
+    let m, i = 0, buf = "", x = <xhtml:p class="twlist-text" xmlns:xhtml="http://www.w3.org/1999/xhtml"/>;
+    while((m=reg.exec(str))){
+      buf = str.substring(i, m.index);
+      if (buf)
+        x.appendChild(buf);
+      let klass = "twlist-link", href = "";
+      switch (m[0].charAt(0)){
+        case "@":
+          klass += " twlist-user";
+          href = "http://twitter.com/" + m[0].substr(1);
+          break;
+        case "#":
+          klass += " twlist-hash";
+          href = "http://twitter.com/search?q=%23" + m[0].substr(1);
+          break;
+        default:
+          klass += " twlist-url";
+          href = m[0];
+      }
+      x.appendChild(<xhtml:a class={klass} href={href}
+                           onclick="twlist.onClick(event)" xmlns:xhtml={XHTML}>{m[0]}</xhtml:a>);
+      i=reg.lastIndex;
+    }
+    buf = str.substr(i);
+    if (buf)
+      x.appendChild(buf);
+    return x;
+  } // }}}
+
+  function escapeBreakers (text) // {{{
+    text.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]+/g, function(c) uneval(c)); // }}}
+
+  function getSidebarWindow ()
+    document.getElementById('sidebar')._contentWindow;
+
+  let appendTweet = (function () { // {{{
+    function messageToXML (t) {
+      XML.prettyPrinting = true;
+      XML.ignoreWhitespace = true;
+      let xml;
+      let sbWidth = getSidebarWindow().document.width;
+      xml =
+        <richlistitem
+          class={[className('tweet-panel'), className('tweet-' + t.type)].join(' ')}
+          style={[
+            "font-size: " + px(Config.fontSize - (t.text.length > 70 ? 2 : 0)),
+            "width: " + px(sbWidth - 100) + ' !important'
+          ].join(';')}
+          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+          <hbox>
+            <vbox>
+              <image src={t.img} height="48" width="48" />
+            </vbox>
+            <vbox style={"width: " + (sbWidth - 48 - 35) + "px !important"}>
+              <hbox>
+                <label style="font-weight: bold">{escapeBreakers(t.name)}</label>
+                <spacer flex="1"/>
+                <label>{t.sub || ''}</label>
+              </hbox>
+              <description width="100%">{escapeBreakers(t.text)}</description>
+            </vbox>
+          </hbox>
+        </richlistitem>;
+      return xml;
+    }
+
+    function xmlToDom(xml, xmlns) {
+      XML.prettyPrinting = true;
+      XML.ignoreWhitespace = true;
+      var doc = (new DOMParser).parseFromString(
+        '<root xmlns="' + xmlns + '">' + xml.toXMLString() + "</root>",
+        "application/xml");
+      var imported = document.importNode(doc.documentElement, true);
+      var range = document.createRange();
+      range.selectNodeContents(imported);
+      var fragment = range.extractContents();
+      range.detach();
+      return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
+    }
+
+    let latest = {};
+    let latestNode = null;
+
+    function append (t, tab, streamName) {
+      tab = tab || 'home';
+
+      let now = JSON.stringify({name: t.name, text: t.text, tab: tab});
+      if (latest === now) {
+        if (latestNode)
+          latestNode.setAttribute(
+            'class',
+            latestNode.getAttributeNode('class') + className('tweet-' + t.type)
+          );
+        return;
+      }
+      latest = now;
+
+      let cntr = getSidebarWindow().document.getElementById('tw-anekos-sb-' + tab + '-list');
+      let dom = xmlToDom(messageToXML(t));
+      let repDom = dom.cloneNode(true);
+      let len = cntr.itemCount;
+      cntr.appendChild(repDom);
+      latestNode = repDom;
+
+      cntr.scrollToIndex(len - 1);
+      if (len > Config.listMax)
+        cntr.removeChild(cntr.firstChild);
+    }
+
+    return append;
+  })(); // }}}
+
+  function objectToString (obj, head) { // {{{
+    if (!head)
+      head = '';
+
+    let nextHead = head + '  ';
+
+    let result = '';
+    for (let [n, v] in Iterator(obj)) {
+      let vstr =
+        (v && typeof v === 'object') ? objectToString(v, nextHead)
+                                     : (v || '').toString();
+      result += head + n + ':\n' + vstr.split(/\n/).map(function(s) nextHead + s).join('\n') + '\n';
+    }
+
+    return result.trim();
+  } // }}}
+
+  function onMsg (real, msg, raw, streamName) { // {{{
+    if (real) {
+      Tweets.unshift(msg);
+      if (Tweets.length > Config.listMax)
+        Tweets.splice(Config.listMax);
+    }
+
+    let screenName = Config.screenName;
+    let my = (msg.retweeted_status && msg.retweeted_status.user.screen_name === screenName)
+             ||
+             (msg.target_object && msg.event && (
+                (msg.event === 'favorite' && msg.target_object.user.screen_name == screenName)
+                ||
+                (msg.event === 'list_member_added' && msg.target.screen_name == screenName)
+             ))
+             ||
+             (msg.user && msg.text && Config.myNames.test(msg.text))
+             ||
+             (msg.user && msg.text && msg.in_reply_to_screen_name == screenName)
+             ||
+             (msg.direct_message);
+
+    // Fav test
+    try {
+      //liberator.log(JSON.stringify(msg, null, 2));
+      if (msg.event && msg.event === 'favorite' && msg.source && msg.source.screen_name === screenName) {
+        let t = {
+          name: '>' + msg.target_object.user.screen_name + '<',
+          img: msg.target_object.user.profile_image_url,
+          text: msg.target_object.text,
+          type: 'favorite'
+        };
+        appendTweet(t, 'home', streamName);
+        appendTweet(t, 'debug', streamName);
+        Config.sound.debug.play();
+      }
+    } catch (e) {
+      liberator.log(e);
+    }
+
+    // Ignore not JP
+    if (!my && streamName === 'filter' && msg.text && Config.jpOnly && !JP.test(msg.text)) {
+      return;
+    }
+
+    if (msg.text && msg.user && msg.user && msg.user.screen_name === screenName)
+      my = false;
+
+    let t, dummy;
+
+    if (msg.direct_message) {
+      t = {
+        name: msg.direct_message.sender.screen_name,
+        img: msg.direct_message.sender.profile_image_url,
+        text: msg.direct_message.text,
+        sub: 'DM',
+        type: 'DM'
+      };
+    } else if (msg.retweeted_status) {
+      t = {
+        name: my ? msg.user.screen_name : msg.retweeted_status.user.screen_name,
+        img: my ? msg.user.profile_image_url : msg.retweeted_status.user.profile_image_url,
+        text: msg.retweeted_status.text,
+        sub: '\u21BB ' + msg.user.screen_name,
+        type: 'retweet'
+      };
+      dummy = true;
+    } else if (my && msg.target && msg.event) {
+      if (msg.event === 'favorite' && msg.target_object && !msg.target_object.retweeted_status) {
+        t = {
+          name: msg.source.screen_name,
+          img: msg.source.profile_image_url,
+          text: msg.target_object.text,
+          type: 'favorite',
+          sub: 'fav'
+        };
+        dummy = true;
+      } else if (msg.event === 'list_member_added' && msg.target) {
+       // 結構漏れがある？
+        t = {
+          name: msg.source.screen_name,
+          img: msg.source.profile_image_url,
+          text:
+            '\u3042\u306A\u305F\u3092\u30EA\u30B9\u30C8\u300C' +
+            msg.target_object.name +
+            '\u300D\u306B\u8FFD\u52A0\u3057\u307E\u3057\u305F\u3002\n' +
+            'http://twitter.com' + msg.target_object.uri,
+          type: 'list-member-added',
+          sub: 'listed'
+        };
+        dummy = true;
+      }
+    } else if (msg.event === 'follow' && msg.target && msg.source) {
+      t = {
+        name: msg.source.screen_name,
+        img: msg.source.profile_image_url,
+        text: 'follow ' + msg.target.screen_name,
+        type: 'follow'
+      };
+      my = msg.target.screen_name === screenName;
+      dummy = true;
+    } else if (msg.user && msg.text && msg.in_reply_to_screen_name == screenName) {
+      t = {
+        name: msg.user.screen_name,
+        img: msg.user.profile_image_url,
+        text: msg.text,
+        type: 'reply'
+      };
+    } else if (msg.user && msg.text) {
+      t = {
+        name: msg.user.screen_name,
+        img: msg.user.profile_image_url,
+        text: msg.text,
+        type: 'normal'
+      };
+    }
+
+    if (t) {
+      if (Config.earthquake && /\u5730\u9707/.test(t.text) && msg.text.length < 20 && msg.user && msg.user.location) {
+        t.text += ' [\u5730\u57DF: ' + msg.user.location + ']';
+      }
+
+      if (!t.sub && msg.created_at) {
+        t.sub = new Date(msg.created_at).toLocaleTimeString().replace(/:\d+$/,'');;
+      }
+
+      if (real && dummy) {
+        if (typeof dummy != 'object') {
+          dummy = {
+            user: {
+              screen_name: t.name || '',
+              profile_image_url: t.img
+            },
+            text: '[' + t.type + '] ' + t.text + ' - http://twitter.com/' + t.name
+          };
+        }
+        plugins.twittperator.Twittperator.onMessage(dummy);
+      }
+
+      if (my || !Config.vanish.test([t.name, t.text, t.sub].join(' '))) {
+        if (my) {
+          if (real) {
+            let sound = Config.sound[t.type] || Config.sound.fanfare;
+            sound.play();
+          }
+          t.type += '-my';
+        } else {
+          if (t.type === 'normal' && Config.keyword.test(t.text))
+            t.type = 'keyword';
+        }
+
+        if (streamName === 'filter') {
+          if (!msg.retweeted_status) {
+            t.type = 'filter';
+            appendTweet(t, 'home', streamName);
+            appendTweet(t, 'filter', streamName);
+            let (s = Config.sound.filter) (s && s.play());
+          }
+        } else if (/^(keyword)$/.test(t.type)) {
+          appendTweet(t, 'home', streamName);
+          appendTweet(t, t.type, streamName);
+        } else if (my) {
+          appendTweet(t, 'home', streamName);
+          appendTweet(t, 'my', streamName);
+        } else {
+          appendTweet(t, 'home', streamName);
+        }
+      }
+    }
+
+    if (real) {
+      let s =
+        '----------------------------------------\n' +
+        objectToString(msg).replace(/\x0D\x0A|\x0D|\x0A/g, '\n');
+      if (Config.logFile)
+        Config.logFile.write(s, '>>');
+      if (my && Config.myLogFile)
+        Config.myLogFile.write(s, '>>');
+    }
+  } // }}}
+
+  function makeOnMsg (real, streamName) // {{{
+    function (msg, raw)
+      onMsg(real, msg, raw, streamName); // }}}
+
+  function addCommands () { // {{{
+    commands.addUserCommand(
+      ['tws[idebar'],
+      'nosidebar commands',
+      function (args) {
+      },
+      {
+        subCommands: [
+          new Command(
+            ['v[anish]'],
+            'Vanish matched tweets',
+            function (args) {
+              Config.vanish = new RegExp(args.literalArg, 'i');
+            },
+            {
+              literal: 0,
+              completer: function (context, args) {
+                context.completions = [
+                  [util.escapeRegex(Config.vanish.source), '']
+                ];
+              }
+            }
+          ),
+          new Command(
+            ['k[eyword]'],
+            'Show matched tweets in keyword tab',
+            function (args) {
+              Config.keyword = new RegExp(args.literalArg, 'i');
+            },
+            {
+              literal: 0,
+              completer: function (context, args) {
+                context.completions = [
+                  [util.escapeRegex(Config.keyword.source), '']
+                ];
+              }
+            }
+          ),
+          new Command(
+            ['j[ponly]'],
+            'Show only Japanese Tweet',
+            function (args) {
+              Config.jpOnly = /yes/i.test(args.literalArg);
+            },
+            {
+              literal: 0,
+              completer: function (context, args) {
+                context.completions = [
+                  ['yes', 'yes'],
+                  ['no', 'no']
+                ];
+              }
+            }
+          ),
+          new Command(
+            ['t[ab]'],
+            'select tab',
+            function (args) {
+              let tabbox = getSidebarWindow().document.getElementById('tw-anekos-sb-tabbox');
+              let index = parseInt(args.literalArg, 10);
+              tabbox.selectedIndex = index;
+            },
+            {
+              literal: 0,
+              completer: function (context, args) {
+                let tabs = getSidebarWindow().document.getElementById('tw-anekos-sb-tabbox').querySelectorAll('tab');
+                context.completions = [
+                  [i + ': ' + tab.getAttribute('label'), tab.getAttribute('label')]
+                  for ([i, tab] in Iterator(Array.slice(tabs)))
+                ];
+              }
+            }
+          )
+        ]
+      },
+      true
+    );
+  } // }}}
+
+  /*********************************************************************************
+  * Install
+  *********************************************************************************/
+
+  let Store = storage.newMap("twittperator-anekos-sb", {store: true});
+  let started = false;
+  let readyToStart = false;
+
+  let Tweets = __context__.Tweets;
+  if (!Tweets)
+    Tweets = __context__.Tweets = Store.get("history", []);
+
+  let added = {};
+
+  function start () { // {{{
+    if (readyToStart)
+      return;
+    if (started)
+      stop();
+
+    readyToStart = true;
+    started = true;
+    setTimeout(
+      function () {
+        readyToStart = false;
+        Tweets.reverse().forEach(makeOnMsg(false));
+        plugins.twittperator.ChirpUserStream.addListener(added.chirp = makeOnMsg(true, 'chirp'));
+        plugins.twittperator.TrackingStream.addListener(added.filter = makeOnMsg(true, 'filter'));
+      },
+      1000
+    );
+  } // }}}
+
+  function stop () { // {{{
+    if (!started)
+      return liberator.echoerr('TWAnekoSB has not been started!');
+
+    plugins.twittperator.ChirpUserStream.removeListener(added.chirp);
+    plugins.twittperator.TrackingStream.removeListener(added.filter);
+    Store.set("history", Tweets);
+  } // }}}
+
+  function makeAudio (path, volume) { // {{{
+    let audio = new Audio(path);
+    // XXX 効いてない
+    if (volume)
+      audio.volume = volume;
+    return audio;
+  } // }}}
+
+  __context__.onUnload = function() { stop(); };
+
+  addCommands();
+
+  return {start: start, stop: stop};
+
+})();
+
+try {
+  ANekoSB.start();
+} catch (e) {
+  window.alert(e);
+}

@@ -1,0 +1,4 @@
+content	twsidebar	chrome/content/
+locale	twsidebar	en-US	chrome/locale/en-US/
+skin	twsidebar	classic/1.0	chrome/skin/
+overlay	chrome://browser/content/browser.xul	chrome://twsidebar/content/overlay.xul

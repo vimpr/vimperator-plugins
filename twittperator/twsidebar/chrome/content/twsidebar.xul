@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://twsidebar/content/twsidebar.css" type="text/css"?>
+<page id="tw-sidebar-page" title="Twitter Sidebar"
+      onload="window.parent.liberator.modules.TWAnekoSB.start()"
+      onunload="window.parent.liberator.modules.TWAnekoSB.stop()"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
+  <vbox flex="1">
+    <tabbox id="tw-anekos-sb-tabbox" flex="1">
+      <tabs>
+        <tab label="Home"/>
+        <tab label="My"/>
+        <tab label="Keyword"/>
+        <tab label="Filter"/>
+        <tab label="Debug"/>
+      </tabs>
+      <tabpanels flex="1" id="tw-anekos-sb-tab-panels" style="background: transparent;">
+        <tabpanel flex="1">
+          <richlistbox id="tw-anekos-sb-home-list" contextmenu="contentAreaContextMenu" flex="1"/>
+        </tabpanel>
+        <tabpanel flex="1">
+          <richlistbox id="tw-anekos-sb-my-list" contextmenu="contentAreaContextMenu" flex="1"/>
+        </tabpanel>
+        <tabpanel flex="1">
+          <richlistbox id="tw-anekos-sb-keyword-list" contextmenu="contentAreaContextMenu" flex="1"/>
+        </tabpanel>
+        <tabpanel flex="1">
+          <richlistbox id="tw-anekos-sb-filter-list" contextmenu="contentAreaContextMenu" flex="1"/>
+        </tabpanel>
+        <tabpanel flex="1">
+          <richlistbox id="tw-anekos-sb-debug-list" contextmenu="contentAreaContextMenu" flex="1"/>
+        </tabpanel>
+      </tabpanels>
+    </tabbox>
+  </vbox>
+</page>

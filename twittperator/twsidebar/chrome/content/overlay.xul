@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<overlay id="twitter-sidebar-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <menupopup id="viewSidebarMenu">
+    <menuitem key="key_openEmptySidebar" observes="viewTwitteerSidebar" />
+  </menupopup>
+
+  <keyset id="mainKeyset">
+    <key id="key_openEmptySidebar" command="viewTwitteerSidebar"
+         key="E"
+         modifiers="shift accel" />
+  </keyset>
+
+  <broadcasterset id="mainBroadcasterSet">
+    <broadcaster id="viewTwitteerSidebar"
+                 label="Twitter Sidebar"
+                 autoCheck="false"
+                 type="checkbox"
+                 group="sidebar"
+                 sidebarurl="chrome://twsidebar/content/twsidebar.xul"
+                 sidebartitle="Twitter Sidebar"
+                 oncommand="toggleSidebar('viewTwitteerSidebar');" />
+  </broadcasterset>
+</overlay>

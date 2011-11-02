@@ -1,0 +1,50 @@
+#tw-anekos-sb-tab-panels {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.tw-anekos-sb-plugin-tweet-panel {
+  background-color: floralwhite !important;
+  font-size: %Config.fontSize%px;
+  padding-top: 2px;
+  padding-left: 2px;
+}
+
+.tw-anekos-sb-plugin-tweet-DM-my {
+  background-color: darkred !important;
+  color: white !important;
+}
+
+.tw-anekos-sb-plugin-tweet-retweet-my {
+  background-color: aqua !important;
+}
+
+.tw-anekos-sb-plugin-tweet-favorite-my {
+  background-color: pink !important;
+}
+
+.tw-anekos-sb-plugin-tweet-reply-my {
+  background-color: yellow !important;
+}
+
+.tw-anekos-sb-plugin-tweet-normal-my {
+  background-color: yellow !important;
+}
+
+.tw-anekos-sb-plugin-tweet-keyword {
+  background-color: lightgreen !important;
+}
+
+.tw-anekos-sb-plugin-tweet-filter {
+  background-color: #66cdaa !important;
+}
+
+.tw-anekos-sb-plugin-tweet-list-member-added-my {
+  background-color: lightskyblue !important;
+}
+
+.tw-anekos-sb-plugin-tweet-follow,
+.tw-anekos-sb-plugin-tweet-follow-my {
+  background-color: lightsalmon !important;
+}
