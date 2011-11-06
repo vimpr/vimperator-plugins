@@ -13,8 +13,8 @@ var INFO =
   <project name="Vimperator" minVersion="3.2"/>
   <item>
     <tags>:nicolist-add</tags>
-    <spec>:nicolist add <a>mylist-id</a></spec>
-    <description><p><a>mylist-id</a>で指定したマイリストに動画を追加します</p></description>
+    <spec>:nicolist add <a>mylist-id</a> <a>mylist-comment</a></spec>
+    <description><p><a>mylist-id</a>で指定したマイリストに動画を追加します。マイリストコメントの入力も可能です</p></description>
   </item>
   <item>
     <tags>:nicolist-delete</tags>
@@ -48,12 +48,13 @@ commands.addUserCommand(
           let video_id = content.window.wrappedJSObject.video_id;
           if (!video_id)
             return liberator.echoerr('nicolist : watchページじゃない！');
+          let [mylist_id, description] = args;
           let token = content.window.wrappedJSObject.so.variables.csrfToken;
-          let url = 'http://www.nicovideo.jp/api/mylist/add?group_id=' + args.literalArg + '&token=' + token + '&item_id=' + video_id;
+          let url = 'http://www.nicovideo.jp/api/mylist/add?group_id=' + mylist_id + '&token=' + token + '&item_id=' + video_id + '&description=' + description;
           liberator.echo('nicolist add : ' + JSON.parse(util.httpGet(url).responseText).status);
         },
         {
-          literal: 0,
+          literal: 1,
           completer: mylistCompleter,
         }
       ),
@@ -128,7 +129,7 @@ function mylistCompleter (context, args) {
         for ([k, v] in Iterator(JSON.parse(xhr.responseText).mylistgroup))
       ];
     });
-  } else if (args.completeArg == 1){
+  } else if (args.completeArg == 1 && !/add/.test(context.name)){
     context.incomplete = true;
     context.title = ["id", "title"];
     context.filters = [CompletionContext.Filter.textDescription];
