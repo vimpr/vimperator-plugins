@@ -42,8 +42,7 @@
 
 (function() {
 
-Function.prototype.bind = function(object) {
-    var __method = this;
+let bind = function(__method, object) {
     return function() {
         return __method.apply(object, arguments);
     };
@@ -56,7 +55,7 @@ function YouTubePlayerController() {
 }
 YouTubePlayerController.prototype = {
     initialize: function() {
-        this.fuller = this._changeToFull.bind(this);
+        this.fuller = bind(this._changeToFull, this);
     },
 
     constants: {
