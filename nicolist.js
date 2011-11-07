@@ -46,9 +46,11 @@ commands.addUserCommand(
         'マイリストに追加する',
         function (args) {
           let video_id = content.window.wrappedJSObject.video_id;
-          if (!video_id)
+          if (!video_id) {
             return liberator.echoerr('nicolist : watchページじゃない！');
+          }
           let [mylist_id, description] = args;
+          if (!description){ description = ''; }  //undefinedが入っているとそれをマイリストコメントにしてしまうので。
           let token = content.window.wrappedJSObject.so.variables.csrfToken;
           let url = 'http://www.nicovideo.jp/api/mylist/add?group_id=' + mylist_id + '&token=' + token + '&item_id=' + video_id + '&description=' + description;
           liberator.echo('nicolist add : ' + JSON.parse(util.httpGet(url).responseText).status);
