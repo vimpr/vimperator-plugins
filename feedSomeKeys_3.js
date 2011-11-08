@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = <>
-  <plugin name="feedSomeKeys" version="1.9.2"
+  <plugin name="feedSomeKeys" version="1.9.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -140,7 +140,7 @@ let INFO = <>
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.9.2"
+  <plugin name="feedSomeKeys" version="1.9.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Web コンテンツに直接キーイベントを送ります。"
           lang="ja"
@@ -309,6 +309,10 @@ let INFO = <>
     '\'': KeyEvent.DOM_VK_QUOTE
   };
 
+  const State = {
+    feeding: false
+  };
+
   function id (v)
     v;
 
@@ -359,22 +363,35 @@ let INFO = <>
   }
 
   function feed (keys, eventNames, target) {
-    let _passAllKeys = modes.passAllKeys;
-    modes.passAllKeys = true;
-    modes.passNextKey = false;
-
-    for (let [, keyEvent] in Iterator(events.fromString(keys))) {
-      eventNames.forEach(function (eventName) {
-        let ke = util.cloneObject(keyEvent);
-        let [, vkey, name] = eventName.match(/^(v)?(.+)$/);
-        if (vkey)
-          virtualize(ke);
-        let event = createEvent(name, ke);
-        target.dispatchEvent(event);
-      });
+    function finalize (){
+      modes.passAllKeys = _passAllKeys;
+      State.feeding = false;
     }
 
-    modes.passAllKeys = _passAllKeys;
+    State.feeding = true;
+
+    let _passAllKeys = modes.passAllKeys;
+
+    try {
+      modes.passAllKeys = true;
+      modes.passNextKey = false;
+
+      for (let [, keyEvent] in Iterator(events.fromString(keys))) {
+        eventNames.forEach(function (eventName) {
+          let ke = util.cloneObject(keyEvent);
+          let [, vkey, name] = eventName.match(/^(v)?(.+)$/);
+          if (vkey)
+            virtualize(ke);
+          let event = createEvent(name, ke);
+          target.dispatchEvent(event);
+        });
+      }
+    } catch (e) {
+      finalize();
+      throw e;
+    }
+
+    finalize();
   }
 
   function makeTryValidator (func)
@@ -696,7 +713,7 @@ let INFO = <>
   );
 
   __context__.API =
-    'VKeys feed getFrames fromXPath virtualize unmap findMappings list'.split(/\s+/).reduce(
+    'State VKeys feed getFrames fromXPath virtualize unmap findMappings list'.split(/\s+/).reduce(
       function (result, name)
         (result[name] = eval(name), result),
       {}
