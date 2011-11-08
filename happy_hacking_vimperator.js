@@ -3323,7 +3323,7 @@ let PLUGIN_INFO =
   around(events, 'onKeyPress', function (next, [event]) {
     let keyStr = events.toString(event);
     let fmaping = let (fmap  = liberator.plugins.feedSomeKeys_3) (fmap && fmap.API.State.feeding);
-    if (!fmaping && !modes.passAllKeys && !events.feedingKeys && uncleanKeys.some(function(v) v == keyStr)) {
+    if (!fmaping && !events.feedingKeys && uncleanKeys.some(function(v) v == keyStr)) {
       return kill('key')(event);
     }
     next();
