@@ -23,143 +23,317 @@
  * THE SOFTWARE.
  */
 
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Twittperator</name>
-  <description>Twitter Client using OAuth and Streaming API</description>
-  <description lang="ja">OAuth/StreamingAPI対応Twitterクライアント</description>
-  <version>1.16.2</version>
-  <minVersion>2.3</minVersion>
-  <author email="teramako@gmail.com" homepage="http://d.hatena.ne.jp/teramako/">teramako</author>
-  <author email="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>MIT License</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js</updateURL>
-  <detail><![CDATA[
-    This is the Twitter client plugin with OAuth authentication.
-    == Command ==
-    - Use completion for comfort.
-    :tw[ittperator] -getPIN
-        Opens the page to authorize Twittperator and get your PIN from Twitter.
-    :tw[ittperator] -setPIN {PINcode}
-        Allows Twittperator to access Twitter by signifying your PIN.
-
-    :tw[ittperator]
-        Shows recent your timeline. (The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter.)
-    :tw[ittperator]!
-        Gets recent your timeline from Twitter and shows it.
-    :tw[ittperator]!@
-        Shows mentions to you.
-    :tw[ittperator]!@user
-        Show @user's tweets.
-    :tw[ittperator] {TweetText}
-        Tweets {TweetText}.
-    :tw[ittperator] @user#id {TweetText}
-        Tweets a reply to @user.
-    :tw[ittperator] RT @user#id: {refTweet}
-        Does official retweet.
-    :tw[ittperator] {TweetText} RT @user#id: {refTweet}
-        Does classic retweet.
-    :tw[ittperator]!+status_id
-        Adds the tweet to your favorites.
-    :tw[ittperator]!-status_id
-        Delete the tweet from your favorites.
-    :tw[ittperator]!?{SearchText}
-        Shows the result of searching {SearchText}.
-    :tw[ittperator]!/{URI}
-        Opens {URI}.
-    :tw[ittperator]!delete {StatusID}
-        Deletes the {StatusID} tweet.
-    == Authentication Setting ==
+// INFO {{{
+let INFO =
+<>
+  <plugin name="Twittperator" version="1.16.2"
+          href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
+          summary="Twitter Client using OAuth and Streaming API">
+    <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
+    <author email="anekos@snca.net" href="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+    <license>MIT License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      This is the Twitter client plugin with OAuth authentication.
+    </p>
+    <h2>Command</h2>
+      - Use completion for comfort.
+    <item>
+      <spec>:tw<oa>ittperator</oa> -getPIN</spec>
+      <description>
+        <p>Opens the page to authorize Twittperator and get your PIN from Twitter.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> -setPIN <a>PINCode</a></spec>
+      <description>
+        <p>Allows Twittperator to access Twitter by signifying your PIN.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa></spec>
+      <description>
+        <p>Shows recent your timeline. (The timeline will be cashed and expired 90 seconds after Twittperator get from Twitter.)</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!</spec>
+      <description>
+        <p>Gets recent your timeline from Twitter and shows it.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!@</spec>
+      <description>
+        <p>Shows mentions to you.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!@user</spec>
+      <description>
+        <p>Show @user's tweets.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> <a>TweetText</a></spec>
+      <description>
+        <p>Tweets <a>TweetText</a>.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> @user#id <a>TweetText</a></spec>
+      <description>
+        <p>Tweets a reply to @user.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> RT @user#id: <a>refTweet</a></spec>
+      <description>
+        <p>Does official retweet.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> <a>TweetText</a> RT @user#id: <a>refTweet</a></spec>
+      <description>
+        <p>Does classic retweet.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!+status_id</spec>
+      <description>
+        <p>Adds the tweet to your favorites.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!-status_id</spec>
+      <description>
+        <p>Delete the tweet from your favorites.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!?<a>SearchText</a></spec>
+      <description>
+        <p>Shows the result of searching <a>SearchText</a>.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!/<a>URI</a></spec>
+      <description>
+        <p>Opens <a>URI</a>.</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!delete <a>StatusID</a></spec>
+      <description>
+        <p>Deletes the <a>StatusID</a> tweet.</p>
+      </description>
+    </item>
+    <h2>Authentication Setting</h2>
     First of all, you have to get your PIN from Twitter and signify it to Twittperator. Type a following command:
-    >||
+    <code>
         :tw -getPIN
-    ||<
+    </code>
     and you will get the page to authorize Twittperator to access Twitter in a new tab.
     If you allow and you will get the PIN (7 digit numbers), then yank it.
 
     Secondarily, authorize Twittperator with your PIN.
-    >||
+    <code>
         :tw -setPIN yanked_PIN
-    ||<
-    == FAQ ==
+    </code>
+    <h2>FAQ</h2>
+    <p>
     - What is this ?
+    </p>
+    <p>
         The plugin that just tweet with Vimperator.
+    </p>
+    <p>
     - My timeline is hard to see...?
+    </p>
+    <p>
         We are making an effort, and welcoming patches.
+    </p>
+    <p>
     - By the way, is it possible to show timeline automatically?
+    </p>
+    <p>
         Use chirpstream. Write the below line into rc file.
         let g:twittperator_use_chirp = 1
+    </p>
+    <p>
     - It's too much of the bother to show my timeline manually!!
+    </p>
+    <p>
         We think implementing a wider display method and a mean of word wrapping will solve this issue.
         Any ideas?
+    </p>
+    <p>
     - Is there a plan to work together Growl GNTP?
+    </p>
+    <p>
         Write the plugin.
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    これはOAuth認証を用いたTwitterクライアントプラグインです。
-    == Command ==
-    - 適当に補完しましょう。
-    :tw[ittperator] -getPIN
-        PINコード取得ページを開きます。
-    :tw[ittperator] -setPIN {PINcode}
-        PINcodeを設定します。
+    </p>
+  </plugin>
+  <plugin name="Twittperator" version="1.16.2"
+          href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
+          lang="ja"
+          summary="OAuth/StreamingAPI対応Twitterクライアント">
+    <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
+    <author email="anekos@snca.net" href="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
+    <license>MIT License</license>
+    <project name="Vimperator" minVersion="2.3"/>
+    <p>
+      これはOAuth認証を用いたTwitterクライアントプラグインです。
+    </p>
+    <h2>Command</h2>
+      - 適当に補完しましょう。
+    <item>
+      <spec>:tw<oa>ittperator</oa> -getPIN</spec>
+      <description>
+        <p>PINコード取得ページを開きます。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> -setPIN <a>PINcode</a></spec>
+      <description>
+        <p>PINcodeを設定します。</p>
+      </description>
+    </item>
 
-    :tw[ittperator]
-        前回取得したタイムラインを表示します。 (キャッシュが90秒以上古い場合は再取得。)
-    :tw[ittperator]!
-        強制的に取得したタイムラインを表示します。
-    :tw[ittperator]!@
-      あなたへの言及(mentions)表示します。
-    :tw[ittperator]!@user
-        @user のタイムラインを表示します。
-    :tw[ittperator] {TweetText}
-        {TweetText}をポストします。
-    :tw[ittperator] @user#id {TweetText}
-        @user への返信になります。
-    :tw[ittperator] RT @user#id: {refTweet}
-        公式RTになるはずです。
-    :tw[ittperator] {TweetText} RT @user#id: {refTweet}
-        非公式RTになるはずです。
-    :tw[ittperator]!+status_id
-        tweetをfavoriteします。
-    :tw[ittperator]!-status_id
-        tweetをunfavoriteします。
-    :tw[ittperator]!?{SearchText}
-        {SearchText}の検索結果を表示します。
-    :tw[ittperator]!/{URI}
-        {URI}を開きます。
-    :tw[ittperator]!delete {StatusID}
-        {StatusID}のツイートを削除します。
-    == Authentication Setting ==
+    <item>
+      <spec>:tw<oa>ittperator</oa></spec>
+      <description>
+        <p>前回取得したタイムラインを表示します。 (キャッシュが90秒以上古い場合は再取得。)</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!</spec>
+      <description>
+        <p>強制的に取得したタイムラインを表示します。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!@</spec>
+      <description>
+        <p>あなたへの言及(mentions)表示します。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!@user</spec>
+      <description>
+        <p>@user のタイムラインを表示します。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> <a>TweetText</a></spec>
+      <description>
+        <p><a>TweetText</a>をポストします。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> @user#id <a>TweetText</a></spec>
+      <description>
+        <p>@user への返信になります。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> RT @user#id: <a>refTweet</a></spec>
+      <description>
+        <p>公式RTになるはずです。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa> <a>TweetText</a> RT @user#id: <a>refTweet</a></spec>
+      <description>
+        <p>非公式RTになるはずです。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!+status_id</spec>
+      <description>
+        <p>tweetをfavoriteします。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!-status_id</spec>
+      <description>
+        <p>tweetをunfavoriteします。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!?<a>SearchText</a></spec>
+      <description>
+        <p><a>SearchText</a>の検索結果を表示します。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!/<a>URI</a></spec>
+      <description>
+        <p><a>URI</a>を開きます。</p>
+      </description>
+    </item>
+    <item>
+      <spec>:tw<oa>ittperator</oa>!delete <a>StatusID</a></spec>
+      <description>
+        <p><a>StatusID</a>のツイートを削除します。</p>
+      </description>
+    </item>
+    <h2>Authentication Setting</h2>
     最初にPINコードを取得し設定する必要があります。
-    >||
+    <code>
         :tw -getPIN
-    ||<
+    </code>
     を実行すると新規タブに本アプリケーションを許可するかを問うページが開かれます。
     許可をすると、PINコード(数値)が表示されるのでコピーしてください。
 
-    >||
+    <code>
         :tw -setPIN コピーしたPINコード
-    ||<
+    </code>
     で初期設定完了です。
-    == FAQ ==
+    <h2>FAQ</h2>
+    <p>
     - なんて読むんだ
+    </p>
+    <p>
         知らん。トゥイットゥペレータと自分は勝手に読んでいる。
+    </p>
+    <p>
     - 何のためのクライアント？
+    </p>
+    <p>
         Vimperatorを使っていて、さくっと呟きたいとき用です（ぉ
+    </p>
+    <p>
     - TL表示をもっと工夫しろ
+    </p>
+    <p>
         ごめんなさい。改良してコミットしてくれると嬉しいです。
+    </p>
+    <p>
     - つーか、TLくらい自動取得しろ
+    </p>
+    <p>
         はい、がんばりました。
-        let g:twittperator_use_chirp = 1
+        <code>let g:twittperator_use_chirp = 1</code>
         として、chirpstream を利用してください。
+    </p>
+    <p>
     - ぶっちゃけTL表示とか面倒だよね？
+    </p>
+    <p>
         はい、がんばります・・・
         でかい表示領域と行の折り返し方法が確立できれば、もっと頑張れる気がします。
+    </p>
+    <p>
     - Growl GNTP との連携しないの？
+    </p>
+    <p>
         プラグイン書きましょう。
-  ]]></detail>
-</VimperatorPlugin>;
+    </p>
+  </plugin>
+</>;
+
+// }}}
 
 (function() {
 
