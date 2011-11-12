@@ -1,14 +1,14 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="facebook" version="0.1.7"
+  <plugin name="facebook" version="0.2.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="ninja.tottori@gmail.com">ninjatottori</author>
 	<license>MIT License</license>
-    <project name="Vimperator" minVersion="3.0"/>
+    <project name="Vimperator" minVersion="8.0"/>
     <p>
 	コマンドラインからfacebookをあれこれするプラグインです。<br />
 	</p>
@@ -23,6 +23,15 @@ let INFO =
 			facebookにログインした状態で :fa -getAuth するとfacebookのアプリ認証ページに飛びます。
 			認証ページで承認を行うと結果ページが開きますので、そのままの状態で :fa -setAccessToken して下さい。
 			一度設定すれば以後は不要です。(自動的にサブコマンドから消えます）
+			</p>
+		</description>
+    </item>
+    <item>
+		<tags>:facebook resetoauth</tags>
+		<spec>:fa<oa>cebook</oa> <a>resetoauth</a></spec>
+		<description>
+			<p>OAuthの認証を再設定します。
+			実行するとキャッシュされてるアクセスコードをリセットするので、再度上記セットアップ(-getAuth,-setAccessToken)を行って下さい。
 			</p>
 		</description>
     </item>
@@ -42,18 +51,40 @@ let INFO =
 		<spec>let g:facebook_auto_interval = <a>msec</a></spec>
 		<description>
 			<p>
-			wallデータの自動更新間隔を設定します。デフォルトは60000(1分)です。
+			wallデータの自動更新間隔を設定します。デフォルトは60000(1分)ですが中毒具合によって適宜調整して下さい。
+			あまり間隔を短くしすぎるとエラーになりますのでご注意。
+			</p>
+		</description>
+    </item>
+    <item>
+		<tags>g:facebook_history_limit</tags>
+		<spec>let g:facebook_history_limit = <a>num</a></spec>
+		<description>
+			<p>
+			キャッシュしておく履歴の数。デフォルト100件。
+			</p>
+		</description>
+    </item>
+    <item>
+		<tags>g:facebook_notify</tags>
+		<spec>let g:facebook_notify = <a>0 or 1</a></spec>
+		<description>
+			<p>
+			通知のオンオフ。デフォルト無効。
+			オンにしておくと更新があった時にいろいろ通知します。
+			フィードが更新された時、メッセージが来た時と新着お知らせに対応。
 			</p>
 		</description>
     </item>
 	<h3 tag="facebook-post-command">Post(投稿)</h3>
     <item>
 		<tags>:facebook </tags>
-		<spec>:fa<oa>cebook</oa> text <a>-link</a> url <a>-group</a> id</spec>
+		<spec>:fa<oa>cebook</oa> text <a>-link</a> url <a>-group</a> id <a>-to</a> id</spec>
 		<description>
 			<p>:fa hogehoge とするとfacebookへ「hogehoge」と投稿します。
 			-link オプションを選ぶと補完リストに開いているURLが出てくるので選択して投稿できます。
 			-group オプションを選ぶと補完リストにグループidが出てくるので選択して投稿するとそのグループにのみ投稿ができます。
+			-to オプションを選ぶと補完リストにフレンドが出てくるので選択して投稿するとそのフレンドのウォールに投稿します。
 			</p>
 		</description>
     </item>
@@ -73,8 +104,7 @@ let INFO =
 		<spec>:fa<oa>cebook</oa> <a>get</a></spec>
 		<description>
 			<p>facebookのウォールデータを取得してMOWに出力します。
-			また、同時にlocal strage(デフォルトでは~/vimperator/info/default/facebook)にキャッシュを入れます。
-			後述するコメントやlike(いいね)はこのキャッシュされているデータにのみ行う仕様になっています。
+			ただそれだけの機能なので、そのうちなくなる予定です。
 			</p>
 		</description>
     </item>
@@ -110,6 +140,17 @@ let INFO =
 			</p>
 		</description>
     </item>
+	<h3 tag="facebook-notification-command">Notification</h3>
+    <item>
+		<tags>:facebook <a>notication</a> <a>url</a></tags>
+		<spec>:fa<oa>cebook</oa> <a>notication</a> <a>url</a></spec>
+		<description>
+			<p>:fa notification&lt;Space&gt; で通知があれば補完リストに何かでます。
+			選択して実行するとurl開きます。
+			何も選択せず実行すると通知があるか取得しに行きます（自動更新OFFにしてる人用ですかね）
+			</p>
+		</description>
+    </item>
   </plugin>
 </>;
 // }}}
@@ -141,6 +182,17 @@ function setup(){ // access_token取得後 {{{
 	FB.set_friends();
 	FB.set_groups();
 
+	if(liberator.globalVariables.facebook_auto_load == 1 && __context__.AutoLoader.id == undefined){
+		__context__.AutoLoader.id = setInterval(
+										function(){
+											FB.get_wall_data();
+											FB.notification();
+										}
+										,liberator.globalVariables.facebook_auto_load_interval || 60000
+										);
+		__context__.AutoLoader.active = true;
+	}
+
 	commands.addUserCommand(["facebook","fa"],	"facebook util",
 		function(args){
 			if(args[0] || args["-link"])FB.post_to_wall(args);
@@ -149,17 +201,41 @@ function setup(){ // access_token取得後 {{{
 			options:[
 				[["-link","-l"],commands.OPTION_STRING,null,tablist],
 				[["-group","-g"],commands.OPTION_STRING,null,grouplist],
+				[["-to","-t"],commands.OPTION_STRING,null,friendlist],
 			],
 			subCommands: [
-				new Command(["get"], "get walldata from facebook to MOW",
-					function (args) {
-						FB.view_wall_data(args)
+//				new Command(["test"], "test",
+//					function () {
+//						Store.remove("notification");
+//						Store.save();
+//					},{
+//						literal:0,
+//					}
+//				),
+				new Command(["resetoauth"], "Reset OAuth Information",
+					function () {
+						FB.resetoauth();
 					},{
 						literal:0,
-						completer:friends_completer,
 					}
 				),
-				new Command(["checkin"], "check in",
+				new Command(["notification"], "Get Notifications",
+					function (args) {
+						FB.notification(args)
+					},{
+						literal:0,
+						completer:notify_completer,
+					}
+				),
+//				new Command(["get"], "get walldata from facebook to MOW",
+//					function (args) {
+//						FB.view_wall_data(args)
+//					},{
+//						literal:0,
+//						completer:friends_completer,
+//					}
+//				),
+				new Command(["checkin"], "Check in",
 					function (args) {
 						FB.check_in(args);
 					},{
@@ -167,7 +243,7 @@ function setup(){ // access_token取得後 {{{
 						completer:checkins_completer,
 					}
 				),
-				new Command(["comment"], "comment",
+				new Command(["comment"], "Comment",
 					function (args) {
 						FB.comment(args);
 					},{
@@ -178,7 +254,7 @@ function setup(){ // access_token取得後 {{{
 						},
 					}
 				),
-				new Command(["like"], "like",
+				new Command(["like","l"], "Like",
 					function (args) {
 						FB.like(args);
 					},{
@@ -189,9 +265,9 @@ function setup(){ // access_token取得後 {{{
 						},
 					}
 				),
-				new Command(["open"], "open in background tab",
+				new Command(["open","o"], "Open url in new tab",
 					function (args) {
-						liberator.open(args[0],liberator.NEW_BACKGROUND_TAB)
+						liberator.open(args[0],liberator.NEW_TAB)
 					},{
 						literal:0,
 						completer:function(context){
@@ -205,7 +281,8 @@ function setup(){ // access_token取得後 {{{
 		true
 	);
 
-	function checkins_completer(context){
+	// completers {{{
+	function checkins_completer(context){ // {{{
 
 		context.title = ["id","name"]
 		context.filters = [CompletionContext.Filter.textDescription]; 
@@ -219,27 +296,26 @@ function setup(){ // access_token取得後 {{{
 			for each(let l in res){
 				checkins.push([l["place"]["id"] + "," + l["place"]["location"]["latitude"] + "," + l["place"]["location"]["longitude"] ,l["place"]["name"] + " " + l["place"]["location"]["street"]])
 			}
-			context.completions = checkins;
 			context.incomplete = false;
+			context.completions = checkins;
 		});
-	}
+	} // }}}
 
-	function friends_completer(context){
+	function friends_completer(context){ // {{{
 		context.title = ["id","name"]
 		context.filters = [CompletionContext.Filter.textDescription]; 
 		context.compare = void 0;
 		context.anchored = false;
 
-		let store = storage.newMap("facebook",{store:true}).get("friends");
+		let cache = Store.get("friends");
 		let friends = [];
-		for (let d in store){
-			friends.push([store[d]["id"],store[d]["name"]]);
+		for each(let d in cache){
+			friends.push([d["id"],d["name"]]);
 		}
 		context.completions = friends;
-		context.incomplete = false;
-	}
+	} // }}}
 
-	function feed_completer(context){ 
+	function feed_completer(context){  // {{{
 
 		context.title = ["feed"];
 		context.filters = [statusObjectFilter]; 
@@ -260,7 +336,7 @@ function setup(){ // access_token取得後 {{{
 					<img src={info.user_icon} style="height:24px;"/>
 					<img src={info.icon}/>
 					{info.user_name} 
-					: {info.name} {info.story} {info.message} <u>{info.link}</u> {info.description}
+					: {info.name} {info.story} {info.message} 
 					<span style="color:red;">{info.likes}</span>
 					<span style="color:yellow;">{info.comments}</span>
 				</li>
@@ -268,18 +344,16 @@ function setup(){ // access_token取得後 {{{
 		
 		};
 
-		context.incomplete = false;
-
 		function statusObjectFilter(item)
 			let (desc = item.description)
 			(this.match(desc.user_name) || this.match(desc.message) || this.match(desc.link) || this.match(desc.description));
 
-	}
+	}  // }}}
 
-	function feed_complations(command) {
-		let store = storage.newMap("facebook",{store:true}).get("feed_cache");
+	function feed_complations(command) { // {{{
+		let cache = Store.get("feed_cache");
 		let feeds = [];
-		for each(let d in store){
+		for each(let d in cache){
 			feeds.push([
 				(command === "open") ? (d["link"] || (d["actions"] ? d["actions"][0]["link"] : FB.www)) : d["id"] ,
 				{
@@ -299,9 +373,96 @@ function setup(){ // access_token取得後 {{{
 		}
 		return feeds;
 	
-	}
+	} // }}}
 
-	function tablist(){
+	function notify_completer(context){ // {{{
+
+		let cache = Store.get("notification")
+		if(cache){
+			context.title = ["notification"];
+			context.filters = [statusObjectFilter]; 
+			context.compare = void 0;
+			context.anchored = false;
+
+			context.createRow = function(item, highlightGroup){
+
+				// タイトル
+				if (highlightGroup === 'CompTitle') {
+					return <div highlight={highlightGroup} style="white-space: nowrap">
+						<li highlight="CompDesc">{item}</li>
+					</div>;
+				}
+
+				let [value, info] = item.item;
+				return <div highlight="CompItem" style="white-space: nowrap">
+					<li highlight="CompDesc">
+						<img src={info.user_icon} style="height:24px;"/>
+						{info.user_name} 
+						{ /notif.*/.test(info.id) ? <font color="red">[notify]</font> : <font color="yellow">[message]</font>} : 
+						{info.message} {info.title}
+					</li>
+				</div>;
+
+			};
+
+			context.incomplete = false;
+			context.completions = notify_complations();
+
+		}else{
+
+			context.title = ["link","description"]
+			context.filters = [CompletionContext.Filter.textDescription]; 
+			context.compare = void 0;
+			context.anchored = false;
+			context.incomplete = true;
+
+			let url = FB.graph + "me/notifications?access_token=" + FB.access_token;
+			FB.request(url,function(data){
+				res = libly.$U.evalJson(data.responseText)["data"];
+				let notify = [];
+				for each(let n in res){
+					let id = n["id"];
+					let link = n["link"];
+					let title = n["title"] || "";
+					let from = n["from"]["name"] || "";
+					let message = n["message"] || "";
+					notify.push([link,"[" + from + "]" + title + ":" + message])
+				}
+				context.incomplete = false;
+				context.completions = notify;
+			});
+		}
+
+		function statusObjectFilter(item)
+			let (desc = item.description)
+			(this.match(desc.user_name) || this.match(desc.message) || this.match(desc.link) || this.match(desc.description));
+
+	} // }}}
+
+	function notify_complations() { // {{{
+		let cache = Store.get("notification");
+		let notify = [];
+		for each(let d in cache){
+			if(d["unread"]>0){
+				notify.push([
+					d["link"] || FB.www + "messages/",
+					{
+						id:d["id"],
+						user_name:d["from"]["name"],
+						message:(d["message"] || ''),
+						title:(d["title"] || ''),
+						user_icon:FB.graph + d["from"]["id"] + "/picture/" ,
+						link:(d["link"] || ''),
+					}
+				]);
+			}
+		}
+		return notify;
+	
+	} // }}}
+
+	function tablist(context){
+		context.filters = [CompletionContext.Filter.textDescription]; 
 		let tablist = [];
 		for each([i,tab] in tabs.browsers){
 			tablist.push([tab.currentURI.spec,tabs.getTab(i).label]);
@@ -309,15 +470,27 @@ function setup(){ // access_token取得後 {{{
 		return tablist;
 	}
 
-	function grouplist(){
-		let store = storage.newMap("facebook",{store:true}).get("groups");
+	function grouplist(context){
+		context.filters = [CompletionContext.Filter.textDescription]; 
+		let cache = Store.get("groups");
 		let grouplist = [];
-		for each(let d in store){
+		for each(let d in cache){
 			grouplist.push([d["id"],d["name"]])
 		}
 		return grouplist;
 	}
 
+	function friendlist(context){
+		context.filters = [CompletionContext.Filter.textDescription]; 
+		let cache = Store.get("friends");
+		let friendlist = [];
+		for each(let d in cache){
+			friendlist.push([d["id"],d["name"]])
+		}
+		return friendlist;
+	}
+
+	// }}}
 
 } // }}}
 
@@ -326,26 +499,26 @@ function setup(){ // access_token取得後 {{{
 		www : "http://www.facebook.com/",
 		https_www : "https://www.facebook.com/",
 		graph : "https://graph.facebook.com/",
+
 		get_auth : function(){ // get_auth {{{
 			let app_id = "149105991809432";
 			let auth_url = this.https_www + "/dialog/oauth?" 
 							+ "client_id=" + app_id 
 							+ "&redirect_uri=https://www.facebook.com/connect/login_success.html"
-							+ "&scope=offline_access,publish_stream,read_stream,user_groups,user_checkins,friends_checkins,publish_checkins"
+							+ "&scope=offline_access,publish_stream,read_stream,user_groups,user_checkins,friends_checkins,publish_checkins,manage_notifications,read_mailbox" 
 							+ "&response_type=token";
-			liberator.open(auth_url,liberator.NEW_BACKGROUND_TAB);
+			liberator.open(auth_url,liberator.NEW_TAB);
 		}, // }}}
 
 		set_access_token : function(){ // set_access_token {{{
 			commandline.input("Paste URL",
 					function(res){
-						let store = storage.newMap("facebook",{store:true});
 						let token = res.match(/^https:\/\/.*access_token\=(.*)\&.*$/)[1];
 						if(token){
-							store.set('access_token',token);
-							store.save();
-							FB.access_token = token;
-							e("[facebook.js]:set access_token!");
+							Store.set("access_token",token);
+							Store.save();
+							this.access_token = token;
+							liberator.echo("[facebook.js]:set access_token!");
 							setup();
 						}
 					},{
@@ -360,15 +533,41 @@ function setup(){ // access_token取得後 {{{
 													}
 													return tablist;
 												})();
-							context.incomplete = false;
 						},
 					}
 					);
 		}, // }}}
+		
+		resetoauth : function() { // resetOAuth {{{ 
+			this.confirm(
+				"[facebook.js]:Do you want to reset OAuth information?",
+				function(){
+					Store.remove("access_token");
+					Store.save();
+					liberator.echo("[facebook.js]:OAuth information were reset.");
+					presetup();
+				}
+			)
+
+
+		}, // }}}
+
+		confirm: function(msg, onYes, onNo, onCancel) { // {{{
+			if (!onNo)
+				onNo = function () liberator.echo('canceled.');
+
+			commandline.input(
+				msg + " (input 'yes/no'): ",
+				function(s) (s === "yes" ? onYes : onNo)(),
+				{
+					onCancel: onCancel || onNo
+				}
+		  );
+		}, // }}}
 
 		post_to_wall : function(data) { // post {{{
 
-			let url = this.graph + (data["-group"] || "me") + "/feed";
+			let url = this.graph + (data["-group"] || data["-to"] || "me") + "/feed";
 
 			let post_data = getParameterMap({
 				access_token : this.access_token,
@@ -376,20 +575,42 @@ function setup(){ // access_token取得後 {{{
 				link : data["-link"] || '',
 			});
 
-			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
+			this.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
 			   
 	   }, // }}} 
 
 		get_wall_data : function() { // set to local storage 'feed_cache' {{{ 
 
-			let url = FB.graph + "/me/home?access_token=" + FB.access_token;
+			let url = FB.graph + "me/home?access_token=" + FB.access_token;
 
 			FB.request(url,function(data){
-				res = libly.$U.evalJson(data.responseText);
+				let res = libly.$U.evalJson(data.responseText)["data"];
+				let cache = Store.get("feed_cache") ? Store.get("feed_cache") : [];
+				let data = [];
 
-				let store = storage.newMap("facebook",{store:true});
-				store.set('feed_cache',res["data"]);
-				store.save();
+				let c = 0;
+				for (let i in res){
+					if (res[i].id == (cache[0] ? cache[0].id : undefined)) break;
+					c++;
+				}
+
+				// popup notify
+				if (c > 0 && liberator.globalVariables.facebook_notify == 1) 
+					popup("facebook.js",c + " new entry.",FB.graph + res[0]["from"]["id"] + "/picture/" || null);
+
+
+				// cache 
+				for (let i in cache){
+					if (res[res.length - 1].id != cache[i].id) continue;
+					i++; // typeof(i) = "string";
+					data = res.concat(cache.splice(i,cache.length));
+					break;
+				}
+				if (data.length == 0) data = res.concat(cache);
+				data = data.splice(0,liberator.globalVariables.facebook_history_limit || 100);
+
+				Store.set("feed_cache",data);
+				Store.save();
 
 			});
 
@@ -397,15 +618,10 @@ function setup(){ // access_token取得後 {{{
 
 		view_wall_data : function(data) { // view wall data on MOW {{{ 
 
-			let url = data[0] ? this.graph + data[0] + "/feed?access_token=" + this.access_token : this.graph + "/me/home?access_token=" + this.access_token;
+			let url = data[0] ? this.graph + data[0] + "/feed?access_token=" + this.access_token : this.graph + "me/home?access_token=" + this.access_token;
 
-			FB.request(url,function(data){
-				res = libly.$U.evalJson(data.responseText);
-
-				let store = storage.newMap("facebook",{store:true});
-				store.set('feed_cache',res["data"]);
-				store.save();
-
+			this.request(url,function(data){
+				let res = libly.$U.evalJson(data.responseText);
 
 				viewWallData(res);
 
@@ -451,29 +667,28 @@ function setup(){ // access_token取得後 {{{
 
 		set_friends : function(data) { // store friends data {{{ 
 
-			let url = this.graph + "/me/friends?access_token=" + this.access_token;
+			let url = this.graph + "me/friends?access_token=" + this.access_token;
 
-			FB.request(url,function(data){
-				res = libly.$U.evalJson(data.responseText)
-				let store = storage.newMap("facebook",{store:true});
-				store.set('friends',res["data"]);
-				store.save();
+			this.request(url,function(data){
+				let res = libly.$U.evalJson(data.responseText)
+				Store.set('friends',res["data"]);
+				Store.save();
 			})
 
 		}, // }}}
 
 		set_groups : function(data) { // store groups data {{{ 
 
-			let url = this.graph + "/me/groups?access_token=" + this.access_token;
+			let url = this.graph + "me/groups?access_token=" + this.access_token;
 
-			FB.request(url,function(data){
-				res = libly.$U.evalJson(data.responseText)
-				let store = storage.newMap("facebook",{store:true});
-				store.set('groups',res["data"]);
-				store.save();
+			this.request(url,function(data){
+				let res = libly.$U.evalJson(data.responseText)
+				Store.set('groups',res["data"]);
+				Store.save();
 			})
 
 		}, // }}}
+
 		request : function(url,callback,type,post_data){ // get or post requester. def:get {{{
 
 			let req = new libly.Request(
@@ -490,13 +705,16 @@ function setup(){ // access_token取得後 {{{
 			});
 
 			req.addEventListener("failure",function(data){
-				e(data.responseText)
-				liberator.echoerr(data.responseText);
+				e("[facebook.js:failure] : " + data.responseText)
+				e(data.req.url)
+				e(data)
+				liberator.echoerr("[facebook.js:failure] : " + data.responseText);
 			});
 
 			req.addEventListener("exception",function(data){
-				e(data.responseText)
-				liberator.echoerr(data.responseText);
+				e("[facebook.js:exception] : " + data.responseText)
+				e(data)
+				liberator.echoerr("[facebook.js:exception] : " + data.responseText);
 			});
 			   
 			!type ? req.get() : req.post();
@@ -522,7 +740,7 @@ function setup(){ // access_token取得後 {{{
 				message : message || ''
 			});
 
-			FB.request(url,function(data) echo("[facebook.js]:checkin success"),true,post_data);
+			this.request(url,function(data) echo("[facebook.js]:checkin success"),true,post_data);
 
 
 		}, // }}}
@@ -540,7 +758,7 @@ function setup(){ // access_token取得後 {{{
 				message : message
 			});
 
-			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
+			this.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
 
 		}, // }}}
 
@@ -553,30 +771,90 @@ function setup(){ // access_token取得後 {{{
 				access_token : this.access_token,
 			});
 
-			FB.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
+			this.request(url,function(data) echo("[facebook.js]:post success"),true,post_data);
 
 		}, // }}}
 
+		notification : function(data) { // notification {{{ 
+
+			try{
+				if(data[0]) return liberator.open(data[0],liberator.NEW_TAB);
+			}catch(e){}
+
+			let post_data = getParameterMap({
+				access_token : this.access_token,
+				batch:'[{"method":"GET","relative_url":"me/notifications"},{"method":"GET","relative_url":"me/inbox"}]',
+			});
 
 
-		
+			this.request(
+					FB.graph,
+					function(data){
+						let res = libly.$U.evalJson(data.responseText);
+						let temp_cache = [];
+						let cache = Store.get("notifications");
+
+						for each(let d in res){
+							if(d["code"]==400){
+								liberator.echoerr("[facebook.js]maybe too much request???");
+								e(d);
+							}
+							let body = libly.$U.evalJson(d["body"]);
+							for each(let n in body["data"]){
+								if(!(is_cache(n.id))){
+									if(/^notif.*/.test(n.id)){ // notification
+										easy_popup(n);
+									}else if(n.unread > 0){ // message
+										easy_popup(n); 
+									}
+								}
+								temp_cache.push(n);
+							}
+						}
+						Store.set("notification",temp_cache);
+						Store.save();
+
+						function easy_popup(n){
+							if (liberator.globalVariables.facebook_notify == 1){
+								let title = n["title"] || n["from"]["name"];
+								let from_icon = FB.graph + n["from"]["id"] + "/picture/" || null;
+								let message = n["message"] || "";
+								popup(title,message,from_icon);
+							}
+						}
+						function is_cache(id){
+							let cache = Store.get("notification");
+							for each(let c in cache){
+								if(id == c.id) return true;
+							}
+							return false;
+						}
+					}
+					,true
+					,post_data
+			);
+
+		}, // }}}
+
 	} /// }}}
 
 
-// wall data update timer
-let timer={id:0,active:false};
+	let Store = storage.newMap("facebook",{store:true});
 
-if(storage.newMap("facebook",{store:true}).get("access_token")){
-	setup();
-	if(liberator.globalVariables.facebook_auto_load == 1){
-		timer.id = setInterval(FB.get_wall_data,liberator.globalVariables.facebook_auto_load_interval || 60000);
-		timer.active = true;
-		e("[facebook.js]start getting wall data");
+	// 公開オブジェクト
+	if (! __context__.AutoLoader) __context__.AutoLoader = {id:undefined,active:false}
+
+	if(Store.get("access_token")){
+		setup();
+	}else{
+		presetup();
 	}
-}else{
-	presetup();
-}
 
+	function popup(title, text ,image) {
+		Components.classes['@mozilla.org/alerts-service;1'].
+		getService(Components.interfaces.nsIAlertsService).
+		showAlertNotification(image, title, text, false, '', null);
+	}
 
 	function getParameterMap(parameters){  
 		let map = "";
@@ -599,5 +877,6 @@ if(storage.newMap("facebook",{store:true}).get("access_token")){
 
 
 })();
+
 
 
