@@ -167,8 +167,6 @@ let INFO =
       height : 100% !important;
     ]]></>;
 
-    styleTogglers.push();
-
     let toggleFullscreen = makeFullscreenToggler(doc, makeStyleToggler(fullScreenStyle, player));
 
     toggleFullscreen(
