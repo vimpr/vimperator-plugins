@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Slideshare" version="1.1.0"
+  <plugin name="Slideshare" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="Controll slideshare's slide."
           lang="en-US"
@@ -169,27 +169,23 @@ let INFO =
 
     let toggleFullscreen = makeFullscreenToggler(doc, makeStyleToggler(fullScreenStyle, player));
 
-    toggleFullscreen(
-      function () {
-        callback({
-          next: function () {
-            this.player.next();
-          },
+    callback({
+      next: function () {
+        this.player.next();
+      },
 
-          previous: function () {
-            this.player.previous();
-          },
+      previous: function () {
+        this.player.previous();
+      },
 
-          toggleFullscreen: function () {
-            toggleFullscreen();
-          },
+      toggleFullscreen: function () {
+        toggleFullscreen();
+      },
 
-          get player () doc.querySelector('#player'),
+      get player () doc.querySelector('#player'),
 
-          get current () player.controller.currentPosition
-        });
-      }
-    );
+      get current () player.controller.currentPosition
+    });
   }
 
   function Slideshare (callback) {
