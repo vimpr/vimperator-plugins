@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GMailCommando" version="1.4.10"
+  <plugin name="GMailCommando" version="1.4.11"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/gmail-commando.js"
           summary="The handy commands for GMail"
           lang="en-US"
@@ -230,12 +230,12 @@ let INFO =
 
 
   const Elements = {
-    get doc() content.frames[3].document,
+    get doc() content.document.querySelector('#canvas_frame').contentDocument,
 
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/.test(it.href))),
 
     // 入力欄 と 検索ボタンは Buzz の有効無効によって ID が変わる
-    get input() this.doc.querySelector('input.GcwpPb-hsoKDf.nr'),
+    get input() this.doc.querySelector('input.w-as1.nr'),
 
     get searchButton() this.doc.querySelector('div.J-Zh-I.J-J5-Ji.L3.J-Zh-I-Js-Zq'),
 
