@@ -645,11 +645,10 @@ for Migemo search: require XUL/Migemo Extension
         }, {}, true);
     liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
-            var comment = "";
             var targetServices = useServicesByPost;
 
             if (arg["-s"]) targetServices = arg["-s"];
-            if (arg.length > 0) comment = arg.join(" ");
+            comment = arg.literalArg;
 
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
@@ -692,6 +691,7 @@ for Migemo search: require XUL/Migemo Extension
             d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
             setTimeout(function(){first.call();},0);
         },{
+            literal: 0,
             completer: function(context, arg){
                 let filter = context.filter;
                 var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
