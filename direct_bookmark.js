@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.15.2</version>
+    <version>0.16.0</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -387,6 +387,24 @@ for Migemo search: require XUL/Migemo Extension
                 });
                 return hatena_tags;
             },
+            userTags:function(url, results){
+                var url = 'http://b.hatena.ne.jp/entry/json/?url=' + encodeURIComponent(url)
+
+                return Deferred.http({
+                    method: "get",
+                    url: url,
+                }).next(function(xhr){
+                    if(xhr.status != 200)
+                        return;
+                    let json = JSON.parse(xhr.responseText);
+                    let tags = json.bookmarks.map(function(it) it.tags);
+                    tags = tags.filter(function(it) it.length);
+                    tags = Array.concat.apply([], tags);
+                    tags = tags.map(String.trim);
+                    tags = util.Array.uniq(tags);
+                    results.push(tags);
+                });
+            },
             icon:function(url){
                 return '<img src="http://b.hatena.ne.jp/entry/image/' + url + '" style="vertical-align: middle;" />';
             },
@@ -595,6 +613,24 @@ for Migemo search: require XUL/Migemo Extension
         }).error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
         return first;
     }
+    function getUserTags(url, onComplete){
+        var d = new Deferred();
+        var first = d;
+        var results = [];
+
+        useServicesByTag.split(/\s*/).forEach(function(service){
+            var user, password, currentService = services[service] || null;
+            if (!(currentService && currentService.userTags))
+                return;
+            d = d.next(currentService.userTags(url, results));
+        });
+        d.next(function(){
+            let tags = Array.concat.apply([], results);
+            onComplete(tags);
+        });
+
+        first.call([]);
+    }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
@@ -691,29 +727,47 @@ for Migemo search: require XUL/Migemo Extension
             setTimeout(function(){first.call();},0);
         },{
             literal: 0,
-            completer: function(context, arg){
-                function set (){
-                    var completionList = [];
-                    context.incomplete = false;
-                    context.completions =
-                        [ ["[" + tag + "]","Tag"]
-                          for each (tag in __context__.tags)
-                          if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
-                }
+            completer: let (lastURL = null, lastUserTags) function(context, arg){
 
-                let filter = context.filter;
-                var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
-                var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
+                context.fork('UserTags', 0, context, function(context){
+                    context.title = ['User Tags', 'User Tags'];
+                    if (buffer.URL == lastURL){
+                        context.completions = [['[' + t + ']', t] for ([, t] in Iterator(lastUserTags))];
+                    } else {
+                        lastURL = buffer.URL;
+                        context.incomplete = true;
+                        getUserTags(buffer.URL, function(tags){
+                            lastUserTags = tags;
+                            context.completions = [['[' + t + ']', t] for ([, t] in Iterator(tags))];
+                            context.incomplete = false;
+                        });
+                    }
+                });
 
-                context.title = ['Tag','Description'];
-                context.advance( match_result[1].length );
+                context.fork('MyTags', 0, context, function(context, arg){
+                    function set (){
+                        var completionList = [];
+                        context.incomplete = false;
+                        context.completions =
+                            [ ["[" + tag + "]","Tag"]
+                              for each (tag in __context__.tags)
+                              if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                    }
 
-                if(__context__.tags.length == 0){
-                    context.incomplete = true;
-                    getTagsAsync(set).call([]);
-                } else {
-                    set();
-                }
+                    let filter = context.filter;
+                    var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
+                    var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
+
+                    context.title = ['Tag','Description'];
+                    context.advance( match_result[1].length );
+
+                    if(__context__.tags.length == 0){
+                        context.incomplete = true;
+                        getTagsAsync(set).call([]);
+                    } else {
+                        set();
+                    }
+                });
             },
             options: [
                 [['-s','-service'], liberator.modules.commands.OPTION_STRING],
