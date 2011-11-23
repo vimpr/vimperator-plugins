@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.15.1</version>
+    <version>0.15.2</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -567,9 +567,10 @@ for Migemo search: require XUL/Migemo Extension
                 Application.bookmarks.tags.children.map(function(x) x.title),
         },
     };
-    liberator.plugins.direct_bookmark = { services: services, tags: [] };
+    __context__.services = services;
+    __context__.tags = [];
 
-    function getTagsAsync(arg){
+    function getTagsAsync(onComplete){
         var d,first;
         d = first = Deferred();
 
@@ -582,19 +583,13 @@ for Migemo search: require XUL/Migemo Extension
                 return t.concat(tags);
             });
         });
-        d.next(function(tags){liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort()})
-         .error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
+        d.next(function(tags){
+            tags = tags.filter(function(e,i,a) a.indexOf(e) == i);
+            tags.sort();
+            __context__.tags = tags;
+            onComplete(tags);
+        }).error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
         return first;
-    }
-    function getTags(arg){
-        var user,password;
-        var tags = [];
-        useServicesByTag.split(/\s*/).forEach(function(service){
-            var currentService = services[service] || null;
-            [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : [null, null];
-            tags = tags.concat(currentService.tags(user,password));
-        });
-        liberator.plugins.direct_bookmark.tags = tags.filter(function(e,i,a) a.indexOf(e) == i).sort();
     }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
@@ -693,17 +688,28 @@ for Migemo search: require XUL/Migemo Extension
         },{
             literal: 0,
             completer: function(context, arg){
+                function set (){
+                    var completionList = [];
+                    context.incomplete = false;
+                    context.completions =
+                        [ ["[" + tag + "]","Tag"]
+                          for each (tag in __context__.tags)
+                          if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                }
+
                 let filter = context.filter;
                 var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                 var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
-                var completionList = [];
-                // XXX: completer works asynchronous. thus we shouldn't call getTagsAsync().
-                if(liberator.plugins.direct_bookmark.tags.length == 0)
-                    getTags().call([]);
+
                 context.title = ['Tag','Description'];
                 context.advance( match_result[1].length );
-                context.completions = [["[" + tag + "]","Tag"]
-                            for each (tag in liberator.plugins.direct_bookmark.tags) if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0)];
+
+                if(__context__.tags.length == 0){
+                    context.incomplete = true;
+                    getTagsAsync(set).call([]);
+                } else {
+                    set();
+                }
             },
             options: [
                 [['-s','-service'], liberator.modules.commands.OPTION_STRING],
