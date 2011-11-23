@@ -388,7 +388,7 @@ for Migemo search: require XUL/Migemo Extension
                 return hatena_tags;
             },
             userTags:function(url, results){
-                var url = 'http://b.hatena.ne.jp/entry/json/?url=' + encodeURIComponent(url)
+                var url = 'http://b.hatena.ne.jp/entry/jsonlite/?url=' + encodeURIComponent(url)
 
                 return Deferred.http({
                     method: "get",
@@ -758,7 +758,7 @@ for Migemo search: require XUL/Migemo Extension
                     var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
                     var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
 
-                    context.title = ['Tag','Description'];
+                    context.title = ['My Tag','Description'];
                     context.advance( match_result[1].length );
 
                     if(__context__.tags.length == 0){
