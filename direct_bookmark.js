@@ -502,18 +502,22 @@ for Migemo search: require XUL/Migemo Extension
                 });
             },
             tags:function(user,password){
-                var returnValue = [];
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "https://www.google.com/bookmarks", false, user, password);
-                xhr.send(null);
+                return [];
 
-                var html = parseHTML(xhr.responseText);
-                var tags = getElementsByXPath('id("sidenav")/div/ul/li/a[count(*)=1]/text()',html);
+                // FIXME: NOT WORKS
+                //
+                // var returnValue = [];
+                // var xhr = new XMLHttpRequest();
+                // xhr.open("GET", "https://www.google.com/bookmarks", false, user, password);
+                // xhr.send(null);
 
-                tags.forEach(function(tag){
-                    returnValue.push(tag.textContent.match(/\S+/));
-                });
-                return returnValue;
+                // var html = parseHTML(xhr.responseText);
+                // var tags = getElementsByXPath('id("sidenav")/div/ul/li/a[count(*)=1]/text()',html);
+
+                // tags.forEach(function(tag){
+                //     returnValue.push(tag.textContent.match(/\S+/));
+                // });
+                // return returnValue;
             },
         },
         'f': {
