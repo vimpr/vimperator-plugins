@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.16.0</version>
+    <version>0.16.1</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -492,6 +492,8 @@ for Migemo search: require XUL/Migemo Extension
 
                 var mypage_html = parseHTML(xhr.responseText);
                 var tags = getElementsByXPath("id(\"tag_list\")/div/span",mypage_html);
+                if (!tags)
+                    return [];
 
                 tags.forEach(function(tag){
                     ldc_tags.push(tag.textContent);
@@ -732,6 +734,19 @@ for Migemo search: require XUL/Migemo Extension
         },{
             literal: 0,
             completer: let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
+                function set (context, tags) {
+                    let filter = context.filter;
+                    var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
+                    var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
+
+                    context.advance( match_result[1].length );
+
+                    context.incomplete = false;
+                    context.completions =
+                        [ ["[" + tag + "]","Tag"]
+                          for each (tag in tags)
+                          if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                }
 
                 context.fork('UserTags', 0, context, function(context){
                     context.title = ['User Tags', 'User Tags'];
@@ -740,7 +755,7 @@ for Migemo search: require XUL/Migemo Extension
                         done = true;
                         lastUserTags = tags;
                         context.incomplete = false;
-                        context.completions = [['[' + t + ']', t] for ([, t] in Iterator(tags))];
+                        set(context, tags);
                     };
 
                     if (buffer.URL == lastURL){
@@ -758,27 +773,13 @@ for Migemo search: require XUL/Migemo Extension
                 });
 
                 context.fork('MyTags', 0, context, function(context, arg){
-                    function set (){
-                        var completionList = [];
-                        context.incomplete = false;
-                        context.completions =
-                            [ ["[" + tag + "]","Tag"]
-                              for each (tag in __context__.tags)
-                              if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
-                    }
-
-                    let filter = context.filter;
-                    var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
-                    var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
-
                     context.title = ['My Tag','Description'];
-                    context.advance( match_result[1].length );
 
                     if(__context__.tags.length == 0){
                         context.incomplete = true;
-                        getTagsAsync(set).call([]);
+                        getTagsAsync(set.bind(null, context)).call([]);
                     } else {
-                        set();
+                        set(context, __context__.tags);
                     }
                 });
             },
