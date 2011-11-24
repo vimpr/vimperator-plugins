@@ -397,8 +397,12 @@ for Migemo search: require XUL/Migemo Extension
                     if(xhr.status != 200)
                         return;
                     let json = JSON.parse(xhr.responseText);
+                    if (!json)
+                        return;
                     let tags = json.bookmarks.map(function(it) it.tags);
                     tags = tags.filter(function(it) it.length);
+                    if (!tags.length)
+                        return;
                     tags = Array.concat.apply([], tags);
                     tags = tags.map(String.trim);
                     tags = util.Array.uniq(tags);
@@ -625,7 +629,7 @@ for Migemo search: require XUL/Migemo Extension
             d = d.next(currentService.userTags(url, results));
         });
         d.next(function(){
-            let tags = Array.concat.apply([], results);
+            let tags = results.length ? Array.concat.apply([], results) : [];
             onComplete(tags);
         });
 
@@ -727,20 +731,29 @@ for Migemo search: require XUL/Migemo Extension
             setTimeout(function(){first.call();},0);
         },{
             literal: 0,
-            completer: let (lastURL = null, lastUserTags) function(context, arg){
+            completer: let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
 
                 context.fork('UserTags', 0, context, function(context){
                     context.title = ['User Tags', 'User Tags'];
+
+                    onComplete = function(tags){
+                        done = true;
+                        lastUserTags = tags;
+                        context.incomplete = false;
+                        context.completions = [['[' + t + ']', t] for ([, t] in Iterator(tags))];
+                    };
+
                     if (buffer.URL == lastURL){
-                        context.completions = [['[' + t + ']', t] for ([, t] in Iterator(lastUserTags))];
+                        if (done) {
+                            onComplete(lastUserTags);
+                        } else {
+                            context.incomplete = true;
+                        }
                     } else {
                         lastURL = buffer.URL;
                         context.incomplete = true;
-                        getUserTags(buffer.URL, function(tags){
-                            lastUserTags = tags;
-                            context.completions = [['[' + t + ']', t] for ([, t] in Iterator(tags))];
-                            context.incomplete = false;
-                        });
+                        done = false;
+                        getUserTags(buffer.URL, function (tags) onComplete(tags));
                     }
                 });
 
