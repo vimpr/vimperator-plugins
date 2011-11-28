@@ -9,9 +9,8 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<minVersion>3.0</minVersion>
-	<maxVersion>3.3</maxVersion>
 	<author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
 	<detail lang="ja"><![CDATA[
