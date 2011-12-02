@@ -9,9 +9,8 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<minVersion>3.0</minVersion>
-	<maxVersion>3.3</maxVersion>
 	<author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
 	<detail lang="ja"><![CDATA[
@@ -189,7 +188,16 @@ let PLUGIN_INFO =
 
 		save: function() CacheStore.save(),
 
-		get isExpired() (!this.lastUpdated || (new Date().getTime() > (this.lastUpdated + this.limit)))
+		get isExpired() (!this.lastUpdated || (new Date().getTime() > (this.lastUpdated + this.limit))),
+		remove: function(url){ // {{{
+			if (!this.cache)
+				return this.udpate(true);
+			let names = [n for ([n, v] in Iterator(this.cache.list)) if (v.url == url)];
+			for (let [, name] in Iterator(names))
+				delete this.cache.list[name];
+			this.save();
+			this.update();
+		} // }}}
 	};
   // }}}
 
@@ -228,7 +236,7 @@ let PLUGIN_INFO =
 
 		}, // }}}
 
-		get : function(callback){ // {{{
+		get : function(state, callback){ // {{{
 		// document => http://readitlaterlist.com/api/docs#get
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
@@ -246,7 +254,7 @@ let PLUGIN_INFO =
 				password  : logins[0].password,
 				format    : "json",
 				count     : (liberator.globalVariables.readitlater_get_count? liberator.globalVariables.readitlater_get_count : 50 ),
-				//state   : (args["read"]) ? "read" : "unread",
+				state     : state
 				//tags    : (args["tags"]) ? 1 : 0,
 				//myAppOnly: (args["myAppOnly"]) ? 1 : 0,
 				}
@@ -427,20 +435,14 @@ let PLUGIN_INFO =
 
 	}
 
-	let ListCache = new Cache({name: 'list', updater: ReadItLater.get.bind(ReadItLater)}); // {{{
-	ListCache.remove = function(url){
-		if (!this.cache)
-			return this.udpate(true);
-		let names = [n for ([n, v] in Iterator(this.cache.list)) if (v.url == url)];
-		for (let [, name] in Iterator(names))
-			delete this.cache.list[name];
-		this.save();
-		this.update();
-	}; // }}}
+	let ListCache = {
+		all: new Cache({name: 'list', updater: ReadItLater.get.bind(ReadItLater, '')}),
+		unread: new Cache({name: 'list', updater: ReadItLater.get.bind(ReadItLater, 'unread')})
+	};
 
 	function markAsRead(urls){ // {{{
 		for (let [, url] in Iterator(urls))
-			ListCache.remove(url);
+			ListCache.unread.remove(url);
 		ReadItLater.send(urls, echo.bind(null, "Mark as read: " + urls.length));
 	} // }}}
 
@@ -451,7 +453,7 @@ let PLUGIN_INFO =
 			url = buffer.URL;
 		ReadItLater.add(url, title, function(){
 			echo("Added: " + (title || url));
-			ListCache.update(true);
+			ListCache.unread.update(true);
 		});
 	} // }}}
 
@@ -476,14 +478,12 @@ let PLUGIN_INFO =
 		context.anchored = false;
 		context.incomplete = true;
 
-		ListCache.get(function(data){
+		ListCache[args.bang ? 'all' : 'unread'].get(function(data){
 			context.completions = [
 				[item.url,item.title]
 				for([, item] in Iterator(data.list))
 				if(
 					!args.some(function (arg) arg == item.url)
-					&&
-					(!args["bang"] ?  item.state == 0 : item.state == 1)
 				)
 			];
 			context.incomplete = false;
