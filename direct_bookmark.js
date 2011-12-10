@@ -480,7 +480,9 @@ for Migemo search: require XUL/Migemo Extension
                     user: user,
                     password: password,
                 }).next(function(xhr){
-                    if(xhr.status != 200) throw "livedoor clip: failed";
+                    if(xhr.status != 200) {
+                        throw "livedoor clip: failed";
+                    }
                 });
             },
             tags:function(user,password){
@@ -734,10 +736,21 @@ for Migemo search: require XUL/Migemo Extension
         },{
             literal: 0,
             completer: let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
+                function matchPosition (e){
+                    let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
+                    switch (m) {
+                    case 'infix': return e;
+                    case 'suffix': return e + "$";
+                    }
+                    return "^" + e;
+                }
+
                 function set (context, tags) {
                     let filter = context.filter;
                     var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
-                    var m = new RegExp(XMigemoCore && isUseMigemo ? "^(" + XMigemoCore.getRegExp(match_result[2]) + ")" : "^" + match_result[2],'i');
+                    var expr = XMigemoCore && isUseMigemo ? "(" + XMigemoCore.getRegExp(match_result[2]) + ")"
+                                                          : match_result[2];
+                    var m = new RegExp(matchPosition(expr),'i');
 
                     context.advance( match_result[1].length );
 
