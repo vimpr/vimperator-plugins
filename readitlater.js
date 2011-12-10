@@ -518,6 +518,9 @@ let PLUGIN_INFO =
 	// Export {{{
 	__context__.ListCache = ListCache;
 	__context__.API = ReadItLater;
+	__context__.WrappedAPI = {
+		markAsRead: markAsRead
+	}
 	// }}}
 
 })();
