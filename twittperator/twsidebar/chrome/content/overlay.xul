@@ -3,23 +3,23 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <menupopup id="viewSidebarMenu">
-    <menuitem key="key_openEmptySidebar" observes="viewTwitteerSidebar" />
+    <menuitem key="key_openEmptySidebar" observes="viewTwitterSidebar" />
   </menupopup>
 
   <keyset id="mainKeyset">
-    <key id="key_openEmptySidebar" command="viewTwitteerSidebar"
+    <key id="key_openEmptySidebar" command="viewTwitterSidebar"
          key="E"
          modifiers="shift accel" />
   </keyset>
 
   <broadcasterset id="mainBroadcasterSet">
-    <broadcaster id="viewTwitteerSidebar"
+    <broadcaster id="viewTwitterSidebar"
                  label="Twitter Sidebar"
                  autoCheck="false"
                  type="checkbox"
                  group="sidebar"
                  sidebarurl="chrome://twsidebar/content/twsidebar.xul"
                  sidebartitle="Twitter Sidebar"
-                 oncommand="toggleSidebar('viewTwitteerSidebar');" />
+                 oncommand="toggleSidebar('viewTwitterSidebar');" />
   </broadcasterset>
 </overlay>

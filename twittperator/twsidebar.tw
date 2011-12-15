@@ -484,7 +484,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     setTimeout(
       function () {
         readyToStart = false;
-        Tweets.reverse().forEach(makeOnMsg(false));
+        Array.slice(Tweets).reverse().forEach(makeOnMsg(false));
         plugins.twittperator.ChirpUserStream.addListener(added.chirp = makeOnMsg(true, 'chirp'));
         plugins.twittperator.TrackingStream.addListener(added.filter = makeOnMsg(true, 'filter'));
       },
