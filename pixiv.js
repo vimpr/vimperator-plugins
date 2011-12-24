@@ -1,6 +1,6 @@
 // INFO //
 var INFO =
-<plugin name="pixiv.js" version="0.7.2"
+<plugin name="pixiv.js" version="0.7.3"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -38,6 +38,16 @@ commands.addUserCommand(
 
     const Cc=Components.classes;
     const Ci=Components.interfaces;
+
+    let cookie=contents.cookie;
+    let id;
+    let idTmp=contents.URL.match(/illust_id=(\d+)/i);
+    if(idTmp===null){
+      liberator.echoerr("This page is not image page and not manga page.");
+      return false;
+    }else{
+      id=idTmp[1];
+    }
 
     let createWorker=function(fileName){
       let ret;
@@ -85,31 +95,6 @@ commands.addUserCommand(
     worker.addEventListener('error',function(event){  
       liberator.echoerr(event.data.status);
     },false);
-
-    let id;
-    let idTmp=contents.URL.match(/illust_id=(\d+)/i);
-    if(idTmp===null){
-      liberator.echoerr("This page is not image page and not manga page.");
-      return false;
-    }else{
-      id=idTmp[1];
-    }
-
-    let baseInfo;
-    let scroll;
-    let type=contents.getElementsByClassName('works_display').item(0)
-              .firstChild.getAttribute('href');
-    if(-1!=type.search(/big&illust_id=/i)){
-      baseInfo="http://www.pixiv.net/member_illust.php?mode=big&illust_id=";
-      scroll='';
-    }else if(-1!=type.search(/manga&illust_id=/i)){
-      baseInfo="http://www.pixiv.net/member_illust.php?mode=manga&illust_id=";
-      scroll='&type=scroll';
-    }else{
-      liberator.echoerr("This page is not image page and not manga page.");
-      return false;
-    }
-    let cookie=contents.cookie;
 
     let directoryPicker=function() {
       let path;
@@ -277,6 +262,18 @@ commands.addUserCommand(
       }
     };
 
+    let url;
+    let type=contents.getElementsByClassName('works_display')
+             .item(0).firstChild.getAttribute('href');
+    if(-1!=type.search(/big&illust_id=/i)){
+      url=contents.documentURI.replace('medium','big');
+    }else if(-1!=type.search(/manga&illust_id=/i)){
+      url=contents.documentURI.replace('medium','manga')+'&type=scroll';
+    }else{
+      liberator.echoerr("This page is not image page and not manga page.");
+      return false;
+    }
+
     let trueImgInfo=function(){
       if(-1!=type.search(/big&illust_id=/i)){
         saveImageFile();
@@ -299,7 +296,7 @@ commands.addUserCommand(
     xhrImgInfo.addEventListener("load",trueImgInfo,false);
     xhrImgInfo.addEventListener("error",falseImgInfo,false);
     xhrImgInfo.QueryInterface(Ci.nsIXMLHttpRequest);
-    xhrImgInfo.open("GET",baseInfo+id+scroll,true);
+    xhrImgInfo.open("GET",url,true);
     xhrImgInfo.setRequestHeader('Referer',contents.URL);
     xhrImgInfo.setRequestHeader('Cookie',cookie);
     xhrImgInfo.send(null);
