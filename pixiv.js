@@ -1,4 +1,4 @@
-// INFO //
+// {{{ INFO
 var INFO =
 <plugin name="pixiv.js" version="0.7.3"
         summary="Download image from pixiv"
@@ -20,11 +20,13 @@ var INFO =
     </description>
   </item>
 </plugin>;
+// }}}
 
 commands.addUserCommand(
   ['pixiv'],
   'Save Image File from pixiv',
   function(){
+// {{{ environment
     let contents=gBrowser.selectedBrowser.contentDocument;
     if(contents.domain!="www.pixiv.net"){
       liberator.echoerr('This page is not pixiv.');
@@ -38,77 +40,10 @@ commands.addUserCommand(
 
     const Cc=Components.classes;
     const Ci=Components.interfaces;
-
     let cookie=contents.cookie;
-    let id;
-    let idTmp=contents.URL.match(/illust_id=(\d+)/i);
-    if(idTmp===null){
-      liberator.echoerr("This page is not image page and not manga page.");
-      return false;
-    }else{
-      id=idTmp[1];
-    }
+// }}}
 
-    let createWorker=function(fileName){
-      let ret;
-      const resourceName="vimp-plugin";
-      const ioService=Cc["@mozilla.org/network/io-service;1"]
-                        .getService(Ci.nsIIOService); 
-      const resProt=ioService.getProtocolHandler("resource")  
-                      .QueryInterface(Ci.nsIResProtocolHandler);
-      let pluginDirs=io.getRuntimeDirectories("plugin");
-      if (pluginDirs.length === 0){
-        return null;
-      }
-      resProt.setSubstitution(resourceName,ioService.newFileURI(pluginDirs[0]));
-      try {
-        worker=new ChromeWorker("resource://"+resourceName+"/modules/"+fileName);
-      }catch(e){
-        return null;
-      }
-      return worker;
-    };
-    let worker=createWorker('libDLImage.js');
-    if(worker==null){
-      liberator.echoerr('plugin directory is not found');
-      return false;
-    }
-    worker.addEventListener('message',function(event){  
-      if(event.data.status=='error'){
-        liberator.echoerr(event.data.message);
-        return false;
-      };
-      let instream=event.data.message;
-      let savePath=event.data.savePath;
-      let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-      aFile.initWithPath(savePath);
-      let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
-        .createInstance(Ci.nsIFileOutputStream);
-      outstream.init(aFile,0x02|0x08|0x20,0664,0);
-      outstream.write(instream,instream.length);
-      if (outstream instanceof Ci.nsISafeOutputStream) {
-        outstream.finish();
-      }else{
-        outstream.close();
-      }
-    },false);
-    worker.addEventListener('error',function(event){  
-      liberator.echoerr(event.data.status);
-    },false);
-
-    let directoryPicker=function() {
-      let path;
-      let fp=Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
-      fp.init(window,'Select Directory',Ci.nsIFilePicker.modeGetFolder);
-      let result=fp.show();
-      if(result==Ci.nsIFilePicker.returnOK){
-        return fp.file;
-      }
-      return null;
-    };
-    let saveDirectory=directoryPicker();
-    if(saveDirectory==null) return false;
-
+// {{{ convert to DOM Document from text
     let getDOMHtmlDocument=function(str){
       let doc;
       let range;
@@ -136,27 +71,115 @@ commands.addUserCommand(
       }
       return doc;
     };
+// }}}
 
-    let getImageUrl=function(pageContents){
-      let url;
-      let htmldoc=getDOMHtmlDocument(pageContents);
-      if(htmldoc){
-        if(0<htmldoc.getElementsByTagName('img').length)
-          url=htmldoc.getElementsByTagName('img').item(0).getAttribute('src');
-        else
-          url='';
-      }else{
-        let s=pageContents.indexOf('src="')+5;
-        let e=pageContents.indexOf('"',s);
-        url=pageContents.substr(s,e-s);
+// {{{ get image id
+    let id;
+    let idTmp=contents.URL.match(/illust_id=(\d+)/i);
+    if(idTmp===null){
+      liberator.echoerr("This page is not image page and not manga page.");
+      return false;
+    }else{
+      id=idTmp[1];
+    }
+// }}}
+
+// {{{ make ChromeWorker
+    let createWorker=function(fileName){
+      let ret;
+      const resourceName="vimp-plugin";
+      const ioService=Cc["@mozilla.org/network/io-service;1"]
+                        .getService(Ci.nsIIOService); 
+      const resProt=ioService.getProtocolHandler("resource")  
+                      .QueryInterface(Ci.nsIResProtocolHandler);
+      let pluginDirs=io.getRuntimeDirectories("plugin");
+      if (pluginDirs.length === 0){
+        return null;
       }
-      return url;
+      resProt.setSubstitution(resourceName,ioService.newFileURI(pluginDirs[0]));
+      try {
+        worker=new ChromeWorker("resource://"+resourceName+"/modules/"+fileName);
+      }catch(e){
+        return null;
+      }
+      return worker;
     };
+// }}}
+// {{{ save image ChromeWorker process
+    let workerImage=createWorker('libDLImage.js');
+    if(workerImage==null){
+      liberator.echoerr('plugin directory is not found');
+      return false;
+    }
+    workerImage.addEventListener('message',function(event){
+      if(event.data.status=='error'){
+        liberator.echoerr(event.data.message);
+        return false;
+      };
+      let instream=event.data.message;
+      let savePath=event.data.savePath;
+      let aFile=Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+      aFile.initWithPath(savePath);
+      let outstream=Cc["@mozilla.org/network/safe-file-output-stream;1"]
+        .createInstance(Ci.nsIFileOutputStream);
+      outstream.init(aFile,0x02|0x08|0x20,0664,0);
+      outstream.write(instream,instream.length);
+      if (outstream instanceof Ci.nsISafeOutputStream) {
+        outstream.finish();
+      }else{
+        outstream.close();
+      }
+    },false);
+    workerImage.addEventListener('error',function(event){
+      liberator.echoerr(event.data.status);
+    },false);
+// }}}
+// {{{ Recieve Manga Contents ChromeWorker
+    let workerManga=createWorker('libDLMangaSingleContent.js');
+    workerManga.addEventListener('message',function(event){
+      if(event.data.status=='error'){
+        liberator.echoerr(event.data.message);
+        return false;
+      };
+      let domContent=getDOMHtmlDocument(event.data.message);
+      if(domContent){
+        // DOM で画像 URL を取得して画像ファイルの取得リクエストを発行
+        let imgUrl=domContent.getElementsByTagName('img')
+                  .item(0).getAttribute('src');
+        let destPath=getDestPath(imgUrl);
+        if(destPath==null){
+           return false;
+        };
+        saveImage(
+          imgUrl,
+          destPath.path,
+          event.data.refererUrl,
+          cookie
+        );
+      }
+    },false);
+    workerManga.addEventListener('error',function(event){
+      liberator.echoerr(event.data.status);
+    },false);
+// }}}
 
-    let imgUrl;
-    let destPath;
+// {{{ directory picker
+    let directoryPicker=function() {
+      let path;
+      let fp=Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
+      fp.init(window,'Select Directory',Ci.nsIFilePicker.modeGetFolder);
+      let result=fp.show();
+      if(result==Ci.nsIFilePicker.returnOK){
+        return fp.file;
+      }
+      return null;
+    };
+    let saveDirectory=directoryPicker();
+    if(saveDirectory==null) return false;
+// }}}
 
-    let saveImage=function(){
+// {{{ send request save image
+    let saveImage=function(imgUrl,savePath,referer,cookie){
       let objMessage={
         imageUrl  :'',
         savePath  :'',
@@ -164,13 +187,15 @@ commands.addUserCommand(
         cookie    :''
       };
       objMessage.imageUrl=imgUrl;
-      objMessage.savePath=destPath.path;
-      objMessage.refererUrl=contents.URL;
+      objMessage.savePath=savePath;
+      objMessage.refererUrl=referer;
       objMessage.cookie=cookie;
       let JSONmessage=JSON.stringify(objMessage);
-      worker.postMessage(JSONmessage);
+      workerImage.postMessage(JSONmessage);
     };
+// }}}
 
+// {{{ get destnation fullpath name
     let getDestPath=function(url){
       let fname=url.substr(url.lastIndexOf('/')+1);
       if(fname.lastIndexOf('?')!=-1){
@@ -193,75 +218,71 @@ commands.addUserCommand(
       }
       return newPath;
     };
+// }}}
 
-    let saveImageFile=function(){
-      imgUrl=getImageUrl(xhrImgInfo.responseText);
-      if(0<imgUrl.length){
-        destPath=getDestPath(imgUrl);
-        if(destPath==null){
-          return false;
-        };
-        saveImage();
-      }else{
-        liberator.echoerr("You should login pixiv :<");
-      };
-    };
-
-    let getImageUrls=function(pageContents){
-      const BIG='_big';
-      let url=[];
-      let strScript;
-      let fst,snd;
-      let strFst='';
-      let strSnd='';
-      let tblElm;
-      let i;
+// {{{ save single image file
+    let getImageUrl=function(pageContents){
+      let url;
       let htmldoc=getDOMHtmlDocument(pageContents);
       if(htmldoc){
-        let max=htmldoc.getElementsByClassName('image-container').length;
-        for(i=0;i<max;i++){
-          strScript=htmldoc.getElementsByClassName('image-container').item(i)
-            .getElementsByTagName('script').item(0)
-            .childNodes.item(0).nodeValue;
-          fst=strScript.search(/unshift/i)+'unshift'.length+2;
-          snd=strScript.lastIndexOf('_');
-          strFst=strScript.substr(fst,snd-fst);
-
-          fst=snd;
-          snd=strScript.indexOf("'",fst);
-          strSnd=strScript.substr(fst,snd-fst);
-          
-          url.push(strFst+BIG+strSnd);
-        }
+        if(0<htmldoc.getElementsByTagName('img').length)
+          url=htmldoc.getElementsByTagName('img').item(0).getAttribute('src');
+        else
+          url='';
       }else{
-        url.length=0;
+        url=pageContents.match(/http:\/\/img[0-9]{2}\.pixiv\.net\/img\/[0-9a-z_]+\/[0-9]+\.jpg|http:\/\/img[0-9]{2}\.pixiv\.net\/img\/[0-9a-z_]+\/[0-9]+\.png/i);
       }
       return url;
     };
 
-    let imgUrls;
-    let saveMangaFiles=function(){
-      imgUrls=getImageUrls(xhrImgInfo.responseText);
-      if(0<imgUrls.length){
-        let i;
-        let max=imgUrls.length;
-        for(i=0;i<max;i++){
-          imgUrl=imgUrls[i];
-          pnt=imgUrl.lastIndexOf('?');
-          if(-1!=pnt){
-            imgUrl=imgUrl.substr(0,pnt);
-          }
-          destPath=getDestPath(imgUrl);
-          if(destPath==null){
-            continue;
-          }
-          saveImage();
-        }
+    let saveImageFile=function(){
+      let imgUrl=getImageUrl(xhrImgInfo.responseText);
+      if(0<imgUrl.length){
+        let destPath=getDestPath(imgUrl);
+        if(destPath==null){
+          return false;
+        };
+        saveImage(
+          imgUrl,
+          destPath.path,
+          contents.URL,
+          cookie
+        );
       }else{
-        liberator.echoerr("Not found image data on the manga page.");
-      }
+        liberator.echoerr("You should login pixiv :<");
+      };
+    };
+// }}}
+
+// {{{ save manga image file
+    let requestMangaSingleContent=function(url,ref){
+      let objMessage={
+        pageUrl  :'',
+        refererUrl:'',
+        cookie    :''
+      };
+      objMessage.pageUrl=url;
+      objMessage.refererUrl=ref;
+      objMessage.cookie=cookie;
+      let JSONmessage=JSON.stringify(objMessage);
+      workerManga.postMessage(JSONmessage);
     };
 
+    let saveMangaFiles=function(){
+      let htmldoc=getDOMHtmlDocument(xhrImgInfo.responseText);
+      if(htmldoc){
+        let max=htmldoc.getElementsByClassName('image-container').length;
+        for(var i=0;i<max;i++){
+          requestMangaSingleContent(
+            url.replace('manga','manga_big').replace('type=scroll','page=')+i,
+            url.replace('&type=scroll','')
+          );
+        }
+      }
+    };
+// }}}
+
+// {{{ first XMLHttpRequest
     let url;
     let type=contents.getElementsByClassName('works_display')
              .item(0).firstChild.getAttribute('href');
@@ -300,6 +321,7 @@ commands.addUserCommand(
     xhrImgInfo.setRequestHeader('Referer',contents.URL);
     xhrImgInfo.setRequestHeader('Cookie',cookie);
     xhrImgInfo.send(null);
+//  }}}
   },
   {},
   true
