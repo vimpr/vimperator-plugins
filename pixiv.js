@@ -15,7 +15,7 @@ var INFO =
     <spec>:pixiv</spec>
     <description>
       <p>You can save image from <link topic="http://www.pixiv.net/">pixiv</link> by this plugin.</p>
-      <p>You need libDLImage.js under of plugin/modules.</p>
+      <p>You need libDLImage.js and libDLMangaSingleContent.js under of plugin/modules.</p>
       <p>You must login pixiv.</p>
     </description>
   </item>
