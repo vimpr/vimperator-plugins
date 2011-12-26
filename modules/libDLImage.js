@@ -56,7 +56,7 @@ function downloadImage(){
   if(0<JSONMessage.refererUrl.length){
     xhrImg.setRequestHeader('Referer',JSONMessage.refererUrl);
   };
-  if(0<JSONMessage.cookie){
+  if(0<JSONMessage.cookie.length){
     xhrImg.setRequestHeader('Cookie',JSONMessage.cookie);
   };
   xhrImg.send(null);
