@@ -43,6 +43,9 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
     // 地震ツイートの本文に場所をくっつける
     earthquake: true,
+
+    // サイドバーを閉じても機能を停止しない
+    dontStop: true
   };
 
   // 日本語判定
@@ -201,6 +204,9 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       if (Tweets.length > Config.listMax)
         Tweets.splice(Config.listMax);
     }
+
+    if (sidebarClosed)
+      return;
 
     let screenName = Config.screenName;
     let my = (msg.retweeted_status && msg.retweeted_status.user.screen_name === screenName)
@@ -466,6 +472,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
   let Store = storage.newMap("twittperator-anekos-sb", {store: true});
   let started = false;
   let readyToStart = false;
+  let sidebarClosed = false;
 
   let Tweets = __context__.Tweets;
   if (!Tweets)
@@ -473,7 +480,17 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
   let added = {};
 
-  function start () { // {{{
+  function start (isOpen) { // {{{
+    function restore () {
+      Array.slice(Tweets).reverse().forEach(makeOnMsg(false));
+    }
+
+    if (isOpen && sidebarClosed) {
+      sidebarClosed = false;
+      restore();
+      return;
+    }
+
     if (readyToStart)
       return;
     if (started)
@@ -484,7 +501,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     setTimeout(
       function () {
         readyToStart = false;
-        Array.slice(Tweets).reverse().forEach(makeOnMsg(false));
+        restore();
         plugins.twittperator.ChirpUserStream.addListener(added.chirp = makeOnMsg(true, 'chirp'));
         plugins.twittperator.TrackingStream.addListener(added.filter = makeOnMsg(true, 'filter'));
       },
@@ -492,9 +509,14 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     );
   } // }}}
 
-  function stop () { // {{{
+  function stop (isClose) { // {{{
     if (!started)
       return liberator.echoerr('TWAnekoSB has not been started!');
+
+    if (isClose && Config.dontStop) {
+      sidebarClosed = true;
+      return;
+    }
 
     plugins.twittperator.ChirpUserStream.removeListener(added.chirp);
     plugins.twittperator.TrackingStream.removeListener(added.filter);
