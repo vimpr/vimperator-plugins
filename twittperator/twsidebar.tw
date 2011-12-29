@@ -480,9 +480,13 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
   let added = {};
 
-  function start (isOpen) { // {{{
+  function start (isOpen, silent) { // {{{
     function restore () {
       Array.slice(Tweets).reverse().forEach(makeOnMsg(false));
+    }
+
+    if (silent) {
+      sidebarClosed = true;
     }
 
     if (isOpen && sidebarClosed) {
@@ -535,7 +539,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
   addCommands();
 
-  return {start: start, stop: stop};
+  return {start: start, silentStart: function () start(false, true), stop: stop};
 
 })();
 
