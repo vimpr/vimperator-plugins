@@ -35,9 +35,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="XXXX" version="1.0.0"
+  <plugin name="AutoBookmark" version="1.0.0"
           href="http://vimpr.github.com/"
-          summary="XXXXX"
+          summary="Auto update bookmark"
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
@@ -45,14 +45,14 @@ let INFO =
     <project name="Vimperator" minVersion="3.0"/>
     <p></p>
     <item>
-      <tags>:hoge</tags>
-      <spec>:hoge</spec>
+      <tags>:autobookmark</tags>
+      <spec>:autobookmark</spec>
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="XXXX" version="1.0.0"
+  <plugin name="AutoBookmark" version="1.0.0"
           href="http://vimpr.github.com/"
-          summary="XXXXX"
+          summary="自動更新するブックマーク"
           lang="ja"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
@@ -60,8 +60,8 @@ let INFO =
     <project name="Vimperator" minVersion="3.0"/>
     <p></p>
     <item>
-      <tags>:hoge</tags>
-      <spec>:hoge</spec>
+      <tags>:autobookmark</tags>
+      <spec>:autobookmark</spec>
       <description><p></p></description>
     </item>
   </plugin>
