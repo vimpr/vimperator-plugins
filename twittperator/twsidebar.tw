@@ -472,7 +472,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
   let Store = storage.newMap("twittperator-anekos-sb", {store: true});
   let started = false;
   let readyToStart = false;
-  let sidebarClosed = false;
+  let sidebarClosed = true;
 
   let Tweets = __context__.Tweets;
   if (!Tweets)
@@ -485,9 +485,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       Array.slice(Tweets).reverse().forEach(makeOnMsg(false));
     }
 
-    if (silent) {
-      sidebarClosed = true;
-    }
+    if (silent && (started || readyToStart))
+        return;
 
     if (isOpen && sidebarClosed) {
       sidebarClosed = false;
