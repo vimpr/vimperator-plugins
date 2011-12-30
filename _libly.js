@@ -14,7 +14,7 @@ var PLUGIN_INFO =
     <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
     <author mail="anekos@snca.net" homepage="http://snca.net/">anekos</author>
     <license>MIT</license>
-    <version>0.1.37</version>
+    <version>0.1.38</version>
     <minVersion>2.3pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/_libly.js</updateURL>
     <detail><![CDATA[
@@ -561,7 +561,7 @@ libly.Request.prototype = {
                 }
             });
             this.setRequestHeaders();
-            this.transport.overrideMimeType('text/html; charset=' + this.options.encoding);
+            this.transport.overrideMimeType(this.options.mimetype || 'text/html; charset=' + this.options.encoding);
 
             this.body = this.method == 'POST' ? this.options.postBody : null;
 
