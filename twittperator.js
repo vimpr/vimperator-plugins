@@ -2350,7 +2350,7 @@ let INFO =
           Twittperator.activitySummary(arg);
         },
         timelineCompleter: true,
-        completer: Completers.rawid(function(st) st.id)
+        completer: Completers.id(function(st) st.id)
       }),
       SubCommand({
         command: ["info"],
