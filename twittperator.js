@@ -26,7 +26,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Twittperator" version="1.16.2"
+  <plugin name="Twittperator" version="1.17.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -174,7 +174,7 @@ let INFO =
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.16.2"
+  <plugin name="Twittperator" version="1.17.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
@@ -1233,7 +1233,7 @@ let INFO =
         var btquery =  query ? "?" + this.buildQuery(query) : "";
         var message = {
           method: "GET",
-          action: setting.apiURLBase + api + btquery,
+          action: setting.getAPIURL(api + btquery),
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.get("consumerKey", ""), // Queryの構築
@@ -1261,7 +1261,7 @@ let INFO =
       post: function(api, content, callback) {
         var message = {
           method: "POST",
-          action: setting.apiURLBase + api,
+          action: setting.getAPIURL(api),
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.get("consumerKey", ""),
@@ -1295,7 +1295,7 @@ let INFO =
         var btquery =  query ? "?" + this.buildQuery(query) : "";
         var message = {
           method: "DELETE",
-          action: setting.apiURLBase + api + btquery,
+          action: setting.getAPIURL(api + btquery),
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.get("consumerKey", ""), // Queryの構築
@@ -1770,6 +1770,31 @@ let INFO =
     }, // }}}
   }; // }}}
   let Twittperator = { // {{{
+    activitySummary: function(id) { // {{{
+      tw.jsonGet(
+        'https://api.twitter.com/i/statuses/' + id + '/activity/summary',
+        {},
+        function(json) {
+          function idToIcon (id) {
+            return <span><a href={'http://twitter.com/#!/' + id}>{icons[id] ? <img src={icons[id]}/> : <>&#128568;</>}</a></span>;
+          }
+
+          let icons = {};
+          for (let [, t] in Iterator(history)) {
+            if (t.user && t.user.id_str && t.user.profile_image_url)
+              icons[t.user.id_str] = t.user.profile_image_url;
+          }
+          liberator.echo(<>
+            <dl>
+              <dt>Retweeter {json.retweeters_count}</dt>
+              <dd>{template.map(json.retweeters, idToIcon)}</dd>
+              <dt>Favoriters {json.favoriters_count}</dt>
+              <dd>{template.map(json.favoriters, idToIcon)}</dd>
+            </dl>
+          </>);
+        }
+      );
+    }, // }}}
     confirm: function(msg, onYes, onNo, onCancel) { // {{{
       if (!onNo)
         onNo = function () Twittperator.echo('canceled.');
@@ -2319,6 +2344,15 @@ let INFO =
         completer: Completers.rawid(seleceMine)
       }),
       SubCommand({
+        command: ["activity"],
+        description: "Activity Summary",
+        action: function(arg) {
+          Twittperator.activitySummary(arg);
+        },
+        timelineCompleter: true,
+        completer: Completers.rawid(function(st) st.id)
+      }),
+      SubCommand({
         command: ["info"],
         description: "Display status information",
         action: function(arg) {
@@ -2594,6 +2628,7 @@ let INFO =
       trackWords: gv.twittperator_track_words,
       count: (gv.twittperator_count || 20),
       lang: (gv.twittperator_lang || ''),
+      getAPIURL: function (path) (/^https?\:\/\//.test(path) ? path : this.apiURLBase + path)
     });
 
   let statusRefreshTimer;
