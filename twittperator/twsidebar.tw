@@ -45,7 +45,10 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     earthquake: true,
 
     // サイドバーを閉じても機能を停止しない
-    dontStop: true
+    dontStop: true,
+
+    // サイドバーが閉じていても、こっそり開始しておく
+    silentStart: false
   };
 
   // 日本語判定
@@ -486,12 +489,14 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     }
 
     if (silent && (started || readyToStart))
-        return;
+      return;
 
     if (isOpen && sidebarClosed) {
       sidebarClosed = false;
-      restore();
-      return;
+      if (started) {
+        restore();
+        return;
+      }
     }
 
     if (readyToStart)
@@ -538,12 +543,9 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
   addCommands();
 
-  return {start: start, silentStart: function () start(false, true), stop: stop};
+  if (Config.silentStart)
+    start(false, true);
+
+  return {start: start, stop: stop};
 
 })();
-
-try {
-  ANekoSB.start();
-} catch (e) {
-  window.alert(e);
-}
