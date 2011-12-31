@@ -16,7 +16,7 @@ let client_secret = liberator.globalVariables.google_tasks_client_secret || 'eVO
 let debug = liberator.globalVariables.google_tasks_debug || 0;
 let oauth2_url = 'https://accounts.google.com/o/oauth2/';
 let redirect_uri = 'urn:ietf:wg:oauth:2.0:oob';
-let scope = 'https://www.googleapis.com/auth';
+let scope = 'https://www.googleapis.com/auth/tasks';
 let rest_uri = 'https://www.googleapis.com/tasks/v1';
 
 if (debug) {
