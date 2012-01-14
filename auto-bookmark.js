@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="AutoBookmark" version="1.0.0"
+  <plugin name="AutoBookmark" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
           lang="en-US"
@@ -50,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="AutoBookmark" version="1.0.0"
+  <plugin name="AutoBookmark" version="1.1.0"
           href="http://vimpr.github.com/"
           summary="自動更新するブックマーク"
           lang="ja"
@@ -157,12 +157,15 @@ let INFO =
     }
   } // }}}
 
-  function namesCompleter (context, args) { // {{{
-    context.title = ['Bookmark name'];
-    context.completions = [
-      [name, data.current.URL]
-      for ([name, data] in Iterator(bookmarks))
-    ]
+  function namesCompleter (hidden) { // {{{
+    return function (context, args) {
+      context.title = ['Bookmark name'];
+      context.completions = [
+        [name, data.current.URL]
+        for ([name, data] in Iterator(bookmarks))
+        if (!!data.hidden === !!hidden)
+      ];
+    };
   } // }}}
 
   function windowToTab (win) { // {{{
@@ -254,18 +257,6 @@ let INFO =
     true
   ); // }}}
 
-  let pageCommand =
-    new Command(
-      ['p[age]'],
-      'For pages',
-      function () {
-      },
-      {
-        subCommands: [
-        ]
-      }
-    );
-
   commands.addUserCommand( // {{{
     'autobookmark',
     'Auto bookmarking',
@@ -286,7 +277,6 @@ let INFO =
     },
     {
       subCommands: [
-        pageCommand,
         new Command(
           ['s[tart]'],
           'Start bookmarking',
@@ -318,12 +308,12 @@ let INFO =
             if (AutoBookmark.remove(name)) {
               liberator.echo('Removed: ' + name);
             } else {
-              liberator.echoerr('Not found: ' + name);
+              liberator.echoerr('Bookmark not found: ' + name);
             }
           },
           {
             literal: 0,
-            completer: namesCompleter
+            completer: namesCompleter()
           }
         ),
         new Command(
@@ -333,12 +323,12 @@ let INFO =
             let name = args.literalArg;
             if (AutoBookmark.open(name)) {
             } else {
-              liberator.echoerr('Not found: ' + name);
+              liberator.echoerr('Bookmark not found: ' + name);
             }
           },
           {
             literal: 0,
-            completer: namesCompleter
+            completer: namesCompleter()
           }
         ),
         new Command(
@@ -349,12 +339,12 @@ let INFO =
             if (AutoBookmark.update(gBrowser.mCurrentTab, name)) {
               liberator.echomsg('Updated: ' + name);
             } else {
-              liberator.echoerr('Not found: ' + name);
+              liberator.echoerr('Bookmark not found: ' + name);
             }
           },
           {
             literal: 0,
-            completer: namesCompleter
+            completer: namesCompleter()
           }
         ),
         new Command(
@@ -383,12 +373,12 @@ let INFO =
                 </dl>
               </>);
             } else {
-              liberator.echoerr('Not found: ' + name);
+              liberator.echoerr('Bookmark not found: ' + name);
             }
           },
           {
             literal: 0,
-            completer: namesCompleter
+            completer: namesCompleter()
           }
         ),
         new Command(
@@ -398,7 +388,7 @@ let INFO =
             let name = args.literalArg;
             let data = bookmarks.get(name);
             if (!data)
-              return liberator.echoerr('Not found: ' + name);
+              return liberator.echoerr('Bookmark not found: ' + name);
             io.withTempFiles(
               function (file) {
                 file.write(JSON.stringify(data, null, 2));
@@ -412,7 +402,35 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter
+            completer: namesCompleter()
+          }
+        ),
+        new Command(
+          ['sh[ow]'],
+          'Show hidden bookmark',
+          function (args) {
+            let name = args.literalArg;
+            let data = AutoBookmark.show(name);
+            if (data) {
+              liberator.echo('Hide: ' + data.name);
+            } else {
+              liberator.echoerr('Bookmark not found: ' + name);
+            }
+          },
+          {
+            literal: 0,
+            completer: namesCompleter(true)
+          }
+        ),
+        new Command(
+          ['h[ide]'],
+          'Edit bookmark',
+          function (args) {
+            AutoBookmark.hide(args.literalArg);
+          },
+          {
+            literal: 0,
+            completer: namesCompleter(false)
           }
         )
       ]
@@ -510,6 +528,26 @@ let INFO =
       );
       updated();
       return initializeTab(tab, data);
+    },
+
+    hide: function (name) {
+      let data = bookmarks.get(name);
+      if (!data)
+        return false;
+      data.hidden = true;
+      bookmarks.save();
+      updated();
+      return true;
+    },
+
+    show: function (name) {
+      let data = bookmarks.get(name);
+      if (!data)
+        return false;
+      data.hidden = false;
+      bookmarks.save();
+      updated();
+      return true;
     }
   }; // }}}
 
