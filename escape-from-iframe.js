@@ -63,6 +63,7 @@ let INFO =
       if (modes.passNextKey || modes.passAllKeys)
         return events.onEscape();
       Buffer.focusedWindow = Buffer.focusedWindow.parent;
+      return events.onEscape();
     },
     {}
   );
