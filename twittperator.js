@@ -1553,7 +1553,6 @@ let INFO =
       clearRetryTimer();
       if (!connection)
         return;
-      window.alert(Error().stack);
       connection.cancel();
       liberator.log("Twittperator: stop " + name);
     }
