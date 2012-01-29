@@ -26,7 +26,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Twittperator" version="1.17.0"
+  <plugin name="Twittperator" version="1.17.1"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -174,7 +174,7 @@ let INFO =
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.17.0"
+  <plugin name="Twittperator" version="1.17.1"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
@@ -1553,6 +1553,7 @@ let INFO =
       clearRetryTimer();
       if (!connection)
         return;
+      window.alert(Error().stack);
       connection.cancel();
       liberator.log("Twittperator: stop " + name);
     }
@@ -2658,16 +2659,20 @@ let INFO =
 
   Twittperator.loadPlugins();
 
-  if (setting.useChirp){
-    if(setting.allReplies)
-      ChirpUserStream.start({"replies":"all"});
-    else
-      ChirpUserStream.start();
-  }
+  liberator.registerObserver(
+    'enter',
+    function () {
+    if (setting.useChirp){
+      if(setting.allReplies)
+        ChirpUserStream.start({"replies":"all"});
+      else
+        ChirpUserStream.start();
+    }
 
-  let trackWords = setting.trackWords || Store.get("trackWords");
-  if (trackWords)
-    TrackingStream.start({track: trackWords});
+    let trackWords = setting.trackWords || Store.get("trackWords");
+    if (trackWords)
+      TrackingStream.start({track: trackWords});
+  });
 
   __context__.onUnload = function() {
     Store.set("history", history);
