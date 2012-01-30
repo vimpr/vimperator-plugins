@@ -178,7 +178,7 @@ let INFO =
     util.httpGet(
       URL,
       function (xhr) {
-        let xml = new XML(xhr.responseText.replace(/<\?.*?\?>\n/, ''));
+        let xml = new XML(xhr.responseText.replace(/<\?.*?\?>\n/, '').replace(/\n/g, ''));
         liberator.__xml = xml;
         withTransaction(importFromXML.bind(null, xml));
         liberator.echo('Done: Livedoor Clip synchronization');
