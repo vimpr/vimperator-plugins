@@ -201,11 +201,12 @@ let INFO =
         let url = post.@href;
         let title = post.@description;
         let datetime = formatDate(String(post.@time));
+        let comment = post.@extended;
         DB.insert(
           'bookmarks', {
             url: url,
             title: title,
-            comment: post.@extended,
+            comment: comment,
             datetime: datetime,
             tags: tags.map(function (it) ('[' + it + ']')).join(''),
             key_text: [url, title, comment, tags.join(' ')].join(' '),
@@ -231,9 +232,10 @@ let INFO =
         if (xhr.status != 200)
           return onError(xhr.responseText);
         try {
-          let xml = liberator.___xml = new XML(xhr.responseText);
+          let xml = liberator.___xml = new XML(xhr.responseText.replace(/\n/g, ''));
           onReceive(xml);
         } catch (e) {
+          liberator.___xml_text  =  xhr.responseText;
           onError(/SyntaxError/.test(String(e)) ? xhr.responseText : e);
         }
       }
@@ -267,6 +269,7 @@ let INFO =
       function (e) {
         updating = false;
         liberator.echo('Failed: Livedoor Clip update - ' + e);
+        liberator.log(e);
       }
     );
   }
@@ -295,7 +298,7 @@ let INFO =
       let words = [];
       words = filter.split(/\s+/);
 
-      if (words.length < 1 || (words.length < 2 && words[0].length < 4))
+      if (words.length < 1 || (words.length < 2 && words[0].length < 1))
         return;
 
       if (migemo) {
@@ -307,7 +310,7 @@ let INFO =
 
       context.title = ['LDC URL', 'LDC Title'];
       context.keys = {text: "url", description: "title", icon: "icon"};
-      context.imcomplete = true;
+      context.incomplete = true;
 
       updateBookmarksIfExpired(
         function () {
@@ -319,7 +322,7 @@ let INFO =
           ];
 
           context.completions = cs;
-          context.imcomplete = false;
+          context.incomplete = false;
         }
       );
     }
