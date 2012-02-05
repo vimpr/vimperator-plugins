@@ -175,6 +175,15 @@ var services = {
         usernameField: "email",
         passwordField: "password",
     },
+    livedoor: {
+        NAME: "livedoor",
+        HOST: ["https://member.livedoor.com", "http://api.livedoor.com"],
+        URL: /^https?:\/\/(?:\w+\.)?livedoor\.com\//,
+        LOGIN: "/login/?.sv=top",
+        LOGOUT: "/logout/", /* FIXME not works */
+        usernameField: "livedoor_id",
+        passwordField: "password",
+    },
 };
 for (let [name, service] in Iterator(services)){
     if (!service.NAME)
@@ -243,6 +252,7 @@ function Service(service) //{{{
         if (service.extraField && !self.setExtraField(content)) return false;
 
         let loginURL = host+service.LOGIN;
+        liberator.log(loginURL);
         let error = function(e) liberator.echo('login failed "'+host+'" as '+username);
         let success = function(e) liberator.echo('login "'+host+'" as '+username);
         let login = function() request(loginURL, content, success, error);
