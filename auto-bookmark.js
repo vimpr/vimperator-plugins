@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2011, anekos.
+Copyright (c) 2011-2012, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="AutoBookmark" version="1.1.0"
+  <plugin name="AutoBookmark" version="1.2.0"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
           lang="en-US"
@@ -50,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="AutoBookmark" version="1.1.0"
+  <plugin name="AutoBookmark" version="1.2.0"
           href="http://vimpr.github.com/"
           summary="自動更新するブックマーク"
           lang="ja"
@@ -77,6 +77,22 @@ let INFO =
   if (!__context__.Previous)
     __context__.Previous = {};
 
+  function config (name, defaultValue) { // {{{
+    let value = liberator.globalVariables['auto_bookmark_' + name];
+    return (typeof value === 'undefined') ? defaultValue : value;
+  } // }}}
+
+  function highlightElement (target) { // {{{
+    const Style = 'background-color: orange; color: black; border: dotted 2px blue;';
+
+    let doc = target.ownerDocument;
+    let span = doc.createElement('span');
+    span.setAttribute('style', Style);
+    let range = doc.createRange();
+    range.selectNode(target);
+    range.surroundContents(span);
+  } // }}}
+
   function def (obj, names, defaultValue) { // {{{
     if (!obj)
       return defaultValue;
@@ -98,7 +114,41 @@ let INFO =
     win.scrollTo(data.scroll.x, data.scroll.y);
   } // }}}
 
+  function fixTab (tab, data) { // {{{
+    if (config('overwrite_target', true)) {
+      let links = tab.linkedBrowser.contentDocument.querySelectorAll('a[href][target]');
+      for (let [, link] in Iterator(Array.slice(links))) {
+        link.removeAttribute('target');
+      }
+    }
+
+    if (config('mark', true) && data.pages) {
+      let links = tab.linkedBrowser.contentDocument.querySelectorAll('a[href]');
+      for (let [, link] in Iterator(Array.slice(links))) {
+        if (!data.pages.some(function (page) page.URL == link.href))
+          continue;
+        highlightElement(link);
+      }
+    }
+
+    if (config('focus_next', true) && data.pages) {
+      let links = tab.linkedBrowser.contentDocument.querySelectorAll('a[href]');
+      let next = false;
+      let last = data.pages[data.pages.length - 1].URL;
+      for (let [, link] in Iterator(Array.slice(links))) {
+        if (next) {
+          link.focus();
+          break;
+        }
+        next = last === link.href;
+      }
+    }
+
+  } // }}}
+
   function initializeTab (tab, data) { // {{{
+    fixTab(tab, data);
+
     if (tab.__anekos_auto_bookmark)
       return false;
 
@@ -205,6 +255,7 @@ let INFO =
 
     bookmarks.set(name, data);
     updated();
+    fixTab(tab, data);
 
     liberator.echomsg('AutoBookmark: CT Updated - ' + data.name + ' / ' + data.current.URL);
   } // }}}
