@@ -38,13 +38,6 @@ let PLUGIN_INFO =
 		また、URL の補完も効きます。
 		URL補完は let g:readitlater_complete = "slf" のようにして使用する補完を選択できます。
 
-	:ril get
-		登録されてるページの情報を取得してキャッシュしときます。
-		デフォルトは50件ですが
-		let g:readitlater_get_count = 100
-		とかで取得件数を変更できます。
-		add , open , read された後に問答無用で同期かけに行ってますので、件数をやたらに増やさない方がいいかもしれません。
-
 	:ril open
 		<Space>で補完にreaditlaterのリストが出てくるので、任意のURLを選択(<Space>)して実行すると新しいタブに開きます。
 		:ril open! と!をつけると既読のみ補完に表示されます。
@@ -52,7 +45,6 @@ let PLUGIN_INFO =
 		また、開くと同時に既読フラグを立てに行く事ができます。
 		let g:readitlater_open_as_read = 1
 		としてもらえれば大丈夫です。
-		※初回はキャッシュにデータが入っていないと思うので自分で:ril getしてやる必要があります。
 
 	:ril read
 		既読フラグを立てる為のサブコマンドです。
@@ -96,9 +88,10 @@ let PLUGIN_INFO =
 				}
 			),
 
+			/*
 			new Command(["get","g"], "Retrieve a user's reading list",
 				function (args) {
-          ListCache.update(true, function(data) echo(countObjectValues(data.list) + " found."));
+					ListCache.unread.update(true, function(data) echo(countObjectValues(data.list) + " found."));
 				},{
 				options : [
 					//[["num"],commands.OPTION_INT],
@@ -108,6 +101,7 @@ let PLUGIN_INFO =
 				],
 				}
 			),
+			*/
 
 			new Command(["open","o"], "Open url in new tab from RIL list.",
 				function (args) {
