@@ -1260,6 +1260,7 @@ Thanks:
     Player.apply(this, arguments);
   }
 
+  NicoPlayer.SIZE_FULL   = 'full';
   NicoPlayer.SIZE_LARGE  = 'fit';
   NicoPlayer.SIZE_NORMAL = 'normal';
 
@@ -1326,8 +1327,11 @@ Thanks:
 
     get fileExtension () '.flv',
 
-    get fullscreen () this.large,
-    set fullscreen (value) (this.large = value),
+    get fullscreen () this.player.ext_getVideoSize() === NicoPlayer.SIZE_FULL,
+    set fullscreen (value) {
+      this.player.ext_setVideoSize(value ? NicoPlayer.SIZE_FULL : NicoPlayer.SIZE_NORMAL);
+      return this.fullscreen;
+    },
 
     get id ()
       let (m = U.currentURL.match(/\/(?:watch|playlist\/mylist)\/([a-z\d]+)/))
