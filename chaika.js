@@ -117,11 +117,20 @@ let INFO =
           {
             argCount: '0'
           }
+        ),
+        new Command(
+          ['abonem[anager]'],
+          'Open abone manager',
+          function (args) {
+            liberator.open('chrome://chaika/content/settings/abone-manager.xul', liberator.NEW_TAB);
+          },
+          {}
         )
       ]
     },
     true
   );
+
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
