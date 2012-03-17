@@ -35,10 +35,11 @@ commands.addUserCommand(["gr"],
     "Google Results",
     function (args) {
         var doc = window.content.document;
-        if(args >= 1) {
+        if(args.length >= 1) {
+            var num = parseInt(args.literalArg, 10);
             var results = doc.querySelectorAll("div > ol > li > div > h3 > a");
-            if(args <= results.length) {
-                results[args - 1].click(); 
+            if(num <= results.length) {
+                results[num - 1].click(); 
             }
             else {
                 console.error("Not that many results");
@@ -47,5 +48,16 @@ commands.addUserCommand(["gr"],
         else {
             (doc.querySelector("div > p > a.spell") || doc.querySelector("div > button")).click();
         }
-    });
+    }, {
+      literal: 0,
+      completer: function (context, args) {
+        var doc = window.content.document;
+        var es = doc.querySelectorAll("div > ol > li > div > h3 > a");
+        context.title = ['Title', 'URL'];
+        context.completions = [
+          [(n + 1) + ': ' + e.textContent, e.href]
+          for ([n, e] in Iterator(Array.slice(es)))
+        ];
+      }
+    }, true);
 })();
