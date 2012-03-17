@@ -53,6 +53,7 @@ commands.addUserCommand(["gr"],
       completer: function (context, args) {
         var doc = window.content.document;
         var es = doc.querySelectorAll("div > ol > li > div > h3 > a");
+        context.compare = false;
         context.title = ['Title', 'URL'];
         context.completions = [
           [(n + 1) + ': ' + e.textContent, e.href]
