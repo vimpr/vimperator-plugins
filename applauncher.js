@@ -68,7 +68,7 @@ liberator.plugins.AppLauncher = (function(){
             filter = filter.toLowerCase();
             context.completions = completer.filter( function(el) el[0].toLowerCase().indexOf(filter) == 0);
           }
-        });
+        }, true);
     },
     buildMenu: function(){
       var self = this;
