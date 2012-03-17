@@ -1,0 +1,19 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_reply_eject_alert = 1
+ * let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"
+ */
+
+(function () {
+  let screenName = liberator.globalVariables.twittperator_screen_name;
+
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      if (msg.text && msg.user && msg.in_reply_to_screen_name === screenName)
+        io.system('eject && eject -t');
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
+
