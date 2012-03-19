@@ -4,7 +4,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>login manager</description>
     <author mail="konbu.komuro@gmail.com" homepage="http://d.hatena.ne.jp/hogelog/">hogelog</author>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/loginManger.js</updateURL>
     <license>public domain</license>
@@ -79,11 +79,16 @@ var services = {
         },
     },
     tumblr: {
-        HOST: ["http://www.tumblr.com"],
-        LOGIN: "/login",
+        NAME: "tumblr",
+        HOST: ["https://www.tumblr.com"],
+        URL: /^https?:\/\/(?:\w+\.)?tumblr\.com\//,
+        LOGIN: "/svc/account/register",
         LOGOUT: "/logout",
-        usernameField: "email",
-        passwordField: "password",
+        usernameField: "user[email]",
+        passwordField: "user[password]",
+        extraField: {
+            action: 'signup_login'
+        },
     },
     twitter: {
         HOST: ["https://twitter.com", "http://twitter.com"],
@@ -165,15 +170,6 @@ var services = {
         extraField: {
             op: "userlogin",
         }
-    },
-    tumblr: {
-        NAME: "tumblr",
-        HOST: ["https://www.tumblr.com"],
-        URL: /^https?:\/\/(?:\w+\.)?tumblr\.com\//,
-        LOGIN: "/login",
-        LOGOUT: "/logout",
-        usernameField: "email",
-        passwordField: "password",
     },
     livedoor: {
         NAME: "livedoor",
