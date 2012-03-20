@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2011, anekos.
+Copyright (c) 2011-2012, anekos.
 Copyright (c) 2011, teramako.
 All rights reserved.
 
@@ -36,7 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="GooglePlusCommando" version="2.4.6"
+  <plugin name="GooglePlusCommando" version="2.4.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="en-US"
@@ -133,7 +133,7 @@ let g:gplus_commando_map_menu            = "m"
       </description>
     </item>
   </plugin>
-  <plugin name="GooglePlusCommando" version="2.4.6"
+  <plugin name="GooglePlusCommando" version="2.4.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
           lang="ja-JP"
@@ -529,11 +529,12 @@ let g:gplus_commando_map_menu            = "m"
           if (editors.length > 1)
             throw 'Two and more editors were found.';
 
+          let peditor = editors[0];
           return {
-            editor: #1=(editors[0]),
+            editor: peditor,
             button: {
-              submit: button(#1#, 'post'),
-              cancel: button(#1#, 'cancel')
+              submit: button(peditor, 'post'),
+              cancel: button(peditor, 'cancel')
             }
           };
         }
@@ -556,11 +557,12 @@ let g:gplus_commando_map_menu            = "m"
           if (editors.length > 1)
             throw 'Two and more editors were found.';
 
+          let peditor = editors[0];
           return {
-            editor: #1=(editors[0]),
+            editor: peditor,
             button: {
-              submit: button(#1#, 0),
-              cancel: button(#1#, 1)
+              submit: button(peditor, 0),
+              cancel: button(peditor, 1)
             }
           };
         }
@@ -580,7 +582,7 @@ let g:gplus_commando_map_menu            = "m"
             throw 'Two and more editors were found.';
 
           return {
-            editor: #1=(editors[0]),
+            editor: editors[0],
             button: {
               submit: root.querySelector(S.dialog.submit),
               cancel: root.querySelector(S.dialog.cancel),

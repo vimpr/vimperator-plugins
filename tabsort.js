@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009, anekos.
+Copyright (c) 2009-2012, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -38,10 +38,9 @@ let PLUGIN_INFO =
   <name>tabsort</name>
   <description>Add ":tabsort" and ":tabuniq" command.</description>
   <description lang="ja">":tabsort", ":tabuniq" コマンドを追加する</description>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/tabsort.js</updateURL>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -68,17 +67,21 @@ let PLUGIN_INFO =
   function memberCompare (name)
     function (a, b) a[name].toString().localeCompare(b[name].toString());
 
-  function getTabs () [
-    {
-      index: i,
-      tab: tab,
-      browser: #1=(tab.linkedBrowser),
-      doc: #2=(#1#.contentDocument),
-      url: (#1#.__SS_restore_data ? #1#.__SS_restore_data.url : (#2#.location && #2#.location.href)),
-      title: (#1#.__SS_restore_data ? #1#.__SS_restore_data.title : #2#.title)
+  function getTabs () {
+    function gen(tab, i) {
+      let browser = tab.linkedBrowser;
+      let doc = browser.contentDocument;
+      return {
+        index: i,
+        tab: tab,
+        browser: browser,
+        doc: doc,
+        url: (browser.__SS_restore_data ? browser.__SS_restore_data.url : (doc.location && doc.location.href)),
+        title: (browser.__SS_restore_data ? browser.__SS_restore_data.title : doc.title)
+      };
     }
-    for ([i, tab] in util.Array(config.browser.mTabs))
-  ];
+    return [gen(tab, i) for ([i, tab] in Iterator(config.browser.mTabs))];
+  }
 
   function tabUniq (cmp) {
     let rms = [];
