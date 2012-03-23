@@ -62,6 +62,7 @@ commands.addUserCommand(
       if(true===aFile.exists()){
         let value=window.prompt('すでに同じ名前のファイルがあります。デフォルトファイル名を変更してください。',fileName.substr(1));
         if(null===value){
+          delete contents;
           return false;
         }
         fileName='/'+value;
@@ -77,9 +78,11 @@ commands.addUserCommand(
       }else{
         outstream.close();
       }
+      delete contents;
     };
     let falseCurrntImg=function(){
       liberator.echo("Image file accept error.");
+      delete contents;
       return false;
     };
 
