@@ -35,8 +35,10 @@ commands.addUserCommand(
       contents.location.reload();
     }else{
       liberator.echoerr('Invalid Parameter');
+      delete contents;
       return false;
     }
+    delete contents;
   },{
     completer : function(context, args){
       context.completions=[
