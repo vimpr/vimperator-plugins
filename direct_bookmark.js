@@ -719,7 +719,9 @@ for Migemo search: require XUL/Migemo Extension
                     isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
                 //));
-                ));
+                )).error(function() {
+                    throw services[service].description + ": failed"
+                });
                 if(echoType == "multiline") {
                     d = d.next(function(){
                         liberator.echo("[" + services[service].description + "] post completed.");
