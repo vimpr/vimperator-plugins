@@ -718,13 +718,15 @@ for Migemo search: require XUL/Migemo Extension
                     user,password,
                     isNormalize ? getNormalizedPermalink(url) : url,title,
                     comment,tags
-                //));
-                ));
+                    ));
                 if(echoType == "multiline") {
                     d = d.next(function(){
                         liberator.echo("[" + services[service].description + "] post completed.");
                     });
                 }
+                d = d.error(function() {
+                    liberator.echoerr(services[service].description + ": failed");
+                });
             });
             if(echoType == "simple") {
                 d = d.next(function(){
