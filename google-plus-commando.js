@@ -697,7 +697,7 @@ let g:gplus_commando_map_menu            = "m"
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
         get comment() (self.commentEditor || self.commentButton),
         get plusone () root.querySelector(S.typePlusone),
-        get share () self.buttons[1],
+        get share () self.buttons[2],
         menu: {
           get root () root.querySelector(S.role('menu')),
           get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
