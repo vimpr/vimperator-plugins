@@ -425,7 +425,7 @@ let g:gplus_commando_map_menu            = "m"
         menu: {
           mute: '----'
         },
-        menuButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/options_default\.png"\).*margin-right: -44/),
+        menuButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/options_default\.png"\).*pointer.*13.*margin-right: -44/, /\.\w{3,}\s\{/),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
       },
