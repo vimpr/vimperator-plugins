@@ -415,17 +415,21 @@ let g:gplus_commando_map_menu            = "m"
       currentEntry: {
         root: cssRules.finder(/border-left: 1px solid rgb\(77, 144, 240\);\s*\}/),
         unfold: {
-          comment: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\)/),
+          comment: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/expand\.png"\);\s*background-repeat/),
           content: function () {
+            /*
+             * FIXME UghhhhhHHhaaa
             let content = cssRules.find(/\{ overflow: hidden; padding-bottom: \d+px; padding-top: \d+px; text-overflow: ellipsis ellipsis; \}/);
             let buttons = cssRules.find(/^[^,]+\,[^,]+\{\s*color:\s*rgb\(51, 102, 204\);\s*cursor:\s*pointer;\s*\}$/);
             return buttons.split(/,/).map(function (b) (content + ' > div > ' +  b)).join(', ');
+            */
+            return '.SS0Hfe';
           }
         },
         menu: {
           mute: '----'
         },
-        menuButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/options_default\.png"\).*margin-right: -44/),
+        menuButton: cssRules.finder(/url\("\/\/ssl\.gstatic\.com\/s2\/oz\/images\/stream\/options_default\.png"\).*pointer.*13.*margin-right: -44/, /\.\w{3,}\s\{/),
         cancel: role('button', '[id$=".cancel"]'),
         submit: role('button', '[id$=".post"]'),
       },
@@ -697,8 +701,9 @@ let g:gplus_commando_map_menu            = "m"
         get commentEditor () let (e = root.querySelector(S.editable)) (e && e.parentNode),
         get comment() (self.commentEditor || self.commentButton),
         get plusone () root.querySelector(S.typePlusone),
-        get share () self.buttons[1],
+        get share () self.buttons[2],
         menu: {
+          // FIXME この三つは、一度メニューを出さないと、現われないかもしれない
           get root () root.querySelector(S.role('menu')),
           get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
           get mute () self.menu.items.slice(-2)[0]
