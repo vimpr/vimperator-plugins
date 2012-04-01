@@ -703,6 +703,7 @@ let g:gplus_commando_map_menu            = "m"
         get plusone () root.querySelector(S.typePlusone),
         get share () self.buttons[2],
         menu: {
+          // FIXME この三つは、一度メニューを出さないと、現われないかもしれない
           get root () root.querySelector(S.role('menu')),
           get items () A(self.menu.root.querySelectorAll(S.role('menuitem'))),
           get mute () self.menu.items.slice(-2)[0]
