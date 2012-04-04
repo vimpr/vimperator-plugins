@@ -7,7 +7,6 @@ var PLUGIN_INFO =
   <version>0.12</version>
   <author>pekepeke</author>
   <minVersion>2.0pre</minVersion>
-  <maxVersion>2.0pre</maxVersion>
   <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/applauncher.js</updateURL>
   <detail lang='ja'><![CDATA[
   == Commands ==
@@ -55,9 +54,10 @@ liberator.plugins.AppLauncher = (function(){
       var self = this;
       commands.addUserCommand(['applaunch', 'runapp'], 'Run Defined Application',
         function(arg){
-          arg = (typeof arg.string == 'undefined' ? arg : arg.string);
+          arg = (typeof arg.string == 'undefined' ? arg : arg.literalArg);
           self.launch(arg);
         }, {
+          literal: 0,
           completer: function(context, arg){
             var filter = context.filter;
             context.title = [ 'Name', 'Description'];
