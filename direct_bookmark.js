@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.16.1</version>
+    <version>0.16.2</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -617,7 +617,8 @@ for Migemo search: require XUL/Migemo Extension
             tags = tags.filter(function(e,i,a) a.indexOf(e) == i);
             tags.sort();
             __context__.tags = tags;
-            onComplete(tags);
+            if (onComplete)
+                onComplete(tags);
         }).error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
         return first;
     }
