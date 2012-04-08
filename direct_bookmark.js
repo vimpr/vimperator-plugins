@@ -601,7 +601,7 @@ for Migemo search: require XUL/Migemo Extension
 
     let (_tags = {}, _empty = true) {
         __context__.tags = {
-            __iterator__: function () (v for ([v, ] in Iterator(_tags))),
+            __iterator__: function () Iterator(_tags, true),
             update: function (atags) {
                 _tags = {};
                 _empty = atags.length === 0;
