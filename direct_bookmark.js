@@ -601,6 +601,7 @@ for Migemo search: require XUL/Migemo Extension
 
     let (_tags = {}, _empty = true) {
         __context__.tags = {
+            __iterator__: function () (v for ([v, ] in Iterator(_tags))),
             update: function (atags) {
                 _tags = {};
                 _empty = atags.length === 0;
@@ -610,7 +611,6 @@ for Migemo search: require XUL/Migemo Extension
             add: function (newTag) {
                 _tags[newTag] = true;
             },
-            get list () Object.keys(_tags),
             get isEmpty () _empty,
         };
     }
@@ -812,7 +812,7 @@ for Migemo search: require XUL/Migemo Extension
                         context.incomplete = true;
                         getTagsAsync(set.bind(null, context)).call([]);
                     } else {
-                        set(context, __context__.tags.list);
+                        set(context, __context__.tags);
                     }
                 });
             },
