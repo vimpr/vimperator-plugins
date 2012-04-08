@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.16.2</version>
+    <version>0.17.0</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -598,7 +598,22 @@ for Migemo search: require XUL/Migemo Extension
         },
     };
     __context__.services = services;
-    __context__.tags = [];
+
+    let (_tags = {}, _empty = true) {
+        __context__.tags = {
+            update: function (atags) {
+                _tags = {};
+                _empty = atags.length === 0;
+                for (let [, t] in Iterator(atags))
+                    _tags[t] = true;
+            },
+            add: function (newTag) {
+                _tags[newTag] = true;
+            },
+            get list () Object.keys(_tags),
+            get isEmpty () _empty,
+        };
+    }
 
     function getTagsAsync(onComplete){
         var d,first;
@@ -616,7 +631,7 @@ for Migemo search: require XUL/Migemo Extension
         d.next(function(tags){
             tags = tags.filter(function(e,i,a) a.indexOf(e) == i);
             tags.sort();
-            __context__.tags = tags;
+            __context__.tags.update(tags);
             if (onComplete)
                 onComplete(tags);
         }).error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
@@ -709,6 +724,8 @@ for Migemo search: require XUL/Migemo Extension
                 comment = text || '';
             }
 
+            tags.forEach(function (t) __context__.tags.add(t));
+
             var url = liberator.modules.buffer.URL;
             var title = liberator.modules.buffer.title;
 
@@ -791,11 +808,11 @@ for Migemo search: require XUL/Migemo Extension
                 context.fork('MyTags', 0, context, function(context, arg){
                     context.title = ['My Tag','Description'];
 
-                    if(__context__.tags.length == 0){
+                    if(__context__.tags.isEmpty){
                         context.incomplete = true;
                         getTagsAsync(set.bind(null, context)).call([]);
                     } else {
-                        set(context, __context__.tags);
+                        set(context, __context__.tags.list);
                     }
                 });
             },
