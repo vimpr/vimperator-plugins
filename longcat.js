@@ -37,7 +37,7 @@ let INFO =
 <>
   <plugin name="longcat" version="1.0.0"
           href="http://vimpr.github.com/"
-          summary="Longcat beautify your life."
+          summary="Longcat beautifies your life."
           lang="en-US"
           xmlns="http://vimperator.org/namespaces/liberator">
     <author email="anekos@snca.net">anekos</author>
@@ -242,7 +242,7 @@ let INFO =
 
   commands.addUserCommand(
     ['longcat'],
-    'Longcat beautify your life.',
+    'Longcat beautifies your life.',
     function (args) {
       let n = parseInt(args[0] || '20', 10);
       drawCat(n);
