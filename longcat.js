@@ -195,7 +195,6 @@ let INFO =
     let canvas = doc.createElement('canvas');
     let bg = doc.createElement('div');
 
-    canvas.innerHTML = 'hoge';
     canvas.setAttribute('style', String(<><![CDATA[
       position: absolute; !important;
       top: 0px !important;
@@ -203,6 +202,7 @@ let INFO =
       margin: auto;
       right: 0;
       left: 0;
+      z-index: 666;
     ]]></>));
 
     bg.setAttribute('style', String(<><![CDATA[
@@ -212,6 +212,7 @@ let INFO =
       background-color: black !important;
       width: 100%;
       height: 100%;
+      z-index: 616;
     ]]></>));
 
     canvas.width = 114;
@@ -231,23 +232,22 @@ let INFO =
     setTimeout(
       function () {
         ctx.drawImage(head, 0, 0);
-        for (let i = 0; i < n; i++)
-          ctx.drawImage(body, 0, 100 + i * 100);
+        ctx.drawImage(body, 0, 100, 114, n * 100);
         ctx.drawImage(tail, 0, 100 + n * 100);
       },
       0
     );
   }
 
-
   commands.addUserCommand(
     ['longcat'],
     'Longcat beautifies your life.',
     function (args) {
-      let n = parseInt(args[0] || '20', 10);
+      let n = parseInt(args[0] || 20, 10);
       drawCat(n);
     },
-    {}
+    {},
+    true
   );
 
 })();
