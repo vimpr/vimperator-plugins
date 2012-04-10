@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010, anekos.
+Copyright (c) 2010-2012, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.3.1</version>
+  <version>2.3.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.3.1"
+  <plugin name="link-opener" version="2.3.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.3.1"
+  <plugin name="link-opener" version="2.3.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -244,7 +244,7 @@ let INFO =
       'Filtered open',
       function (args) {
         let where = charToWhere(args['-where'], args.bang ? liberator.NEW_TAB : liberator.NEW_BACKGROUND_TAB);
-        let [i, links] = [1, filteredLinks(args.join(''), args['-include-current'])];
+        let i = 1, links = filteredLinks(args.join(''), args['-include-current']);
         if (!links.length)
           return;
 
@@ -261,6 +261,7 @@ let INFO =
               clearInterval(foihandle);
           } catch (e) {
             clearInterval(foihandle);
+            liberator.echoerr(e);
           }
         }, interval);
       },
@@ -272,7 +273,7 @@ let INFO =
           [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS],
           [['-include-current', '-I'], commands.OPTION_NOARG]
         ],
-        completer: function (context, arg) {
+        completer: function (context, args) {
           context.title = ['URL', 'Text Content'];
           // 本来の補完の絞り込みを抑止
           let filter = context.filter;
