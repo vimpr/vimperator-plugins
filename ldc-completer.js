@@ -443,6 +443,17 @@ let INFO =
           function (args) {
             importBookmarks();
           }
+        ),
+        new Command(
+          ['open'],
+          'Open bookmark',
+          function (args) {
+            liberator.open(args.literalArg);
+          },
+          {
+            literal: 0,
+            completer: makeUrlCompleter(false)
+          }
         )
       ]
     },
