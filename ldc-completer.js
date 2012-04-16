@@ -97,6 +97,20 @@ let INFO =
   const XMigemoTextUtils = Cc["@piro.sakura.ne.jp/xmigemo/text-utility;1"].getService(Ci.pIXMigemoTextUtils);
 
 
+  function httpGet(url, {username, password}, callback) {
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.mozBackgroundRequest = true;
+    if (callback) {
+      xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4)
+          callback(xmlhttp);
+      };
+    }
+    xmlhttp.open("GET", url, !!callback, username, password);
+    xmlhttp.send(null);
+    return xmlhttp;
+  }
+
   function formatDate (date) {
     if (!(date instanceof Date))
       date = new Date(date);
@@ -175,8 +189,9 @@ let INFO =
 
     //return withTransaction(importFromXML.bind(null ,liberator.__xml));
 
-    util.httpGet(
+    httpGet(
       URL,
+      {},
       function (xhr) {
         let xml = new XML(xhr.responseText.replace(/<\?.*?\?>\n/, '').replace(/\n/g, ''));
         liberator.__xml = xml;
@@ -187,10 +202,57 @@ let INFO =
   }
 
 
-  function getAPIKey () {
-    let passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-    let logins = passwordManager.findLogins({}, 'http://api.clip.livedoor.com', 'http://api.clip.livedoor.com', null);
-    return logins[0].password;
+  function initializeAuthInfo (username, password) {
+    const PSVC = Cc['@mozilla.org/embedcomp/prompt-service;1'].getService(Ci.nsIPromptService);
+    const PM = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+
+    let nsLoginInfo = new Components.Constructor('@mozilla.org/login-manager/loginInfo;1', Ci.nsILoginInfo, 'init');
+
+    liberator.log([username, password]);
+    let result = {username: {value: username}, password: {value: password}};
+
+    let ok =
+      PSVC.promptUsernameAndPassword(
+        null,
+        '',
+        'Livedoor Clip Username and APIKey',
+        result.username,
+        result.password,
+        null,
+        {}
+      );
+
+    if (ok) {
+      PM.addLogin(
+        new nsLoginInfo(
+          'http://api.clip.livedoor.com',
+          'http://api.clip.livedoor.com',
+           null,
+           result.username.value,
+           result.password.value,
+           '',
+           ''
+        )
+      );
+    }
+    return true;
+  }
+
+
+  function getAuthInfo () {
+    const PM = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+
+    let logins =
+      PM.findLogins(
+        {},
+        'http://api.clip.livedoor.com',
+        'http://api.clip.livedoor.com',
+        null
+      ).filter(function ({username, password}) (username && password));
+    return {
+      username: logins[0].username,
+      password: logins[0].password
+    };
   }
 
 
@@ -226,8 +288,9 @@ let INFO =
       callback();
     }
 
-    util.httpGet(
-      'http://api.clip.livedoor.com/v1/posts/recent?count=100&password=' + getAPIKey(),
+    httpGet(
+      'http://api.clip.livedoor.com/v1/posts/recent?count=100&password=',
+      getAuthInfo(),
       function (xhr) {
         if (xhr.status != 200)
           return onError(xhr.responseText);
@@ -275,15 +338,9 @@ let INFO =
   }
 
 
-  delete completion.urlCompleters.L;
-
-  let completerCallback;
-
-  completion.addUrlCompleter(
-    'L',
-    'Open the urls in tweets',
-    function (context, args) {
-      let prefix = liberator.globalVariables.ldc_completer_prefix;
+  function makeUrlCompleter (usePrefix) {
+    return function (context, args) {
+      let prefix = usePrefix && liberator.globalVariables.ldc_completer_prefix;
       let migemo = liberator.globalVariables.ldc_completer_use_migemo;
 
       let filter = context.filter.trim();
@@ -325,7 +382,18 @@ let INFO =
           context.incomplete = false;
         }
       );
-    }
+    };
+  }
+
+
+  delete completion.urlCompleters.L;
+
+  let completerCallback;
+
+  completion.addUrlCompleter(
+    'L',
+    'Open the urls in tweets',
+    makeUrlCompleter(true)
   );
 
 
@@ -335,6 +403,40 @@ let INFO =
     function (args) {},
     {
       subCommands: [
+        new Command(
+          ['auth'],
+          'Setup auth info',
+          function (args) {
+            const URL = 'http://clip.livedoor.com/config/api';
+            liberator.open(URL, liberator.NEW_TAB);
+            let limit = 50;
+            let h =
+              setInterval(
+                function () {
+                  function q (sel) {
+                    let doc = content.document;
+                    let e = doc.querySelector(sel);
+                    return e && e.textContent;
+                  }
+
+                  if (--limit <= 0) {
+                    clearInterval(h);
+                    initializeAuthInfo();
+                    return;
+                  }
+
+                  if (buffer.URL === URL && buffer.loaded) {
+                    clearInterval(h);
+                    let username = q('.font-header > span[title]');
+                    let password = q('.api-key-box');
+                    initializeAuthInfo(username, password);
+                    return;
+                  }
+                },
+                100
+              );
+          }
+        ),
         new Command(
           ['sync'],
           'synchronize LDC',
