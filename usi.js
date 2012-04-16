@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.3.1"
+  <plugin name="usi.js" version="1.3.2"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -447,7 +447,60 @@ let INFO =
         },
         {}
       )
-    } //}}}
+    }, //}}}
+
+    showTasks: Combo(function (c, [lists]) { // {{{
+      Cow.get(
+        {
+          method: 'rtm.lists.getList',
+        },
+        {
+          cache: 'lists.getList',
+          onComplete: function (result) {
+            let table = {};
+            for (let [k, v] in Iterator(result.lists.list))
+              table[v.@id] = v.@name;
+            c.next(table);
+          }
+        }
+      );
+
+      let table = yield;
+
+      Cow.get(
+        {
+          method: 'rtm.tasks.getList',
+          filter: 'status:incomplete'
+        },
+        {
+          cache: 'rtm.tasks.getList?filter=status:incomplete',
+          onComplete: function (result) {
+            let cs = [];
+            for (let [, list] in Iterator(result.tasks.list)) {
+              if (lists && lists.every(function (name) table[list.@id] != name))
+                continue;
+              for (let [, taskseries] in Iterator(list.taskseries)) {
+                for (let [, task] in Iterator(taskseries.task)) {
+                  cs.push([
+                    let (d = Utils.toDate(task.@due))
+                      (d ? d.getTime() : Infinity),
+                    [taskseries.@name, Utils.toSmartDateText(task.@due)]
+                  ]);
+                }
+              }
+            }
+            let n = new Date().getTime();
+            Utils.timeArraySort(cs);
+            let contents = <></>;
+            for (let [, [d, [a, b]]] in Iterator(cs)) {
+              let hl = (n - d) > 0 ? 'ErrorMsg' : '';
+              contents += <tr highlight={hl}><td>{a}</td><td>{b}</td></tr>;
+            }
+            liberator.echo(<><table>{contents}</table></>);
+          }
+        }
+      );
+    }), // }}}
   }; // }}}
 
   const CommandOptions = { // {{{
@@ -743,7 +796,36 @@ let INFO =
       names: 'p[ostpone]',
       description: 'Postpone a task',
       onComplete: TaskActionOnComplete('Task was postponed')
-    }) // }}}
+    }), // }}}
+    new Command(
+      ['s[how]'],
+      'Show tasks',
+      function (args) {
+        Cow.showTasks(args.length && args);
+      },
+      {
+        completer: function (context, args) {
+          context.incomplete = true;
+
+          Cow.get(
+            {
+              method: 'rtm.lists.getList',
+            },
+            {
+              synchronize: true,
+              cache: 'lists.getList',
+              onComplete: function (result) {
+                context.completions = [
+                  [v.@name, v.@id]
+                  for ([k, v] in Iterator(result.lists.list))
+                ];
+                context.incomplete = false;
+              }
+            }
+          );
+        }
+      }
+    )
   ]; // }}}
 
   TransactionSubCommands = [ // {{{
@@ -790,60 +872,9 @@ let INFO =
     new Command(
       ['t[ask]'],
       'Task control',
-      Combo(function (c, [args]) {
-        Cow.get(
-          {
-            method: 'rtm.lists.getList',
-          },
-          {
-            cache: 'lists.getList',
-            onComplete: function (result) {
-              let table = {};
-              for (let [k, v] in Iterator(result.lists.list))
-                table[v.@id] = v.@name;
-              c.next(table);
-            }
-          }
-        );
-
-        let table = yield;
-
-        Cow.get(
-          {
-            method: 'rtm.tasks.getList',
-            filter: 'status:incomplete'
-          },
-          {
-            cache: 'rtm.tasks.getList?filter=status:incomplete',
-            onComplete: function (result) {
-              let cs = [];
-              let lists = args['-lists'];
-
-              for (let [, list] in Iterator(result.tasks.list)) {
-                if (lists && lists.every(function (name) table[list.@id] != name))
-                  continue;
-                for (let [, taskseries] in Iterator(list.taskseries)) {
-                  for (let [, task] in Iterator(taskseries.task)) {
-                    cs.push([
-                      let (d = Utils.toDate(task.@due))
-                        (d ? d.getTime() : Infinity),
-                      [taskseries.@name, Utils.toSmartDateText(task.@due)]
-                    ]);
-                  }
-                }
-              }
-              let n = new Date().getTime();
-              Utils.timeArraySort(cs);
-              let contents = <></>;
-              for (let [, [d, [a, b]]] in Iterator(cs)) {
-                let hl = (n - d) > 0 ? 'ErrorMsg' : '';
-                contents += <tr highlight={hl}><td>{a}</td><td>{b}</td></tr>;
-              }
-              liberator.echo(<><table>{contents}</table></>);
-            }
-          }
-        );
-      }),
+      function (args) {
+        Cow.showTasks(args['-lists']);
+      },
       {
         options: [CommandOptions.lists],
         subCommands: TaskSubCommands
