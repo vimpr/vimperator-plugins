@@ -288,11 +288,6 @@ for Migemo search: require XUL/Migemo Extension
         return doc;
     }
 
-    //
-    //
-    //
-    //
-
     function getNormalizedPermalink(url){
         var canonical = plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]');
         return canonical ? canonical.href : url;
@@ -335,11 +330,6 @@ for Migemo search: require XUL/Migemo Extension
         }
         return [user, password];
     }
-
-    //
-    //
-    //
-    //
 
     var services = {
         'h': {
