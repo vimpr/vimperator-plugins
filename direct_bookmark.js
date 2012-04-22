@@ -668,6 +668,7 @@ for Migemo search: require XUL/Migemo Extension
         let html = parseHTML(xhr.responseText);
         let title = getFirstElementByXPath("//title/text()", html);
 
+        // FIXME: encoding (see charset and must I convert...?)
         return title.nodeValue;
     }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
