@@ -666,9 +666,9 @@ for Migemo search: require XUL/Migemo Extension
         xhr.send(null);
 
         let html = parseHTML(xhr.responseText);
-        let title = getFirstElementByXPath("title", html);
+        let title = getFirstElementByXPath("//title/text()", html);
 
-        return title ? title.innerText : '';
+        return title.nodeValue;
     }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
