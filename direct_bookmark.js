@@ -705,7 +705,7 @@ for Migemo search: require XUL/Migemo Extension
             var targetServices = useServicesByPost;
 
             if (arg["-s"]) targetServices = arg["-s"];
-            comment = arg.literalArg;
+            var comment = arg.literalArg;
 
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
