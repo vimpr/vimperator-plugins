@@ -175,8 +175,6 @@ for Migemo search: require XUL/Migemo Extension
         d.xhr = req;
         return d;
     }
-    http.get  = function (url)       http({method:"get",  url:url});
-    http.post = function (url, data) http({method:"post", url:url, data:data, headers:{"Content-Type":"application/x-www-form-urlencoded"}});
 
     Deferred.Deferred = Deferred;
     Deferred.http     = http;
@@ -290,11 +288,6 @@ for Migemo search: require XUL/Migemo Extension
         return doc;
     }
 
-    //
-    //
-    //
-    //
-
     function getNormalizedPermalink(url){
         var canonical = plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]');
         return canonical ? canonical.href : url;
@@ -337,11 +330,6 @@ for Migemo search: require XUL/Migemo Extension
         }
         return [user, password];
     }
-
-    //
-    //
-    //
-    //
 
     var services = {
         'h': {
@@ -707,7 +695,7 @@ for Migemo search: require XUL/Migemo Extension
             var targetServices = useServicesByPost;
 
             if (arg["-s"]) targetServices = arg["-s"];
-            comment = arg.literalArg;
+            var comment = arg.literalArg;
 
             var tags = [];
             var re = /\[([^\]]+)\]([^\[].*)?/g;
