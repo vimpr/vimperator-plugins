@@ -175,8 +175,6 @@ for Migemo search: require XUL/Migemo Extension
         d.xhr = req;
         return d;
     }
-    http.get  = function (url)       http({method:"get",  url:url});
-    http.post = function (url, data) http({method:"post", url:url, data:data, headers:{"Content-Type":"application/x-www-form-urlencoded"}});
 
     Deferred.Deferred = Deferred;
     Deferred.http     = http;
