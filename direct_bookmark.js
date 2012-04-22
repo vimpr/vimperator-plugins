@@ -67,6 +67,8 @@ for Migemo search: require XUL/Migemo Extension
       Arguments
           -s,-service: default:"hdl"
               Specify target SBM services to post
+          -u,--url: default:Current buffer URL
+              Specify target SBM services to post
 ||<
 === :bentry ===
 >||
@@ -655,6 +657,19 @@ for Migemo search: require XUL/Migemo Extension
 
         first.call([]);
     }
+    function getTitleByURL(url) {
+        if (url === liberator.modules.buffer.URL)
+            return liberator.modules.buffer.title;
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url, false);
+        xhr.send(null);
+
+        let html = parseHTML(xhr.responseText);
+        let title = getFirstElementByXPath("title", html);
+
+        return title ? title.innerText : '';
+    }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
@@ -705,8 +720,10 @@ for Migemo search: require XUL/Migemo Extension
     liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
         function(arg){
             var targetServices = useServicesByPost;
+            var url = liberator.modules.buffer.URL;
 
             if (arg["-s"]) targetServices = arg["-s"];
+            if (arg["-u"]) url = arg["-u"];
             comment = arg.literalArg;
 
             var tags = [];
@@ -726,15 +743,12 @@ for Migemo search: require XUL/Migemo Extension
 
             tags.forEach(function (t) __context__.tags.add(t));
 
-            var url = liberator.modules.buffer.URL;
-            var title = liberator.modules.buffer.title;
-
             targetServices.split(/\s*/).forEach(function(service){
                 var user, password, currentService = services[service] || null;
                 [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
                 d = d.next(function() currentService.poster(
                     user,password,
-                    isNormalize ? getNormalizedPermalink(url) : url,title,
+                    isNormalize ? getNormalizedPermalink(url) : url,getTitleByURL(url),
                     comment,tags
                     ));
                 if(echoType == "multiline") {
@@ -791,6 +805,10 @@ for Migemo search: require XUL/Migemo Extension
                         set(context, tags);
                     };
 
+                    /*
+                     * XXX: Should recognize --url option?
+                     * TODO: Complete --url argument like :open
+                     */
                     if (buffer.URL == lastURL){
                         if (done) {
                             onComplete(lastUserTags);
@@ -818,6 +836,7 @@ for Migemo search: require XUL/Migemo Extension
             },
             options: [
                 [['-s','-service'], liberator.modules.commands.OPTION_STRING],
+                [['-u','--url'], liberator.modules.commands.OPTION_STRING],
             ]
         },
         true
