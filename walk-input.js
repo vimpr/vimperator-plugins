@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Walk Input'
 // License: BSD
-// Version: 1.2.3
+// Version: 1.3.0
 // Maintainer: Takayama Fumihiko <tekezo@pqrs.org>
 //             anekos <anekos@snca.net>
 
@@ -20,7 +20,7 @@
 
 // PLUGIN_INFO {{{
 let INFO =
-<plugin name="Walk-Input" version="1.2.3"
+<plugin name="Walk-Input" version="1.3.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -133,9 +133,12 @@ var walkinput = function (forward) {
     elem.element.focus();
 };
 
-mappings.addUserMap([modes.NORMAL, modes.INSERT], ['<M-i>', '<A-i>'],
+let mapForward = liberator.globalVariables.walk_input_map_forward || '<M-i> <A-i>'
+let mapBackward = liberator.globalVariables.walk_input_map_backward || '<M-S-i> <A-S-i>'
+
+mappings.addUserMap([modes.NORMAL, modes.INSERT], mapForward.split(/\s+/),
                     'Walk Input Fields (Forward)', function () walkinput(true));
-mappings.addUserMap([modes.NORMAL, modes.INSERT], ['<M-S-i>', '<A-S-i>'],
+mappings.addUserMap([modes.NORMAL, modes.INSERT], mapBackward.split(/\s+/),
                     'Walk Input Fields (Backward)', function () walkinput(false));
 
 })();
