@@ -217,14 +217,16 @@ Object.defineProperty(
         enumerable: true,
         get: function(){
             let currentURI = makeURI(buffer.URL);
-            for (let n in Iterator(this, true)){
-                if (n === "auto") continue;
-                let s = this[n];
-                if (s.URL && s.URL.test(buffer.URL))
-                    return s;
-                for (let [, h] in Iterator(s.HOST)){
-                    let sURI = makeURI(h);
-                    if (sURI.host === currentURI.host) return s;
+            if (/^https?/.test(currentURI.scheme)) {
+                for (let n in Iterator(this, true)){
+                    if (n === "auto") continue;
+                    let s = this[n];
+                    if (s.URL && s.URL.test(buffer.URL))
+                        return s;
+                    for (let [, h] in Iterator(s.HOST)){
+                        let sURI = makeURI(h);
+                        if (sURI.host === currentURI.host) return s;
+                    }
                 }
             }
             // XXX (補完に|エラーを)出さないためのダミー
