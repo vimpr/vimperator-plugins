@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">すてら</name>
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
-  <version>0.33.0</version>
+  <version>0.33.1</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1351,9 +1351,15 @@ Thanks:
       ];
     },
 
-    get player () content.document.getElementById('flvplayer').wrappedJSObject.__proto__,
+    get player () {
+      return (
+        U.getElementById('flvplayer')
+        ||
+        U.getElementById('external_nicoplayer')
+      ).wrappedJSObject.__proto__;
+    },
 
-    get playerContainer () U.getElementByIdEx('flvplayer_container'),
+    // get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get ready () {
       try {
