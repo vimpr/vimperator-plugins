@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="erection" version="1.0.0"
+  <plugin name="erection" version="1.0.1"
           href="http://vimpr.github.com/"
           summary="Show the Erection."
           lang="en-US"
@@ -55,7 +55,7 @@ let INFO =
       <description><p>Show erected text with the image.</p></description>
     </item>
   </plugin>
-  <plugin name="エレクチオン" version="1.0.0"
+  <plugin name="エレクチオン" version="1.0.1"
           href="http://vimpr.github.com/"
           summary="どうしてなの――ッ！！ どうしてエレクチオンしないのよーッ！！"
           lang="ja"
@@ -181,6 +181,8 @@ let INFO =
     context.title = ['セリフ', '人物 (出典)'];
     context.compare = false;
     context.incomplete = true;
+
+    context.filters = [CompletionContext.Filter.textDescription];
 
     erect(function (erections) {
       context.completions = [
