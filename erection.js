@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="erection" version="1.0.1"
+  <plugin name="erection" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="Show the Erection."
           lang="en-US"
@@ -55,7 +55,7 @@ let INFO =
       <description><p>Show erected text with the image.</p></description>
     </item>
   </plugin>
-  <plugin name="エレクチオン" version="1.0.1"
+  <plugin name="エレクチオン" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="どうしてなの――ッ！！ どうしてエレクチオンしないのよーッ！！"
           lang="ja"
@@ -197,7 +197,7 @@ let INFO =
     return function (args) {
       let num = parseInt(args.literalArg, 10);
       return erect(function (erections) {
-        return action(erections[num]);
+        return action(erections[num], args);
       });
     }
   }
@@ -235,6 +235,24 @@ let INFO =
             </>);
           }),
           subOption
+        ),
+        new Command(
+          ['e[xcommand]'],
+          'Open command line with select erection',
+          makeErectionCommand(function (e, args) {
+            let cmdArgs = String(<>{e.text} - {e.by} {e.from} {e.imageURL}</>);
+            setTimeout(function () commandline.open('', args[0] + ' ' + cmdArgs, modes.EX), 1);
+          }),
+          {
+            literal: 1,
+            completer: function (context, args) {
+              if (args.length <= 1) {
+                completion.ex(context);
+              } else {
+                erectionCompleter(context, args);
+              }
+            }
+          }
         )
       ]
     },
