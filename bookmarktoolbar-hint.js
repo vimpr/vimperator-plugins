@@ -2,7 +2,7 @@
 // @name           BookmarksToolbar-Hint
 // @description    Feature the BookmarksToolbar-Hint
 // @description-ja ブックマークツールバーのヒント機能を提供
-// @version        0.2c
+// @version        0.2d
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -35,7 +35,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			tooltipbox.removeChild(tooltipbox.firstChild);
 		}
 	}
-	function getToolbar() toolbar || (toolbar = document.getElementById('bookmarksBarContent'));
+	function getToolbar() toolbar || (toolbar = document.getElementById('PlacesToolbarItems'));
 	function onKeyPress(event){
 		manager.onEvent(event);
 		event.stopPropagation();
@@ -54,7 +54,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 			else
 				fn.call(target, {button:1, ctrlKey:true});
 		} else {
-			liberator.open(target.node.uri, where);
+			liberator.open(target._placesNode.uri, where);
 		}
 		closeMenus(target);
 		liberator.modules.options.guioptions = manager.go;
