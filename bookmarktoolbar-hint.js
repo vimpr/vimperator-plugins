@@ -2,7 +2,7 @@
 // @name           BookmarksToolbar-Hint
 // @description    Feature the BookmarksToolbar-Hint
 // @description-ja ブックマークツールバーのヒント機能を提供
-// @version        0.2d
+// @version        0.2e
 // ==/VimperatorPlugin==
 //
 // Usage:
@@ -43,7 +43,11 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 	}
 	function updateSelector(){
 		for (let i=0; i<tooltipbox.childNodes.length; i++){
-			tooltipbox.childNodes[i].style.color = (i+1).toString().indexOf(currentNum+1) == 0 ? "red" : "black";
+			if (useShift) {
+				tooltipbox.childNodes[i].style.color = (i+1) == (currentNum+1) ? "red" : "black";
+			} else {
+				tooltipbox.childNodes[i].style.color = (i+1).toString().indexOf(currentNum+1) == 0 ? "red" : "black";
+			}
 		}
 	}
 	function itemOpen(target){
@@ -77,7 +81,8 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 	var toolbar;
 	var current;
 	var currentNum = 0;
-	var useShift = false;
+	var pressedNum = "";
+	var useShift = true;
 	var where = liberator.CURERNT_TAB;
 	var manager = {
 		get toolbar() getToolbar(),
@@ -136,6 +141,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 						currentNum = currentNum == 0 ? hints.length -1 : currentNum - 1;
 					}
 					useShift = true;
+					pressedNum = "";
 					updateSelector();
 					return;
 				case "l":
@@ -144,8 +150,10 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 					}
 					return;
 				case "<BS>":
-					if (key == "<BS>" && currentNum > 0){
-						currentNum = Math.floor(currentNum / 10);
+					if (key == "<BS>" && pressedNum.length > 0){
+						pressedNum = pressedNum.substring(0,pressedNum.length - 1);
+						currentNum = pressedNum.length > 0 ? parseInt(pressedNum,10) : 0;
+						useShift = pressedNum.length == 0;
 						updateSelector();
 						return;
 					}
@@ -162,15 +170,16 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 					return;
 				default:
 					if (/^[0-9]$/.test(key)){
-						let num = parseInt(key,10);
-						if (!useShift && currentNum) num += currentNum * 10;
-
+						useShift = false;
+						pressedNum += key;
+						let num = parseInt(pressedNum,10);
 						if (hints.length >= num*10){
 							currentNum = num - 1;
 							updateSelector();
 							return;
 						}
 						if (hints[num-1]){
+							pressedNum = "";
 							if (toolbarOpen(hints[num-1])) return;
 						}
 					}
@@ -180,6 +189,7 @@ liberator.plugins.bookmarkToolbarHints = (function(){
 		},
 		quit: function(){
 			currentNum = 0;
+			pressedNum = "";
 			useShift = false;
 			window.removeEventListener('keypress',onKeyPress,true);
 			liberator.modules.modes.reset(true);
