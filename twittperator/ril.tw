@@ -1,0 +1,21 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_ril = 1
+ */
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['ril'],
+      action: function(arg) {
+        liberator.execute('readitlater add https://twitter.com/' + arg);
+      },
+      timelineCompleter: true,
+      completer: TW.Completers.statusPage(function(s) s.id)
+    })
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:

@@ -2,7 +2,7 @@
  * The MIT License
  *
  * Copyright (c) 2010 teramako
- * Copyright (c) 2010-2011 anekos
+ * Copyright (c) 2010-2012 anekos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Twittperator" version="1.17.1"
+  <plugin name="Twittperator" version="1.18.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -174,7 +174,7 @@ let INFO =
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.17.1"
+  <plugin name="Twittperator" version="1.18.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
@@ -2123,34 +2123,19 @@ let INFO =
   Store.set("consumerKey", "GQWob4E5tCHVQnEVPvmorQ");
   Store.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
   // }}}
-
-  // アクセストークン取得前 {{{
-  function preSetup() {
-    commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
-      function(args) {
-        if (args["-getPIN"]) {
-          tw.getRequestToken(function(url) {
-            liberator.open(url, { where: liberator.NEW_TAB });
-          });
-          Twittperator.echo("Please get PIN code and execute\n :tw -setPIN {PINcode}");
-        } else if (args["-setPIN"]) {
-          tw.setPin(args["-setPIN"]);
-        }
-      }, {
-        options: [
-          [["-getPIN"], commands.OPTION_NOARG],
-          [["-setPIN"], commands.OPTION_STRING, null, null]
-        ],
-      }, true);
-  } // }}}
-  // アクセストークン取得後 {{{
-  function setup() {
-    function rejectMine(st)
+  let Predicates = { // {{{
+    notMine: function (st)
       let (n = setting.screenName)
-        (n ? (!st.user || st.user.screen_name !== n) : st);
+        (n ? (!st.user || st.user.screen_name !== n) : st),
+    mine: function (st)
+      (!Predicates.notMine(st))
+  }; // }}}
+  let Completers = (function() { // {{{
+    function rt(st)
+      ("retweeted_status" in st ? st.retweeted_status : st);
 
-    function seleceMine(st)
-      (!rejectMine(st));
+    function removeNewLine(text)
+      text.replace(/\r\n|[\r\n]/g, ' ');
 
     function setTimelineCompleter(context) { // {{{
       function statusObjectFilter(item)
@@ -2193,290 +2178,307 @@ let INFO =
       }
     } // }}}
 
-    const Completers = (function() { // {{{
-      function rt(st)
-        ("retweeted_status" in st ? st.retweeted_status : st);
-
-      function removeNewLine(text)
-        text.replace(/\r\n|[\r\n]/g, ' ');
-
-      function completer(generator, nort) {
-        let getHistory = nort ? function() history
-                              : function() history.map(rt);
-        return function(filter) {
-          function completer(context, args) {
-            let cs = [];
-            for (let [, it] in Iterator(getHistory())) {
-              if (filter && !filter(it))
-                continue;
-              let item = generator(it);
-              if (item[0])
-                cs.push(item);
-            }
-            context.completions = cs;
-          }
-          return makeTimelineCompleter(completer);
-        }
-      }
-
-      return {
-        name:
-          completer(function(s) [s.user.screen_name, s]),
-        atname:
-          completer(function(s) ['@' + s.user.screen_name, s]),
-        text:
-          completer(function(s) [removeNewLine(s.text), s]),
-        id:
-          completer(function(s) [s.id, s]),
-        rawid:
-          completer(function(s) [s.id, s], true),
-        name_id:
-          completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
-        name_id_text:
-          completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + removeNewLine(s.text), s]),
-        screenName:
-          completer(function(s) [s.user.screen_name, s]),
-        statusPage:
-          completer(function(s) [s.user.screen_name + '/status/' + s.id , s]),
-        hashtag:
-          function(filter) {
-            return makeTimelineCompleter(function(context, args){
-              context.completions = [
-                [
-                  ['#' + h.text for ([, h] in Iterator(s.entities.hashtags))].join(' '),
-                  s
-                ]
-                for ([, s] in Iterator(history))
-                if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
-              ]
-            });
-          }
-      };
-    })(); // }}}
-
-    const SubCommand = function(init) { // {{{
-      if (!(init.completer instanceof Array))
-        init.completer = [init.completer];
-
-      return {
-        __proto__: init,
-        get expr() {
-          return RegExp(
-            "^" +
-            this.command.map(function(c)
-              let (r = util.escapeRegex(c))
-                (/^\W$/.test(c) ? r : r + "( |$)")
-            ).join("|")
-          );
-        },
-        match: function(s) s.match(this.expr),
-        action: function(args) init.action(args.literalArg.replace(this.expr, "").trim())
-      };
-    }; // }}}
-
-    const SubCommands = [ // {{{
-      SubCommand({
-        command: ["+"],
-        description: "Fav a tweet",
-        action: function(arg) {
-          let m = arg.match(/^\d+/);
-          if (m)
-            Twitter.favorite(m[0]);
-        },
-        timelineCompleter: true,
-        completer: Completers.id(rejectMine)
-      }),
-      SubCommand({
-        command: ["-"],
-        description: "Unfav a tweet",
-        action: function(arg) {
-          let m = arg.match(/^\d+/);
-          if (m)
-            Twitter.favorite(m[0]);
-        },
-        timelineCompleter: true,
-        completer: Completers.id(rejectMine)
-      }),
-      SubCommand({
-        command: ["@"],
-        description: "Show mentions or follower tweets",
-        action: function(arg) {
-          if (arg.length > 0) {
-            Twittperator.showUserTimeline(arg);
-          } else {
-            Twittperator.showTwitterMentions();
-          }
-        },
-        timelineCompleter: true,
-        completer: Completers.name()
-      }),
-      SubCommand({
-        command: ["?"],
-        description: "Twitter search",
-        action: function(arg) Twittperator.showTwitterSearchResult(arg),
-        completer: [
-          function (context, args) {
-            let lst = [[buffer.URL, 'Current Tab']];
-            let w = buffer.getCurrentWord();
-            if (w && w.length)
-              lst.push([w, 'Current word']);
-            context.completions = lst;
-          },
-          Completers.text()
-        ]
-      }),
-      SubCommand({
-        command: ["/"],
-        description: "Open link",
-        action: function(arg) Twittperator.openLink(arg),
-        timelineCompleter: true,
-        completer: Completers.text(function(s) /https?:\/\//.test(s.text))
-      }),
-      SubCommand({
-        command: ["delete"],
-        description: "Delete status",
-        action: function(arg) {
-          let m = arg.match(/^\d+/);
-          if (m)
-            Twitter.destroy(m[0]);
-        },
-        timelineCompleter: true,
-        completer: Completers.rawid(seleceMine)
-      }),
-      SubCommand({
-        command: ["activity"],
-        description: "Activity Summary",
-        action: function(arg) {
-          Twittperator.activitySummary(arg);
-        },
-        timelineCompleter: true,
-        completer: Completers.id(function(st) st.id)
-      }),
-      SubCommand({
-        command: ["info"],
-        description: "Display status information",
-        action: function(arg) {
-          function dtdd(obj) {
-            let items = <></>;
-            for (let [n, v] in Iterator(obj)) {
-              let cont = (v && typeof v === "object") ? dtdd(v) : v;
-              items += <><dt>{n}</dt><dd>{cont}</dd></>;
-            }
-
-            return <dl>{items}</dl>;
-          }
-
-          let m = arg.match(/^\d+/);
-          if (!m)
-            return;
-          let id = m[0];
-          history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
-        },
-        timelineCompleter: true,
-        completer: Completers.rawid(function(st) st.id)
-      }),
-      SubCommand({
-        command: ["lookupuser"],
-        description: "Lookup users",
-        action: function(arg) {
-          Twittperator.lookupUser(arg.split(/\s+/));
-        },
-        timelineCompleter: true,
-        completer: Completers.screenName()
-      }),
-      SubCommand({
-        command: ["track"],
-        description: "Track the specified words.",
-        action: function(arg) {
-          if (arg.trim().length > 0) {
-            Store.set("trackWords", arg);
-            TrackingStream.start({track: arg});
-          } else {
-            TrackingStream.stop();
-          }
-        },
-        completer: function(context, args) {
+    function completer(generator, nort) {
+      let getHistory = nort ? function() history
+                            : function() history.map(rt);
+      return function(filter) {
+        function completer(context, args) {
           let cs = [];
-          if (setting.trackWords)
-            cs.push([setting.trackWords, "Global variable"]);
-          if (Store.get("trackWords"))
-            cs.push([Store.get("trackWords"), "Current tracking words"]);
+          for (let [, it] in Iterator(getHistory())) {
+            if (filter && !filter(it))
+              continue;
+            let item = generator(it);
+            if (item[0])
+              cs.push(item);
+          }
           context.completions = cs;
         }
-      }),
-      SubCommand({
-        command: ["home"],
-        description: "Open user home.",
-        action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
-        timelineCompleter: true,
-        completer: Completers.screenName(rejectMine)
-      }),
-      SubCommand({
-        command: ["status"],
-        description: "Open status page.",
-        action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
-        timelineCompleter: true,
-        completer: Completers.statusPage(function (s) s.id)
-      }),
-      SubCommand({
-        command: ["thread"],
-        description: "Show tweets thread.",
-        action: function(arg) {
-          function showThread () {
-            Twittperator.showTL(thread);
-          }
-          function getStatus(id, next) {
-            let result;
-            if (history.some(function (it) (it.id == id && (result = it)))) {
-              return next(result);
-            }
-            // XXX エラーの時はなにか表示しておくべき？
-            tw.jsonGet("statuses/show/" + id, null, function(res) next(res), showThread);
-          }
-          function trace(st) {
-            thread.push(st);
-            if (st.in_reply_to_status_id) {
-              getStatus(st.in_reply_to_status_id, trace);
-            } else {
-              showThread();
-            }
+        return makeTimelineCompleter(completer);
+      }
+    }
+
+    return {
+      name:
+        completer(function(s) [s.user.screen_name, s]),
+      atname:
+        completer(function(s) ['@' + s.user.screen_name, s]),
+      text:
+        completer(function(s) [removeNewLine(s.text), s]),
+      id:
+        completer(function(s) [s.id, s]),
+      rawid:
+        completer(function(s) [s.id, s], true),
+      name_id:
+        completer(function(s) ["@" + s.user.screen_name + "#" + s.id, s]),
+      name_id_text:
+        completer(function(s) ["@" + s.user.screen_name + "#" + s.id + ": " + removeNewLine(s.text), s]),
+      screenName:
+        completer(function(s) [s.user.screen_name, s]),
+      statusPage:
+        completer(function(s) [s.user.screen_name + '/status/' + s.id , s]),
+      hashtag:
+        function(filter) {
+          return makeTimelineCompleter(function(context, args){
+            context.completions = [
+              [
+                ['#' + h.text for ([, h] in Iterator(s.entities.hashtags))].join(' '),
+                s
+              ]
+              for ([, s] in Iterator(history))
+              if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
+            ]
+          });
+        }
+    };
+  })(); // }}}
+  let SubCommand = function(init) { // {{{
+    if (!(init.completer instanceof Array))
+      init.completer = [init.completer];
+
+    return {
+      __proto__: init,
+      get expr() {
+        return RegExp(
+          "^" +
+          this.command.map(function(c)
+            let (r = util.escapeRegex(c))
+              (/^\W$/.test(c) ? r : r + "( |$)")
+          ).join("|")
+        );
+      },
+      match: function(s) s.match(this.expr),
+      action: function(args) init.action(args.literalArg.replace(this.expr, "").trim())
+    };
+  }; // }}}
+  let SubCommands = [ // {{{
+    SubCommand({
+      command: ["+"],
+      description: "Fav a tweet",
+      action: function(arg) {
+        let m = arg.match(/^\d+/);
+        if (m)
+          Twitter.favorite(m[0]);
+      },
+      timelineCompleter: true,
+      completer: Completers.id(Predicates.notMine)
+    }),
+    SubCommand({
+      command: ["-"],
+      description: "Unfav a tweet",
+      action: function(arg) {
+        let m = arg.match(/^\d+/);
+        if (m)
+          Twitter.favorite(m[0]);
+      },
+      timelineCompleter: true,
+      completer: Completers.id(Predicates.notMine)
+    }),
+    SubCommand({
+      command: ["@"],
+      description: "Show mentions or follower tweets",
+      action: function(arg) {
+        if (arg.length > 0) {
+          Twittperator.showUserTimeline(arg);
+        } else {
+          Twittperator.showTwitterMentions();
+        }
+      },
+      timelineCompleter: true,
+      completer: Completers.name()
+    }),
+    SubCommand({
+      command: ["?"],
+      description: "Twitter search",
+      action: function(arg) Twittperator.showTwitterSearchResult(arg),
+      completer: [
+        function (context, args) {
+          let lst = [[buffer.URL, 'Current Tab']];
+          let w = buffer.getCurrentWord();
+          if (w && w.length)
+            lst.push([w, 'Current word']);
+          context.completions = lst;
+        },
+        Completers.text()
+      ]
+    }),
+    SubCommand({
+      command: ["/"],
+      description: "Open link",
+      action: function(arg) Twittperator.openLink(arg),
+      timelineCompleter: true,
+      completer: Completers.text(function(s) /https?:\/\//.test(s.text))
+    }),
+    SubCommand({
+      command: ["delete"],
+      description: "Delete status",
+      action: function(arg) {
+        let m = arg.match(/^\d+/);
+        if (m)
+          Twitter.destroy(m[0]);
+      },
+      timelineCompleter: true,
+      completer: Completers.rawid(Predicates.selectMine)
+    }),
+    SubCommand({
+      command: ["activity"],
+      description: "Activity Summary",
+      action: function(arg) {
+        Twittperator.activitySummary(arg);
+      },
+      timelineCompleter: true,
+      completer: Completers.id(function(st) st.id)
+    }),
+    SubCommand({
+      command: ["info"],
+      description: "Display status information",
+      action: function(arg) {
+        function dtdd(obj) {
+          let items = <></>;
+          for (let [n, v] in Iterator(obj)) {
+            let cont = (v && typeof v === "object") ? dtdd(v) : v;
+            items += <><dt>{n}</dt><dd>{cont}</dd></>;
           }
 
-          Twittperator.echo("Start thread tracing..");
-          let thread = [];
-          getStatus(parseInt(arg), trace);
-        },
-        timelineCompleter: true,
-        completer: Completers.id(function (it) it.in_reply_to_status_id)
-      }),
-      SubCommand({
-        command: ["resetoauth"],
-        description: "Reset OAuth Information",
-        action: function(arg) {
-          Twittperator.confirm(
-            'Do you want to reset OAuth information?',
-            function () {
-              Store.remove("consumerKey");
-              Store.remove("consumerSecret");
-              Store.remove("token");
-              Store.remove("tokenSecret");
-              Store.save();
-              Twittperator.echo("OAuth information were reset.");
-            }
-          );
-        },
-        timelineCompleter: false,
-        completer: Completers.id(function (it) it.in_reply_to_status_id)
-      }),
-      SubCommand({
-        command: ["findpeople"],
-        description: "Find people with the words.",
-        action: function(arg) Twittperator.showUsersSeachResult(arg),
-      }),
-    ]; // }}}
+          return <dl>{items}</dl>;
+        }
 
+        let m = arg.match(/^\d+/);
+        if (!m)
+          return;
+        let id = m[0];
+        history.filter(function(st) st.id === id).map(dtdd).forEach(liberator.echo);
+      },
+      timelineCompleter: true,
+      completer: Completers.rawid(function(st) st.id)
+    }),
+    SubCommand({
+      command: ["lookupuser"],
+      description: "Lookup users",
+      action: function(arg) {
+        Twittperator.lookupUser(arg.split(/\s+/));
+      },
+      timelineCompleter: true,
+      completer: Completers.screenName()
+    }),
+    SubCommand({
+      command: ["track"],
+      description: "Track the specified words.",
+      action: function(arg) {
+        if (arg.trim().length > 0) {
+          Store.set("trackWords", arg);
+          TrackingStream.start({track: arg});
+        } else {
+          TrackingStream.stop();
+        }
+      },
+      completer: function(context, args) {
+        let cs = [];
+        if (setting.trackWords)
+          cs.push([setting.trackWords, "Global variable"]);
+        if (Store.get("trackWords"))
+          cs.push([Store.get("trackWords"), "Current tracking words"]);
+        context.completions = cs;
+      }
+    }),
+    SubCommand({
+      command: ["home"],
+      description: "Open user home.",
+      action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
+      timelineCompleter: true,
+      completer: Completers.screenName(Predicates.notMine)
+    }),
+    SubCommand({
+      command: ["status"],
+      description: "Open status page.",
+      action: function(arg) liberator.open("http://twitter.com/" + arg, liberator.NEW_TAB),
+      timelineCompleter: true,
+      completer: Completers.statusPage(function (s) s.id)
+    }),
+    SubCommand({
+      command: ["thread"],
+      description: "Show tweets thread.",
+      action: function(arg) {
+        function showThread () {
+          Twittperator.showTL(thread);
+        }
+        function getStatus(id, next) {
+          let result;
+          if (history.some(function (it) (it.id == id && (result = it)))) {
+            return next(result);
+          }
+          // XXX エラーの時はなにか表示しておくべき？
+          tw.jsonGet("statuses/show/" + id, null, function(res) next(res), showThread);
+        }
+        function trace(st) {
+          thread.push(st);
+          if (st.in_reply_to_status_id) {
+            getStatus(st.in_reply_to_status_id, trace);
+          } else {
+            showThread();
+          }
+        }
+
+        Twittperator.echo("Start thread tracing..");
+        let thread = [];
+        getStatus(parseInt(arg), trace);
+      },
+      timelineCompleter: true,
+      completer: Completers.id(function (it) it.in_reply_to_status_id)
+    }),
+    SubCommand({
+      command: ["resetoauth"],
+      description: "Reset OAuth Information",
+      action: function(arg) {
+        Twittperator.confirm(
+          'Do you want to reset OAuth information?',
+          function () {
+            Store.remove("consumerKey");
+            Store.remove("consumerSecret");
+            Store.remove("token");
+            Store.remove("tokenSecret");
+            Store.save();
+            Twittperator.echo("OAuth information were reset.");
+          }
+        );
+      },
+      timelineCompleter: false,
+      completer: Completers.id(function (it) it.in_reply_to_status_id)
+    }),
+    SubCommand({
+      command: ["findpeople"],
+      description: "Find people with the words.",
+      action: function(arg) Twittperator.showUsersSeachResult(arg),
+    }),
+  ];
+
+  SubCommands.add = function(subCmd) {
+    this.push(subCmd);
+    return;
+  }; // }}}
+
+  // アクセストークン取得前 {{{
+  function preSetup() {
+    commands.addUserCommand(["tw[ittperator]"], "Twittperator setup command",
+      function(args) {
+        if (args["-getPIN"]) {
+          tw.getRequestToken(function(url) {
+            liberator.open(url, { where: liberator.NEW_TAB });
+          });
+          Twittperator.echo("Please get PIN code and execute\n :tw -setPIN {PINcode}");
+        } else if (args["-setPIN"]) {
+          tw.setPin(args["-setPIN"]);
+        }
+      }, {
+        options: [
+          [["-getPIN"], commands.OPTION_NOARG],
+          [["-setPIN"], commands.OPTION_STRING, null, null]
+        ],
+      }, true);
+  } // }}}
+  // アクセストークン取得後 {{{
+  function setup() {
     function findSubCommand(s) { // {{{
-      for (let [, cmd] in Iterator(SubCommands)) {
+      for (let [, cmd] in util.Array(SubCommands)) {
         let m = cmd.match(s);
         if (m)
           return [cmd, m];
@@ -2531,15 +2533,15 @@ let INFO =
       if (m = arg.match(/^D\s+/)) {
         context.title = "Entry";
         context.advance(m[0].length);
-        Completers.name(rejectMine)(context, args);
+        Completers.name(Predicates.notMine)(context, args);
         return;
       } else if (m = arg.match(/(RT\s+)@.*$/)) {
         (m.index === 0 ? Completers.name_id
-                       : Completers.name_id_text)(m.index === 0 && rejectMine)(context, args);
+                       : Completers.name_id_text)(m.index === 0 && Predicates.notMine)(context, args);
       } else if (m = tailMatch(/(^|\b|\s)#[^#\s]*$/, arg)) {
         Completers.hashtag()(context, args);
       } else if (m = tailMatch(/(^|\b|\s)@[^@\s]*$/, arg)) {
-        (m.index === 0 ? Completers.name_id(rejectMine) : Completers.atname(rejectMine))(context, args);
+        (m.index === 0 ? Completers.name_id(Predicates.notMine) : Completers.atname(Predicates.notMine))(context, args);
       }
 
       if (m)
@@ -2655,6 +2657,9 @@ let INFO =
   __context__.Twitter = Twitter;
   __context__.Utils = Utils;
   __context__.Store = Store;
+  __context__.SubCommand = SubCommand;
+  __context__.SubCommands = SubCommands;
+  __context__.Completers = Completers;
 
   Twittperator.loadPlugins();
 
