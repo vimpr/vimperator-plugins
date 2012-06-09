@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="AutoBookmark" version="1.2.0"
+  <plugin name="AutoBookmark" version="1.3.0"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
           lang="en-US"
@@ -50,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="AutoBookmark" version="1.2.0"
+  <plugin name="AutoBookmark" version="1.3.0"
           href="http://vimpr.github.com/"
           summary="自動更新するブックマーク"
           lang="ja"
@@ -209,11 +209,32 @@ let INFO =
 
   function namesCompleter (hidden) { // {{{
     return function (context, args) {
-      context.title = ['Bookmark name'];
-      context.completions = [
-        [name, data.current.URL]
-        for ([name, data] in Iterator(bookmarks))
+      function toTime (data) {
+        if (data.last && data.last.date)
+          return new Date(data.last.date).getTime();
+        return new Date('3000/12/31').getTime();
+      }
+
+      let bs = [
+        data
+        for ([, data] in Iterator(bookmarks))
         if (!!data.hidden === !!hidden)
+      ];
+
+      context.title = ['Bookmark name'];
+      if (args['-sort'] == 'title') {
+      }else {
+        // default date sorting
+        context.compare = void 0;
+        bs.sort(function (a, b) {
+          let d = toTime(b) - toTime(a);
+          return (d == 0 ? a.name.localeCompare(b.name) : d);
+        });
+      }
+
+      context.completions = [
+        [data.name, data.current.URL]
+        for ([, data] in Iterator(bs))
       ];
     };
   } // }}}
@@ -281,16 +302,28 @@ let INFO =
   } // }}}
 
   function updateCurrent (data, URL, title) { // {{{
+    let now = new Date().toString();
+
+    liberator.log('update-current: 1');
     data.current = {
       URL: URL,
-      title: title
+      title: title,
+      added: now
+    };
+    liberator.log('update-current: 2');
+    data.last = {
+      date: now
     };
     if (data.pages) {
+      liberator.log('update-current: 3');
       if (data.pages.some(function (it) (it.URL == URL)))
         return;
+      liberator.log('update-current: 4');
     } else {
       data.pages = [];
+      liberator.log('update-current: 5');
     }
+    liberator.log('update-current: 6');
     data.pages.push(data.current);
   } // }}}
 
@@ -308,7 +341,13 @@ let INFO =
     true
   ); // }}}
 
-  commands.addUserCommand( // {{{
+  // {{{
+  let commandOptions = [
+    [ ['-sort'], commands.OPTION_STRING, null,
+      [ ['last', 'Last updated date (default)'], ['name', 'By name'] ] ]
+  ];
+
+  commands.addUserCommand(
     'autobookmark',
     'Auto bookmarking',
     function () {
@@ -364,7 +403,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter()
+            completer: namesCompleter(),
+            options: commandOptions
           }
         ),
         new Command(
@@ -379,7 +419,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter()
+            completer: namesCompleter(),
+            options: commandOptions
           }
         ),
         new Command(
@@ -395,7 +436,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter()
+            completer: namesCompleter(),
+            options: commandOptions
           }
         ),
         new Command(
@@ -429,7 +471,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter()
+            completer: namesCompleter(),
+            options: commandOptions
           }
         ),
         new Command(
@@ -453,7 +496,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter()
+            completer: namesCompleter(),
+            options: commandOptions
           }
         ),
         new Command(
@@ -470,7 +514,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter(true)
+            completer: namesCompleter(true),
+            options: commandOptions
           }
         ),
         new Command(
@@ -481,7 +526,8 @@ let INFO =
           },
           {
             literal: 0,
-            completer: namesCompleter(false)
+            completer: namesCompleter(false),
+            options: commandOptions
           }
         )
       ]
