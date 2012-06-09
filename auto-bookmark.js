@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="AutoBookmark" version="1.3.0"
+  <plugin name="AutoBookmark" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
           lang="en-US"
@@ -50,7 +50,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="AutoBookmark" version="1.3.0"
+  <plugin name="AutoBookmark" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="自動更新するブックマーク"
           lang="ja"
@@ -212,7 +212,7 @@ let INFO =
       function toTime (data) {
         if (data.last && data.last.date)
           return new Date(data.last.date).getTime();
-        return new Date('3000/12/31').getTime();
+        return 0;
       }
 
       let bs = [
