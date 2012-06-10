@@ -1,0 +1,23 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_mstrans = 1
+ *
+ * Require: mstrans.js
+ */
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['mstrans'],
+      action: function(arg) {
+        liberator.execute('mstrans ' + arg);
+      },
+      timelineComplete: true,
+      completer: TW.Completers.text()
+    })
+  );
+})();
+
+// vim: set et fdm=syntax fenc= ft=javascript sts=2 sw=2 ts=2 :
