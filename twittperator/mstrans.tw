@@ -11,11 +11,12 @@
   TW.SubCommands.add(
     TW.SubCommand({
       command: ['mstrans'],
+      description: "Translate a tweet",
       action: function(arg) {
         liberator.execute('mstrans ' + arg);
       },
       timelineComplete: true,
-      completer: TW.Completers.text()
+      completer: TW.Completers.text(function(s) s.id)
     })
   );
 })();
