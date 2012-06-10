@@ -1,0 +1,44 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_rt = 1
+ */
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['rt'],
+      description: 'Official retweet',
+      action: function(arg) {
+        setTimeout(function () {
+          commandline.open(':', 'tw RT ' + arg, modes.EX);
+        }, 100);
+      },
+      timelineComplete: true,
+      completer: TW.Completers.name_id(function(s) s.id)
+    })
+  );
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['urt'],
+      description: 'Unofficial retweet',
+      action: function(arg) {
+        arg.match(/^@([a-zA-Z0-9_]+)#\d+: (.*)$/);
+        var screen_name = RegExp.$1;
+        var text = RegExp.$2;
+        if (screen_name && text) {
+          setTimeout(function () {
+            commandline.open(':', 'tw RT @' + screen_name + ': ' + text, modes.EX);
+          }, 100);
+        }
+      },
+      timelineComplete: true,
+      completer: TW.Completers.name_id_text(function(s) s.id)
+    })
+  );
+
+})();
+
+// vim: set et fdm=syntax fenc= ft=javascript sts=2 sw=2 ts=2 :
