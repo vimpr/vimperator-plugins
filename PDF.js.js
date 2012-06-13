@@ -59,6 +59,8 @@ let INFO =
 
   let scrollCount = 1;
 
+  // Functions {{{
+
   function getScrollHeight (count) {
     let base = content.innerHeight / 10;
     if (count > 0)
@@ -98,6 +100,10 @@ let INFO =
       res += '　';
     return res;
   }
+
+  // }}}
+
+  // Mappings {{{
 
   addMap(
     ['j'],
@@ -142,7 +148,41 @@ let INFO =
     }
   );
 
-  commands.addUserCommand(
+  addMap(
+    ['zh'],
+    'Fit to page.',
+    function (count) {
+      liberator.execute('pdfjs zoom page-fit');
+    }
+  );
+
+  addMap(
+    ['zw'],
+    'Fit to page to width.',
+    function (count) {
+      liberator.execute('pdfjs zoom page-width');
+    }
+  );
+
+  addMap(
+    ['za'],
+    'Fit to page to width.',
+    function (count) {
+      liberator.execute('pdfjs zoom auto');
+    }
+  );
+
+  addMap(
+    ['zz'],
+    'Fit to page to width.',
+    function (count) {
+      commandline.open('', 'pdfjs zoom ', modes.EX);
+    }
+  );
+
+  // }}}
+
+  commands.addUserCommand( // {{{
     ['pdfjs'],
     'PDF.js',
     function () void 'Meow is best',
@@ -205,7 +245,7 @@ let INFO =
       ]
     },
     true
-  );
+  ); // }}}
 
 })();
 
