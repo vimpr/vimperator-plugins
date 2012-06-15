@@ -251,8 +251,8 @@ var SBM = { //{{{
             }
             var pageURL, items;
             try {
-                pageURL = evaluateXPath(rss, '//rss:channel/rss:link')[0].textContent;
-                items = evaluateXPath(rss, '//rss:item');
+                pageURL = evaluateXPath(rss, '//channel/link')[0].textContent;
+                items = evaluateXPath(rss, '//item');
             } catch(e){
                 liberator.log(e);
             }
