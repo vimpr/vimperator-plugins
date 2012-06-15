@@ -313,7 +313,7 @@ var SBM = { //{{{
                 });
                 return c;
             } else {
-                liberator.log('Faild: LivedoorClip');
+                liberator.log('Failed: LivedoorClip');
             }
         }
     }, //}}}
@@ -341,7 +341,7 @@ var SBM = { //{{{
                 });
                 return c;
             } else {
-                liberator.log('Faild: Buzzurl');
+                liberator.log('Failed: Buzzurl');
             }
         }
     }, //}}} 
@@ -368,7 +368,7 @@ var SBM = { //{{{
                 });
                 return c;
             } else {
-                liberator.echo('Faild: Topsy');
+                liberator.echo('Failed: Topsy');
             }
         }
     } //}}}
