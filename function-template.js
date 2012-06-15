@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2009-2011, anekos.
+Copyright (c) 2009-2012, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -32,29 +32,42 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Functions Template</name>
-  <name lang="ja">関数テンプレート</name>
-  <description>function Template</description>
-  <description lang="ja">Vimperator の関数のテンプレート</description>
-  <version>1.3.0</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/function-template.js</updateURL>
-  <minVersion>3.0</minVersion>
-  <detail><![CDATA[
-    Functions template
-    (Fix|Add) me!
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    関数のテンプレート
-    (おかしい|書かれていない)(関数|引数|説明)があったら適当に(足|なお)してください。
-  ]]></detail>
-</VimperatorPlugin>;
+// INFO {{{
+let INFO =
+<>
+  <plugin name="XXXX" version="1.0.0"
+          href="http://vimpr.github.com/"
+          summary="XXXXX"
+          lang="en-US"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="xxxx@xxxx.net">xxxxx</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <p></p>
+    <item>
+      <tags>:hoge</tags>
+      <spec>:hoge</spec>
+      <description><p></p></description>
+    </item>
+  </plugin>
+  <plugin name="XXXX" version="1.0.0"
+          href="http://vimpr.github.com/"
+          summary="XXXXX"
+          lang="ja"
+          xmlns="http://vimperator.org/namespaces/liberator">
+    <author email="xxxx@xxxx.net">xxxxx</author>
+    <license>New BSD License</license>
+    <project name="Vimperator" minVersion="3.0"/>
+    <p></p>
+    <item>
+      <tags>:hoge</tags>
+      <spec>:hoge</spec>
+      <description><p></p></description>
+    </item>
+  </plugin>
+</>;
 // }}}
+
 
 (function () {
   // XXX 以下は実行しないよ。
