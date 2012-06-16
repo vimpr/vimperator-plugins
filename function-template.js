@@ -43,11 +43,15 @@ let INFO =
     <author email="xxxx@xxxx.net">xxxxx</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
-    <p></p>
+    <p>
+      This is the Sample Plugin
+    </p>
     <item>
       <tags>:hoge</tags>
-      <spec>:hoge</spec>
-      <description><p></p></description>
+      <spec>:hoge <oa>-opt1=<a>val1</a></spec>
+      <description><p>
+        Description for Command
+      </p></description>
     </item>
   </plugin>
   <plugin name="XXXX" version="1.0.0"
@@ -58,11 +62,15 @@ let INFO =
     <author email="xxxx@xxxx.net">xxxxx</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
-    <p></p>
+    <p>
+      サンプル用のプラグインだよ
+    </p>
     <item>
       <tags>:hoge</tags>
-      <spec>:hoge</spec>
-      <description><p></p></description>
+      <spec>:hoge <oa>-opt1=<a>val1</a></spec>
+      <description><p>
+        コマンドの説明
+      </p></description>
     </item>
   </plugin>
 </>;
