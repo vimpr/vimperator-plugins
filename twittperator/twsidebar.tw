@@ -237,8 +237,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
           type: 'favorite'
         };
         appendTweet(t, 'home', streamName);
-        appendTweet(t, 'debug', streamName);
-        Config.sound.debug.play();
       }
     } catch (e) {
       liberator.log(e);
