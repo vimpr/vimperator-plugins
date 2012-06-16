@@ -48,10 +48,21 @@ let INFO =
     </p>
     <item>
       <tags>:hoge</tags>
-      <spec>:hoge <oa>-opt1=<a>val1</a></spec>
+      <spec>:hoge <oa>-opt1=<a>val1</a></oa></spec>
       <description><p>
         Description for Command
-      </p></description>
+      </p>
+      <code><![CDATA[
+javascript<<EOM
+liberator.globalVariables.this_is_sample = [{
+    neko_tails: 2,
+    neko_eyes: 2,
+    neko_legs: 4,
+    neko_head: 1
+  }];
+EOM
+      ]]></code>
+      </description>
     </item>
   </plugin>
   <plugin name="XXXX" version="1.0.0"
@@ -67,10 +78,21 @@ let INFO =
     </p>
     <item>
       <tags>:hoge</tags>
-      <spec>:hoge <oa>-opt1=<a>val1</a></spec>
+      <spec>:hoge <oa>-opt1=<a>val1</a></oa></spec>
       <description><p>
         コマンドの説明
-      </p></description>
+      </p>
+      <code><![CDATA[
+javascript<<EOM
+liberator.globalVariables.this_is_sample = [{
+    neko_tails: 2,
+    neko_eyes: 2,
+    neko_legs: 4,
+    neko_head: 1
+  }];
+EOM
+      ]]></code>
+      </description>
     </item>
   </plugin>
 </>;
@@ -123,7 +145,7 @@ let INFO =
       subCommands: [
         new Command(
           ['subA'],
-          'Sub command A'
+          'Sub command A',
           function (args) {
             // addUserCommand のと同じ
           },
@@ -133,7 +155,7 @@ let INFO =
         ),
         new Command(
           ['subB'],
-          'Sub command B'
+          'Sub command B',
           function (args) { },
           {}
         )
