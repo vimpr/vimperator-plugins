@@ -66,7 +66,7 @@ let INFO =
     'n',
     'about:newtab completer',
     function (context, args) {
-      context.title = ['URL', 'Title'];
+      context.title = ['about:newtab', 'Title'];
       context.filters = [CompletionContext.Filter.textAndDescription];
       context.completions = [
         [t.url, t.title]
