@@ -23,7 +23,7 @@
     }
 
     function requirePrefix (s) {
-        if (!s.trim())
+        if (!s)
           return false;
         let validators = [hasMultipleWords, isWord, isIPAddress, hasScheme, hasTLD];
         return !(validators.some(function(validator) { return validator(s); }));
