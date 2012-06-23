@@ -1,0 +1,24 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_copy = 1
+ *
+ */
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['copy'],
+      description: "Copy a tweet",
+      action: function(arg) {
+        util.copyToClipboard(arg);
+      },
+      timelineComplete: true,
+      completer: TW.Completers.text(function(s) s.id)
+    })
+  );
+})();
+
+// vim: set et fdm=syntax fenc= ft=javascript sts=2 sw=2 ts=2 :
+
