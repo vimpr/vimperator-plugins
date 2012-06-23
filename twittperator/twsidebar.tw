@@ -48,7 +48,12 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     dontStop: true,
 
     // サイドバーが閉じていても、こっそり開始しておく
-    silentStart: false
+    silentStart: false,
+
+    // 配列かオブジェクトを返すと、変更できる。
+    modifier: function (msg, tab, streamName) {
+      return [msg, tab, streamName];
+    }
   };
 
   // 日本語判定
@@ -157,6 +162,15 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
     function append (t, tab, streamName) {
       tab = tab || 'home';
+
+      let modified = Config.modifier && Config.modifier(t, tab, streamName);
+      if (modified) {
+        if (modified instanceof Array) {
+          [t, tab, streamName] = modified;
+        } else {
+          t = modified;
+        }
+      }
 
       let now = JSON.stringify({name: t.name, text: t.text, tab: tab});
       if (latest === now) {
