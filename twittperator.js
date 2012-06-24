@@ -39,6 +39,7 @@ let INFO =
     <h2>Command</h2>
       - Use completion for comfort.
     <item>
+      <tags><![CDATA[:twittperator :tw]]></tags>
       <spec>:tw<oa>ittperator</oa> -getPIN</spec>
       <description>
         <p>Opens the page to authorize Twittperator and get your PIN from Twitter.</p>
@@ -188,6 +189,7 @@ let INFO =
     <h2>Command</h2>
       - 適当に補完しましょう。
     <item>
+      <tags><![CDATA[:twittperator :tw]]></tags>
       <spec>:tw<oa>ittperator</oa> -getPIN</spec>
       <description>
         <p>PINコード取得ページを開きます。</p>
