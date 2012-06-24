@@ -51,6 +51,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     silentStart: false,
 
     // 配列かオブジェクトを返すと、変更できる。
+    // 文字列 "reject" を返すと、そもそもツイートが表示されなくなる。
     modifier: function (msg, tab, streamName) {
       return [msg, tab, streamName];
     }
@@ -167,6 +168,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       if (modified) {
         if (modified instanceof Array) {
           [t, tab, streamName] = modified;
+        } if (modified === 'reject') {
+          return;
         } else {
           t = modified;
         }
