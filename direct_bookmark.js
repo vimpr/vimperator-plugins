@@ -796,6 +796,8 @@ for Migemo search: require XUL/Migemo Extension
                           if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
                 }
 
+                let url = arg["-u"] || buffer.URL;
+
                 context.fork('UserTags', 0, context, function(context){
                     context.title = ['User Tags', 'User Tags'];
 
@@ -807,20 +809,19 @@ for Migemo search: require XUL/Migemo Extension
                     };
 
                     /*
-                     * XXX: Should recognize --url option?
                      * TODO: Complete --url argument like :open
                      */
-                    if (buffer.URL == lastURL){
+                    if (url == lastURL){
                         if (done) {
                             onComplete(lastUserTags);
                         } else {
                             context.incomplete = true;
                         }
                     } else {
-                        lastURL = buffer.URL;
+                        lastURL = url;
                         context.incomplete = true;
                         done = false;
-                        getUserTags(buffer.URL, function (tags) onComplete(tags));
+                        getUserTags(url, function (tags) onComplete(tags));
                     }
                 });
 
