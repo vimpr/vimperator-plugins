@@ -97,6 +97,9 @@ let INFO =
       value = parseFloat(value);
       elem.volume = Math.min(value > 1 ? value / 100 : value, 100);
     },
+    fullscreen: function (elem) {
+      elem.mozRequestFullScreen();
+    },
     seek: function (elem, value) {
       elem.currentTime = timeCodeToSec(value);
     }
