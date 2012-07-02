@@ -720,55 +720,57 @@ for Migemo search: require XUL/Migemo Extension
         }, {}, true);
     // Add :sbm, :sbmo {{{
     {
-        let action = function(arg){
-            var targetServices = useServicesByPost;
-            var url = liberator.modules.buffer.URL;
+        let makeAction = function(withUrl) {
+            return function(arg){
+                var targetServices = useServicesByPost;
+                var url = liberator.modules.buffer.URL;
 
-            if (arg["-s"]) targetServices = arg["-s"];
-            if (arg[0]) url = arg[0];
-            comment = arg.literalArg;
+                if (arg["-s"]) targetServices = arg["-s"];
+                if (arg[0] && withUrl) url = arg[0];
+                comment = arg.literalArg;
 
-            var tags = [];
-            var re = /\[([^\]]+)\]([^\[].*)?/g;
+                var tags = [];
+                var re = /\[([^\]]+)\]([^\[].*)?/g;
 
-            var d = new Deferred();
-            var first = d;
+                var d = new Deferred();
+                var first = d;
 
-            if(/^\[[^\]]+\]/.test(comment)){
-                var tag, text;
-                while((tag = re.exec(comment))){
-                    [, tag, text] = tag;
-                    tags.push(tag);
+                if(/^\[[^\]]+\]/.test(comment)){
+                    var tag, text;
+                    while((tag = re.exec(comment))){
+                        [, tag, text] = tag;
+                        tags.push(tag);
+                    }
+                    comment = text || '';
                 }
-                comment = text || '';
-            }
 
-            tags.forEach(function (t) __context__.tags.add(t));
+                tags.forEach(function (t) __context__.tags.add(t));
 
-            targetServices.split(/\s*/).forEach(function(service){
-                var user, password, currentService = services[service] || null;
-                [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
-                d = d.next(function() currentService.poster(
-                    user,password,
-                    isNormalize ? getNormalizedPermalink(url) : url,getTitleByURL(url),
-                    comment,tags
-                    ));
-                if(echoType == "multiline") {
+                targetServices.split(/\s*/).forEach(function(service){
+                    var user, password, currentService = services[service] || null;
+                    [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
+                    d = d.next(function() currentService.poster(
+                        user,password,
+                        isNormalize ? getNormalizedPermalink(url) : url,getTitleByURL(url),
+                        comment,tags
+                        ));
+                    if(echoType == "multiline") {
+                        d = d.next(function(){
+                            liberator.echo("[" + services[service].description + "] post completed.");
+                        });
+                    }
+                    d = d.error(function() {
+                        liberator.echoerr(services[service].description + ": failed");
+                    });
+                });
+                if(echoType == "simple") {
                     d = d.next(function(){
-                        liberator.echo("[" + services[service].description + "] post completed.");
+                        liberator.echo("post completed.");
                     });
                 }
-                d = d.error(function() {
-                    liberator.echoerr(services[service].description + ": failed");
-                });
-            });
-            if(echoType == "simple") {
-                d = d.next(function(){
-                    liberator.echo("post completed.");
-                });
-            }
-            d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
-            setTimeout(function(){first.call();},0);
+                d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
+                setTimeout(function(){first.call();},0);
+            };
         };
 
         let completer = let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
@@ -850,13 +852,13 @@ for Migemo search: require XUL/Migemo Extension
         };
 
         liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark (Current Buffer)",
-            action,
+            makeAction(false),
             {literal: 0, completer: completer, options: options},
             true
         );
 
         liberator.modules.commands.addUserCommand(['sbmo[ther]'],"Post to Social Bookmark",
-            action,
+            makeAction(true),
             {literal: 1, completer: urlCompleter, options: options},
             true
         );
