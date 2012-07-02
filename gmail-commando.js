@@ -1,5 +1,5 @@
 /* NEW BSD LICENSE {{{
-Copyright (c) 2010-2011, anekos.
+Copyright (c) 2010-2012, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -234,16 +234,15 @@ let INFO =
 
     get labels() A(this.doc.querySelectorAll('a.n0')).filter(function (it) (/#label/.test(it.href))),
 
-    // 入力欄 と 検索ボタンは Buzz の有効無効によって ID が変わる
-    get input() this.doc.querySelector('input.w-as1.nr'),
+    get input() this.doc.querySelector('input.gbqfif'),
 
-    get searchButton() this.doc.querySelector('div.J-Zh-I.J-J5-Ji.L3.J-Zh-I-Js-Zq'),
+    get searchButton() this.doc.querySelector('button.gbqfb'),
 
-    get translateButton () (this.mail && this.mail.querySelector('tr > td.SA > .iL.B9')),
-    get translateButtons () A(this.doc.querySelectorAll('tr > td.SA > .iL.B9')),
+    get translateButton () (this.mail && this.mail.querySelector('div.adJ > .B9.J-J5-Ji')),
+    get translateButtons () A(this.doc.querySelectorAll('div.adJ > .B9.J-J5-Ji')),
 
     get mail ()
-      let (es = this.mails.filter(function (it) !it.querySelector('.hF.hH > img.hG')))
+      let (es = this.mails.filter(function (it) !it.querySelector('.ads > .hH')))
         (es.length && es[0]),
     get mails () A(this.doc.querySelectorAll('.h7')),
 
