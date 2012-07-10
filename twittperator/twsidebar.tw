@@ -38,6 +38,12 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     // リストの最大保持数
     listMax: 100,
 
+    // リストの表示順（昇順／降順）
+    listAscendingOrder: true,
+
+    // ツイートされる度に最新ツイート位置までスクロールする
+    listAutoScroll: true,
+
     // 日本語だけ for filter stream
     jpOnly: true,
 
@@ -189,13 +195,47 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       let cntr = getSidebarWindow().document.getElementById('tw-anekos-sb-' + tab + '-list');
       let dom = xmlToDom(messageToXML(t));
       let repDom = dom.cloneNode(true);
+      let visibleIndex = cntr.getIndexOfFirstVisibleRow();
       let len = cntr.itemCount;
-      cntr.appendChild(repDom);
+      if (Config.listAscendingOrder) {
+        cntr.appendChild(repDom);
+      } else {
+        cntr.insertBefore(repDom, cntr.firstChild);
+        visibleIndex += 1;
+      }
       latestNode = repDom;
 
-      cntr.scrollToIndex(len - 1);
-      if (len > Config.listMax)
-        cntr.removeChild(cntr.firstChild);
+      if (len > Config.listMax) {
+        if (Config.listAscendingOrder) {
+          cntr.removeChild(cntr.firstChild);
+          visibleIndex -= 1;
+        } else {
+          cntr.removeChild(cntr.lastChild);
+        }
+        len -= 1;
+      }
+
+      if (Config.listAutoScroll) {
+        if (Config.listAscendingOrder) {
+          cntr.scrollToIndex(len - 1);
+        } else {
+          cntr.scrollToIndex(0);
+        }
+      } else {
+        if (Config.listAscendingOrder) {
+          if (len - visibleIndex < 10) { // 10 = 絶妙な値！これでいいのか！
+            cntr.scrollToIndex(len - 1);
+          } else {
+            cntr.scrollToIndex(visibleIndex);
+          }
+        } else {
+          if (visibleIndex < 3) { // 3 = 絶妙な値！これでいいのか！
+            cntr.scrollToIndex(0);
+          } else {
+            cntr.scrollToIndex(visibleIndex);
+          }
+        }
+      }
     }
 
     return append;
