@@ -1031,7 +1031,7 @@ Thanks:
     fetch: function (filepath) {
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
-      let cargs = content.wrappedJSObject.yt.config_.PLAYER_CONFIG.args;
+      let cargs = content.wrappedJSObject.yt.playerConfig.args;
       cargs.url_encoded_fmt_stream_map.split(',')[0].split('&').forEach(function(x) {
         let [key, val] = x.split('=');
         if (key == 'url') {
@@ -1160,7 +1160,7 @@ Thanks:
     fetch: function (filepath) {
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
       // FIXME 一番初めが最高画質だと期待
-      let cargs = content.wrappedJSObject.yt.config_.PLAYER_CONFIG.args;
+      let cargs = content.wrappedJSObject.yt.playerConfig.args;
       cargs.url_encoded_fmt_stream_map.split(',')[0].split('&').forEach(function(x) {
         let [key, val] = x.split('=');
         if (key == 'url') {
