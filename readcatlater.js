@@ -147,12 +147,11 @@ let PLUGIN_INFO =
   const history = Cc["@mozilla.org/browser/nav-history-service;1"].
                     getService(Ci.nsINavHistoryService);
 
-  let [folderId, folderGUID] = [prefs.get('folderId', false), prefs.get('folderGUID', false)];
+  let folderId = prefs.get('folderId', false);
 
-  if (!(folderGUID && folderId && (folderId == bookmarks.getItemIdForGUID(folderGUID)))) {
+  if (!folderId) {
     folderId = bookmarks.createFolder(bookmarks.toolbarFolder, FOLDER_NAME, bookmarks.DEFAULT_INDEX);
     prefs.set('folderId', folderId);
-    prefs.set('folderGUID', bookmarks.getItemGUID(folderId));
   }
 
   /*
