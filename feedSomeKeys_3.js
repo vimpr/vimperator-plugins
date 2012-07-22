@@ -692,7 +692,7 @@ let INFO = <>
     {
       literal: 0,
       options: [
-        [['-modes', '-m'], commands.OPTION_LIST]
+        [['-modes', '-m'], commands.OPTION_LIST],
         [['-urls', '-u'], commands.OPTION_STRING, regexpValidator, urlCompleter({})],
         [['-ignoreurls', '-iu'], commands.OPTION_NOARG]
       ],
