@@ -172,7 +172,7 @@ EOM
   options.add(
     ['names'],
     'description',
-    'string', // type: string, stringlist, charlist, boolean
+    'string', // type: string, stringlist, charlist, boolean, number
     'defaultValue',
     {
       scope: Option.SCOPE_GLOBAL, // <- default
@@ -186,6 +186,11 @@ EOM
         return value;
       },
       completer: function () {
+        return [
+          ["value1", "description one"],
+          ["value2", "description two"],
+          ["value3", "description three"],
+        ];
       },
       validator: function () {
       },
