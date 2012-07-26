@@ -643,6 +643,20 @@ for Migemo search: require XUL/Migemo Extension
 
         first.call([]);
     }
+    function getTitleByURL(url) {
+        if (url === liberator.modules.buffer.URL)
+            return liberator.modules.buffer.title;
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url, false);
+        xhr.send(null);
+
+        let html = parseHTML(xhr.responseText);
+        let title = getFirstElementByXPath("//title/text()", html);
+
+        // FIXME: encoding (see charset and must I convert...?)
+        return title.nodeValue;
+    }
     liberator.modules.commands.addUserCommand(['btags'],"Update Social Bookmark Tags",
         function(arg){setTimeout(function(){getTagsAsync().call([])},0)}, {}, true);
     liberator.modules.commands.addUserCommand(['bentry'],"Goto Bookmark Entry Page",
@@ -690,125 +704,147 @@ for Migemo search: require XUL/Migemo Extension
             }).join('<br />');
             liberator.echo(html, true);
         }, {}, true);
-    liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark",
-        function(arg){
-            var targetServices = useServicesByPost;
+    // Add :sbm, :sbmo {{{
+    {
+        let makeAction = function(withUrl) {
+            return function(arg){
+                var targetServices = useServicesByPost;
+                var url = liberator.modules.buffer.URL;
 
-            if (arg["-s"]) targetServices = arg["-s"];
-            var comment = arg.literalArg;
+                if (arg["-s"]) targetServices = arg["-s"];
+                if (arg[0] && withUrl) url = arg[0];
+                var comment = arg.literalArg;
 
-            var tags = [];
-            var re = /\[([^\]]+)\]([^\[].*)?/g;
+                var tags = [];
+                var re = /\[([^\]]+)\]([^\[].*)?/g;
 
-            var d = new Deferred();
-            var first = d;
+                var d = new Deferred();
+                var first = d;
 
-            if(/^\[[^\]]+\]/.test(comment)){
-                var tag, text;
-                while((tag = re.exec(comment))){
-                    [, tag, text] = tag;
-                    tags.push(tag);
+                if(/^\[[^\]]+\]/.test(comment)){
+                    var tag, text;
+                    while((tag = re.exec(comment))){
+                        [, tag, text] = tag;
+                        tags.push(tag);
+                    }
+                    comment = text || '';
                 }
-                comment = text || '';
-            }
 
-            tags.forEach(function (t) __context__.tags.add(t));
+                tags.forEach(function (t) __context__.tags.add(t));
 
-            var url = liberator.modules.buffer.URL;
-            var title = liberator.modules.buffer.title;
-
-            targetServices.split(/\s*/).forEach(function(service){
-                var user, password, currentService = services[service] || null;
-                [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
-                d = d.next(function() currentService.poster(
-                    user,password,
-                    isNormalize ? getNormalizedPermalink(url) : url,title,
-                    comment,tags
-                    ));
-                if(echoType == "multiline") {
+                targetServices.split(/\s*/).forEach(function(service){
+                    var user, password, currentService = services[service] || null;
+                    [user,password] = currentService.account ? getUserAccount.apply(currentService,currentService.account) : ["", ""];
+                    d = d.next(function() currentService.poster(
+                        user,password,
+                        isNormalize ? getNormalizedPermalink(url) : url,getTitleByURL(url),
+                        comment,tags
+                        ));
+                    if(echoType == "multiline") {
+                        d = d.next(function(){
+                            liberator.echo("[" + services[service].description + "] post completed.");
+                        });
+                    }
+                    d = d.error(function() {
+                        liberator.echoerr(services[service].description + ": failed");
+                    });
+                });
+                if(echoType == "simple") {
                     d = d.next(function(){
-                        liberator.echo("[" + services[service].description + "] post completed.");
+                        liberator.echo("post completed.");
                     });
                 }
-                d = d.error(function() {
-                    liberator.echoerr(services[service].description + ": failed");
-                });
-            });
-            if(echoType == "simple") {
-                d = d.next(function(){
-                    liberator.echo("post completed.");
-                });
+                d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
+                setTimeout(function(){first.call();},0);
+            };
+        };
+
+        let completer = let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
+            function matchPosition (e){
+                let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
+                switch (m) {
+                case 'infix': return e;
+                case 'suffix': return e + "$";
+                }
+                return "^" + e;
             }
-            d.error(function(e){liberator.echoerr("direct_bookmark.js: Exception throwed! " + e);liberator.log(e);});
-            setTimeout(function(){first.call();},0);
-        },{
-            literal: 0,
-            completer: let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
-                function matchPosition (e){
-                    let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
-                    switch (m) {
-                    case 'infix': return e;
-                    case 'suffix': return e + "$";
-                    }
-                    return "^" + e;
-                }
 
-                function set (context, tags) {
-                    let filter = context.filter;
-                    var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
-                    var expr = XMigemoCore && isUseMigemo ? "(" + XMigemoCore.getRegExp(match_result[2]) + ")"
-                                                          : match_result[2];
-                    var m = new RegExp(matchPosition(expr),'i');
+            function set (context, tags) {
+                let filter = context.filter;
+                var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
+                var expr = XMigemoCore && isUseMigemo ? "(" + XMigemoCore.getRegExp(match_result[2]) + ")"
+                                                      : match_result[2];
+                var m = new RegExp(matchPosition(expr),'i');
 
-                    context.advance( match_result[1].length );
+                context.advance( match_result[1].length );
 
+                context.incomplete = false;
+                context.completions =
+                    [ ["[" + tag + "]","Tag"]
+                      for each (tag in tags)
+                      if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+            }
+
+            let url = arg[0] || buffer.URL;
+            liberator.log(url);
+
+            context.fork('UserTags', 0, context, function(context){
+                context.title = ['User Tags', 'User Tags'];
+
+                onComplete = function(tags){
+                    done = true;
+                    lastUserTags = tags;
                     context.incomplete = false;
-                    context.completions =
-                        [ ["[" + tag + "]","Tag"]
-                          for each (tag in tags)
-                          if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                    set(context, tags);
+                };
+
+                if (url == lastURL){
+                    if (done) {
+                        onComplete(lastUserTags);
+                    } else {
+                        context.incomplete = true;
+                    }
+                } else {
+                    lastURL = url;
+                    context.incomplete = true;
+                    done = false;
+                    getUserTags(url, function (tags) onComplete(tags));
                 }
+            });
 
-                context.fork('UserTags', 0, context, function(context){
-                    context.title = ['User Tags', 'User Tags'];
+            context.fork('MyTags', 0, context, function(context, arg){
+                context.title = ['My Tag','Description'];
 
-                    onComplete = function(tags){
-                        done = true;
-                        lastUserTags = tags;
-                        context.incomplete = false;
-                        set(context, tags);
-                    };
+                if(__context__.tags.isEmpty){
+                    context.incomplete = true;
+                    getTagsAsync(set.bind(null, context)).call([]);
+                } else {
+                    set(context, __context__.tags);
+                }
+            });
+        };
 
-                    if (buffer.URL == lastURL){
-                        if (done) {
-                            onComplete(lastUserTags);
-                        } else {
-                            context.incomplete = true;
-                        }
-                    } else {
-                        lastURL = buffer.URL;
-                        context.incomplete = true;
-                        done = false;
-                        getUserTags(buffer.URL, function (tags) onComplete(tags));
-                    }
-                });
+        let options = [ [['-s','-service'], liberator.modules.commands.OPTION_STRING] ];
 
-                context.fork('MyTags', 0, context, function(context, arg){
-                    context.title = ['My Tag','Description'];
+        let urlCompleter = function(context, args){
+            if (args.length <= 1) {
+                return completion.url(context, 'hsl');
+            } else {
+                return completer(context, args);
+            }
+        };
 
-                    if(__context__.tags.isEmpty){
-                        context.incomplete = true;
-                        getTagsAsync(set.bind(null, context)).call([]);
-                    } else {
-                        set(context, __context__.tags);
-                    }
-                });
-            },
-            options: [
-                [['-s','-service'], liberator.modules.commands.OPTION_STRING],
-            ]
-        },
-        true
-    );
+        liberator.modules.commands.addUserCommand(['sbm'],"Post to Social Bookmark (Current Buffer)",
+            makeAction(false),
+            {literal: 0, completer: completer, options: options},
+            true
+        );
+
+        liberator.modules.commands.addUserCommand(['sbmo[ther]'],"Post to Social Bookmark",
+            makeAction(true),
+            {literal: 1, completer: urlCompleter, options: options},
+            true
+        );
+    } // }}}
 })();
 // vim:sw=4 ts=4 et:
