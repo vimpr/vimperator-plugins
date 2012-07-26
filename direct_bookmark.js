@@ -67,8 +67,6 @@ for Migemo search: require XUL/Migemo Extension
       Arguments
           -s,-service: default:"hdl"
               Specify target SBM services to post
-          -u,--url: default:Current buffer URL
-              Specify target SBM services to post
 ||<
 === :bentry ===
 >||
@@ -812,9 +810,6 @@ for Migemo search: require XUL/Migemo Extension
                     set(context, tags);
                 };
 
-                /*
-                 * TODO: Complete --url argument like :open
-                 */
                 if (url == lastURL){
                     if (done) {
                         onComplete(lastUserTags);
