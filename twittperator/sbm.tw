@@ -1,0 +1,34 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_sbm = 1
+ * let g:twittperator_screen_sbm_default_tags = "[Twitter]"
+ */
+
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['sbm'],
+      description: "Direct SBM",
+      action: function(arg) {
+        let url = 'https://twitter.com/' + arg;
+        setTimeout(
+          function () {
+            let tags = liberator.globalVariables.twittperator_screen_sbm_default_tags || '';
+
+            commandline.open(
+              '',
+              'sbmother ' + url + ' ' + tags,
+              modes.EX
+            );
+          },
+          0
+        );
+      },
+      timelineComplete: true,
+      completer: TW.Completers.statusPage(function(s) s.id)
+    })
+  );
+})();
