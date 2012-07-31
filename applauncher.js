@@ -55,7 +55,6 @@ liberator.plugins.AppLauncher = (function(){
       ['', 'other'].forEach(function (suffix) {
         commands.addUserCommand(['applaunch' + suffix, 'runapp' + suffix], 'Run Defined Application',
           function(arg){
-            liberator.log(arg)
             let app = (typeof arg.string == 'undefined' ? arg : arg.literalArg);
             self.launch(app, suffix && arg[0]);
           }, {
