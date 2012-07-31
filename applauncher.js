@@ -52,23 +52,30 @@ liberator.plugins.AppLauncher = (function(){
     },
     registerCommand: function(){
       var self = this;
-      commands.addUserCommand(['applaunch', 'runapp'], 'Run Defined Application',
-        function(arg){
-          arg = (typeof arg.string == 'undefined' ? arg : arg.literalArg);
-          self.launch(arg);
-        }, {
-          literal: 0,
-          completer: function(context, arg){
-            var filter = context.filter;
-            context.title = [ 'Name', 'Description'];
-            if (!filter){
-              context.completions = completer;
-              return;
+      ['', 'other'].forEach(function (suffix) {
+        commands.addUserCommand(['applaunch' + suffix, 'runapp' + suffix], 'Run Defined Application',
+          function(arg){
+            liberator.log(arg)
+            let app = (typeof arg.string == 'undefined' ? arg : arg.literalArg);
+            self.launch(app, suffix && arg[0]);
+          }, {
+            literal: suffix ? 1 : 0,
+            completer: function(context, arg){
+              if (suffix && arg.length <= 1) {
+                return completion.url(context, 'hsl');
+              }
+
+              var filter = context.filter;
+              context.title = [ 'Name', 'Description'];
+              if (!filter){
+                context.completions = completer;
+                return;
+              }
+              filter = filter.toLowerCase();
+              context.completions = completer.filter( function(el) el[0].toLowerCase().indexOf(filter) == 0);
             }
-            filter = filter.toLowerCase();
-            context.completions = completer.filter( function(el) el[0].toLowerCase().indexOf(filter) == 0);
-          }
-        }, true);
+          }, true);
+      });
     },
     buildMenu: function(){
       var self = this;
@@ -99,12 +106,18 @@ liberator.plugins.AppLauncher = (function(){
       },
       TITLE: function() buffer.title
     },
-    launch: function(appName){
+    launch: function(appName, url){
       var self = this;
+      let vars = self.variables;
+      if (url) {
+        vars = Object.create(vars);
+        vars.URL = function() url;
+      }
+
       appName = appName.replace(/\\+/g, '');                // fix commandline input ' ' -> '\ '
       settings.some( function([name, app, args]){
         args = args instanceof Array ? args : args ? [args] : [];
-        args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) self.variables[name]()) );
+        args = args.map( function( val ) val.replace(/%([A-Z]+)%/g, function( _, name ) vars[name]()) );
         if (defaultCharset){
           UConv.charset = defaultCharset;
           args = args.map( function( val ) UConv.ConvertFromUnicode(val) );
