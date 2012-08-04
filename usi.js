@@ -43,7 +43,12 @@ let INFO =
     <author email="anekos@snca.net">anekos</author>
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
-    <p>See ( ◕ ‿‿ ◕ ) the completions.</p>
+    <h3>Setup</h3>
+    <p>
+      At first of use, just execute below command and complete authentication.
+      <code>:usi</code>
+    </p>
+    <p>and see ( ◕ ‿‿ ◕ ) the completions.</p>
     <item>
       <tags>:usi</tags>
       <spec>:usi</spec>
