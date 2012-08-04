@@ -251,6 +251,10 @@ let INFO =
     indigo: '#4b0082',
   };
 
+  function className (name) {
+    return 'anekos-migemized-find-' +name;
+  }
+
   let colorsCompltions = [
     [name, <span style={'color: ' + name}>{'\u25a0 ' + value}</span>]
     for each ([name, value] in Iterator(colors))
@@ -389,6 +393,7 @@ let INFO =
     highlight: function (target, color, doScroll, setRemover) {
       let span = this.document.createElement('span');
 
+      span.setAttribute('class', className('highlight'));
       span.setAttribute('style', this.coloredStyle(color));
       target.range.surroundContents(span);
 
