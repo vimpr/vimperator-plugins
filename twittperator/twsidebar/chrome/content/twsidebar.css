@@ -11,6 +11,10 @@
   padding-left: 2px;
 }
 
+.tw-anekos-sb-plugin-tweet-protected {
+  background-color: lightgray !important;
+}
+
 .tw-anekos-sb-plugin-tweet-DM-my {
   background-color: darkred !important;
   color: white !important;
