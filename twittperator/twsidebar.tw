@@ -126,8 +126,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       let xml;
       let sbWidth = getSidebarWindow().document.width;
       let richlistitemClasses = [className('tweet-panel'), className('tweet-' + t.type)];
-      if (t.protected)
-        richlistitemClasses.push(className('tweet-protected'));
+      let nameClass = t.protected ? className('tweet-protected') : '';
       xml =
         <richlistitem
           class={richlistitemClasses.join(' ')}
@@ -142,7 +141,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             </vbox>
             <vbox style={"width: " + (sbWidth - 48 - 35) + "px !important"}>
               <hbox>
-                <label style="font-weight: bold">{escapeBreakers(t.name)}</label>
+                <label class={nameClass} style="font-weight: bold">{escapeBreakers(t.name)}</label>
                 <spacer flex="1"/>
                 <label>{t.sub || ''}</label>
               </hbox>
