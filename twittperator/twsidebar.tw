@@ -129,6 +129,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       let nameClass = t.protected ? className('tweet-protected') : '';
       xml =
         <richlistitem
+          id={t.id}
           class={richlistitemClasses.join(' ')}
           style={[
             "font-size: " + px(Config.fontSize - (t.text.length > 70 ? 2 : 0)),
@@ -316,6 +317,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
     if (msg.direct_message) {
       t = {
+        id: msg.id,
         name: msg.direct_message.sender.screen_name,
         img: msg.direct_message.sender.profile_image_url,
         text: msg.direct_message.text,
@@ -324,6 +326,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       };
     } else if (msg.retweeted_status) {
       t = {
+        id: msg.id,
         name: my ? msg.user.screen_name : msg.retweeted_status.user.screen_name,
         img: my ? msg.user.profile_image_url : msg.retweeted_status.user.profile_image_url,
         text: msg.retweeted_status.text,
@@ -367,6 +370,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       dummy = true;
     } else if (msg.user && msg.text && msg.in_reply_to_screen_name == screenName) {
       t = {
+        id: msg.id,
         name: msg.user.screen_name,
         img: msg.user.profile_image_url,
         text: msg.text,
@@ -374,6 +378,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       };
     } else if (msg.user && msg.text) {
       t = {
+        id: msg.id,
         name: msg.user.screen_name,
         img: msg.user.profile_image_url,
         text: msg.text,
