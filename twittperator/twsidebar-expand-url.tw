@@ -1,0 +1,77 @@
+(function () {
+  let Config = liberator.globalVariables.twittperator_sidebar_expand_url_config || {
+    host: ['ff.im', 'is.gd', 't.co', 'bit.ly', 'j.mp', 'htn.to', 'goo.gl', 'ow.ly'],
+    filter: function (url) {
+      return url.length > 60 ? url.substr(0, 60) + '...' : url;
+    }
+  }
+
+  function isShorten(uri)
+    Config.host.indexOf(uri.host) >= 0 ? true : false;
+
+  function expandURL (url, callback) {
+    let uri = util.createURI(url);
+    if (isShorten(uri)) {
+      let xhr = new XMLHttpRequest;
+      xhr.open('HEAD', uri.spec, true);
+      xhr.setRequestHeader('User-Agent', 't.co'); // t.co対策
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+          callback(xhr.channel.URI.spec, url);
+        }
+      }
+      xhr.send();
+    } else {
+      callback(url, false);
+    }
+  }
+
+  // twsidebar.twの直接呼びたい
+  function escapeBreakers (text)
+    text.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]+/g, function(c) uneval(c));
+
+  function sidebar ()
+    document.getElementById('sidebar')._contentWindow.document;
+
+  function twsText (id)
+    sidebar().getElementById(id).childNodes[1].childNodes[3].childNodes[3].firstChild;
+
+  function scroll () {
+    let tws = sidebar().getElementById('tw-anekos-sb-home-list');
+    let len = tws.itemCount;
+    tws.scrollToIndex(len - 1);
+  }
+
+  function replaceURL (tweet, id, urls) {
+    for (let i in urls) {
+      let sUrl = urls[i].url;
+      expandURL(urls[i].expanded_url, function (eUrl , expand) {
+        tweet.text = tweet.text.replace(sUrl, eUrl);
+        let fUrl = expand ? sUrl : eUrl;
+        let interval = setInterval(function () {
+          if (twsText(id)) {
+            twsText(id).textContent = escapeBreakers(twsText(id).textContent.replace(fUrl, Config.filter(eUrl)));
+            scroll();
+            clearInterval(interval)
+          }
+        }, 100);
+      });
+    }
+  }
+
+  function onMsg (msg, raw) {
+    if (!msg.entities) { return; }
+    let tweet = (msg.retweeted_status) ? msg.retweeted_status : msg;
+    if (tweet.entities.urls[0]) {
+      replaceURL(tweet, msg.id, tweet.entities.urls);
+    }
+    if (tweet.entities.media && tweet.entities.media[0]) {
+      replaceURL(tweet, msg.id, tweet.entities.media);
+    }
+  }
+
+  plugins.twittperator.ChirpUserStream.addListener(onMsg);
+  plugins.twittperator.TrackingStream.addListener(onMsg);
+})();
+
+// vim: ft=javascript:
