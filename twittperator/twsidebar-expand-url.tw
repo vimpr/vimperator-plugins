@@ -47,6 +47,7 @@
       let sUrl = urls[i].url;
       expandURL(urls[i].expanded_url, function (eUrl , expand) {
         tweet.text = tweet.text.replace(sUrl, eUrl);
+        if (!sidebar().getElementById('tw-anekos-sb-home-list')) { return; }
         let fUrl = expand ? sUrl : eUrl;
         let interval = setInterval(function () {
           if (twsText(id)) {
