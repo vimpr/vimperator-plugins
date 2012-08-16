@@ -1770,6 +1770,9 @@ let INFO =
       }
       xhr.send(null);
     }, // }}}
+    getPluginNameFromFile: function(file) { // {{{
+      return file.leafName.replace(/\..*/, "");
+    }, // }}}
   }; // }}}
   let Twittperator = { // {{{
     activitySummary: function(id) { // {{{
@@ -1838,20 +1841,33 @@ let INFO =
         let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
           liberator.globalVariables["twittperator_plugin_" + name];
 
-      function loadPluginFromDir(checkGV) {
+      function loadPluginFromDir(checkGV, candidates) {
         return function(dir) {
           dir.readDirectory().forEach(function(file) {
-            if (/\.tw$/.test(file.path) && (!checkGV || isEnabled(file)))
-              Twittperator.sourceScriptFile(file);
+            if (/\.tw$/.test(file.path) && (!checkGV || isEnabled(file))) {
+              if (candidates) {
+                self._plugins.candidates[Utils.getPluginNameFromFile(file)] = file;
+              } else {
+                Twittperator.sourceScriptFile(file);
+              }
+            }
           });
         }
       }
 
+      let self = this;
+      this._plugins = {
+        candidates: {},
+        loaded: {}
+      };
+
       ChirpUserStream.clearPluginData();
       TrackingStream.clearPluginData();
 
-      io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true));
-      io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false));
+      for (let [, c] in Iterator([true, false])) {
+        io.getRuntimeDirectories("plugin/twittperator").forEach(loadPluginFromDir(true, c));
+        io.getRuntimeDirectories("twittperator").forEach(loadPluginFromDir(false, c));
+      }
     }, // }}}
     lookupUser: function(users) { // {{{
       function showUsersInfo(json) { // {{{
@@ -2082,31 +2098,39 @@ let INFO =
       });
     }, // }}}
     sourceScriptFile: function(file) { // {{{
-      // XXX 悪い子向けのハックです。すみません。 *.tw ファイルを *.js のように読み込みます。
-      let script = liberator.plugins.contexts[file.path];
+      let self = this;
 
-      let originalPath = file.path;
-      let hackedPath = originalPath.replace(/\.tw$/, ".js");
+      if (self._plugins.loaded[Utils.getPluginNameFromFile(file)])
+        return true;
 
-      let ugly = {
-        __noSuchMethod__: function (name, args) originalPath[name].apply(originalPath, args),
-        toString: function() {
-          function isFile (caller) {
-            if (!caller)
-              return false;
-            if (caller === io.File)
-              return true;
-            return isFile(caller.caller);
-          }
-          return isFile(arguments.callee.caller) ? originalPath : hackedPath;
-        }
-      };
+      let stdScript = liberator.plugins.contexts[file.path];
 
       try {
-        io.source(ugly, false);
+        let script = Script(file);
+
+        script.__context__.require = function (names) {
+          if (!(names instanceof Array))
+            names = [names];
+          names.forEach(function (name) {
+            if (self._plugins.loaded[name])
+              return;
+            let lib = self._plugins.candidates[name];
+            if (lib)
+              self.sourceScriptFile(lib);
+            else
+              throw "Not found twittperator plugin: " + name;
+          });
+        };
+
+        let uri = services.get("io").newFileURI(file);
+        let suffix = '?' + encodeURIComponent(services.get("UUID").generateUUID().toString());
+
+        liberator.loadScript(uri.spec + suffix, script);
+        self._plugins.loaded[Utils.getPluginNameFromFile(file)] = script;
+
       } finally {
-        if (script)
-          liberator.plugins[script.NAME] = script;
+        if (stdScript)
+          liberator.plugins[stdScript.NAME] = stdScript;
       }
     }, // }}}
     withProtectedUserConfirmation: function(check, actionName, action) { // {{{
