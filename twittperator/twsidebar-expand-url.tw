@@ -56,11 +56,13 @@ require('twsidebar');
       expandURL(urls[i].expanded_url, function (eUrl , expand) {
         tweet.text = tweet.text.replace(sUrl, eUrl);
         let fUrl = expand ? sUrl : eUrl;
-        let e = twsText(id);
-        if (e) {
-          e.textContent = escapeBreakers(e.textContent.replace(fUrl, Config.filter(eUrl)));
-          scroll();
-        }
+        setTimeout(function () {
+          let e = twsText(id);
+          if (e) {
+            e.textContent = escapeBreakers(e.textContent.replace(fUrl, Config.filter(eUrl)));
+            scroll();
+          }
+        }, 100);
       });
     }
   }
