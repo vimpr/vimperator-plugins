@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">外国為替換算</name>
   <description>for exchangeconvertion</description>
   <description lang="ja">為替換算をします</description>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -61,6 +61,8 @@ let PLUGIN_INFO =
         let g:umihara_default_source="USD"
         let g:umihara_default_target="JPY"
       ||<
+    == Require ==
+      _libly.js
   ]]></detail>
   <detail lang="ja"><![CDATA[
     == Usage ==
@@ -81,6 +83,8 @@ let PLUGIN_INFO =
           let g:umihara_default_source="USD"
           let g:umihara_default_target="JPY"
         ||<
+    == Require ==
+      _libly.js
   ]]></detail>
 </VimperatorPlugin>;
 // }}}
@@ -89,8 +93,6 @@ let PLUGIN_INFO =
 
   const defaultSource = liberator.globalVariables.umihara_default_source || 'USD';
   const defaultTarget = liberator.globalVariables.umihara_default_target || 'JPY';
-
-  const re = /<td nowrap>(\d+:\d+)<\/td><td>([\d,]+\.[\d,]+)<\/td><td><b>([\d,]+\.[\d,]+)<\/b><\/td><\/tr><\/table><\/div>/;
 
   const ContryCodes = [
     ['USD', '\u30a2\u30e1\u30ea\u30ab\u30c9\u30eb'],
@@ -146,18 +148,28 @@ let PLUGIN_INFO =
       from = defaultSource;
     if (to == '-')
       to = defaultTarget;
-    let url = 'http://quote.yahoo.co.jp/m5?a=' + value + '&s=' + from + '&t=' + to;
+    //let url = 'http://quote.yahoo.co.jp/m5?a=' + value + '&s=' + from + '&t=' + to;
+    let url = 'http://info.finance.yahoo.co.jp/exchange/convert/?a=' + value + '&s=' + from + '&t=' + to;
     var req = new XMLHttpRequest();
     req.open('GET', url);
     req.onreadystatechange = function (aEvt) {
       if (req.readyState == 4 && req.status == 200) {
-        let m = req.responseText.match(re);
-        if (m) {
+        let html = req.responseText;
+        let doc = plugins.libly.$U.createHTMLDocument(html);
+        liberator.log(doc);
+        let a = doc.querySelector('tbody.yjM > tr > td > a[href^="http://stocks"]');
+        if (a) {
+          let tr = a.parentNode.parentNode;
+          liberator.__tr = tr;
+          let toValue = tr.querySelectorAll('td')[3].textContent;
+          let rateTime = tr.querySelectorAll('td')[2].textContent.match(/([\d,]+\.[\d,]+).*(\d+:\d+)/);
+          let rate = rateTime[1];
+          let time = rateTime[2];
           let text = from + ' -> ' + to +
                      '\n ' + from + ': ' + value +
-                     '\n ' + to + ': ' + m[3] +
-                     '\n rate: ' + m[2] +
-                     '\n time: ' + m[1];
+                     '\n ' + to + ': ' + toValue +
+                     '\n rate: ' + rate +
+                     '\n time: ' + time;
           echo(text);
           if (clipboard) {
             resultBuffer += text + '\n';
