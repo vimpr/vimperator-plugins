@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="MigemizedFind" version="2.11.3"
+  <plugin name="MigemizedFind" version="2.11.4"
           href="http://vimpr.github.com/"
           summary="Search and Highlight with Migemo."
           lang="en-US"
@@ -44,7 +44,7 @@ let INFO =
     <license>New BSD License</license>
     <project name="Vimperator" minVersion="3.0"/>
   </plugin>
-  <plugin name="MigemizedFind" version="2.11.3"
+  <plugin name="MigemizedFind" version="2.11.4"
           href="http://vimpr.github.com/"
           summary="Migemo で検索 &amp; ハイライト"
           lang="ja"
@@ -731,5 +731,7 @@ let INFO =
     let limit = parseInt(liberator.globalVariables.migemized_find_history_limit || 100, 10);
     store.set('history', MF.history.slice(0, limit));
   };
+
+  __context__.migemized = migemized;
 
 })();
