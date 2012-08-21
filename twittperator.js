@@ -1628,6 +1628,7 @@ let INFO =
     return {
       start: start,
       stop: stop,
+      resetRestartCount: function () (restartCount = 0),
       addListener: function(func) listeners.push(func),
       removeListener: function(func) (listeners = listeners.filter(function(l) (l != func))),
       clearPluginData: clearPluginData
@@ -2681,6 +2682,9 @@ let INFO =
   let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1/statuses/filter.json" });
 
   let startStreams = function () {
+    ChirpUserStream.resetRestartCount();
+    TrackingStream.resetRestartCount();
+
     if (setting.useChirp){
       if(setting.allReplies)
         ChirpUserStream.start({"replies":"all"});
