@@ -26,7 +26,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Twittperator" version="1.18.0"
+  <plugin name="Twittperator" version="1.19.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -175,7 +175,7 @@ let INFO =
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.18.0"
+  <plugin name="Twittperator" version="1.19.0"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
@@ -2475,6 +2475,11 @@ let INFO =
       description: "Find people with the words.",
       action: function(arg) Twittperator.showUsersSeachResult(arg),
     }),
+    SubCommand({
+      command: ["restartstreams"],
+      description: "Restart streams",
+      action: function(arg) startStreams(),
+    }),
   ];
 
   SubCommands.add = function(subCmd) {
@@ -2675,6 +2680,19 @@ let INFO =
   let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
   let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1/statuses/filter.json" });
 
+  let startStreams = function () {
+    if (setting.useChirp){
+      if(setting.allReplies)
+        ChirpUserStream.start({"replies":"all"});
+      else
+        ChirpUserStream.start();
+    }
+
+    let trackWords = setting.trackWords || Store.get("trackWords");
+    if (trackWords)
+      TrackingStream.start({track: trackWords});
+  };
+
   // 公開オブジェクト
   __context__.OAuth = tw;
   __context__.ChirpUserStream = ChirpUserStream;
@@ -2689,20 +2707,7 @@ let INFO =
 
   Twittperator.loadPlugins();
 
-  liberator.registerObserver(
-    'enter',
-    function () {
-    if (setting.useChirp){
-      if(setting.allReplies)
-        ChirpUserStream.start({"replies":"all"});
-      else
-        ChirpUserStream.start();
-    }
-
-    let trackWords = setting.trackWords || Store.get("trackWords");
-    if (trackWords)
-      TrackingStream.start({track: trackWords});
-  });
+  liberator.registerObserver('enter', startStreams);
 
   __context__.onUnload = function() {
     Store.set("history", history);
