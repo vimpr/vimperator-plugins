@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.3.3"
+  <plugin name="usi.js" version="1.3.4"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -101,7 +101,7 @@ let INFO =
       get: function (key) let (v = store.get(key)) (v && v.value),
 
       set: function (key, value, age)
-        store.set(key, {value: value, expire: new Date().getTime() + (age || CacheAge)}),
+        store.set(key, {value: value, expire: String(new Date().getTime() + (age || CacheAge))}),
 
       remove: function (key) store.remove(key),
 
@@ -154,7 +154,7 @@ let INFO =
       __iterator__: function () Iterator(data),
 
       push: function (id, desc) {
-        data.push({id: id, desc: desc});
+        data.push({id: String(id), desc: String(desc)});
       },
 
       pop: function (index) {
@@ -357,7 +357,7 @@ let INFO =
           let text = xhr.responseText.replace(/^<\?[^\?]+\?>/, '');
           let result = toResult(text);
           if (result.@stat == 'ok') {
-            if (!pre)
+            if (!pre && cache)
               Cache.set(cache, text);
             onComplete(result);
           } else {
