@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 // INFO {{{
 let INFO =
 <>
-  <plugin name="usi.js" version="1.3.2"
+  <plugin name="usi.js" version="1.3.3"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
           lang="en-US"
@@ -338,7 +338,7 @@ let INFO =
                 synchronize: synchronize,
                 onComplete: function (result) {
                   let timeline = result.timeline;
-                  Save.set('timeline', timeline);
+                  Save.set('timeline', timeline.toString());
                   Cow.get.apply(Cow, args);
                 }
               }
