@@ -9,7 +9,7 @@ let PLUGIN_INFO =
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
-	<version>0.3.1</version>
+	<version>0.4.0</version>
 	<minVersion>3.0</minVersion>
 	<author mail="ninja.tottori@gmail.com" homepage="http://twitter.com/ninja_tottori">ninja.tottori</author>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/readitlater.js</updateURL>
@@ -59,6 +59,51 @@ let PLUGIN_INFO =
 
 
 (function(){
+
+	let listOptions = [ // {{{
+		[['-filter', '-f'], commands.OPTION_STRING, null, []]
+	]; // }}}
+
+	function listCompleter(context,args){ // {{{
+
+		function sortDate(store){
+			let ary = [];
+			for (let s in store){
+				ary.push([s[1].time_updated,s[1]]); // 更新日でソート
+			}
+			ary.sort(function(a,b){return -(a[0] - b[0])});
+			return ary;
+		}
+
+		context.title = ["url","title"]
+		context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
+		context.compare = void 0;
+		context.anchored = false;
+		context.incomplete = true;
+
+		ListCache[args.bang ? 'all' : 'unread'].get(function(data){
+			let filter = function () true;
+			if (args['-filter']) {
+				let matcher = {
+					filter: args['-filter'],
+					match: CompletionContext.prototype.match
+				};
+				filter = function (item) (matcher.match(item.url) || matcher.match(item.title));
+			}
+
+			context.completions = [
+				[item.url,item.title]
+				for([, item] in Iterator(data.list))
+				if(
+					!args.some(function (arg) arg == item.url)
+					&&
+					filter(item)
+				)
+			];
+			context.incomplete = false;
+		});
+
+	} //}}}
 
 	commands.addUserCommand(["ril","readitlater"],	"Read It Late plugin",
 		function(args){
@@ -110,6 +155,7 @@ let PLUGIN_INFO =
 				},{
 					bang: true,
 					completer : listCompleter,
+					options: listOptions
 				}
 			),
 
@@ -119,6 +165,7 @@ let PLUGIN_INFO =
 				},{
 					bang: true,
 					completer : listCompleter,
+					options: listOptions
 				}
 			),
 
@@ -454,36 +501,6 @@ let PLUGIN_INFO =
 	function echo(msg){ // {{{
 		liberator.echo("[ReadItLater] " + msg);
 	} // }}}
-
-	function listCompleter(context,args){ // {{{
-
-		function sortDate(store){
-			let ary = [];
-			for (let s in store){
-				ary.push([s[1].time_updated,s[1]]); // 更新日でソート
-			}
-			ary.sort(function(a,b){return -(a[0] - b[0])});
-			return ary;
-		}
-
-		context.title = ["url","title"]
-		context.filters = [CompletionContext.Filter.textDescription]; // titleも補完対象にする
-		context.compare = void 0;
-		context.anchored = false;
-		context.incomplete = true;
-
-		ListCache[args.bang ? 'all' : 'unread'].get(function(data){
-			context.completions = [
-				[item.url,item.title]
-				for([, item] in Iterator(data.list))
-				if(
-					!args.some(function (arg) arg == item.url)
-				)
-			];
-			context.incomplete = false;
-		});
-
-	} //}}}
 
 	function unixtimeToDate(ut) { // {{{
 		var t = new Date( ut * 1000 );
