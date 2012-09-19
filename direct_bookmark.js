@@ -3,7 +3,7 @@ var PLUGIN_INFO =
     <name>{NAME}</name>
     <description>Direct Post to Social Bookmarks</description>
     <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.18.0</version>
+    <version>0.19.0</version>
     <license>GPL</license>
     <minVersion>2.0pre</minVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
@@ -56,6 +56,11 @@ for Migemo search: require XUL/Migemo Extension
 >||
       Use Migemo completion
 ||<
+=== g:direct_sbm_private ===
+>||
+      Private bookmark
+||<
+
 
 == Commands ==
 === :btags ===
@@ -98,6 +103,8 @@ for Migemo search: require XUL/Migemo Extension
                       true : evalFunc(liberator.globalVariables.direct_sbm_is_normalize); 
     var isUseMigemo = typeof liberator.globalVariables.direct_sbm_is_use_migemo == 'undefined' ? 
                       true : evalFunc(liberator.globalVariables.direct_sbm_is_use_migemo);
+    var isPrivate = typeof liberator.globalVariables.direct_sbm_private == 'undefined' ? 
+                    false : evalFunc(liberator.globalVariables.direct_sbm_private);
 
     var XMigemoCore;
     try{
@@ -599,7 +606,7 @@ for Migemo search: require XUL/Migemo Extension
                 }
                 var request_url = 'https://api.pinboard.in/v1/posts/add?' + [
                     ['url', url], ['description', title], ['extended', comment], ['tags', tags.join(' ')],
-                    ['shared', 'no'], ['toread', 'no'],
+                    ['shared', isPrivate ? 'no' : 'yes'], ['toread', 'no'],
                 ].map(function(p) p[0] + '=' + encodeURIComponent(p[1])).join('&');
                 return Deferred.http({
                     method: "get",
