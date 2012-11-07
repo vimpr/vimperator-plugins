@@ -4,8 +4,18 @@ require('twsidebar');
 (function () {
   let Config = liberator.globalVariables.twittperator_sidebar_expand_url_config || {
     host: ['ff.im', 'is.gd', 't.co', 'bit.ly', 'j.mp', 'htn.to', 'goo.gl', 'ow.ly'],
-    filter: function (url) {
-      return url.length > 60 ? url.substr(0, 60) + '...' : url;
+    filter: function (url, callback) {
+      let isStatus = /https?:\/\/twitter\.com\/(\w+)\/status\/(\d+)/.exec(url);
+      let isPhoto = /\/photo\/\d/;
+      if (isStatus) {
+        if (!isPhoto.test(isStatus.input)) {
+          plugins.twittperator.OAuth.jsonGet('http://api.twitter.com/1/statuses/show', {id:isStatus[2]}, function(msg){
+            callback('\u26A1 ' + msg.user.screen_name + ' : ' + msg.text);
+          });
+        }
+      } else {
+        callback(url.length > 60 ? url.substr(0, 60) + '...' : url);
+      }
     }
   }
 
@@ -60,8 +70,10 @@ require('twsidebar');
         setTimeout(function () {
           let e = twsText(id);
           if (e) {
-            e.textContent = escapeBreakers(e.textContent.replace(fUrl, Config.filter(eUrl)));
-            scroll();
+            Config.filter(eUrl, function(filtered){
+              e.textContent = escapeBreakers(e.textContent.replace(fUrl, filtered));
+              scroll();
+            });
           }
         }, 100);
       });
