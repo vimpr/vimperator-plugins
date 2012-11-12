@@ -5,7 +5,7 @@ require('twsidebar');
   let Config = liberator.globalVariables.twittperator_sidebar_expand_url_config || {
     host: ['ff.im', 'is.gd', 't.co', 'bit.ly', 'j.mp', 'htn.to', 'goo.gl', 'ow.ly'],
     filter: function (url, callback) {
-      let isStatus = /https?:\/\/twitter\.com\/(\w+)\/status\/(\d+)/.exec(url);
+      let isStatus = /https?:\/\/twitter\.com\/(\w+)\/status(?:es)?\/(\d+)/.exec(url);
       let isPhoto = /\/photo\/\d/;
       if (isStatus) {
         if (!isPhoto.test(isStatus.input)) {
