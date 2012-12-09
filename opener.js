@@ -51,7 +51,7 @@ let INFO =
     }
     for each ( [,tab] in tabs.browsers ) {
       if (url == tab.currentURI.spec){
-        tabs.select(index);
+        tabs.select(index, false, true);
         return true;
       }
       ++index;
