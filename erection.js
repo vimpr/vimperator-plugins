@@ -152,14 +152,14 @@ let INFO =
         }
       }
 
-      Store.set('version', VERSION);
+      Store.set('version', String(VERSION));
       Store.set('erections', erections);
       Store.save();
 
       return callback(erections);
     }
 
-    if (VC.compare(Store.get('version'), VERSION) == 0) {
+    if (VC.compare(Store.get('version'), String(VERSION)) == 0) {
       //liberator.log('Get erections from Cache');
       callback(Store.get('erections'));
       return;

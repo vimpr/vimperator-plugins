@@ -188,8 +188,8 @@ let INFO =
   function constant (value)
     function () value;
 
-  function isHttpLink (link)
-    (link.href && link.href.indexOf('http') == 0);
+  function isHttpOrFileLink (link)
+    (link.href && ((link.href.indexOf('http') == 0) || (/^file:/.test(link.href))));
 
   function isCurrent (link)
     (link.href === buffer.URL);
@@ -203,7 +203,7 @@ let INFO =
   function getLinks (includeCurrent) {
     function _get (content)
       Array.prototype.concat.apply(Array.slice(content.document.links), Array.slice(content.frames).map(_get));
-    return _get(content).filter(isHttpLink).filter(includeCurrent ? constant(true) : not(isCurrent));
+    return _get(content).filter(isHttpOrFileLink).filter(includeCurrent ? constant(true) : not(isCurrent));
   }
 
   function makeRegExp (str) {
