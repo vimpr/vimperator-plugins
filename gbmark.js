@@ -1,5 +1,5 @@
-// INFO //
-var INFO = 
+// {{{ INFO
+var INFO =xml`
 <plugin name="gbmark.js" version="0.2"
         summary="Add Google Bookmark."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/gbmark.js"
@@ -15,7 +15,8 @@ var INFO =
       <p>Add Google Bookmark.</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 (function(){
   commands.addUserCommand(
