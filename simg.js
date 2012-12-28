@@ -1,5 +1,5 @@
-// INFO //
-var INFO =
+// {{{ INFO
+var INFO =xml`
 <plugin name="simg.js" version="0.4"
         summary="Save image on contents area"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/simg.js"
@@ -17,7 +17,8 @@ var INFO =
       <p>You can save image on the currnet context area by this plugin.</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 commands.addUserCommand(
   ['simg'],
