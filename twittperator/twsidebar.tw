@@ -136,17 +136,17 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             "width: " + px(sbWidth - 100) + ' !important'
           ].join(';')}
           xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-          <hbox>
-            <vbox>
+          <hbox flex="1">
+            <vbox width="48">
               <image src={t.img} height="48" width="48" />
             </vbox>
-            <vbox style={"width: " + (sbWidth - 48 - 35) + "px !important"}>
-              <hbox>
+            <vbox flex="1">
+              <hbox flex="1">
                 <label class={nameClass} style="font-weight: bold">{escapeBreakers(t.name)}</label>
                 <spacer flex="1"/>
                 <label>{t.sub || ''}</label>
               </hbox>
-              <description width="100%">{escapeBreakers(t.text)}</description>
+              <description flex="1" style="word-break:break-all;">{escapeBreakers(t.text)}</description>
             </vbox>
           </hbox>
         </richlistitem>;
