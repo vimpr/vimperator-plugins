@@ -28,7 +28,6 @@ commands.addUserCommand(
     let Ci=Components.interfaces;
     let cookie=contents.cookie;
     let xhrImg;
-    let path;
     let fp;
     let imgURL=contents.URL;
     let savePath;
