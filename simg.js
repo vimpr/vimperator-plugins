@@ -28,33 +28,13 @@ commands.addUserCommand(
     let Ci=Components.interfaces;
     let cookie=contents.cookie;
     let xhrImg;
-
-    let directoryPicker=function() {
-      let path;
-      let fp=Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
-      fp.init(window,'Select Directory',Ci.nsIFilePicker.modeGetFolder);
-      let result=fp.show();
-      switch(result){
-        case Ci.nsIFilePicker.returnOK:
-          path=fp.file.path;
-          break;
-        default:
-        case Ci.nsIFilePicker.returnCancel:
-          return '';
-      }
-      return path;
-    };
-
-    let saveDirectory=directoryPicker();
-    if(saveDirectory.length<1){
-      delete saveDirectory;
-      delete cookie;
-      delete contents;
-      return;
-    }
+    let path;
+    let fp;
     let imgURL=contents.URL;
     let savePath;
+    let saveDirectory;
 
+// {{{ trueCurrnetImg
     let trueCurrntImg=function(){
       let fileName=imgURL.substr(imgURL.lastIndexOf('/'));
       if (-1!=fileName.indexOf('?')){
@@ -90,32 +70,38 @@ commands.addUserCommand(
       }else{
         outstream.close();
       }
-      delete instream;
-      delete outstream;
-      delete imgURL;
-      delete saveDirectory;
-      delete cookie;
-      delete contents;
     };
+// }}}
+
+// {{{ falseCurrnetImg
     let falseCurrntImg=function(){
       liberator.echo("Image file accept error.");
-      delete imgURL;
-      delete saveDirectory;
-      delete cookie;
-      delete contents;
       return false;
     };
+// }}}
 
-    xhrImg=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-      .createInstance();
-    xhrImg.QueryInterface(Ci.nsIDOMEventTarget);
-    xhrImg.addEventListener("load",trueCurrntImg,false);
-    xhrImg.addEventListener("error",falseCurrntImg,false);
-    xhrImg.QueryInterface(Ci.nsIXMLHttpRequest);
-    xhrImg.open("GET",imgURL,true);
-    xhrImg.overrideMimeType('text/plain;charset=x-user-defined');
-    xhrImg.setRequestHeader('Referer',contents.URL);
-    xhrImg.setRequestHeader('Cookie',cookie);
-    xhrImg.send(null);
+// {{{ fpCallback
+    let fpCallback =  {
+      done : function (aResult) {
+        if ( aResult == fp.returnOK ) {
+          saveDirectory = fp.file.path;
+          xhrImg=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+          xhrImg.QueryInterface(Ci.nsIDOMEventTarget);
+          xhrImg.addEventListener("load",trueCurrntImg,false);
+          xhrImg.addEventListener("error",falseCurrntImg,false);
+          xhrImg.QueryInterface(Ci.nsIXMLHttpRequest);
+          xhrImg.open("GET",imgURL,true);
+          xhrImg.overrideMimeType('text/plain;charset=x-user-defined');
+          xhrImg.setRequestHeader('Referer',contents.URL);
+          xhrImg.setRequestHeader('Cookie',cookie);
+          xhrImg.send(null);
+        }
+      }
+    };
+// }}}
+
+    fp = Cc["@mozilla.org/filepicker;1"].createInstance( Ci.nsIFilePicker );
+    fp.init( window, 'Select Directory', fp.modeGetFolder );
+    fp.open( fpCallback );
   }
 );
