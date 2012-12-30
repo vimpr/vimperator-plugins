@@ -43,6 +43,12 @@ commands.addUserCommand(
     let cookie=contents.cookie;
 // }}}
 
+    let fp;
+    let url;
+    let type;
+    let saveDirectory;
+    let xhrImgInfo;
+
 // {{{ convert to DOM Document from text
     let getDOMHtmlDocument=function(str){
       let doc;
@@ -163,21 +169,6 @@ commands.addUserCommand(
     },false);
 // }}}
 
-// {{{ directory picker
-    let directoryPicker=function() {
-      let path;
-      let fp=Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
-      fp.init(window,'Select Directory',Ci.nsIFilePicker.modeGetFolder);
-      let result=fp.show();
-      if(result==Ci.nsIFilePicker.returnOK){
-        return fp.file;
-      }
-      return null;
-    };
-    let saveDirectory=directoryPicker();
-    if(saveDirectory==null) return false;
-// }}}
-
 // {{{ send request save image
     let saveImage=function(imgUrl,savePath,referer,cookie){
       let objMessage={
@@ -282,19 +273,7 @@ commands.addUserCommand(
     };
 // }}}
 
-// {{{ first XMLHttpRequest
-    let url;
-    let type=contents.getElementsByClassName('works_display')
-             .item(0).firstChild.getAttribute('href');
-    if(-1!=type.search(/big&illust_id=/i)){
-      url=contents.documentURI.replace('medium','big');
-    }else if(-1!=type.search(/manga&illust_id=/i)){
-      url=contents.documentURI.replace('medium','manga')+'&type=scroll';
-    }else{
-      liberator.echoerr("This page is not image page and not manga page.");
-      return false;
-    }
-
+// {{{ trueImgINfo
     let trueImgInfo=function(){
       if(-1!=type.search(/big&illust_id=/i)){
         saveImageFile();
@@ -305,23 +284,49 @@ commands.addUserCommand(
         return false;
       }
     };
+// }}}
 
+// {{{ falseImgInfo
     let falseImgInfo=function(){
       liberator.echo("Image Infomation page accept error.");
       return false;
     };
+// }}}
 
-    let xhrImgInfo;
-    xhrImgInfo=Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-    xhrImgInfo.QueryInterface(Ci.nsIDOMEventTarget);
-    xhrImgInfo.addEventListener("load",trueImgInfo,false);
-    xhrImgInfo.addEventListener("error",falseImgInfo,false);
-    xhrImgInfo.QueryInterface(Ci.nsIXMLHttpRequest);
-    xhrImgInfo.open("GET",url,true);
-    xhrImgInfo.setRequestHeader('Referer',contents.URL);
-    xhrImgInfo.setRequestHeader('Cookie',cookie);
-    xhrImgInfo.send(null);
+// {{{ fpCallback
+    let fpCallback = {
+      done : function (aResult) {
+        if ( aResult == fp.returnOK ) {
+          saveDirectory = fp.file;
+          xhrImgInfo = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                        .createInstance();
+          xhrImgInfo.QueryInterface( Ci.nsIDOMEventTarget );
+          xhrImgInfo.addEventListener( "load", trueImgInfo, false );
+          xhrImgInfo.addEventListener( "error", falseImgInfo, false );
+          xhrImgInfo.QueryInterface( Ci.nsIXMLHttpRequest );
+          xhrImgInfo.open( "GET", url, true);
+          xhrImgInfo.setRequestHeader( 'Referer', contents.URL );
+          xhrImgInfo.setRequestHeader( 'Cookie', cookie );
+          xhrImgInfo.send( null );
+        }
+      }
+    };
 //  }}}
+
+    type = contents.getElementsByClassName('works_display')
+                  .item(0).firstChild.getAttribute('href');
+    if(-1!=type.search(/big&illust_id=/i)){
+      url=contents.documentURI.replace('medium','big');
+    }else if(-1!=type.search(/manga&illust_id=/i)){
+      url=contents.documentURI.replace('medium','manga')+'&type=scroll';
+    }else{
+      liberator.echoerr("This page is not image page and not manga page.");
+      return false;
+    }
+
+    fp = Cc["@mozilla.org/filepicker;1"].createInstance( Ci.nsIFilePicker );
+    fp.init( window, 'Select Directory', fp.modeGetFolder );
+    let result=fp.open( fpCallback );
   },
   {},
   true
