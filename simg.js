@@ -102,5 +102,8 @@ commands.addUserCommand(
     fp = Cc["@mozilla.org/filepicker;1"].createInstance( Ci.nsIFilePicker );
     fp.init( window, 'Select Directory', fp.modeGetFolder );
     fp.open( fpCallback );
-  }
+  },
+  {},
+  true
+
 );
