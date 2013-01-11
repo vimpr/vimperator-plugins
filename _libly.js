@@ -6,6 +6,7 @@
     http://www.opensource.jp/licenses/mit-license.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
+/*
 var PLUGIN_INFO =
 <VimperatorPlugin>
     <name>libly(filename _libly.js)</name>
@@ -130,7 +131,7 @@ Request(url, headers, options):
         以下の値はデフォルトで設定される（'Content-type'はPOST時のみ）
         >||
         {
-            'Accept': 'text/javascript, application/javascript, text/html, application/xhtml+xml, application/xml, text/xml, */*;q=0.1',
+            'Accept': 'text/javascript, application/javascript, text/html, application/xhtml+xml, application/xml, text/xml, * /*;q=0.1',
             'Content-type': 'application/x-www-form-urlencoded; charset=' + options.encodingの値
         }
         ||<
@@ -190,6 +191,7 @@ clearCache:
 
     ]]></detail>
 </VimperatorPlugin>;
+*/
 //}}}
 //if (!liberator.plugins.libly) {
 
@@ -463,21 +465,7 @@ libly.$U = {//{{{
     },
     xmlToDom: function xmlToDom(node, doc, nodes)
     {
-        XML.prettyPrinting = false;
-        switch (node.nodeKind())
-        {
-            case "text":
-                return doc.createTextNode(node);
-            case "element":
-                let domnode = doc.createElementNS(node.namespace(), node.localName());
-                for each (let attr in node.@*)
-                    domnode.setAttributeNS(attr.name() == "highlight" ? NS.uri : attr.namespace(), attr.name(), String(attr));
-                for each (let child in node.*)
-                    domnode.appendChild(arguments.callee(child, doc, nodes));
-                if (nodes && node.@key)
-                    nodes[node.@key] = domnode;
-                return domnode;
-        }
+        return util.xmlToDom(node, doc, nodes);
     },
     getElementPosition: function(elem) {
         var offsetTrail = elem;
