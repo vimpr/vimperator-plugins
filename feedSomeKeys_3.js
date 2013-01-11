@@ -33,8 +33,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = <>
-  <plugin name="feedSomeKeys" version="1.9.3"
+let INFO =
+xml`<plugin name="feedSomeKeys" version="1.9.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -245,8 +245,7 @@ let INFO = <>
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/list' o j k
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
-  </plugin>
-</>;
+</plugin>`;
 
 // }}}
 
@@ -472,20 +471,23 @@ let INFO = <>
   function list (condition) {
     let maps = findMappings(condition);
     let template = modules.template;
+    let length = 0;
     let list =
-      <table>
-        {
-          template.map(maps, function (map)
-            template.map(map.names, function (name)
-            <tr>
-              <td style="font-weight: bold">{name}</td>
-              <td style="font-weight: bold">{map.feedSomeKeys.rhs}</td>
-              <td>{map.matchingUrls ? map.matchingUrls : '[Global]'}</td>
-            </tr>))
+      xml`<table>
+        ${
+          template.map(maps, function (map){
+            ++length;
+            return template.map(map.names, function (name)
+            xml`<tr>
+              <td style="font-weight: bold">${name}</td>
+              <td style="font-weight: bold">${map.feedSomeKeys.rhs}</td>
+              <td>${map.matchingUrls ? map.matchingUrls : '[Global]'}</td>
+            </tr>`)
+          })
         }
-      </table>;
+      </table>`;
 
-    if (list.*.length() == list.text().length()) {
+    if (length == 0) {
       liberator.echomsg("No mapping found");
       return;
     }
@@ -496,15 +498,15 @@ let INFO = <>
     context.title = ['name', 'rhs & url'];
     context.completions = [
       [
-        <span style="font-weight: bold">{map.names[0]}</span>,
+        xml`<span style="font-weight: bold">${map.names[0]}</span>,
         <span>
-          <span style="font-weight: bold">{map.feedSomeKeys.rhs}</span>
-          <span>{
+          <span style="font-weight: bold">${map.feedSomeKeys.rhs}</span>
+          <span>${
             args['-ignoreurls']
-              ? <><span> for </span><span>{map.matchingUrls ? map.matchingUrls : 'Global'}</span></>
+              ? xml`<span> for </span><span>${map.matchingUrls ? map.matchingUrls : 'Global'}</span>`
               : ''
           }</span>
-        </span>
+        </span>`
       ]
       for each (map in findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
     ];
