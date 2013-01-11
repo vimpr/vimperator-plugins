@@ -1,5 +1,5 @@
 var INFO =
-<plugin name="copy" version="0.7.6"
+xml`<plugin name="copy" version="0.7.6"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/copy.js"
         summary="copy strings from the template (like CopyURL+)"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -113,19 +113,7 @@ EOM
             <p>wedata から読込まない label のリストを定義します。</p>
         </description>
     </item>
-</plugin>;
-var PLUGIN_INFO =
-<VimperatorPlugin>
-<name>{NAME}</name>
-<description>enable to copy strings from a template (like CopyURL+)</description>
-<description lang="ja">テンプレートから文字列のコピーを可能にします（CopyURL+みたいなもの）</description>
-<minVersion>2.0pre</minVersion>
-<maxVersion>2.0pre</maxVersion>
-<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/copy.js</updateURL>
-<author mail="teramako@gmail.com" homepage="http://vimperator.g.hatena.ne.jp/teramako/">teramako</author>
-<license>MPL 1.1/GPL 2.0/LGPL 2.1</license>
-<version>0.7.5</version>
-</VimperatorPlugin>;
+</plugin>`;
 
 liberator.plugins.exCopy = (function(){
 var excludeLabelsMap = {};
