@@ -1,81 +1,83 @@
-var PLUGIN_INFO =
-<VimperatorPlugin>
-<name>{NAME}</name>
-<description>Open URL from a template</description>
-<description lang="ja">テンプレートからURLをOpenします</description>
-<minVersion>2.0pre</minVersion>
-<maxVersion>2.0pre</maxVersion>
-<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/exopen.js</updateURL>
-<author homepage="http://vimperator.g.hatena.ne.jp/pekepekesamurai/">pekepekesamurai</author>
-<version>0.10.1</version>
-<detail lang="ja"><![CDATA[
-== Command ==
-:exopen [template_name]
-  [template_name] で設定されたURLを開きます。
+var INFO =
+xml`<plugin name=${NAME} version="0.10.2"
+            href="http://github.com/vimpr/vimperator-plugins/blob/master/exopen.js"
+            summary="テンプレートからURLをOpenします"
+            lang="ja"
+            xmlns="http://vimperator.org/namespaces/liberator">
+  <author homepage="http://vimperator.g.hatena.ne.jp/pekepekesamurai">pekepekesamurai</author>
+  <project name="Vimperator" minVersion="3.6"/>
+  <item>
+    <tags>:exopen</tags>
+    <spec>:exopen <a>template_name</a></spec>
+    <description>
+      <p>
+        <a>template_name</a> で設定されたURLを開きます。
+      </p>
+    </description>
+  </item>
+  <h3 tag="exopen-example">Example</h3>
+  <code><ex><![CDATA[
+    :exopen http://www.google.co.jp/search?q=%TITLE%
+  ]]></ex></code>
+  <p>%TITLE%を現在開いているWebページのタイトルに展開してURLを開きます。</p>
 
-=== Example ===
-:exopen http://www.google.co.jp/search?q=%TITLE%:
-  %TITLE%を現在開いているWebページのタイトルに展開してURLを開きます。
-:exopen [title]
-  テンプレートで設定されたURLを開きます。
+  <code><ex><![CDATA[
+    :exopen [title]
+  ]]></ex></code>
+  <p>テンプレートで設定されたURLを開きます。</p>
 
-== Keyword ==
-%TITLE%:
-  現在のWebページのタイトル
-%URL%:
-  現在のWebページのURL
-%SEL%:
-  選択中の文字列
-%HTMLSEL%:
-  選択中のHTMLソース
+  <h3 tag="exopen-keyword">Keyword</h3>
+  <dl>
+    <dt>%TITLE%</dt><dd>現在のWebページのタイトル</dd>
+    <dt>%URL%</dt><dd>現在のWebページのURL</dd>
+    <dt>%SEL%</dt><dd>選択中の文字列</dd>
+    <dt>%HTMLSEL%</dt><dd>選択中のHTMLソース</dd>
+  </dl>
 
-== .vimperatorrc ==
->||
-javascript <<EOM
-liberator.globalVariables.exopen_templates = [
-  {
-    label: 'vimpnightly',
-    value: 'http://code.google.com/p/vimperator-labs/downloads/list?can=1&q=label:project-vimperator',
-    description: 'open vimperator nightly xpi page',
-    newtab: true
-  }, {
-    label: 'vimplab',
-    value: 'http://www.vimperator.org/vimperator',
-    description: 'open vimperator trac page',
-    newtab: true
-  }, {
-    label: 'vimpscript',
-    value: 'http://code.google.com/p/vimperator-labs/issues/list?can=2&q=label%3Aproject-vimperator+label%3Atype-plugin',
-    description: 'open vimperator trac script page',
-    newtab: true
-  }, {
-    label: 'coderepos',
-    value: 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/',
-    description: 'open coderepos vimperator-plugin page',
-    newtab: true
-  }, {
-    label: 'sldr',
-    value: 'http://reader.livedoor.com/subscribe/%URL%'
-  }
-];
-EOM
-||<
-label:
-  テンプレート名。コマンドの引数で指定してください。
-value:
-  OpenするURL
-custom:
-  関数か配列で指定してください。
-  関数の場合、return された文字列をオープンします。
-  配列の場合、value で指定された文字列を置換します。(条件→Array[0]、置換文字列→Array[1])
-description:
-  補完時に表示する説明文。
-newtab:
-  新規タブで開く場合は true を指定してください。
-escape:
-  URLエンコードする場合、true を指定してください。
-]]></detail>
-</VimperatorPlugin>;
+  <h3 tag="exopen-rc-example">.vimperatorrc exmaple</h3>
+  <code><ex><![CDATA[
+  javascript <<EOM
+  liberator.globalVariables.exopen_templates = [
+    {
+      label: 'vimpnightly',
+      value: 'http://code.google.com/p/vimperator-labs/downloads/list?can=1&q=label:project-vimperator',
+      description: 'open vimperator nightly xpi page',
+      newtab: true
+    }, {
+      label: 'vimplab',
+      value: 'http://www.vimperator.org/vimperator',
+      description: 'open vimperator trac page',
+      newtab: true
+    }, {
+      label: 'vimpscript',
+      value: 'http://code.google.com/p/vimperator-labs/issues/list?can=2&q=label%3Aproject-vimperator+label%3Atype-plugin',
+      description: 'open vimperator trac script page',
+      newtab: true
+    }, {
+      label: 'coderepos',
+      value: 'http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/',
+      description: 'open coderepos vimperator-plugin page',
+      newtab: true
+    }, {
+      label: 'sldr',
+      value: 'http://reader.livedoor.com/subscribe/%URL%'
+    }
+  ];
+  EOM
+  ]]></ex></code>
+  <dl>
+    <dt>label</dt><dd>テンプレート名。コマンドの引数で指定してください。</dd>
+    <dt>value</dt><dd>OpenするURL</dd>
+    <dt>custom</dt><dd>
+      関数か配列で指定してください。
+      関数の場合、return された文字列をオープンします。
+      配列の場合、value で指定された文字列を置換します。(条件→Array[0]、置換文字列→Array[1])
+    </dd>
+    <dt>description</dt><dd>補完時に表示する説明文。</dd>
+    <dt>newtab</dt><dd>新規タブで開く場合は true を指定してください。</dd>
+    <dt>escape</dt><dd>URLエンコードする場合、true を指定してください。</dd>
+  </dl>
+</plugin>`;
 
 liberator.plugins.exOpen = (function() {
   var global = liberator.globalVariables.exopen_templates;
