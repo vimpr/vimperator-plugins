@@ -56,6 +56,9 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     // サイドバーが閉じていても、こっそり開始しておく
     silentStart: false,
 
+    // 時間とかRTした人のIDとかの表示
+    tweetTimeVisible: false,
+
     // 配列かオブジェクトを返すと、変更できる。
     // 文字列 "reject" を返すと、そもそもツイートが表示されなくなる。
     modifier: function (msg, tab, streamName) {
@@ -144,7 +147,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
               <hbox flex="1">
                 <label class={nameClass} style="font-weight: bold">{escapeBreakers(t.name)}</label>
                 <spacer flex="1"/>
-                {t.sub || ''}
+                {(Config.tweetTimeVisible && t.sub) ? t.sub : ''}
               </hbox>
               <description flex="1" style="word-break:break-all;">{escapeBreakers(t.text)}</description>
             </vbox>
