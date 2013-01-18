@@ -144,7 +144,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
               <hbox flex="1">
                 <label class={nameClass} style="font-weight: bold">{escapeBreakers(t.name)}</label>
                 <spacer flex="1"/>
-                <label>{t.sub || ''}</label>
+                {t.sub || ''}
               </hbox>
               <description flex="1" style="word-break:break-all;">{escapeBreakers(t.text)}</description>
             </vbox>
