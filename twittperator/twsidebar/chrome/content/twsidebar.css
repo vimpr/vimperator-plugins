@@ -52,3 +52,16 @@
 .tw-anekos-sb-plugin-tweet-follow-my {
   background-color: lightsalmon !important;
 }
+
+.tw-anekos-sb-plugin-item-name {
+  font-weight: bold;
+}
+
+.tw-anekos-sb-plugin-item-sub {
+  font-size: 80%;
+}
+
+.tw-anekos-sb-plugin-item-text {
+  word-break: break-all;
+}
+
