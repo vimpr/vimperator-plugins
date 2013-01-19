@@ -56,9 +56,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     // サイドバーが閉じていても、こっそり開始しておく
     silentStart: false,
 
-    // 時間とかRTした人のIDとかの表示
-    tweetTimeVisible: false,
-
     // 配列かオブジェクトを返すと、変更できる。
     // 文字列 "reject" を返すと、そもそもツイートが表示されなくなる。
     modifier: function (msg, tab, streamName) {
@@ -146,11 +143,10 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             <vbox flex="1">
               <hbox flex="1">
                 <label class={nameClass}>{escapeBreakers(t.name)}</label>
-                <spacer flex="1"/>
-                {(Config.tweetTimeVisible && t.sub) ? t.sub : ''}
               </hbox>
               <description flex="1" class={className('item-text')}>{escapeBreakers(t.text)}</description>
-              <description flex="1" class={className('item-sub')}>{escapeBreakers(t.sub || '')}</description>
+              <description flex="1" class={className('item-sub')} hidden={!t.sub}>{escapeBreakers(t.sub || '')}</description>
+              <description flex="1" class={className('item-time')} hidden={!t.time}>{escapeBreakers(t.time || '')}</description>
             </vbox>
           </hbox>
         </richlistitem>;
@@ -397,8 +393,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
         t.text += ' [\u5730\u57DF: ' + msg.user.location + ']';
       }
 
-      if (!t.sub && msg.created_at) {
-        t.sub = new Date(msg.created_at).toLocaleTimeString().replace(/:\d+$/,'');;
+      if (msg.created_at) {
+        t.time = new Date(msg.created_at).toLocaleTimeString().replace(/:\d+$/,'');;
       }
 
       if (real && dummy) {

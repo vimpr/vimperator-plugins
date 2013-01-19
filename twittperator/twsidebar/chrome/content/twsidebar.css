@@ -57,11 +57,16 @@
   font-weight: bold;
 }
 
+.tw-anekos-sb-plugin-item-text {
+  word-break: break-all;
+}
+
 .tw-anekos-sb-plugin-item-sub {
+  background-color: pink;
   font-size: 80%;
 }
 
-.tw-anekos-sb-plugin-item-text {
-  word-break: break-all;
+.tw-anekos-sb-plugin-item-time {
+  font-size: 80%;
 }
 
