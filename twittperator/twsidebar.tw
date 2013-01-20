@@ -142,11 +142,15 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             </vbox>
             <vbox flex="1">
               <hbox flex="1">
-                <label class={nameClass}>{escapeBreakers(t.name)}</label>
+                <label flex="2" class={nameClass}>{escapeBreakers(t.name)}</label>
+                <spacer hidden={!(t.sub || t.time)} />
+                <description flex="1" class={className('item-time-and-sub')} hidden={!(t.sub || t.time)}>{escapeBreakers(t.sub || t.time)}</description>
               </hbox>
               <description flex="1" class={className('item-text')}>{escapeBreakers(t.text)}</description>
-              <description flex="1" class={className('item-sub')} hidden={!t.sub}>{escapeBreakers(t.sub || '')}</description>
-              <description flex="1" class={className('item-time')} hidden={!t.time}>{escapeBreakers(t.time || '')}</description>
+              <hbox>
+                <description flex="1" class={className('item-sub')} hidden={!t.sub}>{escapeBreakers(t.sub || '')}</description>
+                <description flex="1" class={className('item-time')} hidden={!t.time}>{escapeBreakers(t.time || '')}</description>
+              </hbox>
             </vbox>
           </hbox>
         </richlistitem>;
