@@ -39,7 +39,7 @@ let PLUGIN_INFO =
   <name lang="ja">Link Opener</name>
   <description>Link Opener</description>
   <description lang="ja">リンクを開く</description>
-  <version>2.3.2</version>
+  <version>2.4.0</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
 // INFO {{{
 let INFO =
 <>
-  <plugin name="link-opener" version="2.3.2"
+  <plugin name="link-opener" version="2.4.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="en-US"
@@ -103,7 +103,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-  <plugin name="link-opener" version="2.3.2"
+  <plugin name="link-opener" version="2.4.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
           lang="ja"
@@ -248,6 +248,11 @@ let INFO =
         if (!links.length)
           return;
 
+        if (args['-copy']) {
+          util.copyToClipboard(links.map(function (it) it.href).join("\n"));
+          return;
+        }
+
         liberator.open(links[0].href, where);
 
         if (links.length <= 1)
@@ -271,7 +276,8 @@ let INFO =
         options: [
           [['-interval', '-i'], commands.OPTION_INT],
           [['-where', '-w'], commands.OPTION_STRING, null, WHERE_COMPLETIONS],
-          [['-include-current', '-I'], commands.OPTION_NOARG]
+          [['-include-current', '-I'], commands.OPTION_NOARG],
+          [['-copy', '-c'], commands.OPTION_NOARG]
         ],
         completer: function (context, args) {
           context.title = ['URL', 'Text Content'];
