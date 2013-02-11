@@ -250,8 +250,10 @@ function getNodeFromXPath(xpath,doc,isMulti) {
     if (isMulti) {
         let nodesSnapshot = doc.evaluate(xpath,doc.documentElement,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
         if (nodesSnapshot.snapshotLength == 0) return;
-        result = document.createElementNS(null,'div');
-        for (let i=0; i<nodesSnapshot.snapshotLength; result.appendChild(nodesSnapshot.snapshotItem(i++)));
+        result = doc.createElementNS(XHTML.uri,'div');
+        for (let i=0, len = nodesSnapshot.snapshotLength; i<len; i++) {
+            result.appendChild(nodesSnapshot.snapshotItem(i));
+        }
     } else {
         let node = doc.evaluate(xpath,doc.documentElement,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
         if (!node.singleNodeValue) return;
