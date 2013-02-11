@@ -179,22 +179,23 @@ SITE_DEFINITION.forEach(function (dictionary) {
             }, dictionary.srcEncode ? dictionary.srcEncode : null);
         },
         {
-            completer: function (arg) {
+            completer: function (context, args) {
                 if (!spellChecker ||
                     !dictionary.dictionary ||
                     !spellChecker.setDictionary(dictionary.dictionary))
-                return [0, []];
+                return;
 
-                var suggestions = spellChecker.suggest(arg);
+                var filter = context.filter;
+                var suggestions = spellChecker.suggest(filter);
                 var candidates = [];
                 for (let i=0, max=suggestions.length ; i<max ; ++i) {
                     candidates.push([suggestions[i], 'suggest']);
                 }
 
-                if (!spellChecker.check(arg)) {
+                if (!spellChecker.check(filter)) {
                     candidates.unshift(['', 'not exist']);
                 }
-                return [0, candidates];
+                context.completions = candidates;
             },
             bang: true
         }
