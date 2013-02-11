@@ -174,7 +174,7 @@ SITE_DEFINITION.forEach(function (dictionary) {
                 var xs = new XMLSerializer();
                 liberator.echo(xml`<div style="white-space:normal;">
                     <base href=${util.escapeHTML(url)}/>
-                    ${new TemplateXML(xs.serializeToString( result ))}
+                    ${template.maybeXML(xs.serializeToString( result ))}
                 </div>`);
             }, dictionary.srcEncode ? dictionary.srcEncode : null);
         },
