@@ -34,14 +34,14 @@ const SITE_DEFINITION = [{
     names: ['wikipe[diaja]'],
     url: 'http://ja.wikipedia.org/wiki/%s',
     shortHelp: 'Wikipedia lite(ja)',
-    xpath: 'id("bodyContent")/p[1]',
+    xpath: 'id("mw-content-text")/p[1]',
     dictionary: 'ja'
 },{
     names: ['wikipe[diaen]'],
     url: 'http://en.wikipedia.org/wiki/%s',
     shortHelp: 'Wikipedia lite(en)',
-    xpath: 'id("bodyContent")/p[1]',
-    dictionary: 'en'
+    xpath: 'id("mw-content-text")/p[1]',
+    dictionary: 'en-US'
 }];
 
 let (siteDef = liberator.globalVariables.lookupDictionary_site_definition) {
