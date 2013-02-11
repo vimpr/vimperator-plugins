@@ -164,15 +164,17 @@ SITE_DEFINITION.forEach(function (dictionary) {
                 url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             }
             //liberator.log('URL: ' +url);
-            var result;
-            getHTML(url, function (str) {
-                var doc = createHTMLDocument(str);
+            getHTML(url, function (doc) {
                 var result = getNodeFromXPath(dictionary.xpath, doc, dictionary.multi);
                 if (!result) {
                     liberator.echoerr('Nothing to show...');
+                    return;
                 }
                 var xs = new XMLSerializer();
-                liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<[^>]+>/g,function (all) all.toLowerCase() ) + '</div>'), true);
+                liberator.echo(xml`<div style="white-space:normal;">
+                    <base href=${util.escapeHTML(url)}/>
+                    ${new TemplateXML(xs.serializeToString( result ))}
+                </div>`);
             }, dictionary.srcEncode ? dictionary.srcEncode : null);
         },
         {
@@ -210,16 +212,17 @@ commands.addUserCommand(
  */
 function getHTML(url, callback, charset) {
     var xhr= new XMLHttpRequest();
+    xhr.open('GET',url,true);
+    xhr.responseType = "document";
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-                callback.call(this,xhr.responseText);
+                callback.call(this,xhr.response);
             } else {
                 throw new Error(xhr.statusText);
             }
         }
     };
-    xhr.open('GET',url,true);
     if (charset) xhr.overrideMimeType('text/html; charset=' + charset);
     xhr.send(null);
 }
