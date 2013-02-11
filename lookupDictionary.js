@@ -170,6 +170,7 @@ SITE_DEFINITION.forEach(function (dictionary) {
                     liberator.echoerr('Nothing to show...');
                     return;
                 }
+                result = sanitizeScript(result);
                 var xs = new XMLSerializer();
                 liberator.echo(xml`<div style="white-space:normal;">
                     <base href=${util.escapeHTML(url)}/>
@@ -227,16 +228,15 @@ function getHTML(url, callback, charset) {
     xhr.send(null);
 }
 /**
- * @param {String} str
- * @return {DOMDocument}
+ * sanitize script element
+ * @param {Element} element
+ * @return {Element}
  */
-function createHTMLDocument(str) {
-    str = str.replace(/^[\s\S]*?<html(?:[ \t\r\n][^>]*)?>[ \t\n\r]*|[ \t\n\r]*<\/html[ \t\r\n]*>[\S\s]*$/ig,'').replace(/[\r\n]+/g,' ');
-    var htmlFragment = content.document.implementation.createDocument(null,'html',null);
-    var range = content.document.createRange();
-    range.setStartAfter(window.content.document.body);
-    htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str),true));
-    return htmlFragment;
+function sanitizeScript (element) {
+    for (let node of element.querySelectorAll("script")){
+        node.parentNode.removeChild(node);
+    }
+    return element;
 }
 /**
  * @param {String} xpath XPath Expression
