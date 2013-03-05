@@ -2659,7 +2659,7 @@ let INFO =
       proxyPort: gv.twittperator_proxy_port,
       screenName: gv.twittperator_screen_name,
       apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
-                  "://api.twitter.com/" + (gv.twittperator_twitter_api_version || 1)  + "/",
+                  "://api.twitter.com/" + (gv.twittperator_twitter_api_version || "1.1")  + "/",
       trackWords: gv.twittperator_track_words,
       count: (gv.twittperator_count || 20),
       lang: (gv.twittperator_lang || ''),
