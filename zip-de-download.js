@@ -350,6 +350,8 @@ let SITE_INFO = [
       completer: liberator.modules.completion.file
     }, true);
 
-  util.extend(__context__, self);
+  for (let [k, v] in Iterator(self)) {
+    __context__[k] = v;
+  }
 })();
 // vim: sw=2 ts=2 et:
