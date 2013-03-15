@@ -2049,7 +2049,7 @@ let INFO =
       liberator.echo(html, true);
     }, // }}}
     showTwitterMentions: function(arg) { // {{{
-      tw.jsonGet("statuses/mentions", null, function(res) {
+      tw.jsonGet("statuses/mentions_timeline", null, function(res) {
         Twittperator.showTL(res.map(Utils.fixStatusObject));
       });
     }, // }}}
