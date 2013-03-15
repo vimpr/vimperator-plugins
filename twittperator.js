@@ -2,7 +2,7 @@
  * The MIT License
  *
  * Copyright (c) 2010 teramako
- * Copyright (c) 2010-2012 anekos
+ * Copyright (c) 2010-2013 anekos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 // INFO {{{
 let INFO =
 <>
-  <plugin name="Twittperator" version="1.19.0"
+  <plugin name="Twittperator" version="1.19.1"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -175,7 +175,7 @@ let INFO =
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.19.0"
+  <plugin name="Twittperator" version="1.19.1"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
@@ -1643,7 +1643,7 @@ let INFO =
       });
     }, // }}}
     favorite: function(id) { // {{{
-      tw.jsonPost("favorites/create/" + id, null, function(res) {
+      tw.jsonPost("favorites/create", {id: id}, function(res) {
         res = Utils.fixStatusObject(res);
         Twittperator.echo("fav: " + res.user.name + " " + res.text)
       });
