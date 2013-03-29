@@ -5,7 +5,7 @@
     }
 
     function isWord (s) {
-        return /^[^\s\.]+$/i.test(s);
+        return /^[^\s\.\/]+$/i.test(s);
     }
 
     function isIPAddress (s) {
