@@ -32,33 +32,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>X-Hint</name>
-  <name lang="ja">X-Hint</name>
-  <description>Show the hints with given XPath.</description>
-  <description lang="ja">指定のXPathでヒントを表示する。</description>
-  <version>1.1.2</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/x-hint.js</updateURL>
-  <minVersion>2.3</minVersion>
-  <maxVersion>2.3</maxVersion>
-  <detail><![CDATA[
-    :xh[int] <Hint-Mode> <XPath>:
-      Show the <Hint-Mode> hints with <XPath>
-  ]]></detail>
-  <detail lang="ja"><![CDATA[
-    :xh[int] <Hint-Mode> <XPath>:
-      <XPath> で <Hint-Mode> ヒントを表示
-  ]]></detail>
-</VimperatorPlugin>;
-// }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="X-Hint" version="1.1.3"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/x-hint.js"
           summary="Show the hints with given XPath."
@@ -121,8 +96,7 @@ let INFO =
         </p>
       </description>
     </item>
-  </plugin>
-</>;
+  </plugin>`;
 // }}}
 
 
