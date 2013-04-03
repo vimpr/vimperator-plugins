@@ -33,26 +33,24 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
-  <plugin name="PDF.js.js" version="1.0.0"
-          href="http://vimpr.github.com/"
-          summary="PDF.js controller."
-          lang="en-US"
-          xmlns="http://vimperator.org/namespaces/liberator">
-    <author email="anekos@snca.net">anekos</author>
-    <license>New BSD License</license>
-    <project name="Vimperator" minVersion="3.0"/>
-    <p></p>
-    <item>
-      <tags>:pdfjs-mapping-sample</tags>
-      <description><p>mapping sample</p><code><![CDATA[
-        nnoremap -urls ^\\.pdf$ i :<C-u>pdfjs index<Space>
-        nnoremap -urls ^\\.pdf$ z :<C-u>pdfjs zoom<Space>
-      ]]></code></description>
-    </item>
-  </plugin>
-</>;
+let INFO = xml`
+<plugin name="PDF.js.js" version="1.0.0"
+        href="http://vimpr.github.com/"
+        summary="PDF.js controller."
+        lang="en-US"
+        xmlns="http://vimperator.org/namespaces/liberator">
+  <author email="anekos@snca.net">anekos</author>
+  <license>New BSD License</license>
+  <project name="Vimperator" minVersion="3.0"/>
+  <p></p>
+  <item>
+    <tags>:pdfjs-mapping-sample</tags>
+    <description><p>mapping sample</p><code><![CDATA[
+      nnoremap -urls ^\\.pdf$ i :<C-u>pdfjs index<Space>
+      nnoremap -urls ^\\.pdf$ z :<C-u>pdfjs zoom<Space>
+    ]]></code></description>
+  </item>
+</plugin>`;
 // }}}
 
 (function () {
@@ -206,9 +204,9 @@ let INFO =
               function desc (o) {
                 const PageRE = /#page=(\d+)\&/;
                 if (o.href && PageRE.test(o.href)) {
-                  return String(<>{nSpace(getOutlineLevel(o))} {o.textContent} (p{o.href.match(PageRE)[1]})</>);
+                  return `${nSpace(getOutlineLevel(o))} ${o.textContent} (p${o.href.match(PageRE)[1]})`;
                 } else {
-                  return String(<>{nSpace(getOutlineLevel(o))} {o.textContent}</>);
+                  return `${nSpace(getOutlineLevel(o))} ${o.textContent}`;
                 }
               }
 
