@@ -5,7 +5,7 @@
 
 var INFO = xml`
 <plugin name="unloadTab"
-        version="0.2"
+        version="0.3"
         summary="Unload tab contents like (BarTab)"
         xmlns="http://vimperator.org/namespaces/liberator">
   <author email="teramako@gmail.com">teramako</author>
@@ -25,20 +25,22 @@ if (!("SS" in this)) {
 }
 
 function unloadTab (aTab) {
-  var state = SS.getTabState(aTab);
-  var tab = gBrowser.addTab(null, { skipAnimation: true });
-  SS.setTabState(tab, state);
-  if (aTab.pinned) {
-    gBrowser.pinTab(tab);
-  } else {
-    let objState = JSON.parse(state);
-    if (objState.hidden) {
-      gBrowser.hideTab(tab);
-      TabView.moveTabTo(tab, JSON.parse(objState.extData["tabview-tab"]).groupID);
-    }
-  }
-  gBrowser.moveTabTo(tab, aTab._tPos + 1)
-  gBrowser.removeTab(aTab);
+  var browser = aTab.linkedBrowser,
+      state = SS.getTabState(aTab),
+      shistory = browser.sessionHistory,
+      icon = aTab.getAttribute("image");
+
+  browser.addEventListener("load", function onload(){
+    this.removeEventListener("load", onload, true);
+    if (shistory.count > 1)
+      shistory.PurgeHistory(shistory.count -1);
+
+    aTab.ownerDocument.defaultView.setTimeout(function(){
+      aTab.setAttribute("image", icon);
+    }, 0);
+    SS.setTabState(aTab, state);
+  }, true);
+  browser.loadURI("about:blank");
 }
 
 commands.addUserCommand(["unload[tab]"], "Unload Tabs",
