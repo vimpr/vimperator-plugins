@@ -3,7 +3,7 @@
  * unload[tab] num
  */
 
-var INFO =
+var INFO = xml`
 <plugin name="unloadTab"
         version="0.2"
         summary="Unload tab contents like (BarTab)"
@@ -18,7 +18,7 @@ var INFO =
       <p>Unload the tab contents.</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 
 if (!("SS" in this)) {
   XPCOMUtils.defineLazyServiceGetter(this, "SS", "@mozilla.org/browser/sessionstore;1", "nsISessionStore");
