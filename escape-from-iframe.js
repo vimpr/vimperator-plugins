@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO =
-<>
+xml`
   <plugin name="Escape from iframe." version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Escape from iframe (focus to parent window)."
@@ -49,8 +49,7 @@ let INFO =
       <spec>&lt;Esc></spec>
       <description><p>Escape from iframe (focus to parent window).</p></description>
     </item>
-  </plugin>
-</>;
+  </plugin>`;
 // }}}
 
 (function () {
