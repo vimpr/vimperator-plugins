@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>mkreport</name>
   <description>Write current information to the specified file</description>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
         - デフォルトから変更されている preference (about:config でみられる設定) のリスト
         - バージョンなどの情報
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

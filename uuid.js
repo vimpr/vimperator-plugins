@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>UUID generator</description>
@@ -17,7 +17,7 @@ uuid:
 == THANKS ==
 http://moz-addon.g.hatena.ne.jp/ZIGOROu/20080417/1208413079
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function() {

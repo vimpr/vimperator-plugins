@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="Newtab" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Add about:newtab URL Completer."
@@ -50,7 +49,7 @@ let INFO =
       ]]></code>
     </p>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {

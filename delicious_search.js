@@ -1,4 +1,4 @@
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>search DeliciousBookmark and that completer</description>
@@ -40,7 +40,7 @@ set go-=D
 ||<
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.delicious = (function(){
 
@@ -185,11 +185,11 @@ function templateDescription(item){
 }
 function templateTitleAndIcon(item){
   let simpleURL = item.text.replace(/^https?:\/\//, '');
-  return <>
-    <span highlight="CompIcon">{item.icon ? <img src={item.icon}/> : <></>}</span><span class="td-strut"/>{item.name}<a href={item.text} highlight="simpleURL">
+  return `
+    <span highlight="CompIcon">{item.icon ? <img src={item.icon}/> : ``}</span><span class="td-strut"/>{item.name}<a href={item.text} highlight="simpleURL">
       <span class="extra-info">{simpleURL}</span>
     </a>
-  </>;
+  `;
 }
 
 commands.addUserCommand(["delicious[search]","ds[earch]"], "Delicious Bookmark Search",
@@ -201,7 +201,7 @@ commands.addUserCommand(["delicious[search]","ds[earch]"], "Delicious Bookmark S
     let list = bookmarkSearch(args["-tags"], args["-query"]);
     let xml = template.tabular(["Title","Tags and Note"], [], list.map(function(item){
       return [
-        <><img src={item.icon}/><a highlight="URL" href={item.url}>{item.name}</a></>,
+        `<img src={item.icon}/><a highlight="URL" href={item.url}>{item.name}</a>`,
         "[" + item.tags.join(",") + "] " + item.note
       ];
     }));

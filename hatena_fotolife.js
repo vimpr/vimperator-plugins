@@ -23,7 +23,7 @@
  * IN THE SOFTWARE.
  * */
 
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>Generates and yanks thumbnail tags in Hatena Fotolife</description>
@@ -64,7 +64,7 @@ hatena_fotolife_hint_key='f'
 image_extender_yank_key='f'
 ||<
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 ( function () {
 

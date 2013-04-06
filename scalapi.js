@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Scala API document</description>
@@ -16,7 +16,7 @@ Scala の API を検索し、保管し、該当のページを開きます。
 
 引数には正規表現も利用できます。
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
 var p = function(arg) {

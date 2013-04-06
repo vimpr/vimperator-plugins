@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>UserAgentSwitcherLite</name>
   <description>switch user agent</description>
@@ -38,7 +38,7 @@ var PLUGIN_INFO =
         EOM
       ||<
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 
 liberator.plugins.UserAgentSwitcherLite = (function(){

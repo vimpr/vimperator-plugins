@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>removetabs</name>
 <description>RemoveTabs</description>
@@ -30,7 +30,7 @@ https://addons.mozilla.org/ja/firefox/addon/4227
     noremap <C-S-n> :removetabsright<CR>
 ||<
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function(){
     liberator.modules.commands.addUserCommand(['removetabsleft'], 'remove tabs left',

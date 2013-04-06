@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Replace default search to migemo.</description>
@@ -25,7 +25,7 @@ migemo-find.js は pIXMigemoFind が提供している XUL/Migemo のインタ�
 -- 検索開始文字の先頭が \ なら、通常の検索を行う。migemo りたくない時など用に
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.migemoFind = (function() {
     let p = function(m) Application.console.log(m);

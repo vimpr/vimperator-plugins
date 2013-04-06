@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>alias</name>
   <name lang="ja">alias</name>
@@ -54,11 +54,10 @@ let PLUGIN_INFO =
     :alias <new-command-name> <old-command-name>:
       コマンド <old-command-name> に <new-command-name> という別名をつけます。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="alias" version="1.0.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/alias.js"
           summary="Define the alias for a command."
@@ -107,7 +106,7 @@ let INFO =
 :lazy alias newName oldCommandName
     </ex></code>
   </plugin>
-</>;
+`;
 // }}}
 
 

@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="HintsForEmbeded" version="1.6.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/hints-for-embedded.js"
           summary="Add the hints mode for embedded objects."
@@ -123,7 +122,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {

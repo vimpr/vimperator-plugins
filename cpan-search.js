@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>CPAN search</description>
@@ -16,7 +16,7 @@ var PLUGIN_INFO =
   WebService::Hatena をマッチさせたいなら Web::Ha[tab] などで補完できると思います。
   :cpan! で bang をつけると別のタブで開きます。
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
 var p = function(arg) {

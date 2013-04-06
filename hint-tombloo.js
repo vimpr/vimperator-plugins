@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Hint mode for Tombloo</description>
@@ -18,7 +18,7 @@ let g:hint_tombloo_xpath = '//img'
     Share target element by Tombloo
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

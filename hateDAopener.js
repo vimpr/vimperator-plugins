@@ -31,7 +31,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Search specified Hatena::Diary</description>
@@ -84,7 +84,7 @@ let PLUGIN_INFO =
     - APIを用意する
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 plugins.hateDAopener = (function(){
 
@@ -258,13 +258,13 @@ plugins.hateDAopener = (function(){
      * template: title & url
      */
     function templateTitleAndUrl(item)
-        <>
+        `
             <img src={getFaviconURI(item.baseUrl + '/')} />
             <span class="td-strut"/>{item.name}
             <a href={item.text} highlight="simpleURL">
               <span class="extra-info">{item.text.replace(/^https?:\/\//, '')}</span>
             </a>
-        </>;
+        `;
 
     /**
      * template: tags

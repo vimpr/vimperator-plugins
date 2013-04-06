@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>force focuscontent</description>
@@ -8,7 +8,7 @@ var PLUGIN_INFO =
     <minVersion>2.0pre</minVersion>
     <maxVersion>2.0pre</maxVersion>
     <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/forcefocuscontent.js</updateURL>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 getBrowser().addEventListener("load", onPageLoad, true);

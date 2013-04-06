@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="nume" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Make numeronymized text."
@@ -50,7 +49,7 @@ let INFO =
       <description><p>Make numeronymized text.</p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

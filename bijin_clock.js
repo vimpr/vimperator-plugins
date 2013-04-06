@@ -8,12 +8,12 @@
  * == Stop ==
  * js plugins.bijin_clock.stop()
  */
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Bijin Clock - http://www.bijint.com</description>
 <version>0.1</version>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.bijin_clock = (function(){
 const BASE_URL = 'http://www.bijint.com/jp/img/photo/';
@@ -34,7 +34,7 @@ function showBijinClock(){
   let image_src = BASE_URL + getTimeString(date) + ".jpg";
   liberator.echomsg(date.toLocaleString(), 0);
   openDialog('data:application/vnd.mozilla.xul+xml;charset=utf-8,' +
-    <><?xml-stylesheet type="text/css" href="chrome://global/skin/"?>
+    `<?xml-stylesheet type="text/css" href="chrome://global/skin/"?>
     <?xml-stylesheet type="text/css" href="chrome://browser/skin/browser.css"?>
     <window title={TITLE}
             windowtype="alert:clock"
@@ -74,7 +74,7 @@ function showBijinClock(){
         </hbox>
         <image id="img" src={image_src} onload="init()" onerror="window.close()"/>
       </vbox>
-    </window></>.toXMLString(),
+    </window>`.toXMLString(),
     TITLE,
     'chrome,dialog=yes,titlebar=no,popup=yes');
 }

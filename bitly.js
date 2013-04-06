@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>
@@ -53,7 +53,7 @@ let PLUGIN_INFO =
     == Require ==
       bit.ly API Key
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 

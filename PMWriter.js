@@ -81,13 +81,13 @@
     }
 
     function concatXML (xmls) {
-      let result = <></>;
+      let result = ``;
       xmls.forEach(function (xml) result += xml);
       return result;
     }
 
     function langList (info, name) {
-      let result = <></>;
+      let result = ``;
       let i = info.length();
       while (i-- > 0) {
         if (info[i].@lang.toString()) {
@@ -124,7 +124,7 @@
       if (!tag)
         tag = 'div';
 
-      let result = <></>;
+      let result = ``;
 
       for (let i = 0, l = info.length(); i < l; i++) {
         let it = info[i];
@@ -146,8 +146,8 @@
     };
 
     let files = io.File(pluginDirPath).readDirectory();
-    let indexHtml = <></>;
-    let allHtml = <></>;
+    let indexHtml = ``;
+    let allHtml = ``;
     let pminfos = [];
 
     files.forEach(function (file) {
@@ -236,7 +236,7 @@
                                    true,
                                    function (it) (it.toString()) || '---')
 
-          let versionsBody = <></>;
+          let versionsBody = ``;
 
           VERSIONS.forEach(function (ver) {
             let url = CodeReposBranch + ver + '/' + pluginFilename;
@@ -245,17 +245,17 @@
             file.append(ver);
             file.append(pluginFilename);
             versionsBody +=
-              <>
+              `
                 <dt>{'for ' + ver}</dt>
-                {file.exists() ?  <a href={url} class="coderepos" target="_blank">{url}</a> : <>not supported</>}
-              </>;
+                {file.exists() ?  <a href={url} class="coderepos" target="_blank">{url}</a> : `not supported`}
+              `;
           });
 
           versionsBody +=
-            <>
+            `
               <dt>{'for Nightly'}</dt>
               <a href={CodeRepos + pluginFilename} class="coderepos" target="_blank">{CodeRepos + pluginFilename}</a>
-            </>;
+            `;
 
 
 //                      <dt>Vimperator version</dt>

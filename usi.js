@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="usi.js" version="1.3.4"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."
@@ -55,7 +54,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -496,12 +495,12 @@ let INFO =
             }
             let n = new Date().getTime();
             Utils.timeArraySort(cs);
-            let contents = <></>;
+            let contents = ``;
             for (let [, [d, [a, b]]] in Iterator(cs)) {
               let hl = (n - d) > 0 ? 'ErrorMsg' : '';
               contents += <tr highlight={hl}><td>{a}</td><td>{b}</td></tr>;
             }
-            liberator.echo(<><table>{contents}</table></>);
+            liberator.echo(`<table>{contents}</table>`);
           }
         }
       );

@@ -22,7 +22,7 @@
 (function () {
 
     function fixFilename (filename) {
-      const badChars = /[\\\/:;*?"<>|]/g;
+      const badChars = /[\\\/:;*?"`|]/g;
       return filename.replace(badChars, '_');
     }
 

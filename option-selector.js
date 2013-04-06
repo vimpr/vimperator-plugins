@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Option Selector</name>
   <description>Select a option of the select element.</description>
@@ -51,7 +51,7 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
      "select" 要素上で <C-i> を打つ。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

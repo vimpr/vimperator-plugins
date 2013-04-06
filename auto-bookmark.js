@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="AutoBookmark" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
@@ -65,7 +64,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -356,10 +355,10 @@ let INFO =
           template.map(
             bookmarks,
             function ([name, data]) {
-              return <>
+              return `
                 <dt style="font-weight: bold">{name}</dt>
                 <dd>{data.current.title} <a href={data.current.URL}> {data.current.URL} </a> ({def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}) ({def(data, 'pages.length', '?')})</dd>
-              </>;
+              `;
             }
           )
         }</dl>
@@ -447,7 +446,7 @@ let INFO =
             let name = args.literalArg;
             let data = bookmarks.get(name);
             if (data) {
-              liberator.echo(<>
+              liberator.echo(`
                 <dl>
                   <dt>Name</dt>
                   <dd>{name}</dd>
@@ -464,7 +463,7 @@ let INFO =
                     template.map(data.pages, function (it) (<li>{it.URL}</li>))
                   }</dd>
                 </dl>
-              </>);
+              `);
             } else {
               liberator.echoerr('Bookmark not found: ' + name);
             }
@@ -548,7 +547,7 @@ let INFO =
         title = name;
 
       if (bookmarks.get(name)) {
-        error.data = String(<>"{name}" already exists</>);
+        error.data = String(`"{name}" already exists`);
         return false;
       }
 
@@ -559,7 +558,7 @@ let INFO =
       updateCurrent(data, url, title);
 
       if (!initializeTab(tab, data)) {
-        error.data = String(<>This tab is already started</>);
+        error.data = String(`This tab is already started`);
         return false;
       }
 

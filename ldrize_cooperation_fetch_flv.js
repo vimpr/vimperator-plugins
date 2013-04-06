@@ -1,5 +1,5 @@
 // Last Change: 12-Jun-2009. Jan 2008
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>Flv Downloader for Nicovideo</description>
@@ -42,7 +42,7 @@ Flv downloader for nicovideo.
     Nicovideo Mylist of registration destination.
 ||<
     ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 function Deferred () this instanceof Deferred ? this.init(this) : new Deferred();
@@ -184,7 +184,7 @@ var groupId = liberator.globalVariables.nicovideo_mylist || '';
 
 function NiconicoFlvHandler(url, title) {
     let videoId = url.match(/\w{2}\d+/)[0];
-    let fileName = title.replace(/[?\\*\/:<>|"]/g, '_') + '.flv';
+    let fileName = title.replace(/[?\\*\/:`|"]/g, '_') + '.flv';
 
     Deferred.http.get(nicoApiEndPoint + videoId).next(function(apiResult){
         let flvUrl = decodeURIComponent(apiResult.responseText.match(/url=(.*?)&/)[1]);

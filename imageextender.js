@@ -32,7 +32,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>extend image operation.</description>
@@ -144,7 +144,7 @@ image_skip_prompt='true'
 と設定すると、 ';g' で画像の URL をヤンクする拡張ヒントモードが開始されます。
 ';e' で画像を保存しますが、その際ダイアログは表示されません。
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 ( function () {
 

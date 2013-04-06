@@ -1,6 +1,5 @@
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="atnd" version="0.1.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/atnd.js"
           summary="Atndのイベント検索"
@@ -20,7 +19,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

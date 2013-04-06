@@ -5,7 +5,7 @@
   http://www.gnu.org/copyleft/gpl.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>marker PageDown/PageUp.</description>
@@ -44,7 +44,7 @@ let g:marker_reader_mapping = "J,K"
 adds mapping J = mnext, K = mprev.
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 plugins.marker_reader = (function() {
 

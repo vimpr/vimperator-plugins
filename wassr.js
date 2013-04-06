@@ -81,13 +81,13 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
-                <>
+                `
                     <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
                          title={status.user.screen_name}
                          class="wassr photo"/>
                     <strong>{status.user_login_id}&#x202C;</strong>
-                </>.toSource()
+                `.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
                     sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.html))
                         .join("<br/>");
@@ -126,13 +126,13 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             statuses.map(function(status)
-                <>
+                `
                     <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
                          title={status.user.screen_name}
                          class="wassr photo"/>
                     <strong>{status.user_login_id}&#x202C;</strong>
-                </>.toSource()
+                `.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
                     sprintf(': <span class="wassr entry-content">%s&#x202C;</span>', status.html))
                         .join("<br/>");
@@ -150,12 +150,12 @@
         ]]></style>.toSource()
             .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         for (var n = 0; n < items.length; n++)
-            html += <>
+            html += `
                 <strong>{items[n].getElementsByTagName('title')[0].textContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/^%/, '')}&#x202C;</strong>
                 : <span class="wassr entry-content">{items[n].getElementsByTagName('description')[0].textContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<')}&#x202C;</span>
 
                 <br />
-            </>.toSource()
+            `.toSource()
                 .replace(/(?:\r?\n|\r)[ \t]*/g, " ");
         liberator.echo(html, true);
     }
@@ -198,13 +198,13 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             todos.map(function(todo)
-                <>
+                `
                     <img src="http://wassr.jp/img/icn-balloon.gif"
                          alt="todo"
                          title="todo"
                          class="wassr icon"/>
                     <strong>{todo.todo_rid}</strong>
-                </>.toSource()
+                `.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
                     sprintf(': <span class="wassr entry-content">%s</span>', todo.body))
                         .join("<br/>");
@@ -223,13 +223,13 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             footmarks.map(function(footmark)
-                <>
+                `
                     <img src={"http://wassr.jp/user/" + footmark.login_id + "/profile_img.png.32"}
                          alt={footmark.nick}
                          title={footmark.nick}
                          class="wassr photo"/>
                     <strong>{footmark.login_id}&#x202C;</strong>
-                </>.toSource()
+                `.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ")).join("<br/>");
 
         liberator.echo(html, true);
@@ -246,13 +246,13 @@
         ]]></style>.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ") +
             footmarks.map(function(footmark)
-                <>
+                `
                     <img src={"http://wassr.jp/user/" + footmark.login_id + "/profile_img.png.32"}
                          alt={footmark.nick}
                          title={footmark.nick}
                          class="wassr photo"/>
                     <strong>{footmark.login_id}&#x202C;</strong>
-                </>.toSource()
+                `.toSource()
                    .replace(/(?:\r?\n|\r)[ \t]*/g, " ")).join("<br/>");
 
         liberator.echo(html, true);

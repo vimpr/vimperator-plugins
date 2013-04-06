@@ -30,7 +30,7 @@
 //
 // }}}
 // PLUGIN INFO: {{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Open livedoor Reader pinned items</description>
@@ -142,7 +142,7 @@ var PLUGIN_INFO =
       linkに該当するピンを一覧から削除する。
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 let self = liberator.plugins.pino = (function() {
   // COMMAND /////////////////////////////////////////////////////// {{{

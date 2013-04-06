@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Auto Source</name>
   <description>Sourcing automatically when the specified file is modified.</description>
@@ -65,8 +65,8 @@ let PLUGIN_INFO =
       - :aso! taro.js
       - :autoso[urce]! taro.js
   ]]></detail>
-</VimperatorPlugin>;
-let INFO =
+</VimperatorPlugin>`;
+let INFO = xml`
 <plugin name="Auto Source" version="1.6.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/auto_source.js"
         summary="Sourcing automatically when the specified file is modified."
@@ -95,7 +95,7 @@ let INFO =
       </dl>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 // }}}
 
 // Links:

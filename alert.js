@@ -7,7 +7,7 @@
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Alert</name>
   <name lang="ja">アラート</name>
@@ -48,7 +48,7 @@ let PLUGIN_INFO =
       JavaScriptでSLを走らせる「SL.JS」を作りました ::: creazy photograph
       http://creazy.net/2008/02/sl_js.html
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {
@@ -388,14 +388,14 @@ let PLUGIN_INFO =
       let sleep = parseFloat(arg || 3) * 1000;
       let sz = innerWidth / msg.length / 1.5;
       liberator.echo(
-        <div style="background: white; color: black;">
+        xml`<div style="background: white; color: black;">
           <table>
             <tr>
               <td><img src={gunsou}/></td>
               <td style={"font-size: " + sz + "px; white-space: nowrap;"}>{msg}</td>
             </tr>
           </table>
-        </div>
+        </div>`
       );
       setTimeout(next, sleep);
     },

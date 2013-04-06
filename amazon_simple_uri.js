@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>amazon_simple_uri</name>
   <description>Copy Amazon Simple URI.</description>
@@ -19,7 +19,7 @@ var PLUGIN_INFO =
 と設定することにより、Amazon アソシエイトID(上の例ではhogehoge-22)をURLに追加します。
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 //
 (function()

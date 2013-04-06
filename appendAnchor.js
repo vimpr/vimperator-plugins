@@ -1,4 +1,4 @@
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>
@@ -27,7 +27,7 @@ let PLUGIN_INFO =
       g:auto_append_anchor_once:
         最初の一回だけ。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function(){
 

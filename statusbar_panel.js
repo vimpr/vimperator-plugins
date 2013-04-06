@@ -1,4 +1,4 @@
-let INFO = //{{{
+let INFO = xml` //{{{
 <plugin name="statusbar panel" version="0.1"
         href="https://github.com/vimpr/vimperator-plugins/raw/master/statusbar_panel.js"
         summary="Click statusbar panel"
@@ -29,7 +29,7 @@ let INFO = //{{{
             <p><oa>-double-click</oa>を指定するとダブルクリックになります。</p>
         </description>
   </item>
-</plugin>;
+</plugin>`;
 //}}}
 
 let MOUSE_BUTTON_LEFT = 0;
@@ -140,7 +140,7 @@ commands.addUserCommand(['statusbarpanel'],'click statusbar panel',
             context.keys = { text: 'text', description: 'desc', icon: 'icon' };
             context.compare = CompletionContext.Sort.unsorted;
             context.process = [function (item, text) {
-                return <><span highlight="CompIcon">{item.icon ? item.icon : <></>}</span><span class="td-strut"/>{text}</>
+                return `<span highlight="CompIcon">{item.icon ? item.icon : ``}</span><span class="td-strut"/>{text}`
             }];
 
             var list = generateStatusbarpaneIDlList(arg);

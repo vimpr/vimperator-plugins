@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>autoproxychanger</name>
   <description>setting proxy</description>
@@ -50,7 +50,7 @@ var PLUGIN_INFO =
       EOM
       ||<
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.AutoProxyChanger = (function() {
 var gVar = liberator.globalVariables;

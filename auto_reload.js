@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Auto Reload</name>
   <name lang="ja">自動リロード</name>
@@ -51,7 +51,7 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
     制作中
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

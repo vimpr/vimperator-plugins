@@ -7,7 +7,7 @@
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
 /*
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>libly(filename _libly.js)</name>
     <description>Vimperator plugins library?</description>
@@ -190,7 +190,7 @@ clearCache:
   wedata 読込み成功したら、強制的にキャッシュと置き換えるの作って！
 
     ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 */
 //}}}
 //if (!liberator.plugins.libly) {

@@ -1,5 +1,5 @@
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Map behave like text-object</description>
@@ -52,7 +52,7 @@ let PLUGIN_INFO =
           t:
             Tabs
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 // Vimperator plugin: 'Map behave like text-object'

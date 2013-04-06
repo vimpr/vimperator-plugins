@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Link Opener</name>
   <name lang="ja">Link Opener</name>
@@ -49,11 +49,10 @@ let PLUGIN_INFO =
   <detail><![CDATA[
     :help link-opener-plugin
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="link-opener" version="2.3.2"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"
@@ -153,7 +152,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 // Usage:
@@ -336,7 +335,7 @@ let INFO =
           context.process = [
             process[0],
             function (item, text)
-              (item.thumbnail ? <><img src={item.thumbnail} style={CompItemStyle}/>{text}</>
+              (item.thumbnail ? `<img src={item.thumbnail} style={CompItemStyle}/>{text}`
                               : process[1].apply(this, arguments))
           ];
           context.completions = lolinks.map(function (it, i) ({elem: it, index: i}));

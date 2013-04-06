@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Yet Mappings</name>
   <description>Display the keys that are not mapped yet.</description>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
     == Links ==
       http://d.hatena.ne.jp/nokturnalmortum/20081109/1226223461
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

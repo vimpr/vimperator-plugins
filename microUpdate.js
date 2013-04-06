@@ -31,7 +31,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Update blog more quickly.</description>
@@ -67,7 +67,7 @@ let PLUGIN_INFO =
     == ToDo ==
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 plugins.microUpdate = (function() {
 
@@ -84,12 +84,12 @@ plugins.microUpdate = (function() {
       transport.open('POST', this.endpoint['collection'], false /* synchronous */);
       transport.setRequestHeader('X-WSSE', hatena.wsseHeader);
       transport.setRequestHeader('Content-Type', 'application/atom+xml;type=entry;charset="utf-8"');
-      transport.send(<>
+      transport.send(`
           <entry xmlns="http://purl.org/atom/ns#">
             <title>{title}</title>
             <content type="text/plain">{content}</content>
           </entry>
-      </>.toXMLString());
+      `.toXMLString());
       return transport.responseXML;
     }
   };

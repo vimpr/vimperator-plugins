@@ -32,7 +32,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Happy Happy Vimperator</name>
   <description>This plugin makes you to True Vimperatorer</description>
@@ -51,7 +51,7 @@ let PLUGIN_INFO =
     == Requirements ==
     Steel Heart
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

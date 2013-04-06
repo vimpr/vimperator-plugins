@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>localkeymode</name>
   <description>assign temporary keymap</description>
@@ -52,7 +52,7 @@ var PLUGIN_INFO =
       extra:
       noremap, count 等の指定。addUserMap にて使用されます。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.LocalKeyMode = (function() {
 

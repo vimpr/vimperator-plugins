@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>AmebaNau</name>
   <name lang="ja">Amebaなう</name>
@@ -55,10 +55,10 @@ let PLUGIN_INFO =
         let g:amebanow_multipost = "twitter|wassr"
       ||<
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
+let INFO = xml`
 <plugin name="AmebaNow" version="1.0.4"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/amebanow.js"
         summary="AmebaNau"
@@ -77,7 +77,7 @@ let INFO =
       </p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 // }}}
 
 

@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Command Menu</name>
   <description>Execute main-menu and tool-bar by ex-command.</description>
@@ -65,7 +65,7 @@ let PLUGIN_INFO =
     == Requires ==
       XUL/Migemo アドオン
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 // TODO ==

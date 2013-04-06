@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="Win Cursor" version="1.3.2"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"
@@ -119,7 +118,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -558,7 +557,7 @@ let INFO =
   function displayCurrent () {
     let pos = API.position;
     let col = API.getPixel(pos);
-    return liberator.echo(<>[Position] {pos.x}, {pos.y} [Color] {col.r}, {col.g}, {col.b} ({col.name})</>);
+    return liberator.echo(`[Position] {pos.x}, {pos.y} [Color] {col.r}, {col.g}, {col.b} ({col.name})`);
   }
 
   commands.addUserCommand(

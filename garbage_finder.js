@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Garbage Finder</name>
   <name lang="ja">ゴミ探し</name>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
       :garbages:
         (追加|削除)された変数を表示。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {
@@ -116,7 +116,7 @@ let PLUGIN_INFO =
     function (args) {
       function makeLI (list) {
         if (list.length) {
-          let result = <></>;
+          let result = ``;
           list.forEach(function (it) (result += <li>{it}</li>));
           return <ol>{result}</ol>;
         }

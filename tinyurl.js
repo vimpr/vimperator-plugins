@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>TinyURL from Vimperator</description>
@@ -23,7 +23,7 @@ plugins.tinyurl.getExpand(url):
     return ExpandURL
 
     ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function() {

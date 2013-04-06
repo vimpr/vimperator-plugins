@@ -30,7 +30,7 @@
 //
 // }}}
 // PLUGIN INFO: {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Make notify hatebu-count when specified site's hatebu-count changed.</description>
@@ -89,7 +89,7 @@ let PLUGIN_INFO =
       - 監視フレームワークにのっける
 
     ]]></detail>
-  </VimperatorPlugin>;
+  </VimperatorPlugin>`;
 // }}}
 
 // Clear all watchers if started watcher exists.

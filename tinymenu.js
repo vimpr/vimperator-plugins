@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Tiny Menu for Vimperator</description>
@@ -17,7 +17,7 @@ thx icon id:tnx.
   :opentinymenu:
     Open the tiny menu.
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
     if (!liberator.plugins.tinymenu)

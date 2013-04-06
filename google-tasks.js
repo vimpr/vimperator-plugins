@@ -1,4 +1,4 @@
-var INFO =
+var INFO = xml`
 <plugin name="google-tasks.js"
         version="0.1"
         summary="For Google Tasks"
@@ -6,7 +6,7 @@ var INFO =
   <author email="ebith.h@gmail.com">ebith</author>
   <license href="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
   <project name="Vimperator" minVersion="3.3"/>
-</plugin>;
+</plugin>`;
 
 
 let httpGet = util.httpGet;
@@ -43,17 +43,17 @@ function setup() {
       access_token = getAccessToken();
       let url = rest_uri + '/users/@me/lists?oauth_token=' + access_token;
       let lists = JSON.parse(httpGet(url).responseText).items;
-      let tbody = <></>;
+      let tbody = ``;
       for (let i=0; i<lists.length; i++) {
         let url = rest_uri + '/lists/' + lists[i].id + '/tasks?oauth_token=' + access_token;
         let tasks = JSON.parse(httpGet(url).responseText).items;
         if (!tasks) { continue; } //空っぽのリストは飛ばす
         for (let i2=0; i2<tasks.length; i2++) {
-          let taskTitle = (tasks[i2].status == 'completed') ? <>&#x2611;<del>{tasks[i2].title}</del></>  : <>&#x2610;{tasks[i2].title}</>;
+          let taskTitle = (tasks[i2].status == 'completed') ? `&#x2611;<del>{tasks[i2].title}</del>`  : `&#x2610;{tasks[i2].title}`;
           tbody += <tr style="border-bottom: 1px dotted;"><td style="width: 20%">{lists[i].title}</td><td>{taskTitle}</td></tr>;
         }
       }
-      liberator.echo(<><table style="width: 100%; line-height: 1.6; border-collapse: collapse; border-top: 1px solid;">{tbody}</table></>);
+      liberator.echo(`<table style="width: 100%; line-height: 1.6; border-collapse: collapse; border-top: 1px solid;">{tbody}</table>`);
     },
     {
       subCommands: [

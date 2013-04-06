@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="Caret Hint" version="1.4.0"
           href="http://vimpr.github.com/"
           summary="Move caret position by hint"
@@ -161,7 +160,7 @@ let INFO =
       </p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 /*       _\|/_

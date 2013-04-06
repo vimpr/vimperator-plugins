@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="ePub Reader" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="for ePub Reader addon"
@@ -102,7 +101,7 @@ let INFO =
       一つのアクションに複数のマッピングをしたいときは、スペースで区切ります。
     </p>
   </plugin>
-</>;
+`;
 // }}}
 
 

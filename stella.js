@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Stella</name>
   <name lang="ja">すてら</name>
@@ -239,7 +239,7 @@ addLocalMappings(
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081213/1229168832
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 /* {{{
@@ -366,7 +366,7 @@ Thanks:
     },
 
     fixFilename: function (filename) {
-      const badChars = /[\\\/:;*?"<>|]/g;
+      const badChars = /[\\\/:;*?"`|]/g;
       return filename.replace(badChars, '_');
     },
 
@@ -2033,7 +2033,7 @@ Thanks:
               context.process = [
                 process[0],
                 function (item, text)
-                  (item.thumbnail ? <><img src={item.thumbnail} style="margin-right: 0.5em; height: 3em;"/>{text}</>
+                  (item.thumbnail ? `<img src={item.thumbnail} style="margin-right: 0.5em; height: 3em;"/>{text}`
                                   : process[1].apply(this, arguments))
               ];
               lastCompletions = self.player.relations;

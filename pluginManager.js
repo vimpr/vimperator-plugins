@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Manage Vimperator Plugins</description>
@@ -99,7 +99,7 @@ detail:
 - スタイルの追加(これはすべき？)
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.pluginManager = (function(){
 
@@ -109,22 +109,22 @@ var tags = { // {{{
     name: function(info) fromUTF8Octets(info.toString()),
     author: function(info){
         var name = fromUTF8Octets(info.toString());
-        var xml = <>{name}</>;
+        var xml = `{name}`;
         if (info.@mail.toString() != '')
-            xml += <><span> </span>&lt;<a href={'mailto:'+name+' <'+info.@mail+'>'} highlight="URL">{info.@mail}</a>&gt;</>;
+            xml += `<span> </span>&lt;<a href={'mailto:'+name+' <'+info.@mail+'>'} highlight="URL">{info.@mail}</a>&gt;`;
         if (info.@homepage.toString() != '')
-            xml += <><span> </span>({makeLink(info.@homepage.toString())})</>;
+            xml += `<span> </span>({makeLink(info.@homepage.toString())})`;
         return xml;
     },
     description: function(info) makeLink(fromUTF8Octets(info.toString())),
     license: function(info){
-        var xml = <>{fromUTF8Octets(info.toString())}</>;
+        var xml = `{fromUTF8Octets(info.toString())}`;
         if (info.@document.toString() != '')
-            xml += <><span> </span>{makeLink(info.@document.toString())}</>;
+            xml += `<span> </span>{makeLink(info.@document.toString())}`;
         return xml;
     },
     require: function(infos){
-        let xml = <></>;
+        let xml = ``;
         for (let i=0; i<infos.length(); i++){
             let info = infos[i];
             let name = info.toString();
@@ -195,10 +195,10 @@ function makeLink(str, withLink){
     while (s.length > 0) {
         let m = s.match(/(?:https?:\/\/|mailto:)\S+/);
         if (m) {
-            result += <>{s.slice(0, m.index)}<a href={withLink ? m[0] : '#'} highlight="URL">{m[0]}</a></>;
+            result += `{s.slice(0, m.index)}<a href={withLink ? m[0] : '#'} highlight="URL">{m[0]}</a>`;
             s = s.slice(m.index + m[0].length);
         } else {
-            result += <>{s}</>;
+            result += `{s}`;
             break;
         }
     }
@@ -230,7 +230,7 @@ Plugin.prototype = { // {{{
     initialize: function(path, context){
         this.path = path;
         this.name = context.NAME;
-        this.info = context.PLUGIN_INFO || <></>;
+        this.info = context.PLUGIN_INFO || ``;
         this.getItems();
     },
     getItems: function(){
@@ -386,7 +386,7 @@ var WikiParser = (function () {
         return new arguments.callee(lines, result, indents);
 
     this.lines = lines;
-    this.result = result || <></>;
+    this.result = result || ``;
     this.indents = indents || [];
   }
   State.prototype = {
@@ -439,7 +439,7 @@ var WikiParser = (function () {
     Array.concat(ary);
 
   function xmlJoin (xs, init) {
-    let result = init || <></>;
+    let result = init || ``;
     for (let i = 0, l = xs.length; i < l; i++)
       result += xs[i];
     return result;
@@ -470,13 +470,13 @@ var WikiParser = (function () {
   // FIXME
   function link (s) {
     let m;
-    let result = <></>;
+    let result = ``;
     while (s && (m = s.match(/(?:https?:\/\/|mailto:)\S+/))) {
-      result += <>{RegExp.leftContext || ''}<a href={m[0]}>{m[0]}</a></>;
+      result += `{RegExp.leftContext || ''}<a href={m[0]}>{m[0]}</a>`;
       s = RegExp.rightContext;
     }
     if (s)
-      result += <>{s}</>;
+      result += `{s}`;
     return result;
   }
 
@@ -591,7 +591,7 @@ var WikiParser = (function () {
         if (m) {
           let h = m[2];
           let next = C.many(self.wikiLine)(st.next.indent(m[1]));
-          return next.indentBack().set(xmlJoin([<>{h}<br/></>].concat(next.result))).wrap('li');
+          return next.indentBack().set(xmlJoin([`{h}<br/>`].concat(next.result))).wrap('li');
         }
         return Error(c, st);
       };
@@ -606,7 +606,7 @@ var WikiParser = (function () {
 
       emptyLine: function emptyLine (st) {
         if (/^\s*$/.test(st.head)) {
-          return st.next.set(<></>);
+          return st.next.set(``);
         }
         return Error('spaces', st);
       },
@@ -614,7 +614,7 @@ var WikiParser = (function () {
       // St -> St XML
       plain: function plain (st) {
         let text = st.head;
-        return st.next.set(<>{stripAndLink(text)}<br/></>);
+        return st.next.set(`{stripAndLink(text)}<br/>`);
       },
 
       // St -> St XML
@@ -750,7 +750,7 @@ HTMLStack.prototype = { // {{{
         }
         var buf = this.last[this.last.length()-1];
         if (buf.nodeKind() == 'text'){
-            this.last[this.last.length()-1] += this.isInline(xml) ? <><br/>{xml}</> : xml;
+            this.last[this.last.length()-1] += this.isInline(xml) ? `<br/>{xml}` : xml;
         } else if (this.isInline(xml)){
             this.stack[this.length-1] += xml;
         } else if (buf.localName() == xml.localName()){
@@ -783,7 +783,7 @@ HTMLStack.prototype = { // {{{
             if (tmp[tmp.length()-1].nodeKind() == 'element'){
                 buf[buf.length()-1].* += xml;
             } else {
-                buf[buf.length()-1].* += <><br/>{xml}</>;
+                buf[buf.length()-1].* += `<br/>{xml}`;
             }
         } else {
             this.last[this.last.length()-1].* += xml;
@@ -965,14 +965,14 @@ var public = {
         return plugins.filter(function(plugin) names.indexOf(plugin.name) >= 0);
     },
     checkVersion: function(names){
-        let xml = <></>;
+        let xml = ``;
         this.getPlugins(names).forEach(function(plugin){
             xml += plugin.checkVersion();
         });
         return xml;
     },
     update: function(names){
-        let xml = <></>;
+        let xml = ``;
         this.getPlugins(names).forEach(function(plugin){
             xml += plugin.updatePlugin();
         });
@@ -986,7 +986,7 @@ var public = {
         return;
     },
     list: function(names, verbose){
-        let xml = <></>
+        let xml = ``
         this.getPlugins(names).forEach(function(plugin){
             xml += plugin.itemFormatter(verbose);
         });

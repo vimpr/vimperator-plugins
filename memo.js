@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Write a memo to the specified file.</description>
@@ -59,7 +59,7 @@ let PLUGIN_INFO =
       :memo fooooobar!
         "fooooobar!" と、メモに書く
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 // References:
@@ -122,7 +122,7 @@ let PLUGIN_INFO =
       if (arg.literalArg) {
         puts(arg.literalArg);
       } else {
-        let out = <></>;
+        let out = ``;
         gets().split(/\n/).reverse().forEach(function (l) {
           out += <li>{l}</li>
         });

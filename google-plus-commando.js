@@ -34,8 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="GooglePlusCommando" version="2.4.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"
@@ -230,7 +229,7 @@ let g:gplus_commando_map_menu            = "m"
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -522,7 +521,7 @@ let g:gplus_commando_map_menu            = "m"
         // エントリにコメント
         function get1 (root) {
           function button (editor, name)
-            editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
+            editor.parentNode.querySelector(S.role('button', `[id$=".{name}"]`));
 
           if (!root)
             return;
@@ -574,7 +573,7 @@ let g:gplus_commando_map_menu            = "m"
         // ダイアログ
         function get3 (root) {
           function button (editor, name)
-            editor.parentNode.querySelector(S.role('button', <>[id$=".{name}"]</>));
+            editor.parentNode.querySelector(S.role('button', `[id$=".{name}"]`));
 
           if (!root)
             return;
@@ -832,7 +831,7 @@ let g:gplus_commando_map_menu            = "m"
         ps.backgroundColor = 'white';
         ps.border = 'solid 1px grey';
       }
-      panel.innerHTML = <>
+      panel.innerHTML = `
         <table>
           <tr><th>入力</th>           <th>効果</th>                   <th>解説</th>                                 </tr>
           <tr><td>*TEXT*</td>         <td><b>TEXT</b></td>            <td>太字</td>                                 </tr>
@@ -843,7 +842,7 @@ let g:gplus_commando_map_menu            = "m"
           <tr><td>-ね こ-</td>        <td><s>ね こ</s></td>           <td>英数字や半角スペースを入れたらOK</td>     </tr>
           <tr><td>-Aねこす-</td>      <td><s>Aねこす</s></td>         <td>英数字を前後に入れても良い</td>           </tr>
         </table>
-      </>;
+      `;
 
       move(panel);
       parent.appendChild(panel);
@@ -1122,7 +1121,7 @@ let g:gplus_commando_map_menu            = "m"
           for (let [, root] in Iterator(roots)) {
             if (!root.visible)
               continue;
-            xpath.push(String(<>div[contains(@class, "{s2x(S.closeButton)}")]</>));
+            xpath.push(String(`div[contains(@class, "{s2x(S.closeButton)}")]`));
             xpath = xpath.map(function (it) (root.selector + '//' + it));
             break;
           }

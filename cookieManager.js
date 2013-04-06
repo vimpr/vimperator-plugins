@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Manage Cookies (list, remove, add/remove permission)</description>
@@ -40,7 +40,7 @@ Cookie の管理をするプラグイン
 補完機能を存分にお楽しみください :)
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.cookieManager = (function(){
 
@@ -135,7 +135,7 @@ commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
         if (!host) return;
         switch (args[0]){
             case "list":
-                let xml = <></>;
+                let xml = ``;
                 let tree = cManager.stored.getTree(host);
                 for (let name in tree){
                     xml += template.table(name, [[c.name, c.value] for each(c in tree[name])]);

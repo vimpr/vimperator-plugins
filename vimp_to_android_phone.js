@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 	<name>{NAME}</name>
 	<description>Send to your Android Phone</description>
@@ -7,7 +7,7 @@ var PLUGIN_INFO =
 	<minVersion>2.3</minVersion>
 	<maxVersion>2.3</maxVersion>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/vimp_to_android_phone.js</updateURL>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
 

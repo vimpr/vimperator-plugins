@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>show application information</description>
@@ -15,7 +15,7 @@ appinfo [information]:
     echo and copy mozilla information
 
      ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function() {

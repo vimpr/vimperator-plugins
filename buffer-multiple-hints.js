@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="BufferMultipeHints" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Open multiple hints in tabs (;F) at the same time."
@@ -57,7 +56,7 @@ let INFO =
     <require type="plugin">_libly.js</require>
     <p>This plugin requires _libly.js.</p>
   </plugin>
-</>;
+`;
 // }}}
 
 

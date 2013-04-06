@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Mouse Gestures</name>
   <name lang='ja'>マウスジェスチャー</name>
@@ -68,7 +68,7 @@ var PLUGIN_INFO =
     - noremap flag
       キーを送る、かつ、そのキーコードを noremap で処理を行いたい場合、true を指定してください。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.MouseGestures = (function() {
 

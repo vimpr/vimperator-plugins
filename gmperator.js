@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Vimperator plugin for Greasemonkey</description>
@@ -105,7 +105,7 @@ liberator.plugins.gmperator:
                               )
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function(){
 
@@ -235,7 +235,7 @@ liberator.plugins.gmperator = (function(){ //{{{
 // ---------------------------
 commands.addUserCommand(['gmli[st]','lsgm'],'list Greasemonkey scripts', //{{{
     function(args){
-        var xml = <></>;
+        var xml = ``;
         var scripts = GM_getConfig().scripts;
         var reg;
         if (args.bang || args.string == 'full'){

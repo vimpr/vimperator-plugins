@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>extension manager</name>
   <name lang="ja">アドオン管理</name>
@@ -56,11 +56,10 @@ let PLUGIN_INFO =
     read the help with the below command.
     ":help extension-manager-plugin"
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="extension-manager" version="1.1.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/extension-manager.js"
           summary="extension manager"
@@ -144,7 +143,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

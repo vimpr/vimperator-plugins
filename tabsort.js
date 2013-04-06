@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>tabsort</name>
   <description>Add ":tabsort" and ":tabuniq" command.</description>
@@ -59,7 +59,7 @@ let PLUGIN_INFO =
     ||<
     なんかを .vimperatorrc に書いておくと良いよ。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

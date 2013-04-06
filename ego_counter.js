@@ -16,7 +16,7 @@
   let update = function(color) {
     myHatebu.setAttribute(
       'src',
-      <>http://b.hatena.ne.jp/bc/{color}/{MY_SITE}/</>.toSource()
+      `http://b.hatena.ne.jp/bc/{color}/{MY_SITE}/`.toSource()
     );
   };
 

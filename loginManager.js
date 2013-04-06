@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>login manager</description>
@@ -17,7 +17,7 @@ var PLUGIN_INFO =
 === TODO ===
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function(){

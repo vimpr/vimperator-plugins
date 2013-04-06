@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <name lang="ja">{NAME}</name>
@@ -62,7 +62,7 @@ let PLUGIN_INFO =
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081111#1226414487
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

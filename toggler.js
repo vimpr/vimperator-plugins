@@ -91,7 +91,7 @@ var manager = {
 		}
 	},
 	list: function(name){
-		var xml = <></>;
+		var xml = ``;
 		if (name && (name in settings)){
 			xml += settings[name].list();
 		} else {

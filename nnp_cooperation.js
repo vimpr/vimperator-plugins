@@ -140,7 +140,7 @@ liberator.modules.commands.addUserCommand(
         }
 
         // evaluate variables
-        let xml = <>
+        let xml = `
             {style()}
             {table({
                 numofDisplay: (nodesLength < numofList) ? nodesLength : numofList,
@@ -149,7 +149,7 @@ liberator.modules.commands.addUserCommand(
                 statuses:     getStatusText(playlistNode.id),
                 items:        items,
             })}
-        </>
+        `
 
         liberator.echo(xml, liberator.modules.commandline.FORCE_MULTILINE);
     },

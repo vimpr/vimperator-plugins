@@ -1,4 +1,4 @@
-var INFO =
+var INFO = xml`
 <plugin name="Statusline Toolbar" version="0.1"
         href="http://github.com/vimpr/vimperator-plugins/raw/master/statusline-toolbar.js"
         summary="Append Toolbar to Statusline"
@@ -29,7 +29,7 @@ var INFO =
         </p>
       </description>
     </item>
-</plugin>;
+</plugin>`;
 
 var updater = {
   "star-button": [
