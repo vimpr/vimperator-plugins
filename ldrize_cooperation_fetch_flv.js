@@ -218,7 +218,7 @@ function NiconicoMylistHandler(url, title){
             var csrfToken = getElementsByXPath('//input[@name="csrf_token"]', html)[0].value;
             var mylists = getElementsByXPath('id("mylist_add_group_id")/option', html).map(function(element) [element.innerHTML, element.value]);
 
-            var params = [['ajax', '1'], ['mylist', 'add'], ['mylist_add', '“o˜^'], ['csrf_token', csrfToken], ['group_id', groupId]].map(function(p) p[0] + "=" + encodeURIComponent(p[1])).join("&");
+            var params = [['ajax', '1'], ['mylist', 'add'], ['mylist_add', 'ç™»éŒ²'], ['csrf_token', csrfToken], ['group_id', groupId]].map(function(p) p[0] + "=" + encodeURIComponent(p[1])).join("&");
             return Deferred.wait(count++ * 5).next(function(est){
                 return Deferred.http.post(nicoWatchEndPoint + videoId, params).next(function(mylistResult){
                         liberator.log(mylistResult.responseText);
