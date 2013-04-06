@@ -30,7 +30,7 @@ var PLUGIN_INFO =
     引数を複数指定する場合は配列形式で指定してください。
     applauncher_charset を指定すると、渡される文字列が指定の文字セットに変換されます。
   ]]></detail>
-</VimperatorPlugin>
+</VimperatorPlugin>;
 
 liberator.plugins.AppLauncher = (function(){
   const UConv = Cc['@mozilla.org/intl/scriptableunicodeconverter'].getService(Ci.nsIScriptableUnicodeConverter);

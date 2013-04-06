@@ -29,7 +29,7 @@ var INFO =
         </p>
       </description>
     </item>
-</plugin>
+</plugin>;
 
 var updater = {
   "star-button": [
