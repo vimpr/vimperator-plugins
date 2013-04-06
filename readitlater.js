@@ -412,18 +412,18 @@ let PLUGIN_INFO = xml`
 
 		req.addEventListener("success",function(data){
 			let res = libly.$U.evalJson(data.responseText);
-			liberator.echo(
+			liberator.echo(xml`
 			<style type="text/css"><![CDATA[
 				div.stats{font-weight:bold;text-decoration:underline;color:gold;padding-left:1em;line-height:1.5em;}
-			]]></style> +
-			<div>#ReadItLater Stats</div> +
-			<div class="stats">
-				since : {unixtimeToDate(res.user_since)} <br />
-				list : {res.count_list} <br />
-				unread : {res.count_unread} <br />
-				read : {res.count_read} <br />
+			]]></style>` +
+			xml`<div>#ReadItLater Stats</div>` +
+			xml`<div class="stats">
+				since : ${unixtimeToDate(res.user_since)} <br />
+				list : ${res.count_list} <br />
+				unread : ${res.count_unread} <br />
+				read : ${res.count_read} <br />
 			</div>
-			);
+			`);
 		});
 
 		req.addEventListener("failure",function(data){
@@ -452,17 +452,17 @@ let PLUGIN_INFO = xml`
 		);
 
 		req.addEventListener("success",function(data){
-			liberator.echo(
+			liberator.echo(xml`
 			<div>
-				X-Limit-User-Limit : {data.transport.getResponseHeader("X-Limit-User-Limit")} <br />
-				X-Limit-User-Remaining : {data.transport.getResponseHeader("X-Limit-User-Remaining")} <br />
-				X-Limit-User-Reset : {data.transport.getResponseHeader("X-Limit-User-Reset")} <br />
-				X-Limit-Key-Limit : {data.transport.getResponseHeader("X-Limit-Key-Limit")} <br />
-				X-Limit-Key-Remaining : {data.transport.getResponseHeader("X-Limit-Key-Remaining")} <br />
-				X-Limit-Key-Reset : {data.transport.getResponseHeader("X-Limit-Key-Reset")} <br />
+				X-Limit-User-Limit : ${data.transport.getResponseHeader("X-Limit-User-Limit")} <br />
+				X-Limit-User-Remaining : ${data.transport.getResponseHeader("X-Limit-User-Remaining")} <br />
+				X-Limit-User-Reset : ${data.transport.getResponseHeader("X-Limit-User-Reset")} <br />
+				X-Limit-Key-Limit : ${data.transport.getResponseHeader("X-Limit-Key-Limit")} <br />
+				X-Limit-Key-Remaining : ${data.transport.getResponseHeader("X-Limit-Key-Remaining")} <br />
+				X-Limit-Key-Reset : ${data.transport.getResponseHeader("X-Limit-Key-Reset")} <br />
 
 			</div>
-			);
+			`);
 		});
 
 		req.addEventListener("failure",function(data){

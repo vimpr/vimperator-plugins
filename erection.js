@@ -79,7 +79,7 @@ let INFO = xml`
 
 (function () {
 
-  const VERSION = INFO.@version[0];
+  const VERSION = '1.1.1';
 
   function erect (callback) {
     const VC =
@@ -225,7 +225,7 @@ let INFO = xml`
           ['s[how]'],
           'Show text and image',
           makeErectionCommand(function (e) {
-            liberator.echo(`
+            liberator.echo(xml`
               <div style="height: 800px">
                 <h1>{e.text}</h1>
                 <img src={e.imageURL} />

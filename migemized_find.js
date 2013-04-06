@@ -255,7 +255,7 @@ let INFO = xml`
   }
 
   let colorsCompltions = [
-    [name, <span style={'color: ' + name}>{'\u25a0 ' + value}</span>]
+    [name, xml`<span style=${'color: ' + name}>${'\u25a0 ' + value}</span>`]
     for each ([name, value] in Iterator(colors))
   ];
 

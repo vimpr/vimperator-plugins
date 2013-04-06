@@ -44,7 +44,7 @@ let INFO = xml`
     <project name="Vimperator" minVersion="3.0"/>
     <p>
       <code><![CDATA[
-:cabbrev -javascript .song let (song = plugins.mpdCurrentsong.API.getSongInfo()) `{song.Title} / {song.Artist} #NowPlaying`
+:cabbrev -javascript .song let (song = plugins.mpdCurrentsong.API.getSongInfo()) xml\`\${song.Title} / \${song.Artist} #NowPlaying\`
       ]]> </code>
     </p>
   </plugin>
@@ -58,7 +58,7 @@ let INFO = xml`
     <project name="Vimperator" minVersion="3.0"/>
     <p>
       <code><![CDATA[
-:cabbrev -javascript .song let (song = plugins.mpdCurrentsong.API.getSongInfo()) `{song.Title} / {song.Artist} #NowPlaying`
+:cabbrev -javascript .song let (song = plugins.mpdCurrentsong.API.getSongInfo()) xml\`\${song.Title} / \${song.Artist} #NowPlaying\`
       ]]> </code>
     </p>
   </plugin>

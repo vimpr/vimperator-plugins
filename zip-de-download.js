@@ -6,7 +6,7 @@ let INFO = xml`
   <author email="teramako@gmail.com">teramako</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
   <project name="Vimperator" minVersion="2.3"/>
-  <p xmlns={XHTML}>
+  <p xmlns=${XHTML}>
     特定ページの画像とかのURLを取ってきて一気にZIPにしてダウンロードするお
     <code style='font-family: sans-serif !important;'><![CDATA[
 　　　　　　　　　　　　 ／）
@@ -17,7 +17,7 @@ let INFO = xml`
 　　　　／　 　,i　　　,二ﾆ⊃（ ●）.　（●）＼
 　　　/　 　　ﾉ　　　 ilﾞフ::::::⌒（__人__）⌒::::: ＼
 　　　　　　,ｲ｢ﾄ､　　,!,!|　　　　　|r┬-|　　　　　|
-　　　　　/　iﾄヾヽ_/ｨ"＼ 　　 　 `ー'´ 　 　 ／
+　　　　　/　iﾄヾヽ_/ｨ"＼ 　　 　 \`ー'´ 　 　 ／
     ]]></code>
   </p>
   <item>

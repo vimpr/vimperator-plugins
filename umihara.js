@@ -137,7 +137,7 @@ let PLUGIN_INFO = xml`
   ];
 
   function echo (msg) {
-    liberator.echo(<pre>{msg}</pre>);
+    liberator.echo(xml`<pre>${msg}</pre>`);
   }
 
   function kawase (value, clipboard, from, to) {

@@ -43,17 +43,17 @@ function setup() {
       access_token = getAccessToken();
       let url = rest_uri + '/users/@me/lists?oauth_token=' + access_token;
       let lists = JSON.parse(httpGet(url).responseText).items;
-      let tbody = ``;
+      let tbody = xml``;
       for (let i=0; i<lists.length; i++) {
         let url = rest_uri + '/lists/' + lists[i].id + '/tasks?oauth_token=' + access_token;
         let tasks = JSON.parse(httpGet(url).responseText).items;
         if (!tasks) { continue; } //空っぽのリストは飛ばす
         for (let i2=0; i2<tasks.length; i2++) {
-          let taskTitle = (tasks[i2].status == 'completed') ? `&#x2611;<del>{tasks[i2].title}</del>`  : `&#x2610;{tasks[i2].title}`;
-          tbody += <tr style="border-bottom: 1px dotted;"><td style="width: 20%">{lists[i].title}</td><td>{taskTitle}</td></tr>;
+          let taskTitle = (tasks[i2].status == 'completed') ? xml`&#x2611;<del>${tasks[i2].title}</del>`  : `&#x2610;${tasks[i2].title}`;
+          tbody += xml`<tr style="border-bottom: 1px dotted;"><td style="width: 20%">${lists[i].title}</td><td>${taskTitle}</td></tr>`;
         }
       }
-      liberator.echo(`<table style="width: 100%; line-height: 1.6; border-collapse: collapse; border-top: 1px solid;">{tbody}</table>`);
+      liberator.echo(xml`<table style="width: 100%; line-height: 1.6; border-collapse: collapse; border-top: 1px solid;">{tbody}</table>`);
     },
     {
       subCommands: [

@@ -350,18 +350,15 @@ let INFO = xml`
     'autobookmark',
     'Auto bookmarking',
     function () {
+      function block ([name, data]) {
+        return xml`
+          <dt style="font-weight: bold">${name}</dt>
+          <dd>${data.current.title} <a href=${data.current.URL}> ${data.current.URL} </a> (${def(data, 'scroll.x', '?')}, ${def(data, 'scroll.y', '?')}) (${def(data, 'pages.length', '?')})</dd>
+        `;
+      }
+
       liberator.echo(
-        <dl>{
-          template.map(
-            bookmarks,
-            function ([name, data]) {
-              return `
-                <dt style="font-weight: bold">{name}</dt>
-                <dd>{data.current.title} <a href={data.current.URL}> {data.current.URL} </a> ({def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}) ({def(data, 'pages.length', '?')})</dd>
-              `;
-            }
-          )
-        }</dl>
+        xml`<dl>${template.map(bookmarks, block)}</dl>`
       );
     },
     {
@@ -446,21 +443,21 @@ let INFO = xml`
             let name = args.literalArg;
             let data = bookmarks.get(name);
             if (data) {
-              liberator.echo(`
+              liberator.echo(xml`
                 <dl>
                   <dt>Name</dt>
-                  <dd>{name}</dd>
+                  <dd>${name}</dd>
                   <dt>Start URL</dt>
-                  <dd><a href={data.start.URL}>{data.start.URL}</a></dd>
+                  <dd><a href=${data.start.URL}>{data.start.URL}</a></dd>
                   <dt>Current Title</dt>
-                  <dd>{data.current.Title}</dd>
+                  <dd>${data.current.Title}</dd>
                   <dt>Current URL</dt>
-                  <dd><a href={data.current.URL}>{data.current.URL}</a></dd>
+                  <dd><a href=${data.current.URL}>{data.current.URL}</a></dd>
                   <dt>Current Position</dt>
-                  <dd>{def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}</dd>
+                  <dd>${def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}</dd>
                   <dt>Pages</dt>
-                  <dd>{
-                    template.map(data.pages, function (it) (<li>{it.URL}</li>))
+                  <dd>${
+                    template.map(data.pages, function (it) (`<li>${it.URL}</li>`))
                   }</dd>
                 </dl>
               `);

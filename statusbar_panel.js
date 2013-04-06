@@ -52,15 +52,14 @@ function getImages(panel) {
 }
 
 function makeIcon(panel) {
-    var icon = <image xmlns={XUL.uri}/>;
+    var icon = xml`<image xmlns=${XUL.uri}/>`;
     var image = getImages(panel)[0];
 
     if (image) {
         let style = window.getComputedStyle(image, null);
         let src = image.src || style.listStyleImage.replace(/^url\("(.+)"\)$/, '$1');
         if (src != '') {
-            icon.@style = 'list-style-image: url("' + src + '");' +
-                          '-moz-image-region: ' + style.MozImageRegion;
+            icon.setAttribute('style','list-style-image: url("' + src + '");' + '-moz-image-region: ' + style.MozImageRegion);
         }
     }
     return icon;
@@ -140,7 +139,7 @@ commands.addUserCommand(['statusbarpanel'],'click statusbar panel',
             context.keys = { text: 'text', description: 'desc', icon: 'icon' };
             context.compare = CompletionContext.Sort.unsorted;
             context.process = [function (item, text) {
-                return `<span highlight="CompIcon">{item.icon ? item.icon : ``}</span><span class="td-strut"/>{text}`
+                return xml`<span highlight="CompIcon">{item.icon ? item.icon : ``}</span><span class="td-strut"/>{text}`
             }];
 
             var list = generateStatusbarpaneIDlList(arg);
