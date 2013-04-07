@@ -122,9 +122,9 @@ let PLUGIN_INFO = xml`
       if (arg.literalArg) {
         puts(arg.literalArg);
       } else {
-        let out = ``;
+        let out = xml``;
         gets().split(/\n/).reverse().forEach(function (l) {
-          out += <li>{l}</li>
+          out += xml`<li>${l}</li>`;
         });
         liberator.echo(out);
       }
@@ -142,16 +142,16 @@ let PLUGIN_INFO = xml`
           let desc = item[1] || this.process[1].call(this, item, item.description);
 
           if (item.description && item.description.length) {
-            return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
+            return xml`<div highlight=${highlightGroup || "CompItem"} style="white-space: nowrap">
                 <li highlight="CompDesc">
-                  {item.description}
+                  ${item.description}
                 </li>
-            </div>;
+            </div>`;
           }
 
-          return <div highlight={highlightGroup || "CompItem"} style="white-space: nowrap">
-              <li highlight="CompDesc">{item[0]}&#160;</li>
-          </div>;
+          return xml`<div highlight=${highlightGroup || "CompItem"} style="white-space: nowrap">
+              <li highlight="CompDesc">${item[0]}&#160;</li>
+          </div>`;
         };
         context.filters = [function (item) this.match(item.description)];
 

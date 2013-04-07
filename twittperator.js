@@ -1707,9 +1707,9 @@ let INFO = xml`
         let center = m[0];
         let [head, tail] = [center[0], center.slice(1)];
         let right = str.substring(m.index + m[0].length);
-        let content = head === "@" ? `<a highlight="URL" href=${setting.showTLURLScheme + "://twitter.com/" + tail}> ${center} </a>`
-                                   : `<a highlight="URL" href=${center}> ${center} </a>`;
-        return `${Utils.anchorLink(left)}${content}${Utils.anchorLink(right)}`;
+        let content = head === "@" ? xml`<a highlight="URL" href=${setting.showTLURLScheme + "://twitter.com/" + tail}> ${center} </a>`
+                                   : xml`<a highlight="URL" href=${center}> ${center} </a>`;
+        return xml`${Utils.anchorLink(left)}${content}${Utils.anchorLink(right)}`;
       }
       return str;
     }, // }}}
