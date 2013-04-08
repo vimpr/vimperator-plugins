@@ -115,4 +115,16 @@ let INFO = xml`
     );
   }
 
+  U.around(
+    quickmarks,
+    'jumpTo',
+    function (next, args) {
+      let qmark = args[0];
+      let url = quickmarks._qmarks.get(qmark);
+      if (!(url && jump(url))) {
+        return next();
+      }
+    }
+  );
+
 })();
