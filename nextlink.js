@@ -5,7 +5,7 @@
   http://www.gnu.org/copyleft/gpl.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>nextlink</name>
   <description>mapping "[[", "]]" by AutoPagerize XPath.</description>
@@ -62,7 +62,7 @@ n:
 
 == TODO ==
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 liberator.plugins.nextlink = (function() {
 

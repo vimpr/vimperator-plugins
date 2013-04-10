@@ -1,5 +1,5 @@
 // {{{ INFO
-var INFO =
+var INFO =xml`
 <plugin name="pixiv.js" version="0.7.3"
         summary="Download image from pixiv"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/pixiv.js"
@@ -19,7 +19,7 @@ var INFO =
       <p>You must login pixiv.</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 // }}}
 
 commands.addUserCommand(

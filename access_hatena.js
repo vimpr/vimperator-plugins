@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Access to Hatena Sevices quickly.</description>
@@ -46,7 +46,7 @@ map ; :accesshatena
 # 最後にスペースを入れておくと直ぐにホストの入力から始められます．
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 (function(){
     var useWedata;
     var ignoreIds;

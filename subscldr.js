@@ -9,7 +9,7 @@
 // }}}
 //
 // PLUGIN INFO: {{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Adds subscriptions to livedoor Reader/Fastladder in place.</description>
@@ -44,7 +44,7 @@ var PLUGIN_INFO =
     ||<
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 liberator.plugins.subscldr = (function() {

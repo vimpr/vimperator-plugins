@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>options migrate user_pref</description>
@@ -41,7 +41,7 @@ EOF
 ||<
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
     let p = function(msg) {

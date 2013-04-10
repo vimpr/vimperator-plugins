@@ -5,18 +5,16 @@
   http://www.opensource.jp/licenses/mit-license.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>{NAME}</name>
-  <description>request, and the result is displayed to the buffer.</description>
-  <description lang="ja">リクエストの結果をバッファに出力する。</description>
-  <author mail="suvene@zeromemory.info" homepage="http://zeromemory.sblo.jp/">suVene</author>
-  <version>0.4.16</version>
-  <license>MIT</license>
-  <minVersion>2.0pre</minVersion>
-  <maxVersion>2.3</maxVersion>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/multi_requester.js</updateURL>
-  <detail><![CDATA[
+var INFO = xml`
+<plugin name="multi_requester" version="0.4.16"
+        href="https://github.com/vimpr/vimperator-plugins/raw/master/multi_requester.js"
+        summary="request, and the result is displayed to the buffer."
+        xmlns="http://vimperator.org/namespaces/liberator">
+    <author href="http://zeromemory.sblo.jp/">suVene</author>
+    <license>MIT</license>
+    <project name="Vimperator" minVersion="3.6"/>
+    <p>
+      <code><![CDATA[
 == Needs Library ==
 - _libly.js(ver.0.1.19)
   @see http://coderepos.org/share/browser/lang/javascript/vimperator-plugins/trunk/_libly.js
@@ -99,9 +97,9 @@ let g:multi_requester_order = 'count'; // date by default
 ||<
 補完の順番を設定します。(大きい順に並びます)
 "count" または "date" を設定してください。
-
-   ]]></detail>
-</VimperatorPlugin>;
+      ]]></code>
+    </p>
+</plugin>`;
 //}}}
 (function() {
 if (!liberator.plugins.libly) {

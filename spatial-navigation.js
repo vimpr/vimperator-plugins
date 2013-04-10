@@ -38,7 +38,7 @@
 /* Original version is "SpatialNavigation.js" of Firefox. */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Spatial Navigation</name>
   <name lang="ja">空間ナビゲーション</name>
@@ -54,11 +54,10 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
     Read the help. (:help SpatialNavigation-plugin)
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="SpatialNavigation" version="1.0.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/spatial-navigation.js"
           summary="Spatial navigation"
@@ -95,7 +94,7 @@ let g:spatial_navigation_mappings="&lt;A-h> &lt;A-j> &lt;A-k> &lt;A-l>"
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

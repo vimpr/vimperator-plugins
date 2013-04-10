@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="Chaika-Controller" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="for Chika"
@@ -59,7 +58,7 @@ let INFO =
       </p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {

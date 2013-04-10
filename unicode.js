@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Copy the escaped-unicode text to the clipboard.</description>
@@ -50,7 +50,7 @@ let PLUGIN_INFO =
       :uc <MULTIBYTE_TEXT>
       :uc! <ESCAPED_UNICODE_TEXT>
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

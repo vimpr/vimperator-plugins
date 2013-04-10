@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Clear highlight or highlight keywords in Hatena Services.</description>
@@ -26,7 +26,7 @@ Google で検索してはてなにアクセスしたときにハイライトを�
 ||<
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 (function(){
     function toggleHighlight(isClear) {
         var elements = window.content.document.getElementsByTagName('span');

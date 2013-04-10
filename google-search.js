@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Google Search, and AutoComplete.</description>
@@ -17,7 +17,7 @@ var PLUGIN_INFO =
 google suggest での飛び先はあくまで google ですが、このプラグインは google の検索結果先に飛びます。
 この plugin を作ってから multi_requester.js の存在をしってあっちを使えば・・・、と思いました。いちおう favicon が表示されたりします。
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
 

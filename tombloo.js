@@ -1,4 +1,4 @@
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Tombloo integrate plugin</description>
@@ -35,7 +35,7 @@ let PLUGIN_INFO =
     ツールバーから選択できる Tombloo のメニューを実行します
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

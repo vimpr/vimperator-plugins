@@ -1,6 +1,6 @@
 /* NEW BSD LICENSE {{{
 Copyright (c) 2009-2010, anekos.
-Copyright (c) 2012, Jagua.
+Copyright (c) 2012-2013, Jagua.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -33,26 +33,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-// PLUGIN_INFO {{{
-let PLUGIN_INFO =
-<VimperatorPlugin>
-  <name>Microsoft Translator</name>
-  <name lang="ja">Microsoft Translator</name>
-  <description>Translate with Microsoft AJAX Language API</description>
-  <version>1.0.0</version>
-  <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
-  <author homepage="https://github.com/Jagua">Jagua</author>
-  <license>new BSD License (Please read the source code comments of this plugin)</license>
-  <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
-  <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/microsoft-translator.js</updateURL>
-  <require>_libly.js</require>
-  <minVersion>2.3</minVersion>
-  <maxVersion>3.3</maxVersion>
-</VimperatorPlugin>;
-// }}}
-
 // INFO {{{
-let INFO =
+let INFO = xml`
 <plugin name="Microsoft Translator" version="1.0.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/microsoft-translator.js"
         summary="Translate with Microsoft AJAX Language API"
@@ -90,7 +72,7 @@ let INFO =
       </dl>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 // }}}
 
 (function () {

@@ -1,5 +1,5 @@
 // {{{ INFO
-var INFO =
+var INFO =xml`
 <plugin name="goo.gl.js" version="0.2"
         summary="google url shortener"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/goo.gl.js"
@@ -15,7 +15,7 @@ var INFO =
       <p>Shorten URL by used of google</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 // }}}
 
 commands.addUserCommand(

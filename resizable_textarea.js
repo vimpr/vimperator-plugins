@@ -5,7 +5,7 @@
   http://www.opensource.jp/licenses/mit-license.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Allows you to resize textareas.</description>
@@ -41,7 +41,7 @@ you can resize current component by using a keyboad.
 "escape" or "enter":
   end of resize.
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 (function() {
 

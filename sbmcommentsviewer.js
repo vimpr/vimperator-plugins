@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
@@ -43,7 +43,7 @@ e.g.)
  一度取得したものは(30分ほど)キャッシュに貯めてますので何度も見直すことが可能です。
  粋なコマンド名募集中
      ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 liberator.plugins.sbmCommentsViewer = (function(){
 
 var isFilterNoComments = liberator.globalVariables.sbm_comments_viewer_filter_nocomments || false;
@@ -74,11 +74,11 @@ SBMContainer.prototype = { //{{{
         ));
     },
     toHTML: function(format, countOnly){
-        var label = <>
-            {this.faviconURL ? <img src={this.faviconURL} width="16" height="16" style="vertical-align: middle; margin-right: 5px;" /> : <></>}
+        var label = `
+            {this.faviconURL ? <img src={this.faviconURL} width="16" height="16" style="vertical-align: middle; margin-right: 5px;" /> : ``}
             {manager.type[this.type] + ' ' + this.count + '(' + this.entries.length + ')'}
-            {this.pageURL ? <a href="#" highlight="URL" style="margin-left: 5px;">{this.pageURL}</a> : <></>}
-        </>;
+            {this.pageURL ? <a href="#" highlight="URL" style="margin-left: 5px;">{this.pageURL}</a> : ``}
+        `;
         if (countOnly){
             return label;
         } else {
@@ -87,7 +87,7 @@ SBMContainer.prototype = { //{{{
             </div>;
             let self = this;
             xml.* += (function(){
-                var div = <></>;
+                var div = ``;
                 self.entries.forEach(function(e){
                     if (isFilterNoComments && !e.comment) return;
                     div += e.toHTML(format);
@@ -129,10 +129,10 @@ SBMEntry.prototype = { //{{{
             while (s.length > 0) {
                 let m = s.match(/(?:https?:\/\/|mailto:)\S+/);
                 if (m) {
-                    result += <>{s.slice(0, m.index)}<a href={withLink ? m[0] : '#'} highlight="URL">{m[0]}</a></>;
+                    result += `{s.slice(0, m.index)}<a href={withLink ? m[0] : '#'} highlight="URL">{m[0]}</a>`;
                     s = s.slice(m.index + m[0].length);
                 } else {
-                    result += <>{s}</>;
+                    result += `{s}`;
                     break;
                 }
             }
@@ -144,7 +144,7 @@ SBMEntry.prototype = { //{{{
         format.forEach(function(colum){
             switch(colum){
                 case 'id':
-                    xml.* += <span class="liberator-sbmcommentsviewer-id" style="margin-right: 10px;">{self.userIcon ? <><img src={self.userIcon} width="16" height="16" style="margin-right: 5px; vertical-align: middle;"/>{self.id}</> : <>{self.id}</>}</span>;
+                    xml.* += <span class="liberator-sbmcommentsviewer-id" style="margin-right: 10px;">{self.userIcon ? `<img src={self.userIcon} width="16" height="16" style="margin-right: 5px; vertical-align: middle;"/>{self.id}` : `{self.id}`}</span>;
                     break;
                 case 'timestamp':
                     xml.* += <span class="liberator-sbmcommentsviewer-timestamp" style="margin-right: 10px;">{self.formatDate()}</span>;

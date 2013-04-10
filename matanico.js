@@ -1,4 +1,4 @@
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>update Twitter status to current video/search page information and comment.</description>
@@ -111,7 +111,7 @@ matanico_related_tag_format:
 matanico_related_tag_servicename:
     matanico_related_tag_format で指定した $SERVICENAME 部分がこの値で展開されます。書式はそのままで投稿する文字列のみを変更したい場合にこの値を変更することで設定が容易になります。設定なしの場合 "またキーワードでニコニコタグ検索してる" が使用されます。
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

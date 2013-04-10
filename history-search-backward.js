@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>History search backward like UNIX shell.</description>
@@ -16,7 +16,7 @@ liberator.globalVariables.history_search_backward_map = ['<C-r>'];
 ||<
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
     let p = function(msg) {

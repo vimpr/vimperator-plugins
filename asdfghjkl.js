@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>asdfghjkl;</name>
   <description>Inputting numbers by asdfghjkl; keys in hint mode.</description>
@@ -85,7 +85,7 @@ let PLUGIN_INFO =
     == Link ==
       http://d.hatena.ne.jp/nokturnalmortum/20081021#1224543467
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

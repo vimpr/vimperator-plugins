@@ -1,5 +1,5 @@
-// INFO //
-var INFO =
+// {{{ INFO
+var INFO =xml`
 <plugin name="onclick.js" version="0.2"
         summary="Emulate onClick event."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/onclick.js"
@@ -27,7 +27,8 @@ For Exsample,
       ]]></code>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 (function(){
   let onclick=function(args){

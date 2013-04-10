@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Auto focus frame</name>
   <description>Automatically focus to largest frame.</description>
@@ -54,7 +54,7 @@ let PLUGIN_INFO =
       インストールするだけ
       一番面積の大きいフレームをフォーカスします
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

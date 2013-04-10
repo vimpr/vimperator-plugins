@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="FoxAge2ch" version="1.3.1"
           href="https://github.com/vimpr/vimperator-plugins/blob/master/foxage2ch.js"
           summary="for FoxAge2ch addon"
@@ -78,7 +77,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

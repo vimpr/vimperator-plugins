@@ -1,4 +1,4 @@
-let INFO =
+let INFO = xml`
 <plugin name="Inspector" version="0.3"
         href="http://github.com/vimpr/vimperator-plugins/raw/master/inspector.js"
         summary="run DOM Inspector"
@@ -25,7 +25,7 @@ let INFO =
       <p>inspect the return value of evaluated the <a>expr</a></p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 
 
 var inspectorID = "inspector@mozilla.org";

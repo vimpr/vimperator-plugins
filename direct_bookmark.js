@@ -1,89 +1,92 @@
-var PLUGIN_INFO =
-<VimperatorPlugin>
-    <name>{NAME}</name>
-    <description>Direct Post to Social Bookmarks</description>
-    <author mail="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid">Trapezoid</author>
-    <version>0.19.0</version>
+var INFO = xml`<plugin name=${NAME} version="0.19.0"
+        href="https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js"
+        summary="Direct Post to Social Bookmarks"
+        lang="en_US"
+        xmlns="http://vimperator.org/namespaces/liberator">
+    <project name="Vimperator" minVersion="3.6"/>
+    <author email="trapezoid.g@gmail.com" homepage="http://unsigned.g.hatena.ne.jp/Trapezoid/">Trapezoid</author>
     <license>GPL</license>
-    <minVersion>2.0pre</minVersion>
-    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/direct_bookmark.js</updateURL>
-    <detail><![CDATA[
-Social Bookmark direct add script for Vimperator 2.2
-for Migemo search: require XUL/Migemo Extension
+    <p>Social Bookmark direct add script</p>
+    <p>for Migemo search: require XUL/Migemo Extension</p>
+    <h3 tag="directBookmark_Parts">Parts</h3>
+    <ul>
+        <li>http://d.hatena.ne.jp/fls/20080309/p1</li>
+        <li>Pagerization (c) id:ofk</li>
+        <li>AutoPagerize (c) id:swdyh</li>
+        <li>direct_delb.js id:mattn</li>
+        <li>JSDeferred id:cho45</li>
+    </ul>
+    <h3 tag="directBookmark_variables">Viriables</h3>
+    <h4 tag="direct_sbm_use_services_by_tag">g:direct_sbm_use_services_by_tag</h4>
+    <p>Use social bookmark services to extract tags</p>
+    <dl>
+        <dt>h</dt><dd>Hatena Bookmark</dd>
+        <dt>d</dt><dd>del.icio.us</dd>
+        <dt>l</dt><dd>livedoor clip</dd>
+        <dt>g</dt><dd>Google Bookmarks</dd>
+        <dt>p</dt><dd>Places (Firefox bookmarks)</dd>
+        <dt>P</dt><dd>pinboard.in</dd>
+    </dl>
+    <p>Usage: <ex>let g:direct_sbm_use_services_by_tag = "hdl"</ex></p>
 
-== Parts ==
-- http://d.hatena.ne.jp/fls/20080309/p1
-- Pagerization (c) id:ofk
-- AutoPagerize (c) id:swdyh
-- direct_delb.js id:mattn
-- JSDeferred id:cho45
+    <h4 tag="direct_sbm_use_services_by_post">g:direct_sbm_use_services_by_post</h4>
+    <p>Use social bookmark services to post</p>
+    <dl>
+        <dt>h</dt><dd>Hatena Bookmark</dd>
+        <dt>d</dt><dd>del.icio.us</dd>
+        <dt>l</dt><dd>livedoor clip</dd>
+        <dt>g</dt><dd>Google Bookmarks</dd>
+        <dt>P</dt><dd>pinboard.in</dd>
+    </dl>
+    <p>Usage: <ex>let g:direct_sbm_use_services_by_post = "hdl"</ex></p>
 
+    <h4 tag="direct_sbm_echo_type">g:direct_sbm_echo_type</h4>
+    <p>Post message type</p>
+    <dl>
+        <dt>simple</dt><dd>single line, no posted services description</dd>
+        <dt>multiline</dt><dd>multi line, display services description</dd>
+        <dt>none</dt><dd>hide post message</dd>
+    </dl>
 
-== Variables ==
-=== g:direct_sbm_use_services_by_tag ===
->||
-      Use social bookmark services to extract tags
-          'h': Hatena Bookmark
-          'd': del.icio.us
-          'l': livedoor clip
-          'g': Google Bookmarks
-          'p': Places (Firefox bookmarks)
-          'P': pinboard.in
-      Usage: let g:direct_sbm_use_services_by_tag = "hdl"
-||<
-=== g:direct_sbm_use_services_by_post ===
->||
-      Use social bookmark services to post
-          'h': Hatena Bookmark
-          'd': del.icio.us
-          'l': livedoor clip
-          'g': Google Bookmarks
-          'P': pinboard.in
-      Usage: let g:direct_sbm_use_services_by_post = "hdl"
-||<
-=== g:direct_sbm_echo_type ===
->||
-      Post message type
-          'simple'    : single line, no posted services description
-          'multiline' : multi line, display services description
-          'none'      : hide post message
-||<
-=== g:direct_sbm_is_normalize ===
->||
-      Use normalize permalink
-||<
-=== g:direct_sbm_is_use_migemo ===
->||
-      Use Migemo completion
-||<
-=== g:direct_sbm_private ===
->||
-      Private bookmark
-||<
+    <h4 tag="direct_sbm_is_normalize">g:direct_sbm_is_normalize</h4>
+    <p>Use normalize permalink</p>
 
+    <h4 tag="direct_sbm_is_use_migemo">g:direct_sbm_is_use_migemo</h4>
+    <p>Use Migemo completion</p>
 
-== Commands ==
-=== :btags ===
->||
-      Extract tags from social bookmarks for completion
-||<
-=== :sbm ===
->||
-      Post a current page to social bookmarks
-      Arguments
-          -s,-service: default:"hdl"
-              Specify target SBM services to post
-||<
-=== :bentry ===
->||
-      Goto Bookmark Entry Page
-||<
-=== :bicon ===
->||
-      Show Bookmark Count as Icon
-||<
-   ]]></detail>
-</VimperatorPlugin>;
+    <h4 tag="direct_sbm_private">g:direct_sbm_private</h4>
+    <p>Private bookmark</p>
+
+    <item>
+        <tags>:btags</tags>
+        <spec>:btags</spec>
+        <description>
+            <p>Extract tags from social bookmarks for completion</p>
+        </description>
+    </item>
+    <item>
+        <tags>:sbm</tags>
+        <spec>:sbm <oa>-s<oa>ervice</oa> <a>service</a></oa></spec>
+        <description>
+            <p>Post a current page to social bookmarks.</p>
+            <p><a>service</a>: Specify target SBM services to post (default: "hdl")</p>
+        </description>
+    </item>
+    <item>
+        <tags>:bentry</tags>
+        <spec>:bentry</spec>
+        <description>
+            <p>Goto Bookmark Entry Page</p>
+        </description>
+    </item>
+    <item>
+        <tags>:bicon</tags>
+        <spec>:bicon</spec>
+        <description>
+            <p>Show Bookmark Count as Icon</p>
+        </description>
+    </item>
+</plugin>`;
 
 (function(){
     var evalFunc = window.eval;
@@ -347,12 +350,19 @@ for Migemo search: require XUL/Migemo Extension
             entryPage:'http://b.hatena.ne.jp/entry/%URL::HATENA%',
             poster:function(user,password,url,title,comment,tags){
                 var tagString = tags.length > 0 ? '[' + tags.join('][') + ']' : "";
-                var request =
-                    <entry xmlns="http://purl.org/atom/ns#">
-                        <title>dummy</title>
-                        <link rel="related" type="text/html" href={url}/>
-                        <summary type="text/plain">{tagString + comment}</summary>
-                    </entry>;
+                // TODO: xml`...` を使うとillegal character 言われる、、、何故？
+                /*
+                var request = xml`<entry xmlns="http://purl.org/atom/ns#">
+                    <title>dummy</title>
+                    <link rel="related" type="text/html" href=${url}/>
+                    <summary type="text/plain">${tagString + comment}</summary>
+                </entry>`;
+                */
+                var request = '<entry xmlns="http://purl.org/atom/ns#">' +
+                        '<title>dummy</title>' +
+                        '<link rel="related" type="text/html" href="' + url + '"/>' +
+                        '<summary type="text/plain">' + tagString + comment + '</summary>' +
+                    '</entry>';
                 var wsse = new WSSEUtils(user,password);
 
                 return Deferred.http({

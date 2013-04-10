@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>every.js</name>
   <description>to run a specified command every time at specified interval.</description>
@@ -87,7 +87,7 @@ let PLUGIN_INFO =
     == Links ==
       http://d.hatena.ne.jp/nokturnalmortum/20081102#1225552718
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 ps = [];

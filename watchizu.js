@@ -1,5 +1,5 @@
-// INFO //
-var INFO = 
+// {{{ INFO
+var INFO =xml`
 <plugin name="watchizu.js" version="0.1"
         summary="Get Watchizu URL of current machine location"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/watchizu.js"
@@ -17,7 +17,8 @@ var INFO =
       <p>You can get <link topic="http://watchizux.gsi.go.jp/index.html">Watchizu</link> URL of current machine location by this plugin.</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 (function(){
 	commands.addUserCommand(

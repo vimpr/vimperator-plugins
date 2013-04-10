@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Namakubi</name>
   <name lang="ja">生首</name>
@@ -60,10 +60,10 @@ let PLUGIN_INFO =
       喋ります！
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
+let INFO = xml`
 <plugin name="生首" version="1.0.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/namakubi.js"
         summary="Wonderful Namakubi Talker"
@@ -108,7 +108,7 @@ let INFO =
     <link topic="http://chi.usamimi.info/Program/Application/BouyomiChan/">http://chi.usamimi.info/Program/Application/BouyomiChan/</link>
     で Windows 用バイナリが手に入ります。
   </p>
-</plugin>;
+</plugin>`;
 // }}}
 
 (function () {

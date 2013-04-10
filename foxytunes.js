@@ -32,7 +32,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 }}} */
 
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Foxy Tunes</name>
   <description>for FoxyTunes</description>
@@ -60,7 +60,7 @@ var PLUGIN_INFO =
       + :ftprevious
       + :ftvolume <VOLUME>
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

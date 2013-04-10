@@ -1,5 +1,5 @@
-// INFO //
-var INFO =
+// {{{ INFO
+var INFO =xml`
 <plugin name="addhatebu.js" version="0.2"
         summary="Add Hatena Bookmark"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/addhatebu.js"
@@ -15,7 +15,8 @@ var INFO =
       <p>Add Hatena Bookmark</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 commands.addUserCommand(
   ['addhatebu'],

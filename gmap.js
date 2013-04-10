@@ -1,5 +1,5 @@
-// INFO //
-var INFO = 
+// {{{ INFO
+var INFO =xml`
 <plugin name="gmap.js" version="0.1"
         summary="Get google maps URL of current machine location."
         href="http://github.com/vimpr/vimperator-plugins/blob/master/gmap.js"
@@ -24,7 +24,8 @@ var INFO =
       </dl>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 (function(){
 	commands.addUserCommand(

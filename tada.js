@@ -9,7 +9,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Show ToDo items in commandline buffer. Also add item to your Ta-da list.</description>
@@ -100,7 +100,7 @@ var PLUGIN_INFO =
       - 表示のパフォーマンス改善
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 liberator.plugins.tada = (function(){

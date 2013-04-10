@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 	<name>{NAME}</name>
 	<description>Add Hatena Star.</description>
@@ -8,7 +8,7 @@ var PLUGIN_INFO =
 	<minVersion>2.3pre</minVersion>
 	<maxVersion>2.3pre</maxVersion>
 	<updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/hatenaStar.js</updateURL>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 (function() {
 
 const Cc = Components.classes;

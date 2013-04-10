@@ -1,4 +1,4 @@
-var INFO =
+var INFO = xml`
 <plugin name="Statusline Toolbar" version="0.1"
         href="http://github.com/vimpr/vimperator-plugins/raw/master/statusline-toolbar.js"
         summary="Append Toolbar to Statusline"
@@ -29,7 +29,7 @@ var INFO =
         </p>
       </description>
     </item>
-</plugin>
+</plugin>`;
 
 var updater = {
   "star-button": [
@@ -39,7 +39,8 @@ var updater = {
     }
   ],
 };
-var css = <css><![CDATA[
+var css = xml`
+<css><![CDATA[
   #liberator-customize-toolbar {
     border: none !important;
     min-width: 5px !important;
@@ -49,18 +50,18 @@ var css = <css><![CDATA[
   #liberator-customize-toolbar .statusbar-resizerpanel { display: none; }
   #liberator-customize-toolbar toolbarbutton { padding: 0 !important; }
   #status-bar { background-color: transparent !important; }
-]]></css>.toString() +
+]]></css>`.toString() +
 ({
-  WINNT: <css></css>,
-  Linux: <css></css>,
-  Darwin: <css><![CDATA[
+  WINNT: xml`<css></css>`,
+  Linux: xml`<css></css>`,
+  Darwin: xml`<css><![CDATA[
     #liberator-customize-toolbar toolbarbutton {
       background: transparent !important;
       border: none !important;
       margin: 0 !important;
       padding: 0 !important;
     }
-  ]]></css>
+  ]]></css>`
 })[Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS].toString();
 
 function $(id) document.getElementById(id);

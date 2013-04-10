@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="longcat" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Longcat beautifies your life."
@@ -50,7 +49,7 @@ let INFO =
       <description><p>Meow!</p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 
@@ -195,7 +194,7 @@ let INFO =
     let canvas = doc.createElement('canvas');
     let bg = doc.createElement('div');
 
-    canvas.setAttribute('style', String(<><![CDATA[
+    canvas.setAttribute('style', String(`<![CDATA[
       position: absolute; !important;
       top: 0px !important;
       background-color: black !important;
@@ -203,9 +202,9 @@ let INFO =
       right: 0;
       left: 0;
       z-index: 666;
-    ]]></>));
+    ]]>`));
 
-    bg.setAttribute('style', String(<><![CDATA[
+    bg.setAttribute('style', String(`<![CDATA[
       position: fixed; !important;
       top: 0px;
       left: 0px;
@@ -213,7 +212,7 @@ let INFO =
       width: 100%;
       height: 100%;
       z-index: 616;
-    ]]></>));
+    ]]>`));
 
     canvas.width = 114;
     canvas.height = 100 + n * 100 + 30;

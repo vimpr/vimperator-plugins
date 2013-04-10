@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Auto Detect Link</name>
   <description>Find (next|previous) link, and jump.</description>
@@ -78,7 +78,7 @@ var PLUGIN_INFO =
           liberator.plugins.autoDetectLink.detect(false, {useBackHistory: false});
         ||<
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 
 (function () {

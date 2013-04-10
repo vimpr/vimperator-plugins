@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Google Kanji</name>
   <name lang="ja">Google 漢字</name>
@@ -55,7 +55,7 @@ let PLUGIN_INFO =
       が開き、補完が可能になるので、正しそうな漢字を選びます。
       すると、クリップボードにその漢字がコピーされます。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

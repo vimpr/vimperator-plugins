@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>clear privacy data</description>
@@ -48,7 +48,7 @@ var PLUGIN_INFO =
         で 1m2d3h は 32日と3時間 という意味になり、現在から32日と3時間前までのデータを削除します。
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 liberator.plugins.privacySanitizer = (function(){
 
 var isFx31 = (Application.version.substring(0, 3) == "3.1") 

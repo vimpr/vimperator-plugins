@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>refcontrol</name>
   <description>control referrer</description>
@@ -40,7 +40,7 @@ param:
   url:
     指定したURLでリファラーを送信します。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.RefControl = (function() {
 

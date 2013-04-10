@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>mkcolor</name>
   <name lang="ja">mkcolor</name>
@@ -51,7 +51,7 @@ let PLUGIN_INFO =
       - mkcolor <FILENAME>
         <FILENAME> に現在の Highlight 設定を書き出します。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

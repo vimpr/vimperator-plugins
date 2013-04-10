@@ -33,7 +33,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
    }}} */
 
-let PLUGIN_INFO = // {{{
+let PLUGIN_INFO = xml` // {{{
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Add/Delete a :dialog argument.</description>
@@ -62,7 +62,7 @@ let PLUGIN_INFO = // {{{
 :deldialog gmmanage
 ||<
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 /// }}}
 
 liberator.plugins.adddialog = (function(args) { // {{{

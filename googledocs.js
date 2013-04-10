@@ -37,7 +37,7 @@
  * */
 
 // Last Change: 2009/01/14 22:14:16.
-let PLUGIN_INFO = 
+let PLUGIN_INFO = xml` 
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>provide extended-hints modes for Google Docs</description>
@@ -74,7 +74,7 @@ Google Docs のトップページ ( http://docs.google.com/ ) で ';d' と押し
 let googledocs_mapping='g'
 ||<
     ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 
 ( function () {

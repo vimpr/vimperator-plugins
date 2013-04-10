@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>Adds "Yank element's text/html/attrs" or "Paste to element" hint mode</description>
@@ -38,7 +38,7 @@ set hintpastetags='//xpath|//xpath2';
     Paste(replace) to input/textarea.
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function() {
 var p = function(msg) {

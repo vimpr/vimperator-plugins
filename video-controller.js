@@ -34,8 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // PLUGIN_INFO {{{
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="VideoController" version="1.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/video-controller.js"
           summary="Control HTML5 Videos"
@@ -70,7 +69,7 @@ let INFO =
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

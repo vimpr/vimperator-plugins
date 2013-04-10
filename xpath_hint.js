@@ -5,7 +5,7 @@
     http://www.opensource.jp/licenses/mit-license.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>add "get element's XPath" hint mode</description>
@@ -22,7 +22,7 @@ var PLUGIN_INFO =
     copy selected element's XPath
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function(){

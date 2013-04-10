@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="XXXX" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="XXXXX"
@@ -95,7 +94,7 @@ EOM
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 

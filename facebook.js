@@ -1,6 +1,5 @@
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="facebook" version="0.2.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/facebook.js"
           summary="[facebook.js] コマンドラインからfacebookを操作するプラグイン"
@@ -152,7 +151,7 @@ let INFO =
 		</description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function(){

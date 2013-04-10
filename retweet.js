@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>retweet</name>
   <description>ReTweet This Page.</description>
@@ -19,7 +19,7 @@ Usage:
     ReTweet This Post.
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 //
 (

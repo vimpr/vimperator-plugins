@@ -1,5 +1,5 @@
-// INFO //
-var INFO = 
+// {{{ INFO
+var INFO =xml`
 <plugin name="jweather.js" version="0.1"
         summary="Get Japanese Weather Report"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/jweather.js"
@@ -16,7 +16,8 @@ var INFO =
       <p>See. <link topic="http://www.weathermap.co.jp/hitokuchi_rss/">http://www.weathermap.co.jp/hitokuchi_rss/</link></p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
+// }}}
 
 commands.addUserCommand(
 	['jw[eather]'],

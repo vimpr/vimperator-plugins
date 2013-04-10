@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="MyStyle" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Apply my style sheet to current page."
@@ -121,7 +120,7 @@ EOM
       </description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -129,14 +128,14 @@ EOM
   const StyleNamePrefix = 'my-style-';
 
   const DefaultDefinedStyle = {
-    BLACKBOARD: <><![CDATA[
+    BLACKBOARD: `<![CDATA[
       * {
         color: white !important;
         background-color: #004040 !important;
         background-image: none !important;
       }
-    ]]></>,
-    NEKOME: <><![CDATA[
+    ]]>`,
+    NEKOME: `<![CDATA[
       body {
         background-image: url(http://snca.net/images/redeye.jpg) !important;
       }
@@ -144,15 +143,15 @@ EOM
         background: transparent !important;
         color: white !important;
       }
-    ]]></>,
-    VIMPMASK: <><![CDATA[
+    ]]>`,
+    VIMPMASK: `<![CDATA[
       body {
         background-image: url(http://snca.net/images/ildjarn.png) !important;
         background-repeat: no-repeat !important;
         background-position: right bottom !important;
         background-attachment: fixed !important;
       }
-    ]]></>
+    ]]>`
   };
 
   if (!__context__.DefinedStyles) {

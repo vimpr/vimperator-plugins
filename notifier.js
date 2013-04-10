@@ -5,7 +5,7 @@
   http://www.opensource.jp/licenses/mit-license.html
 }}}  END LICENSE BLOCK ***/
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>change notice framework.</description>
@@ -122,7 +122,7 @@ buildMessages(diff):
   this.diff() により抽出されたオブジェクトを元に、liberator.plugins.notifier.Message のインスタンス、
   または、その配列を返却して下さい。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 (function() {
 if (!liberator.plugins.libly) {

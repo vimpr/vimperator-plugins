@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="refe" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="refe (Ruby reference) for vimperator"
@@ -75,7 +74,7 @@ let INFO =
       <description><p>補完で検索し、リファレンスのページを新しいタブに開きます。</p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {

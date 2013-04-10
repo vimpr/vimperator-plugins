@@ -22,7 +22,7 @@
 //      un-fav someone's last status.. mean remove Hatena Star.
 //  :haiku! #keyword
 //      show the keyword timeline.
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Hatena Haiku Client</description>
@@ -52,7 +52,7 @@ The script allows you to update Haiku status from Vimperator.
 :haiku! #keyword:
     show the keyword timeline.
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function(){
     liberator.plugins.haiku = {
@@ -149,8 +149,8 @@ The script allows you to update Haiku status from Vimperator.
         statuses.forEach(function(status) {
             var text = status.text;
             var keyword = status.keyword;
-            var star = status.favorited > 0 ? <><img src="http://s.hatena.ne.jp/images/star.gif"/><span style="color:orange;">{'x' + status.favorited}</span></> : <></>;
-            var replies = <></>;
+            var star = status.favorited > 0 ? `<img src="http://s.hatena.ne.jp/images/star.gif"/><span style="color:orange;">{'x' + status.favorited}</span>` : ``;
+            var replies = ``;
 
             if (text.indexOf(keyword+"=") == 0) text = status.text.substr(keyword.length + 1);
             text = convert(text);
@@ -159,16 +159,16 @@ The script allows you to update Haiku status from Vimperator.
             if (status.replies.length > 0){
                 replies = <dl class="haiku"></dl>;
                 status.replies.forEach(function(rep){
-                    replies.* += <>
+                    replies.* += `
                                  <dt>
                                     <img src={rep.user.profile_image_url} alt={rep.user.screen_name} class="haiku photo"/>
                                     <strong>{rep.user.name}</strong>
                                  </dt>
                                  <dd class="haiku entry-content">{rep.text.substr(keyword.length)}</dd>
-                                 </>;
+                                 `;
                 });
             }
-            html += <>
+            html += `
                 <div>
                     <img src={status.user.profile_image_url}
                          alt={status.user.screen_name}
@@ -182,7 +182,7 @@ The script allows you to update Haiku status from Vimperator.
                 </div>
                 {replies}
                 <hr/>
-            </>;
+            `;
         });
         return html;
     }

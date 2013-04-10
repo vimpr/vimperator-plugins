@@ -32,7 +32,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Maine Coon</name>
   <name lang="ja">メインクーン</name>
@@ -139,7 +139,7 @@ let PLUGIN_INFO =
     == メインクーン ==
       http://ja.wikipedia.org/wiki/%E3%83%A1%E3%82%A4%E3%83%B3%E3%82%AF%E3%83%BC%E3%83%B3
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 (function () {
 

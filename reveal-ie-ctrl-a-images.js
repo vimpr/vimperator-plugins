@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Reveal Image</name>
   <description>Reveal IE Ctrl-A images.</description>
@@ -63,7 +63,7 @@ let PLUGIN_INFO =
       g:reveal_ie_image_mode_reverse = 'R':
         反対版のヒントモード
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

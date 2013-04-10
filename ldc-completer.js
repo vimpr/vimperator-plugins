@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="LivedoorClipCompleter" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Add the completer for Livedoor Clip"
@@ -65,7 +64,7 @@ let INFO =
       <description><p>同期して、ローカルにインポートする。</p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {

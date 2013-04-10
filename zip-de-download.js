@@ -1,4 +1,4 @@
-let INFO =
+let INFO = xml`
 <plugin name="zip-de-download" version="0.7.1"
         href=""
         summary="ZIPでダウンロードするお"
@@ -6,7 +6,7 @@ let INFO =
   <author email="teramako@gmail.com">teramako</author>
   <license href="http://opensource.org/licenses/mit-license.php">MIT</license>
   <project name="Vimperator" minVersion="2.3"/>
-  <p xmlns={XHTML}>
+  <p xmlns=${XHTML}>
     特定ページの画像とかのURLを取ってきて一気にZIPにしてダウンロードするお
     <code style='font-family: sans-serif !important;'><![CDATA[
 　　　　　　　　　　　　 ／）
@@ -17,7 +17,7 @@ let INFO =
 　　　　／　 　,i　　　,二ﾆ⊃（ ●）.　（●）＼
 　　　/　 　　ﾉ　　　 ilﾞフ::::::⌒（__人__）⌒::::: ＼
 　　　　　　,ｲ｢ﾄ､　　,!,!|　　　　　|r┬-|　　　　　|
-　　　　　/　iﾄヾヽ_/ｨ"＼ 　　 　 `ー'´ 　 　 ／
+　　　　　/　iﾄヾヽ_/ｨ"＼ 　　 　 \`ー'´ 　 　 ／
     ]]></code>
   </p>
   <item>
@@ -74,7 +74,7 @@ let INFO =
       </p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 
 // FIXME: 将来的には、storageに入れるべき
 // FIXME: あと、それぞれダウンロード先を指定できた方が良い(?)
@@ -320,14 +320,14 @@ let SITE_INFO = [
       }
       if ("-list" in arg){
         let [file, urls, comment] = self.download(arg[0], true, option);
-        let xml = <>
+        let xml = `
           <h1><span>Download :</span><span>{file.path}</span></h1>
           <p>{comment}</p>
           <ol>
             {liberator.modules.template.map(urls, function(url) <li>{url}</li>)}
           </ol>
           <br/>
-        </>;
+        `;
         liberator.echo(xml, true);
         return;
       }

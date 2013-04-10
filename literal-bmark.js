@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>literal bmark</name>
   <description>:bmark command that can included characters such as '"' in the URL.</description>
@@ -58,7 +58,7 @@ let PLUGIN_INFO =
         引数は :bmark コマンドと同じですが、URL に '"' などの文字を含めることが出来ます。
         ただし、-title などのオプションは URL に先行する必要があります。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {

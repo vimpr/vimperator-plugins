@@ -8,7 +8,7 @@
 // }}}
 //
 // PLUGIN INFO: {{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>prevent_focus_ietab</name>
   <description>This plugin prevents focusing IETab automaticaly.</description>
@@ -31,7 +31,7 @@ var PLUGIN_INFO =
     == 使い方 ==
     vimpのpluginディレクトリにこのファイルを格納してください。それだけです。
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function() {

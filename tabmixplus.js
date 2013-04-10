@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>add some tabmixplus commands</description>
@@ -22,7 +22,7 @@ lock:
     lock current tab
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 (function(){
 commands.add(["dup[licate]"], "duplicate current tab", function(args) {

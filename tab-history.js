@@ -1,4 +1,4 @@
-var INFO =
+var INFO = xml`
 <plugin name="TabHistory"
         version="0.1"
         summary="Go back/forward the tab selection history"
@@ -25,7 +25,7 @@ var INFO =
       <p>Go forward the history</p>
     </description>
   </item>
-</plugin>;
+</plugin>`;
 
 var tabHistory = (function(){
   const gBrowser = window.gBrowser,

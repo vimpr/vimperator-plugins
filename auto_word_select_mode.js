@@ -31,7 +31,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Add auto word select mode.</description>
@@ -143,7 +143,7 @@ var PLUGIN_INFO =
     - http://d.zeromemory.info/2008/11/20/vimperator-multi_requester.html
 
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function(){

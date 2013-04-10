@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>pypi</name>
 <description>Add a pypi command</description>
@@ -15,7 +15,7 @@ var PLUGIN_INFO =
 :pypi {package or term}
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.pypi = (function(){
 

@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="AutoBookmark" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"
@@ -65,7 +64,7 @@ let INFO =
       <description><p></p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
@@ -351,18 +350,15 @@ let INFO =
     'autobookmark',
     'Auto bookmarking',
     function () {
+      function block ([name, data]) {
+        return xml`
+          <dt style="font-weight: bold">${name}</dt>
+          <dd>${data.current.title} <a href=${data.current.URL}> ${data.current.URL} </a> (${def(data, 'scroll.x', '?')}, ${def(data, 'scroll.y', '?')}) (${def(data, 'pages.length', '?')})</dd>
+        `;
+      }
+
       liberator.echo(
-        <dl>{
-          template.map(
-            bookmarks,
-            function ([name, data]) {
-              return <>
-                <dt style="font-weight: bold">{name}</dt>
-                <dd>{data.current.title} <a href={data.current.URL}> {data.current.URL} </a> ({def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}) ({def(data, 'pages.length', '?')})</dd>
-              </>;
-            }
-          )
-        }</dl>
+        xml`<dl>${template.map(bookmarks, block)}</dl>`
       );
     },
     {
@@ -447,24 +443,24 @@ let INFO =
             let name = args.literalArg;
             let data = bookmarks.get(name);
             if (data) {
-              liberator.echo(<>
+              liberator.echo(xml`
                 <dl>
                   <dt>Name</dt>
-                  <dd>{name}</dd>
+                  <dd>${name}</dd>
                   <dt>Start URL</dt>
-                  <dd><a href={data.start.URL}>{data.start.URL}</a></dd>
+                  <dd><a href=${data.start.URL}>{data.start.URL}</a></dd>
                   <dt>Current Title</dt>
-                  <dd>{data.current.Title}</dd>
+                  <dd>${data.current.Title}</dd>
                   <dt>Current URL</dt>
-                  <dd><a href={data.current.URL}>{data.current.URL}</a></dd>
+                  <dd><a href=${data.current.URL}>{data.current.URL}</a></dd>
                   <dt>Current Position</dt>
-                  <dd>{def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}</dd>
+                  <dd>${def(data, 'scroll.x', '?')}, {def(data, 'scroll.y', '?')}</dd>
                   <dt>Pages</dt>
-                  <dd>{
-                    template.map(data.pages, function (it) (<li>{it.URL}</li>))
+                  <dd>${
+                    template.map(data.pages, function (it) (`<li>${it.URL}</li>`))
                   }</dd>
                 </dl>
-              </>);
+              `);
             } else {
               liberator.echoerr('Bookmark not found: ' + name);
             }
@@ -548,7 +544,7 @@ let INFO =
         title = name;
 
       if (bookmarks.get(name)) {
-        error.data = String(<>"{name}" already exists</>);
+        error.data = String(`"{name}" already exists`);
         return false;
       }
 
@@ -559,7 +555,7 @@ let INFO =
       updateCurrent(data, url, title);
 
       if (!initializeTab(tab, data)) {
-        error.data = String(<>This tab is already started</>);
+        error.data = String(`This tab is already started`);
         return false;
       }
 

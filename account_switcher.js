@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Switch account easily.</description>
@@ -50,7 +50,7 @@ liberator.accountSwitcherOpenNewTab = 1;
 ||<
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 (function(){
     var services = [];
     var accounts = [];
@@ -180,7 +180,7 @@ liberator.accountSwitcherOpenNewTab = 1;
                     if (value.indexOf('=') > 0) {
                         params.push(value);
                     } else {
-                        res.responseText.match(new RegExp('<([^<>]*?name=\"' + value + '\"[^<>]*?)>'));
+                        res.responseText.match(new RegExp('<([^`]*?name=\"' + value + '\"[^`]*?)>'));
                         RegExp.$1.match(/value=\"([\w-]+)\"/);
                         params.push(value + '=' + encodeURIComponent(RegExp.$1));
                     }

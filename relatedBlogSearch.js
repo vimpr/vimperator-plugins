@@ -1,4 +1,4 @@
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Show/Open related blog</description>
@@ -62,7 +62,7 @@ let コマンドで設定してください(しない場合はデフォルト値
 %updated%:
   更新された日時(%Y-%m-%dT%H:%M:%SZ)
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.relatedBlogSearch = (function(){
 const LANG = window.navigator.language;

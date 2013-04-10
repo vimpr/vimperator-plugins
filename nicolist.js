@@ -3,7 +3,7 @@
  * http://twitter.com/ebith
  */
 
-var INFO =
+var INFO = xml`
 <plugin name="nicolist"
         version="0.3"
         summary="ニコニコ動画のマイリストを操作します"
@@ -31,7 +31,7 @@ var INFO =
     <spec>:nicolist open <a>mylist-id</a> <a>video-id</a></spec>
     <description><p><a>mylist-id</a>のみであればマイリストを、<a>video-id</a>の指定もあれば動画を開きます</p></description>
   </item>
-</plugin>;
+</plugin>`;
 
 commands.addUserCommand(
   ['nicolist'],

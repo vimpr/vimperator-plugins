@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>simple takahashi-method presentation tool</description>
@@ -18,7 +18,7 @@ presentation:
 open HTML file includes <pre id="page">...</pre> and <div id="text">...</div>.
 start :presentation.
      ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 (function() {
     let keys = [

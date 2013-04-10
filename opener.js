@@ -1,5 +1,5 @@
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>opener</name>
   <name lang="ja">opener</name>
@@ -17,11 +17,10 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
     URL 移動時にそのURLが既に開かれていたら、そのタブに移動する
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="opener" version="1.0.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/opener.js"
           summary="URL 移動時にそのURLが既に開かれていたら、そのタブに移動する"
@@ -31,7 +30,7 @@ let INFO =
     <project name="Vimperator" minVersion="2.3"/>
     <p>URL 移動時にそのURLが既に開かれていたら、そのタブに移動する</p>
   </plugin>
-</>;
+`;
 // }}}
 
 /*

@@ -34,14 +34,14 @@ const SITE_DEFINITION = [{
     names: ['wikipe[diaja]'],
     url: 'http://ja.wikipedia.org/wiki/%s',
     shortHelp: 'Wikipedia lite(ja)',
-    xpath: 'id("bodyContent")/p[1]',
+    xpath: 'id("mw-content-text")/p[1]',
     dictionary: 'ja'
 },{
     names: ['wikipe[diaen]'],
     url: 'http://en.wikipedia.org/wiki/%s',
     shortHelp: 'Wikipedia lite(en)',
-    xpath: 'id("bodyContent")/p[1]',
-    dictionary: 'en'
+    xpath: 'id("mw-content-text")/p[1]',
+    dictionary: 'en-US'
 }];
 
 let (siteDef = liberator.globalVariables.lookupDictionary_site_definition) {
@@ -164,34 +164,38 @@ SITE_DEFINITION.forEach(function (dictionary) {
                 url = dictionary.url.replace(/%s/g,encodeURIComponent(arg));
             }
             //liberator.log('URL: ' +url);
-            var result;
-            getHTML(url, function (str) {
-                var doc = createHTMLDocument(str);
+            getHTML(url, function (doc) {
                 var result = getNodeFromXPath(dictionary.xpath, doc, dictionary.multi);
                 if (!result) {
                     liberator.echoerr('Nothing to show...');
+                    return;
                 }
+                result = sanitizeScript(result);
                 var xs = new XMLSerializer();
-                liberator.echo(new XMLList('<div style="white-space:normal;"><base href="' + util.escapeHTML(url) + '"/>' + xs.serializeToString( result ).replace(/<[^>]+>/g,function (all) all.toLowerCase() ) + '</div>'), true);
+                liberator.echo(xml`<div style="white-space:normal;">
+                    <base href=${util.escapeHTML(url)}/>
+                    ${template.maybeXML(xs.serializeToString( result ))}
+                </div>`);
             }, dictionary.srcEncode ? dictionary.srcEncode : null);
         },
         {
-            completer: function (arg) {
+            completer: function (context, args) {
                 if (!spellChecker ||
                     !dictionary.dictionary ||
                     !spellChecker.setDictionary(dictionary.dictionary))
-                return [0, []];
+                return;
 
-                var suggestions = spellChecker.suggest(arg);
+                var filter = context.filter;
+                var suggestions = spellChecker.suggest(filter);
                 var candidates = [];
                 for (let i=0, max=suggestions.length ; i<max ; ++i) {
                     candidates.push([suggestions[i], 'suggest']);
                 }
 
-                if (!spellChecker.check(arg)) {
+                if (!spellChecker.check(filter)) {
                     candidates.unshift(['', 'not exist']);
                 }
-                return [0, candidates];
+                context.completions = candidates;
             },
             bang: true
         }
@@ -210,30 +214,30 @@ commands.addUserCommand(
  */
 function getHTML(url, callback, charset) {
     var xhr= new XMLHttpRequest();
+    xhr.open('GET',url,true);
+    xhr.responseType = "document";
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-                callback.call(this,xhr.responseText);
+                callback.call(this,xhr.response);
             } else {
                 throw new Error(xhr.statusText);
             }
         }
     };
-    xhr.open('GET',url,true);
     if (charset) xhr.overrideMimeType('text/html; charset=' + charset);
     xhr.send(null);
 }
 /**
- * @param {String} str
- * @return {DOMDocument}
+ * sanitize script element
+ * @param {Element} element
+ * @return {Element}
  */
-function createHTMLDocument(str) {
-    str = str.replace(/^[\s\S]*?<html(?:[ \t\r\n][^>]*)?>[ \t\n\r]*|[ \t\n\r]*<\/html[ \t\r\n]*>[\S\s]*$/ig,'').replace(/[\r\n]+/g,' ');
-    var htmlFragment = content.document.implementation.createDocument(null,'html',null);
-    var range = content.document.createRange();
-    range.setStartAfter(window.content.document.body);
-    htmlFragment.documentElement.appendChild(htmlFragment.importNode(range.createContextualFragment(str),true));
-    return htmlFragment;
+function sanitizeScript (element) {
+    for (let node of element.querySelectorAll("script")){
+        node.parentNode.removeChild(node);
+    }
+    return element;
 }
 /**
  * @param {String} xpath XPath Expression
@@ -247,8 +251,10 @@ function getNodeFromXPath(xpath,doc,isMulti) {
     if (isMulti) {
         let nodesSnapshot = doc.evaluate(xpath,doc.documentElement,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
         if (nodesSnapshot.snapshotLength == 0) return;
-        result = document.createElementNS(null,'div');
-        for (let i=0; i<nodesSnapshot.snapshotLength; result.appendChild(nodesSnapshot.snapshotItem(i++)));
+        result = doc.createElementNS(XHTML.uri,'div');
+        for (let i=0, len = nodesSnapshot.snapshotLength; i<len; i++) {
+            result.appendChild(nodesSnapshot.snapshotItem(i));
+        }
     } else {
         let node = doc.evaluate(xpath,doc.documentElement,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null);
         if (!node.singleNodeValue) return;

@@ -1,5 +1,5 @@
 // PLUGIN_INFO//{{{
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>atodeyomu</description>
@@ -11,7 +11,7 @@ var PLUGIN_INFO =
     <license>public domain</license>
     <detail><![CDATA[
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 //}}}
 
 (function(){

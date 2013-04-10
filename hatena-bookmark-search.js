@@ -1,4 +1,4 @@
-var PLUGIN_INFO =
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Hatena Bookmark UserSearch</description>
@@ -63,7 +63,7 @@ let g:hatena_bookmark_suffix_array='true';
 -- キャッシュの追加, SuffixArray 検索の追加
 
 ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 
 liberator.plugins.HatenaBookmark = (function(){
 
@@ -116,29 +116,29 @@ HatenaBookmark.reload = function() {
 
 HatenaBookmark.Command = {
    templateDescription: function (item, text) {
-       return <>
+       return `
            {
                !(item.extra && item.extra.length) ? "" :
                <span class="extra-info">
                    {
                        template.map(item.extra, function (e)
-                       <><span highlight={e[2]}>{e[1]}</span></>,
-                       <>&#xa0;</>/* Non-breaking space */)
+                       `<span highlight={e[2]}>{e[1]}</span>`,
+                       `&#xa0;`/* Non-breaking space */)
                    }
                </span>
            }
-       </>
+       `
     },
     templateTitleIcon: function (item, text) {
        var simpleURL = text.replace(/^https?:\/\//, '');
        if (simpleURL.indexOf('/') == simpleURL.length-1)
            simpleURL = simpleURL.replace('/', '');
-       return <><span highlight="CompIcon">{item.icon ? <img src={item.icon}/> : <></>}</span><span class="td-strut"/>{item.item.title}
+       return `<span highlight="CompIcon">{item.icon ? <img src={item.icon}/> : ``}</span><span class="td-strut"/>{item.item.title}
 
        <a href={item.item.url} highlight="simpleURL"><span class="extra-info">{
              simpleURL
        }</span></a>
-       </>
+       `
     },
     filter: function (_item) {
         var item = _item.item;

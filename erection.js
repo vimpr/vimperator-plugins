@@ -33,8 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
-<>
+let INFO = xml`
   <plugin name="erection" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="Show the Erection."
@@ -75,12 +74,12 @@ let INFO =
       <description><p>エレクチオンテキストと画像を表示します。</p></description>
     </item>
   </plugin>
-</>;
+`;
 // }}}
 
 (function () {
 
-  const VERSION = INFO.@version[0];
+  const VERSION = '1.1.1';
 
   function erect (callback) {
     const VC =
@@ -218,7 +217,7 @@ let INFO =
           ['c[opy]'],
           'Copy text',
           makeErectionCommand(function (e) {
-            util.copyToClipboard(String(<>{e.text} - {e.by} {e.from} {e.imageURL}</>));
+            util.copyToClipboard(String(`{e.text} - {e.by} {e.from} {e.imageURL}`));
           }),
           subOption
         ),
@@ -226,13 +225,13 @@ let INFO =
           ['s[how]'],
           'Show text and image',
           makeErectionCommand(function (e) {
-            liberator.echo(<>
+            liberator.echo(xml`
               <div style="height: 800px">
                 <h1>{e.text}</h1>
                 <img src={e.imageURL} />
                 <span>{e.by}</span> <span>{e.from}</span>
               </div>
-            </>);
+            `);
           }),
           subOption
         ),
@@ -240,7 +239,7 @@ let INFO =
           ['e[xcommand]'],
           'Open command line with select erection',
           makeErectionCommand(function (e, args) {
-            let cmdArgs = String(<>{e.text} - {e.by} {e.from} {e.imageURL}</>);
+            let cmdArgs = String(`{e.text} - {e.by} {e.from} {e.imageURL}`);
             setTimeout(function () commandline.open('', args[0] + ' ' + cmdArgs, modes.EX), 1);
           }),
           {

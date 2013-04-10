@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO =
+let PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Auto wildoptions</name>
   <description>Automatically toggle wildoptions=auto</description>
@@ -51,7 +51,7 @@ let PLUGIN_INFO =
   <detail lang="ja"><![CDATA[
     ----
   ]]></detail>
-</VimperatorPlugin>;
+</VimperatorPlugin>`;
 // }}}
 
 (function () {
