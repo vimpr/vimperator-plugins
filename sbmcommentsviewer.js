@@ -12,7 +12,7 @@ var PLUGIN_INFO = xml`
 viewSBMComments [url] [options]
  url             : 省略時は現在のURL
  options:
-     -f, -format : 出力時のフォーマット(`,'区切りのリスト)
+     -f, -format : 出力時のフォーマット(','区切りのリスト)
                    (default: id,timestamp,tags,comment)
                    let g:def_sbm_format = ... で指定可能
      -t, -type   : 出力するSBMタイプ
