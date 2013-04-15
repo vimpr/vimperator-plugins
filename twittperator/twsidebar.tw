@@ -122,11 +122,11 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     function messageToXML (t) {
       XML.prettyPrinting = true;
       XML.ignoreWhitespace = true;
-      let xml;
+      let tweetXml;
       let sbWidth = getSidebarWindow().document.width;
       let richlistitemClasses = [className('tweet-panel'), className('tweet-' + t.type)];
       let nameClass = className('item-name') + ' ' + (t.protected ? className('tweet-protected') : '');
-      xml =
+      tweetXml =
         xml`<richlistitem
           id=${t.id}
           class=${richlistitemClasses.join(' ')}
@@ -153,14 +153,14 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             </vbox>
           </hbox>
         </richlistitem>`;
-      return xml;
+      return tweetXml;
     }
 
-    function xmlToDom(xml, xmlns) {
+    function xmlToDom(tweetXml, xmlns) {
       XML.prettyPrinting = true;
       XML.ignoreWhitespace = true;
       var doc = (new DOMParser).parseFromString(
-        '<root xmlns="' + xmlns + '">' + xml.toXMLString() + "</root>",
+        '<root xmlns="' + xmlns + '">' + tweetXml.toString() + "</root>",
         "application/xml");
       var imported = document.importNode(doc.documentElement, true);
       var range = document.createRange();
