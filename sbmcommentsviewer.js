@@ -32,6 +32,7 @@ viewSBMComments [url] [options]
 - l : livedoor clip
 - z : Buzzurl
 - t : Topsy
+- T : Twitter
 - XXX:今後増やしていきたい
 
 >||
@@ -373,6 +374,35 @@ var SBM = { //{{{
                 liberator.echo('Failed: Topsy');
             }
         }
+    }, //}}}
+    twitter: { //{{{
+        getURL: function(url){
+            var urlPrefix = 'http://search.twitter.com/search.json?q='
+            return urlPrefix + encodeURIComponent(url.replace(/%23/g,'#'));
+        },
+        parser: function(xhr){
+            var json = jsonDecode(xhr.responseText);
+            if (json && json.results){
+                let c = new SBMContainer('T', json.results.length, {
+                    faviconURL: 'https://twitter.com/favicon.ico',
+                    pageURL:    'https://twitter.com/search/realtime?q=' + encodeURIComponent(json.query)
+                });
+                json.results.forEach(function(result){
+                    c.add( result.from_user,
+                           new Date(result.created_at),
+                           result.text,
+                           null,
+                           {
+                            userIcon: result.profile_image_url,
+                            link: 'https://twitter.com/' + result.from_user
+                           }
+                    );
+                });
+                return c;
+            } else {
+                liberator.echo('Failed: Twitter');
+            }
+        }
     } //}}}
 }; //}}}
 
@@ -459,7 +489,8 @@ var manager = {
         d: 'delicious',
         l: 'livedoorclip',
         z: 'buzzurl', 
-        t: 'topsy'
+        t: 'topsy',
+        T: 'twitter'
     },
     format: {
         id: 'ID',
