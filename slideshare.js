@@ -109,7 +109,8 @@ let INFO = xml`
     let styleTogglers = Array.slice(doc.querySelectorAll('object')).map(makeStyleToggler.bind(null, hiddenStyle));
 
     return function (callback) {
-      main();
+      if (liberator.globalVariables.slideshare_auto_fullscreen)
+        main();
       styleTogglers.forEach(function (f) f());
       setTimeout(function () {
         if (callback)
