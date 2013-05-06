@@ -13,7 +13,7 @@ let PLUGIN_INFO = xml`
   <name lang="ja">アラート</name>
   <description>Displays an alert after the specified time.</description>
   <description lang="ja">指定時間後にアラートダイアログを出したりする。タイマー。</description>
-  <version>1.01</version>
+  <version>1.0.2</version>
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <minVersion>2.0pre</minVersion>
   <maxVersion>2.0pre</maxVersion>
@@ -446,7 +446,7 @@ let PLUGIN_INFO = xml`
       });
       if (!message)
           message = defaults.message;
-      if (!time)
+      if (typeof time != 'number')
         time = defaults.time;
       if (!methods.length)
           methods = defaults.methods;
