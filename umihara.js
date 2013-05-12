@@ -169,7 +169,7 @@ let PLUGIN_INFO = xml`
                      '\n ' + to + ': ' + toValue +
                      '\n rate: ' + rate +
                      '\n time: ' + time;
-          echo(text);
+          echo('<<Results>>\n' + text);
           if (clipboard) {
             resultBuffer += text + '\n';
             util.copyToClipboard(resultBuffer);
@@ -209,8 +209,6 @@ let PLUGIN_INFO = xml`
     ['kawase'],
     'Umihara Kawase Meow',
     function (args) {
-      liberator.echo('<<Results>>\n')
-
       if (args.length == 0)
         args.push('1');
 
