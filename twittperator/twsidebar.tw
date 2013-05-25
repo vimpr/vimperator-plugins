@@ -83,7 +83,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
   function formatText (str) { // {{{
     str = str.trim();
     let reg = /https?:\/\/[^\s]+|[#@]\w+/g;
-    XML.ignoreWhitespace = false;
     let m, i = 0, buf = "", x = xml`<xhtml:p class="twlist-text" xmlns:xhtml="http://www.w3.org/1999/xhtml"/>`;
     while((m=reg.exec(str))){
       buf = str.substring(i, m.index);
@@ -120,8 +119,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
   let appendTweet = (function () { // {{{
     function messageToXML (t) {
-      XML.prettyPrinting = true;
-      XML.ignoreWhitespace = true;
       let tweetXml;
       let sbWidth = getSidebarWindow().document.width;
       let richlistitemClasses = [className('tweet-panel'), className('tweet-' + t.type)];
@@ -157,8 +154,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     }
 
     function xmlToDom(tweetXml, xmlns) {
-      XML.prettyPrinting = true;
-      XML.ignoreWhitespace = true;
       var doc = (new DOMParser).parseFromString(
         '<root xmlns="' + xmlns + '">' + tweetXml.toString() + "</root>",
         "application/xml");
