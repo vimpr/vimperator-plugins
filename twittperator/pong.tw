@@ -13,7 +13,9 @@
     function onMsg (msg, raw) {
       function negi (pattern, reply) {
         if (RegExp('^\\s*@' + screenName + '\\s+' + pattern + '\s*$').test(msg.text.trim())) {
-          plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ' + reply, msg.id_str);
+          let replyText = reply instanceof Array ? reply[parseInt(Math.random() * reply.length, 10)]
+                                                 : reply;
+          plugins.twittperator.Twitter.say('@' + msg.user.screen_name + ' ' + replyText, msg.id_str);
           return true;
         }
       }
@@ -29,7 +31,7 @@
       negi('pang', 'bang') ||
       negi('bang', '( \u25D5 \u203F\u203F \u25D5 )') ||
       negi('\u30C6\u30A3\u30ED', '\u30D5\u30A3\u30CA\u30FC\u30EC') ||
-      negi('ニンジャ', 'コマンドー！') ||
+      negi('ニンジャ', ['コマンドー！', 'チョーカン', 'トノサマ']) ||
       negi('ねこなめりんちょくらぶ', 'ざりっ…ざりっ…') ||
       negi('いつやるか？', '今でしょ！') ||
       true;
