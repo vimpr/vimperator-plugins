@@ -40,6 +40,7 @@ let PLUGIN_INFO = xml`
   <description>For Niconico/YouTube/Vimeo, Add control commands and information display(on status line).</description>
   <description lang="ja">ニコニコ動画/YouTube/Vimeo 用。操作コマンドと情報表示(ステータスライン上に)追加します。</description>
   <version>0.33.2</version>
+
   <author mail="anekos@snca.net" homepage="http://d.hatena.ne.jp/nokturnalmortum/">anekos</author>
   <license>new BSD License (Please read the source code comments of this plugin)</license>
   <license lang="ja">修正BSDライセンス (ソースコードのコメントを参照してください)</license>
@@ -1023,7 +1024,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.getDuration()),
 
-    get isValid () (this.player && U.currentURL.match(/^https:\/\/(?:[^.]+\.)?youtube\.com\/watch/)),
+    get isValid () (this.player && U.currentURL.match(/^https?:\/\/(?:[^.]+\.)?youtube\.com\/watch/)),
 
     get volume () parseInt(this.player.getVolume()),
     set volume (value) (this.player.setVolume(value), this.volume),
