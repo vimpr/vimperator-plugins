@@ -25,7 +25,7 @@
 
 // INFO {{{
 let INFO = xml`
-  <plugin name="Twittperator" version="1.19.1"
+  <plugin name="Twittperator" version="1.19.2"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
     <author email="teramako@gmail.com" href="http://d.hatena.ne.jp/teramako/">teramako</author>
@@ -174,7 +174,7 @@ let INFO = xml`
         Write the plugin.
     </p>
   </plugin>
-  <plugin name="Twittperator" version="1.19.1"
+  <plugin name="Twittperator" version="1.19.2"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           lang="ja"
           summary="OAuth/StreamingAPI対応Twitterクライアント">
