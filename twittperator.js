@@ -1697,6 +1697,9 @@ let INFO = xml`
     }, // }}}
     searchUsers: function(word, callback) { // {{{
       tw.jsonGet("users/search", { q: word }, callback);
+    }, // }}}
+    searchTweets: function(word, callback) { // {{{
+      tw.jsonGet("search/tweets", { q: word }, callback);
     } // }}}
   }; // }}}
   let Utils = { // {{{
@@ -1872,7 +1875,7 @@ let INFO = xml`
     }, // }}}
     lookupUser: function(users) { // {{{
       function showUsersInfo(json) { // {{{
-        let xml = modules.template.map(json, function(user) {
+        let body = modules.template.map(json, function(user) {
           return xml`
             <tr>
               <td class="twittperator lookup-user photo">
@@ -1909,7 +1912,7 @@ let INFO = xml`
               .twittperator.lookup-user.description { white-space: normal !important; }
               .twittperator.lookup-user.description a { text-decoration: none; }
             ]]></style>
-            <table>${xml}</table>
+            <table>${body}</table>
         `);
       } // }}}
 
@@ -2048,28 +2051,11 @@ let INFO = xml`
       });
     }, // }}}
     showTwitterSearchResult: function(word) { // {{{
-      // フォーマットが違うの変換
-      function konbuArt(obj) {
-        return {
-          __proto__: obj,
-          user: {
-            __proto__: obj,
-            screen_name: obj.from_user,
-            id: obj.from_id
-          }
-        };
-      }
-
-      Utils.xmlhttpRequest({
-        method: 'GET',
-        url: "http://search.twitter.com/search.json?" + tw.buildQuery({ q: word, rpp: setting.count, lang: setting.lang }),
-        onload: function(xhr) {
-          let res = JSON.parse(xhr.responseText);
-          if (res.results.length > 0) {
-            Twittperator.showTL(res.results.map(Utils.fixStatusObject).map(konbuArt));
-          } else {
-            Twittperator.echo("No results found.")
-          }
+      Twitter.searchTweets(word, function(res){
+        if (res.statuses.length > 0) {
+          Twittperator.showTL(res.statuses.map(Utils.fixStatusObject));
+        } else {
+          Twittperator.echo("No results found.")
         }
       });
     }, // }}}
