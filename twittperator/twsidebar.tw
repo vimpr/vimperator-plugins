@@ -175,7 +175,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       if (modified) {
         if (modified instanceof Array) {
           [t, tab, streamName] = modified;
-        } if (modified === 'reject') {
+        } else if (modified === 'reject') {
           return;
         } else {
           t = modified;
