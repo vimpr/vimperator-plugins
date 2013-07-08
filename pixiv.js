@@ -262,13 +262,16 @@ commands.addUserCommand(
     let saveMangaFiles=function(){
       let htmldoc=getDOMHtmlDocument(xhrImgInfo.responseText);
       if(htmldoc){
-        let max=htmldoc.getElementsByClassName('image-container').length;
+        let max=htmldoc.getElementsByClassName('image ui-scroll-view').length;
         for(var i=0;i<max;i++){
           requestMangaSingleContent(
-            url.replace('manga','manga_big').replace('type=scroll','page=')+i,
+            url.replace('manga','manga_big')
+              .replace('type=scroll','page=')
+              .replace('&uarea=follower_new_illust','')+i,
             url.replace('&type=scroll','')
           );
         }
+
       }
     };
 // }}}
