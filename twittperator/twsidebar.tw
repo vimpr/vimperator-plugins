@@ -586,6 +586,9 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
     if (!started)
       return liberator.echoerr('TWAnekoSB has not been started!');
 
+    Store.set("history", Tweets);
+    Store.save();
+
     if (isClose && Config.dontStop) {
       sidebarClosed = true;
       return;
@@ -593,7 +596,6 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
 
     plugins.twittperator.ChirpUserStream.removeListener(added.chirp);
     plugins.twittperator.TrackingStream.removeListener(added.filter);
-    Store.set("history", Tweets);
   } // }}}
 
   function makeAudio (path, volume) { // {{{
