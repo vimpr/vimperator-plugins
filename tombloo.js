@@ -103,12 +103,14 @@ commands.addUserCommand(
 
 // helper ---
 function getTombloo() {
-    const serviceId = '@brasil.to/tombloo-service;1';
+    const serviceIds = ['@tombfix.github.io/tombfix-service;1', '@brasil.to/tombloo-service;1'];
 
-    if (!Cc[serviceId])
-        throw new Error('Tombloo is not found. install from http://github.com/to/tombloo/wikis');
-
-    return Cc[serviceId].getService().wrappedJSObject;
+    for each (let serviceId in serviceIds) {
+        if (Cc[serviceId]) {
+            return Cc[serviceId].getService().wrappedJSObject;
+        }
+    }
+    throw new Error('Tombloo or Tombfix is not found. install from https://github.com/tombfix/core');
 }
 
 function getContext() {

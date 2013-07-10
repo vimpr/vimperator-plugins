@@ -29,7 +29,8 @@ hints.addMode(
     hintKey,
     'Share by Tombloo',
     function (elem) {
-        var tomblooService = Cc['@brasil.to/tombloo-service;1'].getService().wrappedJSObject.Tombloo.Service;
+        var tombloo = Cc['@tombfix.github.io/tombfix-service;1'] || Cc['@brasil.to/tombloo-service;1'];
+        var tomblooService = tombloo.getService().wrappedJSObject.Tombloo.Service;
 
         var d = window.content.document;
         var w = window.content.wrappedJSObject;
