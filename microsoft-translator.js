@@ -147,7 +147,7 @@ let INFO = xml`
       'onSuccess',
       function (res) {
         var result = res.responseText;
-        done(result.substring(1,3));
+        done(result.substring(1,result.length-1));
       }
     );
     req.get();
