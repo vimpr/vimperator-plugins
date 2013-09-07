@@ -3276,16 +3276,16 @@ let PLUGIN_INFO = xml`
         let sz = innerWidth / msg.length / 1.5;
         if (plugins.namakubi && typeof plugins.namakubi.talk == 'function')
           plugins.namakubi.talk(msg);
-        liberator.echo(
+        liberator.echo(xml`
           <div style="background: white; color: black;">
             <table>
               <tr>
-                <td><img src={gunsou}/></td>
-                <td style={"font-size: " + sz + "px; white-space: nowrap;"}>{msg}</td>
+                <td><img src=${gunsou}/></td>
+                <td style=${"font-size: " + sz + "px; white-space: nowrap;"}>${msg}</td>
               </tr>
             </table>
           </div>
-        );
+        `);
       }
 
   function kill (msg) {
