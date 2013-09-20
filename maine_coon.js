@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2008-2011, anekos.
+Copyright (c) 2008-2013, anekos.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -272,7 +272,7 @@ let PLUGIN_INFO = xml`
           }) +
           elemStyle
         );
-      let elem = U.xmlToDom(<div id="liberator_maine_coon" style={style}>{message}</div>, doc);
+      let elem = U.xmlToDom(`<div id="liberator_maine_coon" style=${style}>${message}</div>`, doc);
       doc.body.appendChild(elem);
       let count = time;
       let handle = setInterval(function () {
