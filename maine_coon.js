@@ -272,7 +272,7 @@ let PLUGIN_INFO = xml`
           }) +
           elemStyle
         );
-      let elem = U.xmlToDom(`<div id="liberator_maine_coon" style=${style}>${message}</div>`, doc);
+      let elem = U.xmlToDom(xml`<div id="liberator_maine_coon" style=${style}>${message}</div>`, doc);
       doc.body.appendChild(elem);
       let count = time;
       let handle = setInterval(function () {
