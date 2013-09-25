@@ -1,0 +1,37 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_pebble = 1
+ * let g:twittperator_plugin_pebble_user_id = '<USER_ID>';
+ * let g:twittperator_plugin_pebble_user_token = '<USER_TOKEN>';
+ * let g:twittperator_screen_name = "<YOUR_SCREEN_NAME>"
+ */
+
+(function () {
+  let screenName = liberator.globalVariables.twittperator_screen_name;
+  let userId = liberator.globalVariables.twittperator_plugin_pebble_user_id;
+  let userToken = liberator.globalVariables.twittperator_plugin_pebble_user_token;
+
+  function notify (username) {
+    let body = [
+      'userId=' + userId,
+      'userToken=' + userToken,
+      'title=Twitter',
+      'body=' + encodeURIComponent('reply from ' + username),
+      'type=notification'].join('&');
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://ofkorth.net/pebble/send', true, null, null);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    xhr.send(body);
+  }
+
+  plugins.twittperator.ChirpUserStream.addListener(
+    function onMsg (msg, raw) {
+      if (msg.text && msg.user && msg.in_reply_to_screen_name === screenName)
+        notify(msg.user.screen_name, msg.text);
+    }
+  );
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
