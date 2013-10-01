@@ -6,7 +6,7 @@
 
 (function () {
 
-  let tmpl = liberator.globalVariables.twittperator_plugin_taioooooooooonoooooooooooooooooooooooooooooon_template || '体温 %s';
+  let tmpl = liberator.globalVariables.twittperator_plugin_taioooooooooonoooooooooooooooooooooooooooooon_template || '体温 %s (%S)';
 
   let taionds = [
     ['焼死体', 666],
@@ -37,7 +37,11 @@
     ['taioooooooooonoooooooooooooooooooooooooooooon'],
     'Description',
     function (args) {
-      plugins.twittperator.Twittperator.say(tmpl.replace(/%s/g, args.literalArg));
+      plugins.twittperator.Twittperator.say(
+        tmpl.replace(/%s/g, args.literalArg).replace(/%S/g, function (it) {
+          return whatAmI(parseFloat(args.literalArg.match(/\d{1,2}(\.\d)?/).toString()))
+        })
+      );
     },
     {
       literal: 0,
@@ -50,7 +54,7 @@
         }
         liberator.__cs = cs;
 
-        context.filters = [CompletionContext.Filter.textDescription]; // 説明(desc)もフィルタリング対象にする
+        context.filters = [CompletionContext.Filter.textDescription];
         context.completions = cs;
       },
     },
