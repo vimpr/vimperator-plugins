@@ -1,0 +1,62 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_taioooooooooonoooooooooooooooooooooooooooooon = 1
+ * let g:twittperator_plugin_taioooooooooonoooooooooooooooooooooooooooooon_template = '体温 %s'
+ */
+
+(function () {
+
+  let tmpl = liberator.globalVariables.twittperator_plugin_taioooooooooonoooooooooooooooooooooooooooooon_template || '体温 %s';
+
+  let taionds = [
+    ['焼死体', 666],
+    ['鶏', 41.5],
+    ['豚', 39.0],
+    ['やぎ', 39.0],
+    ['ひつじ', 39.0],
+    ['うさぎ', 39.5],
+    ['牛', 38.5],
+    ['犬', 38.5],
+    ['猫', 38.1],
+    ['馬', 37.7],
+    ['ヒト', 36.0],
+    ['死体', 0],
+  ];
+  taionds.reverse();
+
+  function whatAmI (myon) {
+    let result = '石';
+    for ([name, taion] of taionds) {
+      if (taion < myon)
+        result = name;
+    }
+    return result;
+  }
+
+  commands.addUserCommand(
+    ['taioooooooooonoooooooooooooooooooooooooooooon'],
+    'Description',
+    function (args) {
+      plugins.twittperator.Twittperator.say(tmpl.replace(/%s/g, args.literalArg));
+    },
+    {
+      literal: 0,
+      completer: function (context, args) {
+        context.title = ['温度', 'description'];
+
+        let cs = [];
+        for (let i = 30.0; i < 50.0; i += 0.1) {
+          cs.push([i.toString().replace(/\.\d*$/, function (it) it.substring(0, 2)), whatAmI(i)]);
+        }
+        liberator.__cs = cs;
+
+        context.filters = [CompletionContext.Filter.textDescription]; // 説明(desc)もフィルタリング対象にする
+        context.completions = cs;
+      },
+    },
+    true // replace
+  );
+
+})();
+
+// vim: sw=2 ts=2 et fdm=marker ft=javascript:
