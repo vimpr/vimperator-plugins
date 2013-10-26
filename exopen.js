@@ -164,6 +164,7 @@ liberator.plugins.exOpen = (function() {
       var self = this;
       commands.addUserCommand(['exopen'], 'Open byextension URL',
         function(args) self.open(args), {
+          bang: true,
           completer: function(context, args) {
             context.title = ['Template', 'Description - Value'];
             if (!context.filter) {
