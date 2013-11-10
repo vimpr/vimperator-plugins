@@ -2135,7 +2135,7 @@ let INFO = xml`
     notMine: function (st)
       let (n = setting.screenName)
         (n ? (!st.user || st.user.screen_name !== n) : st),
-    mine: function (st)
+    selectMine: function (st)
       (!Predicates.notMine(st))
   }; // }}}
   let Completers = (function() { // {{{
