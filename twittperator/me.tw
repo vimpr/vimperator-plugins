@@ -1,0 +1,38 @@
+/*
+ * Please write the below line into .vimperatorrc.
+ * let g:twittperator_plugin_me = 1
+ *
+ */
+
+(function () {
+  const TW = liberator.plugins.twittperator;
+
+  TW.SubCommands.add(
+    TW.SubCommand({
+      command: ['me'],
+      description: 'reply to myself',
+      action: function(arg) {
+        setTimeout(
+          function () {
+            commandline.open(
+              '',
+              'tw ' + arg + ' ',
+              modes.EX
+            );
+          },
+          0
+        );
+      },
+      timelineComplete: true,
+      completer: TW.Completers.name_id(
+        function (s)
+          (s.user &&
+           s.user.screen_name == liberator.globalVariables.twittperator_screen_name)
+          ? s.id : false
+      )
+    })
+  );
+})();
+
+// vim: set et fdm=syntax ft=javascript sts=2 sw=2 ts=2 :
+
