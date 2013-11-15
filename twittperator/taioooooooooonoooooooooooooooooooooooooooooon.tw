@@ -27,7 +27,7 @@
   function whatAmI (myon) {
     let result = '石';
     for ([name, taion] of taionds) {
-      if (taion < myon)
+      if (taion <= myon)
         result = name;
     }
     return result;
