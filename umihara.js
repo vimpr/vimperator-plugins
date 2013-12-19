@@ -156,7 +156,7 @@ let PLUGIN_INFO = xml`
       if (req.readyState == 4 && req.status == 200) {
         let html = req.responseText;
         let doc = plugins.libly.$U.createHTMLDocument(html);
-        let a = doc.querySelector('tbody.yjM > tr > td > a[href^="http://rdsig.yahoo.co.jp"]');
+        let a = doc.querySelector('tbody > tr > td > a[href^="http://rdsig.yahoo.co.jp"]');
         if (a) {
           let tr = a.parentNode.parentNode;
           liberator.__tr = tr;
