@@ -317,7 +317,7 @@ let PLUGIN_INFO = xml`
 		add : function(url,title,callback){ // {{{
 
 		let manager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
-		let logins = manager.findLogins({},"http://readitlaterlist.com","",null);
+		let logins = manager.findLogins({},"http://getpocket.com","",null);
 		let req = new libly.Request(
 			"https://readitlaterlist.com/v2/add" , // url
 			null, // headers
