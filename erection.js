@@ -217,7 +217,7 @@ let INFO = xml`
           ['c[opy]'],
           'Copy text',
           makeErectionCommand(function (e) {
-            util.copyToClipboard(String(`{e.text} - {e.by} {e.from} {e.imageURL}`));
+            util.copyToClipboard(String(`${e.text} - ${e.by} ${e.from} ${e.imageURL}`));
           }),
           subOption
         ),
@@ -227,9 +227,9 @@ let INFO = xml`
           makeErectionCommand(function (e) {
             liberator.echo(xml`
               <div style="height: 800px">
-                <h1>{e.text}</h1>
-                <img src={e.imageURL} />
-                <span>{e.by}</span> <span>{e.from}</span>
+                <h1>${e.text}</h1>
+                <img src=${e.imageURL} />
+                <span>${e.by}</span> <span>${e.from}</span>
               </div>
             `);
           }),
@@ -239,7 +239,7 @@ let INFO = xml`
           ['e[xcommand]'],
           'Open command line with select erection',
           makeErectionCommand(function (e, args) {
-            let cmdArgs = String(`{e.text} - {e.by} {e.from} {e.imageURL}`);
+            let cmdArgs = String(`${e.text} - ${e.by} ${e.from} ${e.imageURL}`);
             setTimeout(function () commandline.open('', args[0] + ' ' + cmdArgs, modes.EX), 1);
           }),
           {
