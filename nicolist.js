@@ -45,13 +45,13 @@ commands.addUserCommand(
         ['a[dd]'],
         'マイリストに追加する',
         function (args) {
-          let video_id = content.window.wrappedJSObject.video_id;
+          let video_id = content.window.wrappedJSObject.WatchJsApi.video.getVideoID();
           if (!video_id) {
             return liberator.echoerr('nicolist : watchページじゃない！');
           }
           let [mylist_id, description] = args;
           if (!description){ description = ''; }  //undefinedが入っているとそれをマイリストコメントにしてしまうので。
-          let token = content.window.wrappedJSObject.so.variables.csrfToken;
+          let token = getToken(true);
           let url = 'http://www.nicovideo.jp/api/mylist/add?group_id=' + mylist_id + '&token=' + token + '&item_id=' + video_id + '&description=' + description;
           liberator.echo('nicolist add : ' + JSON.parse(util.httpGet(url).responseText).status);
         },
@@ -160,7 +160,12 @@ function sorter (a, b) {
   return - (a.create_time - b.create_time);
 }
 
-function getToken () {
-  let url = 'http://www.nicovideo.jp/my/mylist';
-  return util.httpGet(url).responseText.match(/NicoAPI\.token.+/)[0].match(/\d{5}-\d{10}-[\d\w]{40}/)[0];
+function getToken (isWatchPage) {
+  if (isWatchPage) {
+    let watchAPIData = JSON.parse(content.document.wrappedJSObject.getElementById('watchAPIDataContainer').firstChild.nodeValue);
+    return watchAPIData.flashvars.csrfToken;
+  } else {
+    let url = 'http://www.nicovideo.jp/my/mylist';
+    return util.httpGet(url).responseText.match(/NicoAPI\.token.+/)[0].match(/\d{5}-\d{10}-[\d\w]{40}/)[0];
+  }
 }
