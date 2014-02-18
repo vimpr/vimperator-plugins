@@ -33,6 +33,7 @@ var INFO = xml`
   </item>
 </plugin>`;
 
+let video = {};
 commands.addUserCommand(
   ['nicolist'],
   'ニコニコ動画のマイリストを操作する',
@@ -58,6 +59,84 @@ commands.addUserCommand(
         {
           literal: 1,
           completer: mylistCompleter,
+        }
+      ),
+      new Command(
+        ['p[lay]'],
+        '動画を再生する',
+        function (args) {
+          let [mylist_id, video_id] = args;
+          let video_ids = []
+          if (video_id) {
+            video_ids = [video_id];
+          } else if (mylist_id) {
+            let list = JSON.parse(util.httpGet('http://www.nicovideo.jp/api/mylist/list?group_id=' + mylist_id).responseText).mylistitem;
+            list.forEach(function(v){
+              video_ids.push(v.item_data.video_id);
+            });
+          } else { return; }
+          video_ids = video_ids.shuffle();
+          let i = 0;
+
+          video.container = document.createElementNS('http://www.w3.org/1999/xhtml', 'video');
+          video.container.volume = 0.7;  // 効いてない
+          video.container.autoplay = true;
+          ['error', 'ended'].forEach(function(event) {
+            video.container.addEventListener(event, function() {
+              if (video.container.src === 'chrome://browser/content/browser.xul') { return; }
+              if (!video_ids[i]) { return; }
+              i++;
+              setupVideo();
+            });
+          });
+
+          setupVideo();
+
+          function setupVideo() {
+            video.flv = {}
+            util.httpGet('http://flapi.nicovideo.jp/api/getflv/' + video_ids[i]).responseText.split('&').forEach(function(param){
+              let tmp = param.split('=');
+              video.flv[tmp[0]] = decodeURIComponent(tmp[1]);
+            });
+
+            video.thumbinfo = util.httpGet('http://ext.nicovideo.jp/api/getthumbinfo/' + video_ids[i]).responseXML;
+            video.video_id = video.thumbinfo.getElementsByTagName('video_id')[0].firstChild.nodeValue;
+            video.title = video.thumbinfo.getElementsByTagName('title')[0].firstChild.nodeValue;
+            video.description = video.thumbinfo.getElementsByTagName('description')[0].firstChild.nodeValue;
+
+            util.httpGet('http://www.nicovideo.jp/watch/' + video_ids[i]); // watchページにアクセスしておかないと読み込み時403
+            video.container.src = video.flv.url;
+          }
+        },
+        {
+          literal: 1,
+          completer: mylistCompleter,
+        }
+      ),
+      new Command(
+        ['s[top]'],
+        '動画の再生を止める',
+        function (args) {
+          video.container.pause();
+          video.container.src = ''; // chrome://browser/content/browser.xul になる
+        }
+      ),
+      new Command(
+        ['now[Playing]'],
+        '再生中の動画情報',
+        function (arg) {
+          if (arg) {
+            let url = 'http://www.nicovideo.jp/watch/' + arg;
+            liberator.open(url, liberator.NEW_TAB);
+          }
+        },
+        {
+          literal: 0,
+          completer: function(context, args) {
+            context.filters = [CompletionContext.Filter.textDescription];
+            context.title = ['id', 'title']
+            context.completions = [[video.video_id, video.title]]
+          }
         }
       ),
       new Command(
@@ -141,7 +220,7 @@ function mylistCompleter (context, args) {
     util.httpGet(url, function (xhr) {
       context.incomplete = false;
 
-      if (/open/.test(context.name)) {
+      if (/open|play/.test(context.name)) {
         context.completions = [
           [v.item_data.video_id, v.item_data.title]
           for ([k, v] in Iterator(JSON.parse(xhr.responseText).mylistitem.sort(sorter)))
@@ -168,4 +247,15 @@ function getToken (isWatchPage) {
     let url = 'http://www.nicovideo.jp/my/mylist';
     return util.httpGet(url).responseText.match(/NicoAPI\.token.+/)[0].match(/\d{5}-\d{10}-[\d\w]{40}/)[0];
   }
+}
+
+Array.prototype.shuffle = function() {
+    var i = this.length;
+    while(i){
+        var j = Math.floor(Math.random()*i);
+        var t = this[--i];
+        this[i] = this[j];
+        this[j] = t;
+    }
+    return this;
 }
