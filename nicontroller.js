@@ -196,7 +196,7 @@ NicoPlayerController.prototype = {
         WATCH_URL:      '^http://[^.]+\.nicovideo\.jp/watch/',
         WATCH_PAGE:     1,
 
-        FLVPLAYER_NODE_ID: 'flvplayer',
+        FLVPLAYER_NODE_ID: 'external_nicoplayer',
 
         STATE_PLAYING:  'playing',
         PLAY:           true,
