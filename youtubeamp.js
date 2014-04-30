@@ -197,8 +197,14 @@ YouTubePlayerController.prototype = {
     },
 
     seekTo: function(position) {
+        var p = this._player();
+
         if(position) {
-            if(position.match(/^(\d+):(\d+)$/)) {
+            if(position.match(/^(\d+)%$/)) {
+                var duration = p.getDuration();
+                position = parseInt((duration * RegExp.$1 / 100), this.constants.CARDINAL_NUMBER);
+            }
+            else if(position.match(/^(\d+):(\d+)$/)) {
                 position = parseInt(RegExp.$1, this.constants.CARDINAL_NUMBER) * 60
                     + parseInt(RegExp.$2, this.constants.CARDINAL_NUMBER);
             }
@@ -206,17 +212,22 @@ YouTubePlayerController.prototype = {
         }
         else position = this.constants.SEEKTO_DEFAULT;
 
-        var p = this._player();
         p.seekTo(position);
     },
 
     seekBy: function(delta) {
+        var p = this._player();
+
         if(delta) {
+            if(delta.match(/^([-+]?)(\d+)%$/)) {
+                var duration = p.getDuration();
+                delta = parseInt((duration * RegExp.$2 / 100), this.constants.CARDINAL_NUMBER);
+                if(RegExp.$1 == '-') delta = -delta;
+            }
             if(isNaN(delta)) throw new Error('assign signed number : seekBy()');
         }
         else delta = this.constants.SEEKBY_DEFAULT;
 
-        var p = this._player();
         var position = p.getCurrentTime();
         position += parseInt(delta, this.constants.CARDINAL_NUMBER);
 
