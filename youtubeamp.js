@@ -64,8 +64,8 @@ YouTubePlayerController.prototype = {
         CARDINAL_NUMBER: 10,
 
         YOUTUBE_DOMAIN: '.youtube.jp',
-        YOUTUBE_URL:    '^http://[^.]+\\.youtube\\.com/',
-        WATCH_URL:      'http://[^.]+\\.youtube\\.com/watch',
+        YOUTUBE_URL:    '^https?://[^.]+\\.youtube\\.com/',
+        WATCH_URL:      'https?://[^.]+\\.youtube\\.com/watch',
         WATCH_PAGE:     1,
 
         PLAYER_NODE_ID: 'movie_player',
