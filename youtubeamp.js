@@ -94,6 +94,23 @@ YouTubePlayerController.prototype = {
             'chrome-promo',
             'watch-video-quality-setting',
         ],
+
+        PLAYER_WRAPPER_NODE_ID: 'player-api',
+        TOGGLE_PLAYER_WRAPPER_STYLE: {
+            position:        'fixed',
+            visibility:      'visible',
+            top:             '0px',
+            left:            '0px',
+            margin:          '0px',
+            padding:         '0px',
+            width:           '100%',
+            height:          '100%',
+            zIndex:          '99999999999',
+            borderWidth:     '0px',
+            backgroundImage: 'none',
+            backgroundColor: '#000',
+            overflow:        'hidden',
+        },
     },
 
     getControllerVersion: function() { return this.constants.VERSION; },
@@ -128,10 +145,11 @@ YouTubePlayerController.prototype = {
     },
 
     toggleSize: function() {
-        var p = this._player();
-        (p.width == this.constants.SIZE_WIDTH_DEFAULT && p.height == this.constants.SIZE_HEIGHT_DEFAULT)
-            ? this._fullSize()
-            : this._normalSize();
+        var playerWrapper = this._getElementById(this.constants.PLAYER_WRAPPER_NODE_ID);
+
+        (playerWrapper.style.position == 'fixed')
+            ? this._normalSize()
+            : this._fullSize();
     },
 
     _changeToFull: function() {
@@ -152,48 +170,25 @@ YouTubePlayerController.prototype = {
     },
 
     _fullSize: function() {
-        var b = this._getElementById('baseDiv');
-        this.defMargin = b.style.margin;
-        this.defPadding = b.style.padding;
-        this.defWidth = b.style.width;
-        b.style.margin = 0;
-        b.style.padding = 0;
-        b.style.width = '100%';
-
-        for(let i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
-            let h = this._getElementById(this.constants.HIDE_NODES[i]);
-            if(h) { h.style.display = 'none'; }
-        }
-
-        this._changeToFull();
-
-        window.addEventListener(
-            'resize',
-            this.fuller,
-            false
-        );
+        var playerWrapper = this._getElementById(this.constants.PLAYER_WRAPPER_NODE_ID);
+        this._setStyle(playerWrapper, this.constants.TOGGLE_PLAYER_WRAPPER_STYLE);
     },
 
     _normalSize: function() {
-        var b = this._getElementById('baseDiv');
-        b.style.margin  = this.defMargin;
-        b.style.padding = this.defPadding;
-        b.style.width   = this.defWidth;
+        var playerWrapper = this._getElementById(this.constants.PLAYER_WRAPPER_NODE_ID);
+        this._clearStyle(playerWrapper, this.constants.TOGGLE_PLAYER_WRAPPER_STYLE);
+    },
 
-        for(let i=0, max=this.constants.HIDE_NODES.length ; i<max ; ++i) {
-            let h = this._getElementById(this.constants.HIDE_NODES[i]);
-            if(h) { h.style.display = 'block'; }
-        }
+    _setStyle: function(ele, style) {
+        Object.keys(style).forEach(function (key) {
+            ele.style[key] = style[key];
+        });
+    },
 
-        var p = this._player();
-        p.width = this.constants.SIZE_WIDTH_DEFAULT;
-        p.height = this.constants.SIZE_HEIGHT_DEFAULT;
-
-        window.removeEventListener(
-            'resize',
-            this.fuller,
-            false
-        );
+    _clearStyle: function(ele, style) {
+        Object.keys(style).forEach(function (key) {
+            ele.style[key] = '';
+        });
     },
 
     seekTo: function(position) {
