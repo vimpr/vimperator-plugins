@@ -350,8 +350,9 @@ let PLUGIN_INFO = xml`
   }
 
   function torelativetime(h, m) {
-    if (h < 0 || h > 24 || m < 0 || m > 59)
+    if (m > 59)
       return false;
+    h %= 24;
     var now = new Date();
     var d = (h * 60 + parseInt(m)) - (now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60);
     return d >= 0 ? d : d + 60 * 24;
