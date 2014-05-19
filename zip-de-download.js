@@ -320,15 +320,16 @@ let SITE_INFO = [
       }
       if ("-list" in arg){
         let [file, urls, comment] = self.download(arg[0], true, option);
-        let xml = `
-          <h1><span>Download :</span><span>{file.path}</span></h1>
-          <p>{comment}</p>
+        let listUrlsXml = liberator.modules.template.map(urls, function(url) xml`<li>${url}</li>`);
+        let listXml = xml`
+          <h1><span>Download :</span><span>${file.path}</span></h1>
+          <p>${comment}</p>
           <ol>
-            {liberator.modules.template.map(urls, function(url) <li>{url}</li>)}
+            ${listUrlsXml}
           </ol>
           <br/>
         `;
-        liberator.echo(xml, true);
+        liberator.echo(listXml, true);
         return;
       }
       liberator.echo("Started DownloadZip");
