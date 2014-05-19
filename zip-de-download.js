@@ -152,7 +152,7 @@ let SITE_INFO = [
     try {
       mime = mimeService.getTypeFromURI(uri);
     } catch(e) {
-      liberator.reportError(e);
+      liberator.log('zip-de-download: error: ' + e);
     };
     let ext = mimeService.getPrimaryExtension(mime ? mime : mimeType, null)
     let name = uri.path.split("/").pop();
