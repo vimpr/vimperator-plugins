@@ -149,7 +149,7 @@ let PLUGIN_INFO = xml`
     if (to == '-')
       to = defaultTarget;
     //let url = 'http://quote.yahoo.co.jp/m5?a=' + value + '&s=' + from + '&t=' + to;
-    let url = 'http://info.finance.yahoo.co.jp/exchange/convert/?a=' + value + '&s=' + from + '&t=' + to;
+    let url = 'http://info.finance.yahoo.co.jp/fx/convert/?a=' + value + '&s=' + from + '&t=' + to;
     var req = new XMLHttpRequest();
     req.open('GET', url);
     req.onreadystatechange = function (aEvt) {
