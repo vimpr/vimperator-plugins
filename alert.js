@@ -349,6 +349,15 @@ let PLUGIN_INFO = xml`
     };
   }
 
+  function torelativetime(h, m) {
+    if (m > 59)
+      return false;
+    h %= 24;
+    var now = new Date();
+    var d = (h * 60 + parseInt(m)) - (now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60);
+    return d >= 0 ? d : d + 60 * 24;
+  }
+
   let alertMethods = {
     alert: function (next, msg) {
         window.alert(msg);
@@ -436,11 +445,13 @@ let PLUGIN_INFO = xml`
     function (args) {
       let methods = [], time = null, message = '';
       args.forEach(function (v) {
-        let m, f;
+        let m, f, t;
         if ((m = v.match(/^-(\w+)(?:=(.*))?$/)) && (f = alertMethods[m[1]]))
           methods.push([f, m[2]]);
         else if (!time && v.match(/^\d+(\.\d+)?$/))
           time = parseFloat(v);
+        else if (!time && (m = v.match(/^(\d{1,2}):(\d{1,2})$/)) && (t = torelativetime(m[1], m[2])))
+          time = parseFloat(t);
         else
           message += ' ' + v;
       });
