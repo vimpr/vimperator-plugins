@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = xml`
-  <plugin name="EditVimperatorFile" version="1.2.3"
+  <plugin name="EditVimperatorFile" version="1.3.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."
           lang="en-US"
@@ -49,7 +49,7 @@ let INFO = xml`
       <description><p></p></description>
     </item>
   </plugin>
-  <plugin name="EditVimperatorFile" version="1.2.3"
+  <plugin name="EditVimperatorFile" version="1.3.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/edit-vimperator-files.js"
           summary="Vimperator 関連のファイルをエディタで開く"
           lang="ja"
@@ -81,9 +81,10 @@ let INFO = xml`
   }
 
   let dirs = toArray(liberator.globalVariables.plugin_loader_roots || []).map(function (path) io.File(path).path);
+  let directoryName = liberator.globalVariables.edit_vimperator_files_directory_names || 'plugin colors styles style script';
 
   // XXX dont remove first space
-  ' plugin colors styles style script'.split(/\s/).forEach(
+  (' ' + directoryName).split(/\s/).forEach(
     function (name) (dirs = dirs.concat(io.getRuntimeDirectories(name).map(function (file) file.path)))
   );
 
