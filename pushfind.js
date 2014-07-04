@@ -17,7 +17,7 @@ let PLUGIN_INFO = xml`
 
 (function () {
   /* n文字以下は弾く */
-  var skip_char_num = 2;
+  var skip_char_num = 1;
   /* 実行した際にコマンドラインにechoする */
   var is_echo_pushfind = true;
   /* ヒットした文字列を逆に流し込む */
@@ -70,7 +70,8 @@ let PLUGIN_INFO = xml`
             words = res.split(cf.delimiter);
           }
           for each (var w in words) {
-            if (!w || pushwords.indexOf(w) != -1) {
+            //空白文字列,重複,短い単語のskip
+            if (!w || pushwords.indexOf(w) != -1 || w.length <= skip_char_num) {
               continue;
             }
             pushwords.push(w);
