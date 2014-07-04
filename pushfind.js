@@ -6,7 +6,7 @@ let PLUGIN_INFO = xml`
 <name lang="ja">プッシュファインド</name>
 <description>push FIndHistory word searched on google</description>
 <description lang="ja">Google検索したワードをfindの履歴に放り込みます</description>
-<version>1.1</version>
+<version>1.2</version>
 <author mail="hiro@elzup.com" homepage="blog.elzup.com">elzup</author>
 <minVersion>2.0pre</minVersion>
 <maxVersion>2.0pre</maxVersion>
@@ -28,19 +28,19 @@ let PLUGIN_INFO = xml`
     name: "wikipedia",
     url: 'http:\/\/ja.wikipedia.org\/wiki/*',
     get_regex: /http:\/\/ja.wikipedia.org\/wiki\/([^#\/]*)/,
-    delimiter: "+"
+    delimiter: " "
   },
   { 
     name: "nicovideo",
     url: 'http:\/\/www.nicovideo.jp\/search\/*',
     get_regex: /http:\/\/www.nicovideo.jp\/search\/(.*)/,
-    delimiter: "%20"
+    delimiter: " "
   },
   { 
     name: "google",
     url: 'https:\/\/www.google.co.jp\/search.*',
     get_regex: /google.co.jp\/search.*[&?]q=(.*?)&/,
-    delimiter: "+"
+    delimiter: " "
   },
   ];
 
@@ -58,22 +58,18 @@ let PLUGIN_INFO = xml`
         var words, res, hits, hs, pushwords;
         hs = storage['history-search'];
         for each (var cf in pushfind_configs) {
-//          liberator.echomsg("pushfind: " + cf.name + "check start");
           pushwords = [];
           hits = (args.url.match(cf.get_regex));
           if (!hits || !hits[1]) {
-            //          liberator.echomsg(is_echo_pushfind ? "pushfind: [no hits]" + pushwords : "");
             continue;
-            //          return;
           }
-          res = hits[1];
+          res = decodeURI(hits[1]).replace(/[　+]/g, cf.delimiter);
           if (!cf.delimiter) {
             words.push(res);
           } else {
             words = res.split(cf.delimiter);
           }
-          for (var i = 0; i < words.length; i++) {
-            var w = decodeURI(words[i]);
+          for each (var w in words) {
             if (!w || pushwords.indexOf(w) != -1) {
               continue;
             }
