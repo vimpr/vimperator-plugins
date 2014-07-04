@@ -24,25 +24,25 @@ let PLUGIN_INFO = xml`
   var is_reverse_push = true;
   var pushfind_configs = 
   [
-{ 
-  name: "wikipedia",
-  url: 'http:\/\/ja.wikipedia.org\/wiki/*',
-  get_regex: /http:\/\/ja.wikipedia.org\/wiki\/([^#\/]*)/,
-  delimiter: "+"
-},
-{ 
-  name: "nicovideo",
-  url: 'http:\/\/www.nicovideo.jp\/search\/*',
-  get_regex: /http:\/\/www.nicovideo.jp\/search\/(.*)/,
-  delimiter: "%20"
-},
-{ 
-  name: "google",
-  url: 'https:\/\/www.google.co.jp\/search.*',
-  get_regex: /google.co.jp\/search.*[&?]q=(.*?)&/,
-  delimiter: "+"
-},
-];
+  { 
+    name: "wikipedia",
+    url: 'http:\/\/ja.wikipedia.org\/wiki/*',
+    get_regex: /http:\/\/ja.wikipedia.org\/wiki\/([^#\/]*)/,
+    delimiter: "+"
+  },
+  { 
+    name: "nicovideo",
+    url: 'http:\/\/www.nicovideo.jp\/search\/*',
+    get_regex: /http:\/\/www.nicovideo.jp\/search\/(.*)/,
+    delimiter: "%20"
+  },
+  { 
+    name: "google",
+    url: 'https:\/\/www.google.co.jp\/search.*',
+    get_regex: /google.co.jp\/search.*[&?]q=(.*?)&/,
+    delimiter: "+"
+  },
+  ];
 
   var urls,hiturl;
   urls = [];
@@ -58,7 +58,7 @@ let PLUGIN_INFO = xml`
         var words, res, hits, hs, pushwords;
         hs = storage['history-search'];
         for each (var cf in pushfind_configs) {
-          liberator.echomsg("pushfind: " + cf.name + "check start");
+//          liberator.echomsg("pushfind: " + cf.name + "check start");
           pushwords = [];
           hits = (args.url.match(cf.get_regex));
           if (!hits || !hits[1]) {
@@ -101,7 +101,7 @@ let PLUGIN_INFO = xml`
         liberator.echomsg(is_echo_pushfind ? "pushfind: " + pushwords : "");
       }
   );
-  liberator.echomsg("pushfind: 3.8 loaded");
+//  liberator.echomsg("pushfind: 4.1 loaded");
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
