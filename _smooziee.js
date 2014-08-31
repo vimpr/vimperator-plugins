@@ -80,68 +80,80 @@ var INFO = xml`
 
 let self = liberator.plugins.smooziee = (function(){
 
-  // Mappings  {{{
-  mappings.addUserMap(
-    [modes.NORMAL],
-    ["j"],
-    "Smooth scroll down",
-    function(count){
-      self.smoothScrollBy(getScrollAmount() * (count || 1));
-    },
-    {
-      count: true
+    mappings.addUserMap(
+        [modes.NORMAL],
+        ["j"],
+        "Smooth scroll down",
+        function(count){
+            self.smoothScrollBy(getScrollAmount());
+        },
+        {
+            count: true
+        }
+        );
+    mappings.addUserMap(
+        [modes.NORMAL],
+        ["k"],
+        "Smooth scroll up",
+        function(count){
+            self.smoothScrollBy(getScrollAmount() * -1);
+        },
+        {
+            count: true
+        }
+        );
+
+    var next;
+    var win;
+    var interval;
+
+    var PUBLICS = {
+        smoothScrollBy: function(moment) {
+            win = Buffer.findScrollableWindow();
+            interval = window.eval(liberator.globalVariables.smooth_scroll_interval || '30');
+            clearTimeout(next);
+            smoothScroll(moment);
+        }
     }
-  );
-  mappings.addUserMap(
-    [modes.NORMAL],
-    ["k"],
-    "Smooth scroll up",
-    function(count){
-      self.smoothScrollBy(getScrollAmount() * -(count || 1));
-    },
-    {
-      count: true
+
+    function logBase(x, y) {
+        // Logarithm of arbitrary base `x`
+        return Math.log(y) / Math.log(x);
     }
-  );
-  // }}}
-  // PUBLIC {{{
-  var PUBLICS = {
-    smoothScrollBy: function(moment) {
-      win = Buffer.findScrollableWindow();
-      interval = window.eval(liberator.globalVariables.smooziee_scroll_interval || '20');
-      destY = win.scrollY + moment;
-      clearTimeout(next);
-      smoothScroll(moment);
+
+    function getScrollAmount() {
+        // see recognition of Fibonacci Numbers (here approximation is used)
+        // http://en.wikipedia.org/wiki/Fibonacci_number#Recognizing_Fibonacci_numbers
+        phi = 1.618033;
+        sqrt5 = 2.236067;
+        fn = liberator.globalVariables.smooth_scroll_amount || '150'
+            n = Math.ceil(logBase(phi, (fn * sqrt5 + Math.sqrt(5 * Math.pow(fn, 2) + 4)) / 2))
+            return window.eval(n);
     }
-  }
 
-  // }}}
-  // PRIVATE {{{
-  var next;
-  var destY;
-  var win;
-  var interval;
-
-  function getScrollAmount() window.eval(liberator.globalVariables.smooziee_scroll_amount || '400');
-
-  function smoothScroll(moment) {
-    if (moment > 0)
-      moment = Math.floor(moment / 2);
-    else
-      moment = Math.ceil(moment / 2);
-
-    win.scrollBy(0, moment);
-
-    if (Math.abs(moment) < 1) {
-      setTimeout(makeScrollTo(win.scrollX, destY), interval);
-      destY = null;
-      return;
+    function fib(n){
+        // see optimized Binet's formula for Fibonacci sequence
+        // http://en.wikipedia.org/wiki/Fibonacci_number#Closed_form_expression
+        phi = 1.618033;
+        sqrt5 = 2.236067;
+        return Math.floor((Math.pow(phi, n) / sqrt5) + 0.5)
     }
-    next = setTimeout(function() smoothScroll(moment), interval);
-  }
 
-  function makeScrollTo(x, y) function() win.scrollTo(x, y);
-  // }}}
-  return PUBLICS;
+    function smoothScroll(moment) {
+        if (moment > 0) {
+            moment = moment - 1;
+            win.scrollBy(0, fib(Math.abs(moment)));
+        } else {
+            moment = moment + 1;
+            win.scrollBy(0, -fib(Math.abs(moment)));
+        }
+
+        if (moment == 0)
+            return;
+
+        next = setTimeout(function() smoothScroll(moment), interval);
+    }
+
+    return PUBLICS;
 })();
 // vim: sw=2 ts=2 et si fdm=marker:
