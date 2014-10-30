@@ -186,7 +186,7 @@ let SITE_INFO = [
   }
   function getXPathFromExtensions(exts){
     function getXPath(elem){
-      if (!elem)
+      if (!elem || !elem.getAttribute)
         return '';
 
       // 連番かもしれない id は無視する
