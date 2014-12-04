@@ -280,7 +280,7 @@ libly.$U = {//{{{
             }
             original = obj[name];
             let current = obj[name] = function () {
-                let self = this, args = arguments;
+                let self = this, args = Array.from(arguments);
                 return func.call(self, function (_args) original.apply(self, _args || args), args);
             };
             libly.$U.extend(current, {original: original && original.original || original, restore: restore});
