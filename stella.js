@@ -2149,6 +2149,8 @@ Thanks:
     },
 
     enable: function () {
+      if (liberator.globalVariables.stella_hidden_panel === true)
+        return;
       if (this.noGUI)
         return;
       this.hidden = false;
