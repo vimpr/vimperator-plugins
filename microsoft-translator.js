@@ -125,11 +125,10 @@ let INFO = xml`
   ];
 
   const config = {
-    access_token: '',
+    access_token: liberator.globalVariables.mstrans_appid || '',
     expires: 0,
     get client_id ()
-      liberator.globalVariables.microsoft_translator_client_id ||
-      liberator.globalVariables.mstrans_appid,
+      liberator.globalVariables.microsoft_translator_client_id,
     get client_secret ()
       liberator.globalVariables.microsoft_translator_client_secret,
   };
@@ -142,7 +141,7 @@ let INFO = xml`
   };
 
   function auth(config, text, opts, callback) {
-    if (config.client_secret == '' || (new Date()).getTime() / 1000 < config.expires) {
+    if (config.client_secret == undefined || (new Date()).getTime() / 1000 < config.expires) {
       callback(config, text, opts);
     } else {
       let url = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13';
@@ -180,7 +179,8 @@ let INFO = xml`
     auth(config, text, opts, function (config, text, opts) {
       let url =
         'http://api.microsofttranslator.com/V2/Ajax.svc/Detect' +
-        '?text=' + encodeURIComponent(text);
+        '?appId=' + (config.client_secret == undefined ? config.access_token : '') +
+        '&text=' + encodeURIComponent(text);
       let req =
         new plugins.libly.Request(
           url,
@@ -205,7 +205,8 @@ let INFO = xml`
       opts || (opts = {});
       let url =
         'http://api.microsofttranslator.com/V2/Ajax.svc/Translate' +
-        '?text=' + encodeURIComponent(text) +
+        '?appId=' + (config.client_secret == undefined ? config.access_token : '') +
+        '&text=' + encodeURIComponent(text) +
         '&from=' + (opts.from || 'en') + '&to=' + (opts.to || 'ja') +
         '&contentType=text/plain';
       let req =
@@ -292,7 +293,7 @@ let INFO = xml`
       let actionNames = args['-action'] || settings.actions;
       let [from, to] = [args['-from'], args['-to']];
 
-      if (config.client_id == undefined && config.client_secret == undefined) {
+      if (config.client_id == undefined && config.client_secret == undefined && liberator.globalVariables.mstrans_appid == undefined) {
         liberator.echoerr('The setting of g:microsoft_translator_client_(id|secret) in .vimperatorrc is required.');
         return false;
       }
