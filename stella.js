@@ -2149,7 +2149,7 @@ Thanks:
     },
 
     enable: function () {
-      if (liberator.globalVariables.stella_hidden_panel === true)
+      if (liberator.globalVariables.stella_hidden_panel)
         return;
       if (this.noGUI)
         return;
