@@ -214,6 +214,9 @@ commands.addUserCommand(
 // {{{ save single image file
     let getImageUrl=function(pContents){
       let url = pContents.getElementsByClassName("_layout-thumbnail ui-modal-trigger")[0].childNodes.item( 0 ).getAttribute( "src" );
+      url = url.replace( /\/.\/[0-9][0-9][0-9]x[0-9][0-9][0-9]\/img\-master/, "/img-original" );
+      url = url.replace( /_master[0-9][0-9][0-9][0-9]/, "" );
+      url = url.replace( /_m/, "" );
       return url;
     };
 
