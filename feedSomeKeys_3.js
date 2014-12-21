@@ -300,7 +300,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
     ',': KeyEvent.DOM_VK_COMMA,
     '.': KeyEvent.DOM_VK_PERIOD,
     '/': KeyEvent.DOM_VK_SLASH,
-    '?': KeyEvent.DOM_VK_SLASH,
+    '?': KeyEvent.DOM_VK_QUESTION_MARK,
     '`': KeyEvent.DOM_VK_BACK_QUOTE,
     '{': KeyEvent.DOM_VK_OPEN_BRACKET,
     '\\': KeyEvent.DOM_VK_BACK_SLASH,
