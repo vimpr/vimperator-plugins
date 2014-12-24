@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO =
-xml`<plugin name="feedSomeKeys" version="1.9.3"
+xml`<plugin name="feedSomeKeys" version="1.9.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -300,7 +300,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.3"
     ',': KeyEvent.DOM_VK_COMMA,
     '.': KeyEvent.DOM_VK_PERIOD,
     '/': KeyEvent.DOM_VK_SLASH,
-    '?': KeyEvent.DOM_VK_SLASH,
+    '?': KeyEvent.DOM_VK_QUESTION_MARK,
     '`': KeyEvent.DOM_VK_BACK_QUOTE,
     '{': KeyEvent.DOM_VK_OPEN_BRACKET,
     '\\': KeyEvent.DOM_VK_BACK_SLASH,
@@ -450,11 +450,11 @@ xml`<plugin name="feedSomeKeys" version="1.9.3"
       urls = RegExp(urls);
 
     // FIXME 同じオブジェクトがダブって返るかも(あるいはそれで良い？)
-    let result = [];
+    let maps = [];
     for (let [, m] in Iterator(targetModes || [modes.NORMAL]))
-      result = result.concat(mappings._user[m].filter(match));
+      maps = maps.concat(mappings._user[m].filter(match));
 
-    return result;
+    return maps;
   }
 
   function unmap (condition) {

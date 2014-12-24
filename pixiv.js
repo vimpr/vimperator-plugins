@@ -213,7 +213,7 @@ commands.addUserCommand(
 
 // {{{ save single image file
     let getImageUrl=function(pContents){
-      let url = pContents.getElementsByClassName("_layout-thumbnail _illust_modal")[0].childNodes.item( 1 ).getAttribute( "data-src" );
+      let url = pContents.getElementsByClassName("original-image")[0].getAttribute( "data-src" );
       return url;
     };
 
