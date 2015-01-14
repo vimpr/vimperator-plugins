@@ -655,14 +655,14 @@ let g:gplus_commando_map_menu            = "m"
             txt = "<br/>\n";
             break;
           case "img":
-            txt = "<img src=" + aNode.src.quote() + " width=\"" + aNode.width + "\" height=\"" + aNode.height + "\"/>";
+            txt = "<img src=" + JSON.stringify(aNode.src) + " width=\"" + aNode.width + "\" height=\"" + aNode.height + "\"/>";
             break;
           case "p":
             txt = nodelist2txt(children, "p", "").join("") + "<br/>\n";
             break;
           case "a":
             if (aNode.hasAttribute("href") && aNode.href.indexOf("http") == 0) {
-              txt = "<a href=" + aNode.href.quote() + (aNode.title ? " title=" + aNode.title.quote() : "") + ">" +
+              txt = "<a href=" + JSON.stringify(aNode.href) + (aNode.title ? " title=" + JSON.stringify(aNode.title) : "") + ">" +
                     nodelist2txt(children, "a", "").join("") +
                     "</a>";
               break;
