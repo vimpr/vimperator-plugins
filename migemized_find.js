@@ -493,6 +493,7 @@ let INFO = xml`
     findAgain: function (reverse) {
       let backwards = !!(!this.lastDirection ^ !reverse);
       let last = this.storage.lastResult;
+      let start, end;
 
       let frames = this.currentFrames;
 
@@ -515,7 +516,6 @@ let INFO = xml`
       this.removeHighlight(this.lastColor);
 
       let str = this.lastSearchExpr;
-      let start, end;
 
       let result;
       let ret = this.find(str, backwards, this.makeBodyRange(last.frame), start, end);
