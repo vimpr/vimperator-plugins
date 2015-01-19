@@ -612,7 +612,9 @@ let INFO = xml`
     },
 
     findAgain: function findAgain (reverse) {
-      if (!MF.findAgain(reverse))
+      if (MF.findAgain(reverse))
+        liberator.echomsg('');
+      else
         liberator.echoerr('not found: ' + MF.lastSearchText);
     },
 
@@ -624,7 +626,9 @@ let INFO = xml`
       }
       if (MF.currentSearchText !== command)
         MF.findFirst(command, forcedBackward);
-      if (!MF.submit())
+      if (MF.submit())
+        liberator.echomsg('');
+      else
         liberator.echoerr('not found: ' + MF.currentSearchText);
     },
 
