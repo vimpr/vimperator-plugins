@@ -359,7 +359,7 @@ Plugin.prototype = { // {{{
             file.write(source);
         } catch (e){
             liberator.log('Could not write to ' + file.path + ': ' + e.message);
-            return 'E190: Cannot open ' + file.path.quote() + ' for writing';
+            return 'E190: Cannot open ' + JSON.stringify(file.path) + ' for writing';
         }
 
         try {
