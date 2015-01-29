@@ -217,8 +217,7 @@ commands.addUserCommand(
       return url;
     };
 
-    let saveImageFile=function(){
-      let imgUrl=getImageUrl(contents);
+    let saveImageFile=function(imgUrl){
       if(0<imgUrl.length){
         let destPath=getDestPath(imgUrl);
         if(destPath==null){
@@ -267,7 +266,17 @@ commands.addUserCommand(
     };
 // }}}
 
-// {{{ trueImgINfo
+// {{{ trueNestImgInfo
+    let trueNestImgInfo=function(){
+      let htmldoc=getDOMHtmlDocument(xhrImgInfo.responseText);
+      if ( htmldoc ) {
+        let imgUrl = htmldoc.getElementsByTagName( 'img' )[0].getAttribute( 'src' );
+        saveImageFile(imgUrl);
+      }
+    };
+// }}}
+
+// {{{ trueImgInfo
     let trueImgInfo=function(){
       if(-1!=type.search(/manga&illust_id=/i)){
         saveMangaFiles();
@@ -291,7 +300,22 @@ commands.addUserCommand(
         if ( aResult == fp.returnOK ) {
           saveDirectory = fp.file;
           if ( url == null ) {
-            saveImageFile();
+            if ( type == null ) {
+              let imgUrl=getImageUrl(contents);
+              saveImageFile(imgUrl);
+            } else {
+              let secondUrl = "http://www.pixiv.net/"+type;
+              xhrImgInfo = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                            .createInstance();
+              xhrImgInfo.QueryInterface( Ci.nsIDOMEventTarget );
+              xhrImgInfo.addEventListener( "load", trueNestImgInfo, false );
+              xhrImgInfo.addEventListener( "error", falseImgInfo, false );
+              xhrImgInfo.QueryInterface( Ci.nsIXMLHttpRequest );
+              xhrImgInfo.open( "GET", secondUrl, true);
+              xhrImgInfo.setRequestHeader( 'Referer', contents.URL );
+              xhrImgInfo.setRequestHeader( 'Cookie', cookie );
+              xhrImgInfo.send( null );
+            }
           } else {
             xhrImgInfo = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                           .createInstance();
@@ -313,6 +337,8 @@ commands.addUserCommand(
                   .item(0).firstChild.getAttribute('href');
     if( type == null ){ // single iamge
       url=null; 
+    }else if(-1!=type.search(/member_illust\.php\?mode=big\&illust\_id=/i)) {
+      url=null;
     }else if(-1!=type.search(/manga&illust_id=/i)){ // plural image
       url=contents.documentURI.replace('medium','manga')+'&type=scroll';
     }else{
