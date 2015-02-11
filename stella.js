@@ -1020,7 +1020,7 @@ Thanks:
     },
 
     get title ()
-      content.document.title.replace(/^YouTube - /, ''),
+      content.document.title.replace(/- YouTube$/, ''),
 
     get totalTime () parseInt(this.player.getDuration()),
 
@@ -1156,7 +1156,7 @@ Thanks:
     },
 
     get title ()
-      content.document.title.replace(/^YouTube - /, ''),
+      content.document.title.replace(/ - YouTube$/, ''),
 
     fetch: function (filepath) {
       // all(1080p,720p,480p,360p) -> 37, 22, 35, 34, 5
