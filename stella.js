@@ -1477,7 +1477,7 @@ Thanks:
       }
     },
 
-    get title () content.document.title.replace(/\s*\u2010\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
+    get title () content.document.title.replace(/\s*\u002D\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
 
     get totalTime () parseInt(this.player.ext_getTotalTime()),
 
