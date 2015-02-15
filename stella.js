@@ -313,14 +313,12 @@ Thanks:
         return mis;
       }
 
-      let dm = Cc["@mozilla.org/download-manager;1"].getService(Ci.nsIDownloadManager);
-      let wbp = Cc["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Ci.nsIWebBrowserPersist);
       let file;
 
       if (filepath) {
         file = io.File(io.expandPath(filepath));
       } else {
-        file = dm.userDownloadsDirectory;
+        file = io.File(FileUtils.getDir("DfltDwnld", [""]));
       }
 
       if (file.exists() && file.isDirectory() && title)
@@ -329,12 +327,15 @@ Thanks:
       if (file.exists())
         return U.echoError('The file already exists! -> ' + file.path);
 
-      file = makeFileURI(file);
-
-      let dl = dm.addDownload(0, U.makeURL(url, null, null), file, title, null, null, null, null, wbp);
-      wbp.progressListener = dl;
-      wbp.persistFlags |= wbp.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-      wbp.saveURI(U.makeURL(url), null, null, postData && makePostStream(postData), null, file);
+      Task.spawn(function () {
+        if (postData) {
+          yield U.httpRequest(url, postData, function (xhr) {
+            file.write(xhr.response);
+          });
+        } else {
+          yield Downloads.fetch(url, file);
+        }
+      }).then(null, Cu.reportError);
 
       return file;
     },
