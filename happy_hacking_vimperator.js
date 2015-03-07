@@ -3320,7 +3320,8 @@ let PLUGIN_INFO = xml`
     }
   });
 
-  around(events, 'onKeyPress', function (next, [event]) {
+  around(events, 'onKeyPress', function (next, args) {
+    let event = args[0];
     let keyStr = events.toString(event);
     let fmaping = let (fmap  = liberator.plugins.feedSomeKeys_3) (fmap && fmap.API.State.feeding);
     if (!fmaping && !events.feedingKeys && uncleanKeys.some(function(v) v == keyStr)) {
