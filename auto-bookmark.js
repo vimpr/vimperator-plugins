@@ -70,7 +70,7 @@ let INFO = xml`
 (function () {
 
   const bookmarks = storage.newMap('auto-bookmark-bookmarks', {store: true});
-  const watching = {};
+  let watching = {};
   let pendingJump = null;
 
   if (!__context__.Previous)
