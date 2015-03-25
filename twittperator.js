@@ -2043,7 +2043,7 @@ let INFO = xml`
           '</table>';
 
       window.Services.console.logStringMessage(html);
-      liberator.echo(new TemplateXML(html), true);
+      liberator.echo(new template.maybeXML(html), true);
     }, // }}}
     showTwitterMentions: function(arg) { // {{{
       tw.jsonGet("statuses/mentions_timeline", null, function(res) {
@@ -2355,7 +2355,7 @@ let INFO = xml`
           return;
         let id = m[0];
         history.filter(function(st) st.id === id).map(dtdd).forEach(function(v) {
-          liberator.echo(new TemplateXML(v));
+          liberator.echo(new template.maybeXML(v));
         });
       },
       timelineCompleter: true,
