@@ -24,7 +24,7 @@ let PLUGIN_INFO = xml`
         }
 
         // クエリ部の抜き出し
-        var q = decodeURI(url.href).match(/q=(.*?)&/);
+        var q = decodeURI(url.href).match(/[?&]q=(.*?)&/);
         // コマンドの引数
         // foo+bar+hogeの形で取得されるので'+'を' 'で置き換え
         var commandPram = q[1].replace(/\+/g,' ');
