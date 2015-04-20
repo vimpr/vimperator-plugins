@@ -13,7 +13,7 @@ let PLUGIN_INFO = xml`
 (function () {
     mappings.addUserMap(
       [modes.NORMAL],['o'],':open',
-      function() { 
+      function() {
         // urlを取得
         var url = window.content.window.location;
         // コマンドの引数
