@@ -101,6 +101,9 @@ let INFO = xml`
     },
     seek: function (elem, value) {
       elem.currentTime = timeCodeToSec(value);
+    },
+    playbackRate: function (elem, value) {
+      elem.playbackRate = value;
     }
   };
 
