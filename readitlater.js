@@ -151,7 +151,7 @@ let PLUGIN_INFO = xml`
 			new Command(["open","o"], "Open url in new tab from RIL list.",
 				function (args) {
 					liberator.open(args, liberator.NEW_BACKGROUND_TAB);
-					if(liberator.globalVariables.readitlater_open_as_read == 1) markAsRead(args);
+					if(liberator.globalVariables.readitlater_open_as_read == 1 && !args.bang) markAsRead(args);
 				},{
 					bang: true,
 					completer : listCompleter,
