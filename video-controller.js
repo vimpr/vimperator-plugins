@@ -86,6 +86,12 @@ let INFO = xml`
   let lastCommand = null;
   let controlls = {
     __proto__: null,
+    play: function (elem) {
+      elem.play();
+    },
+    pause: function (elem) {
+      elem.pause();
+    },
     playOrPause: function (elem) {
       elem.paused ? elem.play() : elem.pause();
     },
