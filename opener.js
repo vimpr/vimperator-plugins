@@ -42,9 +42,9 @@ let INFO = xml`
 (function () {
   let U = liberator.plugins.libly.$U;
 
-  function jump (url) {
+  function jump (_url) {
     let index = 0;
-    let url = util.stringToURLArray(url).toString();
+    let url = util.stringToURLArray(_url).toString();
     if (url == buffer.URL){
       return false;
     }
