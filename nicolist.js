@@ -249,7 +249,8 @@ function getToken (isWatchPage) {
   }
 }
 
-Array.prototype.shuffle = function() {
+Object.defineProperty(Array.prototype, 'shuffle', {value:
+  function() {
     var i = this.length;
     while(i){
         var j = Math.floor(Math.random()*i);
@@ -258,4 +259,5 @@ Array.prototype.shuffle = function() {
         this[j] = t;
     }
     return this;
-}
+  }
+});
