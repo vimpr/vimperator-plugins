@@ -43,6 +43,25 @@ commands.addUserCommand(
   {
     subCommands: [
       new Command(
+        ['v[olume]'],
+        '音量を調節する',
+        function (args) {
+          if (/^(\+|-)/.test(args.literalArg)) {
+            video.container.volume += args.literalArg * 0.1
+          } else {
+            video.container.volume = args.literalArg * 0.1
+          }
+        },
+        {
+          literal: 0,
+          completer: function(context, args) {
+            context.filters = [CompletionContext.Filter.textDescription];
+            context.title = ['volume']
+            context.completions = [['', (video.container.volume * 10) + '/10']]
+          }
+        }
+      ),
+      new Command(
         ['a[dd]'],
         'マイリストに追加する',
         function (args) {
@@ -79,7 +98,7 @@ commands.addUserCommand(
           let i = 0;
 
           video.container = document.createElementNS('http://www.w3.org/1999/xhtml', 'video');
-          video.container.volume = 0.7;  // 効いてない
+          video.container.volume = 0.5;
           video.container.autoplay = true;
           ['error', 'ended'].forEach(function(event) {
             video.container.addEventListener(event, function() {
