@@ -15,9 +15,10 @@ let PLUGIN_INFO = xml`
 // }}}
 
 (function () {
-  var google_url = 'https:\/\/www.google.co.jp\/search.*';
   /* user config */
-  // 引数なしの場合, デフォルト変更値
+  // デフォルト(引数なしの場合)の変更値
+  // true: チェックする
+  // false: チェックを外す
   var DEFAULT_CHECK_VALUE = true;
 
   commands.addUserCommand(
@@ -57,4 +58,3 @@ let PLUGIN_INFO = xml`
 })();
 
 // vim:sw=2 ts=2 et si fdm=marker:
-
