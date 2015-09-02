@@ -1,6 +1,6 @@
 /* NEW BSD LICENSE {{{
 Copyright (c) 2009-2010, anekos.
-Copyright (c) 2012-2014, Jagua.
+Copyright (c) 2012-2015, Jagua.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -282,6 +282,8 @@ let INFO = xml`
       function (text) util.copyToClipboard(text, true)
   };
 
+  let actionTypes = [n for (n in actions)];
+
   function makeListValidator (list)
     function (vs) (!vs || !vs.some(function (v) !list.some(function (at) (v == at))));
 
@@ -319,9 +321,10 @@ let INFO = xml`
         actionNames.push('echo');
 
       function setPair () {
-        if ((!from ^ !to) && settings.pair.length >= 2)
-          let (v = settings.pair[(settings.pair[0] == (from || to)) - 0])
-            (from ? (to = v) : (from = v));
+        if ((!from ^ !to) && settings.pair.length >= 2) {
+          let v = settings.pair[(settings.pair[0] == (from || to)) - 0];
+          (from ? (to = v) : (from = v));
+        }
       }
 
       function req () {
@@ -360,19 +363,18 @@ let INFO = xml`
       literal: 0,
       bang: true,
       options:
-        let (actionTypes = [n for (n in actions)])
+        [
           [
-            [
-              ['-action', '-a'],
-              commands.OPTION_LIST,
-              makeListValidator(actionTypes),
-              actionTypes.map(function (v) [v, v]),
-              true
-            ],
-            [['-from', '-f'], commands.OPTION_STRING, null, languages],
-            [['-to', '-t'], commands.OPTION_STRING, null, languages],
-            [['-guess', '-g'], commands.OPTION_NOARG]
+            ['-action', '-a'],
+            commands.OPTION_LIST,
+            makeListValidator(actionTypes),
+            actionTypes.map(function (v) [v, v]),
+            true
           ],
+          [['-from', '-f'], commands.OPTION_STRING, null, languages],
+          [['-to', '-t'], commands.OPTION_STRING, null, languages],
+          [['-guess', '-g'], commands.OPTION_NOARG]
+        ],
     },
     true
   );
