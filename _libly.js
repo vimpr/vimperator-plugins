@@ -246,9 +246,10 @@ libly.$U = {//{{{
         function getPluginPath () {
           let pluginPath;
           Error('hoge').stack.split(/\n/).some(
-            function (s)
-              let (m = s.match(/@chrome:\/\/liberator\/content\/liberator\.js -> file:\/\/\/(.+):\d+$/))
-                (m && (pluginPath = m[1].replace(/\?.*$/, '')))
+            function (s) {
+              let m = s.match(/@chrome:\/\/liberator\/content\/liberator\.js -> file:\/\/\/(.+):\d+$/);
+              (m && (pluginPath = m[1].replace(/\?.*$/, '')));
+            }
           );
           return pluginPath;
         }
