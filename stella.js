@@ -394,9 +394,10 @@ Thanks:
     getElementById: function (id)
       content.document.getElementById(id),
 
-    getElementByIdEx: function (id)
-      let (p = content.document.getElementById(id))
-        (p && (p.wrappedJSObject || p)),
+    getElementByIdEx: function (id) {
+      let p = content.document.getElementById(id);
+      return (p && (p.wrappedJSObject || p));
+    },
 
     httpRequest: function (uri, data, onComplete) {
       var xhr = new XMLHttpRequest();
@@ -439,9 +440,10 @@ Thanks:
 
     parseParameter: function (str) {
       let result = {};
-      str.split(/&/).forEach(function (it)
-                               let ([_, n, v] = it.match(/^([^=]*)=(.*)$/))
-                                 (result[n] = unescape(v)));
+      str.split(/&/).forEach(function (it) {
+                               let [_, n, v] = it.match(/^([^=]*)=(.*)$/);
+                               result[n] = unescape(v);
+                             });
       return result;
     },
 
@@ -596,10 +598,9 @@ Thanks:
     function setf (name, value)
       ((self.functions[name] === undefined) && (self.functions[name] = value || ''));
 
-    let (seek = this.has('currentTime', 'rw', 'totalTime', 'r') && 'x') {
-      setf('seek', seek);
-      setf('seekRelative', seek);
-    }
+    let seek = this.has('currentTime', 'rw', 'totalTime', 'r') && 'x';
+    setf('seek', seek);
+    setf('seekRelative', seek);
     setf('playOrPause', this.has('play', 'x', 'pause', 'x') && 'x');
     setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
     setf('maxVolume', this.has('volume', 'rw') && 'r');
@@ -663,13 +664,14 @@ Thanks:
 
     is: function (state) (this.state == state),
 
-    has: function (name, ms)
-      (arguments.length < 2)
+    has: function (name, ms) {
+      let f = this.functions[name];
+      return (arguments.length < 2)
       ||
-      let (f = this.functions[name])
-        (f && !Array.some(ms, function (m) f.indexOf(m) < 0))
-        &&
-        arguments.callee.apply(this, Array.splice(arguments, 2)),
+      (f && !Array.some(ms, function (m) f.indexOf(m) < 0))
+      &&
+      arguments.callee.apply(this, Array.splice(arguments, 2));
+    },
 
     get currentTime () undefined,
     set currentTime (value) value,
@@ -900,7 +902,7 @@ Thanks:
     Player.apply(this, arguments);
   }
 
-  YouTubePlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
+  YouTubePlayer.getIDfromURL = function (url) {let [_, r] = url.match(/[?;&]v=([-\w]+)/); return r;};
   YouTubePlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubePlayer.prototype = {
@@ -937,9 +939,10 @@ Thanks:
 
     get fileExtension () '.mp4',
 
-    get fileURL ()
-      let (as = content.document.defaultView.wrappedJSObject.swfArgs)
-        ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
+    get fileURL () {
+      let as = content.document.defaultView.wrappedJSObject.swfArgs;
+      return 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;
+    },
 
     get id ()
       YouTubePlayer.getIDfromURL(U.currentURL),
@@ -1096,9 +1099,10 @@ Thanks:
 
     get fileExtension () '.mp4',
 
-    get fileURL ()
-      let (as = content.document.defaultView.wrappedJSObject.swfArgs)
-        ('http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t),
+    get fileURL () {
+      let as = content.document.defaultView.wrappedJSObject.swfArgs;
+      return 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;
+    },
 
     get id ()
       YouTubePlayer.getIDfromURL(U.currentURL),
@@ -1204,7 +1208,7 @@ Thanks:
     Player.apply(this, arguments);
   }
 
-  YouTubeUserChannelPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/\/([^\/]+)($|[\?]+)/)) r;
+  YouTubeUserChannelPlayer.getIDfromURL = function (url) {let [_, r] = url.match(/\/([^\/]+)($|[\?]+)/); return r;};
   YouTubeUserChannelPlayer.isVideoURL = function (url) /^https?:\/\/(www\.)?youtube\.com\/watch\?.+/.test(url);
 
   YouTubeUserChannelPlayer.prototype = {
@@ -1331,9 +1335,10 @@ Thanks:
     get fullscreen () this.large,
     set fullscreen (value) (this.large = value),
 
-    get id ()
-      let (m = U.currentURL.match(/\/(?:watch|playlist\/mylist)\/([a-z\d]+)/))
-        (m && m[1]),
+    get id () {
+      let m = U.currentURL.match(/\/(?:watch|playlist\/mylist)\/([a-z\d]+)/);
+      return (m && m[1]);
+    },
 
     get muted () this.player.ext_isMute(),
     set muted (value) (this.player.ext_setMute(value), value),
@@ -1501,7 +1506,7 @@ Thanks:
             function (xhr) {
               let res = xhr.responseText;
               let info = {};
-              res.split(/&/).forEach(function (it) let ([n, v] = it.split(/=/)) (info[n] = v));
+              res.split(/&/).forEach(function (it) {let [n, v] = it.split(/=/); info[n] = v;});
               U.download(decodeURIComponent(info.url), filepath, self.fileExtension, self.title);
               let postData = '<thread thread="' + info.thread_id + '"' + ' version="20061206" res_from="-1000" />';
               // FIXME
@@ -1659,7 +1664,7 @@ Thanks:
     Player.apply(this, arguments);
   }
 
-  VimeoPlayer.getIDfromURL = function (url) let ([_, r] = url.match(/[?;&]v=([-\w]+)/)) r;
+  VimeoPlayer.getIDfromURL = function (url) {let [_, r] = url.match(/[?;&]v=([-\w]+)/); return r;};
 
   VimeoPlayer.prototype = {
     __proto__: Player.prototype,
@@ -1790,24 +1795,23 @@ Thanks:
         return menu.forEach(function (it) append(parent, it));
       if (!menu.label)
         menu.label = U.capitalize(menu.name);
-      let (elem) {
-        if (menu.sub) {
-          let _menu = document.createElement('menu');
-          let _menupopup = elem = document.createElement('menupopup');
-          _menu.setAttribute('label', menu.label);
-          _menu.appendChild(_menupopup);
-          parent.appendChild(_menu);
-          append(_menupopup, menu.sub);
-        } else {
-          elem = document.createElement('menuitem');
-          elem.setAttribute('label', menu.label);
-          parent.appendChild(elem);
-        }
-        menu.id && elem.setAttribute('id', menu.id);
-        for (let [name, value] in Iterator(menu.attributes || {}))
-          elem.setAttribute(name, value);
-        setting.onAppend.call(setting, elem, menu);
+      let elem;
+      if (menu.sub) {
+        let _menu = document.createElement('menu');
+        let _menupopup = elem = document.createElement('menupopup');
+        _menu.setAttribute('label', menu.label);
+        _menu.appendChild(_menupopup);
+        parent.appendChild(_menu);
+        append(_menupopup, menu.sub);
+      } else {
+        elem = document.createElement('menuitem');
+        elem.setAttribute('label', menu.label);
+        parent.appendChild(elem);
       }
+      menu.id && elem.setAttribute('id', menu.id);
+      for (let [name, value] in Iterator(menu.attributes || {}))
+        elem.setAttribute(name, value);
+      setting.onAppend.call(setting, elem, menu);
     }
 
     let root = document.createElement('menupopup');
@@ -2002,49 +2006,48 @@ Thanks:
         true
       );
 
-      let (lastCompletions = []) {
-        commands.addUserCommand(
-          ['strel[ations]'],
-          'relations - Stella',
-          function (args) {
+      let lastCompletions = [];
+      commands.addUserCommand(
+        ['strel[ations]'],
+        'relations - Stella',
+        function (args) {
+          if (!self.isValid)
+            return U.raiseNotSupportedPage();
+
+          let arg = args.literalArg;
+          let index = /^\d+:/.test(arg) && parseInt(arg, 10);
+          if (index > 0)
+            arg = lastCompletions[index - 1].command;
+          let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;
+          liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+        },
+        {
+          literal: 0,
+          argCount: '*',
+          bang: true,
+          completer: function (context, args) {
             if (!self.isValid)
-              return U.raiseNotSupportedPage();
+              U.raiseNotSupportedPage();
+            if (!self.player.has('relations', 'r'))
+              U.raiseNotSupportedFunction();
 
-            let arg = args.literalArg;
-            let index = /^\d+:/.test(arg) && parseInt(arg, 10);
-            if (index > 0)
-              arg = lastCompletions[index - 1].command;
-            let url = self.player.has('makeURL', 'x') ? makeRelationURL(self.player, arg) : arg;
-            liberator.open(url, args.bang ? liberator.NEW_TAB : liberator.CURRENT_TAB);
+            context.filters = [CompletionContext.Filter.textDescription];
+            context.anchored = false;
+            context.title = ['Tag/ID', 'Description'];
+            context.keys = {text: 'text', description: 'description', thumbnail: 'thumbnail'};
+            let process = Array.slice(context.process);
+            context.process = [
+              process[0],
+              function (item, text)
+                (item.thumbnail ? `<img src={item.thumbnail} style="margin-right: 0.5em; height: 3em;"/>{text}`
+                                : process[1].apply(this, arguments))
+            ];
+            lastCompletions = self.player.relations;
+            context.completions = lastCompletions.map(function (rel) rel.completionItem);
           },
-          {
-            literal: 0,
-            argCount: '*',
-            bang: true,
-            completer: function (context, args) {
-              if (!self.isValid)
-                U.raiseNotSupportedPage();
-              if (!self.player.has('relations', 'r'))
-                U.raiseNotSupportedFunction();
-
-              context.filters = [CompletionContext.Filter.textDescription];
-              context.anchored = false;
-              context.title = ['Tag/ID', 'Description'];
-              context.keys = {text: 'text', description: 'description', thumbnail: 'thumbnail'};
-              let process = Array.slice(context.process);
-              context.process = [
-                process[0],
-                function (item, text)
-                  (item.thumbnail ? `<img src={item.thumbnail} style="margin-right: 0.5em; height: 3em;"/>{text}`
-                                  : process[1].apply(this, arguments))
-              ];
-              lastCompletions = self.player.relations;
-              context.completions = lastCompletions.map(function (rel) rel.completionItem);
-            },
-          },
-          true
-        );
-      }
+        },
+        true
+      );
     },
 
     addPageInfo: function () {
@@ -2173,11 +2176,11 @@ Thanks:
     update: function () {
       if (!(this.isValid && this.player.ready))
         return;
+      let v = this.player.statusText;
       this.labels.main.text =
-        let (v = this.player.statusText)
-          (this.__currentTimeTo == undefined) ? v
-                                              : v.replace(/^\d*\:\d*/,
-                                                          U.toTimeCode(this.__currentTimeTo));
+        (this.__currentTimeTo == undefined) ? v
+                                            : v.replace(/^\d*\:\d*/,
+                                                        U.toTimeCode(this.__currentTimeTo));
       this.labels.volume.text = this.player.volume;
       for (let name in this.toggles) {
         this.toggles[name].text = (this.player[name] ? String.toUpperCase : U.id)(name[0]);
