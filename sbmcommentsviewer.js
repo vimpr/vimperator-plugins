@@ -3,9 +3,9 @@ var PLUGIN_INFO = xml`
     <name>SBM Comments Viewer</name>
     <description>List show Social Bookmark Comments</description>
     <description lang="ja">ソーシャル・ブックマーク・コメントを表示します</description>
-    <version>0.2.5</version>
-    <minVersion>2.0pre</minVersion>
-    <updateURL>https://github.com/vimpr/vimperator-plugins/raw/master/sbmcommentsviewer.js</updateURL>
+    <version>0.2.6</version>
+    <minVersion>3.8.3.1</minVersion>
+    <updateURL>https://raw.githubusercontent.com/vimpr/vimperator-plugins/master/sbmcommentsviewer.js</updateURL>
     <detail><![CDATA[
 == Usage ==
 >||
@@ -537,16 +537,17 @@ commands.addUserCommand(['viewSBMComments'], 'SBM Comments Viewer', //{{{
         var format = (liberator.globalVariables.def_sbm_format || 'id,timestamp,tags,comment').split(',');
         var countOnly = false, openToBrowser = false;
         var url = arg.literalArg || buffer.URL;
-        [
-            let (v = arg['-' + name]) (v && f(v))
-            for ([name, f] in Iterator({
-                count: function () countOnly = true,
-                browser: function () openToBrowser = true,
-                type: function (v) (types = v),
-                format: function (v) (format = v),
-                arguments: function (v) (v.length > 0 && (url = v[0]))
-            }))
-        ]
+
+        for ([name, f] of Iterator({
+            count: function () countOnly = true,
+            browser: function () openToBrowser = true,
+            type: function (v) (types = v),
+            format: function (v) (format = v),
+            arguments: function (v) (v.length > 0 && (url = v[0]))
+        })) {
+            let v = arg['-' + name];
+            v && f(v);
+        }
 
         for (let i=0; i<types.length; i++){
             let type = types.charAt(i);
