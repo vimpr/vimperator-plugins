@@ -304,7 +304,8 @@ var MultiRequester = {
       let srcEncode = info.srcEncode || "UTF-8";
       let urlEncode = info.urlEncode || srcEncode;
 
-      let repStrCount = let (m = url.match(/%s/g)) (m && m.length);
+      let m = url.match(/%s/g);
+      let repStrCount = m && m.length;
       if (repStrCount && !parsedArgs.strs.length) continue;
 
       // via. lookupDictionary.js
