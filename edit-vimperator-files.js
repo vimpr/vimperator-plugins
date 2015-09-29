@@ -91,8 +91,9 @@ let INFO = xml`
   dirs = util.Array.uniq(util.Array.compact(dirs).map(io.expandPath));
 
   let getItems =
-    let (lastTime, lastItems)
-      function () {
+    (function () {
+      let lastTime, lastItems;
+      return function () {
         if (lastTime && (new Date() - lastTime < 5 * 1000))
           return lastItems;
         return lastItems = util.Array.flatten([
@@ -103,8 +104,8 @@ let INFO = xml`
           ]
           for ([, dir] in Iterator(dirs))
         ]);
-
       };
+    })();
 
 
   completion.vimperatorFiles =

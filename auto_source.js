@@ -121,9 +121,10 @@ let INFO = xml`
     (files = files.filter(function (it) (!(it.path.indexOf(filepath) === 0 && func(it)+'-'))));
 
   function expandPath (filepath) {
-    function normalize (filepath)
-      let (file = io.File(filepath))
-        (file.normalize(), file.path);
+    function normalize (filepath) {
+      let file = io.File(filepath);
+      return (file.normalize(), file.path);
+    }
 
     filepath = io.expandPath(filepath);
     if (filepath.match(/\/|\w:[\\\/]/))
