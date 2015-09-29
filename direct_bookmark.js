@@ -819,7 +819,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
             };
         };
 
-        let completer = let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
+        let completer = (function(lastURL, lastUserTags, onComplete, done){ return function(context, arg){
             function matchPosition (e){
                 let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
                 switch (m) {
@@ -882,7 +882,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
                     set(context, __context__.tags);
                 }
             });
-        };
+        }; })(undefined, undefined, undefined, true);
 
         let options = [ [['-s','-service'], liberator.modules.commands.OPTION_STRING] ];
 
