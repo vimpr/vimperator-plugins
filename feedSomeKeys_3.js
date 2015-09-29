@@ -317,7 +317,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
 
   function or (list, func) {
     let [head,] = list;
-    (list.length && (func(head) || or(list.slice(1), func)));
+    return (list.length && (func(head) || or(list.slice(1), func)));
   }
 
   function getFrames () {
