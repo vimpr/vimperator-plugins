@@ -647,7 +647,8 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
     };
     __context__.services = services;
 
-    let (_tags = {}, _empty = true) {
+    (function () {
+        let _tags = {}, _empty = true;
         __context__.tags = {
             __iterator__: function () Iterator(_tags, true),
             update: function (atags) {
@@ -661,7 +662,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
             },
             get isEmpty () _empty,
         };
-    }
+    })();
 
     function getTagsAsync(onComplete){
         var d,first;
@@ -819,70 +820,74 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
             };
         };
 
-        let completer = let (lastURL, lastUserTags, onComplete, done = true) function(context, arg){
-            function matchPosition (e){
-                let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
-                switch (m) {
-                case 'infix': return e;
-                case 'suffix': return e + "$";
-                }
-                return "^" + e;
-            }
-
-            function set (context, tags) {
-                let filter = context.filter;
-                var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
-                var expr = XMigemoCore && isUseMigemo ? "(" + XMigemoCore.getRegExp(match_result[2]) + ")"
-                                                      : match_result[2];
-                var m = new RegExp(matchPosition(expr),'i');
-
-                context.advance( match_result[1].length );
-
-                context.incomplete = false;
-                context.completions =
-                    [ ["[" + tag + "]","Tag"]
-                      for each (tag in tags)
-                      if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
-            }
-
-            let url = arg[0] || buffer.URL;
-            liberator.log(url);
-
-            context.fork('UserTags', 0, context, function(context){
-                context.title = ['User Tags', 'User Tags'];
-
-                onComplete = function(tags){
-                    done = true;
-                    lastUserTags = tags;
-                    context.incomplete = false;
-                    set(context, tags);
-                };
-
-                if (url == lastURL){
-                    if (done) {
-                        onComplete(lastUserTags);
-                    } else {
-                        context.incomplete = true;
+        let completer =
+            (function () {
+                let lastURL, lastUserTags, onComplete, done = true;
+                return function(context, arg){
+                    function matchPosition (e){
+                        let m = liberator.globalVariables.direct_sbm_tag_match || 'prefix';
+                        switch (m) {
+                        case 'infix': return e;
+                        case 'suffix': return e + "$";
+                        }
+                        return "^" + e;
                     }
-                } else {
-                    lastURL = url;
-                    context.incomplete = true;
-                    done = false;
-                    getUserTags(url, function (tags) onComplete(tags));
-                }
-            });
 
-            context.fork('MyTags', 0, context, function(context, arg){
-                context.title = ['My Tag','Description'];
+                    function set (context, tags) {
+                        let filter = context.filter;
+                        var match_result = filter.match(/((?:\[[^\]]*\])*)\[?(.*)/); //[all, commited, now inputting]
+                        var expr = XMigemoCore && isUseMigemo ? "(" + XMigemoCore.getRegExp(match_result[2]) + ")"
+                                                              : match_result[2];
+                        var m = new RegExp(matchPosition(expr),'i');
 
-                if(__context__.tags.isEmpty){
-                    context.incomplete = true;
-                    getTagsAsync(set.bind(null, context)).call([]);
-                } else {
-                    set(context, __context__.tags);
-                }
-            });
-        };
+                        context.advance( match_result[1].length );
+
+                        context.incomplete = false;
+                        context.completions =
+                            [ ["[" + tag + "]","Tag"]
+                              for each (tag in tags)
+                              if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                    }
+
+                    let url = arg[0] || buffer.URL;
+                    liberator.log(url);
+
+                    context.fork('UserTags', 0, context, function(context){
+                        context.title = ['User Tags', 'User Tags'];
+
+                        onComplete = function(tags){
+                            done = true;
+                            lastUserTags = tags;
+                            context.incomplete = false;
+                            set(context, tags);
+                        };
+
+                        if (url == lastURL){
+                            if (done) {
+                                onComplete(lastUserTags);
+                            } else {
+                                context.incomplete = true;
+                            }
+                        } else {
+                            lastURL = url;
+                            context.incomplete = true;
+                            done = false;
+                            getUserTags(url, function (tags) onComplete(tags));
+                        }
+                    });
+
+                    context.fork('MyTags', 0, context, function(context, arg){
+                        context.title = ['My Tag','Description'];
+
+                        if(__context__.tags.isEmpty){
+                            context.incomplete = true;
+                            getTagsAsync(set.bind(null, context)).call([]);
+                        } else {
+                            set(context, __context__.tags);
+                        }
+                    });
+                };
+            })();
 
         let options = [ [['-s','-service'], liberator.modules.commands.OPTION_STRING] ];
 

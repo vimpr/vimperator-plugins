@@ -1841,9 +1841,10 @@ let INFO = xml`
       tw.jsonGet(api, query, callback);
     }, // }}}
     loadPlugins: function() { // {{{
-      function isEnabled(file)
-        let (name = file.leafName.replace(/\..*/, "").replace(/-/g, "_"))
-          liberator.globalVariables["twittperator_plugin_" + name];
+      function isEnabled(file) {
+        let name = file.leafName.replace(/\..*/, "").replace(/-/g, "_");
+        return liberator.globalVariables["twittperator_plugin_" + name];
+      }
 
       function loadPluginFromDir(checkGV, candidates) {
         return function(dir) {
@@ -2132,9 +2133,10 @@ let INFO = xml`
   Store.set("consumerSecret", "gVwj45GaW6Sp7gdua6UFyiF910ffIety0sD1dv36Cz8");
   // }}}
   let Predicates = { // {{{
-    notMine: function (st)
-      let (n = setting.screenName)
-        (n ? (!st.user || st.user.screen_name !== n) : st),
+    notMine: function (st) {
+      let n = setting.screenName;
+      return n ? (!st.user || st.user.screen_name !== n) : st;
+    },
     selectMine: function (st)
       (!Predicates.notMine(st))
   }; // }}}
@@ -2146,9 +2148,10 @@ let INFO = xml`
       text.replace(/\r\n|[\r\n]/g, ' ');
 
     function setTimelineCompleter(context) { // {{{
-      function statusObjectFilter(item)
-        let (desc = item.description)
-          (this.match(desc.user.screen_name) || this.match(desc.text));
+      function statusObjectFilter(item) {
+        let desc = item.description;
+        return this.match(desc.user.screen_name) || this.match(desc.text);
+      }
 
       context.compare = void 0;
       context.createRow = function(item, highlightGroup) {
@@ -2248,10 +2251,10 @@ let INFO = xml`
       get expr() {
         return RegExp(
           "^" +
-          this.command.map(function(c)
-            let (r = util.escapeRegex(c))
-              (/^\W$/.test(c) ? r : r + "( |$)")
-          ).join("|")
+          this.command.map(function(c) {
+            let r = util.escapeRegex(c);
+            return /^\W$/.test(c) ? r : r + "( |$)";
+          }).join("|")
         );
       },
       match: function(s) s.match(this.expr),
@@ -2592,61 +2595,73 @@ let INFO = xml`
         bang: true,
         literal: 0,
         hereDoc: true,
-        completer: let (getting, lastTime) function(context, args) {
-          let now = new Date().getTime();
-          let doGet =
-            setting.autoStatusUpdate &&
-            !getting &&
-            (!lastTime || ((lastTime + setting.statusValidDuration * 1000) < now));
+        completer: (function () {
+          let getting, lastTime;
+          return function(context, args) {
+            let now = new Date().getTime();
+            let doGet =
+              setting.autoStatusUpdate &&
+              !getting &&
+              (!lastTime || ((lastTime + setting.statusValidDuration * 1000) < now));
 
-          let completer = args.bang ? subCommandCompleter : commandCompelter;
-          let matches = args.bang || args.literalArg.match(/(RT\s+|)@|#|^D\s+/);
+            let completer = args.bang ? subCommandCompleter : commandCompelter;
+            let matches = args.bang || args.literalArg.match(/(RT\s+|)@|#|^D\s+/);
 
-          if (!matches)
-            return;
+            if (!matches)
+              return;
 
-          context.fork(
-            "TwittperatorCommand", 0, context,
-            function(context) {
-              context.incomplete = doGet;
-              context.hasitems = !doGet;
+            context.fork(
+              "TwittperatorCommand", 0, context,
+              function(context) {
+                context.incomplete = doGet;
+                context.hasitems = !doGet;
 
-              if (doGet) {
-                getting = true;
-                lastTime = now;
-                Twitter.getUserTimeline(null, function() {
-                  getting = false;
-                  completer(context, args);
-                  context.incomplete = false;
-                });
-                return;
+                if (doGet) {
+                  getting = true;
+                  lastTime = now;
+                  Twitter.getUserTimeline(null, function() {
+                    getting = false;
+                    completer(context, args);
+                    context.incomplete = false;
+                  });
+                  return;
+                }
+                completer(context, args);
               }
-              completer(context, args);
-            }
-          );
-        }
+            );
+          };
+        })()
       }, true); // }}}
   } // }}}
 
   // Initialization {{{
   let setting =
-    let (gv = liberator.globalVariables) ({
-      useChirp: !!gv.twittperator_use_chirp,
-      allReplies: !!gv.twittperator_all_replies,
-      autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
-      statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
-      historyLimit: let (v = gv.twittperator_history_limit) (v === 0 ? 0 : (v || 1000)),
-      showTLURLScheme: let (v = gv.twittperator_show_tl_with_https_url) ("http" + (v === false ? "" : "s")),
-      proxyHost: gv.twittperator_proxy_host,
-      proxyPort: gv.twittperator_proxy_port,
-      screenName: gv.twittperator_screen_name,
-      apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
-                  "://api.twitter.com/" + (gv.twittperator_twitter_api_version || "1.1")  + "/",
-      trackWords: gv.twittperator_track_words,
-      count: (gv.twittperator_count || 20),
-      lang: (gv.twittperator_lang || ''),
-      getAPIURL: function (path) (/^https?\:\/\//.test(path) ? path : this.apiURLBase + path)
-    });
+    (function () {
+      let gv = liberator.globalVariables;
+      return {
+        useChirp: !!gv.twittperator_use_chirp,
+        allReplies: !!gv.twittperator_all_replies,
+        autoStatusUpdate: !!parseInt(gv.twittperator_auto_status_update || 0),
+        statusValidDuration: parseInt(gv.twitperator_status_valid_duration || 90),
+        historyLimit: (function () {
+          let v = gv.twittperator_history_limit;
+          return v === 0 ? 0 : (v || 1000)
+        })(),
+        showTLURLScheme: (function () {
+          let v = gv.twittperator_show_tl_with_https_url;
+          return "http" + (v === false ? "" : "s");
+        })(),
+        proxyHost: gv.twittperator_proxy_host,
+        proxyPort: gv.twittperator_proxy_port,
+        screenName: gv.twittperator_screen_name,
+        apiURLBase: "http" + (!!gv.twittperator_use_ssl_connection_for_api_ep ? "s" : "") +
+                    "://api.twitter.com/" + (gv.twittperator_twitter_api_version || "1.1")  + "/",
+        trackWords: gv.twittperator_track_words,
+        count: (gv.twittperator_count || 20),
+        lang: (gv.twittperator_lang || ''),
+        getAPIURL: function (path) (/^https?\:\/\//.test(path) ? path : this.apiURLBase + path)
+      };
+    })();
 
   let statusRefreshTimer;
 
