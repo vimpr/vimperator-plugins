@@ -315,8 +315,10 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
   function id (v)
     v;
 
-  function or (list, func)
-    (list.length && let ([head,] = list) (func(head) || or(list.slice(1), func)));
+  function or (list, func) {
+    let [head,] = list;
+    return (list.length && (func(head) || or(list.slice(1), func)));
+  }
 
   function getFrames () {
     function bodyCheck (content)
@@ -596,7 +598,8 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
         }
 
         if (multi) {
-          let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
+          let s = args['-separator'] || ',';
+          let sep = function (v) v.split(s);
           args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
