@@ -2573,6 +2573,8 @@ let INFO = xml`
       context.incomplete = false;
     } // }}}
 
+    let getting;
+    let lastTime;
     commands.addUserCommand(["tw[ittperator]"], "Twittperator command", // {{{
       function(args) {
         let bang = args.bang;
@@ -2595,7 +2597,7 @@ let INFO = xml`
         bang: true,
         literal: 0,
         hereDoc: true,
-        completer: let (getting, lastTime) function(context, args) {
+        completer: function(context, args) {
           let now = new Date().getTime();
           let doGet =
             setting.autoStatusUpdate &&
