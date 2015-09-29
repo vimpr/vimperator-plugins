@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO =
-xml`<plugin name="feedSomeKeys" version="1.9.4"
+xml`<plugin name="feedSomeKeys" version="1.9.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Feed some defined key events into the Web content"
           lang="en-US"
@@ -140,7 +140,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
 :lazy fmaps -u='http://code.google.com/p/vimperator-labs/issues/detail' u
     </ex></code>
   </plugin>
-  <plugin name="feedSomeKeys" version="1.9.3"
+  <plugin name="feedSomeKeys" version="1.9.5"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/feedSomeKeys_3.js"
           summary="Web コンテンツに直接キーイベントを送ります。"
           lang="ja"
@@ -252,7 +252,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
 (function () {
 
   const EVENTS = 'keypress keydown keyup'.split(/\s+/);
-  const EVENTS_WITH_V = EVENTS.concat(['v' + n for each (n in EVENTS)]);
+  const EVENTS_WITH_V = EVENTS.concat(['v' + n for (n of EVENTS)]);
   const IGNORE_URLS = /<ALL>/;
 
   const VKeys = {
@@ -315,8 +315,15 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
   function id (v)
     v;
 
-  function or (list, func)
-    (list.length && let ([head,] = list) (func(head) || or(list.slice(1), func)));
+  function or (list, func) {
+    return (
+      list.length &&
+      (function () {
+        let [head,] = list;
+        return (func(head) || or(list.slice(1), func));
+      })()
+    );
+  }
 
   function getFrames () {
     function bodyCheck (content)
@@ -508,7 +515,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
           }</span>
         </span>`
       ]
-      for each (map in findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
+      for (map of findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
     ];
   }
 
@@ -518,7 +525,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
       let uniq = {};
       let result = [
         (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
-        for each (map in maps)
+        for (map of maps)
         if (map.matchingUrls && !uniq[map.matchingUrls])
       ];
       if (currentURL) {
@@ -533,7 +540,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
   function frameCompleter (context, args) {
     return [
       [i, frame.document.location]
-      for each ([i, frame] in Iterator(getFrames()))
+      for ([i, frame] of Iterator(getFrames()))
     ];
   }
 
@@ -596,7 +603,8 @@ xml`<plugin name="feedSomeKeys" version="1.9.4"
         }
 
         if (multi) {
-          let sep = let (s = args['-separator'] || ',') function (v) v.split(s);
+          let sepStr = s = args['-separator'] || ',';
+          let sep = function (v) v.split(s);
           args.literalArg.split(/\s+/).map(String.trim).map(sep).forEach(add);
         } else {
           let [, lhs, rhs] = args.literalArg.match(/^(\S+)\s+(.*)$/) || args.literalArg;
