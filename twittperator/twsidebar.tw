@@ -425,7 +425,10 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             t.type = 'filter';
             appendTweet(t, 'home', streamName);
             appendTweet(t, 'filter', streamName);
-            let (s = Config.sound.filter) (s && s.play());
+            (function () {
+              let s = Config.sound.filter;
+              return s && s.play();
+            })();
           }
         } else if (/^(keyword)$/.test(t.type)) {
           appendTweet(t, 'home', streamName);

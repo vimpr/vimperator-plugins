@@ -50,9 +50,11 @@ let INFO =
 
 (function () {
   let socketService =
-    let (stsvc = Components.classes["@mozilla.org/network/socket-transport-service;1"])
-      let (svc = stsvc.getService())
-        svc.QueryInterface(Components.interfaces["nsISocketTransportService"]);
+    (function () {
+      let stsvc = Components.classes["@mozilla.org/network/socket-transport-service;1"];
+      let svc = stsvc.getService();
+      return svc.QueryInterface(Components.interfaces["nsISocketTransportService"]);
+    })();
 
   function talk (name, msg) {
     let transport = socketService.createTransport(null, 0, '127.0.0.1', 9801, null);
