@@ -334,7 +334,10 @@ let INFO = xml`
           context.keys = {
             text: function ({elem, index}) (index + ': ' + join((elem.textContent || elem.href))),
             description: function ({elem}) (elem.href),
-            thumbnail: function ({elem}) let (img = elem.querySelector('img')) (img && img.src)
+            thumbnail: function ({elem}) {
+              let img = elem.querySelector('img');
+              return (img && img.src);
+            }
           };
           context.compare = CompletionContext.Sort.number;
           let process = Array.slice(context.process);
