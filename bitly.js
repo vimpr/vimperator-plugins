@@ -92,7 +92,7 @@ let PLUGIN_INFO = xml`
           {
             default: (function () {
               let e = content.document.querySelector('#bitly_api_key');
-              return (e ? e.value : '')
+              return e ? e.value : ''
             })()
           }
         );
