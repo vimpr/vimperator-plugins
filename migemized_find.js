@@ -470,10 +470,10 @@ let INFO = xml`
       if (backwards)
         frames = frames.reverse();
 
-      frames.some(function (frame)
-        let (ret = this.find(expr, backwards, this.makeBodyRange(frame)))
-          (ret && (result = this.storage.lastResult = { frame: frame, range: ret}))
-      , this);
+      frames.some(function (frame) {
+        let ret = this.find(expr, backwards, this.makeBodyRange(frame));
+        return ret && (result = this.storage.lastResult = { frame: frame, range: ret});
+      }, this);
 
       this.removeHighlight(color);
 
@@ -527,10 +527,10 @@ let INFO = xml`
         let [head, tail] = slashArray(frames, last.frame);
         let next = backwards ? head.reverse().concat(tail.reverse())
                              : tail.concat(head);
-        next.some(function (frame)
-          let (ret = this.find(str, backwards, this.makeBodyRange(frame)))
-            (ret && (result = {frame: frame, range: ret}))
-        , this);
+        next.some(function (frame) {
+          let ret = this.find(str, backwards, this.makeBodyRange(frame));
+          return ret && (result = {frame: frame, range: ret});
+        }, this);
       }
 
       this.storage.lastResult = result;

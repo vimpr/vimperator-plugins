@@ -136,21 +136,24 @@ let INFO = xml`
   };
 
   let socketService =
-    let (stsvc = Components.classes["@mozilla.org/network/socket-transport-service;1"])
-      let (svc = stsvc.getService())
-        svc.QueryInterface(Components.interfaces["nsISocketTransportService"]);
+    (function () {
+      let stsvc = Components.classes["@mozilla.org/network/socket-transport-service;1"];
+      let svc = stsvc.getService();
+      return svc.QueryInterface(Components.interfaces["nsISocketTransportService"]);
+    })();
 
   function talk (msg, option) {
-    function value (name, size)
-      let (v = (option && typeof option[name] !== 'undefined') ? option[name] : talkOption[name].value)
-        (size ? intToBin(v, size) : v);
+    function value (name, size) {
+      let v = (option && typeof option[name] !== 'undefined') ? option[name] : talkOption[name].value;
+      return (size ? intToBin(v, size) : v);
+    }
 
     let transport = socketService.createTransport(null, 0, value('host'), value('port'), null);
     let outputStream = transport.openOutputStream(0, 0, 0);
-    let (binaryOutputStream =
-          Components.classes["@mozilla.org/binaryoutputstream;1"].
-            createInstance(Components.interfaces["nsIBinaryOutputStream"]))
+    (function () {
+      let binaryOutputStream = Components.classes["@mozilla.org/binaryoutputstream;1"].createInstance(Components.interfaces["nsIBinaryOutputStream"]);
       binaryOutputStream.setOutputStream(outputStream);
+    })();
 
     msg = strToBin(msg);
     let buf =

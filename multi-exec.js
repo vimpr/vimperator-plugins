@@ -80,8 +80,9 @@ let PLUGIN_INFO = xml`
     'Multiple ex',
     function (args) {
       let [sep, body] = ['|', args.string];
-      let (m = body.match(/^(\S)\s+(.*)$/))
-        m && ([sep, body] = [m[1], m[2]]);
+      let m = body.match(/^(\S)\s+(.*)$/);
+      if (m)
+        [sep, body] = [m[1], m[2]];
       body.split(sep)
           .map(function (it) it.replace(/^\s+/, ''))
           .forEach(liberator.execute, liberator);

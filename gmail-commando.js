@@ -240,9 +240,10 @@ let INFO = xml`
     get translateButton () (this.mail && this.mail.querySelector('div.adJ > .B9.J-J5-Ji')),
     get translateButtons () A(this.doc.querySelectorAll('div.adJ > .B9.J-J5-Ji')),
 
-    get mail ()
-      let (es = this.mails.filter(function (it) !it.querySelector('.ads > .hH')))
-        (es.length && es[0]),
+    get mail () {
+      let es = this.mails.filter(function (it) !it.querySelector('.ads > .hH'));
+      return (es.length && es[0])
+    },
     get mails () A(this.doc.querySelectorAll('.h7')),
 
     get threadButtons () this.doc.querySelectorAll('div.hk > span > u'),
@@ -333,19 +334,22 @@ let INFO = xml`
     __noSuchMethod__: function () void 0,
 
     // XXX storage はちょっと重いっぽいので、ちょっと工夫する
-    label: let (last = []) function (context) {
-      if (Commando.inGmail) {
-        var labels = Elements.labels.map(function (it) it.textContent);
-        if (last.toString() != labels)
-          Commando.storage.set('labels', labels);
-      } else {
-        var labels = last.length ? last : Commando.storage.get('labels', []);
-      }
-      context.completions = [
-        [label.replace(/\s*\(\d+\+?\)$/, ''), label]
-        for ([, label] in Iterator(labels))
-      ];
-    },
+    label: (function () {
+      let last = [];
+        return function (context) {
+        if (Commando.inGmail) {
+          var labels = Elements.labels.map(function (it) it.textContent);
+          if (last.toString() != labels)
+            Commando.storage.set('labels', labels);
+        } else {
+          var labels = last.length ? last : Commando.storage.get('labels', []);
+        }
+        context.completions = [
+          [label.replace(/\s*\(\d+\+?\)$/, ''), label]
+          for ([, label] in Iterator(labels))
+        ];
+      };
+    })(),
 
     labelAndValue: function (context) {
       KeywordValueCompleter.label(context);

@@ -236,7 +236,8 @@ let INFO = xml`
 
   const WHERE_COMPLETIONS = ['f', 't', 'n', 'b', 'c', 'w'];
 
-  let (foihandle) {
+  (function () {
+    let foihandle;
 
     commands.addUserCommand(
       ['fo[pen]', 'filteropen'],
@@ -299,9 +300,10 @@ let INFO = xml`
       true
     );
 
-  }
+  })();
 
-  let (lolinks = []) {
+  (function () {
+    let lolinks = [];
     commands.addUserCommand(
       ['lo[pen]', 'linkopen'],
       'Filtered open',
@@ -334,7 +336,10 @@ let INFO = xml`
           context.keys = {
             text: function ({elem, index}) (index + ': ' + join((elem.textContent || elem.href))),
             description: function ({elem}) (elem.href),
-            thumbnail: function ({elem}) let (img = elem.querySelector('img')) (img && img.src)
+            thumbnail: function ({elem}) {
+              let img = elem.querySelector('img');
+              return img && img.src;
+            }
           };
           context.compare = CompletionContext.Sort.number;
           let process = Array.slice(context.process);
@@ -350,7 +355,7 @@ let INFO = xml`
       true
     );
 
-  }
+  })();
 
 })();
 
