@@ -69,9 +69,11 @@ let INFO = xml`
 (function () {
 
   let socketService =
-    let (stsvc = Cc['@mozilla.org/network/socket-transport-service;1'])
-      let (svc = stsvc.getService())
-        svc.QueryInterface(Ci.nsISocketTransportService);
+    (function () {
+      let stsvc = Cc['@mozilla.org/network/socket-transport-service;1'];
+      let svc = stsvc.getService();
+      return svc.QueryInterface(Ci.nsISocketTransportService);
+    })();
 
   function getSongInfo () {
     let host = liberator.globalVariables.mpd_currentsong_host || 'localhost';
