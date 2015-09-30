@@ -142,9 +142,10 @@ let INFO = xml`
     return main;
   }
 
-  function getIndexLinks ()
-    let (frame = content.document.querySelector('#nav_frame').contentDocument)
-      Array.slice(frame.querySelectorAll('.navPoint .childLevel > a'));
+  function getIndexLinks () {
+    let frame = content.document.querySelector('#nav_frame').contentDocument;
+    return Array.slice(frame.querySelectorAll('.navPoint .childLevel > a'));
+  }
 
   let api = __context__.API = {
     bookmark:

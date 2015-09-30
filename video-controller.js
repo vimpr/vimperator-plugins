@@ -126,19 +126,22 @@ let INFO = xml`
     },
     {
       subCommands: [
-        let (o = o) new Command(
-          [o[0] + '[' + o.slice(1) + ']'],
-          o + ' <video>',
-          function (args) {
-            lastCommand = o;
-            lastArgs = args;
-            hints.show(HintName);
-          },
-          {
-            literal: 0
-          }
-        )
-        for (o in controlls)
+        (function () {
+          let o = it;
+          return new Command(
+            [o[0] + '[' + o.slice(1) + ']'],
+            o + ' <video>',
+            function (args) {
+              lastCommand = o;
+              lastArgs = args;
+              hints.show(HintName);
+            },
+            {
+              literal: 0
+            }
+          )
+        })()
+        for (it in controlls)
       ],
     },
     true

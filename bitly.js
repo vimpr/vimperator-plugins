@@ -90,7 +90,10 @@ let PLUGIN_INFO = xml`
             callback();
           },
           {
-            default: let (e = content.document.querySelector('#bitly_api_key')) (e ? e.value : '')
+            default: (function () {
+              let e = content.document.querySelector('#bitly_api_key');
+              return e ? e.value : ''
+            })()
           }
         );
       }

@@ -110,29 +110,32 @@ let INFO = xml`
       },
       {
         literal: 0,
-        completer: let (getter) function (context, args) {
-          function setCompletions (context, word) {
-            getList(
-              word,
-              function (list) {
-                context.incomplete = false;
-                context.completions = list;
-              }
-            );
-          }
+        completer: (function (){
+          let getter;
+          return function (context, args) {
+            function setCompletions (context, word) {
+              getList(
+                word,
+                function (list) {
+                  context.incomplete = false;
+                  context.completions = list;
+                }
+              );
+            }
 
-          let word = args.literalArg;
+            let word = args.literalArg;
 
-          if (word.length <= 2)
-            return;
+            if (word.length <= 2)
+              return;
 
-          context.incomplete = true;
-          context.filters = [CompletionContext.Filter.textDescription];
+            context.incomplete = true;
+            context.filters = [CompletionContext.Filter.textDescription];
 
-          if (getter)
-            clearTimeout(getter);
-          getter = setTimeout(setCompletions.bind(null, context, word), 1000);
-        }
+            if (getter)
+              clearTimeout(getter);
+            getter = setTimeout(setCompletions.bind(null, context, word), 1000);
+          };
+        })()
       },
       true
     );

@@ -126,11 +126,13 @@ let INFO = xml`
     let toggleFullscreen =
       makeFullscreenToggler(
         doc,
-        let (isFullscreen = false)
-          function () {
+        (function () {
+          let isFullscreen = false;
+          return function () {
             doc.querySelector(isFullscreen ? '.btnLeaveFullScreen' : '.btnFullScreen').click();
             isFullscreen ^= true;
-          }
+          };
+        })()
       );
 
     toggleFullscreen(

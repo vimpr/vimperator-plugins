@@ -86,7 +86,9 @@
         ];
     };
 
-    var proxy_settings = liberator.globalVariables.proxy_settings;
+    function proxy_settings () {
+        return liberator.globalVariables.proxy_settings;
+    }
 
     commands.addUserCommand(["proxy"], 'Proxy settings', function (args) {
         const prefs = Components.classes["@mozilla.org/preferences-service;1"]
@@ -96,7 +98,7 @@
         if (!name) {
             liberator.echo("Usage: proxy {setting name}");
         }
-        proxy_settings.some(function (proxy_setting) {
+        proxy_settings().some(function (proxy_setting) {
             if (proxy_setting.conf_name.toLowerCase() != name.toLowerCase()) {
                 return false;
             }
@@ -119,9 +121,9 @@
         completer: function (context, args) {
             var completions = [];
             context.title = ["Proxy Name", "Proxy Usage"];
-            context.completions = [[c.conf_name, c.conf_usage] for each (c in proxy_settings)];
+            context.completions = proxy_settings().map(function (it) [it.conf_name, it.conf_usage]);
         }
-    });
+    }, true);
 
 })();
 // vim: set sw=4 ts=4 et:
