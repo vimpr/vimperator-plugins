@@ -18,14 +18,12 @@ var PLUGIN_INFO = xml`
 (function () {
   /* user config */
   let select_configs = [
-    { name: 'google', url: 'https?://www\.google\.co\.jp/search', element_css_selector: '.r' }
+    { name: 'google', url: 'https?://www\.google\.co\.jp/search', element_css_selector: '.r', marker_posfix: { top: '0.0em', left: '-1.0em'} }
   ];
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
   // マーカー位置微調整
   let SELECT_MARKER_ID = 'google-select-pointer';
-  let SELECT_MARKER_REPOSITION_LEFT = '0em';
-  let SELECT_MARKER_REPOSITION_TOP = '0.3em';
 
   /* hard config */
   let SELECTED_CLASS = 'vimpr_googleelect_selected';
@@ -61,8 +59,8 @@ var PLUGIN_INFO = xml`
         $pointer.style.color = 'blue';
         $pointer.id = SELECT_MARKER_ID;
         $pointer.style.position = 'absolute';
-        $pointer.style.marginTop = SELECT_MARKER_REPOSITION_TOP;
-        $pointer.style.left = SELECT_MARKER_REPOSITION_LEFT;
+        $pointer.style.marginTop = config.marker_posfix.top;
+        $pointer.style.left = config.marker_posfix.left;
         $pointer.innerHTML = SELECT_MARKER_CHAR;
 
 
@@ -93,10 +91,9 @@ var PLUGIN_INFO = xml`
           return;
         }
 
-        // $ses[preIndex + v].style.borderLeft = "solid 5px blue";
-        $ses[preIndex + v].classList.add(SELECTED_CLASS);
-        $ses[preIndex + v].childNodes[0].focus();
-        $ses[preIndex + v].parentNode.parentNode.insertBefore($pointer, $ses[preIndex + v].parentNode.parentNode.firstChild);
+        $ses[nextIndex].classList.add(SELECTED_CLASS);
+        $ses[nextIndex].childNodes[0].focus();
+        $ses[nextIndex].insertBefore($pointer, $ses[nextIndex].firstChild);
       },
       {
         literal: 0,
