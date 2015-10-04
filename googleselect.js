@@ -73,10 +73,12 @@ var PLUGIN_INFO = xml`
           $ses[preIndex].childNodes[0].blur();
           let $e = $doc.getElementById('google-select-pointer');
           $e.parentNode.removeChild($e);
-        } else if (v == -1) {
-          preIndex = $ses.length;
         }
-        if ((preIndex == 0 && v == -1) || (preIndex == $ses.length - 1 && v == 1)) {
+        let nextIndex = preIndex + v;
+        if (nextIndex == -2) {
+          nextIndex = $ses.length - 1;
+        }
+        if (nextIndex < 0 || $ses.length <= nextIndex) {
           return;
         }
 
