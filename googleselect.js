@@ -17,8 +17,36 @@ var PLUGIN_INFO = xml`
 
 (function () {
   /* user config */
+  // TODO: 外部ファイル化したい
   let select_configs = [
-    { name: 'google', url: 'https?://www\.google\.co\.jp/search', element_css_selector: '.r', marker_posfix: { top: '0.0em', left: '-1.0em'} }
+    {
+      name: 'google',
+      url: 'https?://www\.google\.co\.jp/search',
+      element_css_selector: '.r a',
+      marker_posfix: {
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    },
+    {
+      name: 'qiita mypage',
+      url: 'https?://qiita.com/?$',
+      element_css_selector: '.activities .item-box-title h1 a',
+      marker_posfix: {
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    }
+  /* {
+      name: 'google', // サービス名
+      url: 'https?://www\.google\.co\.jp/search', // 適用したいURLのマッチ正規表現
+      element_css_selector: '.r a', // アイテム要素を絞り込む CSSセレクタ
+      marker_posfix: { // マーカーの位置を修正
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    }, */
+    
   ];
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
@@ -92,7 +120,7 @@ var PLUGIN_INFO = xml`
         }
 
         $ses[nextIndex].classList.add(SELECTED_CLASS);
-        $ses[nextIndex].childNodes[0].focus();
+        $ses[nextIndex].focus();
         $ses[nextIndex].insertBefore($pointer, $ses[nextIndex].firstChild);
       },
       {
