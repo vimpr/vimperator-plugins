@@ -1,6 +1,6 @@
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>GoogleSelect</name>
 <name lang="ja">グーグルセレクト</name>
@@ -16,8 +16,10 @@ let PLUGIN_INFO = xml`
 // }}}
 
 (function () {
-  let google_url = 'https:\/\/www.google.co.jp\/search.*';
   /* user config */
+  let select_configs = [
+    { name: 'google', url: 'https://www.google.co.jp/search.*', element_css_selector: '.r' }
+  ];
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
   // マーカー位置微調整
@@ -25,8 +27,7 @@ let PLUGIN_INFO = xml`
   let SELECT_MARKER_REPOSITION_TOP = '0.3em';
 
   /* hard config */
-  let GOOGLE_SELECTION_CLASS = 'r';
-  let GOOGLE_SELECTION_SELECTED_CLASS = 'r-selected';
+  let SELECTED_CLASS = 'vimpr_googleelect_selected';
 
   commands.addUserCommand(
       ['googleselect'],
@@ -36,16 +37,29 @@ let PLUGIN_INFO = xml`
         if (args.length && args[0] == 'back') {
           v = -1;
         }
-        let $rs = window.content.window.document.getElementsByClassName(GOOGLE_SELECTION_CLASS);
-        let pre = -1;
-        for (let i = 0; i < $rs.length; i++) {
-          if ($rs[i].className.indexOf(GOOGLE_SELECTION_SELECTED_CLASS) != -1) {
-            pre = i;
-            break;
-          }
+        // TODO: select config from page url
+        let config = select_configs[0];
+        // HACK: 適切でない？
+        // document DOM Element
+        let $doc = window.content.window.document;
+        // 選択対象となる要素
+        let $ses = $doc.querySelectorAll(config.element_css_selector);
+        let preIndex = -1;
+
+        // 指定した要素がなかったら終了
+        if ($ses.length == 0) {
+          // TODO: error 出力にしたい
+          liberator.echo('no selection element.');
+          return;
         }
+        // すでに選択している要素があったら index を取得
+        $sdes = $doc.getElementsByClassName(SELECTED_CLASS);
+        if ($sdes.length > 0) {
+          preIndex = Array.prototype.indexOf.call($ses, $sdes[0]);
+        }
+
         // ターゲット表示スタイル
-        let $pointer = window.content.window.document.createElement('span');
+        let $pointer = $doc.createElement('span');
         $pointer.style.color = 'blue';
         $pointer.id = 'google-select-pointer';
         $pointer.style.position = 'absolute';
@@ -53,24 +67,23 @@ let PLUGIN_INFO = xml`
         $pointer.style.left = SELECT_MARKER_REPOSITION_LEFT;
         $pointer.innerHTML = SELECT_MARKER_CHAR;
 
-        if (pre != -1) {
+        if (preIndex != -1) {
           // 現在の選択状態削除
-          $rs[pre].className = GOOGLE_SELECTION_CLASS;
-//          $rs[pre].style.borderLeft = "none";
-          $rs[pre].childNodes[0].blur();
-          let $e = window.content.window.document.getElementById('google-select-pointer');
+          $ses[preIndex].classList.remove(SELECTED_CLASS)
+          $ses[preIndex].childNodes[0].blur();
+          let $e = $doc.getElementById('google-select-pointer');
           $e.parentNode.removeChild($e);
         } else if (v == -1) {
-          pre = $rs.length;
+          preIndex = $ses.length;
         }
-        if ((pre == 0 && v == -1) || (pre == $rs.length - 1 && v == 1)) {
+        if ((preIndex == 0 && v == -1) || (preIndex == $ses.length - 1 && v == 1)) {
           return;
         }
 
-//        $rs[pre + v].style.borderLeft = "solid 5px blue";
-        $rs[pre + v].className = $rs[pre + v].className + " " + GOOGLE_SELECTION_SELECTED_CLASS;
-        $rs[pre + v].childNodes[0].focus();
-        $rs[pre + v].parentNode.parentNode.insertBefore($pointer, $rs[pre + v].parentNode.parentNode.firstChild);
+        // $ses[preIndex + v].style.borderLeft = "solid 5px blue";
+        $ses[preIndex + v].classList.add(SELECTED_CLASS);
+        $ses[preIndex + v].childNodes[0].focus();
+        $ses[preIndex + v].parentNode.parentNode.insertBefore($pointer, $ses[preIndex + v].parentNode.parentNode.firstChild);
       },
       {
         literal: 0,
