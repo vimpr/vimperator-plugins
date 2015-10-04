@@ -18,7 +18,7 @@ var PLUGIN_INFO = xml`
 (function () {
   /* user config */
   let select_configs = [
-    { name: 'google', url: 'https://www.google.co.jp/search.*', element_css_selector: '.r' }
+    { name: 'google', url: 'https?://www\.google\.co\.jp/search', element_css_selector: '.r' }
   ];
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
@@ -38,8 +38,17 @@ var PLUGIN_INFO = xml`
         if (args.length && args[0] == 'back') {
           v = -1;
         }
-        // TODO: select config from page url
-        let config = select_configs[0];
+        // url から有効化する設定をチェック
+        let config = null;
+        for (var i = 0; i < select_configs.length; i ++) {
+          if (RegExp(select_configs[i].url).test(buffer.URL)) {
+            config = select_configs[i];
+            break;
+          }
+        }
+        if (config == null) {
+          return;
+        }
         // HACK: 適切でない？
         // document DOM Element
         let $doc = window.content.window.document;
