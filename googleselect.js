@@ -30,8 +30,27 @@ var PLUGIN_INFO = xml`
     },
     {
       name: 'qiita mypage',
-      url: 'https?://qiita.com/?$',
+      url: 'https?://qiita\.com/?$',
       element_css_selector: '.activities .item-box-title h1 a',
+      marker_posfix: {
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    },
+    {
+      name: 'qiita search',
+      url: 'https?://qiita\.com/search',
+      element_css_selector: '.searchResultContainer_main .searchResult_itemTitle a',
+      marker_posfix: {
+        top: '0.0em',
+        left: '1.0em'
+      }
+    },
+    {
+      
+      name: 'github search',
+      url: 'https?://github\.com/search',
+      element_css_selector: '.codesearch-results .repo-list-item h3 a,.code-list-item p.title a:nth-of-type(2),.issue-list-item p.title a,.user-list-info>a',
       marker_posfix: {
         top: '0.0em',
         left: '-1.0em'
