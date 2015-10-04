@@ -23,6 +23,7 @@ var PLUGIN_INFO = xml`
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
   // マーカー位置微調整
+  let SELECT_MARKER_ID = 'google-select-pointer';
   let SELECT_MARKER_REPOSITION_LEFT = '0em';
   let SELECT_MARKER_REPOSITION_TOP = '0.3em';
 
@@ -46,10 +47,20 @@ var PLUGIN_INFO = xml`
         let $ses = $doc.querySelectorAll(config.element_css_selector);
         let preIndex = -1;
 
+        // ターゲット表示スタイル
+        let $pointer = $doc.createElement('span');
+        $pointer.style.color = 'blue';
+        $pointer.id = SELECT_MARKER_ID;
+        $pointer.style.position = 'absolute';
+        $pointer.style.marginTop = SELECT_MARKER_REPOSITION_TOP;
+        $pointer.style.left = SELECT_MARKER_REPOSITION_LEFT;
+        $pointer.innerHTML = SELECT_MARKER_CHAR;
+
+
         // 指定した要素がなかったら終了
         if ($ses.length == 0) {
           // TODO: error 出力にしたい
-          liberator.echo('no selection element.');
+          liberator.echo('no selection element. [googleselect]');
           return;
         }
         // すでに選択している要素があったら index を取得
@@ -58,20 +69,11 @@ var PLUGIN_INFO = xml`
           preIndex = Array.prototype.indexOf.call($ses, $sdes[0]);
         }
 
-        // ターゲット表示スタイル
-        let $pointer = $doc.createElement('span');
-        $pointer.style.color = 'blue';
-        $pointer.id = 'google-select-pointer';
-        $pointer.style.position = 'absolute';
-        $pointer.style.marginTop = SELECT_MARKER_REPOSITION_TOP;
-        $pointer.style.left = SELECT_MARKER_REPOSITION_LEFT;
-        $pointer.innerHTML = SELECT_MARKER_CHAR;
-
         if (preIndex != -1) {
           // 現在の選択状態削除
           $ses[preIndex].classList.remove(SELECTED_CLASS)
           $ses[preIndex].childNodes[0].blur();
-          let $e = $doc.getElementById('google-select-pointer');
+          let $e = $doc.getElementById(SELECT_MARKER_ID);
           $e.parentNode.removeChild($e);
         }
         let nextIndex = preIndex + v;
