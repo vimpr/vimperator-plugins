@@ -1,6 +1,6 @@
 // Vimperator plugin: 'Cooperation LDRize Mappings'
 // Version: 0.25
-// Last Change: 09-Jun-2011. Jan 2008
+// Last Change: 2015/09/29 16:18:39. Jan 2008
 // License: Creative Commons
 // Maintainer: Trapezoid <trapezoid.g@gmail.com> - http://unsigned.g.hatena.ne.jp/Trapezoid
 //
@@ -117,9 +117,10 @@ if (liberator.plugins.LDRizeCooperation == undefined) (function(){
       var old = liberator.modules.mappings.getDefault(mode,key);
       var oldAction = old.action;
       old.description = desc;
-      old.action = function()
-                      let (self = this,args = arguments)
-                        aroundFunc(function() oldAction.apply(self,args));
+      old.action = function(){
+                      let self = this, args = arguments;
+                      return aroundFunc(function() oldAction.apply(self,args));
+      };
     }
 
     var LDRizeCooperation = new Class();
