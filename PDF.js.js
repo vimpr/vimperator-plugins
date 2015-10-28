@@ -123,7 +123,7 @@ let INFO = xml`
     ['n'],
     'Next page',
     function (count) {
-      content.window.wrappedJSObject.PDFView.page += (count > 0 ? count : 1);
+      content.window.wrappedJSObject.PDFViewerApplication.page += (count > 0 ? count : 1);
     }
   );
 
@@ -131,7 +131,7 @@ let INFO = xml`
     ['p'],
     'Previous page',
     function (count) {
-      content.window.wrappedJSObject.PDFView.page -= (count > 0 ? count : 1);
+      content.window.wrappedJSObject.PDFViewerApplication.page -= (count > 0 ? count : 1);
     }
   );
 
@@ -140,9 +140,9 @@ let INFO = xml`
     'Go to page top or N page.',
     function (count) {
       if (count > 0)
-        content.window.wrappedJSObject.PDFView.page = count;
+        content.window.wrappedJSObject.PDFViewerApplication.page = count;
       else
-        content.window.wrappedJSObject.PDFView.page = 1;
+        content.window.wrappedJSObject.PDFViewerApplication.page = 1;
     }
   );
 
@@ -195,7 +195,7 @@ let INFO = xml`
               let os = getOutline();
               buffer.followLink(os[parseInt(index[1], 10)], liberator.CURRENT_TAB);
             } else {
-              content.window.wrappedJSObject.PDFView.page = parseInt(args.literalArg, 10);
+              content.window.wrappedJSObject.PDFViewerApplication.page = parseInt(args.literalArg, 10);
             }
           },
           {
@@ -227,7 +227,7 @@ let INFO = xml`
           ['z[oom]'],
           'Zoom',
           function (args) {
-            content.window.wrappedJSObject.PDFView.parseScale(args.literalArg);
+            content.window.wrappedJSObject.PDFViewerApplication.setScale(args.literalArg);
           },
           {
             literal: 0,
