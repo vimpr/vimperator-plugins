@@ -97,11 +97,12 @@ let PLUGIN_INFO = xml`
 
   function around (obj, name, func) {
     let next = obj[name];
-    obj[name] = function ()
+    obj[name] = function () {
       let (self = this, args =  Array.from(arguments))
         func.call(self,
                   function () next.apply(self, args),
                   args);
+    }
   }
 
   around(events, 'onKeyPress', function (next, [event]) {
