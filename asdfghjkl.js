@@ -98,10 +98,10 @@ let PLUGIN_INFO = xml`
   function around (obj, name, func) {
     let next = obj[name];
     obj[name] = function () {
-      let (self = this, args =  Array.from(arguments))
-        func.call(self,
-                  function () next.apply(self, args),
-                  args);
+      let args = Array.from(arguments);
+      func.call(this,
+                () => next.apply(this, args),
+                args);
     }
   }
 
