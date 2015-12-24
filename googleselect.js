@@ -1,4 +1,3 @@
-
 // PLUGIN_INFO {{{
 var PLUGIN_INFO = xml`
 <VimperatorPlugin>
@@ -27,36 +26,20 @@ var PLUGIN_INFO = xml`
         top: '0.0em',
         left: '-1.0em'
       }
-    },
-    {
-      name: 'qiita mypage',
-      url: 'https?://qiita\.com/?$',
-      element_css_selector: '.activities .item-box-title h1 a',
-      marker_posfix: {
-        top: '0.0em',
-        left: '-1.0em'
-      }
-    },
-    {
-      name: 'qiita search',
-      url: 'https?://qiita\.com/search',
-      element_css_selector: '.searchResultContainer_main .searchResult_itemTitle a',
-      marker_posfix: {
-        top: '0.0em',
-        left: '1.0em'
-      }
-    },
-    {
-      
-      name: 'github search',
-      url: 'https?://github\.com/search',
-      element_css_selector: '.codesearch-results .repo-list-item h3 a,.code-list-item p.title a:nth-of-type(2),.issue-list-item p.title a,.user-list-info>a',
-      marker_posfix: {
-        top: '0.0em',
-        left: '-1.0em'
-      }
     }
-  /* {
+  ];
+/*
+独自設定は設定ファイルで変数を定義しておく
+liberator.globalVariables.googleSelectConfigs = [
+  {
+    name: 'github search',
+    url: 'https?://github\.com/search',
+    element_css_selector: '.codesearch-results .repo-list-item h3 a,.code-list-item p.title a:nth-of-type(2),.issue-list-item p.title a,.user-list-info>a',
+    marker_posfix: {
+      top: '0.0em',
+      left: '-1.0em'
+    }
+  }, {
       name: 'google', // サービス名
       url: 'https?://www\.google\.co\.jp/search', // 適用したいURLのマッチ正規表現
       element_css_selector: '.r a', // アイテム要素を絞り込む CSSセレクタ
@@ -64,9 +47,9 @@ var PLUGIN_INFO = xml`
         top: '0.0em',
         left: '-1.0em'
       }
-    }, */
-    
-  ];
+    },
+];
+*/
   // 選択状態表示マーカー
   let SELECT_MARKER_CHAR = '▶';
   // マーカー位置微調整
@@ -85,6 +68,9 @@ var PLUGIN_INFO = xml`
         }
         // url から有効化する設定をチェック
         let config = null;
+        if (liberator.globalVariables.googleSelectConfigs != 'undefined') {
+            select_configs = select_configs.concat(liberator.globalVariables.googleSelectConfigs);
+        }
         for (var i = 0; i < select_configs.length; i ++) {
           if (RegExp(select_configs[i].url).test(buffer.URL)) {
             config = select_configs[i];
