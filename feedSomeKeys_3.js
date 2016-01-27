@@ -711,7 +711,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
     true
   );
 
-  plugins.libly.$U.around(
+  liberator.plugins.libly.$U.around(
     mappings,
     'getCandidates',
     function (next, [mode, prefix, patternOrUrl]) {

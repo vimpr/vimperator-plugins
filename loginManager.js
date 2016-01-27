@@ -186,19 +186,21 @@ for (let [name, service] in Iterator(services)){
         service.NAME = name;
     services[name] = new Service(service);
 }
-let (gv = liberator.globalVariables.userLoginServices || liberator.globalVariables.login_manager_services) {
+(function () {
+    let gv = liberator.globalVariables.userLoginServices || liberator.globalVariables.login_manager_services;
     if (gv) {
         let userServices = gv;
         for (name in userServices){
             services[name] = new Service(userServices[name]);
         }
     }
-}
+})();
 for (let [name, service] in Iterator(services)){
     if (!service.NAME)
         service.NAME = name;
 }
-let (gv = liberator.globalVariables.userLoginDefaults || liberator.globalVariables.login_manager_default_user) {
+(function () {
+    let gv = liberator.globalVariables.userLoginDefaults || liberator.globalVariables.login_manager_default_user;
     if (typeof gv === 'string') {
         for (let [, sn] in Iterator(gv.split(','))) {
             let [s, v] = sn.split('=');
@@ -208,7 +210,7 @@ let (gv = liberator.globalVariables.userLoginDefaults || liberator.globalVariabl
         for (let [n, v] in Iterator(gv))
             services[n].DEFAULT_USER = v;
     }
-}
+})();
 
 Object.defineProperty(
     services,

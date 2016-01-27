@@ -68,20 +68,20 @@ let PLUGIN_INFO = xml`
       let func = reload = function () tabs.reload(tab);
       let time = parseInt(parseFloat(args[0] || 1) * 1000);
 
-      let (file = io.File(args.string)) {
-        if (file.exists() && file.isFile()) {
-          let filepath = file.path;
-          storage.lastModifiedTime = file.lastModifiedTime;
-          time = 200;
-          func = function () {
-            let file = io.File(filepath);
-            let mt = file.lastModifiedTime;
-            if (storage.lastModifiedTime == mt)
-              return;
-            storage.lastModifiedTime = mt;
-            reload();
-          };
-        }
+      let file = io.File(args.string);
+
+      if (file.exists() && file.isFile()) {
+        let filepath = file.path;
+        storage.lastModifiedTime = file.lastModifiedTime;
+        time = 200;
+        func = function () {
+          let file = io.File(filepath);
+          let mt = file.lastModifiedTime;
+          if (storage.lastModifiedTime == mt)
+            return;
+          storage.lastModifiedTime = mt;
+          reload();
+        };
       }
 
       if (storage.timer) {

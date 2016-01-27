@@ -79,7 +79,7 @@ let INFO = xml`
 
 (function () {
 
-  let L = plugins.libly;
+  let L = liberator.plugins.libly;
 
   function getList (word, callback) {
     let req = new L.Request('http://gimite.net/refe-web/main/search?query=' + encodeURIComponent(word));

@@ -94,10 +94,11 @@ ps = [];
 
 (function () {
 
-  let (every = liberator.plugins.every) {
+  (function () {
+    let every = liberator.plugins.every;
     if (every && every.ps)
       kill('*');
-  }
+  })();
 
   function defined (value)
     (typeof value !== 'undefined');

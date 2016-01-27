@@ -654,14 +654,14 @@ let INFO = xml`
 
   finder.findAgain = migemized.findAgain;
 
-  plugins.libly.$U.around(
+  liberator.plugins.libly.$U.around(
     finder,
     'openPrompt',
     function (next, [mode]) {
       let res = next();
-      plugins.libly.$U.around(commandline._input, 'change', function (next, [str]) migemized.onChange(str));
-      plugins.libly.$U.around(commandline._input, 'submit', function (next, [str]) migemized.onSubmit(str));
-      plugins.libly.$U.around(commandline._input, 'cancel', function (next, [str]) migemized.onCancel());
+      liberator.plugins.libly.$U.around(commandline._input, 'change', function (next, [str]) migemized.onChange(str));
+      liberator.plugins.libly.$U.around(commandline._input, 'submit', function (next, [str]) migemized.onSubmit(str));
+      liberator.plugins.libly.$U.around(commandline._input, 'cancel', function (next, [str]) migemized.onCancel());
       commandline._input.complete = migemized.completer;
       return res;
     },

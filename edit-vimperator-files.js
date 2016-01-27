@@ -126,7 +126,7 @@ let INFO = xml`
     {
       literal: 0,
       completer: function (context) completion.vimperatorFiles(context),
-      options: (plugins.auto_source ? [[['-autosource', '-a'], commands.OPTION_NOARG]] : [])
+      options: (liberator.plugins.auto_source ? [[['-autosource', '-a'], commands.OPTION_NOARG]] : [])
 
     },
     true

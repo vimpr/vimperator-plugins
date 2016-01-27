@@ -378,7 +378,8 @@ let PLUGIN_INFO = xml`
                   'left: '   +                   0 + 'px;' +
                   'width: '  +  content.innerWidth + 'px';
       indicator.setAttribute('style', style);
-      let (count = 0) {
+      (function () {
+        let count = 0;
         let handle = setInterval(
           function () {
             if (count++ < times) {
@@ -391,7 +392,7 @@ let PLUGIN_INFO = xml`
           },
           100
         );
-      }
+      })();
     },
     gunsou: function (next, msg, arg) {
       let sleep = parseFloat(arg || 3) * 1000;

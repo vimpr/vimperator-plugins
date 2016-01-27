@@ -29,7 +29,7 @@
         return !(validators.some(function(validator) { return validator(s); }));
     }
 
-    plugins.libly.$U.around(
+    liberator.plugins.libly.$U.around(
         liberator,
         'open',
         function (next, args) {

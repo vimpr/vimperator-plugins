@@ -247,7 +247,8 @@ var PLUGIN_INFO = xml`
       return [];
     var [_, dir, file] = urim, result = [];
     // succ number
-    let (dm, file = file, left = '', temp = []) {
+    (function () {
+      let dm, file = file, left = '', temp = [];
       while (file && (dm = file.match(/\d+/))) {
         let [rcontext, lcontext, lmatch] = [RegExp.rightContext, RegExp.leftContext, RegExp.lastMatch];
         left += lcontext;
@@ -258,9 +259,10 @@ var PLUGIN_INFO = xml`
         file = rcontext;
       }
       result = result.concat(temp.reverse());
-    }
+    })();
     // succ string
-    let (dm, file = file, left = '', temp = []) {
+    (function () {
+      let dm, file = file, left = '', temp = [];
       while (file && (dm = file.match(/(^|[^a-zA-Z])([a-zA-Z])([^a-zA-Z]|$)/))) {
         let [rcontext, lcontext] = [RegExp.rightContext, RegExp.leftContext];
         left += lcontext + dm[1];
@@ -271,7 +273,7 @@ var PLUGIN_INFO = xml`
         file = dm[3] + rcontext;
       }
       result = result.concat(temp.reverse());
-    }
+    })();
     return result;
   }
 
