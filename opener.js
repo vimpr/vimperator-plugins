@@ -77,7 +77,8 @@ let INFO = xml`
 
   //buffer.followLink()を変更
   //hint-a-hint時[f,F]に対象のタブが既に開いてあったらjump
-  let (ignore = false) {
+  (function () {
+    let ignore = false;
     let ignoreBlock = function (block) {
       ignore = true;
       let result = block();
@@ -113,7 +114,7 @@ let INFO = xml`
       },
       true
     );
-  }
+  })();
 
   U.around(
     quickmarks,
