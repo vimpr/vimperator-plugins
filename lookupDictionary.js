@@ -44,15 +44,14 @@ const SITE_DEFINITION = [{
     dictionary: 'en-US'
 }];
 
-let (siteDef = liberator.globalVariables.lookupDictionary_site_definition) {
-    if (siteDef) {
-        if (siteDef instanceof String)
-            siteDef = eval(siteDef);
-        if (siteDef.forEach instanceof Function)
-            siteDef.forEach(function (obj) { SITE_DEFINITION.push(obj); });
-        else
-            SITE_DEFINITION.push(siteDef);
-    }
+let siteDef = liberator.globalVariables.lookupDictionary_site_definition;
+if (siteDef) {
+    if (siteDef instanceof String)
+        siteDef = eval(siteDef);
+    if (siteDef.forEach instanceof Function)
+        siteDef.forEach(function (obj) { SITE_DEFINITION.push(obj); });
+    else
+        SITE_DEFINITION.push(siteDef);
 }
 
 // class definition
