@@ -115,7 +115,7 @@ let INFO = xml`
     last = {};
   }
 
-  plugins.libly.$U.around(
+  liberator.plugins.libly.$U.around(
     hints,
     'show',
     function (next, [minor, filter, win]) {
@@ -137,7 +137,7 @@ let INFO = xml`
     true
   );
 
-  plugins.libly.$U.around(
+  liberator.plugins.libly.$U.around(
     hints,
     'hide',
     function (next, [minor, filter, win]) {

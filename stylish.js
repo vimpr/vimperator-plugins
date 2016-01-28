@@ -16,7 +16,7 @@ var PLUGIN_INFO = xml`
 
 (function(){
 let stylishService = stylishOverlay.service;
-let control = plugins.stylish = {
+let control = liberator.plugins.stylish = {
     COMMAND_DESCRIPTION: 0,
     COMMAND_FUNCTION: 1,
     COMMAND_COMPLETER: 2,
