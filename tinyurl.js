@@ -40,7 +40,8 @@ plugins.tinyurl.getExpand(url):
             argCount: '1',
         });
 
-    var tiny = plugins.tinyurl = {
+//    var tiny = plugins.tinyurl = {
+    var tiny = tinyurl = {
         getTiny: function(url)
             util.httpGet(TinyAPI+encodeURIComponent(url)).responseText,
         getExpand: function (url)
