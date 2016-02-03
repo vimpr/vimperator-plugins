@@ -1,6 +1,6 @@
 /* NEW BSD LICENSE {{{
 Copyright (c) 2009-2010, anekos.
-Copyright (c) 2012-2015, Jagua.
+Copyright (c) 2012-2016, Jagua.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -151,7 +151,7 @@ let INFO = xml`
         '&scope=http://api.microsofttranslator.com' +
         '&grant_type=client_credentials';
       let req =
-        new plugins.libly.Request(
+        new liberator.plugins.libly.Request(
           url,
           {
             Referrer: refererURL,
@@ -182,7 +182,7 @@ let INFO = xml`
         '?appId=' + (config.client_secret == undefined ? config.access_token : '') +
         '&text=' + encodeURIComponent(text);
       let req =
-        new plugins.libly.Request(
+        new liberator.plugins.libly.Request(
           url,
           {
               Referrer: refererURL,
@@ -210,7 +210,7 @@ let INFO = xml`
         '&from=' + (opts.from || 'en') + '&to=' + (opts.to || 'ja') +
         '&contentType=text/plain';
       let req =
-        new plugins.libly.Request(
+        new liberator.plugins.libly.Request(
           url,
           {
               Referrer: refererURL,
