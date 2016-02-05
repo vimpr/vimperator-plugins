@@ -1,5 +1,5 @@
 // Vimperator plugin: Relative Move
-// Version: 0.1
+// Version: 0.2
 //
 // Usage:
 //   If you stay "http://example.com/aaa/bbb/ccc"
@@ -28,7 +28,7 @@
     function open_path(path, tab){
         var win = window.content.window;
         var loc = win.location;
-        var splited_path = path.split(/\/+/);
+        var splited_path = path.toString().split(/\/+/);
         var up = 0;
 
         if(!tab){
