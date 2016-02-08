@@ -28,14 +28,14 @@
  *  suggest(word)           word suggestion. return generator of iterator
  *
  * EXAMPLE
- *  1. plugins.spellchecker.setDictionary('en-US').suggest('liberater');
+ *  1. liberator.plugins.spellchecker.setDictionary('en-US').suggest('liberater');
  *      -> liberate
  *         liberate r
  *         liberated
  *         liberates
  *         liberator
  *
- *  2. plugins.spellchecker.check('liberater');
+ *  2. liberator.plugins.spellchecker.check('liberater');
  *      -> false
  * */
 
@@ -115,7 +115,7 @@ plugins.spellchecker = new SpellChecker();
 commands.addUserCommand(
     ['availabledictionaries', 'adict'],
     'display available dictionaries',
-    function () liberator.echo('available dictionaries: ' + [a for (a in plugins.spellchecker.getDictionaryList())].join(', ')),
+    function () liberator.echo('available dictionaries: ' + [a for (a in liberator.plugins.spellchecker.getDictionaryList())].join(', ')),
     {}
 );
 

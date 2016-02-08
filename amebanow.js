@@ -85,7 +85,7 @@ let INFO = xml`
 
   function getToken (onSuccess) {
     const url = 'http://now.ameba.jp/';
-    let req = new plugins.libly.Request(url);
+    let req = new liberator.plugins.libly.Request(url);
     req.addEventListener(
       'onSuccess',
       function (res) {
@@ -104,7 +104,7 @@ let INFO = xml`
       '&token=' + token +
       '&inputBtn=%E6%8A%95%E7%A8%BF';
     let req =
-      new plugins.libly.Request(
+      new liberator.plugins.libly.Request(
         url,
         {Referer: 'http://now.ameba.jp/'},
         {postBody: data}

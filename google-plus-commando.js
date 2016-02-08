@@ -745,7 +745,7 @@ let g:gplus_commando_map_menu            = "m"
           let h = parseInt(root.style.height, 10) > 0;
           if (!h)
             return false;
-          let nwc =  plugins.googlePlusCommando.element.frames.notifications.root.contentDocument.querySelector('#nw-content');
+          let nwc =  liberator.plugins.googlePlusCommando.element.frames.notifications.root.contentDocument.querySelector('#nw-content');
           return parseInt(util.computedStyle(nwc).height, 10) > 100;
         },
         summary: {
@@ -882,7 +882,7 @@ let g:gplus_commando_map_menu            = "m"
           return menus[0];
       })();
 
-      plugins.feedSomeKeys_3.API.feed.apply(
+      liberator.plugins.feedSomeKeys_3.API.feed.apply(
         null,
         arrowTarget ? [arrow, ['keypress'], arrowTarget] : [vim, ['vkeypress'], Elements.doc]
       );
@@ -1143,7 +1143,7 @@ let g:gplus_commando_map_menu            = "m"
       );
     });
 
-    plugins.libly.$U.around(
+    liberator.plugins.libly.$U.around(
       hints,
       'hide',
       function (next) {

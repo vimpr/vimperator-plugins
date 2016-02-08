@@ -69,7 +69,7 @@ var PLUGIN_INFO = xml`
       Interval of opening tabs. (msec)
 
     == API ==
-    plugins.pino.items():
+    liberator.plugins.pino.items():
       Return pinned items list array.
       Each item is following structure.
       >||
@@ -80,10 +80,10 @@ var PLUGIN_INFO = xml`
       }
       ||<
 
-    plugins.pino.shift():
+    liberator.plugins.pino.shift():
       Return first item and remove pin.
 
-    plugins.pino.remove(link):
+    liberator.plugins.pino.remove(link):
       Remove pin from item that matched by 'link'.
 
   ]]></detail>
@@ -124,7 +124,7 @@ var PLUGIN_INFO = xml`
       タブを開く間隔(ミリ秒)
 
     == API ==
-    plugins.pino.items():
+    liberator.plugins.pino.items():
       ピンの一覧を配列で取得する。
       ピンのデータ構造は以下のとおりとなっている。
       >||
@@ -135,10 +135,10 @@ var PLUGIN_INFO = xml`
       }
       ||<
 
-    plugins.pino.shift():
+    liberator.plugins.pino.shift():
       先頭のピンを取得して、そのピンを一覧から削除する。
 
-    plugins.pino.remove(link):
+    liberator.plugins.pino.remove(link):
       linkに該当するピンを一覧から削除する。
 
   ]]></detail>
@@ -296,7 +296,7 @@ let self = liberator.plugins.pino = (function() {
   }
   // }}}
   // FUNCTIONS ///////////////////////////////////////////////////// {{{
-  var libly = plugins.libly;
+  var libly = liberator.plugins.libly;
 
   function getLDRApiKey() {
     var ioService = Cc["@mozilla.org/network/io-service;1"]

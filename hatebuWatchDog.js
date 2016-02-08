@@ -93,12 +93,12 @@ let PLUGIN_INFO = xml`
 // }}}
 
 // Clear all watchers if started watcher exists.
-if (plugins.hatebuWatchDog && plugins.hatebuWatchDog.stopWatching)
-  plugins.hatebuWatchDog.stopWatching();
+if (liberator.plugins.hatebuWatchDog && liberator.plugins.hatebuWatchDog.stopWatching)
+  liberator.plugins.hatebuWatchDog.stopWatching();
 
-let publics = plugins.hatebuWatchDog = (function() {
+let publics = liberator.plugins.hatebuWatchDog = (function() {
   // PRIVATE //////////////////////////////////////////////////////////////{{{
-  const libly = plugins.libly;
+  const libly = liberator.plugins.libly;
   let previousValue = 0;
   let tasks = [];
 

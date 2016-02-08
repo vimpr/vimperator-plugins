@@ -233,7 +233,7 @@ commands.addUserCommand(["clearp[rivacy]"], "Clear Privacy data",
                     getTimeRange(args["-time"], false) :
                     getTimeRange(options.getPref("privacy.sanitize.timeSpan"), true);
         }
-        clearList.forEach(function(name) this[name].clear(range), plugins.privacySanitizer);
+        clearList.forEach(function(name) this[name].clear(range), liberator.plugins.privacySanitizer);
     }, {
         options: ops,
     },

@@ -3274,8 +3274,8 @@ let PLUGIN_INFO = xml`
         setTimeout(function () (ignore = false), 1000);
         ignore = true;
         let sz = innerWidth / msg.length / 1.5;
-        if (plugins.namakubi && typeof plugins.namakubi.talk == 'function')
-          plugins.namakubi.talk(msg);
+        if (liberator.plugins.namakubi && typeof liberator.plugins.namakubi.talk == 'function')
+          liberator.plugins.namakubi.talk(msg);
         liberator.echo(xml`
           <div style="background: white; color: black;">
             <table>

@@ -2,11 +2,11 @@
  * http://www.bijint.com/
  *
  * == Start ==
- * js plugins.bijin_clock.start(min)
+ * js liberator.plugins.bijin_clock.start(min)
  *    min: interval minutes (default: 1)
  *
  * == Stop ==
- * js plugins.bijin_clock.stop()
+ * js liberator.plugins.bijin_clock.stop()
  */
 let PLUGIN_INFO = xml`
 <VimperatorPlugin>
