@@ -10,7 +10,7 @@
 //
 // INFO: {{{
 var INFO = xml`
-<plugin name="smooziee" version="0.10.2"
+<plugin name="smooziee" version="0.10.3"
         href="https://github.com/vimpr/vimperator-plugins/raw/master/_smooziee.js"
         summary="j,kキーでのスクロールをスムースに"
         lang="en_US"
@@ -107,7 +107,7 @@ let self = liberator.plugins.smooziee = (function(){
   // PUBLIC {{{
   var PUBLICS = {
     smoothScrollBy: function(moment) {
-      win = Buffer.findScrollableWindow();
+      win = findScrollableWindow();
       interval = window.eval(liberator.globalVariables.smooziee_scroll_interval || '20');
       destY = win.scrollY + moment;
       clearTimeout(next);
@@ -141,6 +141,19 @@ let self = liberator.plugins.smooziee = (function(){
   }
 
   function makeScrollTo(x, y) function() win.scrollTo(x, y);
+
+  function findScrollableWindow() {
+    var win = this.focusedWindow;
+    if (win && (win.scrollMaxX > 0 || win.scrollMaxY > 0)) return win;
+
+    win = config.browser.contentWindow;
+    if (win.scrollMaxX > 0 || win.scrollMaxY > 0) return win;
+
+    for (let frame in util.Array.itervalues(win.frames)) {
+      if (frame.scrollMaxX > 0 || frame.scrollMaxY > 0) return frame;
+    }
+    return win;
+  }
   // }}}
   return PUBLICS;
 })();
