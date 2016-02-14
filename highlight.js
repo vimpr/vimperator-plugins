@@ -1,8 +1,8 @@
 /*
  * ==VimperatorPlugin==
  * @name            highlight.js
- * @description     Factory for the object to highlight specified element[s]. this set in plugins.highlighterFactory.
- * @description-ja  指定した要素をハイライトするオブジェクトを返す Factory 。 plugins.highlighterFactory に構築される。
+ * @description     Factory for the object to highlight specified element[s]. this set in liberator.plugins.highlighterFactory.
+ * @description-ja  指定した要素をハイライトするオブジェクトを返す Factory 。 liberator.plugins.highlighterFactory に構築される。
  * @author          janus_wel <janus_wel@fb3.so-net.ne.jp>
  * @version         0.12
  * @minversion      2.3pre 2009/11/02
@@ -12,7 +12,7 @@
  *  New BSD License
  *
  * USAGE
- *  plugins.highlighterFactory() return the object to highlight element[s].
+ *  liberator.plugins.highlighterFactory() return the object to highlight element[s].
  *  arguments is object that have below properties.
  *      color:    color name that define by css or RGB format ( #xxxxxx ),
  *      opacity:  opacity for -moz-opacity property in css.
@@ -29,7 +29,7 @@
  *  when you want to process elements to highlight.
  *
  * EXAMPLE
- *  let h = plugins.highlighterFactory({
+ *  let h = liberator.plugins.highlighterFactory({
  *      color:    '#0080ff',
  *      opacity:  0.7,
  *      interval: 0,
@@ -147,8 +147,8 @@ Highlighter.prototype = {
     },
 };
 
-if (!plugins.highlighterFactory) {
-    plugins.highlighterFactory = function () {
+if (!liberator.plugins.highlighterFactory) {
+    liberator.plugins.highlighterFactory = function () {
         let h = new Highlighter();
         return h.set.apply(h, arguments);
     }

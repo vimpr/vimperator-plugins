@@ -52,10 +52,10 @@ function completer(str){
 
 /* 元のwindow.getShortcutOrURIを退避しておく。*/
 var __getShortcutOrURI;
-if(!plugins["keywordStore"] || !plugins.keywordStore["__getShortcutOrURI"]){
+if(!liberator.plugins["keywordStore"] || !liberator.plugins.keywordStore["__getShortcutOrURI"]){
 	__getShortcutOrURI = window.getShortcutOrURI;
 }else{
-	__getShortcutOrURI = plugins.keywordStore.__getShortcutOrURI;
+	__getShortcutOrURI = liberator.plugins.keywordStore.__getShortcutOrURI;
 }
 
 /* ":open"等が呼ばれたときに、キーワードをキューに入れるようにwindow.getShortcutOrURIを置き換える */

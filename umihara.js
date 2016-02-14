@@ -155,7 +155,7 @@ let PLUGIN_INFO = xml`
     req.onreadystatechange = function (aEvt) {
       if (req.readyState == 4 && req.status == 200) {
         let html = req.responseText;
-        let doc = plugins.libly.$U.createHTMLDocument(html);
+        let doc = liberator.plugins.libly.$U.createHTMLDocument(html);
         let a = doc.querySelector('tbody > tr > td > a[href^="http://rdsig.yahoo.co.jp"]');
         if (a) {
           let tr = a.parentNode.parentNode;

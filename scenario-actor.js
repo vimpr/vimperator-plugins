@@ -371,9 +371,9 @@ function ScenarioActor () { //{{{
     return self;
 }; //}}}
 
-let actor = plugins.scenarioActor = ScenarioActor();
+let actor = liberator.plugins.scenarioActor = ScenarioActor();
 
-let loadedScenarioList = plugins.scenarioActor.loadedScenarioList = [];
+let loadedScenarioList = liberator.plugins.scenarioActor.loadedScenarioList = [];
 
 actor.enabled = !/^(?:false|0)$/i.test(liberator.globalVariables.scenario_actor_enabled);
 

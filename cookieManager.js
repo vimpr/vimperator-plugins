@@ -154,9 +154,9 @@ commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
         ],
         completer: function(context, args){
             if (args["-perm"]){
-                plugins.cookieManager.permission.completer(context, args);
+                liberator.plugins.cookieManager.permission.completer(context, args);
             } else {
-                plugins.cookieManager.stored.completer(context, args);
+                liberator.plugins.cookieManager.stored.completer(context, args);
             }
         },
     }, true);

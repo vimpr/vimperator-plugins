@@ -300,7 +300,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
     }
 
     function getNormalizedPermalink(url){
-        var canonical = plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]');
+        var canonical = liberator.plugins.libly.$U.getFirstNodeFromXPath('//link[@rel="canonical"]');
         return canonical ? canonical.href : url;
     }
 

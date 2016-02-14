@@ -62,12 +62,12 @@ let INFO = xml`
 
 (function () {
 
-  if (!plugins.libly)
+  if (!liberator.plugins.libly)
     return liberator.echoerr(__context__.NAME + ': Please install _libly.js.');
 
   let scheduled = [];
 
-  plugins.libly.$U.around(
+  liberator.plugins.libly.$U.around(
     events,
     'onEscape',
     function (next) {

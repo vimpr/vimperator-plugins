@@ -126,7 +126,7 @@ let INFO = xml`
   function chatPo (msg, after) {
     let uri = 'http://lolipop.jp/support/ojisan/';
     let req =
-      new plugins.libly.Request(
+      new liberator.plugins.libly.Request(
         uri,
         {
           'Referer': 'http://lolipop.jp/support/oshiete/',

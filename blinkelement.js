@@ -43,7 +43,7 @@
 // it is the factory that build highlight object.
 setTimeout( function () {
 
-if (!plugins.highlighterFactory) {
+if (!liberator.plugins.highlighterFactory) {
     liberator.log('blinkelement.js needs highlight.js', 0);
     return;
 }

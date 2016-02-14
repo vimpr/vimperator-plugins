@@ -50,7 +50,7 @@ commands.addUserCommand(["pypi"], "pypi search",
             doc.location.href = 'http://pypi.python.org/pypi';
         }
         var filter = args[0];
-        var packages = plugins.pypi.packages;
+        var packages = liberator.plugins.pypi.packages;
         for (var i=0; i<packages.length; i++) {
             if (filter.toLowerCase() == packages[i].toLowerCase()) {
                 doc.location.href = 'http://pypi.python.org/pypi/'+packages[i];
@@ -61,10 +61,10 @@ commands.addUserCommand(["pypi"], "pypi search",
     }, {
         completer: function(context, args){
             if (context.filter.length < 1) return;
-            if (!plugins.pypi.packages.length) {
-                plugins.pypi.init_packages();
+            if (!liberator.plugins.pypi.packages.length) {
+                liberator.plugins.pypi.init_packages();
             }
-            var packages = plugins.pypi.packages;
+            var packages = liberator.plugins.pypi.packages;
             var results = [];
             for (var i=0; i<packages.length; i++) {
                 if (new RegExp('^'+context.filter.replace('.', '\\.').toLowerCase()).exec(packages[i].toLowerCase())) {

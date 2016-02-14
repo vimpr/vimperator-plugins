@@ -66,8 +66,8 @@ let INFO = xml`
     </description>
   </item>
   <item>
-    <tags>plugins.zipDeDownload.SITE_INFO</tags>
-    <spec>plugins.zipDeDownload.SITE_INFO</spec>
+    <tags>liberator.plugins.zipDeDownload.SITE_INFO</tags>
+    <spec>liberator.plugins.zipDeDownload.SITE_INFO</spec>
     <description>
       <p>
         ページ毎の設定。詳細はコードを見よ。(見れば分かると思う)

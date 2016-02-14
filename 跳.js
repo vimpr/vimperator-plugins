@@ -61,7 +61,7 @@ let INFO = xml`
       return [html, html.match('http://(.+).\u8DF3.jp')[1]];
     }
 
-    let req = new plugins.libly.Request(
+    let req = new liberator.plugins.libly.Request(
       'http://xn--vt3a.jp/api?url=' + encodeURIComponent(url),
       {
         'X-Requested-With': 'XMLHttpRequest',
@@ -114,7 +114,7 @@ let INFO = xml`
     true
   );
 
-  plugins.haneru = {getc: getc};
+  liberator.plugins.haneru = {getc: getc};
 
 })();
 

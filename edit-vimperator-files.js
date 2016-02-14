@@ -120,7 +120,7 @@ let INFO = xml`
     'Open vimperator file',
     function (args) {
       if (args['-autosource'])
-        plugins.auto_source.start(args.literalArg);
+        liberator.plugins.auto_source.start(args.literalArg);
       editFileExternally(args.literalArg);
     },
     {

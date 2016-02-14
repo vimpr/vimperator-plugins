@@ -30,7 +30,7 @@ const DEFAULT_MAP = "x";
 
 let xpathHintMap = liberator.globalVariables.xpath_hint_map || DEFAULT_MAP;
 
-let xh = plugins.xpath_hint = {
+let xh = liberator.plugins.xpath_hint = {
     getElementXPath: function(elem)
     {
         if (elem.nodeType == 9) { // DOCUMENT_NODE = 9

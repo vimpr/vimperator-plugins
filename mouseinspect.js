@@ -37,7 +37,7 @@
 // it is the factory that build highlight object.
 setTimeout( function () {
 
-if (!plugins.highlighterFactory) {
+if (!liberator.plugins.highlighterFactory) {
     liberator.log('mouseinspect.js needs highlight.js', 0);
     return;
 }
@@ -63,7 +63,7 @@ let elementInfo = function (event) {
 };
 
 let setupHighlighter = function () {
-    elementInfo.highlighter = plugins.highlighterFactory({
+    elementInfo.highlighter = liberator.plugins.highlighterFactory({
         color:    liberator.globalVariables.mouse_inspect_color   || defaultColor,
         opacity:  liberator.globalVariables.mouse_inspect_opacity || defaultOpacity,
         interval: 0,

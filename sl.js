@@ -97,7 +97,7 @@ SL.prototype = { // {{{
     }
     if (this.count * this.speed > this.width + this.slWidth){
       window.clearInterval(this.interval);
-      plugins.SL.close();
+      liberator.plugins.SL.close();
     }
   },
   merge: function(){
@@ -566,8 +566,8 @@ return self;
 
 function onUnload(){
   try {
-    plugins.SL.closePopup();
-    document.documentElement.removeChild(plugins.SL.panel);
+    liberator.plugins.SL.closePopup();
+    document.documentElement.removeChild(liberator.plugins.SL.panel);
   } catch(e) {};
 }
 
