@@ -2496,7 +2496,7 @@ let INFO = xml`
   // アクセストークン取得後 {{{
   function setup() {
     function findSubCommand(s) { // {{{
-      for (let [, cmd] in util.Array(SubCommands)) {
+      for (let [, cmd] in util.Array.iteritems(SubCommands)) {
         let m = cmd.match(s);
         if (m)
           return [cmd, m];
