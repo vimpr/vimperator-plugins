@@ -252,7 +252,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
 (function () {
 
   const EVENTS = 'keypress keydown keyup'.split(/\s+/);
-  const EVENTS_WITH_V = EVENTS.concat(['v' + n for (n of EVENTS)]);
+  const EVENTS_WITH_V = EVENTS.concat(EVENTS.map(n => 'v' + n));
   const IGNORE_URLS = /<ALL>/;
 
   const VKeys = {
@@ -311,9 +311,6 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
   const State = {
     feeding: false
   };
-
-  function id (v)
-    v;
 
   function or (list, func) {
     return (
@@ -503,8 +500,7 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
 
   function fmapCompleter (context, args) {
     context.title = ['name', 'rhs & url'];
-    context.completions = [
-      [
+    context.completions = findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}).map(map => [
         xml`<span style="font-weight: bold">${map.names[0]}</span>,
         <span>
           <span style="font-weight: bold">${map.feedSomeKeys.rhs}</span>
@@ -515,19 +511,20 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
           }</span>
         </span>`
       ]
-      for (map of findMappings({urls: args['-urls'], ignoreUrls: args['-ignoreurls']}))
-    ];
+    );
   }
 
   function urlCompleter ({currentURL}) {
     return function (context, args) {
       let maps = findMappings({all: true});
       let uniq = {};
-      let result = [
-        (uniq[map.matchingUrls] = 1, [map.matchingUrls.source, map.names])
-        for (map of maps)
-        if (map.matchingUrls && !uniq[map.matchingUrls])
-      ];
+      let result = [];
+      for (let map of maps) {
+        if (map.matchingUrls && !uniq[map.matchingUrls]) {
+          uniq[map.matchingUrls] = 1;
+          result.push([map.matchingUrls.source, map.names]);
+        }
+      }
       if (currentURL) {
         result.unshift(['^' + util.escapeRegex(buffer.URL), 'Current URL']);
         if (content.document.domain)
@@ -538,18 +535,16 @@ xml`<plugin name="feedSomeKeys" version="1.9.5"
   }
 
   function frameCompleter (context, args) {
-    return [
-      [i, frame.document.location]
-      for ([i, frame] of Iterator(getFrames()))
-    ];
+    return getFrames().map((frame, i) => [i, frame.document.location]);
   }
 
-  const ModeStringsCompleter = [
-    [name, disp + ' mode' + (char ? ' (alias: ' + char + ')' : '')]
-    for ([n, {name, char, disp, extended}] in Iterator(modes._modeMap))
-    if (!extended && /^\D+$/.test(n))
-  ];
-
+  const ModeStringsCompleter = Object.keys(modes._modeMap).filter(function(n) {
+    let {extended} = modes._modeMap[n];
+    return !extended && /^\D+$/.test(n);
+  }).map(function(n) {
+    let {name, char, disp} = modes._modeMap[n];
+    return [name, disp + ' mode' + (char ? ' (alias: ' + char + ')' : '')]
+  });
 
   'fmap fmaps'.split(/\s+/).forEach(function (cmd) {
     let multi = cmd === 'fmaps';
