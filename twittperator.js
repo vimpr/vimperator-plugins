@@ -2230,14 +2230,8 @@ let INFO = xml`
       hashtag:
         function(filter) {
           return makeTimelineCompleter(function(context, args){
-            context.completions = [
-              for (s of history)
-              if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
-              [
-                [for (h of s.entities.hashtags) '#' + h.text].join(' '),
-                s
-              ]
-            ]
+            context.completions = history.filter(s => s.entities && s.entities.hashtags && s.entities.hashtags[0])
+                .map(s => [s.entities.hashtags.map(h => '#' + h.text).join(' '), s])
           });
         }
     };
