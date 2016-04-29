@@ -254,10 +254,10 @@ let INFO = xml`
     return 'anekos-migemized-find-' +name;
   }
 
-  let colorsCompltions = [
-    [name, xml`<span style=${'color: ' + name}>${'\u25a0 ' + value}</span>`]
-    for each ([name, value] in Iterator(colors))
-  ];
+  let colorsCompltions = [];
+  for (let [name, value] in Iterator(colors)) {
+    colorsCompltions.push([name, xml`<span style=${'color: ' + name}>${'\u25a0 ' + value}</span>`]);
+  }
 
   let store = storage.newMap(__context__.NAME, {store: true});
 
@@ -645,10 +645,11 @@ let INFO = xml`
 
     completer: function (context, args) {
       context.compare = CompletionContext.Sort.unsorted;
-      context.completions = [
-        [v, v]
-        for ([, v] in Iterator(MF.history))
-      ];
+      let completions = [];
+      for (let [, v] in Iterator(MF.history)) {
+        completions.push([v, v]);
+      }
+      context.completions = completions;
     }
   };
 
@@ -686,10 +687,11 @@ let INFO = xml`
       ],
       completer: function (context, args) {
         context.compare = void 0;
-        context.completions = [
-          [v, 'History']
-          for ([, v] in Iterator(MF.history))
-        ];
+        let completions = []
+        for (let [, v] in Iterator(MF.history)) {
+          completions.push([v, 'history']);
+        }
+        context.completions = completions;
       }
     },
     true
@@ -703,7 +705,7 @@ let INFO = xml`
       if (!args.string)
         return MF.removeHighlight(MF.highlightColor);
       if (args.string == 'all')
-        return [f() for each (f in MF.storage.highlightRemovers)];
+        return MF.storage.highlightRemovers.map(f => f());
       args.string.split(/\s+/).forEach(MF.removeHighlight, MF);
     },
     {
