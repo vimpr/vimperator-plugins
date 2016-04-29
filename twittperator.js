@@ -2231,12 +2231,12 @@ let INFO = xml`
         function(filter) {
           return makeTimelineCompleter(function(context, args){
             context.completions = [
+              for (s of history)
+              if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
               [
-                ['#' + h.text for ([, h] in Iterator(s.entities.hashtags))].join(' '),
+                [for (h of s.entities.hashtags) '#' + h.text].join(' '),
                 s
               ]
-              for ([, s] in Iterator(history))
-              if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
             ]
           });
         }

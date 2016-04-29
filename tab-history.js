@@ -158,9 +158,7 @@ var tabHistory = (function(){
         TH.goForward();
         break;
       default:
-        let xml = template.table("TabHistory", [
-          [i - index, tab.label] for ([i, tab] in Iterator(history))
-        ]);
+        let xml = template.table("TabHistory", history.map((tab, i) => [i - index, tab.label]));
         liberator.echo(xml);
       }
     }, {

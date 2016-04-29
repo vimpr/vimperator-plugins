@@ -59,7 +59,9 @@ function runInspector(node){
 function getIDList(filter, isChrome){
   var doc = isChrome ? document : content.document;
   var iter = util.evaluateXPath('//*[@id and contains(@id,"' + filter + '")]',doc);
-  return [["#" + e.id, "TagName: "+ e.tagName] for (e in iter)];
+  var arr = [];
+  for (let e in iter) arr.insert(e);
+  return [for (e of arr) ["#" + e.id, "TagName: "+ e.tagName]];
 }
 
 var options = [
