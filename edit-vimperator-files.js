@@ -97,12 +97,12 @@ let INFO = xml`
         if (lastTime && (new Date() - lastTime < 5 * 1000))
           return lastItems;
         return lastItems = util.Array.flatten([
-          [
-            [file.path, dir]
-            for ([, file] in Iterator(io.File(dir).readDirectory(false)))
-            if (file.isFile() && /^[\._]vimperatorrc|\.(js|vimp|css)$/.test(file.leafName))
-          ]
-          for ([, dir] in Iterator(dirs))
+          for (dir of dirs)
+            [
+              for (file of io.File(dir).readDirectory(false))
+              if (file.isFile() && /^[\._]vimperatorrc|\.(js|vimp|css)$/.test(file.leafName))
+              [file.path, dir]
+            ]
         ]);
       };
     })();

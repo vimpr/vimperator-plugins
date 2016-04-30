@@ -282,7 +282,7 @@ let INFO = xml`
       function (text) util.copyToClipboard(text, true)
   };
 
-  let actionTypes = [n for (n in actions)];
+  let actionTypes = Object.keys(actions);
 
   function makeListValidator (list)
     function (vs) (!vs || !vs.some(function (v) !list.some(function (at) (v == at))));
@@ -308,7 +308,12 @@ let INFO = xml`
           config,
           text,
           {
-            done: function (lang) [liberator.echo("<p>"+v+"</p>",commandline.FORCE_MULTILINE) for ([, [k, v]] in Iterator(languages)) if (k == lang)]
+            done: function (lang) {
+              let langmap = new Map(languages);
+              if (langmap.has(lang)) {
+                liberator.echo("<p>"+langmap.get(lang)+"</p>",commandline.FORCE_MULTILINE)
+              }
+            }
           }
         );
         return;
