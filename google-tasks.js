@@ -205,10 +205,9 @@ function gtasCompleter(context, args) {
     let url = rest_uri + '/users/@me/lists?oauth_token=' + access_token;
     httpGet(url, function (xhr) {
       context.incomplete = false;
-      context.completions = [
-        [v.id, v.title]
-        for ([k, v] in Iterator(JSON.parse(xhr.responseText).items))
-      ];
+      context.completions = JSON.parse(xhr.responseText).items.map(function (v) {
+        return [v.id, v.title];
+      });
     });
   } else if (args.completeArg == 1 && !/add/.test(context.name) && !/clear/.test(context.name)){
     context.incomplete = true;
@@ -221,28 +220,29 @@ function gtasCompleter(context, args) {
       let url = rest_uri + '/lists/' + args[0] + '/tasks?oauth_token=' + access_token + '&showHidden=true';
       httpGet(url, function (xhr) {
         context.incomplete = false;
-        context.completions = [
-          [v.id, v.title]
-          for ([k, v] in Iterator(JSON.parse(xhr.responseText).items))
-        ];
+        context.completions = JSON.parse(xhr.responseText).items.map(function (v) {
+          return [v.id, v.title];
+        });
       });
     } else if (/uncomplete/.test(context.name)) {
       let url = rest_uri + '/lists/' + args[0] + '/tasks?oauth_token=' + access_token + '&showHidden=true';
       httpGet(url, function (xhr) {
         context.incomplete = false;
-        context.completions = [
-          [v.id, v.title]
-          for ([k, v] in Iterator(JSON.parse(xhr.responseText).items)) if (v.status == 'completed')
-        ];
+        context.completions = JSON.parse(xhr.responseText).items.filter(function (v) {
+          return v.status == 'completed';
+        }).map(function (v) {
+          return [v.id, v.title];
+        });
       });
     } else {
       let url = rest_uri + '/lists/' + args[0] + '/tasks?oauth_token=' + access_token;
       httpGet(url, function (xhr) {
         context.incomplete = false;
-        context.completions = [
-          [v.id, v.title]
-          for ([k, v] in Iterator(JSON.parse(xhr.responseText).items)) if (v.status == 'needsAction')
-        ];
+        context.completions = JSON.parse(xhr.responseText).items.filter(function (v) {
+          return v.status == 'needsAction';
+        }).map(function (v) {
+          return [v.id, v.title];
+        });
       });
     }
   }
