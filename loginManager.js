@@ -273,15 +273,16 @@ function Service(service) //{{{
         request(logoutURL, content, success, error);
     };
     self.getLogins = function() {
-        return [loginManager.findLogins({}, host, host, null) for each(host in service.HOST)]
-        .reduce(function(sum, logins){
+        return service.HOST.map(function (it ) {
+            return loginManager.findLogins({}, host, host, null);
+        }).reduce(function(sum, logins){
             return sum.concat(logins.filter(function(login)
                 sum.length==0 || sum.filter(function(x)
                     x.username==login.username).length==0))
                 }, []);
     };
     self.getUsernames = function(){
-        return [x.username for each(x in self.getLogins()) if(x.username)];
+        return self.getLogins().filter(function (x) { return x.username; }).map(function (it) { return x.username; });
     };
     self.setPassword = function(content, username){
         let logins = self.getLogins()
@@ -317,7 +318,11 @@ function Service(service) //{{{
 } //}}}
 
 function encode(content)
-    [k+"="+encodeURIComponent(content[k]) for(k in content)].join("&");
+{
+    return content.map(function (v, k) {
+        return k+"="+encodeURIComponent(v);
+    }).join("&");
+}
 function request(url, content, onload, onerror)
 {
     let req = new XMLHttpRequest;
@@ -378,12 +383,17 @@ commands.addUserCommand(["login"], "Login",
         completer: function(context, args){
             if (args.completeArg == 0){
                 context.title = ["service"];
-                context.completions = [[n,s.NAME] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
+                let cs = [];
+                for (let [name, service] in Iterator(services)){
+                    if (s.getUsernames().length)
+                        cs.push([n,s.NAME]);
+                }
+                context.completions = cs;
             } else if (args.completeArg == 1){
                 let service = services[args[0]];
                 if (!service) return false;
                 context.title = ["username"];
-                context.completions = [[u,] for each(u in service.getUsernames())];
+                context.completions = service.getUsernames().map(function (username) { return [username, null]; });
             }
         },
         literal: 1,
@@ -397,7 +407,12 @@ commands.addUserCommand(["logout"], "Logout",
     }, {
         completer: function(context, args){
             context.title = ["service"];
-            context.completions = [[n,s.NAME] for([n,s] in Iterator(services)) if (s.getUsernames().length)];
+            let cs = [];
+            for (let [name, service] in Iterator(services)){
+                if (s.getUsernames().length)
+                    cs.push([n,s.NAME]);
+            }
+            context.completions = cs;
         },
     }, true);
 // }}}
