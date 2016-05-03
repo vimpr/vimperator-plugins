@@ -238,7 +238,7 @@ let INFO = xml`
       {
         default: urls[0][1],
         completer: function (context) {
-          context.completions = [[v, n] for each ([n, v] in urls)];
+          context.completions = urls.map(function ([v, n]) { return [n, v]; });
         }
       }
     );
