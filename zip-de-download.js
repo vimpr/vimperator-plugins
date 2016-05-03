@@ -225,7 +225,7 @@ let SITE_INFO = [
   let self = {
     downloadZip: function(path, urls, comment, isAppend){
       let zipW = new zipWriter();
-      urls = [url for each(url in urls)];
+      urls = Array.from(Iterator(urls));
       liberator.assert(urls.length > 0, "None of URLs");
 
       if (!(/\.zip$/i).test(path)){
