@@ -80,7 +80,9 @@ let PLUGIN_INFO = xml`
         title: (browser.__SS_restore_data ? browser.__SS_restore_data.title : doc.title)
       };
     }
-    return [gen(tab, i) for ([i, tab] in Iterator(config.browser.mTabs))];
+    return Array.from(config.browser.mTabs).map(function (tab, i) {
+      return gen(tab, i);
+    });
   }
 
   function tabUniq (cmp) {
