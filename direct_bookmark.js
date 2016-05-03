@@ -443,10 +443,9 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
                 xhr.open("GET", url, false, user, password);
                 xhr.send(null);
 
-                return [
-                    e.getAttribute("tag")
-                    for ([, e] in Iterator(Array.slice(xhr.responseXML.querySelectorAll('tag'))))
-                ];
+                return Array.slice(xhr.responseXML.querySelectorAll('tag')).map(function (e) {
+                    return e.getAttribute("tag")
+                });
             },
             icon:function(url){
                 var url = liberator.modules.buffer.URL;
@@ -635,10 +634,9 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
                 xhr.open("GET", url, false, user, password);
                 xhr.send(null);
 
-                return [
-                    e.getAttribute("tag")
-                    for ([, e] in Iterator(Array.slice(xhr.responseXML.querySelectorAll('tag'))))
-                ];
+                return Array.slice(xhr.responseXML.querySelectorAll('tag')).map(function (e) {
+                    return e.getAttribute("tag")
+                });
             },
             //icon:function(url){
             //    return '<img src="http://image.clip.livedoor.com/counter/' + url + '" style="vertical-align: middle;" />';
@@ -843,10 +841,11 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
                         context.advance( match_result[1].length );
 
                         context.incomplete = false;
-                        context.completions =
-                            [ ["[" + tag + "]","Tag"]
-                              for each (tag in tags)
-                              if (m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0) ];
+                        context.completions = tags.filter(function (tag) {
+                            return m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0;
+                        }).map(function (tag) {
+                            return ["[" + tag + "]","Tag"];
+                        });
                     }
 
                     let url = arg[0] || buffer.URL;
