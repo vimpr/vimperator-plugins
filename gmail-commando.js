@@ -324,9 +324,7 @@ let INFO = xml`
 
   function simpleValueCompleter (values) {
     return function (context) {
-      context.completions = [
-        [v, v] for ([, v] in Iterator(values))
-      ];
+      context.completions = values.map(function (v) { return [v, v]; });
     };
   }
 
@@ -344,10 +342,9 @@ let INFO = xml`
         } else {
           var labels = last.length ? last : Commando.storage.get('labels', []);
         }
-        context.completions = [
-          [label.replace(/\s*\(\d+\+?\)$/, ''), label]
-          for ([, label] in Iterator(labels))
-        ];
+        context.completions = labels.map(function (label) {
+          return [label.replace(/\s*\(\d+\+?\)$/, ''), label];
+        });
       };
     })(),
 
@@ -365,9 +362,7 @@ let INFO = xml`
     in: simpleValueCompleter('anywhere inbox drafts spam trash'.split(/\s/).sort()),
 
     lang: function (context) {
-      context.completions = [
-        [v, v] for ([, v] in Iterator(Languages))
-      ];
+      context.completions = Languages.map(function (v) { return [v, v]; });
     }
   };
 
@@ -402,9 +397,7 @@ let INFO = xml`
             KeywordValueCompleter[key](context, args);
           } else if (m = /[-\s]*([^-\s:\(\)\{\}]*)$/.exec(input)) {
             context.advance(input.length - m[1].length);
-            context.completions = [
-              [v + ':', v] for ([, v] in Iterator(GMailSearchKeyword))
-            ];
+            context.completions = GMailSearchKeyword.map(function (v) { return [v + ':', v]; });
             if (Conf.labelShortcut)
               context.fork('Label+', 0, context, KeywordValueCompleter.labelAndValue);
           }
