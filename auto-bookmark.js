@@ -214,11 +214,9 @@ let INFO = xml`
         return 0;
       }
 
-      let bs = [
-        data
-        for ([, data] in Iterator(bookmarks))
-        if (!!data.hidden === !!hidden)
-      ];
+      let bs = bookmarks.filter(function (data) {
+        return !!data.hidden === !!hidden;
+      });
 
       context.title = ['Bookmark name'];
       if (args['-sort'] == 'title') {
@@ -231,10 +229,9 @@ let INFO = xml`
         });
       }
 
-      context.completions = [
-        [data.name, data.current.URL]
-        for ([, data] in Iterator(bs))
-      ];
+      context.completions = bs.map(function (data) {
+        return [data.name, data.current.URL];
+      });
     };
   } // }}}
 
