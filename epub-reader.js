@@ -169,10 +169,9 @@ let INFO = xml`
         },
         function (context, args) {
           context.compare = void 0;
-          context.completions = [
-            [i + ': ' + link.textContent, link.href.replace(/.*\//g, '').replace(/\.[^.]+$/, '')]
-            for ([i, link] in Iterator(getIndexLinks()))
-          ];
+          context.completions = getIndexLinks().map(function (link, i) {
+            return [i + ': ' + link.textContent, link.href.replace(/.*\//g, '').replace(/\.[^.]+$/, '')];
+          });
         }
       )
   };
@@ -222,7 +221,7 @@ let INFO = xml`
           return func.completer(context, args);
         }
 
-        context.completions = [keyValue for (keyValue in Iterator(MapKeys))];
+        context.completions = Array.from(Iterator(MapKeys));
       }
     },
     true
