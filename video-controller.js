@@ -125,10 +125,9 @@ let INFO = xml`
     function (args) {
     },
     {
-      subCommands: [
-        (function () {
-          let o = it;
-          return new Command(
+      subCommands:
+        Object.keys(controlls).map(o =>
+          new Command(
             [o[0] + '[' + o.slice(1) + ']'],
             o + ' <video>',
             function (args) {
@@ -140,9 +139,7 @@ let INFO = xml`
               literal: 0
             }
           )
-        })()
-        for (it in controlls)
-      ],
+        )
     },
     true
   );
