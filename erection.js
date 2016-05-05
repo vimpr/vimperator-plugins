@@ -184,10 +184,9 @@ let INFO = xml`
     context.filters = [CompletionContext.Filter.textDescription];
 
     erect(function (erections) {
-      context.completions = [
-        [n + ': ' + e.text, e.by + (e.from || '')]
-        for ([n, e] in Iterator(erections))
-      ];
+      context.completions = erections.map(function (e, n) {
+        return [n + ': ' + e.text, e.by + (e.from || '')];
+      });
       context.incomplete = false;
     });
   }

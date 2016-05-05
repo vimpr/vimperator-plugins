@@ -5,7 +5,7 @@
  * TODO:ADDにbufferからのリストを入れられるように
 */
 
-let PLUGIN_INFO = xml`
+PLUGIN_INFO = xml`
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
@@ -91,15 +91,13 @@ let PLUGIN_INFO = xml`
 				filter = function (item) (matcher.match(item.url) || matcher.match(item.title));
 			}
 
-			context.completions = [
-				[item.url,item.title]
-				for([, item] in Iterator(data.list))
-				if(
-					!args.some(function (arg) arg == item.url)
-					&&
-					filter(item)
-				)
-			];
+			context.completions = Array.from(Iterator(data.list)).map(function ([, item]) {
+				return item;
+			}).filter(function (item) {
+				return !args.some(function (arg) arg == item.url) && filter(item);
+			}).map(function (item) {
+				return [item.url, item.title];
+			});
 			context.incomplete = false;
 		});
 
@@ -233,7 +231,11 @@ let PLUGIN_INFO = xml`
 		remove: function(url){ // {{{
 			if (!this.cache)
 				return this.udpate(true);
-			let names = [n for ([n, v] in Iterator(this.cache.list)) if (v.url == url)];
+			let names = [];
+			for ([n, v] in Iterator(this.cache.list))
+				if (v.url == url)
+					names.push(n);
+
 			for (let [, name] in Iterator(names))
 				delete this.cache.list[name];
 			this.save();
@@ -513,15 +515,18 @@ let PLUGIN_INFO = xml`
 	} // }}}
 
 	function getParameterMap(parameters){ // {{{
-		return [
-			key + "=" + encodeURIComponent(value)
-			for ([key, value] in Iterator(parameters))
+		var result = [];
+		for ([key, value] in Iterator(parameters))
 			if (value)
-		].join("&");
+				result.push(key + "=" + encodeURIComponent(value));
+		return result.join("&");
 	} // }}}
 
   function countObjectValues(obj){ // {{{
-    return [1 for (_ in Iterator(obj))].length;
+  	var fuck = 0;
+		for (_ in Iterator(obj))
+			fuck++;
+    return fuck;
   } // }}}
 
 	// for debug {{{

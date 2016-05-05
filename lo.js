@@ -216,7 +216,9 @@ let INFO = xml`
     if (word.match(/^\s*$/))
       return links;
     let re = makeRegExp(word);
-    return [it for each (it in links) if (lmatch(re, it))];
+    return links.filter(function (it) {
+      return lmatch(re, it)
+    });
   }
 
   function charToWhere (str, fail) {

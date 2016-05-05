@@ -312,9 +312,8 @@ libly.$U = {//{{{
     evalJson: function(str, toRemove) {
         var json;
         try {
-            json = Components.classes['@mozilla.org/dom/json;1'].getService(Components.interfaces.nsIJSON);
             if (toRemove) str = str.substring(1, str.length - 1);
-            return json.decode(str);
+            return JSON.parse(str);
         } catch (e) { return null; }
     },
     dateFormat: function(dtm, fmt) {

@@ -155,11 +155,11 @@ let PLUGIN_INFO = xml`
         };
         context.filters = [function (item) this.match(item.description)];
 
-        context.completions = [
-          [it.replace(/^[^\t]+\t/, ''), it]
-          for ([, it] in Iterator(gets().split(/\n/).reverse()))
-          if (it.length)
-        ];
+        context.completions = gets().split(/\n/).reverse().filter(function (it) {
+          return it.length;
+        }).map(function (it) {
+          return [it.replace(/^[^\t]+\t/, ''), it];
+        });
       }
     },
     true

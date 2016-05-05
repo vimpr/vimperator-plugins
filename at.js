@@ -176,11 +176,11 @@
                 return ary.some(function (it) it == value);
               }
               context.title = ['Handle', 'Command'];
-              context.completions = [
-                [entry.handle, entryToString(entry)]
-                for (entry of entries)
-                if (!has(args, entry.handle))
-              ];
+              context.completions = entries.filter(function (entry) {
+                return !has(args, entry.handle);
+              }).map(function (entry) {
+                return [entry.handle, entryToString(entry)]
+              });
             }
           }
         ),

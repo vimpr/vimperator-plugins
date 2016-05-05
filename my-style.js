@@ -195,10 +195,7 @@ EOM
       context,
       function (context, args) {
         context.title = ['Style set URL'];
-        context.completions = [
-          [url, css]
-          for ([url, css] in Iterator(Currents))
-        ];
+        context.completions = Array.from(Iterator(Currents));
       }
     );
   }
@@ -218,19 +215,13 @@ EOM
           context.advance(m.index + m[1].length);
 
         context.filters = [CompletionContext.Filter.textDescription];
-        context.completions = [
-          [n, v]
-          for ([n, v] in Iterator(DefinedStyles))
-        ];
+        context.completions = Array.from(Iterator(DefinedStyles));
       }
     );
   }
 
   function styleNameCompleter (context) {
-    context.completions = [
-      [url, css]
-      for ([url, css] in Iterator(Currents))
-    ];
+    context.completions = Array.from(Iterator(Currents));
   }
 
   function set (url, css) {
