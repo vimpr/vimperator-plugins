@@ -5,7 +5,7 @@
  * TODO:ADDにbufferからのリストを入れられるように
 */
 
-let PLUGIN_INFO = xml`
+PLUGIN_INFO = xml`
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>
@@ -91,10 +91,12 @@ let PLUGIN_INFO = xml`
 				filter = function (item) (matcher.match(item.url) || matcher.match(item.title));
 			}
 
-			context.completions = data.list.filter(function (item) {
+			context.completions = Array.from(Iterator(data.list)).map(function ([, item]) {
+				return item;
+			}).filter(function (item) {
 				return !args.some(function (arg) arg == item.url) && filter(item);
-			}).map(function (it) {
-				return [item.url,item.title];
+			}).map(function (item) {
+				return [item.url, item.title];
 			});
 			context.incomplete = false;
 		});
