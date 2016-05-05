@@ -214,7 +214,9 @@ let INFO = xml`
         return 0;
       }
 
-      let bs = bookmarks.filter(function (data) {
+      let bs = Array.from(Iterator(bookmarks)).map(function ([,data]) {
+        return data;
+      }).filter(function (data) {
         return !!data.hidden === !!hidden;
       });
 
