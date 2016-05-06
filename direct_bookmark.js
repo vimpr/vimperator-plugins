@@ -680,7 +680,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
             tags.sort();
             __context__.tags.update(tags);
             if (onComplete)
-                onComplete(tags);
+                onComplete(__context__.tags);
         }).error(function(e){liberator.echoerr(e, null, "direct_bookmark.js: ")});
         return first;
     }
@@ -841,7 +841,7 @@ var INFO = xml`<plugin name=${NAME} version="0.19.0"
                         context.advance( match_result[1].length );
 
                         context.incomplete = false;
-                        context.completions = tags.filter(function (tag) {
+                        context.completions = Array.from(Iterator(tags)).filter(function (tag) {
                             return m.test(tag) && match_result[1].indexOf('[' + tag + ']') < 0;
                         }).map(function (tag) {
                             return ["[" + tag + "]","Tag"];
