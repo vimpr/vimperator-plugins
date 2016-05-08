@@ -14,21 +14,28 @@ let PLUGIN_INFO = xml`
 	const original = mappings.getDefault(modes.NORMAL, 'o');
 
 	mappings.addUserMap([modes.NORMAL], ['o'], ':open', () => {
-		// urlを取得
-		const url = window.content.window.location;
+		const location = window.content.window.location;
+
 		// google検索か判定
-		if (url.host !== 'www.google.co.jp') {
+		if (!/www.google/.test(location.host)) {
 			return original.action.apply(this, arguments);
 		}
 
-		// クエリ部の抜き出し
-		const q = url.href.match(/[?&]q=(.*?)&/);
-		// コマンドの引数
-		// foo+bar+hogeの形で取得されるので'+'を' 'で置き換え
-		const commandPram = decodeURIComponent(q[1]).replace(/\+/g, ' ');
+		const str = location.hash.length === 0 ? location.search : location.hash;
+		const query = str.replace(/^(\?|#|&)/, '');
 
-		// コマンドの生成
-		const command = 'open ' + commandPram;
-		commandline.open('', commands.commandToString({command: command}), modes.EX);
+		let ret = {};
+		query.split('&').forEach(param => {
+			const parts = param.replace(/\+/g, ' ').split('=');
+			const key = parts.shift();
+			const val = decodeURIComponent(parts) || '';
+			ret[key] = val;
+		});
+
+		if (ret.q) {
+			commandline.open('', commands.commandToString({command: `open ${ret.q}`}), modes.EX);
+		} else {
+			original.action.apply(this, arguments);
+		}
 	});
 })();
