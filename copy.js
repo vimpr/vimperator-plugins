@@ -362,7 +362,7 @@ var exCopyManager = {
         if (isError){
             liberator.echoerr('CopiedErrorString: `' + copyString + "'");
         } else {
-            liberator.echo('CopiedString: `' + util.escapeHTML(copyString || '') + "'");
+            liberator.echomsg('CopiedString: `' + util.escapeHTML(copyString || '') + "'");
         }
     }
 };
