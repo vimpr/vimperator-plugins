@@ -75,10 +75,9 @@ let PLUGIN_INFO = xml`
             return;
 
           context.title = ['value', 'text'];
-          context.completions = [
-            [[n + ': ' + s for each (s in [opt.textContent, opt.value])], opt.textContent]
-            for ([n, opt] in Iterator(Array.slice(elem.options)))
-          ];
+          context.completions = Array.from(elem.options).map(function (opt, n) {
+            return [[n + ': ' + opt.textContent, n + ': ' + opt.value], opt.textContent];
+          });
         }
       }
     );
