@@ -103,7 +103,11 @@ let INFO = xml`
       elem.mozRequestFullScreen();
     },
     seek: function (elem, value) {
-      elem.currentTime = timeCodeToSec(value);
+      if (value.match(/\d+%/)) {
+        elem.currentTime = elem.duration * parseInt(value, 10) / 100;
+      } else {
+        elem.currentTime = timeCodeToSec(value);
+      }
     },
     playbackRate: function (elem, value) {
       elem.playbackRate = value;
