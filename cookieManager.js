@@ -102,7 +102,11 @@ buffer.addPageInfoSection("c", "Cookies", function(verbose){
     try {
         hostname = content.window.location.host;
     } catch (e){ return []; }
-    return [[c.rawHost + c.path, c.name + " = " + c.value] for (c in cManager.stored.getByHostAndPath(hostname))];
+    let list = [];
+    for (let cookie in cManager.stored.getByHostAndPath(hostname)) {
+      list.push([cookie.rawHost + cookie.path, cookie.name + " = " + cookie.value]);
+    }
+    return list;
 });
 
 // --------------------------------------------------------
@@ -138,7 +142,7 @@ commands.addUserCommand(["cookiem[anager]"], "Cookie Management",
                 let xml = ``;
                 let tree = cManager.stored.getTree(host);
                 for (let name in tree){
-                    xml += template.table(name, [[c.name, c.value] for each(c in tree[name])]);
+                    xml += template.table(name, tree[name].map(c => [c.name, c.value]));
                 }
                 liberator.echo(xml, true);
                 break;
@@ -199,7 +203,11 @@ var cManager = {
                     this.subcommands.filter(function(c) c[0].indexOf(context.filter) >= 0) :
                     this.subcommands;
             } else if (args.length == 2){
-                let list = util.Array.uniq([c.rawHost + c.path for (c in this.getByHostAndPath())]).map(function(host) [host, "-"]);
+                var list = [];
+                for (let cookie in this.getByHostAndPath()) {
+                    list.push([cookie.rawHost + cookie.path, "-"]);
+                }
+                list = util.Array.uniq(list);
                 context.title = ["Host and Path"];
                 context.completions = context.filter ?
                     list.filter(function(c) c[0].indexOf(context.filter) >= 0) :
@@ -245,7 +253,13 @@ var cManager = {
             } else if (!filterReg){
                 filterReg = new RegExp("");
             }
-            return [[p.host, capabilityToString(p.capability)] for (p in cookiePermissionIterator())].filter(function($_) filterReg.test($_[0]));
+            let list = [];
+            for (let permission in cookiePermissionIterator()) {
+                if (filterReg.test(permission.host)) {
+                    list.push([permission.host, capabilityToString(permission.capability)]);
+                }
+            }
+            return list;
         },
         subcommands: [
             ["list",   "list cookie permission"],
