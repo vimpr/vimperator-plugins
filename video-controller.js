@@ -109,6 +109,18 @@ let INFO = xml`
         elem.currentTime = timeCodeToSec(value);
       }
     },
+    mute: function (elem) {
+      elem.muted = true;
+    },
+    unmute: function (elem) {
+      elem.muted = false;
+    },
+    loop: function (elem) {
+      elem.loop = true;
+    },
+    unloop: function (elem) {
+      elem.loop = false;
+    },
     playbackRate: function (elem, value) {
       elem.playbackRate = value;
     }
