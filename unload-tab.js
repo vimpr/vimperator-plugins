@@ -74,9 +74,9 @@ commands.addUserCommand(["unload[tab]"], "Unload Tabs",
     completer: function (context, args) {
       context.anchored = false;
       context.completions = [
-        [tab._tPos + ": " +  tab.label, tab.linkedBrowser.currentURI.spec]
-        for each(tab in Array.slice(gBrowser.tabs))
+        for (tab of Array.slice(gBrowser.tabs))
         if (!tab.selected && !tab.linkedBrowser.__SS_restoreState)
+        [tab._tPos + ": " +  tab.label, tab.linkedBrowser.currentURI.spec]
       ];
     }
   }, true);

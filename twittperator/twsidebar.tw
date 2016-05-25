@@ -523,10 +523,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
               literal: 0,
               completer: function (context, args) {
                 let tabs = getSidebarWindow().document.getElementById('tw-anekos-sb-tabbox').querySelectorAll('tab');
-                context.completions = [
-                  [i + ': ' + tab.getAttribute('label'), tab.getAttribute('label')]
-                  for ([i, tab] in Iterator(Array.slice(tabs)))
-                ];
+                context.completions =
+                  Array.slice(tabs).map((tab, i) => [i + ': ' + tab.getAttribute('label'), tab.getAttribute('label')]);
               }
             }
           )
