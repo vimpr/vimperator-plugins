@@ -2670,8 +2670,8 @@ let INFO = xml`
   let tw = new TwitterOauth(Store);
 
   // ストリーム
-  let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
-  let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1/statuses/filter.json" });
+  let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/1.1/user.json" });
+  let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1.1/statuses/filter.json" });
 
   let startStreams = function () {
     ChirpUserStream.resetRestartCount();
