@@ -222,7 +222,7 @@ let INFO = xml`
           ['z[oom]'],
           'Zoom',
           function (args) {
-            content.window.wrappedJSObject.PDFViewerApplication.setScale(args.literalArg);
+            content.window.wrappedJSObject.PDFViewerApplication.pdfViewer.currentScaleValue = args.literalArg;
           },
           {
             literal: 0,
