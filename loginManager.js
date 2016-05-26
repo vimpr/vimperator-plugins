@@ -273,7 +273,7 @@ function Service(service) //{{{
         request(logoutURL, content, success, error);
     };
     self.getLogins = function() {
-        return service.HOST.map(function (it ) {
+        return service.HOST.map(function (host) {
             return loginManager.findLogins({}, host, host, null);
         }).reduce(function(sum, logins){
             return sum.concat(logins.filter(function(login)
@@ -282,7 +282,7 @@ function Service(service) //{{{
                 }, []);
     };
     self.getUsernames = function(){
-        return self.getLogins().filter(function (x) { return x.username; }).map(function (it) { return x.username; });
+        return self.getLogins().filter(function (x) { return x.username; }).map(function (x) { return x.username; });
     };
     self.setPassword = function(content, username){
         let logins = self.getLogins()
@@ -319,8 +319,8 @@ function Service(service) //{{{
 
 function encode(content)
 {
-    return content.map(function (v, k) {
-        return k+"="+encodeURIComponent(v);
+    return Object.keys(content).map(function (k) {
+        return k+"="+encodeURIComponent(content[k]);
     }).join("&");
 }
 function request(url, content, onload, onerror)
@@ -385,8 +385,8 @@ commands.addUserCommand(["login"], "Login",
                 context.title = ["service"];
                 let cs = [];
                 for (let [name, service] in Iterator(services)){
-                    if (s.getUsernames().length)
-                        cs.push([n,s.NAME]);
+                    if (service.getUsernames().length)
+                        cs.push([name,service.NAME]);
                 }
                 context.completions = cs;
             } else if (args.completeArg == 1){
@@ -409,8 +409,8 @@ commands.addUserCommand(["logout"], "Logout",
             context.title = ["service"];
             let cs = [];
             for (let [name, service] in Iterator(services)){
-                if (s.getUsernames().length)
-                    cs.push([n,s.NAME]);
+                if (service.getUsernames().length)
+                    cs.push([name,service.NAME]);
             }
             context.completions = cs;
         },
