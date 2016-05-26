@@ -213,12 +213,7 @@ let INFO = xml`
               let os = getOutline();
               context.compare = void 0;
               context.filters = [CompletionContext.Filter.textDescription];
-              context.completions = [
-                [
-                  '#' + i, desc(o)
-                ]
-                for ([i, o] in Iterator(os))
-              ];
+              context.completions = os.map((o, i) => ['#' + i, desc(o)]);
             }
           }
         ),
@@ -233,10 +228,7 @@ let INFO = xml`
             literal: 0,
             completer: function (context, args) {
               let os = Array.slice(content.document.querySelector('#scaleSelect').querySelectorAll('option'));
-              context.completions = [
-                [o.value, o.textContent]
-                for ([, o] in Iterator(os))
-              ];
+              context.completions = os.map(o => [o.value, o.textContent]);
             }
           }
         )

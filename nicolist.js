@@ -225,8 +225,8 @@ function mylistCompleter (context, args) {
     util.httpGet(url, function (xhr) {
       context.incomplete = false;
       context.completions = [
+        for (v of JSON.parse(xhr.responseText).mylistgroup)
         [v.id, v.name]
-        for ([k, v] in Iterator(JSON.parse(xhr.responseText).mylistgroup))
       ];
     });
   } else if (args.completeArg == 1 && !/add/.test(context.name)){
@@ -241,13 +241,13 @@ function mylistCompleter (context, args) {
 
       if (/open|play/.test(context.name)) {
         context.completions = [
+          for (v of JSON.parse(xhr.responseText).mylistitem.sort(sorter))
           [v.item_data.video_id, v.item_data.title]
-          for ([k, v] in Iterator(JSON.parse(xhr.responseText).mylistitem.sort(sorter)))
         ];
       } else if (/delete/.test(context.name)) {
         context.completions = [
+          for (v of JSON.parse(xhr.responseText).mylistitem.sort(sorter))
           [v.item_id, v.item_data.title]
-          for ([k, v] in Iterator(JSON.parse(xhr.responseText).mylistitem.sort(sorter)))
         ];
       }
     });
