@@ -103,10 +103,6 @@ let INFO = xml`
 
 (function () {
 
-  let XMigemoCore = Components.classes['@piro.sakura.ne.jp/xmigemo/factory;1']
-                     .getService(Components.interfaces.pIXMigemoFactory)
-                     .getService(liberator.globalVariables.migemized_find_language || 'ja');
-
   let colors = {
     white: '#ffffff',
     whitesmoke: '#f5f5f5',
