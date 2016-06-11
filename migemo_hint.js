@@ -8,15 +8,10 @@
 
 options.get('hintmatching').set('custom');
 liberator.plugins.customHintMatcher = function(inputString){
-    var XMigemoCore, XMigemoTextUtils;
     try{
-        XMigemoCore = Cc['@piro.sakura.ne.jp/xmigemo/factory;1']
-                                .getService(Components.interfaces.pIXMigemoFactory)
-                                .getService('ja');
-        XMigemoTextUtils = Cc['@piro.sakura.ne.jp/xmigemo/text-utility;1']
-                                .getService(Ci.pIXMigemoTextUtils);
+        var {XMigemoCore, MigemoTextUtils} = Components.utils.import('resource://xulmigemo-modules/service.jsm', {});
     }
     catch(ex if ex instanceof TypeError){}
-    var r = new RegExp(XMigemoTextUtils.getANDFindRegExpFromTerms(XMigemoCore.getRegExps(inputString)), 'gi');
+    var r = new RegExp(MigemoTextUtils.getANDFindRegExpFromTerms(XMigemoCore.getRegExps(inputString)), 'gi');
     return function(hintString) r.test(hintString);
 };
