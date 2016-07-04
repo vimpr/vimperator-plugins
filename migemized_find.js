@@ -85,7 +85,7 @@ let INFO = xml`
     </item>
     <item>
       <tags>g:migemized_find_history_limit</tags>
-      <spec>let g:migemized_history_limit = <a>number</a></spec>
+      <spec>let g:migemized_find_history_limit = <a>number</a></spec>
       <description><p>
         検索履歴の保存される最大数 (デフォルト: 100)
       </p></description>
