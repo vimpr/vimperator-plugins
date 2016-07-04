@@ -84,13 +84,6 @@ let INFO = xml`
       </p></description>
     </item>
     <item>
-      <tags>g:migemized_find_language</tags>
-      <spec>let g:migemized_find_language = <a>lang</a></spec>
-      <description><p>
-        検索対象言語の設定
-      </p></description>
-    </item>
-    <item>
       <tags>g:migemized_find_history_limit</tags>
       <spec>let g:migemized_history_limit = <a>number</a></spec>
       <description><p>
