@@ -405,7 +405,7 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
             text: '[' + t.type + '] ' + t.text + ' - http://twitter.com/' + t.name
           };
         }
-        plugins.twittperator.Twittperator.onMessage(dummy);
+        liberator.plugins.twittperator.Twittperator.onMessage(dummy);
       }
 
       if (my || !Config.vanish.test([t.name, t.text, t.sub].join(' '))) {
@@ -576,8 +576,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       function () {
         readyToStart = false;
         restore();
-        plugins.twittperator.ChirpUserStream.addListener(added.chirp = makeOnMsg(true, 'chirp'));
-        plugins.twittperator.TrackingStream.addListener(added.filter = makeOnMsg(true, 'filter'));
+        liberator.plugins.twittperator.ChirpUserStream.addListener(added.chirp = makeOnMsg(true, 'chirp'));
+        liberator.plugins.twittperator.TrackingStream.addListener(added.filter = makeOnMsg(true, 'filter'));
       },
       1000
     );
@@ -595,8 +595,8 @@ liberator.modules.TWAnekoSB = ANekoSB = (function () {
       return;
     }
 
-    plugins.twittperator.ChirpUserStream.removeListener(added.chirp);
-    plugins.twittperator.TrackingStream.removeListener(added.filter);
+    liberator.plugins.twittperator.ChirpUserStream.removeListener(added.chirp);
+    liberator.plugins.twittperator.TrackingStream.removeListener(added.filter);
   } // }}}
 
   function makeAudio (path, volume) { // {{{
