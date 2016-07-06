@@ -641,7 +641,7 @@ let INFO = xml`
             OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
         },
         addToURL: function addToURL(url, parameters) {
-            newURL = url;
+            var newURL = url;
             if (parameters != null) {
                 var toAdd = OAuth.formEncode(parameters);
                 if (toAdd.length > 0) {
