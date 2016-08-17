@@ -9,7 +9,7 @@ This plugin was written by Christopher Grossack, 2016
 website: https://github.com/HallaSurvivor
 email: HallaSurvivor@gmail.com
 
-version 0.5
+version 0.7
 
 == CHANGELOG ==
 version 0.2:
@@ -33,6 +33,9 @@ version 0.6:
     a split.
 
   * Fixed a bug where a list was populating wrong on startup
+  
+version 0.7:
+  * made q[uit] actually override the default implementation
 */
 
 function TileviewIntegration()
@@ -103,7 +106,9 @@ function TileviewIntegration()
       { 
         if (TV.panelCount) TV.menuActions("remove");
         else tabs.remove(config.browser.mCurrentTab, 1, false, 1);
-      }
+      },
+      {},
+      true // replace = true, overrides the default :q[uit] implementation
     );
     
     commands.addUserCommand(
