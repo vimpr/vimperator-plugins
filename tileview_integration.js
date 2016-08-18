@@ -9,7 +9,7 @@ This plugin was written by Christopher Grossack, 2016
 website: https://github.com/HallaSurvivor
 email: HallaSurvivor@gmail.com
 
-version 0.7
+version 0.9
 
 == CHANGELOG ==
 version 0.2:
@@ -33,9 +33,15 @@ version 0.6:
     a split.
 
   * Fixed a bug where a list was populating wrong on startup
-  
+
 version 0.7:
-  * made q[uit] actually override the default implementation
+  * Made q[uit] actually override the default implementation
+
+version 0.8:
+  * Updated tileRemove to take input and remove a pane that isn't selected
+
+version 0.9:
+  * Actually made q[uit] override the default implementation this time.
 */
 
 function TileviewIntegration()
@@ -93,11 +99,8 @@ function TileviewIntegration()
       function() { TV.menuActions("expand"); }
     );
 
-    commands.addUserCommand(
-      ["tileR[emove]"],
-      "Remove the current pane from the tiling",
-      function() { TV.menuActions("remove"); }
-    );
+    // Nasty implementation breach to override q[uit]
+    commands._exCommands = commands._exCommands.filter(function (cmd) !cmd.hasName("quit"));
 
     commands.addUserCommand(
       ["q[uit]"],
@@ -106,9 +109,7 @@ function TileviewIntegration()
       { 
         if (TV.panelCount) TV.menuActions("remove");
         else tabs.remove(config.browser.mCurrentTab, 1, false, 1);
-      },
-      {},
-      true // replace = true, overrides the default :q[uit] implementation
+      }
     );
     
     commands.addUserCommand(
@@ -303,27 +304,49 @@ function TileviewIntegration()
       context.completions = indicesAndHints;
     };
 
+    function _focusOnTab(n)
+    {
+      if (!n || n <= 0 || n > config.tabbrowser.visibleTabs.length)
+      {
+        return;
+      }
+
+      tab = config.tabbrowser.visibleTabs[n - 1];
+
+      if (!tab.hasAttribute("tileview-assigned")) return;
+      if (document.getElementById("print-preview-toolbar") != null) return;
+
+      TV.lastSelectedTab = tab;
+      gBrowser.selectedTab = TV.lastSelectedTab;
+
+      tileView.hideActivate();
+    };
+
+    commands.addUserCommand(
+      ["tileR[emove]"],
+      "Remove a pane from the tiling (current pane by default)",
+      function(n) 
+      { 
+        if (!n || n <= 0 || n > config.tabbrowser.visibleTabs.length)
+        {
+          TV.menuActions("remove"); 
+        }
+        else
+        {
+          currentTab = gBrowser.selectedTab;
+          currentTabIndex = config.tabbrowser.visibleTabs.indexOf(currentTab);
+          _focusOnTab(n);
+          TV.menuActions("remove");
+          _focusOnTab(currentTabIndex + 1); //vimperator indexes from 1
+        }
+      },
+      { argCount: '1', completer: _openPanelsCompleter }
+    );
+
     commands.addUserCommand(
       ["tileF[ocus]"],
       "Focus on the panel with the tab in tabnumber n open. usage: tabNumber",
-      //TODO - make this work with panels with tabs from other tabgroups.
-      function(n)
-      {
-        if (!n || n <= 0 || n > config.tabbrowser.visibleTabs.length)
-        {
-          return;
-        }
-
-        tab = config.tabbrowser.visibleTabs[n - 1];
-
-        if (!tab.hasAttribute("tileview-assigned")) return;
-        if (document.getElementById("print-preview-toolbar") != null) return;
-
-        TV.lastSelectedTab = tab;
-        gBrowser.selectedTab = TV.lastSelectedTab;
-
-        tileView.hideActivate();
-      },
+      _focusOnTab,
       { argCount: '1', completer: _openPanelsCompleter }
     );
   }
