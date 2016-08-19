@@ -16,7 +16,7 @@ var PLUGIN_INFO = xml`
 
 (function(){
 let stylishService = stylishOverlay.service;
-let control = plugins.stylish = {
+let control = liberator.plugins.stylish = {
     COMMAND_DESCRIPTION: 0,
     COMMAND_FUNCTION: 1,
     COMMAND_COMPLETER: 2,
@@ -29,7 +29,9 @@ let control = plugins.stylish = {
             },
             completer: function(args){
                 let title = ["style"];
-                let completions = [[s.name,""] for each(s in control.listStyle())];
+                let completions = Object.keys(control.listStyle()).map(function(key) {
+                    return [control.listStyle()[key].name, ""];
+                });
                 return [title, completions];
             },
         },
@@ -92,10 +94,10 @@ let control = plugins.stylish = {
         },
     },
     listStyle: function()
-        [s for each(s in stylishService.list(0, {}))],
+        stylishService.list(0, {}),
     getStyle: function(name)
     {
-        let styles = [s for each(s in control.listStyle()) if(s.name==name)];
+        let styles = control.listStyle().filter(s => s.name==name);
         if(styles.length == 0) return false
         return styles[0];
     },
@@ -142,7 +144,9 @@ let control = plugins.stylish = {
     {
         if (args.completeArg == 0){
             let title = ["command", "description"];
-            let completions = [[c, control.commands[c].description] for(c in control.commands)];
+            let completions = Object.keys(control.commands).map(function(key) {
+                   return [key, control.commands[key].description];
+            });
             return [title, completions];
         }
         let command = control.commands[args[0]];
