@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>jQuery Loader</name>
   <name lang="ja">jQuery Loader</name>
@@ -55,7 +55,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="jQueryLoader" version="1.0.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/jquery-loader.js"
           summary="jQuery Loader"

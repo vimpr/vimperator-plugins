@@ -8,7 +8,7 @@
  * == Stop ==
  * js liberator.plugins.bijin_clock.stop()
  */
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Bijin Clock - http://www.bijint.com</description>

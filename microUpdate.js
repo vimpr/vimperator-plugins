@@ -31,7 +31,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Update blog more quickly.</description>

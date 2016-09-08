@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="GMailCommando" version="1.4.11"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/gmail-commando.js"
           summary="The handy commands for GMail"

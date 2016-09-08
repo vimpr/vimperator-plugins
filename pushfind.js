@@ -1,6 +1,6 @@
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>PushFind</name>
 <name lang="ja">プッシュファインド</name>

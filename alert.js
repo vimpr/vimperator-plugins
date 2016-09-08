@@ -7,7 +7,7 @@
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Alert</name>
   <name lang="ja">アラート</name>

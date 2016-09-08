@@ -1,4 +1,4 @@
-let INFO = xml` //{{{
+var INFO = xml` //{{{
 <plugin name="statusbar panel" version="0.1"
         href="https://github.com/vimpr/vimperator-plugins/raw/master/statusbar_panel.js"
         summary="Click statusbar panel"

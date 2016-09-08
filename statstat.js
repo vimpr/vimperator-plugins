@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Stat Stat</name>
   <name lang="ja">すた☆すた</name>
@@ -55,7 +55,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="Stat Stat" version="1.0.4"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/statstat.js"
         summary="Show information on statusline."

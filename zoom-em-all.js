@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Zoom Em All</name>
   <name lang="ja">Zoom Em All</name>
@@ -55,7 +55,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="ZoomEmAll" version="1.1.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/zoom-em-all.js"
           summary="Zoom or pan for whole firefox."

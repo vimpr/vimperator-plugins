@@ -1,4 +1,4 @@
-let INFO = xml`
+var INFO = xml`
 <plugin name="zip-de-download" version="0.7.1"
         href=""
         summary="ZIPでダウンロードするお"

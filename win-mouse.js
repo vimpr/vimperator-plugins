@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="Win Cursor" version="1.3.2"
           href="http://vimpr.github.com/"
           summary="Cursor control plugin for MS Windows"

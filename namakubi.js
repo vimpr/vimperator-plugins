@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Namakubi</name>
   <name lang="ja">生首</name>
@@ -63,7 +63,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="生首" version="1.0.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/namakubi.js"
         summary="Wonderful Namakubi Talker"

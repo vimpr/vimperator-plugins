@@ -5,7 +5,7 @@
  * TODO:ADDにbufferからのリストを入れられるように
 */
 
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 	<name>readitlater</name>
 	<description lang="ja">Read it Later を快適に使うためのプラグインです</description>

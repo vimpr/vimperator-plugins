@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Morse</name>
   <name lang="ja">Morse</name>
@@ -57,7 +57,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="Morse" version="1.2.1"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/morse.js"
         summary="Morse code"

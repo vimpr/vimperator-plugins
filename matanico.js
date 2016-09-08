@@ -1,4 +1,4 @@
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>update Twitter status to current video/search page information and comment.</description>

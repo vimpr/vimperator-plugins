@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="EditVimperatorFile" version="1.3.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/edit-vimperator-files.js"
           summary="Open vimperator files with text-editor."

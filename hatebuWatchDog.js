@@ -30,7 +30,7 @@
 //
 // }}}
 // PLUGIN INFO: {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Make notify hatebu-count when specified site's hatebu-count changed.</description>

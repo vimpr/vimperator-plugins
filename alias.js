@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>alias</name>
   <name lang="ja">alias</name>
@@ -57,7 +57,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="alias" version="1.0.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/alias.js"
           summary="Define the alias for a command."

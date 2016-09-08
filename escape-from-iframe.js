@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO =
+var INFO =
 xml`
   <plugin name="Escape from iframe." version="1.0.0"
           href="http://vimpr.github.com/"

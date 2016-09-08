@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="longcat" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Longcat beautifies your life."

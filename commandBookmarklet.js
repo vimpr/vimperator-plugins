@@ -5,7 +5,7 @@
  * @version 0.6.4
  */
 
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>convert bookmarklets to commands</description>
