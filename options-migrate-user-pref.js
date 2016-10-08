@@ -54,7 +54,7 @@ EOF
             let type;
             try
             {
-                switch (services.get('pref').getPrefType(conf.pref))
+                switch (services.get('prefs').getPrefType(conf.pref))
                 {
                 case Ci.nsIPrefBranch.PREF_STRING:
                     // XXX: string のとき、うまく user_pref に設定できていない?

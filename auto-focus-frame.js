@@ -63,11 +63,8 @@ let PLUGIN_INFO = xml`
     if (!(window.content.document instanceof HTMLDocument) || (content.frames.length <= 1))
       return;
 
-    let targetFrames = [
-      frame
-      for (frame in util.Array.itervalues(content.frames))
-      if (frame.frameElement instanceof HTMLFrameElement)
-    ];
+    let targetFrames = content.frames
+        .filter(frame => frame.frameElement instanceof HTMLFrameElement);
 
     let [maxSize, maxFrame] = [-1, null];
     targetFrames.forEach(function(frame) {
