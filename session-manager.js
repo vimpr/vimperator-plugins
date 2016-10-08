@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Session Manager</name>
   <name lang="ja">Session Manager</name>
@@ -54,7 +54,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="session-manager" version="1.3.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/session-manager"
           summary="for Session Manager Addon"

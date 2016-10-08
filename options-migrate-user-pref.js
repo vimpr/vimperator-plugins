@@ -74,14 +74,15 @@ EOF
             {
                 return liberator.echoerr('migrate-user-pref: error pref: ' + pref + ' ' + e);
             }
-
-            options.add(conf.command, conf.description, type,
-                (typeof conf.defaultValue == 'undefined' ? options.getPref(pref) : conf.defaultValue),
-                {
-                    setter: function(value) options.setPref(pref, value),
-                    getter: function() options.getPref(pref),
-                }
-            );
+            if (!options.get(conf.command[0])) {
+                options.add(conf.command, conf.description, type,
+                    (typeof conf.defaultValue == 'undefined' ? options.getPref(pref) : conf.defaultValue),
+                    {
+                        setter: function(value) options.setPref(pref, value),
+                        getter: function() options.getPref(pref),
+                    }
+                );
+            }
         });
     }
 

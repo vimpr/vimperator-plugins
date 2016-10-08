@@ -78,7 +78,8 @@ var INFO = xml`
 </plugin>`;
 // }}}
 
-let self = liberator.plugins.smooziee = (function(){
+liberator.plugins.smooziee = (function(){
+  const self = this;
 
   // Mappings  {{{
   mappings.addUserMap(

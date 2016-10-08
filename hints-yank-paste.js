@@ -52,13 +52,17 @@ const TEXT_ATTRS = 'src value href title alt'.split(/\s+/);
 
 const DEFAULT_PASTE_HINTTAGS = '//input[@type="text" or @type="password" or @type="search" or not(@type)] | //textarea';
 
-options.add(["hintyanktags"],
-    "XPath string of hintable elements activated by 'hints-yank'",
-    "string", DEFAULT_YANK_HINTTAGS);
+if (!options.get("hintyanktags")) {
+  options.add(["hintyanktags"],
+      "XPath string of hintable elements activated by 'hints-yank'",
+      "string", DEFAULT_YANK_HINTTAGS);
+}
 
-options.add(["hintpastetags"],
-    "XPath string of hintable elements activated by 'hints-paste'",
-    "string", DEFAULT_PASTE_HINTTAGS);
+if (!options.get("hintpastetags")) {
+  options.add(["hintpastetags"],
+      "XPath string of hintable elements activated by 'hints-paste'",
+      "string", DEFAULT_PASTE_HINTTAGS);
+}
 
 let maps = liberator.globalVariables.hints_copy_maps || DEFAULT_MAPS;
 if (typeof maps === "string")

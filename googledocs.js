@@ -37,7 +37,7 @@
  * */
 
 // Last Change: 2009/01/14 22:14:16.
-let PLUGIN_INFO = xml` 
+var PLUGIN_INFO = xml` 
 <VimperatorPlugin>
     <name>{NAME}</name>
     <description>provide extended-hints modes for Google Docs</description>

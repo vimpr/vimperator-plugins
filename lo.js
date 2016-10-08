@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Link Opener</name>
   <name lang="ja">Link Opener</name>
@@ -52,7 +52,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="link-opener" version="2.4.0"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lo.js"
           summary="Link Opener"

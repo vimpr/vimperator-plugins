@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>bit.ly</name>
   <description>Get short alias by bit.ly and j.mp</description>

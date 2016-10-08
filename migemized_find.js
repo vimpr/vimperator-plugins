@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="MigemizedFind" version="2.11.5"
           href="http://vimpr.github.com/"
           summary="Search and Highlight with Migemo."

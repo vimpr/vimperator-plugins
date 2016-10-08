@@ -1,5 +1,5 @@
 // INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>google-exopen</name>
 <description>useful in google search</description>

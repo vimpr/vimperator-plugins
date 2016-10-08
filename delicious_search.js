@@ -1,4 +1,4 @@
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>search DeliciousBookmark and that completer</description>

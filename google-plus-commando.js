@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="GooglePlusCommando" version="2.4.7"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/google-plus-commando.js"
           summary="The handy commands for Google+"

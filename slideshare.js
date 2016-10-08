@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="Slideshare" version="1.1.1"
           href="http://vimpr.github.com/"
           summary="Controll slideshare's slide."

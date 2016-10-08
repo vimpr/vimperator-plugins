@@ -1,4 +1,4 @@
-let INFO = xml`
+var INFO = xml`
 <plugin name="Inspector" version="0.3"
         href="http://github.com/vimpr/vimperator-plugins/raw/master/inspector.js"
         summary="run DOM Inspector"

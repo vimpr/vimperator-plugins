@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>lolipo-ojisan</name>
   <name lang="ja">ロリポおじさん</name>
@@ -61,7 +61,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="lolipo-ojisan" version="1.0.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/lolipo-ojisan.js"
           summary="Chat with lolipo-ojisan."

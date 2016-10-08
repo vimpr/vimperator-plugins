@@ -24,7 +24,7 @@
  */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="Twittperator" version="1.19.2"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">

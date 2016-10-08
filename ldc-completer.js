@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="LivedoorClipCompleter" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Add the completer for Livedoor Clip"

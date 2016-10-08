@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>openframe-command</name>
   <name lang="ja">openframeコマンド</name>
@@ -55,7 +55,7 @@ let PLUGIN_INFO = xml`
 </VimperatorPlugin>`;
 // }}}
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="openframe-command" version="1.2.1"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/open-frame.js"
           summary="Add openframe command."

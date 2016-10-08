@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="usi.js" version="1.3.4"
           href="http://vimpr.github.com/"
           summary="for Remember The Milk."

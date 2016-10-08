@@ -1,4 +1,4 @@
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>appendAnchor</name>
   <description>append anchors to texts look like url.</description>

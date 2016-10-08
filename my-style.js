@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="MyStyle" version="1.0.0"
           href="http://vimpr.github.com/"
           summary="Apply my style sheet to current page."

@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="Microsoft Translator" version="1.1.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/microsoft-translator.js"
         summary="Translate with Microsoft AJAX Language API"

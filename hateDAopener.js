@@ -31,7 +31,7 @@
 // }}}
 
 // PLUGIN INFO: {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>{NAME}</name>
   <description>Search specified Hatena::Diary</description>

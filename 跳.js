@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="跳.jp" version="1.0.2"
           href="http://vimpr.github.com/"
           summary="跳ねます"

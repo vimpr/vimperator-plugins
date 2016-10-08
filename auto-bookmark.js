@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="AutoBookmark" version="1.3.1"
           href="http://vimpr.github.com/"
           summary="Auto update bookmark"

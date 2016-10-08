@@ -19,7 +19,7 @@
 // </html>
 
 // PLUGIN_INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="Walk-Input" version="1.3.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/walk-input.js"
         summary="The focus walks 'input' and 'textarea' element."

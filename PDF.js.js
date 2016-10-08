@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
 <plugin name="PDF.js.js" version="1.0.0"
         href="http://vimpr.github.com/"
         summary="PDF.js controller."

@@ -1,5 +1,5 @@
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>CheckBoxAll</name>
 <name lang="ja">チェックボックスオール</name>

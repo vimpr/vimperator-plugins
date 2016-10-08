@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="X-Hint" version="1.1.4"
           href="http://github.com/vimpr/vimperator-plugins/blob/master/x-hint.js"
           summary="Show the hints with given XPath."

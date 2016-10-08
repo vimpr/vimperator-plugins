@@ -33,7 +33,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
    }}} */
 
-let PLUGIN_INFO = xml` // {{{
+var PLUGIN_INFO = xml` // {{{
 <VimperatorPlugin>
 <name>{NAME}</name>
 <description>Add/Delete a :dialog argument.</description>
