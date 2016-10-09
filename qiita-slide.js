@@ -182,7 +182,7 @@ JS
 
   function validateLocation() { // {{{
     if (content.document.location.host !== HOST) {
-      return liberator.echoerr("Not Qiita host!");
+      throw "Not Qiita host!";
     }
   } // }}}
 
