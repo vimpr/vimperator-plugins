@@ -78,9 +78,7 @@ var INFO = xml`
 </plugin>`;
 // }}}
 
-liberator.plugins.smooziee = (function(){
-  const self = this;
-
+let self = liberator.plugins.smooziee = (function(){
   // Mappings  {{{
   mappings.addUserMap(
     [modes.NORMAL],
