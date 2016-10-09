@@ -163,7 +163,8 @@ JS
   const HOST = "qiita.com";
   const MATCHING_URLS = "^https?://qiita\\.com/*";
 
-  var QiitaSlide = {};
+  var QiitaSlide     = {},
+      NullController = {};
 
   QiitaSlide.next = function() { // {{{
     validateLocation();
@@ -178,6 +179,9 @@ JS
   QiitaSlide.toggleFullscreen = function() { // {{{
     validateLocation();
     findController("fullscreen").click();
+  }; // }}}
+
+  NullController.click = function() { // {{{
   }; // }}}
 
   function validateLocation() { // {{{
@@ -204,7 +208,7 @@ JS
       throw "Invalid type: " + type;
     }
 
-    return content.document.querySelector(selector);
+    return content.document.querySelector(selector) || NullController;
   } // }}}
 
   (function defineCommands() { // {{{
