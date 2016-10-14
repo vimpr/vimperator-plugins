@@ -78,14 +78,14 @@ var INFO = xml`
 </plugin>`;
 // }}}
 
-let self = liberator.plugins.smooziee = (function(){
+liberator.plugins.smooziee = (function(){
   // Mappings  {{{
   mappings.addUserMap(
     [modes.NORMAL],
     ["j"],
     "Smooth scroll down",
     function(count){
-      self.smoothScrollBy(getScrollAmount() * (count || 1));
+      liberator.plugins.smooziee.smoothScrollBy(getScrollAmount() * (count || 1));
     },
     {
       count: true
@@ -96,7 +96,7 @@ let self = liberator.plugins.smooziee = (function(){
     ["k"],
     "Smooth scroll up",
     function(count){
-      self.smoothScrollBy(getScrollAmount() * -(count || 1));
+      liberator.plugins.smooziee.smoothScrollBy(getScrollAmount() * -(count || 1));
     },
     {
       count: true
