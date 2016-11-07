@@ -709,7 +709,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//.test(U.currentURL),
+    get isValid () undefined,
 
     get volume () undefined,
     set volume (value) value,
@@ -882,7 +882,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.duration),
 
-    get isValid () false,
+    get isValid () !!this.player,
 
     get volume () parseInt(this.player.volume * 100),
     set volume (value) (this.player.volume = value / 100),
@@ -1359,13 +1359,18 @@ Thanks:
 
     get player () {
       return (
+        this.playerContainer ?
+        this.playerContainer.wrappedJSObject.__proto__ : null
+      );
+    },
+
+    get playerContainer () {
+      return (
         U.getElementById('flvplayer')
         ||
         U.getElementById('external_nicoplayer')
-      ).wrappedJSObject.__proto__;
+      );
     },
-
-    // get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get ready () {
       try {
@@ -1484,6 +1489,8 @@ Thanks:
     get title () content.document.title.replace(/\s*\u002D\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
 
     get totalTime () parseInt(this.player.ext_getTotalTime()),
+
+    get isValid () (this.player && U.currentURL.match(/^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
 
     get volume () parseInt(this.player.ext_getVolume()),
     set volume (value) (this.player.ext_setVolume(value), this.volume),
@@ -1874,7 +1881,8 @@ Thanks:
         youtube: new YouTubePlayer(this.stella),
         youtube5: new YouTubePlayer5(this.stella),
         youtubeuc: new YouTubeUserChannelPlayer(this.stella),
-        vimeo: new VimeoPlayer(this.stella)
+        vimeo: new VimeoPlayer(this.stella),
+        html5video: new VideoPlayer(this.stella)
       };
 
       // this.noGUI = true;
