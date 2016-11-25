@@ -223,24 +223,24 @@ var PLUGIN_INFO = xml`
 
     browserObject.scopes.add('l',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if(i < active)];
+        return ary.filter((v, i) => i < active);
     });
     browserObject.scopes.add('r',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if(i > active)];
+        return Array.from(ary).filter((v, i) => i > active);
     });
     browserObject.scopes.add('o',function(ary){
         var active = this.active();
-        return [ary[i] for (i in ary) if(i != active)];
+        return Array.from(ary).filter((v, i) => i != active);
     });
     browserObject.scopes.add('c',function(ary) [ary[this.active()]]);
     browserObject.scopes.add('a',function(ary) ary);
     browserObject.scopes.add('s',function(ary){
         var activeIdentify = this.identify(ary[this.active()]);
-        return [ary[i] for (i in ary) if(this.identify(ary[i]) == activeIdentify)];
+        return Array.from(ary).filter((v, i) => this.identity(v) === activeIdentify);
     });
     browserObject.scopes.add('p',function(ary){
-        return [ary[i] for (i in ary) if(this.pinned(ary[i]) == true)];
+        return Array.from(ary).filter((v, i) => this.pinned(v) === true);
     });
 
     browserObject.targets.add('t',new Tab());
@@ -290,7 +290,7 @@ var PLUGIN_INFO = xml`
                         }else{
                             pattern = new RegExp(s,"i");
                         }
-                        return [ary[i] for (i in ary) if(pattern.test(this.title(ary[i]) || pattern.test(this.href(ary[i]))))];
+                        return Array.from(ary).filter((v, i) => pattern.test(this.title(v)) || pattern.test(this.href(v)));
                     }).call(target.handler,target.handler.collection());
                     target.handler[motion.handler].call(target.handler,targetCollection);
                 },{completer: liberator.modules.completion.buffer});
