@@ -5,19 +5,6 @@
 
 liberator.plugins.SL = (function(){
 
-function xmlToDom(xml, xmlns){
-  if (!xmlns) xmlns = xulNS;
-  XML.ignoreWhitespace = true;
-  XML.prettyPrinting = false;
-  var doc = (new DOMParser).parseFromString('<box xmlns="' + xmlns + '">' + xml.toXMLString() + "</box>", "application/xml")
-  var imported = document.importNode(doc.documentElement, true);
-  var range = document.createRange();
-  range.selectNodeContents(imported);
-  var fragment = range.extractContents();
-  range.detach();
-  return fragment.childNodes.length > 1 ? fragment : fragment.firstChild;
-}
-
 function getFullScreenAttr(){
   let s = window.screen;
   return {
@@ -377,12 +364,12 @@ BigStar.prototype = { // {{{
 function Logo() { this.init.apply(this, arguments); }
 Logo.prototype = { // {{{
   init: function(str, x, y){
-    this.str = decodeURIComponent(escape(str));
+    this.str = str;
     this.x = x;
     this.y = y;
     this.fontSize = 150;
     this.styles = {
-      mozTextStyle: this.fontSize + "px Monospace",
+      font: this.fontSize + "px Monospace",
       lineWidth: 50,
       strokeStyle: "black",
       fillStyle: "magenta",
@@ -397,7 +384,7 @@ Logo.prototype = { // {{{
     ctx.fillStyle = this.styles.fillStyle;
     ctx.strokeStyle = this.styles.strokeStyle;
     ctx.lineWidth = this.styles.lineWidth;
-    ctx.mozTextStyle = this.styles.mozTextStyle;
+    ctx.font = this.styles.font;
     ctx.lineJoin = this.styles.lineJoin;
     for (var i=0; i<this.str.length; i++){
       ctx.save();
@@ -407,10 +394,7 @@ Logo.prototype = { // {{{
         ctx.rotate(this.radian);
         ctx.translate(-this.fontSize / 2, this.fontSize /2);
       }
-      ctx.beginPath();
-      ctx.mozPathText(this.str.charAt(i));
-      ctx.stroke();
-      ctx.fill();
+      ctx.fillText(this.str.charAt(i), 0, 0);
       ctx.restore();
     }
     ctx.restore();
@@ -494,11 +478,13 @@ let self = {
 return self;
 })();
 
-let xulNS = new Namespace("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-let xhtmlNS = new Namespace("http://www.w3.org/1999/xhtml");
+let xulNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+let xhtmlNS = "http://www.w3.org/1999/xhtml";
 let dialog;
 let self = {
-  panel: xmlToDom(<panel id="vimp-sl" noautohide="true" style="background:transparent;border:none;" xmlns={xulNS}/>),
+  panel: util.xmlToDom(
+    xml`<panel id="vimp-sl" noautohide="true" style="background:transparent;border:none;" xmlns=${xulNS}/>`,
+    document.implementation.createDocument(xulNS, 'box', null)),
   open: function(attr){
     if (!attr) attr = {};
     let defAttr = getFullScreenAttr();
