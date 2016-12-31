@@ -74,7 +74,7 @@ var INFO = xml`
       action,
       {
         count: true,
-        matchingUrls: /\.pdf$/
+        matchingUrls: /\.pdf(\?[^=]+=[^&]*)?(&[^=]+=[^&]*)*$/
       }
     );
   }
