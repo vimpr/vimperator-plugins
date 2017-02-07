@@ -17,7 +17,7 @@ var INFO =xml`
       <p>You can save image from <link topic="http://www.pixiv.net/">pixiv</link> by this plugin.</p>
       <p>You need libDLImage.js and libDLMangaSingleContent.js under of plugin/modules.</p>
       <p>You must login pixiv.</p>
-      <p>This plugin is being ported to the WebExtensions add-on.Please wait for a while until completion.</p>
+      <p>This plugin is being ported to the WebExtensions add-on.Please wait for a while until completion.This plugin has already been ported to the <link topic="https://chrome.google.com/webstore/detail/pixivjs/kdbgkfdkcgpeemobggobdampilcniaie?hl=ja">Google Chrome extension</link>.</p>
     </description>
   </item>
 </plugin>`;
